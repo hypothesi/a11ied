@@ -1,0 +1,14 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/contracts" },
+    { "path": "./packages/wcag-data" },
+    { "path": "./packages/wcag-engine" },
+    { "path": "./packages/core" },
+    { "path": "./packages/guidepup" },
+    { "path": "./packages/storybook" },
+    { "path": "./packages/mcp-server" },
+    { "path": "./packages/cli" },
+    { "path": "./apps/docs" }
+  ]
+}

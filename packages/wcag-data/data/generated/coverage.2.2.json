@@ -1,0 +1,1433 @@
+{
+  "version": "2.2",
+  "coverage": {
+    "1.1.1": {
+      "criterionId": "1.1.1",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "area-alt",
+        "aria-meter-name",
+        "aria-progressbar-name",
+        "image-alt",
+        "input-image-alt",
+        "link-name",
+        "object-alt",
+        "presentation-role-conflict",
+        "role-img-alt",
+        "svg-img-alt"
+      ],
+      "actRuleIds": [
+        "23a2a8",
+        "46ca7f",
+        "59796f",
+        "7d6734",
+        "8fc3b6",
+        "c487ae",
+        "qt1vmo"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: 23a2a8, 46ca7f, 59796f, 7d6734, 8fc3b6, c487ae, qt1vmo.",
+        "Mapped axe rules: area-alt, aria-meter-name, aria-progressbar-name, image-alt, input-image-alt, link-name, object-alt, presentation-role-conflict, role-img-alt, svg-img-alt."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.2.1": {
+      "criterionId": "1.2.1",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "audio-caption"
+      ],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped axe rules: audio-caption."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.2.2": {
+      "criterionId": "1.2.2",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "video-caption"
+      ],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped axe rules: video-caption."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.2.3": {
+      "criterionId": "1.2.3",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.2.4": {
+      "criterionId": "1.2.4",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.2.5": {
+      "criterionId": "1.2.5",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.2.6": {
+      "criterionId": "1.2.6",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.2.7": {
+      "criterionId": "1.2.7",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.2.8": {
+      "criterionId": "1.2.8",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.2.9": {
+      "criterionId": "1.2.9",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.3.1": {
+      "criterionId": "1.3.1",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "aria-deprecated-role",
+        "aria-hidden-body",
+        "aria-input-field-name",
+        "aria-required-attr",
+        "aria-required-children",
+        "aria-required-parent",
+        "aria-roles",
+        "aria-toggle-field-name",
+        "aria-valid-attr",
+        "aria-valid-attr-value",
+        "definition-list",
+        "dlitem",
+        "label",
+        "list",
+        "listitem",
+        "p-as-heading",
+        "select-name",
+        "table-fake-caption",
+        "td-has-header",
+        "td-headers-attr",
+        "th-has-data-cells"
+      ],
+      "actRuleIds": [
+        "4e8ab6",
+        "5f99a7",
+        "674b10",
+        "6a7281",
+        "a25f45",
+        "e086e5"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: 4e8ab6, 5f99a7, 674b10, 6a7281, a25f45, e086e5.",
+        "Mapped axe rules: aria-deprecated-role, aria-hidden-body, aria-input-field-name, aria-required-attr, aria-required-children, aria-required-parent, aria-roles, aria-toggle-field-name, aria-valid-attr, aria-valid-attr-value, definition-list, dlitem, label, list, listitem, p-as-heading, select-name, table-fake-caption, td-has-header, td-headers-attr, th-has-data-cells."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.3.2": {
+      "criterionId": "1.3.2",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.3.3": {
+      "criterionId": "1.3.3",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.3.4": {
+      "criterionId": "1.3.4",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "css-orientation-lock"
+      ],
+      "actRuleIds": [
+        "b33eff"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: b33eff.",
+        "Mapped axe rules: css-orientation-lock."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.3.5": {
+      "criterionId": "1.3.5",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "autocomplete-valid"
+      ],
+      "actRuleIds": [
+        "73f2c2"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: 73f2c2.",
+        "Mapped axe rules: autocomplete-valid."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.3.6": {
+      "criterionId": "1.3.6",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.4.1": {
+      "criterionId": "1.4.1",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "link-in-text-block"
+      ],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped axe rules: link-in-text-block."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.4.2": {
+      "criterionId": "1.4.2",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "no-autoplay-audio"
+      ],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped axe rules: no-autoplay-audio."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.4.3": {
+      "criterionId": "1.4.3",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "color-contrast",
+        "color-contrast-enhanced"
+      ],
+      "actRuleIds": [
+        "09o5cg",
+        "afw4f7"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: 09o5cg, afw4f7.",
+        "Mapped axe rules: color-contrast, color-contrast-enhanced."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.4.4": {
+      "criterionId": "1.4.4",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "meta-viewport"
+      ],
+      "actRuleIds": [
+        "b4f0c3"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: b4f0c3.",
+        "Mapped axe rules: meta-viewport."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.4.5": {
+      "criterionId": "1.4.5",
+      "coverageState": "hybrid",
+      "axeRuleIds": [],
+      "actRuleIds": [
+        "0va7u6"
+      ],
+      "sourceAttribution": [
+        "act-mapping"
+      ],
+      "notes": [
+        "ACT mappings exist, but there is no built-in ACT executor in v0.3.0.",
+        "Mapped ACT rules: 0va7u6."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.4.6": {
+      "criterionId": "1.4.6",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "color-contrast",
+        "color-contrast-enhanced"
+      ],
+      "actRuleIds": [
+        "09o5cg",
+        "afw4f7"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: 09o5cg, afw4f7.",
+        "Mapped axe rules: color-contrast, color-contrast-enhanced."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.4.7": {
+      "criterionId": "1.4.7",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.4.8": {
+      "criterionId": "1.4.8",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.4.9": {
+      "criterionId": "1.4.9",
+      "coverageState": "hybrid",
+      "axeRuleIds": [],
+      "actRuleIds": [
+        "0va7u6"
+      ],
+      "sourceAttribution": [
+        "act-mapping"
+      ],
+      "notes": [
+        "ACT mappings exist, but there is no built-in ACT executor in v0.3.0.",
+        "Mapped ACT rules: 0va7u6."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.4.10": {
+      "criterionId": "1.4.10",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "meta-viewport"
+      ],
+      "actRuleIds": [
+        "b4f0c3"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: b4f0c3.",
+        "Mapped axe rules: meta-viewport."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.4.11": {
+      "criterionId": "1.4.11",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.4.12": {
+      "criterionId": "1.4.12",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "avoid-inline-spacing"
+      ],
+      "actRuleIds": [
+        "24afc2",
+        "78fd32",
+        "9e45ec"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: 24afc2, 78fd32, 9e45ec.",
+        "Mapped axe rules: avoid-inline-spacing."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "1.4.13": {
+      "criterionId": "1.4.13",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.1.1": {
+      "criterionId": "2.1.1",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "frame-focusable-content",
+        "scrollable-region-focusable",
+        "server-side-image-map"
+      ],
+      "actRuleIds": [
+        "0ssw9k",
+        "akn7bn"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: 0ssw9k, akn7bn.",
+        "Mapped axe rules: frame-focusable-content, scrollable-region-focusable, server-side-image-map."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.1.2": {
+      "criterionId": "2.1.2",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.1.3": {
+      "criterionId": "2.1.3",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "frame-focusable-content",
+        "scrollable-region-focusable"
+      ],
+      "actRuleIds": [
+        "0ssw9k",
+        "akn7bn"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: 0ssw9k, akn7bn.",
+        "Mapped axe rules: frame-focusable-content, scrollable-region-focusable."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.1.4": {
+      "criterionId": "2.1.4",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.2.1": {
+      "criterionId": "2.2.1",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "meta-refresh",
+        "meta-refresh-no-exceptions"
+      ],
+      "actRuleIds": [
+        "bc659a",
+        "bisz58"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: bc659a, bisz58.",
+        "Mapped axe rules: meta-refresh, meta-refresh-no-exceptions."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.2.2": {
+      "criterionId": "2.2.2",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "blink",
+        "marquee"
+      ],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped axe rules: blink, marquee."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.2.3": {
+      "criterionId": "2.2.3",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.2.4": {
+      "criterionId": "2.2.4",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "meta-refresh",
+        "meta-refresh-no-exceptions"
+      ],
+      "actRuleIds": [
+        "bc659a",
+        "bisz58"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: bc659a, bisz58.",
+        "Mapped axe rules: meta-refresh, meta-refresh-no-exceptions."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.2.5": {
+      "criterionId": "2.2.5",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.2.6": {
+      "criterionId": "2.2.6",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.3.1": {
+      "criterionId": "2.3.1",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.3.2": {
+      "criterionId": "2.3.2",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.3.3": {
+      "criterionId": "2.3.3",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.4.1": {
+      "criterionId": "2.4.1",
+      "coverageState": "hybrid",
+      "axeRuleIds": [
+        "bypass"
+      ],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "axe-rule-tags",
+        "strategy-heuristic"
+      ],
+      "notes": [
+        "Bypass-block alternatives need structure and navigation evidence on a real target.",
+        "Mapped axe rules: bypass."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.4.2": {
+      "criterionId": "2.4.2",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "document-title"
+      ],
+      "actRuleIds": [
+        "2779a5",
+        "c4a8a4"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: 2779a5, c4a8a4.",
+        "Mapped axe rules: document-title."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.4.3": {
+      "criterionId": "2.4.3",
+      "coverageState": "hybrid",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "strategy-heuristic"
+      ],
+      "notes": [
+        "Focus order depends on interaction flow, not just static structure."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.4.4": {
+      "criterionId": "2.4.4",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "area-alt",
+        "link-name"
+      ],
+      "actRuleIds": [
+        "c487ae"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: c487ae.",
+        "Mapped axe rules: area-alt, link-name."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.4.5": {
+      "criterionId": "2.4.5",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.4.6": {
+      "criterionId": "2.4.6",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.4.7": {
+      "criterionId": "2.4.7",
+      "coverageState": "hybrid",
+      "axeRuleIds": [],
+      "actRuleIds": [
+        "oj04fd"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "strategy-heuristic"
+      ],
+      "notes": [
+        "Focus visibility needs visual and interaction evidence beyond static rules.",
+        "Mapped ACT rules: oj04fd."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.4.8": {
+      "criterionId": "2.4.8",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.4.9": {
+      "criterionId": "2.4.9",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "area-alt",
+        "identical-links-same-purpose",
+        "link-name"
+      ],
+      "actRuleIds": [
+        "c487ae"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: c487ae.",
+        "Mapped axe rules: area-alt, identical-links-same-purpose, link-name."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.4.10": {
+      "criterionId": "2.4.10",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.4.11": {
+      "criterionId": "2.4.11",
+      "coverageState": "hybrid",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "strategy-heuristic"
+      ],
+      "notes": [
+        "Focus obscuration requires a real rendered target and movement through the interface."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.4.12": {
+      "criterionId": "2.4.12",
+      "coverageState": "hybrid",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "strategy-heuristic"
+      ],
+      "notes": [
+        "Focus obscuration requires a real rendered target and movement through the interface."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.4.13": {
+      "criterionId": "2.4.13",
+      "coverageState": "hybrid",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "strategy-heuristic"
+      ],
+      "notes": [
+        "Focus appearance requires rendered-state evidence, not just static markup inspection."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.5.1": {
+      "criterionId": "2.5.1",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.5.2": {
+      "criterionId": "2.5.2",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.5.3": {
+      "criterionId": "2.5.3",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "aria-input-field-name",
+        "aria-toggle-field-name",
+        "label",
+        "label-content-name-mismatch",
+        "select-name"
+      ],
+      "actRuleIds": [
+        "e086e5"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: e086e5.",
+        "Mapped axe rules: aria-input-field-name, aria-toggle-field-name, label, label-content-name-mismatch, select-name."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.5.4": {
+      "criterionId": "2.5.4",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.5.5": {
+      "criterionId": "2.5.5",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.5.6": {
+      "criterionId": "2.5.6",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.5.7": {
+      "criterionId": "2.5.7",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "2.5.8": {
+      "criterionId": "2.5.8",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "target-size"
+      ],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped axe rules: target-size."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.1.1": {
+      "criterionId": "3.1.1",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "html-has-lang",
+        "html-lang-valid",
+        "html-xml-lang-mismatch"
+      ],
+      "actRuleIds": [
+        "b5c3f8",
+        "bf051a"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: b5c3f8, bf051a.",
+        "Mapped axe rules: html-has-lang, html-lang-valid, html-xml-lang-mismatch."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.1.2": {
+      "criterionId": "3.1.2",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "valid-lang"
+      ],
+      "actRuleIds": [
+        "de46e4"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: de46e4.",
+        "Mapped axe rules: valid-lang."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.1.3": {
+      "criterionId": "3.1.3",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.1.4": {
+      "criterionId": "3.1.4",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.1.5": {
+      "criterionId": "3.1.5",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.1.6": {
+      "criterionId": "3.1.6",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.2.1": {
+      "criterionId": "3.2.1",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.2.2": {
+      "criterionId": "3.2.2",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.2.3": {
+      "criterionId": "3.2.3",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.2.4": {
+      "criterionId": "3.2.4",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.2.5": {
+      "criterionId": "3.2.5",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "meta-refresh",
+        "meta-refresh-no-exceptions"
+      ],
+      "actRuleIds": [
+        "bc659a",
+        "bisz58"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: bc659a, bisz58.",
+        "Mapped axe rules: meta-refresh, meta-refresh-no-exceptions."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.2.6": {
+      "criterionId": "3.2.6",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "strategy-heuristic"
+      ],
+      "notes": [
+        "Consistent help is cross-page behavior and still needs product-aware manual review."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.3.1": {
+      "criterionId": "3.3.1",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.3.2": {
+      "criterionId": "3.3.2",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "form-field-multiple-labels"
+      ],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped axe rules: form-field-multiple-labels."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.3.3": {
+      "criterionId": "3.3.3",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.3.4": {
+      "criterionId": "3.3.4",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.3.5": {
+      "criterionId": "3.3.5",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.3.6": {
+      "criterionId": "3.3.6",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "manual-fallback"
+      ],
+      "notes": [
+        "No direct axe or ACT mapping was found for this criterion."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.3.7": {
+      "criterionId": "3.3.7",
+      "coverageState": "hybrid",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "strategy-heuristic"
+      ],
+      "notes": [
+        "Redundant entry is flow-based and needs repeated-journey evidence."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.3.8": {
+      "criterionId": "3.3.8",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "strategy-heuristic"
+      ],
+      "notes": [
+        "Accessible authentication still needs product-aware manual review in v0.3.0."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "3.3.9": {
+      "criterionId": "3.3.9",
+      "coverageState": "manual",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "strategy-heuristic"
+      ],
+      "notes": [
+        "Enhanced authentication requirements still need product-aware manual review in v0.3.0."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "4.1.2": {
+      "criterionId": "4.1.2",
+      "coverageState": "automated",
+      "axeRuleIds": [
+        "area-alt",
+        "aria-allowed-attr",
+        "aria-braille-equivalent",
+        "aria-command-name",
+        "aria-conditional-attr",
+        "aria-deprecated-role",
+        "aria-hidden-body",
+        "aria-hidden-focus",
+        "aria-input-field-name",
+        "aria-prohibited-attr",
+        "aria-required-attr",
+        "aria-roledescription",
+        "aria-roles",
+        "aria-toggle-field-name",
+        "aria-tooltip-name",
+        "aria-valid-attr",
+        "aria-valid-attr-value",
+        "button-name",
+        "duplicate-id-aria",
+        "frame-title",
+        "frame-title-unique",
+        "input-button-name",
+        "input-image-alt",
+        "label",
+        "link-name",
+        "nested-interactive",
+        "select-name",
+        "summary-name"
+      ],
+      "actRuleIds": [
+        "2t702h",
+        "307n5z",
+        "4e8ab6",
+        "59796f",
+        "5f99a7",
+        "674b10",
+        "6a7281",
+        "6cfa84",
+        "97a4e1",
+        "c487ae",
+        "e086e5",
+        "m6b1q3"
+      ],
+      "sourceAttribution": [
+        "act-mapping",
+        "axe-act-id-join",
+        "axe-rule-tags"
+      ],
+      "notes": [
+        "Direct axe coverage exists for this criterion.",
+        "Mapped ACT rules: 2t702h, 307n5z, 4e8ab6, 59796f, 5f99a7, 674b10, 6a7281, 6cfa84, 97a4e1, c487ae, e086e5, m6b1q3.",
+        "Mapped axe rules: area-alt, aria-allowed-attr, aria-braille-equivalent, aria-command-name, aria-conditional-attr, aria-deprecated-role, aria-hidden-body, aria-hidden-focus, aria-input-field-name, aria-prohibited-attr, aria-required-attr, aria-roledescription, aria-roles, aria-toggle-field-name, aria-tooltip-name, aria-valid-attr, aria-valid-attr-value, button-name, duplicate-id-aria, frame-title, frame-title-unique, input-button-name, input-image-alt, label, link-name, nested-interactive, select-name, summary-name."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    },
+    "4.1.3": {
+      "criterionId": "4.1.3",
+      "coverageState": "hybrid",
+      "axeRuleIds": [],
+      "actRuleIds": [],
+      "sourceAttribution": [
+        "strategy-heuristic"
+      ],
+      "notes": [
+        "Status messages need announcement evidence from assistive technology without forced focus changes."
+      ],
+      "updatedAt": "2026-04-07T13:53:30.618Z"
+    }
+  }
+}

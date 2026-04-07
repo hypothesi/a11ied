@@ -1,0 +1,63 @@
+{
+  "version": "2.2",
+  "updatedAt": "2026-04-07T13:53:30.618Z",
+  "totals": {
+    "criteria": 86,
+    "automated": 28,
+    "hybrid": 10,
+    "manual": 48,
+    "unknown": 0
+  },
+  "byLevel": {
+    "A": {
+      "criteria": 31,
+      "automated": 15,
+      "hybrid": 3,
+      "manual": 13,
+      "unknown": 0
+    },
+    "AA": {
+      "criteria": 24,
+      "automated": 8,
+      "hybrid": 4,
+      "manual": 12,
+      "unknown": 0
+    },
+    "AAA": {
+      "criteria": 31,
+      "automated": 5,
+      "hybrid": 3,
+      "manual": 23,
+      "unknown": 0
+    }
+  },
+  "coverageSources": {
+    "criteriaWithAxe": 29,
+    "criteriaWithAct": 24,
+    "criteriaWithBoth": 21
+  },
+  "representativeCriterionIds": {
+    "automated": [
+      "1.1.1",
+      "1.2.1",
+      "1.2.2",
+      "1.3.1",
+      "1.3.4"
+    ],
+    "hybrid": [
+      "1.4.5",
+      "1.4.9",
+      "2.4.1",
+      "2.4.3",
+      "2.4.7"
+    ],
+    "manual": [
+      "1.2.3",
+      "1.2.4",
+      "1.2.5",
+      "1.2.6",
+      "1.2.7"
+    ],
+    "unknown": []
+  }
+}

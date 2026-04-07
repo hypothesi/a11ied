@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Status message page</title>
+  </head>
+  <body>
+    <main>
+      <h1>Status message demo</h1>
+      <form action="/save" method="post" id="profile-form">
+        <label>
+          Display name
+          <input type="text" name="displayName" value="Ada" />
+        </label>
+        <button type="submit">Save</button>
+      </form>
+      <div role="status" aria-live="polite" id="save-status"></div>
+    </main>
+    <script>
+      const form = document.querySelector("#profile-form");
+      const status = document.querySelector("#save-status");
+
+      form?.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (status) {
+          status.textContent = "Profile saved successfully.";
+        }
+        event.submitter?.focus();
+      });
+    </script>
+  </body>
+</html>

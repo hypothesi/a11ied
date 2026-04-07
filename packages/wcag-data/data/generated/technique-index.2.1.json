@@ -1,0 +1,1484 @@
+{
+  "version": "2.1",
+  "techniques": {
+    "1.1.1:sufficient:implementing-or-marking-the-non-text-content-so-that-it-will-be-ignored-by-assistive-technology:5.0": {
+      "key": "1.1.1:sufficient:implementing-or-marking-the-non-text-content-so-that-it-will-be-ignored-by-assistive-technology:5.0",
+      "title": "Implementing or marking the non-text content so that it will be ignored by assistive technology",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.1.1"
+      ]
+    },
+    "1.1.1:sufficient:providing-a-descriptive-label:3.0": {
+      "key": "1.1.1:sufficient:providing-a-descriptive-label:3.0",
+      "title": "Providing a descriptive label",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.1.1"
+      ]
+    },
+    "1.2.8:sufficient:linking-to-the-alternative-for-time-based-media:0.1": {
+      "key": "1.2.8:sufficient:linking-to-the-alternative-for-time-based-media:0.1",
+      "title": "Linking to the alternative for time-based media",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.2.8"
+      ]
+    },
+    "1.3.1:sufficient:making-information-and-relationships-conveyed-through-presentation-programmatically-determinable-or-available-in-text:1.1": {
+      "key": "1.3.1:sufficient:making-information-and-relationships-conveyed-through-presentation-programmatically-determinable-or-available-in-text:1.1",
+      "title": "Making information and relationships conveyed through presentation programmatically determinable or available in text",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "1.3.1:sufficient:making-information-and-relationships-conveyed-through-presentation-programmatically-determinable:0.11": {
+      "key": "1.3.1:sufficient:making-information-and-relationships-conveyed-through-presentation-programmatically-determinable:0.11",
+      "title": "Making information and relationships conveyed through presentation programmatically determinable",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "1.4.8:sufficient:using-measurements-that-are-relative-to-other-measurements-in-the-content:4.1.1": {
+      "key": "1.4.8:sufficient:using-measurements-that-are-relative-to-other-measurements-in-the-content:4.1.1",
+      "title": "using measurements that are relative to other measurements in the content",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "3.2.5:sufficient:including-pop-up-windows:2.0": {
+      "key": "3.2.5:sufficient:including-pop-up-windows:2.0",
+      "title": "Including pop-up windows",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.2.5"
+      ]
+    },
+    "4.1.2:sufficient:exposing-the-names-and-roles-allowing-user-settable-properties-to-be-directly-set-and-providing-notification-of-changes:1.0": {
+      "key": "4.1.2:sufficient:exposing-the-names-and-roles-allowing-user-settable-properties-to-be-directly-set-and-providing-notification-of-changes:1.0",
+      "title": "Exposing the names and roles, allowing user-settable properties to be directly set, and providing notification of changes",
+      "kind": "sufficient",
+      "criterionIds": [
+        "4.1.2"
+      ]
+    },
+    "ARIA11": {
+      "key": "ARIA11",
+      "id": "ARIA11",
+      "title": "Using ARIA landmarks to identify regions of a page",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "ARIA12": {
+      "key": "ARIA12",
+      "id": "ARIA12",
+      "title": "Using role=heading to identify headings",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "ARIA13": {
+      "key": "ARIA13",
+      "id": "ARIA13",
+      "title": "Using aria-labelledby to name regions and landmarks",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "ARIA14": {
+      "key": "ARIA14",
+      "id": "ARIA14",
+      "title": "Using aria-label to provide an accessible name where a visible label cannot be used",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "4.1.2"
+      ]
+    },
+    "ARIA16": {
+      "key": "ARIA16",
+      "id": "ARIA16",
+      "title": "Using aria-labelledby to provide a name for user interface controls",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1",
+        "4.1.2"
+      ]
+    },
+    "ARIA17": {
+      "key": "ARIA17",
+      "id": "ARIA17",
+      "title": "Using grouping roles to identify related form controls",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "ARIA18": {
+      "key": "ARIA18",
+      "id": "ARIA18",
+      "title": "Using aria-alertdialog to Identify Errors",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.1",
+        "3.3.3"
+      ]
+    },
+    "ARIA19": {
+      "key": "ARIA19",
+      "id": "ARIA19",
+      "title": "Using ARIA role=alert or Live Regions to Identify Errors",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.1",
+        "4.1.3"
+      ]
+    },
+    "ARIA20": {
+      "key": "ARIA20",
+      "id": "ARIA20",
+      "title": "Using the region role to identify a region of the page",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "ARIA21": {
+      "key": "ARIA21",
+      "id": "ARIA21",
+      "title": "Using aria-invalid to Indicate An Error Field",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.1"
+      ]
+    },
+    "ARIA22": {
+      "key": "ARIA22",
+      "id": "ARIA22",
+      "title": "Using role=status to present status messages",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "4.1.3"
+      ]
+    },
+    "ARIA23": {
+      "key": "ARIA23",
+      "id": "ARIA23",
+      "title": "Using role=log to identify sequential information updates",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "4.1.3"
+      ]
+    },
+    "ARIA24": {
+      "key": "ARIA24",
+      "id": "ARIA24",
+      "title": "Semantically identifying a font icon with role=\"img\"",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "ARIA25": {
+      "key": "ARIA25",
+      "id": "ARIA25",
+      "title": "Using an ARIA live region to convey the status of a progress bar",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "4.1.3"
+      ]
+    },
+    "ARIA26": {
+      "key": "ARIA26",
+      "id": "ARIA26",
+      "title": "Using aria-current to identify the current item in a set",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "ARIA4": {
+      "key": "ARIA4",
+      "id": "ARIA4",
+      "title": "Using a WAI-ARIA role to expose the role of a user interface component",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "4.1.2"
+      ]
+    },
+    "ARIA5": {
+      "key": "ARIA5",
+      "id": "ARIA5",
+      "title": "Using WAI-ARIA state and property attributes to expose the state of a user interface component",
+      "technology": "aria",
+      "kind": "sufficient",
+      "criterionIds": [
+        "4.1.2"
+      ]
+    },
+    "C12": {
+      "key": "C12",
+      "id": "C12",
+      "title": "Using percent for font sizes",
+      "technology": "css",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "C13": {
+      "key": "C13",
+      "id": "C13",
+      "title": "Using named font sizes",
+      "technology": "css",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "C14": {
+      "key": "C14",
+      "id": "C14",
+      "title": "Using em units for font sizes",
+      "technology": "css",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "C19": {
+      "key": "C19",
+      "id": "C19",
+      "title": "Specifying alignment either to the left or right in CSS",
+      "technology": "css",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "C20": {
+      "key": "C20",
+      "id": "C20",
+      "title": "Using relative measurements to set column widths so that lines can average 80 characters or less when the browser is resized",
+      "technology": "css",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "C21": {
+      "key": "C21",
+      "id": "C21",
+      "title": "Specifying line spacing in CSS",
+      "technology": "css",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "C23": {
+      "key": "C23",
+      "id": "C23",
+      "title": "Specifying text and background colors of secondary content such as banners, features and navigation in CSS while not specifying text and background colors of the main content",
+      "technology": "css",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "C24": {
+      "key": "C24",
+      "id": "C24",
+      "title": "Using percentage values in CSS for container sizes",
+      "technology": "css",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "C25": {
+      "key": "C25",
+      "id": "C25",
+      "title": "Specifying borders and layout in CSS to delineate areas of a web page while not specifying text and text-background colors",
+      "technology": "css",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "G10": {
+      "key": "G10",
+      "id": "G10",
+      "title": "Creating components using a technology that supports the accessibility API features of the platforms on which the user agents will be run to expose the names and roles, allow user-settable properties to be directly set, and provide notification of changes",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "4.1.2"
+      ]
+    },
+    "G100": {
+      "key": "G100",
+      "id": "G100",
+      "title": "Providing a short text alternative which is the accepted name or a descriptive name of the non-text content",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.1.1"
+      ]
+    },
+    "G101": {
+      "key": "G101",
+      "id": "G101",
+      "title": "Providing the definition of a word or phrase used in an unusual or restricted way",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.1.3"
+      ]
+    },
+    "G102": {
+      "key": "G102",
+      "id": "G102",
+      "title": "Providing the expansion or explanation of an abbreviation",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.1.4"
+      ]
+    },
+    "G108": {
+      "key": "G108",
+      "id": "G108",
+      "title": "Using markup features to expose the name and role, allow user-settable properties to be directly set, and provide notification of changes",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "4.1.2"
+      ]
+    },
+    "G110": {
+      "key": "G110",
+      "id": "G110",
+      "title": "Using an instant client-side redirect",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.2.5"
+      ]
+    },
+    "G111": {
+      "key": "G111",
+      "id": "G111",
+      "title": "Using color and pattern",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.1"
+      ]
+    },
+    "G112": {
+      "key": "G112",
+      "id": "G112",
+      "title": "Using inline definitions",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.1.3"
+      ]
+    },
+    "G115": {
+      "key": "G115",
+      "id": "G115",
+      "title": "Using semantic elements to mark up structure",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "G117": {
+      "key": "G117",
+      "id": "G117",
+      "title": "Using text to convey information that is conveyed by variations in presentation of text",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "G133": {
+      "key": "G133",
+      "id": "G133",
+      "title": "Providing a checkbox on the first page of a multipart form that allows users to ask for longer session time limit or no session time limit",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "2.2.1"
+      ]
+    },
+    "G135": {
+      "key": "G135",
+      "id": "G135",
+      "title": "Using the accessibility API features of a technology to expose names and roles, to allow user-settable properties to be directly set, and to provide notification of changes",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "4.1.2"
+      ]
+    },
+    "G138": {
+      "key": "G138",
+      "id": "G138",
+      "title": "Using semantic markup whenever color cues are used",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "G14": {
+      "key": "G14",
+      "id": "G14",
+      "title": "Ensuring that information conveyed by color differences is also available in text",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.1"
+      ]
+    },
+    "G140": {
+      "key": "G140",
+      "id": "G140",
+      "title": "Separating information and structure from presentation to enable different presentations",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "G143": {
+      "key": "G143",
+      "id": "G143",
+      "title": "Providing a text alternative that describes the purpose of the CAPTCHA",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.1.1"
+      ]
+    },
+    "G144": {
+      "key": "G144",
+      "id": "G144",
+      "title": "Ensuring that the web page contains another CAPTCHA serving the same purpose using a different modality",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.1.1"
+      ]
+    },
+    "G145": {
+      "key": "G145",
+      "id": "G145",
+      "title": "Ensuring that a contrast ratio of at least 3:1 exists between text (and images of text) and background behind the text",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.3"
+      ]
+    },
+    "G146": {
+      "key": "G146",
+      "id": "G146",
+      "title": "Using liquid layout",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "G148": {
+      "key": "G148",
+      "id": "G148",
+      "title": "Not specifying background color, not specifying text color, and not using technology features that change those defaults",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.3",
+        "1.4.6",
+        "1.4.8"
+      ]
+    },
+    "G155": {
+      "key": "G155",
+      "id": "G155",
+      "title": "Providing a checkbox in addition to a submit button",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.4"
+      ]
+    },
+    "G156": {
+      "key": "G156",
+      "id": "G156",
+      "title": "Using a technology that has commonly-available user agents that can change the foreground and background of blocks of text",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "G158": {
+      "key": "G158",
+      "id": "G158",
+      "title": "Providing an alternative for time-based media for audio-only content",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.2.1"
+      ]
+    },
+    "G159": {
+      "key": "G159",
+      "id": "G159",
+      "title": "Providing an alternative for time-based media for video-only content",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.2.1",
+        "1.2.8"
+      ]
+    },
+    "G164": {
+      "key": "G164",
+      "id": "G164",
+      "title": "Providing a stated time within which an online request (or transaction) may be amended or canceled by the user after making the request",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.4"
+      ]
+    },
+    "G166": {
+      "key": "G166",
+      "id": "G166",
+      "title": "Providing audio that describes the important video content and describing it as such",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.2.1"
+      ]
+    },
+    "G168": {
+      "key": "G168",
+      "id": "G168",
+      "title": "Requesting confirmation to continue with selected action",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.4"
+      ]
+    },
+    "G169": {
+      "key": "G169",
+      "id": "G169",
+      "title": "Aligning text on only one side",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "G17": {
+      "key": "G17",
+      "id": "G17",
+      "title": "Ensuring that a contrast ratio of at least 7:1 exists between text (and images of text) and background behind the text",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.6"
+      ]
+    },
+    "G172": {
+      "key": "G172",
+      "id": "G172",
+      "title": "Providing a mechanism to remove full justification of text",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "G174": {
+      "key": "G174",
+      "id": "G174",
+      "title": "Providing a control with a sufficient contrast ratio that allows users to switch to a presentation that uses sufficient contrast",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.3",
+        "1.4.6",
+        "1.4.11"
+      ]
+    },
+    "G175": {
+      "key": "G175",
+      "id": "G175",
+      "title": "Providing a multi color selection tool on the page for foreground and background colors",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "G177": {
+      "key": "G177",
+      "id": "G177",
+      "title": "Providing suggested correction text",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.3",
+        "4.1.3"
+      ]
+    },
+    "G18": {
+      "key": "G18",
+      "id": "G18",
+      "title": "Ensuring that a contrast ratio of at least 4.5:1 exists between text (and images of text) and background behind the text",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.3",
+        "1.4.6"
+      ]
+    },
+    "G180": {
+      "key": "G180",
+      "id": "G180",
+      "title": "Providing the user with a means to set the time limit to 10 times the default time limit",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "2.2.1"
+      ]
+    },
+    "G182": {
+      "key": "G182",
+      "id": "G182",
+      "title": "Ensuring that additional visual cues are available when text color differences are used to convey information",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.1"
+      ]
+    },
+    "G183": {
+      "key": "G183",
+      "id": "G183",
+      "title": "Using a contrast ratio of 3:1 with surrounding text and providing additional visual cues on hover for links or controls where color alone is used to identify them",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.1"
+      ]
+    },
+    "G184": {
+      "key": "G184",
+      "id": "G184",
+      "title": "Providing text instructions at the beginning of a form or set of fields that describes the necessary input",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.5"
+      ]
+    },
+    "G188": {
+      "key": "G188",
+      "id": "G188",
+      "title": "Providing a button on the page to increase line spaces and paragraph spaces",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "G193": {
+      "key": "G193",
+      "id": "G193",
+      "title": "Providing help by an assistant in the web page",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.5",
+        "4.1.3"
+      ]
+    },
+    "G194": {
+      "key": "G194",
+      "id": "G194",
+      "title": "Providing spell checking and suggestions for text input",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.5",
+        "4.1.3"
+      ]
+    },
+    "G195": {
+      "key": "G195",
+      "id": "G195",
+      "title": "Using an author-supplied, visible focus indicator",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.11"
+      ]
+    },
+    "G198": {
+      "key": "G198",
+      "id": "G198",
+      "title": "Providing a way for the user to turn the time limit off",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "2.2.1"
+      ]
+    },
+    "G199": {
+      "key": "G199",
+      "id": "G199",
+      "title": "Providing success feedback when data is submitted successfully",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "4.1.3"
+      ]
+    },
+    "G204": {
+      "key": "G204",
+      "id": "G204",
+      "title": "Not interfering with the user agent's reflow of text as the viewing window is narrowed",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "G205": {
+      "key": "G205",
+      "id": "G205",
+      "title": "Including a text cue for colored form control labels",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.1"
+      ]
+    },
+    "G206": {
+      "key": "G206",
+      "id": "G206",
+      "title": "Providing options within the content to switch to a layout that does not require the user to scroll horizontally to read a line of text",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "G207": {
+      "key": "G207",
+      "id": "G207",
+      "title": "Ensuring that a contrast ratio of 3:1 is provided for icons",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.11"
+      ]
+    },
+    "G209": {
+      "key": "G209",
+      "id": "G209",
+      "title": "Provide sufficient contrast at the boundaries between adjoining colors",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.11"
+      ]
+    },
+    "G4": {
+      "key": "G4",
+      "id": "G4",
+      "title": "Allowing the content to be paused and restarted from where it was paused",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "2.2.1"
+      ]
+    },
+    "G55": {
+      "key": "G55",
+      "id": "G55",
+      "title": "Linking to definitions",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.1.3",
+        "3.1.4"
+      ]
+    },
+    "G58": {
+      "key": "G58",
+      "id": "G58",
+      "title": "Placing a link to the alternative for time-based media immediately next to the non-text content",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.2.8"
+      ]
+    },
+    "G62": {
+      "key": "G62",
+      "id": "G62",
+      "title": "Providing a glossary",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.1.3",
+        "3.1.4"
+      ]
+    },
+    "G68": {
+      "key": "G68",
+      "id": "G68",
+      "title": "Providing a short text alternative that describes the purpose of live audio-only and live video-only content",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.1.1"
+      ]
+    },
+    "G69": {
+      "key": "G69",
+      "id": "G69",
+      "title": "Providing an alternative for time based media",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.2.8"
+      ]
+    },
+    "G70": {
+      "key": "G70",
+      "id": "G70",
+      "title": "Providing a function to search an online dictionary",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.1.3",
+        "3.1.4"
+      ]
+    },
+    "G71": {
+      "key": "G71",
+      "id": "G71",
+      "title": "Providing a help link on every web page",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.5"
+      ]
+    },
+    "G76": {
+      "key": "G76",
+      "id": "G76",
+      "title": "Providing a mechanism to request an update of the content instead of updating automatically",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.2.5"
+      ]
+    },
+    "G82": {
+      "key": "G82",
+      "id": "G82",
+      "title": "Providing a text alternative that identifies the purpose of interactive non-text content",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.1.1"
+      ]
+    },
+    "G83": {
+      "key": "G83",
+      "id": "G83",
+      "title": "Providing text descriptions to identify required fields that were not completed",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.1",
+        "4.1.3"
+      ]
+    },
+    "G84": {
+      "key": "G84",
+      "id": "G84",
+      "title": "Providing a text description when the user provides information that is not in the list of allowed values",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.1",
+        "3.3.3",
+        "4.1.3"
+      ]
+    },
+    "G85": {
+      "key": "G85",
+      "id": "G85",
+      "title": "Providing a text description when user input falls outside the required format or values",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.1",
+        "3.3.3",
+        "4.1.3"
+      ]
+    },
+    "G89": {
+      "key": "G89",
+      "id": "G89",
+      "title": "Providing expected data format and example",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.5"
+      ]
+    },
+    "G94": {
+      "key": "G94",
+      "id": "G94",
+      "title": "Providing short text alternative for non-text content that serves the same purpose and presents the same information as the non-text content",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.1.1"
+      ]
+    },
+    "G95": {
+      "key": "G95",
+      "id": "G95",
+      "title": "Providing short text alternatives that provide a brief description of the non-text content",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.1.1"
+      ]
+    },
+    "G97": {
+      "key": "G97",
+      "id": "G97",
+      "title": "Providing the first use of an abbreviation immediately before or after the expanded form",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.1.4"
+      ]
+    },
+    "G98": {
+      "key": "G98",
+      "id": "G98",
+      "title": "Providing the ability for the user to review and correct answers before submitting",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.4"
+      ]
+    },
+    "G99": {
+      "key": "G99",
+      "id": "G99",
+      "title": "Providing the ability to recover deleted information",
+      "technology": "general",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.4"
+      ]
+    },
+    "H101": {
+      "key": "H101",
+      "id": "H101",
+      "title": "Using semantic HTML elements to identify regions of a page",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "H39": {
+      "key": "H39",
+      "id": "H39",
+      "title": "Using caption elements to associate data table captions with data tables",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "H40": {
+      "key": "H40",
+      "id": "H40",
+      "title": "Using description lists",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.1.3"
+      ]
+    },
+    "H42": {
+      "key": "H42",
+      "id": "H42",
+      "title": "Using h1-h6 to identify headings",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "H43": {
+      "key": "H43",
+      "id": "H43",
+      "title": "Using id and headers attributes to associate data cells with header cells in data tables",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "H44": {
+      "key": "H44",
+      "id": "H44",
+      "title": "Using label elements to associate text labels with form controls",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1",
+        "4.1.2"
+      ]
+    },
+    "H48": {
+      "key": "H48",
+      "id": "H48",
+      "title": "Using ol, ul and dl for lists or groups of links",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "H49": {
+      "key": "H49",
+      "id": "H49",
+      "title": "Using semantic markup to mark emphasized or special text",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "H51": {
+      "key": "H51",
+      "id": "H51",
+      "title": "Using table markup to present tabular information",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "H53": {
+      "key": "H53",
+      "id": "H53",
+      "title": "Using the body of the object element",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.2.8"
+      ]
+    },
+    "H54": {
+      "key": "H54",
+      "id": "H54",
+      "title": "Using the dfn element to identify the defining instance of a word or phrase",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.1.3"
+      ]
+    },
+    "H63": {
+      "key": "H63",
+      "id": "H63",
+      "title": "Using the scope attribute to associate header cells with data cells in data tables",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "H64": {
+      "key": "H64",
+      "id": "H64",
+      "title": "Using the title attribute of the iframe element",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "4.1.2"
+      ]
+    },
+    "H65": {
+      "key": "H65",
+      "id": "H65",
+      "title": "Using the title attribute to identify form controls when the label element cannot be used",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1",
+        "4.1.2"
+      ]
+    },
+    "H71": {
+      "key": "H71",
+      "id": "H71",
+      "title": "Providing a description for groups of form controls using fieldset and legend elements",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "H76": {
+      "key": "H76",
+      "id": "H76",
+      "title": "Using meta refresh to create an instant client-side redirect",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.2.5"
+      ]
+    },
+    "H83": {
+      "key": "H83",
+      "id": "H83",
+      "title": "Using the target attribute to open a new window on user request and indicating this in link text",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.2.5"
+      ]
+    },
+    "H85": {
+      "key": "H85",
+      "id": "H85",
+      "title": "Using optgroup to group option elements inside a select",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "H88": {
+      "key": "H88",
+      "id": "H88",
+      "title": "Using HTML according to spec",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "4.1.2"
+      ]
+    },
+    "H91": {
+      "key": "H91",
+      "id": "H91",
+      "title": "Using HTML form controls and links",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "4.1.2"
+      ]
+    },
+    "H97": {
+      "key": "H97",
+      "id": "H97",
+      "title": "Grouping related links using the nav element",
+      "technology": "html",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "PDF10": {
+      "key": "PDF10",
+      "id": "PDF10",
+      "title": "Providing labels for interactive form controls in PDF documents",
+      "technology": "pdf",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1",
+        "4.1.2"
+      ]
+    },
+    "PDF11": {
+      "key": "PDF11",
+      "id": "PDF11",
+      "title": "Providing links and link text using the Link annotation and the /Link structure element in PDF documents",
+      "technology": "pdf",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "PDF12": {
+      "key": "PDF12",
+      "id": "PDF12",
+      "title": "Providing name, role, value information for form fields in PDF documents",
+      "technology": "pdf",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1",
+        "4.1.2"
+      ]
+    },
+    "PDF17": {
+      "key": "PDF17",
+      "id": "PDF17",
+      "title": "Specifying consistent page numbering for PDF documents",
+      "technology": "pdf",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "PDF20": {
+      "key": "PDF20",
+      "id": "PDF20",
+      "title": "Using Adobe Acrobat Pro's Table Editor to repair mistagged tables",
+      "technology": "pdf",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "PDF21": {
+      "key": "PDF21",
+      "id": "PDF21",
+      "title": "Using List tags for lists in PDF documents",
+      "technology": "pdf",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "PDF22": {
+      "key": "PDF22",
+      "id": "PDF22",
+      "title": "Indicating when user input falls outside the required format or values in PDF forms",
+      "technology": "pdf",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.1",
+        "3.3.3"
+      ]
+    },
+    "PDF5": {
+      "key": "PDF5",
+      "id": "PDF5",
+      "title": "Indicating required form controls in PDF forms",
+      "technology": "pdf",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.1"
+      ]
+    },
+    "PDF6": {
+      "key": "PDF6",
+      "id": "PDF6",
+      "title": "Using table elements for table markup in PDF Documents",
+      "technology": "pdf",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "PDF8": {
+      "key": "PDF8",
+      "id": "PDF8",
+      "title": "Providing definitions for abbreviations via an E entry for a structure element",
+      "technology": "pdf",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.1.4"
+      ]
+    },
+    "PDF9": {
+      "key": "PDF9",
+      "id": "PDF9",
+      "title": "Providing headings by marking content with heading tags in PDF documents",
+      "technology": "pdf",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "SCR1": {
+      "key": "SCR1",
+      "id": "SCR1",
+      "title": "Allowing the user to extend the default time limit",
+      "technology": "client-side-script",
+      "kind": "sufficient",
+      "criterionIds": [
+        "2.2.1"
+      ]
+    },
+    "SCR16": {
+      "key": "SCR16",
+      "id": "SCR16",
+      "title": "Providing a script that warns the user a time limit is about to expire",
+      "technology": "client-side-script",
+      "kind": "sufficient",
+      "criterionIds": [
+        "2.2.1"
+      ]
+    },
+    "SCR18": {
+      "key": "SCR18",
+      "id": "SCR18",
+      "title": "Providing client-side validation and alert",
+      "technology": "client-side-script",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.1"
+      ]
+    },
+    "SCR19": {
+      "key": "SCR19",
+      "id": "SCR19",
+      "title": "Using an onchange event on a select element without causing a change of context",
+      "technology": "client-side-script",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.2.5"
+      ]
+    },
+    "SCR24": {
+      "key": "SCR24",
+      "id": "SCR24",
+      "title": "Using progressive enhancement to open new windows on user request",
+      "technology": "client-side-script",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.2.5"
+      ]
+    },
+    "SCR32": {
+      "key": "SCR32",
+      "id": "SCR32",
+      "title": "Providing client-side validation and adding error text via the DOM",
+      "technology": "client-side-script",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.3.1"
+      ]
+    },
+    "SCR33": {
+      "key": "SCR33",
+      "id": "SCR33",
+      "title": "Using script to scroll content, and providing a mechanism to pause it",
+      "technology": "client-side-script",
+      "kind": "sufficient",
+      "criterionIds": [
+        "2.2.1"
+      ]
+    },
+    "SCR34": {
+      "key": "SCR34",
+      "id": "SCR34",
+      "title": "Calculating size and position in a way that scales with text size",
+      "technology": "client-side-script",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.4.8"
+      ]
+    },
+    "SCR36": {
+      "key": "SCR36",
+      "id": "SCR36",
+      "title": "Providing a mechanism to allow users to display moving, scrolling, or auto-updating text in a static window or area",
+      "technology": "client-side-script",
+      "kind": "sufficient",
+      "criterionIds": [
+        "2.2.1"
+      ]
+    },
+    "SVR1": {
+      "key": "SVR1",
+      "id": "SVR1",
+      "title": "Implementing automatic redirects on the server side instead of on the client side",
+      "technology": "server-side-script",
+      "kind": "sufficient",
+      "criterionIds": [
+        "3.2.5"
+      ]
+    },
+    "T1": {
+      "key": "T1",
+      "id": "T1",
+      "title": "Using standard text formatting conventions for paragraphs",
+      "technology": "text",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "T2": {
+      "key": "T2",
+      "id": "T2",
+      "title": "Using standard text formatting conventions for lists",
+      "technology": "text",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    },
+    "T3": {
+      "key": "T3",
+      "id": "T3",
+      "title": "Using standard text formatting conventions for headings",
+      "technology": "text",
+      "kind": "sufficient",
+      "criterionIds": [
+        "1.3.1"
+      ]
+    }
+  }
+}

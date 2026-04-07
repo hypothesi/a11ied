@@ -1,0 +1,3 @@
+display_name: a11lied
+short_description: Plan and run a11lied accessibility automation workflows.
+default_prompt: Use the a11lied CLI and workspace packages to script accessibility checks, with screen reader behavior treated as the primary signal.

@@ -1,0 +1,254 @@
+{
+  "target": {
+    "kind": "url",
+    "value": "http://127.0.0.1:4173/status-message.html",
+    "platform": "virtual",
+    "resolvedUrl": "http://127.0.0.1:4173/status-message.html"
+  },
+  "wcagVersion": "2.2",
+  "requestedScope": {
+    "kind": "criterion",
+    "criterion": "4.1.3"
+  },
+  "summary": {
+    "totalCriteria": 1,
+    "verdicts": {
+      "pass": 1,
+      "fail": 0,
+      "needs-manual-review": 0,
+      "not-applicable": 0,
+      "not-covered": 0,
+      "error": 0
+    },
+    "evidenceModes": {
+      "automated": 0,
+      "hybrid": 1,
+      "manual": 0,
+      "unknown": 0
+    },
+    "uncoveredCount": 0,
+    "manualOnlyCount": 0,
+    "failedCount": 0
+  },
+  "criteria": [
+    {
+      "criterionId": "4.1.3",
+      "criterion": {
+        "id": "4.1.3",
+        "slug": "status-messages",
+        "title": "Status Messages",
+        "summary": "Status messages can be exposed to assistive technologies without moving focus.",
+        "level": "AA",
+        "wcagVersion": "2.2",
+        "normativeText": "In content implemented using markup languages, status messages can be programmatically determined through role or properties such that they can be presented to the user by assistive technologies without receiving focus.",
+        "understandingUrl": "https://www.w3.org/WAI/WCAG22/Understanding/status-messages",
+        "versions": [
+          "2.2"
+        ],
+        "altIds": [],
+        "details": [
+          "Expose status updates without forcing a focus change."
+        ],
+        "tags": [
+          "content",
+          "errors",
+          "forms",
+          "messaging",
+          "progress-steps",
+          "visual-cues"
+        ],
+        "principle": {
+          "id": "principle-4",
+          "number": "4",
+          "title": "Robust"
+        },
+        "guideline": {
+          "id": "guideline-4.1",
+          "number": "4.1",
+          "title": "Compatible"
+        },
+        "techniques": [],
+        "advisoryTechniques": [],
+        "failures": []
+      },
+      "applicability": {
+        "criterionId": "4.1.3",
+        "state": "applicable",
+        "reasons": [
+          "Detected role=status and aria-live on the target page."
+        ],
+        "matchedSignalCategories": [
+          "live-region",
+          "form"
+        ],
+        "matchedTags": [
+          "messaging",
+          "forms"
+        ]
+      },
+      "coverage": {
+        "criterionId": "4.1.3",
+        "coverageState": "hybrid",
+        "axeRuleIds": [],
+        "actRuleIds": [],
+        "sourceAttribution": [
+          "wcag",
+          "quickref",
+          "local-analysis"
+        ],
+        "notes": [
+          "Announcement behavior still needs interaction evidence."
+        ],
+        "updatedAt": "2026-04-07T12:00:00.000Z"
+      },
+      "strategy": {
+        "criterionId": "4.1.3",
+        "preferredEvidenceMode": "hybrid",
+        "procedureIds": [
+          "status_message_probe"
+        ],
+        "requiresRealTarget": false,
+        "notes": [
+          "Use the reusable status message probe and preserve spoken output."
+        ]
+      },
+      "executionPlan": {
+        "strategyId": "wcag-2.2:4.1.3",
+        "preferredEvidenceMode": "hybrid",
+        "selectedProcedureIds": [
+          "status_message_probe"
+        ],
+        "steps": [
+          {
+            "procedureId": "applicability:4.1.3",
+            "kind": "applicability",
+            "mode": "hybrid",
+            "status": "completed",
+            "sourceReferences": [
+              {
+                "kind": "criterion",
+                "id": "4.1.3",
+                "label": "Status Messages"
+              }
+            ]
+          },
+          {
+            "procedureId": "status_message_probe",
+            "kind": "pattern",
+            "mode": "hybrid",
+            "status": "completed",
+            "sourceReferences": [
+              {
+                "kind": "pattern",
+                "id": "status_message_probe",
+                "label": "Status message probe"
+              }
+            ]
+          }
+        ]
+      },
+      "verdict": "pass",
+      "evidenceMode": "hybrid",
+      "procedureIds": [
+        "status_message_probe"
+      ],
+      "evidence": [
+        {
+          "id": "pattern:status-message:1",
+          "kind": "pattern",
+          "mode": "hybrid",
+          "procedureId": "status_message_probe",
+          "collectedAt": "2026-04-07T12:01:00.000Z",
+          "summary": "The status message was announced without moving focus.",
+          "sourceReferences": [
+            {
+              "kind": "pattern",
+              "id": "status_message_probe",
+              "label": "Status message probe"
+            },
+            {
+              "kind": "criterion",
+              "id": "4.1.3",
+              "label": "Status Messages"
+            }
+          ],
+          "patternResult": {
+            "patternId": "status_message_probe",
+            "url": "http://127.0.0.1:4173/status-message.html",
+            "target": "virtual",
+            "sessionId": "drv_status_message",
+            "managedSession": true,
+            "stepLog": [
+              {
+                "id": "trigger-status-message",
+                "label": "Trigger the status message update from the page",
+                "status": "completed"
+              }
+            ],
+            "spokenPhraseLog": [
+              "document",
+              "Profile saved successfully."
+            ],
+            "itemTextLog": [
+              "",
+              "Profile saved successfully."
+            ],
+            "assertions": [
+              {
+                "id": "status-announced",
+                "status": "passed",
+                "message": "The status message was announced."
+              },
+              {
+                "id": "focus-preserved",
+                "status": "passed",
+                "message": "Focus stayed on the original control."
+              }
+            ],
+            "targetMetadata": {
+              "focusChangedUnexpectedly": false
+            },
+            "browserEvidence": [
+              {
+                "kind": "status-message",
+                "summary": "Captured the status region after the save action."
+              }
+            ]
+          },
+          "notes": [
+            "The spoken phrase log is the main evidence for this verdict."
+          ]
+        }
+      ],
+      "sourceReferences": [
+        {
+          "kind": "criterion",
+          "id": "4.1.3",
+          "label": "Status Messages"
+        },
+        {
+          "kind": "coverage-artifact",
+          "id": "coverage.2.2#4.1.3",
+          "label": "Coverage artifact"
+        },
+        {
+          "kind": "strategy-artifact",
+          "id": "strategy.2.2#4.1.3",
+          "label": "Verification strategy artifact"
+        },
+        {
+          "kind": "pattern",
+          "id": "status_message_probe",
+          "label": "Status message probe"
+        }
+      ],
+      "uncoveredWork": [],
+      "notes": [
+        "This criterion used a hybrid path because static rule coverage alone is not enough."
+      ],
+      "errors": []
+    }
+  ],
+  "warnings": [],
+  "errors": []
+}
