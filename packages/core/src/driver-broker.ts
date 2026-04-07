@@ -4,13 +4,21 @@ import net from 'node:net';
 
 import {
    accessibilityDriverSessionSchema,
-   driverActionResultSchema,
    type AccessibilityDriverSession,
-   type DriverActionResult,
    type DriverCheckpoint,
    type Platform,
 } from '@a11lied/contracts';
 import { createDriverAdapter } from '@a11lied/guidepup';
+
+import {
+   handleBrokerRequest,
+   type BrokerHandlerContext,
+   type BrokerRequest,
+   type BrokerResponse,
+} from './driver-broker-handlers.js';
+
+const JSON_INDENT = 2;
+const FIRST_USER_ARG = 2;
 
 interface BrokerArgs {
    sessionId: string;
@@ -19,36 +27,26 @@ interface BrokerArgs {
    socketPath: string;
 }
 
-interface BrokerRequest {
-   command: 'ping' | 'status' | 'stop' | 'action' | 'attach-document';
-   action?: DriverActionResult['action'];
-   payload?: Record<string, unknown>;
+interface BrokerState {
+   stopped: boolean;
 }
 
-interface BrokerResponse {
-   ok: boolean;
-   result?: DriverActionResult;
-   error?: {
-      code: string;
-      message: string;
-   };
+function collectArgValues(argv: string[]): Map<string, string> {
+   const values = new Map<string, string>();
+   for (let index = 0; index < argv.length; index += 1) {
+      const part = argv[index];
+      if (part?.startsWith('--')) {
+         const value = argv[index + 1];
+         if (value) {
+            values.set(part, value);
+         }
+      }
+   }
+   return values;
 }
 
 function parseArgs(argv: string[]): BrokerArgs {
-   const values = new Map<string, string>();
-
-   for (let index = 0; index < argv.length; index += 1) {
-      const part = argv[index];
-      if (!part?.startsWith('--')) {
-         continue;
-      }
-
-      const value = argv[index + 1];
-      if (value) {
-         values.set(part, value);
-      }
-   }
-
+   const values = collectArgValues(argv);
    const sessionId = values.get('--session-id');
    const target = values.get('--target');
    const metadataFile = values.get('--metadata-file');
@@ -64,31 +62,156 @@ function parseArgs(argv: string[]): BrokerArgs {
       throw new Error(`Unsupported target "${target}".`);
    }
 
-   return {
-      sessionId,
-      target,
-      metadataFile,
-      socketPath,
-   };
+   return { sessionId, target, metadataFile, socketPath };
 }
 
 async function writeSessionMetadata(session: AccessibilityDriverSession): Promise<void> {
    await mkdir(dirname(session.metadataFile), { recursive: true });
-   await writeFile(session.metadataFile, `${JSON.stringify(session, null, 2)}\n`, 'utf8');
+   const json = JSON.stringify(session, undefined, JSON_INDENT);
+   await writeFile(session.metadataFile, `${json}\n`, 'utf8');
 }
 
-async function main(): Promise<void> {
-   const args = parseArgs(process.argv.slice(2));
-   const adapter = createDriverAdapter(args.target);
-   const readiness = await adapter.checkReadiness();
-   if (readiness.status !== 'ready') {
-      throw new Error(readiness.summary);
+async function ensureSocketPath(socketPath: string): Promise<void> {
+   if (process.platform !== 'win32') {
+      await mkdir(dirname(socketPath), { recursive: true });
+      await rm(socketPath, { force: true });
    }
+}
 
-   const checkpoints: DriverCheckpoint[] = [];
+interface StopBrokerOptions {
+   adapter: ReturnType<typeof createDriverAdapter>;
+   args: BrokerArgs;
+   state: BrokerState;
+}
 
-   await adapter.start();
+async function stopBroker(options: StopBrokerOptions): Promise<void> {
+   if (options.state.stopped) {
+      return;
+   }
+   options.state.stopped = true;
+   await options.adapter.stop().catch(() => {
+      // No-op
+   });
+   await rm(options.args.metadataFile, { force: true });
+   if (process.platform !== 'win32') {
+      await rm(options.args.socketPath, { force: true });
+   }
+}
 
+function formatErrorMessage(error: unknown): string {
+   if (error instanceof Error) {
+      return error.message;
+   }
+   return String(error);
+}
+
+interface ProcessRequestArgs {
+   connection: net.Socket;
+   rawData: Buffer[];
+   context: BrokerHandlerContext;
+   onStop: () => void;
+}
+
+async function processRequest(args: ProcessRequestArgs): Promise<void> {
+   const raw = Buffer.concat(args.rawData).toString('utf8').trim();
+   const request = JSON.parse(raw) as BrokerRequest;
+   const result = await handleBrokerRequest(args.context, request);
+   args.connection.end(JSON.stringify(result.response));
+   if (result.shouldStop) {
+      args.onStop();
+   }
+}
+
+function toBuffer(chunk: Buffer | string): Buffer {
+   if (Buffer.isBuffer(chunk)) {
+      return chunk;
+   }
+   return Buffer.from(chunk);
+}
+
+interface ConnectionDataArgs {
+   connection: net.Socket;
+   chunks: Buffer[];
+   context: BrokerHandlerContext;
+   onStop: () => void;
+}
+
+function handleConnectionData(args: ConnectionDataArgs, chunk: Buffer | string): void {
+   const buffer = toBuffer(chunk);
+   args.chunks.push(buffer);
+   if (!buffer.includes('\n')) {
+      return;
+   }
+   processRequest({
+      connection: args.connection,
+      rawData: args.chunks,
+      context: args.context,
+      onStop: args.onStop,
+   }).catch((error: unknown) => {
+      const response: BrokerResponse = {
+         ok: false,
+         error: {
+            code: 'broker-error',
+            message: formatErrorMessage(error),
+         },
+      };
+      args.connection.end(JSON.stringify(response));
+   });
+}
+
+interface BrokerServerOptions {
+   context: BrokerHandlerContext;
+   onStop: () => void;
+}
+
+function createBrokerServer(options: BrokerServerOptions): net.Server {
+   return net.createServer((connection) => {
+      const chunks: Buffer[] = [];
+      const dataArgs: ConnectionDataArgs = {
+         connection,
+         chunks,
+         context: options.context,
+         onStop: options.onStop,
+      };
+      connection.on('data', (chunk) => {
+         handleConnectionData(dataArgs, chunk);
+      });
+   });
+}
+
+function shutdownServer(server: net.Server, stopOptions: StopBrokerOptions): void {
+   server.close(() => {
+      stopBroker(stopOptions)
+         .then(() => {
+            process.exitCode = 0;
+         })
+         .catch(() => {
+            process.exitCode = 1;
+         });
+   });
+}
+
+function setupSignalHandlers(server: net.Server, stopOptions: StopBrokerOptions): void {
+   process.on('SIGINT', () => {
+      shutdownServer(server, stopOptions);
+   });
+   process.on('SIGTERM', () => {
+      shutdownServer(server, stopOptions);
+   });
+}
+
+interface InitializedBroker {
+   args: BrokerArgs;
+   adapter: ReturnType<typeof createDriverAdapter>;
+   session: AccessibilityDriverSession;
+   checkpoints: DriverCheckpoint[];
+}
+
+async function createBrokerSession(
+   adapter: ReturnType<typeof createDriverAdapter>,
+   args: BrokerArgs,
+   checkpoints: DriverCheckpoint[],
+): Promise<InitializedBroker> {
    const initialState = await adapter.readState(checkpoints);
    const session = accessibilityDriverSessionSchema.parse({
       sessionId: args.sessionId,
@@ -100,212 +223,50 @@ async function main(): Promise<void> {
       socketPath: args.socketPath,
       metadataFile: args.metadataFile,
    });
-
    await writeSessionMetadata(session);
-
-   if (process.platform !== 'win32') {
-      await mkdir(dirname(args.socketPath), { recursive: true });
-      await rm(args.socketPath, { force: true });
-   }
-
-   let stopped = false;
-
-   async function stopBroker(): Promise<void> {
-      if (stopped) {
-         return;
-      }
-
-      stopped = true;
-      await adapter.stop().catch(() => {});
-      await rm(args.metadataFile, { force: true });
-      if (process.platform !== 'win32') {
-         await rm(args.socketPath, { force: true });
-      }
-   }
-
-   const server = net.createServer((connection) => {
-      const chunks: Buffer[] = [];
-
-      connection.on('data', (chunk) => {
-         const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-         chunks.push(buffer);
-         if (!buffer.includes('\n')) {
-            return;
-         }
-
-         void (async () => {
-            const request = JSON.parse(
-               Buffer.concat(chunks).toString('utf8').trim(),
-            ) as BrokerRequest;
-            const resultFor = async (
-               action: DriverActionResult['action'],
-               details?: Record<string, unknown>,
-            ): Promise<DriverActionResult> => {
-               const state = await adapter.readState(checkpoints);
-               const updatedSession = {
-                  ...session,
-                  logCursor: state.logCursor,
-               };
-               await writeSessionMetadata(updatedSession);
-               return driverActionResultSchema.parse({
-                  session: updatedSession,
-                  action,
-                  state,
-                  details,
-               });
-            };
-
-            const respond = async (response: BrokerResponse): Promise<void> => {
-               connection.end(JSON.stringify(response));
-            };
-
-            if (request.command === 'ping') {
-               await respond({ ok: true });
-               return;
-            }
-
-            if (request.command === 'status') {
-               await respond({
-                  ok: true,
-                  result: await resultFor('status'),
-               });
-               return;
-            }
-
-            if (request.command === 'stop') {
-               await respond({
-                  ok: true,
-                  result: await resultFor('stop'),
-               });
-
-               server.close(() => {
-                  void stopBroker().finally(() => {
-                     process.exit(0);
-                  });
-               });
-               return;
-            }
-
-            if (request.command === 'attach-document') {
-               const html = String(request.payload?.html ?? '');
-               const url = String(request.payload?.url ?? '');
-
-               await adapter.attachDocument({ html, url });
-               const state = await adapter.readState(checkpoints);
-               await writeSessionMetadata({
-                  ...session,
-                  logCursor: state.logCursor,
-               });
-               await respond({ ok: true });
-               return;
-            }
-
-            if (request.command === 'action') {
-               switch (request.action) {
-                  case 'next': {
-                     await adapter.next();
-                     break;
-                  }
-                  case 'previous': {
-                     await adapter.previous();
-                     break;
-                  }
-                  case 'key': {
-                     await adapter.press(String(request.payload?.keys ?? ''));
-                     break;
-                  }
-                  case 'type': {
-                     await adapter.type(String(request.payload?.text ?? ''));
-                     break;
-                  }
-                  case 'interact': {
-                     await adapter.interact();
-                     break;
-                  }
-                  case 'stop-interacting': {
-                     await adapter.stopInteracting();
-                     break;
-                  }
-                  case 'click-current-item': {
-                     await adapter.activateCurrentItem();
-                     break;
-                  }
-                  case 'read':
-                  case 'logs':
-                  case 'attach-document': {
-                     break;
-                  }
-                  case 'clear-logs': {
-                     await adapter.clearLogs(checkpoints);
-                     break;
-                  }
-                  case 'checkpoint': {
-                     checkpoints.push({
-                        label: String(request.payload?.label ?? 'checkpoint'),
-                        createdAt: new Date().toISOString(),
-                     });
-                     break;
-                  }
-                  default: {
-                     await respond({
-                        ok: false,
-                        error: {
-                           code: 'unknown-action',
-                           message: `Unknown driver action "${String(request.action)}".`,
-                        },
-                     });
-                     return;
-                  }
-               }
-
-               await respond({
-                  ok: true,
-                  result: await resultFor(request.action, request.payload),
-               });
-               return;
-            }
-
-            await respond({
-               ok: false,
-               error: {
-                  code: 'unknown-command',
-                  message: `Unknown broker command "${String(request.command)}".`,
-               },
-            });
-         })().catch((error) => {
-            connection.end(
-               JSON.stringify({
-                  ok: false,
-                  error: {
-                     code: 'broker-error',
-                     message: error instanceof Error ? error.message : String(error),
-                  },
-               } satisfies BrokerResponse),
-            );
-         });
-      });
-   });
-
-   server.listen(args.socketPath);
-
-   const shutdown = async (): Promise<void> => {
-      server.close(() => {
-         void stopBroker().finally(() => {
-            process.exit(0);
-         });
-      });
-   };
-
-   process.on('SIGINT', () => {
-      void shutdown();
-   });
-
-   process.on('SIGTERM', () => {
-      void shutdown();
-   });
+   return { args, adapter, session, checkpoints };
 }
 
-void main().catch((error) => {
-   console.error(error);
-   process.exit(1);
-});
+async function initializeBroker(): Promise<InitializedBroker> {
+   const args = parseArgs(process.argv.slice(FIRST_USER_ARG));
+   const adapter = createDriverAdapter(args.target);
+   const readiness = await adapter.checkReadiness();
+   if (readiness.status !== 'ready') {
+      throw new Error(readiness.summary);
+   }
+   const checkpoints: DriverCheckpoint[] = [];
+   await adapter.start();
+   return await createBrokerSession(adapter, args, checkpoints);
+}
+
+async function main(): Promise<void> {
+   const broker = await initializeBroker();
+   await ensureSocketPath(broker.args.socketPath);
+   const brokerState: BrokerState = { stopped: false };
+   const stopOptions: StopBrokerOptions = {
+      adapter: broker.adapter,
+      args: broker.args,
+      state: brokerState,
+   };
+   const context: BrokerHandlerContext = {
+      adapter: broker.adapter,
+      session: broker.session,
+      checkpoints: broker.checkpoints,
+      writeMetadata: writeSessionMetadata,
+   };
+   const server = createBrokerServer({
+      context,
+      onStop: () => {
+         shutdownServer(server, stopOptions);
+      },
+   });
+   server.listen(broker.args.socketPath);
+   setupSignalHandlers(server, stopOptions);
+}
+
+try {
+   await main();
+} catch (error: unknown) {
+   process.stderr.write(`${String(error)}\n`);
+   process.exitCode = 1;
+}

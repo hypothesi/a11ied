@@ -4,9 +4,8 @@ import { resolve } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import type {
-   CliEnvironmentError} from './index.js';
 import {
+   type CliEnvironmentError,
    cleanupStaleDriverSessions,
    getDriverSessionMetadataPath,
    getDriverSessionStatus,
@@ -16,6 +15,7 @@ import {
    stopDriverSession,
 } from './index.js';
 
+const TIMEOUT_MS = 15_000;
 const tempRoots: string[] = [];
 
 async function createTempRoot(): Promise<string> {
@@ -25,37 +25,57 @@ async function createTempRoot(): Promise<string> {
 }
 
 afterEach(async () => {
-   while (tempRoots.length > 0) {
-      const root = tempRoots.pop();
-      if (root) {
-         await rm(root, { recursive: true, force: true });
-      }
-   }
+   await Promise.all(tempRoots.map((root) => rm(root, { recursive: true, force: true })));
+   tempRoots.length = 0;
 });
 
-describe('driver runtime', () => {
-   it('starts, reports, and stops a virtual session', async () => {
-      const cwd = await createTempRoot();
-      const session = await startDriverSession('virtual', cwd);
+function expectValidSession(
+   session: { target: string; sessionId: string; metadataFile: string },
+   cwd: string,
+): void {
+   expect(session.target).toBe('virtual');
+   expect(session.sessionId).toMatch(/^drv_/);
+   expect(session.metadataFile).toBe(
+      getDriverSessionMetadataPath(session.sessionId, cwd),
+   );
+}
 
-      expect(session.target).toBe('virtual');
-      expect(session.sessionId).toMatch(/^drv_/);
-      expect(session.metadataFile).toBe(
-         getDriverSessionMetadataPath(session.sessionId, cwd),
-      );
+async function runAndVerifyDriverActions(sessionId: string, cwd: string): Promise<void> {
+   const stepped = await runDriverSessionAction(sessionId, 'next', { cwd });
+   expect(stepped.action).toBe('next');
+   expect(stepped.state.logCursor).toBeGreaterThanOrEqual(1);
 
-      const status = await getDriverSessionStatus(session.sessionId, cwd);
-      expect(status.action).toBe('status');
-      expect(status.session.sessionId).toBe(session.sessionId);
-      expect(status.state.logCursor).toBeGreaterThan(0);
+   const cleared = await runDriverSessionAction(sessionId, 'clear-logs', { cwd });
+   expect(cleared.state.spokenPhraseLog).toEqual([]);
 
-      const stopped = await stopDriverSession(session.sessionId, cwd);
-      expect(stopped.action).toBe('stop');
+   const logged = await runDriverSessionAction(sessionId, 'logs', { cwd });
+   expect(logged.state.spokenPhraseLog).toEqual([]);
+}
 
-      await expect(getDriverSessionStatus(session.sessionId, cwd)).rejects.toMatchObject({
-         code: 'session-not-found',
-      } satisfies Partial<CliEnvironmentError>);
-   }, 15_000);
+describe('driver runtime sessions', () => {
+   it(
+      'starts, reports, and stops a virtual session',
+      async () => {
+         const cwd = await createTempRoot();
+         const session = await startDriverSession('virtual', cwd);
+         expectValidSession(session, cwd);
+
+         const status = await getDriverSessionStatus(session.sessionId, cwd);
+         expect(status.action).toBe('status');
+         expect(status.session.sessionId).toBe(session.sessionId);
+         expect(status.state.logCursor).toBeGreaterThan(0);
+
+         const stopped = await stopDriverSession(session.sessionId, cwd);
+         expect(stopped.action).toBe('stop');
+
+         await expect(
+            getDriverSessionStatus(session.sessionId, cwd),
+         ).rejects.toMatchObject({
+            code: 'session-not-found',
+         } satisfies Partial<CliEnvironmentError>);
+      },
+      TIMEOUT_MS,
+   );
 
    it('fails cleanly for an unknown session', async () => {
       const cwd = await createTempRoot();
@@ -64,49 +84,35 @@ describe('driver runtime', () => {
          code: 'session-not-found',
       } satisfies Partial<CliEnvironmentError>);
    });
+});
 
-   it('cleans up stale session metadata for dead brokers', async () => {
-      const cwd = await createTempRoot();
-      const session = await startDriverSession('virtual', cwd);
-      const stopped = await stopDriverSession(session.sessionId, cwd);
+describe('driver runtime actions', () => {
+   it(
+      'cleans up stale session metadata for dead brokers',
+      async () => {
+         const cwd = await createTempRoot();
+         const session = await startDriverSession('virtual', cwd);
+         const stopped = await stopDriverSession(session.sessionId, cwd);
 
-      expect(stopped.session.sessionId).toBe(session.sessionId);
-      expect(await cleanupStaleDriverSessions(cwd)).toEqual([]);
-   }, 15_000);
+         expect(stopped.session.sessionId).toBe(session.sessionId);
+         expect(await cleanupStaleDriverSessions(cwd)).toEqual([]);
+      },
+      TIMEOUT_MS,
+   );
 
-   it('runs persistent and ephemeral driver actions against the virtual target', async () => {
-      const cwd = await createTempRoot();
-      const session = await startDriverSession('virtual', cwd);
+   it(
+      'runs persistent and ephemeral driver actions against the virtual target',
+      async () => {
+         const cwd = await createTempRoot();
+         const session = await startDriverSession('virtual', cwd);
+         await runAndVerifyDriverActions(session.sessionId, cwd);
 
-      const stepped = await runDriverSessionAction(
-         session.sessionId,
-         'next',
-         undefined,
-         cwd,
-      );
-      expect(stepped.action).toBe('next');
-      expect(stepped.state.logCursor).toBeGreaterThanOrEqual(1);
+         const ephemeral = await runEphemeralDriverAction('virtual', 'next', { cwd });
+         expect(ephemeral.action).toBe('next');
+         expect(ephemeral.session.sessionId).toMatch(/^ephemeral_/);
 
-      const cleared = await runDriverSessionAction(
-         session.sessionId,
-         'clear-logs',
-         undefined,
-         cwd,
-      );
-      expect(cleared.state.spokenPhraseLog).toEqual([]);
-
-      const logged = await runDriverSessionAction(
-         session.sessionId,
-         'logs',
-         undefined,
-         cwd,
-      );
-      expect(logged.state.spokenPhraseLog).toEqual([]);
-
-      const ephemeral = await runEphemeralDriverAction('virtual', 'next', undefined, cwd);
-      expect(ephemeral.action).toBe('next');
-      expect(ephemeral.session.sessionId).toMatch(/^ephemeral_/);
-
-      await stopDriverSession(session.sessionId, cwd);
-   }, 15_000);
+         await stopDriverSession(session.sessionId, cwd);
+      },
+      TIMEOUT_MS,
+   );
 });

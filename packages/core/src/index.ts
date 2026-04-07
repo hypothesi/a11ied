@@ -18,6 +18,7 @@ export {
    getDriverSessionStatus,
    runDriverSessionAction,
    runEphemeralDriverAction,
+   type SessionActionOptions,
    startDriverSession,
    stopDriverSession,
 } from './driver-runtime.js';
