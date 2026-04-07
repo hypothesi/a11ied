@@ -1,44 +1,45 @@
 {
-  "name": "a11lied",
-  "version": "0.1.0",
-  "private": true,
-  "description": "CLI-first accessibility automation toolkit built on Guidepup.",
-  "type": "module",
-  "engines": {
-    "node": ">=24.13.1",
-    "npm": ">=11.8.0"
-  },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "clean": "rimraf coverage dist apps/*/dist apps/*/.astro packages/*/dist",
-    "dev:docs": "npm run dev --workspace @a11lied/docs",
-    "format": "prettier --check .",
-    "format:write": "prettier --write .",
-    "lint": "eslint .",
-    "standards": "npm run lint && npm run typecheck && npm run test && npm run build",
-    "test": "vitest run --coverage",
-    "test:watch": "vitest",
-    "typecheck": "tsc -p tsconfig.typecheck.json --noEmit && npm run typecheck --workspace @a11lied/docs",
-    "wcag:sync": "npm run sync --workspace @a11lied/wcag-data",
-    "wcag:validate": "npm run validate --workspace @a11lied/wcag-data"
-  },
-  "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@types/jsdom": "^27.0.0",
-    "@types/node": "^25.5.2",
-    "@vitest/coverage-v8": "^4.1.2",
-    "eslint": "^10.2.0",
-    "globals": "^17.4.0",
-    "prettier": "^3.8.1",
-    "rimraf": "^6.1.3",
-    "tsup": "^8.5.1",
-    "tsx": "^4.21.0",
-    "typescript": "^6.0.2",
-    "typescript-eslint": "^8.58.0",
-    "vitest": "^4.1.2"
-  }
+   "name": "a11lied",
+   "version": "0.1.0",
+   "private": true,
+   "description": "CLI-first accessibility automation toolkit built on Guidepup.",
+   "workspaces": [
+      "apps/*",
+      "packages/*"
+   ],
+   "type": "module",
+   "scripts": {
+      "build": "npm run build --workspaces --if-present",
+      "clean": "rimraf coverage dist apps/*/dist apps/*/.astro packages/*/dist",
+      "dev:docs": "npm run dev --workspace @a11lied/docs",
+      "format": "run-s format:*",
+      "format:oxlint": "oxlint --fix",
+      "format:oxfmt": "oxfmt",
+      "lint": "run-s lint:*",
+      "lint:oxlint": "oxlint",
+      "lint:oxfmt": "oxfmt --check",
+      "standards": "run-s lint typecheck test build",
+      "test": "vitest run --coverage",
+      "test:watch": "vitest",
+      "typecheck": "run-s typecheck:*",
+      "typecheck:tsc": "tsc -p tsconfig.typecheck.json --noEmit",
+      "typecheck:docs": "tsc -p apps/docs/tsconfig.json --noEmit",
+      "wcag:sync": "npm run sync --workspace @a11lied/wcag-data",
+      "wcag:validate": "npm run validate --workspace @a11lied/wcag-data"
+   },
+   "devDependencies": {
+      "@types/jsdom": "^27.0.0",
+      "@types/node": "^25.5.2",
+      "@vitest/coverage-v8": "^4.1.2",
+      "globals": "^17.4.0",
+      "npm-run-all": "4.1.5",
+      "oxfmt": "0.44.0",
+      "oxlint": "1.59.0",
+      "oxlint-plugin-complexity": "2.1.1",
+      "rimraf": "^6.1.3",
+      "tsup": "^8.5.1",
+      "tsx": "^4.21.0",
+      "typescript": "^6.0.2",
+      "vitest": "^4.1.2"
+   }
 }

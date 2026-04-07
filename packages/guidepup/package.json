@@ -1,25 +1,27 @@
 {
-  "name": "@a11lied/guidepup",
-  "version": "0.1.0",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    }
-  },
-  "files": ["dist"],
-  "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --clean",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
-  },
-  "dependencies": {
-    "@a11lied/contracts": "0.1.0",
-    "@guidepup/guidepup": "^0.24.1",
-    "@guidepup/setup": "^0.21.0",
-    "@guidepup/virtual-screen-reader": "^0.32.1",
-    "jsdom": "^27.0.1"
-  }
+   "name": "@a11lied/guidepup",
+   "version": "0.1.0",
+   "files": [
+      "dist"
+   ],
+   "type": "module",
+   "main": "./dist/index.cjs",
+   "module": "./dist/index.js",
+   "exports": {
+      ".": {
+         "import": "./dist/index.js",
+         "require": "./dist/index.cjs"
+      }
+   },
+   "scripts": {
+      "build": "tsup src/index.ts --format esm,cjs --clean",
+      "typecheck": "tsc -p tsconfig.json --noEmit"
+   },
+   "dependencies": {
+      "@a11lied/contracts": "0.1.0",
+      "@guidepup/guidepup": "^0.24.1",
+      "@guidepup/setup": "^0.21.0",
+      "@guidepup/virtual-screen-reader": "^0.32.1",
+      "jsdom": "^27.0.1"
+   }
 }

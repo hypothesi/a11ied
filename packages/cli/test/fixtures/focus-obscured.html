@@ -1,50 +1,50 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Focus obscured demo</title>
-    <style>
-      body {
-        font-family: sans-serif;
-        padding: 2rem;
-      }
+   <head>
+      <meta charset="utf-8" />
+      <title>Focus obscured demo</title>
+      <style>
+         body {
+            font-family: sans-serif;
+            padding: 2rem;
+         }
 
-      .action-wrap {
-        position: relative;
-        display: inline-block;
-        margin-top: 6rem;
-      }
+         .action-wrap {
+            position: relative;
+            display: inline-block;
+            margin-top: 6rem;
+         }
 
-      #obscured-action {
-        position: relative;
-        padding: 1rem 1.5rem;
-      }
+         #obscured-action {
+            position: relative;
+            padding: 1rem 1.5rem;
+         }
 
-      #obscured-action:focus {
-        outline: 4px solid #005fcc;
-        outline-offset: 2px;
-      }
+         #obscured-action:focus {
+            outline: 4px solid #005fcc;
+            outline-offset: 2px;
+         }
 
-      #overlay {
-        position: absolute;
-        left: 0.5rem;
-        top: 0.9rem;
-        width: 12rem;
-        height: 2rem;
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid #999;
-        pointer-events: none;
-      }
-    </style>
-  </head>
-  <body>
-    <main>
-      <h1>Focus visibility demo</h1>
-      <p>The overlay partially covers the focused button.</p>
-      <div class="action-wrap">
-        <button type="button" id="obscured-action">Continue checkout</button>
-        <div id="overlay" aria-hidden="true">Sticky notice</div>
-      </div>
-    </main>
-  </body>
+         #overlay {
+            position: absolute;
+            left: 0.5rem;
+            top: 0.9rem;
+            width: 12rem;
+            height: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #999;
+            pointer-events: none;
+         }
+      </style>
+   </head>
+   <body>
+      <main>
+         <h1>Focus visibility demo</h1>
+         <p>The overlay partially covers the focused button.</p>
+         <div class="action-wrap">
+            <button type="button" id="obscured-action">Continue checkout</button>
+            <div id="overlay" aria-hidden="true">Sticky notice</div>
+         </div>
+      </main>
+   </body>
 </html>

@@ -41,4 +41,7 @@ That flow does three things:
 If the generated diffs look wrong, stop there. The provenance manifests and regression fixtures are supposed to make surprising changes obvious.
 
 For the package-level details, see [packages/wcag-data/README.md](/Users/mluedke/code/personal/a11ied/packages/wcag-data/README.md).
+
+```
+
 ```

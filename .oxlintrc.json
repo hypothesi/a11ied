@@ -1,0 +1,36 @@
+{
+   "$schema": "./node_modules/oxlint/configuration_schema.json",
+   "plugins": [ "typescript", "unicorn", "oxc" ],
+   "jsPlugins": [
+      "oxlint-plugin-complexity"
+   ],
+   "categories": {
+      "correctness": "error",
+      "pedantic": "error",
+      "perf": "error",
+      "restriction": "error",
+      "style": "error",
+      "suspicious": "error"
+   },
+   "rules": {
+      "no-async-await": "off",
+      "no-rest-spread-properties": "off",
+      "no-optional-chaining": "off",
+      "sort-keys": "off",
+      "array-type": "off",
+      "sort-imports": "off",
+      "prefer-destructuring": "off",
+      "no-undefined": "off",
+      "no-magic-numbers": [
+         "error", {
+            "ignore": [ 0, -1, 1, 10 ]
+         }
+      ],
+      "func-style": "off",
+      "require-await": "off",
+      "complexity/complexity": "error"
+   },
+   "env": {
+      "builtin": true
+   }
+}

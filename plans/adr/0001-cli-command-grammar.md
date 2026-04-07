@@ -3,7 +3,7 @@
 - Status: accepted
 - Date: 2026-04-07
 - Related plan:
-  - `plans/a11lied-cli-driver-and-execution-plan.md#CE-01`
+   - `plans/a11lied-cli-driver-and-execution-plan.md#CE-01`
 
 ## Context
 
@@ -108,22 +108,22 @@ Every JSON-mode command must emit the same top-level envelope:
 
 ```json
 {
-  "ok": true,
-  "command": {
-    "family": "wcag",
-    "subcommand": "show",
-    "version": "0.1.0"
-  },
-  "target": null,
-  "result": {},
-  "warnings": [],
-  "errors": [],
-  "meta": {
-    "schemaVersion": "1",
-    "startedAt": "2026-04-07T12:00:00.000Z",
-    "completedAt": "2026-04-07T12:00:00.250Z",
-    "durationMs": 250
-  }
+   "ok": true,
+   "command": {
+      "family": "wcag",
+      "subcommand": "show",
+      "version": "0.1.0"
+   },
+   "target": null,
+   "result": {},
+   "warnings": [],
+   "errors": [],
+   "meta": {
+      "schemaVersion": "1",
+      "startedAt": "2026-04-07T12:00:00.000Z",
+      "completedAt": "2026-04-07T12:00:00.250Z",
+      "durationMs": 250
+   }
 }
 ```
 

@@ -108,16 +108,16 @@ That is the blunt reality. If we want the agent to talk about criterion-level co
 
 Here are a few criteria that show why the product needs hybrid verification:
 
-| Criterion | Level | axe coverage | ACT coverage | What it means |
-| --- | --- | --- | --- | --- |
-| 2.4.3 Focus Order | A | none found | none found | Needs a real interaction procedure, not just static analysis. |
-| 2.4.7 Focus Visible | AA | none found | one ACT rule | Needs visual and interaction evidence. |
-| 2.4.11 Focus Not Obscured (Minimum) | AA | none found | none found | Purely hybrid or manual. |
-| 2.5.8 Target Size (Minimum) | AA | one axe rule | none found | Good example of targeted automated coverage. |
-| 3.2.6 Consistent Help | A | none found | none found | Cross-page procedure, probably with site-wide reasoning. |
-| 3.3.7 Redundant Entry | A | none found | none found | Flow-based procedure, often form-journey specific. |
-| 3.3.8 Accessible Authentication (Minimum) | AA | none found | none found | Needs explicit product-aware runbooks. |
-| 4.1.3 Status Messages | AA | none found | none found | Great Guidepup target because the question is whether assistive tech gets the message without focus. |
+| Criterion                                 | Level | axe coverage | ACT coverage | What it means                                                                                        |
+| ----------------------------------------- | ----- | ------------ | ------------ | ---------------------------------------------------------------------------------------------------- |
+| 2.4.3 Focus Order                         | A     | none found   | none found   | Needs a real interaction procedure, not just static analysis.                                        |
+| 2.4.7 Focus Visible                       | AA    | none found   | one ACT rule | Needs visual and interaction evidence.                                                               |
+| 2.4.11 Focus Not Obscured (Minimum)       | AA    | none found   | none found   | Purely hybrid or manual.                                                                             |
+| 2.5.8 Target Size (Minimum)               | AA    | one axe rule | none found   | Good example of targeted automated coverage.                                                         |
+| 3.2.6 Consistent Help                     | A     | none found   | none found   | Cross-page procedure, probably with site-wide reasoning.                                             |
+| 3.3.7 Redundant Entry                     | A     | none found   | none found   | Flow-based procedure, often form-journey specific.                                                   |
+| 3.3.8 Accessible Authentication (Minimum) | AA    | none found   | none found   | Needs explicit product-aware runbooks.                                                               |
+| 4.1.3 Status Messages                     | AA    | none found   | none found   | Great Guidepup target because the question is whether assistive tech gets the message without focus. |
 
 ## What I would do with repo dependencies
 

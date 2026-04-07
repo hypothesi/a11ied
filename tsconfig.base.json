@@ -1,32 +1,32 @@
 {
-  "compilerOptions": {
-    "target": "ES2023",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "lib": ["ES2023"],
-    "strict": true,
-    "types": ["node"],
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "exactOptionalPropertyTypes": true,
-    "ignoreDeprecations": "6.0",
-    "declaration": true,
-    "declarationMap": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "baseUrl": ".",
-    "paths": {
-      "@a11lied/contracts": ["packages/contracts/src/index.ts"],
-      "@a11lied/core": ["packages/core/src/index.ts"],
-      "@a11lied/guidepup": ["packages/guidepup/src/index.ts"],
-      "@a11lied/mcp-server": ["packages/mcp-server/src/index.ts"],
-      "@a11lied/storybook": ["packages/storybook/src/index.ts"],
-      "@a11lied/wcag-engine": ["packages/wcag-engine/src/index.ts"],
-      "@a11lied/wcag-data": ["packages/wcag-data/src/index.ts"]
-    }
-  }
+   "compilerOptions": {
+      "target": "ES2023",
+      "module": "NodeNext",
+      "moduleResolution": "NodeNext",
+      "lib": ["ES2023"],
+      "strict": true,
+      "types": ["node"],
+      "noUncheckedIndexedAccess": true,
+      "noImplicitOverride": true,
+      "exactOptionalPropertyTypes": true,
+      "ignoreDeprecations": "6.0",
+      "declaration": true,
+      "declarationMap": true,
+      "esModuleInterop": true,
+      "forceConsistentCasingInFileNames": true,
+      "isolatedModules": true,
+      "resolveJsonModule": true,
+      "skipLibCheck": true,
+      "sourceMap": true,
+      "baseUrl": ".",
+      "paths": {
+         "@a11lied/contracts": ["packages/contracts/src/index.ts"],
+         "@a11lied/core": ["packages/core/src/index.ts"],
+         "@a11lied/guidepup": ["packages/guidepup/src/index.ts"],
+         "@a11lied/mcp-server": ["packages/mcp-server/src/index.ts"],
+         "@a11lied/storybook": ["packages/storybook/src/index.ts"],
+         "@a11lied/wcag-engine": ["packages/wcag-engine/src/index.ts"],
+         "@a11lied/wcag-data": ["packages/wcag-data/src/index.ts"]
+      }
+   }
 }

@@ -1,24 +1,26 @@
 {
-  "name": "a11lied",
-  "version": "0.1.0",
-  "type": "module",
-  "bin": {
-    "a11lied": "./dist/cli.js"
-  },
-  "exports": {
-    ".": {
-      "import": "./dist/index.js"
-    }
-  },
-  "files": ["dist"],
-  "scripts": {
-    "build": "tsup src/index.ts src/cli.ts --format esm --clean",
-    "typecheck": "tsc -p ../../tsconfig.typecheck.json --noEmit"
-  },
-  "dependencies": {
-    "@a11lied/core": "0.1.0",
-    "@a11lied/mcp-server": "0.1.0",
-    "@clack/prompts": "^1.2.0",
-    "commander": "^14.0.3"
-  }
+   "name": "a11lied",
+   "version": "0.1.0",
+   "bin": {
+      "a11lied": "./dist/cli.js"
+   },
+   "files": [
+      "dist"
+   ],
+   "type": "module",
+   "exports": {
+      ".": {
+         "import": "./dist/index.js"
+      }
+   },
+   "scripts": {
+      "build": "tsup src/index.ts src/cli.ts --format esm --clean",
+      "typecheck": "tsc -p ../../tsconfig.typecheck.json --noEmit"
+   },
+   "dependencies": {
+      "@a11lied/core": "0.1.0",
+      "@a11lied/mcp-server": "0.1.0",
+      "@clack/prompts": "^1.2.0",
+      "commander": "^14.0.3"
+   }
 }

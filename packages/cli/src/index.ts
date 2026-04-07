@@ -1,1 +1,1 @@
-export { buildCli } from "./program.js";
+export { buildCli } from './program.js';

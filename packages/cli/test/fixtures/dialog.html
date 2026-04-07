@@ -1,72 +1,77 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Dialog demo</title>
-    <style>
-      [hidden] {
-        display: none;
-      }
+   <head>
+      <meta charset="utf-8" />
+      <title>Dialog demo</title>
+      <style>
+         [hidden] {
+            display: none;
+         }
 
-      .backdrop {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.3);
-      }
+         .backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+         }
 
-      .dialog-panel {
-        position: fixed;
-        inset: 20% auto auto 20%;
-        width: 20rem;
-        padding: 1rem;
-        background: white;
-        border: 2px solid black;
-      }
-    </style>
-  </head>
-  <body>
-    <main>
-      <h1>Dialog demo</h1>
-      <button type="button" id="open-dialog">Open dialog</button>
-    </main>
+         .dialog-panel {
+            position: fixed;
+            inset: 20% auto auto 20%;
+            width: 20rem;
+            padding: 1rem;
+            background: white;
+            border: 2px solid black;
+         }
+      </style>
+   </head>
+   <body>
+      <main>
+         <h1>Dialog demo</h1>
+         <button type="button" id="open-dialog">Open dialog</button>
+      </main>
 
-    <div id="dialog-root" hidden>
-      <div class="backdrop"></div>
-      <div role="dialog" aria-modal="true" aria-label="Preferences" class="dialog-panel">
-        <h2>Preferences</h2>
-        <label>
-          Nickname
-          <input type="text" id="dialog-name" />
-        </label>
-        <button type="button" id="close-dialog">Close</button>
+      <div id="dialog-root" hidden>
+         <div class="backdrop"></div>
+         <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Preferences"
+            class="dialog-panel"
+         >
+            <h2>Preferences</h2>
+            <label>
+               Nickname
+               <input type="text" id="dialog-name" />
+            </label>
+            <button type="button" id="close-dialog">Close</button>
+         </div>
       </div>
-    </div>
 
-    <script>
-      const root = document.querySelector("#dialog-root");
-      const openButton = document.querySelector("#open-dialog");
-      const closeButton = document.querySelector("#close-dialog");
-      const firstField = document.querySelector("#dialog-name");
+      <script>
+         const root = document.querySelector('#dialog-root');
+         const openButton = document.querySelector('#open-dialog');
+         const closeButton = document.querySelector('#close-dialog');
+         const firstField = document.querySelector('#dialog-name');
 
-      function openDialog() {
-        root.hidden = false;
-        firstField.focus();
-      }
+         function openDialog() {
+            root.hidden = false;
+            firstField.focus();
+         }
 
-      function closeDialog() {
-        root.hidden = true;
-        openButton.focus();
-      }
+         function closeDialog() {
+            root.hidden = true;
+            openButton.focus();
+         }
 
-      openButton?.addEventListener("click", openDialog);
-      closeButton?.addEventListener("click", closeDialog);
+         openButton?.addEventListener('click', openDialog);
+         closeButton?.addEventListener('click', closeDialog);
 
-      document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && !root.hidden) {
-          event.preventDefault();
-          closeDialog();
-        }
-      });
-    </script>
-  </body>
+         document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !root.hidden) {
+               event.preventDefault();
+               closeDialog();
+            }
+         });
+      </script>
+   </body>
 </html>

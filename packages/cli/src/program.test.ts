@@ -1,20 +1,20 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { buildCli } from "./program.js";
+import { buildCli } from './program.js';
 
 function findCommand(commandName: string) {
-  const command = buildCli().commands.find((entry) => entry.name() === commandName);
+   const command = buildCli().commands.find((entry) => entry.name() === commandName);
 
-  if (!command) {
-    throw new Error(`expected command "${commandName}" to exist`);
-  }
+   if (!command) {
+      throw new Error(`expected command "${commandName}" to exist`);
+   }
 
-  return command;
+   return command;
 }
 
-describe("cli grammar snapshots", () => {
-  it("keeps the top-level command split stable", () => {
-    expect(buildCli().helpInformation()).toMatchInlineSnapshot(`
+describe('cli grammar snapshots', () => {
+   it('keeps the top-level command split stable', () => {
+      expect(buildCli().helpInformation()).toMatchInlineSnapshot(`
       "Usage: a11lied [options] [command]
       
       CLI-first accessibility automation for VoiceOver, NVDA, Storybook, and MCP.
@@ -37,10 +37,10 @@ describe("cli grammar snapshots", () => {
         help [command]    display help for command
       "
     `);
-  });
+   });
 
-  it("keeps the wcag subcommand grammar stable", () => {
-    expect(findCommand("wcag").helpInformation()).toMatchInlineSnapshot(`
+   it('keeps the wcag subcommand grammar stable', () => {
+      expect(findCommand('wcag').helpInformation()).toMatchInlineSnapshot(`
       "Usage: a11lied wcag [options] [command]
       
       Look up pinned WCAG requirements and coverage data.
@@ -60,12 +60,14 @@ describe("cli grammar snapshots", () => {
         help [command]                  display help for command
       "
     `);
-  });
+   });
 
-  it("keeps inspect applicable options stable", () => {
-    const command = findCommand("inspect").commands.find((entry) => entry.name() === "applicable");
+   it('keeps inspect applicable options stable', () => {
+      const command = findCommand('inspect').commands.find(
+         (entry) => entry.name() === 'applicable',
+      );
 
-    expect(command?.helpInformation()).toMatchInlineSnapshot(`
+      expect(command?.helpInformation()).toMatchInlineSnapshot(`
       "Usage: a11lied inspect applicable [options]
       
       List criteria that look relevant for a URL target.
@@ -80,10 +82,10 @@ describe("cli grammar snapshots", () => {
         -h, --help            display help for command
       "
     `);
-  });
+   });
 
-  it("keeps drive and run subcommand families stable", () => {
-    expect(findCommand("drive").helpInformation()).toMatchInlineSnapshot(`
+   it('keeps drive and run subcommand families stable', () => {
+      expect(findCommand('drive').helpInformation()).toMatchInlineSnapshot(`
       "Usage: a11lied drive [options] [command]
       
       Control a target screen reader through stable sessions.
@@ -113,7 +115,7 @@ describe("cli grammar snapshots", () => {
       "
     `);
 
-    expect(findCommand("run").helpInformation()).toMatchInlineSnapshot(`
+      expect(findCommand('run').helpInformation()).toMatchInlineSnapshot(`
       "Usage: a11lied run [options] [command]
       
       Execute automated rule scans and named interaction patterns.
@@ -127,10 +129,10 @@ describe("cli grammar snapshots", () => {
         help [command]                 display help for command
       "
     `);
-  });
+   });
 
-  it("keeps the verify subcommand grammar stable", () => {
-    expect(findCommand("verify").helpInformation()).toMatchInlineSnapshot(`
+   it('keeps the verify subcommand grammar stable', () => {
+      expect(findCommand('verify').helpInformation()).toMatchInlineSnapshot(`
       "Usage: a11lied verify [options] [command]
       
       Turn collected evidence into explicit WCAG verification results.
@@ -147,9 +149,11 @@ describe("cli grammar snapshots", () => {
       "
     `);
 
-    const command = findCommand("verify").commands.find((entry) => entry.name() === "criterion");
+      const command = findCommand('verify').commands.find(
+         (entry) => entry.name() === 'criterion',
+      );
 
-    expect(command?.helpInformation()).toMatchInlineSnapshot(`
+      expect(command?.helpInformation()).toMatchInlineSnapshot(`
       "Usage: a11lied verify criterion [options] <criterion>
 
       Verify one WCAG criterion for a live URL target.
@@ -165,9 +169,11 @@ describe("cli grammar snapshots", () => {
       "
     `);
 
-    const levelCommand = findCommand("verify").commands.find((entry) => entry.name() === "level");
+      const levelCommand = findCommand('verify').commands.find(
+         (entry) => entry.name() === 'level',
+      );
 
-    expect(levelCommand?.helpInformation()).toMatchInlineSnapshot(`
+      expect(levelCommand?.helpInformation()).toMatchInlineSnapshot(`
       "Usage: a11lied verify level [options] <level>
 
       Verify a WCAG conformance level against a live URL target.
@@ -182,12 +188,12 @@ describe("cli grammar snapshots", () => {
         -h, --help           display help for command
       "
     `);
-  });
+   });
 
-  it("keeps run axe options stable", () => {
-    const command = findCommand("run").commands.find((entry) => entry.name() === "axe");
+   it('keeps run axe options stable', () => {
+      const command = findCommand('run').commands.find((entry) => entry.name() === 'axe');
 
-    expect(command?.helpInformation()).toMatchInlineSnapshot(`
+      expect(command?.helpInformation()).toMatchInlineSnapshot(`
       "Usage: a11lied run axe [options]
 
       Run axe-core against a URL target.
@@ -205,12 +211,14 @@ describe("cli grammar snapshots", () => {
         -h, --help               display help for command
       "
     `);
-  });
+   });
 
-  it("keeps run pattern options stable", () => {
-    const command = findCommand("run").commands.find((entry) => entry.name() === "pattern");
+   it('keeps run pattern options stable', () => {
+      const command = findCommand('run').commands.find(
+         (entry) => entry.name() === 'pattern',
+      );
 
-    expect(command?.helpInformation()).toMatchInlineSnapshot(`
+      expect(command?.helpInformation()).toMatchInlineSnapshot(`
       "Usage: a11lied run pattern [options] <patternId>
 
       Run a named built-in interaction pattern.
@@ -224,5 +232,5 @@ describe("cli grammar snapshots", () => {
         -h, --help           display help for command
       "
     `);
-  });
+   });
 });

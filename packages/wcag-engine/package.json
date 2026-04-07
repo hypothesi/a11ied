@@ -1,19 +1,21 @@
 {
-  "name": "@a11lied/wcag-engine",
-  "version": "0.1.0",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": "./dist/index.js"
-  },
-  "files": ["dist"],
-  "scripts": {
-    "build": "tsup src/index.ts --format esm --clean",
-    "typecheck": "tsc -p ../../tsconfig.typecheck.json --noEmit"
-  },
-  "dependencies": {
-    "@a11lied/contracts": "0.1.0",
-    "@a11lied/wcag-data": "0.1.0"
-  }
+   "name": "@a11lied/wcag-engine",
+   "version": "0.1.0",
+   "files": [
+      "dist"
+   ],
+   "type": "module",
+   "main": "./dist/index.js",
+   "types": "./dist/index.d.ts",
+   "exports": {
+      ".": "./dist/index.js"
+   },
+   "scripts": {
+      "build": "tsup src/index.ts --format esm --clean",
+      "typecheck": "tsc -p ../../tsconfig.typecheck.json --noEmit"
+   },
+   "dependencies": {
+      "@a11lied/contracts": "0.1.0",
+      "@a11lied/wcag-data": "0.1.0"
+   }
 }

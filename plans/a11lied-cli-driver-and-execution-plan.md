@@ -70,10 +70,10 @@ CLI commands
 - `packages/cli` should only parse arguments, resolve config, call core services, and render output.
 - `packages/core` should coordinate target resolution, engine calls, driver sessions, internal browser sessions, and pattern execution.
 - `packages/guidepup` should own:
-  - target detection
-  - session start and stop
-  - normalized low-level actions
-  - higher-level pattern helpers
+   - target detection
+   - session start and stop
+   - normalized low-level actions
+   - higher-level pattern helpers
 - CLI driver sessions must be backed by a local broker process managed by `packages/core`. Session metadata must be stored under `.a11lied/state/sessions/<sessionId>.json`, and follow-up commands must reattach by `sessionId`.
 - URL-based `inspect`, `run`, and later `verify` flows must use an internal Playwright-backed browser helper owned by `packages/core`. This helper is an internal dependency only and is not exposed as a public low-level browser-control CLI.
 - `axe-core` should run through a dedicated execution path so result normalization stays isolated from CLI formatting.
@@ -95,15 +95,15 @@ Every row in this sub-plan is incomplete until all of the following are true:
 
 ## Task Grid
 
-| Status | ID | Task | Priority | Depends On | Acceptance Criteria |
-| --- | --- | --- | --- | --- | --- |
-| [ ] | CE-01 | Freeze CLI command grammar and output contracts | H | R-02 | `wcag`, `inspect`, `drive`, and `run` semantics are documented, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | CE-02 | Implement `wcag` and `inspect` command handlers | H | CE-01, R-02 | Local WCAG lookup, search, coverage, and applicability queries work from the CLI, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | CE-03 | Implement driver session model and target adapters | H | CE-01, R-02 | `virtual`, `voiceover`, and `nvda` share one normalized driver contract, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | CE-04 | Implement low-level `drive` commands | H | CE-03 | Driver lifecycle, key, type, read, log, and checkpoint commands work with structured output, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | CE-05 | Implement axe-backed `run` commands | H | CE-01, R-02 | Criteria-, level-, and rule-based axe runs work with normalized result payloads, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | CE-06 | Implement reusable Guidepup-backed execution patterns | H | CE-03, CE-04 | Named patterns emit step logs, speech logs, and assertion results consistently, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | CE-07 | Polish CLI UX, exit codes, and regression tests | M | CE-02, CE-04, CE-05, CE-06 | Help output, text formatting, failure semantics, Gherkin traceability, AI-agent manual runs, and standards gate are all satisfied |
+| Status | ID    | Task                                                  | Priority | Depends On                 | Acceptance Criteria                                                                                                                                                          |
+| ------ | ----- | ----------------------------------------------------- | -------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [ ]    | CE-01 | Freeze CLI command grammar and output contracts       | H        | R-02                       | `wcag`, `inspect`, `drive`, and `run` semantics are documented, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass                              |
+| [ ]    | CE-02 | Implement `wcag` and `inspect` command handlers       | H        | CE-01, R-02                | Local WCAG lookup, search, coverage, and applicability queries work from the CLI, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass            |
+| [ ]    | CE-03 | Implement driver session model and target adapters    | H        | CE-01, R-02                | `virtual`, `voiceover`, and `nvda` share one normalized driver contract, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass                     |
+| [ ]    | CE-04 | Implement low-level `drive` commands                  | H        | CE-03                      | Driver lifecycle, key, type, read, log, and checkpoint commands work with structured output, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
+| [ ]    | CE-05 | Implement axe-backed `run` commands                   | H        | CE-01, R-02                | Criteria-, level-, and rule-based axe runs work with normalized result payloads, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass             |
+| [ ]    | CE-06 | Implement reusable Guidepup-backed execution patterns | H        | CE-03, CE-04               | Named patterns emit step logs, speech logs, and assertion results consistently, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass              |
+| [ ]    | CE-07 | Polish CLI UX, exit codes, and regression tests       | M        | CE-02, CE-04, CE-05, CE-06 | Help output, text formatting, failure semantics, Gherkin traceability, AI-agent manual runs, and standards gate are all satisfied                                            |
 
 ## Task Details
 
@@ -112,6 +112,7 @@ Every row in this sub-plan is incomplete until all of the following are true:
 **Goal:** Define a command surface that is easy to script and hard to misunderstand.
 
 **Step-by-step instructions:**
+
 1. Write an ADR that defines the top-level command split:
 
 ```text
@@ -147,6 +148,7 @@ a11lied run
 **Goal:** Expose the standards and applicability layer directly in the CLI.
 
 **Step-by-step instructions:**
+
 1. Implement `a11lied wcag levels`, `criteria`, `show`, `search`, and `coverage`.
 2. Implement `a11lied inspect applicable` and `inspect criterion` for URL targets only in this sub-plan.
 3. Wire both command groups to `packages/wcag-engine`.
@@ -164,6 +166,7 @@ a11lied run
 **Goal:** Normalize low-level accessibility-driver control before building higher-level patterns.
 
 **Step-by-step instructions:**
+
 1. Define `AccessibilityDriverSession` and `DriverActionResult` contracts.
 2. Define the required `AccessibilityDriverSession` fields:
    - `sessionId`
@@ -183,13 +186,14 @@ a11lied run
 7. Add stale-session cleanup on CLI startup so orphaned broker metadata does not accumulate after crashes.
 8. Implement automated tests for the mapped scenarios in `specs/gherkin/06-cli-drive.feature`.
 9. Run an AI-agent manual acceptance pass from that feature file and record it under `specs/manual-runs/CE-03/`.
-10. Verify `npm run standards` passes before closing the row.
+10.   Verify `npm run standards` passes before closing the row.
 
 ### CE-04 - Implement low-level `drive` commands
 
 **Goal:** Let an agent or human operate the screen reader the way a real user would.
 
 **Step-by-step instructions:**
+
 1. Implement session lifecycle commands such as `start`, `stop`, and `status`.
 2. Implement action commands such as:
 
@@ -220,6 +224,7 @@ a11lied drive checkpoint
 **Goal:** Make automated rule execution easy to target by level, criterion, or explicit rule list.
 
 **Step-by-step instructions:**
+
 1. Implement `run axe` with `--url <url>` as the only public target input in this sub-plan.
 2. Support selection by:
    - WCAG level
@@ -238,6 +243,7 @@ a11lied drive checkpoint
 **Goal:** Turn common accessibility procedures into repeatable, named building blocks.
 
 **Step-by-step instructions:**
+
 1. Define an `InteractionPattern` contract that consumes a target session and emits structured evidence.
 2. Implement the first built-in patterns:
    - `tab_sequence`
@@ -264,13 +270,14 @@ a11lied drive checkpoint
 7. Add virtual-target tests and mocked real-target adapter tests for each pattern family.
 8. Implement automated tests for the mapped scenarios in `specs/gherkin/08-cli-run-patterns.feature`.
 9. Run an AI-agent manual acceptance pass from that feature file and record it under `specs/manual-runs/CE-06/`.
-10. Verify `npm run standards` passes before closing the row.
+10.   Verify `npm run standards` passes before closing the row.
 
 ### CE-07 - Polish CLI UX, exit codes, and regression tests
 
 **Goal:** Make the CLI predictable enough for daily use and future automation.
 
 **Step-by-step instructions:**
+
 1. Finalize text formatting for concise output, verbose output, and JSON output.
 2. Map environment failures, validation failures, pattern assertion failures, and internal errors to stable exit codes.
 3. Add regression tests for command parsing, help output, and representative JSON payloads.

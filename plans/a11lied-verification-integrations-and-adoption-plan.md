@@ -71,26 +71,26 @@ wcag-engine + driver + execution results
 
 - Data flow, key interfaces, schemas, external services:
 - The verification layer should consume:
-  - criterion metadata and coverage from `packages/wcag-engine`
-  - verification-strategy metadata from `packages/wcag-engine`
-  - driver actions and pattern outputs from `packages/guidepup`
-  - axe execution results from the execution layer
+   - criterion metadata and coverage from `packages/wcag-engine`
+   - verification-strategy metadata from `packages/wcag-engine`
+   - driver actions and pattern outputs from `packages/guidepup`
+   - axe execution results from the execution layer
 - The verification output should emit:
-  - criterion id
-  - applicability status
-  - verdict
-  - evidence mode
-  - sources used
-  - logs and references
-  - uncovered or manual-only notes
+   - criterion id
+   - applicability status
+   - verdict
+   - evidence mode
+   - sources used
+   - logs and references
+   - uncovered or manual-only notes
 - The top-level verification report payload must include:
-  - `target`
-  - `wcagVersion`
-  - `requestedScope`
-  - `summary`
-  - `criteria`
-  - `warnings`
-  - `errors`
+   - `target`
+   - `wcagVersion`
+   - `requestedScope`
+   - `summary`
+   - `criteria`
+   - `warnings`
+   - `errors`
 - The verification layer must not invent its own criterion-to-procedure mapping. It must use the generated verification-strategy artifact from sub-plan 1.
 - Storybook should normalize story ids and iframe URLs into the same target abstraction used elsewhere.
 - MCP should expose both tools for active execution and resources for read-only standards material.
@@ -111,15 +111,15 @@ Every row in this sub-plan is incomplete until all of the following are true:
 
 ## Task Grid
 
-| Status | ID | Task | Priority | Depends On | Acceptance Criteria |
-| --- | --- | --- | --- | --- | --- |
-| [ ] | VI-01 | Lock evidence, verdict, and report schemas | H | R-02, R-03 | Shared verification payloads are stable across CLI, Storybook, and MCP, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | VI-02 | Implement criterion-level verification orchestration | H | VI-01, R-02, R-03 | `verify criterion` produces explicit verdicts with evidence and coverage notes, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | VI-03 | Implement level-based verification aggregation | H | VI-02 | `verify level` emits a criterion matrix with aggregate summaries and uncovered rows, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | VI-04 | Implement Storybook bridge and target resolution | M | VI-01, R-03 | Stories can be inspected, driven, run, and verified through the shared runtime, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | VI-05 | Implement MCP tools and resources | M | VI-01, VI-02, VI-03, R-03 | MCP exposes knowledge, driver, execution, and verification with contract parity, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | VI-06 | Expand docs site and Agent Skill | M | VI-02, VI-03, VI-04, VI-05 | Docs and skill teach the workflow and call out evidence limits clearly, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | VI-07 | Harden CI, smoke tests, and release path | M | VI-02, VI-03, VI-04, VI-05, VI-06 | Release readiness has repeatable smoke tests, mapped Gherkin tests, AI-agent manual run, and passing standards gate |
+| Status | ID    | Task                                                 | Priority | Depends On                        | Acceptance Criteria                                                                                                                                                  |
+| ------ | ----- | ---------------------------------------------------- | -------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [ ]    | VI-01 | Lock evidence, verdict, and report schemas           | H        | R-02, R-03                        | Shared verification payloads are stable across CLI, Storybook, and MCP, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass              |
+| [ ]    | VI-02 | Implement criterion-level verification orchestration | H        | VI-01, R-02, R-03                 | `verify criterion` produces explicit verdicts with evidence and coverage notes, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass      |
+| [ ]    | VI-03 | Implement level-based verification aggregation       | H        | VI-02                             | `verify level` emits a criterion matrix with aggregate summaries and uncovered rows, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
+| [ ]    | VI-04 | Implement Storybook bridge and target resolution     | M        | VI-01, R-03                       | Stories can be inspected, driven, run, and verified through the shared runtime, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass      |
+| [ ]    | VI-05 | Implement MCP tools and resources                    | M        | VI-01, VI-02, VI-03, R-03         | MCP exposes knowledge, driver, execution, and verification with contract parity, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass     |
+| [ ]    | VI-06 | Expand docs site and Agent Skill                     | M        | VI-02, VI-03, VI-04, VI-05        | Docs and skill teach the workflow and call out evidence limits clearly, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass              |
+| [ ]    | VI-07 | Harden CI, smoke tests, and release path             | M        | VI-02, VI-03, VI-04, VI-05, VI-06 | Release readiness has repeatable smoke tests, mapped Gherkin tests, AI-agent manual run, and passing standards gate                                                  |
 
 ## Task Details
 
@@ -128,6 +128,7 @@ Every row in this sub-plan is incomplete until all of the following are true:
 **Goal:** Define one verification payload that every surface can trust.
 
 **Step-by-step instructions:**
+
 1. Add shared schemas for:
    - evidence entries
    - criterion verification results
@@ -151,6 +152,7 @@ Every row in this sub-plan is incomplete until all of the following are true:
 **Goal:** Turn one criterion request into an honest, evidence-backed result.
 
 **Step-by-step instructions:**
+
 1. Implement `verify criterion` so it:
    - resolves the criterion
    - reads coverage metadata
@@ -175,6 +177,7 @@ Every row in this sub-plan is incomplete until all of the following are true:
 **Goal:** Expand A, AA, or AAA verification into a readable matrix without losing detail.
 
 **Step-by-step instructions:**
+
 1. Implement `verify level` on top of criterion verification instead of duplicating logic.
 2. Expand the selected level into the relevant criterion set for the requested WCAG version.
 3. Run applicability and verification for each criterion while reusing target setup where possible.
@@ -192,6 +195,7 @@ Every row in this sub-plan is incomplete until all of the following are true:
 **Goal:** Make local component work flow through the same verification engine as page-level targets.
 
 **Step-by-step instructions:**
+
 1. Implement Storybook target resolution from `--storybook-url <baseUrl> --story-id <id>` to iframe URL and page metadata by reusing the same internal Playwright-backed browser helper used for URL targets.
 2. Reuse the same target abstraction used by URL-based commands.
 3. Allow Storybook metadata or parameters to supply optional applicability hints.
@@ -206,6 +210,7 @@ Every row in this sub-plan is incomplete until all of the following are true:
 **Goal:** Expose the same runtime to editors and agents without forking the business logic.
 
 **Step-by-step instructions:**
+
 1. Implement MCP tools for:
    - criterion lookup
    - level lookup
@@ -228,6 +233,7 @@ Every row in this sub-plan is incomplete until all of the following are true:
 **Goal:** Teach people and agents how to use the product without bluffing about certainty.
 
 **Step-by-step instructions:**
+
 1. Add docs pages for:
    - WCAG data sources
    - criterion lookup
@@ -256,6 +262,7 @@ npm run build
 **Goal:** Make the combined system safe to evolve and credible to ship.
 
 **Step-by-step instructions:**
+
 1. Add CI jobs or steps for:
    - data validation
    - contract tests

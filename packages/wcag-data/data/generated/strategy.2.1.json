@@ -1,864 +1,557 @@
 {
-  "version": "2.1",
-  "strategies": {
-    "1.1.1": {
-      "criterionId": "1.1.1",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "1.2.1": {
-      "criterionId": "1.2.1",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "1.2.2": {
-      "criterionId": "1.2.2",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "1.2.3": {
-      "criterionId": "1.2.3",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "1.2.4": {
-      "criterionId": "1.2.4",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "1.2.5": {
-      "criterionId": "1.2.5",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "1.2.6": {
-      "criterionId": "1.2.6",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "1.2.7": {
-      "criterionId": "1.2.7",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "1.2.8": {
-      "criterionId": "1.2.8",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "1.2.9": {
-      "criterionId": "1.2.9",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "1.3.1": {
-      "criterionId": "1.3.1",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "1.3.2": {
-      "criterionId": "1.3.2",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "1.3.3": {
-      "criterionId": "1.3.3",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "1.3.4": {
-      "criterionId": "1.3.4",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "1.3.5": {
-      "criterionId": "1.3.5",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "1.3.6": {
-      "criterionId": "1.3.6",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "1.4.1": {
-      "criterionId": "1.4.1",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "1.4.2": {
-      "criterionId": "1.4.2",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "1.4.3": {
-      "criterionId": "1.4.3",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "1.4.4": {
-      "criterionId": "1.4.4",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "1.4.5": {
-      "criterionId": "1.4.5",
-      "preferredEvidenceMode": "hybrid",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "ACT mappings exist, but there is no built-in ACT executor in v0.3.0."
-      ]
-    },
-    "1.4.6": {
-      "criterionId": "1.4.6",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "1.4.7": {
-      "criterionId": "1.4.7",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "1.4.8": {
-      "criterionId": "1.4.8",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "1.4.9": {
-      "criterionId": "1.4.9",
-      "preferredEvidenceMode": "hybrid",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "ACT mappings exist, but there is no built-in ACT executor in v0.3.0."
-      ]
-    },
-    "1.4.10": {
-      "criterionId": "1.4.10",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "1.4.11": {
-      "criterionId": "1.4.11",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "1.4.12": {
-      "criterionId": "1.4.12",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "1.4.13": {
-      "criterionId": "1.4.13",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.1.1": {
-      "criterionId": "2.1.1",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "2.1.2": {
-      "criterionId": "2.1.2",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.1.3": {
-      "criterionId": "2.1.3",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "2.1.4": {
-      "criterionId": "2.1.4",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.2.1": {
-      "criterionId": "2.2.1",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "2.2.2": {
-      "criterionId": "2.2.2",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "2.2.3": {
-      "criterionId": "2.2.3",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.2.4": {
-      "criterionId": "2.2.4",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "2.2.5": {
-      "criterionId": "2.2.5",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.2.6": {
-      "criterionId": "2.2.6",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.3.1": {
-      "criterionId": "2.3.1",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.3.2": {
-      "criterionId": "2.3.2",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.3.3": {
-      "criterionId": "2.3.3",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.4.1": {
-      "criterionId": "2.4.1",
-      "preferredEvidenceMode": "hybrid",
-      "procedureIds": [
-        "axe_scan",
-        "landmark_sequence"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "Bypass-block alternatives need structure and navigation evidence on a real target."
-      ]
-    },
-    "2.4.2": {
-      "criterionId": "2.4.2",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "2.4.3": {
-      "criterionId": "2.4.3",
-      "preferredEvidenceMode": "hybrid",
-      "procedureIds": [
-        "focus_order_probe"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "Focus order depends on interaction flow, not just static structure."
-      ]
-    },
-    "2.4.4": {
-      "criterionId": "2.4.4",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "2.4.5": {
-      "criterionId": "2.4.5",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.4.6": {
-      "criterionId": "2.4.6",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.4.7": {
-      "criterionId": "2.4.7",
-      "preferredEvidenceMode": "hybrid",
-      "procedureIds": [
-        "focus_visibility_probe"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "Focus visibility needs visual and interaction evidence beyond static rules."
-      ]
-    },
-    "2.4.8": {
-      "criterionId": "2.4.8",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.4.9": {
-      "criterionId": "2.4.9",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "2.4.10": {
-      "criterionId": "2.4.10",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.5.1": {
-      "criterionId": "2.5.1",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.5.2": {
-      "criterionId": "2.5.2",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.5.3": {
-      "criterionId": "2.5.3",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "2.5.4": {
-      "criterionId": "2.5.4",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.5.5": {
-      "criterionId": "2.5.5",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "2.5.6": {
-      "criterionId": "2.5.6",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "3.1.1": {
-      "criterionId": "3.1.1",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "3.1.2": {
-      "criterionId": "3.1.2",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "3.1.3": {
-      "criterionId": "3.1.3",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "3.1.4": {
-      "criterionId": "3.1.4",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "3.1.5": {
-      "criterionId": "3.1.5",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "3.1.6": {
-      "criterionId": "3.1.6",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "3.2.1": {
-      "criterionId": "3.2.1",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "3.2.2": {
-      "criterionId": "3.2.2",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "3.2.3": {
-      "criterionId": "3.2.3",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "3.2.4": {
-      "criterionId": "3.2.4",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "3.2.5": {
-      "criterionId": "3.2.5",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "3.3.1": {
-      "criterionId": "3.3.1",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "3.3.2": {
-      "criterionId": "3.3.2",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "3.3.3": {
-      "criterionId": "3.3.3",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "3.3.4": {
-      "criterionId": "3.3.4",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "3.3.5": {
-      "criterionId": "3.3.5",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "3.3.6": {
-      "criterionId": "3.3.6",
-      "preferredEvidenceMode": "manual",
-      "procedureIds": [
-        "manual_review"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "No direct axe or ACT mapping was found for this criterion."
-      ]
-    },
-    "4.1.1": {
-      "criterionId": "4.1.1",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "4.1.2": {
-      "criterionId": "4.1.2",
-      "preferredEvidenceMode": "automated",
-      "procedureIds": [
-        "axe_scan"
-      ],
-      "requiresRealTarget": false,
-      "notes": [
-        "Direct axe coverage exists for this criterion."
-      ]
-    },
-    "4.1.3": {
-      "criterionId": "4.1.3",
-      "preferredEvidenceMode": "hybrid",
-      "procedureIds": [
-        "status_message_probe"
-      ],
-      "requiresRealTarget": true,
-      "notes": [
-        "Status messages need announcement evidence from assistive technology without forced focus changes."
-      ]
-    }
-  }
+   "version": "2.1",
+   "strategies": {
+      "1.1.1": {
+         "criterionId": "1.1.1",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "1.2.1": {
+         "criterionId": "1.2.1",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "1.2.2": {
+         "criterionId": "1.2.2",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "1.2.3": {
+         "criterionId": "1.2.3",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "1.2.4": {
+         "criterionId": "1.2.4",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "1.2.5": {
+         "criterionId": "1.2.5",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "1.2.6": {
+         "criterionId": "1.2.6",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "1.2.7": {
+         "criterionId": "1.2.7",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "1.2.8": {
+         "criterionId": "1.2.8",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "1.2.9": {
+         "criterionId": "1.2.9",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "1.3.1": {
+         "criterionId": "1.3.1",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "1.3.2": {
+         "criterionId": "1.3.2",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "1.3.3": {
+         "criterionId": "1.3.3",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "1.3.4": {
+         "criterionId": "1.3.4",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "1.3.5": {
+         "criterionId": "1.3.5",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "1.3.6": {
+         "criterionId": "1.3.6",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "1.4.1": {
+         "criterionId": "1.4.1",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "1.4.2": {
+         "criterionId": "1.4.2",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "1.4.3": {
+         "criterionId": "1.4.3",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "1.4.4": {
+         "criterionId": "1.4.4",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "1.4.5": {
+         "criterionId": "1.4.5",
+         "preferredEvidenceMode": "hybrid",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["ACT mappings exist, but there is no built-in ACT executor in v0.3.0."]
+      },
+      "1.4.6": {
+         "criterionId": "1.4.6",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "1.4.7": {
+         "criterionId": "1.4.7",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "1.4.8": {
+         "criterionId": "1.4.8",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "1.4.9": {
+         "criterionId": "1.4.9",
+         "preferredEvidenceMode": "hybrid",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["ACT mappings exist, but there is no built-in ACT executor in v0.3.0."]
+      },
+      "1.4.10": {
+         "criterionId": "1.4.10",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "1.4.11": {
+         "criterionId": "1.4.11",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "1.4.12": {
+         "criterionId": "1.4.12",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "1.4.13": {
+         "criterionId": "1.4.13",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.1.1": {
+         "criterionId": "2.1.1",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "2.1.2": {
+         "criterionId": "2.1.2",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.1.3": {
+         "criterionId": "2.1.3",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "2.1.4": {
+         "criterionId": "2.1.4",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.2.1": {
+         "criterionId": "2.2.1",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "2.2.2": {
+         "criterionId": "2.2.2",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "2.2.3": {
+         "criterionId": "2.2.3",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.2.4": {
+         "criterionId": "2.2.4",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "2.2.5": {
+         "criterionId": "2.2.5",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.2.6": {
+         "criterionId": "2.2.6",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.3.1": {
+         "criterionId": "2.3.1",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.3.2": {
+         "criterionId": "2.3.2",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.3.3": {
+         "criterionId": "2.3.3",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.4.1": {
+         "criterionId": "2.4.1",
+         "preferredEvidenceMode": "hybrid",
+         "procedureIds": ["axe_scan", "landmark_sequence"],
+         "requiresRealTarget": true,
+         "notes": [
+            "Bypass-block alternatives need structure and navigation evidence on a real target."
+         ]
+      },
+      "2.4.2": {
+         "criterionId": "2.4.2",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "2.4.3": {
+         "criterionId": "2.4.3",
+         "preferredEvidenceMode": "hybrid",
+         "procedureIds": ["focus_order_probe"],
+         "requiresRealTarget": true,
+         "notes": ["Focus order depends on interaction flow, not just static structure."]
+      },
+      "2.4.4": {
+         "criterionId": "2.4.4",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "2.4.5": {
+         "criterionId": "2.4.5",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.4.6": {
+         "criterionId": "2.4.6",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.4.7": {
+         "criterionId": "2.4.7",
+         "preferredEvidenceMode": "hybrid",
+         "procedureIds": ["focus_visibility_probe"],
+         "requiresRealTarget": true,
+         "notes": [
+            "Focus visibility needs visual and interaction evidence beyond static rules."
+         ]
+      },
+      "2.4.8": {
+         "criterionId": "2.4.8",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.4.9": {
+         "criterionId": "2.4.9",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "2.4.10": {
+         "criterionId": "2.4.10",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.5.1": {
+         "criterionId": "2.5.1",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.5.2": {
+         "criterionId": "2.5.2",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.5.3": {
+         "criterionId": "2.5.3",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "2.5.4": {
+         "criterionId": "2.5.4",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.5.5": {
+         "criterionId": "2.5.5",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "2.5.6": {
+         "criterionId": "2.5.6",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "3.1.1": {
+         "criterionId": "3.1.1",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "3.1.2": {
+         "criterionId": "3.1.2",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "3.1.3": {
+         "criterionId": "3.1.3",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "3.1.4": {
+         "criterionId": "3.1.4",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "3.1.5": {
+         "criterionId": "3.1.5",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "3.1.6": {
+         "criterionId": "3.1.6",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "3.2.1": {
+         "criterionId": "3.2.1",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "3.2.2": {
+         "criterionId": "3.2.2",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "3.2.3": {
+         "criterionId": "3.2.3",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "3.2.4": {
+         "criterionId": "3.2.4",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "3.2.5": {
+         "criterionId": "3.2.5",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "3.3.1": {
+         "criterionId": "3.3.1",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "3.3.2": {
+         "criterionId": "3.3.2",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "3.3.3": {
+         "criterionId": "3.3.3",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "3.3.4": {
+         "criterionId": "3.3.4",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "3.3.5": {
+         "criterionId": "3.3.5",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "3.3.6": {
+         "criterionId": "3.3.6",
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
+      },
+      "4.1.1": {
+         "criterionId": "4.1.1",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "4.1.2": {
+         "criterionId": "4.1.2",
+         "preferredEvidenceMode": "automated",
+         "procedureIds": ["axe_scan"],
+         "requiresRealTarget": false,
+         "notes": ["Direct axe coverage exists for this criterion."]
+      },
+      "4.1.3": {
+         "criterionId": "4.1.3",
+         "preferredEvidenceMode": "hybrid",
+         "procedureIds": ["status_message_probe"],
+         "requiresRealTarget": true,
+         "notes": [
+            "Status messages need announcement evidence from assistive technology without forced focus changes."
+         ]
+      }
+   }
 }

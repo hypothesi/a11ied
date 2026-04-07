@@ -1,740 +1,605 @@
 {
-  "target": {
-    "kind": "url",
-    "value": "http://127.0.0.1:4173/auth-login.html",
-    "platform": "virtual",
-    "resolvedUrl": "http://127.0.0.1:4173/auth-login.html"
-  },
-  "wcagVersion": "2.2",
-  "requestedScope": {
-    "kind": "level",
-    "level": "AA"
-  },
-  "summary": {
-    "totalCriteria": 4,
-    "verdicts": {
-      "pass": 1,
-      "fail": 1,
-      "needs-manual-review": 1,
-      "not-applicable": 0,
-      "not-covered": 1,
-      "error": 0
-    },
-    "evidenceModes": {
-      "automated": 1,
-      "hybrid": 1,
-      "manual": 1,
-      "unknown": 1
-    },
-    "uncoveredCount": 2,
-    "manualOnlyCount": 1,
-    "failedCount": 3
-  },
-  "criteria": [
-    {
-      "criterionId": "4.1.2",
-      "criterion": {
-        "id": "4.1.2",
-        "slug": "name-role-value",
-        "title": "Name, Role, Value",
-        "summary": "User interface components need programmatically determinable name, role, and value.",
-        "level": "A",
-        "wcagVersion": "2.2",
-        "normativeText": "For all user interface components, the name and role can be programmatically determined; states, properties, and values that can be set by the user can be programmatically set; and notification of changes to these items is available to user agents, including assistive technologies.",
-        "understandingUrl": "https://www.w3.org/WAI/WCAG22/Understanding/name-role-value",
-        "versions": [
-          "2.0",
-          "2.1",
-          "2.2"
-        ],
-        "altIds": [],
-        "details": [
-          "Controls need accessible names."
-        ],
-        "tags": [
-          "forms",
-          "controls"
-        ],
-        "principle": {
-          "id": "principle-4",
-          "number": "4",
-          "title": "Robust"
-        },
-        "guideline": {
-          "id": "guideline-4.1",
-          "number": "4.1",
-          "title": "Compatible"
-        },
-        "techniques": [],
-        "advisoryTechniques": [],
-        "failures": []
+   "target": {
+      "kind": "url",
+      "value": "http://127.0.0.1:4173/auth-login.html",
+      "platform": "virtual",
+      "resolvedUrl": "http://127.0.0.1:4173/auth-login.html"
+   },
+   "wcagVersion": "2.2",
+   "requestedScope": {
+      "kind": "level",
+      "level": "AA"
+   },
+   "summary": {
+      "totalCriteria": 4,
+      "verdicts": {
+         "pass": 1,
+         "fail": 1,
+         "needs-manual-review": 1,
+         "not-applicable": 0,
+         "not-covered": 1,
+         "error": 0
       },
-      "applicability": {
-        "criterionId": "4.1.2",
-        "state": "applicable",
-        "reasons": [
-          "Detected interactive controls on the page."
-        ],
-        "matchedSignalCategories": [
-          "form",
-          "widget"
-        ],
-        "matchedTags": [
-          "forms",
-          "controls"
-        ]
+      "evidenceModes": {
+         "automated": 1,
+         "hybrid": 1,
+         "manual": 1,
+         "unknown": 1
       },
-      "coverage": {
-        "criterionId": "4.1.2",
-        "coverageState": "automated",
-        "axeRuleIds": [
-          "button-name"
-        ],
-        "actRuleIds": [],
-        "sourceAttribution": [
-          "axe-core"
-        ],
-        "notes": [
-          "Axe coverage is strong for missing control names."
-        ],
-        "updatedAt": "2026-04-07T12:00:00.000Z"
-      },
-      "strategy": {
-        "criterionId": "4.1.2",
-        "preferredEvidenceMode": "automated",
-        "procedureIds": [
-          "axe:criterion:4.1.2"
-        ],
-        "requiresRealTarget": false,
-        "notes": [
-          "Run axe and preserve node targets and rule ids."
-        ]
-      },
-      "executionPlan": {
-        "strategyId": "wcag-2.2:4.1.2",
-        "preferredEvidenceMode": "automated",
-        "selectedProcedureIds": [
-          "axe:criterion:4.1.2"
-        ],
-        "steps": [
-          {
-            "procedureId": "axe:criterion:4.1.2",
-            "kind": "axe",
-            "mode": "automated",
-            "status": "completed",
-            "sourceReferences": [
-              {
-                "kind": "axe-rule",
-                "id": "button-name",
-                "label": "button-name"
-              }
-            ]
-          }
-        ]
-      },
-      "verdict": "fail",
-      "evidenceMode": "automated",
-      "procedureIds": [
-        "axe:criterion:4.1.2"
-      ],
-      "evidence": [
-        {
-          "id": "axe:4.1.2:1",
-          "kind": "axe",
-          "mode": "automated",
-          "procedureId": "axe:criterion:4.1.2",
-          "collectedAt": "2026-04-07T12:01:00.000Z",
-          "summary": "Axe found a button without an accessible name.",
-          "sourceReferences": [
-            {
-              "kind": "axe-rule",
-              "id": "button-name",
-              "label": "button-name"
-            },
-            {
-              "kind": "criterion",
-              "id": "4.1.2",
-              "label": "Name, Role, Value"
-            }
-          ],
-          "axeResult": {
-            "url": "http://127.0.0.1:4173/button-name-failure.html",
+      "uncoveredCount": 2,
+      "manualOnlyCount": 1,
+      "failedCount": 3
+   },
+   "criteria": [
+      {
+         "criterionId": "4.1.2",
+         "criterion": {
+            "id": "4.1.2",
+            "slug": "name-role-value",
+            "title": "Name, Role, Value",
+            "summary": "User interface components need programmatically determinable name, role, and value.",
+            "level": "A",
             "wcagVersion": "2.2",
-            "selection": {
-              "kind": "criterion",
-              "criterion": "4.1.2",
-              "resolvedRuleIds": [
-                "button-name"
-              ]
+            "normativeText": "For all user interface components, the name and role can be programmatically determined; states, properties, and values that can be set by the user can be programmatically set; and notification of changes to these items is available to user agents, including assistive technologies.",
+            "understandingUrl": "https://www.w3.org/WAI/WCAG22/Understanding/name-role-value",
+            "versions": ["2.0", "2.1", "2.2"],
+            "altIds": [],
+            "details": ["Controls need accessible names."],
+            "tags": ["forms", "controls"],
+            "principle": {
+               "id": "principle-4",
+               "number": "4",
+               "title": "Robust"
             },
-            "ruleIds": [
-              "button-name"
-            ],
-            "violations": [
-              {
-                "id": "button-name",
-                "impact": "critical",
-                "description": "Ensures buttons have discernible text",
-                "help": "Buttons must have discernible text",
-                "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name",
-                "tags": [
-                  "wcag412"
-                ],
-                "nodes": [
+            "guideline": {
+               "id": "guideline-4.1",
+               "number": "4.1",
+               "title": "Compatible"
+            },
+            "techniques": [],
+            "advisoryTechniques": [],
+            "failures": []
+         },
+         "applicability": {
+            "criterionId": "4.1.2",
+            "state": "applicable",
+            "reasons": ["Detected interactive controls on the page."],
+            "matchedSignalCategories": ["form", "widget"],
+            "matchedTags": ["forms", "controls"]
+         },
+         "coverage": {
+            "criterionId": "4.1.2",
+            "coverageState": "automated",
+            "axeRuleIds": ["button-name"],
+            "actRuleIds": [],
+            "sourceAttribution": ["axe-core"],
+            "notes": ["Axe coverage is strong for missing control names."],
+            "updatedAt": "2026-04-07T12:00:00.000Z"
+         },
+         "strategy": {
+            "criterionId": "4.1.2",
+            "preferredEvidenceMode": "automated",
+            "procedureIds": ["axe:criterion:4.1.2"],
+            "requiresRealTarget": false,
+            "notes": ["Run axe and preserve node targets and rule ids."]
+         },
+         "executionPlan": {
+            "strategyId": "wcag-2.2:4.1.2",
+            "preferredEvidenceMode": "automated",
+            "selectedProcedureIds": ["axe:criterion:4.1.2"],
+            "steps": [
+               {
+                  "procedureId": "axe:criterion:4.1.2",
+                  "kind": "axe",
+                  "mode": "automated",
+                  "status": "completed",
+                  "sourceReferences": [
+                     {
+                        "kind": "axe-rule",
+                        "id": "button-name",
+                        "label": "button-name"
+                     }
+                  ]
+               }
+            ]
+         },
+         "verdict": "fail",
+         "evidenceMode": "automated",
+         "procedureIds": ["axe:criterion:4.1.2"],
+         "evidence": [
+            {
+               "id": "axe:4.1.2:1",
+               "kind": "axe",
+               "mode": "automated",
+               "procedureId": "axe:criterion:4.1.2",
+               "collectedAt": "2026-04-07T12:01:00.000Z",
+               "summary": "Axe found a button without an accessible name.",
+               "sourceReferences": [
                   {
-                    "target": [
-                      "button"
-                    ],
-                    "html": "<button></button>",
-                    "failureSummary": "Fix any of the following: Element does not have inner text that is visible to screen readers."
+                     "kind": "axe-rule",
+                     "id": "button-name",
+                     "label": "button-name"
+                  },
+                  {
+                     "kind": "criterion",
+                     "id": "4.1.2",
+                     "label": "Name, Role, Value"
                   }
-                ]
-              }
-            ],
-            "passes": [],
-            "incomplete": [],
-            "inapplicable": []
-          },
-          "notes": []
-        }
-      ],
-      "sourceReferences": [
-        {
-          "kind": "criterion",
-          "id": "4.1.2",
-          "label": "Name, Role, Value"
-        },
-        {
-          "kind": "coverage-artifact",
-          "id": "coverage.2.2#4.1.2",
-          "label": "Coverage artifact"
-        },
-        {
-          "kind": "strategy-artifact",
-          "id": "strategy.2.2#4.1.2",
-          "label": "Verification strategy artifact"
-        }
-      ],
-      "uncoveredWork": [],
-      "notes": [],
-      "errors": []
-    },
-    {
-      "criterionId": "4.1.3",
-      "criterion": {
-        "id": "4.1.3",
-        "slug": "status-messages",
-        "title": "Status Messages",
-        "summary": "Status messages can be exposed to assistive technologies without moving focus.",
-        "level": "AA",
-        "wcagVersion": "2.2",
-        "normativeText": "In content implemented using markup languages, status messages can be programmatically determined through role or properties such that they can be presented to the user by assistive technologies without receiving focus.",
-        "understandingUrl": "https://www.w3.org/WAI/WCAG22/Understanding/status-messages",
-        "versions": [
-          "2.2"
-        ],
-        "altIds": [],
-        "details": [
-          "Expose status updates without forcing a focus change."
-        ],
-        "tags": [
-          "content",
-          "errors",
-          "forms",
-          "messaging"
-        ],
-        "principle": {
-          "id": "principle-4",
-          "number": "4",
-          "title": "Robust"
-        },
-        "guideline": {
-          "id": "guideline-4.1",
-          "number": "4.1",
-          "title": "Compatible"
-        },
-        "techniques": [],
-        "advisoryTechniques": [],
-        "failures": []
-      },
-      "applicability": {
-        "criterionId": "4.1.3",
-        "state": "applicable",
-        "reasons": [
-          "Detected role=status on the page."
-        ],
-        "matchedSignalCategories": [
-          "live-region",
-          "form"
-        ],
-        "matchedTags": [
-          "messaging",
-          "forms"
-        ]
-      },
-      "coverage": {
-        "criterionId": "4.1.3",
-        "coverageState": "hybrid",
-        "axeRuleIds": [],
-        "actRuleIds": [],
-        "sourceAttribution": [
-          "wcag",
-          "quickref",
-          "local-analysis"
-        ],
-        "notes": [
-          "Announcement behavior still needs interaction evidence."
-        ],
-        "updatedAt": "2026-04-07T12:00:00.000Z"
-      },
-      "strategy": {
-        "criterionId": "4.1.3",
-        "preferredEvidenceMode": "hybrid",
-        "procedureIds": [
-          "status_message_probe"
-        ],
-        "requiresRealTarget": false,
-        "notes": [
-          "Use the reusable status message probe and preserve spoken output."
-        ]
-      },
-      "executionPlan": {
-        "strategyId": "wcag-2.2:4.1.3",
-        "preferredEvidenceMode": "hybrid",
-        "selectedProcedureIds": [
-          "status_message_probe"
-        ],
-        "steps": [
-          {
-            "procedureId": "status_message_probe",
-            "kind": "pattern",
-            "mode": "hybrid",
-            "status": "completed",
-            "sourceReferences": [
-              {
-                "kind": "pattern",
-                "id": "status_message_probe",
-                "label": "Status message probe"
-              }
-            ]
-          }
-        ]
-      },
-      "verdict": "pass",
-      "evidenceMode": "hybrid",
-      "procedureIds": [
-        "status_message_probe"
-      ],
-      "evidence": [
-        {
-          "id": "pattern:status-message:mixed",
-          "kind": "pattern",
-          "mode": "hybrid",
-          "procedureId": "status_message_probe",
-          "collectedAt": "2026-04-07T12:02:00.000Z",
-          "summary": "The status message was announced.",
-          "sourceReferences": [
-            {
-              "kind": "pattern",
-              "id": "status_message_probe",
-              "label": "Status message probe"
+               ],
+               "axeResult": {
+                  "url": "http://127.0.0.1:4173/button-name-failure.html",
+                  "wcagVersion": "2.2",
+                  "selection": {
+                     "kind": "criterion",
+                     "criterion": "4.1.2",
+                     "resolvedRuleIds": ["button-name"]
+                  },
+                  "ruleIds": ["button-name"],
+                  "violations": [
+                     {
+                        "id": "button-name",
+                        "impact": "critical",
+                        "description": "Ensures buttons have discernible text",
+                        "help": "Buttons must have discernible text",
+                        "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name",
+                        "tags": ["wcag412"],
+                        "nodes": [
+                           {
+                              "target": ["button"],
+                              "html": "<button></button>",
+                              "failureSummary": "Fix any of the following: Element does not have inner text that is visible to screen readers."
+                           }
+                        ]
+                     }
+                  ],
+                  "passes": [],
+                  "incomplete": [],
+                  "inapplicable": []
+               },
+               "notes": []
             }
-          ],
-          "patternResult": {
-            "patternId": "status_message_probe",
-            "url": "http://127.0.0.1:4173/status-message.html",
-            "target": "virtual",
-            "sessionId": "drv_status_message",
-            "managedSession": true,
-            "stepLog": [
-              {
-                "id": "trigger-status-message",
-                "label": "Trigger the status message update from the page",
-                "status": "completed"
-              }
-            ],
-            "spokenPhraseLog": [
-              "document",
-              "Profile saved successfully."
-            ],
-            "itemTextLog": [
-              "",
-              "Profile saved successfully."
-            ],
-            "assertions": [
-              {
-                "id": "status-announced",
-                "status": "passed",
-                "message": "The status message was announced."
-              }
-            ],
-            "targetMetadata": {
-              "focusChangedUnexpectedly": false
+         ],
+         "sourceReferences": [
+            {
+               "kind": "criterion",
+               "id": "4.1.2",
+               "label": "Name, Role, Value"
             },
-            "browserEvidence": [
-              {
-                "kind": "status-message",
-                "summary": "Captured the status region after the save action."
-              }
+            {
+               "kind": "coverage-artifact",
+               "id": "coverage.2.2#4.1.2",
+               "label": "Coverage artifact"
+            },
+            {
+               "kind": "strategy-artifact",
+               "id": "strategy.2.2#4.1.2",
+               "label": "Verification strategy artifact"
+            }
+         ],
+         "uncoveredWork": [],
+         "notes": [],
+         "errors": []
+      },
+      {
+         "criterionId": "4.1.3",
+         "criterion": {
+            "id": "4.1.3",
+            "slug": "status-messages",
+            "title": "Status Messages",
+            "summary": "Status messages can be exposed to assistive technologies without moving focus.",
+            "level": "AA",
+            "wcagVersion": "2.2",
+            "normativeText": "In content implemented using markup languages, status messages can be programmatically determined through role or properties such that they can be presented to the user by assistive technologies without receiving focus.",
+            "understandingUrl": "https://www.w3.org/WAI/WCAG22/Understanding/status-messages",
+            "versions": ["2.2"],
+            "altIds": [],
+            "details": ["Expose status updates without forcing a focus change."],
+            "tags": ["content", "errors", "forms", "messaging"],
+            "principle": {
+               "id": "principle-4",
+               "number": "4",
+               "title": "Robust"
+            },
+            "guideline": {
+               "id": "guideline-4.1",
+               "number": "4.1",
+               "title": "Compatible"
+            },
+            "techniques": [],
+            "advisoryTechniques": [],
+            "failures": []
+         },
+         "applicability": {
+            "criterionId": "4.1.3",
+            "state": "applicable",
+            "reasons": ["Detected role=status on the page."],
+            "matchedSignalCategories": ["live-region", "form"],
+            "matchedTags": ["messaging", "forms"]
+         },
+         "coverage": {
+            "criterionId": "4.1.3",
+            "coverageState": "hybrid",
+            "axeRuleIds": [],
+            "actRuleIds": [],
+            "sourceAttribution": ["wcag", "quickref", "local-analysis"],
+            "notes": ["Announcement behavior still needs interaction evidence."],
+            "updatedAt": "2026-04-07T12:00:00.000Z"
+         },
+         "strategy": {
+            "criterionId": "4.1.3",
+            "preferredEvidenceMode": "hybrid",
+            "procedureIds": ["status_message_probe"],
+            "requiresRealTarget": false,
+            "notes": ["Use the reusable status message probe and preserve spoken output."]
+         },
+         "executionPlan": {
+            "strategyId": "wcag-2.2:4.1.3",
+            "preferredEvidenceMode": "hybrid",
+            "selectedProcedureIds": ["status_message_probe"],
+            "steps": [
+               {
+                  "procedureId": "status_message_probe",
+                  "kind": "pattern",
+                  "mode": "hybrid",
+                  "status": "completed",
+                  "sourceReferences": [
+                     {
+                        "kind": "pattern",
+                        "id": "status_message_probe",
+                        "label": "Status message probe"
+                     }
+                  ]
+               }
             ]
-          },
-          "notes": [
-            "Spoken evidence is preserved for later review."
-          ]
-        }
-      ],
-      "sourceReferences": [
-        {
-          "kind": "criterion",
-          "id": "4.1.3",
-          "label": "Status Messages"
-        },
-        {
-          "kind": "pattern",
-          "id": "status_message_probe",
-          "label": "Status message probe"
-        }
-      ],
-      "uncoveredWork": [],
-      "notes": [],
-      "errors": []
-    },
-    {
-      "criterionId": "3.3.8",
-      "criterion": {
-        "id": "3.3.8",
-        "slug": "accessible-authentication-minimum",
-        "title": "Accessible Authentication (Minimum)",
-        "summary": "Authentication steps should not rely on a cognitive function test unless an alternative is provided.",
-        "level": "AA",
-        "wcagVersion": "2.2",
-        "normativeText": "A cognitive function test is not relied upon for any step in an authentication process unless that step provides at least one of the listed alternatives.",
-        "understandingUrl": "https://www.w3.org/WAI/WCAG22/Understanding/accessible-authentication-minimum",
-        "versions": [
-          "2.2"
-        ],
-        "altIds": [],
-        "details": [
-          "The system needs human review of the actual authentication challenge."
-        ],
-        "tags": [
-          "auth",
-          "forms"
-        ],
-        "principle": {
-          "id": "principle-3",
-          "number": "3",
-          "title": "Understandable"
-        },
-        "guideline": {
-          "id": "guideline-3.3",
-          "number": "3.3",
-          "title": "Input Assistance"
-        },
-        "techniques": [],
-        "advisoryTechniques": [],
-        "failures": []
+         },
+         "verdict": "pass",
+         "evidenceMode": "hybrid",
+         "procedureIds": ["status_message_probe"],
+         "evidence": [
+            {
+               "id": "pattern:status-message:mixed",
+               "kind": "pattern",
+               "mode": "hybrid",
+               "procedureId": "status_message_probe",
+               "collectedAt": "2026-04-07T12:02:00.000Z",
+               "summary": "The status message was announced.",
+               "sourceReferences": [
+                  {
+                     "kind": "pattern",
+                     "id": "status_message_probe",
+                     "label": "Status message probe"
+                  }
+               ],
+               "patternResult": {
+                  "patternId": "status_message_probe",
+                  "url": "http://127.0.0.1:4173/status-message.html",
+                  "target": "virtual",
+                  "sessionId": "drv_status_message",
+                  "managedSession": true,
+                  "stepLog": [
+                     {
+                        "id": "trigger-status-message",
+                        "label": "Trigger the status message update from the page",
+                        "status": "completed"
+                     }
+                  ],
+                  "spokenPhraseLog": ["document", "Profile saved successfully."],
+                  "itemTextLog": ["", "Profile saved successfully."],
+                  "assertions": [
+                     {
+                        "id": "status-announced",
+                        "status": "passed",
+                        "message": "The status message was announced."
+                     }
+                  ],
+                  "targetMetadata": {
+                     "focusChangedUnexpectedly": false
+                  },
+                  "browserEvidence": [
+                     {
+                        "kind": "status-message",
+                        "summary": "Captured the status region after the save action."
+                     }
+                  ]
+               },
+               "notes": ["Spoken evidence is preserved for later review."]
+            }
+         ],
+         "sourceReferences": [
+            {
+               "kind": "criterion",
+               "id": "4.1.3",
+               "label": "Status Messages"
+            },
+            {
+               "kind": "pattern",
+               "id": "status_message_probe",
+               "label": "Status message probe"
+            }
+         ],
+         "uncoveredWork": [],
+         "notes": [],
+         "errors": []
       },
-      "applicability": {
-        "criterionId": "3.3.8",
-        "state": "applicable",
-        "reasons": [
-          "Detected a login form."
-        ],
-        "matchedSignalCategories": [
-          "auth",
-          "form"
-        ],
-        "matchedTags": [
-          "auth",
-          "forms"
-        ]
-      },
-      "coverage": {
-        "criterionId": "3.3.8",
-        "coverageState": "manual",
-        "axeRuleIds": [],
-        "actRuleIds": [],
-        "sourceAttribution": [
-          "wcag",
-          "quickref"
-        ],
-        "notes": [
-          "No reliable automated signal proves that the flow avoids cognitive function tests."
-        ],
-        "updatedAt": "2026-04-07T12:00:00.000Z"
-      },
-      "strategy": {
-        "criterionId": "3.3.8",
-        "preferredEvidenceMode": "manual",
-        "procedureIds": [
-          "manual:accessible-authentication-minimum"
-        ],
-        "requiresRealTarget": true,
-        "notes": [
-          "A human reviewer needs to inspect the actual authentication challenge."
-        ]
-      },
-      "executionPlan": {
-        "strategyId": "wcag-2.2:3.3.8",
-        "preferredEvidenceMode": "manual",
-        "selectedProcedureIds": [
-          "manual:accessible-authentication-minimum"
-        ],
-        "steps": [
-          {
-            "procedureId": "manual:accessible-authentication-minimum",
-            "kind": "manual",
-            "mode": "manual",
-            "status": "skipped",
-            "reason": "The current run used a virtual target and did not include a human reviewer.",
-            "sourceReferences": [
-              {
-                "kind": "criterion",
-                "id": "3.3.8",
-                "label": "Accessible Authentication (Minimum)"
-              }
+      {
+         "criterionId": "3.3.8",
+         "criterion": {
+            "id": "3.3.8",
+            "slug": "accessible-authentication-minimum",
+            "title": "Accessible Authentication (Minimum)",
+            "summary": "Authentication steps should not rely on a cognitive function test unless an alternative is provided.",
+            "level": "AA",
+            "wcagVersion": "2.2",
+            "normativeText": "A cognitive function test is not relied upon for any step in an authentication process unless that step provides at least one of the listed alternatives.",
+            "understandingUrl": "https://www.w3.org/WAI/WCAG22/Understanding/accessible-authentication-minimum",
+            "versions": ["2.2"],
+            "altIds": [],
+            "details": [
+               "The system needs human review of the actual authentication challenge."
+            ],
+            "tags": ["auth", "forms"],
+            "principle": {
+               "id": "principle-3",
+               "number": "3",
+               "title": "Understandable"
+            },
+            "guideline": {
+               "id": "guideline-3.3",
+               "number": "3.3",
+               "title": "Input Assistance"
+            },
+            "techniques": [],
+            "advisoryTechniques": [],
+            "failures": []
+         },
+         "applicability": {
+            "criterionId": "3.3.8",
+            "state": "applicable",
+            "reasons": ["Detected a login form."],
+            "matchedSignalCategories": ["auth", "form"],
+            "matchedTags": ["auth", "forms"]
+         },
+         "coverage": {
+            "criterionId": "3.3.8",
+            "coverageState": "manual",
+            "axeRuleIds": [],
+            "actRuleIds": [],
+            "sourceAttribution": ["wcag", "quickref"],
+            "notes": [
+               "No reliable automated signal proves that the flow avoids cognitive function tests."
+            ],
+            "updatedAt": "2026-04-07T12:00:00.000Z"
+         },
+         "strategy": {
+            "criterionId": "3.3.8",
+            "preferredEvidenceMode": "manual",
+            "procedureIds": ["manual:accessible-authentication-minimum"],
+            "requiresRealTarget": true,
+            "notes": [
+               "A human reviewer needs to inspect the actual authentication challenge."
             ]
-          }
-        ]
-      },
-      "verdict": "needs-manual-review",
-      "evidenceMode": "manual",
-      "procedureIds": [
-        "manual:accessible-authentication-minimum"
-      ],
-      "evidence": [
-        {
-          "id": "manual-note:3.3.8:1",
-          "kind": "manual-note",
-          "mode": "manual",
-          "procedureId": "manual:accessible-authentication-minimum",
-          "collectedAt": "2026-04-07T12:03:00.000Z",
-          "summary": "The login form was detected, but the authentication challenge itself was not reviewed.",
-          "sourceReferences": [
-            {
-              "kind": "manual-note",
-              "id": "manual:accessible-authentication-minimum",
-              "label": "Manual review required"
-            }
-          ],
-          "notes": [
-            "No false pass should be emitted for this criterion."
-          ]
-        }
-      ],
-      "sourceReferences": [
-        {
-          "kind": "criterion",
-          "id": "3.3.8",
-          "label": "Accessible Authentication (Minimum)"
-        },
-        {
-          "kind": "strategy-artifact",
-          "id": "strategy.2.2#3.3.8",
-          "label": "Verification strategy artifact"
-        }
-      ],
-      "uncoveredWork": [
-        {
-          "kind": "manual-only",
-          "message": "A human review of the actual authentication challenge is still required.",
-          "procedureId": "manual:accessible-authentication-minimum",
-          "sourceReferences": [
-            {
-              "kind": "manual-note",
-              "id": "manual:accessible-authentication-minimum",
-              "label": "Manual review required"
-            }
-          ]
-        },
-        {
-          "kind": "requires-real-target",
-          "message": "A real assistive technology target is required before this criterion can be signed off.",
-          "procedureId": "manual:accessible-authentication-minimum",
-          "sourceReferences": [
-            {
-              "kind": "strategy-artifact",
-              "id": "strategy.2.2#3.3.8",
-              "label": "Verification strategy artifact"
-            }
-          ]
-        }
-      ],
-      "notes": [
-        "This row stays explicit about missing evidence."
-      ],
-      "errors": []
-    },
-    {
-      "criterionId": "2.4.3",
-      "criterion": {
-        "id": "2.4.3",
-        "slug": "focus-order",
-        "title": "Focus Order",
-        "summary": "Focusable components should receive focus in an order that preserves meaning and operability.",
-        "level": "A",
-        "wcagVersion": "2.2",
-        "normativeText": "If a Web page can be navigated sequentially and the navigation sequences affect meaning or operation, focusable components receive focus in an order that preserves meaning and operability.",
-        "understandingUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-order",
-        "versions": [
-          "2.0",
-          "2.1",
-          "2.2"
-        ],
-        "altIds": [],
-        "details": [
-          "This fixture suite does not yet include a reusable verification path for this criterion."
-        ],
-        "tags": [
-          "focus",
-          "keyboard"
-        ],
-        "principle": {
-          "id": "principle-2",
-          "number": "2",
-          "title": "Operable"
-        },
-        "guideline": {
-          "id": "guideline-2.4",
-          "number": "2.4",
-          "title": "Navigable"
-        },
-        "techniques": [],
-        "advisoryTechniques": [],
-        "failures": []
-      },
-      "applicability": {
-        "criterionId": "2.4.3",
-        "state": "likely-applicable",
-        "reasons": [
-          "Detected a login form with multiple focusable controls."
-        ],
-        "matchedSignalCategories": [
-          "form",
-          "widget"
-        ],
-        "matchedTags": [
-          "focus",
-          "keyboard"
-        ]
-      },
-      "coverage": {
-        "criterionId": "2.4.3",
-        "coverageState": "unknown",
-        "axeRuleIds": [],
-        "actRuleIds": [],
-        "sourceAttribution": [
-          "wcag"
-        ],
-        "notes": [
-          "Coverage and procedure mapping are not finalized for this criterion."
-        ],
-        "updatedAt": "2026-04-07T12:00:00.000Z"
-      },
-      "strategy": {
-        "criterionId": "2.4.3",
-        "preferredEvidenceMode": "unknown",
-        "procedureIds": [],
-        "requiresRealTarget": false,
-        "notes": [
-          "No reusable verification path exists yet."
-        ]
-      },
-      "executionPlan": {
-        "strategyId": "wcag-2.2:2.4.3",
-        "preferredEvidenceMode": "unknown",
-        "selectedProcedureIds": [],
-        "steps": [
-          {
-            "procedureId": "unplanned:2.4.3",
-            "kind": "manual",
-            "mode": "unknown",
-            "status": "skipped",
-            "reason": "No verification procedure is mapped yet.",
-            "sourceReferences": [
-              {
-                "kind": "criterion",
-                "id": "2.4.3",
-                "label": "Focus Order"
-              }
+         },
+         "executionPlan": {
+            "strategyId": "wcag-2.2:3.3.8",
+            "preferredEvidenceMode": "manual",
+            "selectedProcedureIds": ["manual:accessible-authentication-minimum"],
+            "steps": [
+               {
+                  "procedureId": "manual:accessible-authentication-minimum",
+                  "kind": "manual",
+                  "mode": "manual",
+                  "status": "skipped",
+                  "reason": "The current run used a virtual target and did not include a human reviewer.",
+                  "sourceReferences": [
+                     {
+                        "kind": "criterion",
+                        "id": "3.3.8",
+                        "label": "Accessible Authentication (Minimum)"
+                     }
+                  ]
+               }
             ]
-          }
-        ]
-      },
-      "verdict": "not-covered",
-      "evidenceMode": "unknown",
-      "procedureIds": [],
-      "evidence": [
-        {
-          "id": "applicability:2.4.3:1",
-          "kind": "applicability",
-          "mode": "unknown",
-          "collectedAt": "2026-04-07T12:04:00.000Z",
-          "summary": "The target looks relevant to focus-order checks, but no verification procedure was available.",
-          "sourceReferences": [
+         },
+         "verdict": "needs-manual-review",
+         "evidenceMode": "manual",
+         "procedureIds": ["manual:accessible-authentication-minimum"],
+         "evidence": [
             {
-              "kind": "applicability",
-              "id": "applicability:2.4.3",
-              "label": "Applicability assessment"
+               "id": "manual-note:3.3.8:1",
+               "kind": "manual-note",
+               "mode": "manual",
+               "procedureId": "manual:accessible-authentication-minimum",
+               "collectedAt": "2026-04-07T12:03:00.000Z",
+               "summary": "The login form was detected, but the authentication challenge itself was not reviewed.",
+               "sourceReferences": [
+                  {
+                     "kind": "manual-note",
+                     "id": "manual:accessible-authentication-minimum",
+                     "label": "Manual review required"
+                  }
+               ],
+               "notes": ["No false pass should be emitted for this criterion."]
             }
-          ],
-          "applicability": {
+         ],
+         "sourceReferences": [
+            {
+               "kind": "criterion",
+               "id": "3.3.8",
+               "label": "Accessible Authentication (Minimum)"
+            },
+            {
+               "kind": "strategy-artifact",
+               "id": "strategy.2.2#3.3.8",
+               "label": "Verification strategy artifact"
+            }
+         ],
+         "uncoveredWork": [
+            {
+               "kind": "manual-only",
+               "message": "A human review of the actual authentication challenge is still required.",
+               "procedureId": "manual:accessible-authentication-minimum",
+               "sourceReferences": [
+                  {
+                     "kind": "manual-note",
+                     "id": "manual:accessible-authentication-minimum",
+                     "label": "Manual review required"
+                  }
+               ]
+            },
+            {
+               "kind": "requires-real-target",
+               "message": "A real assistive technology target is required before this criterion can be signed off.",
+               "procedureId": "manual:accessible-authentication-minimum",
+               "sourceReferences": [
+                  {
+                     "kind": "strategy-artifact",
+                     "id": "strategy.2.2#3.3.8",
+                     "label": "Verification strategy artifact"
+                  }
+               ]
+            }
+         ],
+         "notes": ["This row stays explicit about missing evidence."],
+         "errors": []
+      },
+      {
+         "criterionId": "2.4.3",
+         "criterion": {
+            "id": "2.4.3",
+            "slug": "focus-order",
+            "title": "Focus Order",
+            "summary": "Focusable components should receive focus in an order that preserves meaning and operability.",
+            "level": "A",
+            "wcagVersion": "2.2",
+            "normativeText": "If a Web page can be navigated sequentially and the navigation sequences affect meaning or operation, focusable components receive focus in an order that preserves meaning and operability.",
+            "understandingUrl": "https://www.w3.org/WAI/WCAG22/Understanding/focus-order",
+            "versions": ["2.0", "2.1", "2.2"],
+            "altIds": [],
+            "details": [
+               "This fixture suite does not yet include a reusable verification path for this criterion."
+            ],
+            "tags": ["focus", "keyboard"],
+            "principle": {
+               "id": "principle-2",
+               "number": "2",
+               "title": "Operable"
+            },
+            "guideline": {
+               "id": "guideline-2.4",
+               "number": "2.4",
+               "title": "Navigable"
+            },
+            "techniques": [],
+            "advisoryTechniques": [],
+            "failures": []
+         },
+         "applicability": {
             "criterionId": "2.4.3",
             "state": "likely-applicable",
-            "reasons": [
-              "Detected a login form with multiple focusable controls."
+            "reasons": ["Detected a login form with multiple focusable controls."],
+            "matchedSignalCategories": ["form", "widget"],
+            "matchedTags": ["focus", "keyboard"]
+         },
+         "coverage": {
+            "criterionId": "2.4.3",
+            "coverageState": "unknown",
+            "axeRuleIds": [],
+            "actRuleIds": [],
+            "sourceAttribution": ["wcag"],
+            "notes": [
+               "Coverage and procedure mapping are not finalized for this criterion."
             ],
-            "matchedSignalCategories": [
-              "form",
-              "widget"
-            ],
-            "matchedTags": [
-              "focus",
-              "keyboard"
+            "updatedAt": "2026-04-07T12:00:00.000Z"
+         },
+         "strategy": {
+            "criterionId": "2.4.3",
+            "preferredEvidenceMode": "unknown",
+            "procedureIds": [],
+            "requiresRealTarget": false,
+            "notes": ["No reusable verification path exists yet."]
+         },
+         "executionPlan": {
+            "strategyId": "wcag-2.2:2.4.3",
+            "preferredEvidenceMode": "unknown",
+            "selectedProcedureIds": [],
+            "steps": [
+               {
+                  "procedureId": "unplanned:2.4.3",
+                  "kind": "manual",
+                  "mode": "unknown",
+                  "status": "skipped",
+                  "reason": "No verification procedure is mapped yet.",
+                  "sourceReferences": [
+                     {
+                        "kind": "criterion",
+                        "id": "2.4.3",
+                        "label": "Focus Order"
+                     }
+                  ]
+               }
             ]
-          },
-          "notes": [
-            "This evidence only proves relevance, not compliance."
-          ]
-        }
-      ],
-      "sourceReferences": [
-        {
-          "kind": "criterion",
-          "id": "2.4.3",
-          "label": "Focus Order"
-        },
-        {
-          "kind": "coverage-artifact",
-          "id": "coverage.2.2#2.4.3",
-          "label": "Coverage artifact"
-        }
-      ],
-      "uncoveredWork": [
-        {
-          "kind": "not-covered",
-          "message": "No verification path is mapped for this criterion yet.",
-          "sourceReferences": [
+         },
+         "verdict": "not-covered",
+         "evidenceMode": "unknown",
+         "procedureIds": [],
+         "evidence": [
             {
-              "kind": "coverage-artifact",
-              "id": "coverage.2.2#2.4.3",
-              "label": "Coverage artifact"
+               "id": "applicability:2.4.3:1",
+               "kind": "applicability",
+               "mode": "unknown",
+               "collectedAt": "2026-04-07T12:04:00.000Z",
+               "summary": "The target looks relevant to focus-order checks, but no verification procedure was available.",
+               "sourceReferences": [
+                  {
+                     "kind": "applicability",
+                     "id": "applicability:2.4.3",
+                     "label": "Applicability assessment"
+                  }
+               ],
+               "applicability": {
+                  "criterionId": "2.4.3",
+                  "state": "likely-applicable",
+                  "reasons": ["Detected a login form with multiple focusable controls."],
+                  "matchedSignalCategories": ["form", "widget"],
+                  "matchedTags": ["focus", "keyboard"]
+               },
+               "notes": ["This evidence only proves relevance, not compliance."]
             }
-          ]
-        }
-      ],
-      "notes": [
-        "The report keeps this row explicit instead of silently dropping it."
-      ],
-      "errors": []
-    }
-  ],
-  "warnings": [
-    {
-      "code": "manual-review-required",
-      "message": "One or more criteria still need human review."
-    }
-  ],
-  "errors": []
+         ],
+         "sourceReferences": [
+            {
+               "kind": "criterion",
+               "id": "2.4.3",
+               "label": "Focus Order"
+            },
+            {
+               "kind": "coverage-artifact",
+               "id": "coverage.2.2#2.4.3",
+               "label": "Coverage artifact"
+            }
+         ],
+         "uncoveredWork": [
+            {
+               "kind": "not-covered",
+               "message": "No verification path is mapped for this criterion yet.",
+               "sourceReferences": [
+                  {
+                     "kind": "coverage-artifact",
+                     "id": "coverage.2.2#2.4.3",
+                     "label": "Coverage artifact"
+                  }
+               ]
+            }
+         ],
+         "notes": ["The report keeps this row explicit instead of silently dropping it."],
+         "errors": []
+      }
+   ],
+   "warnings": [
+      {
+         "code": "manual-review-required",
+         "message": "One or more criteria still need human review."
+      }
+   ],
+   "errors": []
 }

@@ -52,13 +52,13 @@ What to review after a sync:
 - Raw synced inputs are ignored by git through `packages/wcag-data/.gitignore`.
 - Generated artifacts are intentionally not ignored, because later normalization output and provenance manifests are meant to be committed.
 - The generated layer currently emits:
-  - `criteria.<version>.json`
-  - `criteria-by-level.<version>.json`
-  - `coverage.<version>.json`
-  - `strategy.<version>.json`
-  - `coverage-summary.<version>.json`
-  - `slug-index.<version>.json`
-  - `technique-index.<version>.json`
-  - `failure-index.<version>.json`
-  - `tag-index.<version>.json`
-  - `generated-provenance.json`
+   - `criteria.<version>.json`
+   - `criteria-by-level.<version>.json`
+   - `coverage.<version>.json`
+   - `strategy.<version>.json`
+   - `coverage-summary.<version>.json`
+   - `slug-index.<version>.json`
+   - `technique-index.<version>.json`
+   - `failure-index.<version>.json`
+   - `tag-index.<version>.json`
+   - `generated-provenance.json`

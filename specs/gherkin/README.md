@@ -45,13 +45,13 @@ CLI JSON output uses this envelope:
 
 ```json
 {
-  "ok": true,
-  "command": {},
-  "target": null,
-  "result": {},
-  "warnings": [],
-  "errors": [],
-  "meta": {}
+   "ok": true,
+   "command": {},
+   "target": null,
+   "result": {},
+   "warnings": [],
+   "errors": [],
+   "meta": {}
 }
 ```
 

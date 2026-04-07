@@ -98,13 +98,13 @@ specs/gherkin/traceability.md
 
 ## Task Grid
 
-| Status | ID | Task | Priority | Depends On | Acceptance Criteria |
-| --- | --- | --- | --- | --- | --- |
-| [✓] | R-01 | Establish scaffold and research baseline | H | — | Monorepo, research notes, and initial design direction exist and are verified |
-| [ ] | R-02 | Execute sub-plan 1: foundation and WCAG data | H | R-01 | WCAG source sync, coverage artifacts, contracts, and engine APIs are stable |
-| [ ] | R-03 | Execute sub-plan 2: CLI, driver, and execution | H | R-02 | CLI surfaces and driver primitives work against the stable engine contracts |
-| [ ] | R-04 | Execute sub-plan 3: verification, integrations, and adoption | H | R-02, R-03 | Verification, Storybook, MCP, docs, and release readiness are wired to the same runtime |
-| [ ] | R-05 | Run cross-plan integration and milestone review | M | R-02, R-03, R-04 | The combined system passes smoke tests and the roadmap can close with clear residual risks |
+| Status | ID   | Task                                                         | Priority | Depends On       | Acceptance Criteria                                                                        |
+| ------ | ---- | ------------------------------------------------------------ | -------- | ---------------- | ------------------------------------------------------------------------------------------ |
+| [✓]    | R-01 | Establish scaffold and research baseline                     | H        | —                | Monorepo, research notes, and initial design direction exist and are verified              |
+| [ ]    | R-02 | Execute sub-plan 1: foundation and WCAG data                 | H        | R-01             | WCAG source sync, coverage artifacts, contracts, and engine APIs are stable                |
+| [ ]    | R-03 | Execute sub-plan 2: CLI, driver, and execution               | H        | R-02             | CLI surfaces and driver primitives work against the stable engine contracts                |
+| [ ]    | R-04 | Execute sub-plan 3: verification, integrations, and adoption | H        | R-02, R-03       | Verification, Storybook, MCP, docs, and release readiness are wired to the same runtime    |
+| [ ]    | R-05 | Run cross-plan integration and milestone review              | M        | R-02, R-03, R-04 | The combined system passes smoke tests and the roadmap can close with clear residual risks |
 
 ## Task Details
 
@@ -113,6 +113,7 @@ specs/gherkin/traceability.md
 **Goal:** Start sub-plan work from a stable scaffold and a documented product direction.
 
 **Step-by-step instructions:**
+
 1. Keep the existing monorepo scaffold and research notes as the prerequisite baseline.
 2. Treat the current workspace verification commands as the baseline regression check:
 
@@ -131,6 +132,7 @@ npm run build
 **Goal:** Build the local standards and engine layer that every other surface depends on.
 
 **Step-by-step instructions:**
+
 1. Open and execute [plans/a11lied-foundation-and-wcag-data-plan.md](plans/a11lied-foundation-and-wcag-data-plan.md).
 2. Finish the data sync pipeline before exposing public WCAG lookup commands.
 3. Freeze criterion, coverage, applicability, and verification-strategy schemas before driver, CLI, or MCP code starts depending on them.
@@ -142,6 +144,7 @@ npm run build
 **Goal:** Expose the product surface that humans and agents will actually use day to day.
 
 **Step-by-step instructions:**
+
 1. Open and execute [plans/a11lied-cli-driver-and-execution-plan.md](plans/a11lied-cli-driver-and-execution-plan.md).
 2. Implement CLI UX only after the WCAG data and engine contracts are stable.
 3. Build low-level driver primitives first, then build higher-level reusable patterns on top of them.
@@ -153,6 +156,7 @@ npm run build
 **Goal:** Turn execution evidence into WCAG-aware verdicts and make the system usable across the repo surfaces.
 
 **Step-by-step instructions:**
+
 1. Open and execute [plans/a11lied-verification-integrations-and-adoption-plan.md](plans/a11lied-verification-integrations-and-adoption-plan.md).
 2. Reuse the contracts and driver layer from the earlier sub-plans instead of inventing integration-specific shapes.
 3. Keep criterion-level evidence explicit so level-based verification never hides uncovered or manual-only criteria.
@@ -164,6 +168,7 @@ npm run build
 **Goal:** Prove the sub-plans add up to one coherent product instead of three disconnected slices.
 
 **Step-by-step instructions:**
+
 1. Run the full workspace verification suite:
 
 ```sh

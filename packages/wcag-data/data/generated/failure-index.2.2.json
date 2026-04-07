@@ -1,1001 +1,777 @@
 {
-  "version": "2.2",
-  "failures": {
-    "1.4.13:failure:failure-to-make-content-dismissible-without-moving-pointer-hover-or-keyboard-focus-potential-future-technique:1": {
-      "key": "1.4.13:failure:failure-to-make-content-dismissible-without-moving-pointer-hover-or-keyboard-focus-potential-future-technique:1",
-      "title": "Failure to make content dismissible without moving pointer hover or keyboard focus (Potential future technique)",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.13"
-      ]
-    },
-    "1.4.13:failure:failure-to-meet-by-content-on-hover-or-focus-not-remaining-visible-until-dismissed-or-invalid-potential-future-technique:2": {
-      "key": "1.4.13:failure:failure-to-meet-by-content-on-hover-or-focus-not-remaining-visible-until-dismissed-or-invalid-potential-future-technique:2",
-      "title": "Failure to meet by content on hover or focus not remaining visible until dismissed or invalid (Potential future technique)",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.13"
-      ]
-    },
-    "2.4.12:failure:a-page-has-a-sticky-footer-attached-to-the-bottom-of-the-viewport-when-tabbing-down-the-page-a-focused-item-is-partially-obscured-by-the-footer-because-content-in-the-viewport-scrolls-without-sufficient-a-href-https-www-w3-org-tr-css-scroll-snap-propdef-scroll-padding-rel-nofollow-scroll-padding-a:1": {
-      "key": "2.4.12:failure:a-page-has-a-sticky-footer-attached-to-the-bottom-of-the-viewport-when-tabbing-down-the-page-a-focused-item-is-partially-obscured-by-the-footer-because-content-in-the-viewport-scrolls-without-sufficient-a-href-https-www-w3-org-tr-css-scroll-snap-propdef-scroll-padding-rel-nofollow-scroll-padding-a:1",
-      "title": "A page has a sticky footer (attached to the bottom of the viewport). When tabbing down the page, a focused item is partially obscured by the footer because content in the viewport scrolls without sufficient <a href=\"https://www.w3.org/TR/css-scroll-snap/#propdef-scroll-padding\" rel=\"nofollow\">scroll padding</a>.",
-      "kind": "failure",
-      "criterionIds": [
-        "2.4.12"
-      ]
-    },
-    "2.4.12:failure:an-interaction-that-causes-content-to-appear-over-the-component-with-keyboard-focus-visually-covering-part-of-the-focus-indicator-this-behavior-might-be-encountered-with-advertising-or-promotional-material-meant-to-provide-more-information-about-a-product-as-the-user-navigates-through-a-catalogue:0": {
-      "key": "2.4.12:failure:an-interaction-that-causes-content-to-appear-over-the-component-with-keyboard-focus-visually-covering-part-of-the-focus-indicator-this-behavior-might-be-encountered-with-advertising-or-promotional-material-meant-to-provide-more-information-about-a-product-as-the-user-navigates-through-a-catalogue:0",
-      "title": "An interaction that causes content to appear over the component with keyboard focus, visually covering part of the focus indicator. This behavior might be encountered with advertising or promotional material meant to provide more information about a product as the user navigates through a catalogue.",
-      "kind": "failure",
-      "criterionIds": [
-        "2.4.12"
-      ]
-    },
-    "2.5.3:failure:accessible-name-contains-the-visible-label-text-but-one-or-more-other-words-are-interspersed-in-the-label-potential-future-technique:3": {
-      "key": "2.5.3:failure:accessible-name-contains-the-visible-label-text-but-one-or-more-other-words-are-interspersed-in-the-label-potential-future-technique:3",
-      "title": "Accessible name contains the visible label text, but one or more other words are interspersed in the label (Potential future technique)",
-      "kind": "failure",
-      "criterionIds": [
-        "2.5.3"
-      ]
-    },
-    "2.5.3:failure:accessible-name-contains-the-visible-label-text-but-the-words-of-the-visible-label-are-not-in-the-same-order-as-they-are-in-the-visible-label-text-potential-future-technique:2": {
-      "key": "2.5.3:failure:accessible-name-contains-the-visible-label-text-but-the-words-of-the-visible-label-are-not-in-the-same-order-as-they-are-in-the-visible-label-text-potential-future-technique:2",
-      "title": "Accessible name contains the visible label text, but the words of the visible label are not in the same order as they are in the visible label text (Potential future technique)",
-      "kind": "failure",
-      "criterionIds": [
-        "2.5.3"
-      ]
-    },
-    "2.5.4:failure:fxxx-failure-of-success-criterion-2-5-4-due-to-disrupting-or-disabling-system-level-features-which-allow-the-user-to-disable-motion-actuation:1": {
-      "key": "2.5.4:failure:fxxx-failure-of-success-criterion-2-5-4-due-to-disrupting-or-disabling-system-level-features-which-allow-the-user-to-disable-motion-actuation:1",
-      "title": "FXXX: Failure of Success Criterion 2.5.4 due to disrupting or disabling system level features which allow the user to disable motion actuation",
-      "kind": "failure",
-      "criterionIds": [
-        "2.5.4"
-      ]
-    },
-    "2.5.5:failure:failure-of-success-criterion-2-5-5-due-to-target-being-less-than-44-by-44-css-pixels:0": {
-      "key": "2.5.5:failure:failure-of-success-criterion-2-5-5-due-to-target-being-less-than-44-by-44-css-pixels:0",
-      "title": "Failure of Success Criterion 2.5.5 due to target being less than 44 by 44 CSS pixels",
-      "kind": "failure",
-      "criterionIds": [
-        "2.5.5"
-      ]
-    },
-    "3.2.6:failure:inconsistent-help-location:0": {
-      "key": "3.2.6:failure:inconsistent-help-location:0",
-      "title": "Inconsistent Help Location",
-      "kind": "failure",
-      "criterionIds": [
-        "3.2.6"
-      ]
-    },
-    "4.1.3:failure:using-code-role-alert-code-or-code-aria-live-assertive-code-on-content-which-is-not-important-and-time-sensitive-future-link:1": {
-      "key": "4.1.3:failure:using-code-role-alert-code-or-code-aria-live-assertive-code-on-content-which-is-not-important-and-time-sensitive-future-link:1",
-      "title": "Using <code>role=\"alert\"</code> or <code>aria-live=\"assertive\"</code> on content which is not important and time-sensitive (future link)",
-      "kind": "failure",
-      "criterionIds": [
-        "4.1.3"
-      ]
-    },
-    "F1": {
-      "key": "F1",
-      "id": "F1",
-      "title": "Failure of Success Criterion 1.3.2 due to changing the meaning of content by positioning information with CSS",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.2"
-      ]
-    },
-    "F10": {
-      "key": "F10",
-      "id": "F10",
-      "title": "Failure of Success Criterion 2.1.2 and Conformance Requirement 5 due to combining multiple content formats in a way that traps users inside one format type",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.1.2"
-      ]
-    },
-    "F100": {
-      "key": "F100",
-      "id": "F100",
-      "title": "Failure of Success Criterion 1.3.4 due to showing a message asking to reorient device",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.4"
-      ]
-    },
-    "F101": {
-      "key": "F101",
-      "id": "F101",
-      "title": "Failure of Success Criterion 2.5.2 due to activating a control on the down-event",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.5.2"
-      ]
-    },
-    "F102": {
-      "key": "F102",
-      "id": "F102",
-      "title": "Failure of Success Criterion 1.4.10 due to content disappearing and not being available when content has reflowed",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.10"
-      ]
-    },
-    "F103": {
-      "key": "F103",
-      "id": "F103",
-      "title": "Failure of Success Criterion 4.1.3 due to providing status messages that cannot be programmatically determined through role or properties",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "4.1.3"
-      ]
-    },
-    "F104": {
-      "key": "F104",
-      "id": "F104",
-      "title": "Failure of Success Criterion 1.4.12 due to clipped or overlapped content when text spacing is adjusted",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.12"
-      ]
-    },
-    "F105": {
-      "key": "F105",
-      "id": "F105",
-      "title": "Failure of Success Criterion 2.5.1 due to providing functionality via a path-based gesture without simple pointer alternative",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.5.1"
-      ]
-    },
-    "F106": {
-      "key": "F106",
-      "id": "F106",
-      "title": "Failure due to inability to deactivate motion actuation",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.5.4"
-      ]
-    },
-    "F107": {
-      "key": "F107",
-      "id": "F107",
-      "title": "Failure of Success Criterion 1.3.5 due to incorrect autocomplete attribute values",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.5"
-      ]
-    },
-    "F108": {
-      "key": "F108",
-      "id": "F108",
-      "title": "Failure of Success Criterion 2.5.7 Dragging Movements due to not providing a single pointer method that does not require a dragging movement",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.5.7"
-      ]
-    },
-    "F109": {
-      "key": "F109",
-      "id": "F109",
-      "title": "Failure of Success Criterion 3.3.8 and 3.3.9 due to preventing password or code re-entry in the same format",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "3.3.8",
-        "3.3.9"
-      ]
-    },
-    "F110": {
-      "key": "F110",
-      "id": "F110",
-      "title": "Failure of Success Criterion 2.4.11 Focus Not Obscured (Minimum) due to a sticky footer or header completely hiding focused elements",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.4.11"
-      ]
-    },
-    "F111": {
-      "key": "F111",
-      "id": "F111",
-      "title": "Failure of Success Criteria 1.3.1, 2.5.3, and 4.1.2 due to a control with visible label text but no accessible name",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.1",
-        "2.5.3",
-        "4.1.2"
-      ]
-    },
-    "F112": {
-      "key": "F112",
-      "id": "F112",
-      "title": "Failure of Success Criterion 2.2.2 due to using blinking content that lasts for more than five seconds without a mechanism to stop it",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.2.2"
-      ]
-    },
-    "F113": {
-      "key": "F113",
-      "id": "F113",
-      "title": "Failure of Success Criterion 1.2.5 due to not using available pauses in dialogue to provide audio descriptions of important visual content",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.2.5"
-      ]
-    },
-    "F12": {
-      "key": "F12",
-      "id": "F12",
-      "title": "Failure of Success Criterion 2.2.5 due to having a session time limit without a mechanism for saving user's input and re-establishing that information upon re-authentication",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.2.5"
-      ]
-    },
-    "F13": {
-      "key": "F13",
-      "id": "F13",
-      "title": "Failure of Success Criterion 1.1.1 and 1.4.1 due to having a text alternative that does not include information that is conveyed by color differences in the image",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.1.1",
-        "1.4.1"
-      ]
-    },
-    "F14": {
-      "key": "F14",
-      "id": "F14",
-      "title": "Failure of Success Criterion 1.3.3 due to identifying content only by its shape or location",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.3"
-      ]
-    },
-    "F15": {
-      "key": "F15",
-      "id": "F15",
-      "title": "Failure of Success Criterion 4.1.2 due to implementing custom controls that do not use an accessibility API for the technology, or do so incompletely",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "4.1.2"
-      ]
-    },
-    "F16": {
-      "key": "F16",
-      "id": "F16",
-      "title": "Failure of Success Criterion 2.2.2 due to including scrolling content where movement is not essential to the activity without also including a mechanism to pause and restart the content",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.2.2"
-      ]
-    },
-    "F2": {
-      "key": "F2",
-      "id": "F2",
-      "title": "Failure of Success Criterion 1.3.1 due to using changes in text presentation to convey information without using the appropriate markup or text",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.1"
-      ]
-    },
-    "F20": {
-      "key": "F20",
-      "id": "F20",
-      "title": "Failure of Success Criterion 1.1.1 and 4.1.2 due to not updating text alternatives when changes to non-text content occur",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.1.1",
-        "4.1.2"
-      ]
-    },
-    "F22": {
-      "key": "F22",
-      "id": "F22",
-      "title": "Failure of Success Criterion 3.2.5 due to opening windows that are not requested by the user",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "3.2.5"
-      ]
-    },
-    "F23": {
-      "key": "F23",
-      "id": "F23",
-      "title": "Failure of 1.4.2 due to playing a sound longer than 3 seconds where there is no mechanism to turn it off",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.2"
-      ]
-    },
-    "F24": {
-      "key": "F24",
-      "id": "F24",
-      "title": "Failure of Success Criterion 1.4.3, 1.4.6 and 1.4.8 due to specifying foreground colors without specifying background colors or vice versa",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.3",
-        "1.4.6",
-        "1.4.8"
-      ]
-    },
-    "F25": {
-      "key": "F25",
-      "id": "F25",
-      "title": "Failure of Success Criterion 2.4.2 due to the title of a web page not identifying the contents",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.4.2"
-      ]
-    },
-    "F26": {
-      "key": "F26",
-      "id": "F26",
-      "title": "Failure of Success Criterion 1.3.3 due to using a graphical symbol alone to convey information",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.3"
-      ]
-    },
-    "F3": {
-      "key": "F3",
-      "id": "F3",
-      "title": "Failure of Success Criterion 1.1.1 due to using CSS to include images that convey important information",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.1.1"
-      ]
-    },
-    "F30": {
-      "key": "F30",
-      "id": "F30",
-      "title": "Failure of Success Criterion 1.1.1 and 1.2.1 due to using text alternatives that are not alternatives (e.g., filenames or placeholder text)",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.1.1",
-        "1.2.1"
-      ]
-    },
-    "F31": {
-      "key": "F31",
-      "id": "F31",
-      "title": "Failure of Success Criterion 3.2.4 due to using two different labels for the same function on different web pages within a set of web pages",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "3.2.4"
-      ]
-    },
-    "F32": {
-      "key": "F32",
-      "id": "F32",
-      "title": "Failure of Success Criterion 1.3.2 due to using white space characters to control spacing within a word",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.2"
-      ]
-    },
-    "F33": {
-      "key": "F33",
-      "id": "F33",
-      "title": "Failure of Success Criterion 1.3.1 and 1.3.2 due to using white space characters to create multiple columns in plain text content",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.1",
-        "1.3.2"
-      ]
-    },
-    "F34": {
-      "key": "F34",
-      "id": "F34",
-      "title": "Failure of Success Criterion 1.3.1 and 1.3.2 due to using white space characters to format tables in plain text content",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.1",
-        "1.3.2"
-      ]
-    },
-    "F36": {
-      "key": "F36",
-      "id": "F36",
-      "title": "Failure of Success Criterion 3.2.2 due to automatically submitting a form and presenting new content without prior warning when the last field in the form is given a value",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "3.2.2"
-      ]
-    },
-    "F37": {
-      "key": "F37",
-      "id": "F37",
-      "title": "Failure of Success Criterion 3.2.2 due to launching a new window without prior warning when the selection of a radio button, check box or select list is changed",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "3.2.2"
-      ]
-    },
-    "F38": {
-      "key": "F38",
-      "id": "F38",
-      "title": "Failure of Success Criterion 1.1.1 due to not marking up decorative images in HTML in a way that allows assistive technology to ignore them",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.1.1"
-      ]
-    },
-    "F39": {
-      "key": "F39",
-      "id": "F39",
-      "title": "Failure of Success Criterion 1.1.1 due to providing a text alternative that is not null (e.g., alt=\"spacer\" or alt=\"image\") for images that should be ignored by assistive technology",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.1.1"
-      ]
-    },
-    "F40": {
-      "key": "F40",
-      "id": "F40",
-      "title": "Failure due to using meta redirect with a time limit",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.2.1",
-        "2.2.4",
-        "3.2.5"
-      ]
-    },
-    "F41": {
-      "key": "F41",
-      "id": "F41",
-      "title": "Failure of Success Criterion 2.2.1, 2.2.4, and 3.2.5 due to using meta refresh to reload the page",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.2.1",
-        "2.2.4",
-        "3.2.5"
-      ]
-    },
-    "F42": {
-      "key": "F42",
-      "id": "F42",
-      "title": "Failure of Success Criteria 1.3.1, 2.1.1, 2.1.3, or 4.1.2 when emulating links",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.1",
-        "2.1.1",
-        "4.1.2"
-      ]
-    },
-    "F43": {
-      "key": "F43",
-      "id": "F43",
-      "title": "Failure of Success Criterion 1.3.1 due to using structural markup in a way that does not represent relationships in the content",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.1"
-      ]
-    },
-    "F44": {
-      "key": "F44",
-      "id": "F44",
-      "title": "Failure of Success Criterion 2.4.3 due to using tabindex to create a tab order that does not preserve meaning and operability",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.4.3"
-      ]
-    },
-    "F46": {
-      "key": "F46",
-      "id": "F46",
-      "title": "Failure of Success Criterion 1.3.1 due to using th elements, caption elements, or non-empty summary attributes in layout tables",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.1"
-      ]
-    },
-    "F48": {
-      "key": "F48",
-      "id": "F48",
-      "title": "Failure of Success Criterion 1.3.1 due to using the pre element to markup tabular information",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.1"
-      ]
-    },
-    "F49": {
-      "key": "F49",
-      "id": "F49",
-      "title": "Failure of Success Criterion 1.3.2 due to using an HTML layout table that does not make sense when linearized",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.2"
-      ]
-    },
-    "F50": {
-      "key": "F50",
-      "id": "F50",
-      "title": "Failure of Success Criterion 2.2.2 due to a script that causes a blink effect without a mechanism to stop the blinking at 5 seconds or less",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.2.2"
-      ]
-    },
-    "F52": {
-      "key": "F52",
-      "id": "F52",
-      "title": "Failure of Success Criterion 3.2.5 due to opening a new window as soon as a new page is loaded",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "3.2.5"
-      ]
-    },
-    "F54": {
-      "key": "F54",
-      "id": "F54",
-      "title": "Failure of Success Criterion 2.1.1 due to using only pointing-device-specific event handlers (including gesture) for a function",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.1.1"
-      ]
-    },
-    "F55": {
-      "key": "F55",
-      "id": "F55",
-      "title": "Failure of Success Criteria 2.1.1, 2.4.7, 2.4.13, and 3.2.1 due to using script to remove focus when focus is received",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.1.1",
-        "2.4.7",
-        "2.4.13",
-        "3.2.1"
-      ]
-    },
-    "F58": {
-      "key": "F58",
-      "id": "F58",
-      "title": "Failure of Success Criterion 2.2.1 due to using server-side techniques to automatically redirect pages after a time-out",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.2.1"
-      ]
-    },
-    "F59": {
-      "key": "F59",
-      "id": "F59",
-      "title": "Failure of Success Criterion 4.1.2 due to using script to make div or span a user interface control in HTML without providing a role for the control",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "4.1.2"
-      ]
-    },
-    "F60": {
-      "key": "F60",
-      "id": "F60",
-      "title": "Failure of Success Criterion 3.2.5 due to launching a new window when a user enters text into an input field",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "3.2.5"
-      ]
-    },
-    "F61": {
-      "key": "F61",
-      "id": "F61",
-      "title": "Failure of Success Criterion 3.2.5 due to complete change of main content through an automatic update that the user cannot disable from within the content",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "3.2.5"
-      ]
-    },
-    "F63": {
-      "key": "F63",
-      "id": "F63",
-      "title": "Failure of Success Criterion 2.4.4 due to providing link context only in content that is not related to the link",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.4.4"
-      ]
-    },
-    "F65": {
-      "key": "F65",
-      "id": "F65",
-      "title": "Failure of Success Criterion 1.1.1 due to omitting the alt attribute or text alternative on img elements, area elements, and input elements of type \"image\"",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.1.1"
-      ]
-    },
-    "F66": {
-      "key": "F66",
-      "id": "F66",
-      "title": "Failure of Success Criterion 3.2.3 due to presenting navigation links in a different relative order on different pages",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "3.2.3"
-      ]
-    },
-    "F67": {
-      "key": "F67",
-      "id": "F67",
-      "title": "Failure of Success Criterion 1.1.1 and 1.2.1 due to providing long descriptions for non-text content that does not serve the same purpose or does not present the same information",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.1.1",
-        "1.2.1"
-      ]
-    },
-    "F68": {
-      "key": "F68",
-      "id": "F68",
-      "title": "Failure of Success Criterion 4.1.2 due to a user interface control not having a programmatically determined name",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "4.1.2"
-      ]
-    },
-    "F69": {
-      "key": "F69",
-      "id": "F69",
-      "title": "Failure of Success Criterion 1.4.4 when resizing visually rendered text up to 200 percent causes the text, image or controls to be clipped, truncated or obscured",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.4"
-      ]
-    },
-    "F7": {
-      "key": "F7",
-      "id": "F7",
-      "title": "Failure of Success Criterion 2.2.2 due to an object or applet that has blinking content without a mechanism to pause the content that blinks for more than five seconds",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.2.2"
-      ]
-    },
-    "F71": {
-      "key": "F71",
-      "id": "F71",
-      "title": "Failure of Success Criterion 1.1.1 due to using text look-alikes to represent text without providing a text alternative",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.1.1"
-      ]
-    },
-    "F72": {
-      "key": "F72",
-      "id": "F72",
-      "title": "Failure of Success Criterion 1.1.1 due to using ASCII art without providing a text alternative",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.1.1"
-      ]
-    },
-    "F73": {
-      "key": "F73",
-      "id": "F73",
-      "title": "Failure of Success Criterion 1.4.1 due to creating links that are not visually evident without color vision",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.1"
-      ]
-    },
-    "F74": {
-      "key": "F74",
-      "id": "F74",
-      "title": "Failure of Success Criterion 1.2.2 and 1.2.8 due to not labeling a synchronized media alternative to text as an alternative",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.2.2",
-        "1.2.8"
-      ]
-    },
-    "F75": {
-      "key": "F75",
-      "id": "F75",
-      "title": "Failure of Success Criterion 1.2.2 by providing synchronized media without captions when the synchronized media presents more information than is presented on the page",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.2.2"
-      ]
-    },
-    "F78": {
-      "key": "F78",
-      "id": "F78",
-      "title": "Failure of Success Criterion 1.4.11, 2.4.7 and 2.4.13 due to styling element outlines and borders in a way that removes or renders non-visible the visual focus indicator",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.11",
-        "2.4.7",
-        "2.4.13"
-      ]
-    },
-    "F79": {
-      "key": "F79",
-      "id": "F79",
-      "title": "Failure of Success Criterion 4.1.2 due to the focus state of a user interface component not being programmatically determinable or no notification of change of focus state available",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "4.1.2"
-      ]
-    },
-    "F8": {
-      "key": "F8",
-      "id": "F8",
-      "title": "Failure of Success Criterion 1.2.2 due to captions omitting some dialogue or important sound effects",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.2.2"
-      ]
-    },
-    "F80": {
-      "key": "F80",
-      "id": "F80",
-      "title": "Failure of Success Criterion 1.4.4 when text-based form controls do not resize when visually rendered text is resized up to 200%",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.4"
-      ]
-    },
-    "F81": {
-      "key": "F81",
-      "id": "F81",
-      "title": "Failure of Success Criterion 1.4.1 due to identifying required or error fields using color differences only",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.1"
-      ]
-    },
-    "F82": {
-      "key": "F82",
-      "id": "F82",
-      "title": "Failure of Success Criterion 3.3.2 by visually formatting a set of phone number fields but not including a text label",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "3.3.2"
-      ]
-    },
-    "F83": {
-      "key": "F83",
-      "id": "F83",
-      "title": "Failure of Success Criterion 1.4.3 and 1.4.6 due to using background images that do not provide sufficient contrast with foreground text (or images of text)",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.3",
-        "1.4.6"
-      ]
-    },
-    "F84": {
-      "key": "F84",
-      "id": "F84",
-      "title": "Failure of Success Criterion 2.4.9 due to using a non-specific link such as \"click here\" or \"more\" without a mechanism to change the link text to specific text.",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.4.9"
-      ]
-    },
-    "F85": {
-      "key": "F85",
-      "id": "F85",
-      "title": "Failure of Success Criterion 2.4.3 due to using dialogs or menus that are not adjacent to their trigger control in the sequential navigation order",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.4.3"
-      ]
-    },
-    "F86": {
-      "key": "F86",
-      "id": "F86",
-      "title": "Failure of Success Criterion 4.1.2 due to not providing names for each part of a multi-part form field, such as a US telephone number",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "4.1.2"
-      ]
-    },
-    "F88": {
-      "key": "F88",
-      "id": "F88",
-      "title": "Failure of Success Criterion 1.4.8 due to using text that is justified (aligned to both the left and the right margins)",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.8"
-      ]
-    },
-    "F89": {
-      "key": "F89",
-      "id": "F89",
-      "title": "Failure of Success Criteria 2.4.4, 2.4.9 and 4.1.2 due to not providing an accessible name for an image which is the only content in a link",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.4.4",
-        "2.4.9",
-        "4.1.2"
-      ]
-    },
-    "F9": {
-      "key": "F9",
-      "id": "F9",
-      "title": "Failure of Success Criterion 3.2.5 due to changing the context when the user removes focus from a form element",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "3.2.5"
-      ]
-    },
-    "F90": {
-      "key": "F90",
-      "id": "F90",
-      "title": "Failure of Success Criterion 1.3.1 for incorrectly associating table headers and content via the headers and id attributes",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.1"
-      ]
-    },
-    "F91": {
-      "key": "F91",
-      "id": "F91",
-      "title": "Failure of Success Criterion 1.3.1 for not correctly marking up table headers",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.1"
-      ]
-    },
-    "F92": {
-      "key": "F92",
-      "id": "F92",
-      "title": "Failure of Success Criterion 1.3.1 due to the use of role presentation on content which conveys semantic information",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.1"
-      ]
-    },
-    "F93": {
-      "key": "F93",
-      "id": "F93",
-      "title": "Failure of Success Criterion 1.4.2 for absence of a way to pause or stop an HTML5 media element that autoplays",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.2"
-      ]
-    },
-    "F94": {
-      "key": "F94",
-      "id": "F94",
-      "title": "Failure of Success Criterion 1.4.4 due to incorrect use of viewport units to resize text",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.4"
-      ]
-    },
-    "F95": {
-      "key": "F95",
-      "id": "F95",
-      "title": "Failure of Success Criterion 1.4.13 due to content shown on hover not being hoverable",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.4.13"
-      ]
-    },
-    "F96": {
-      "key": "F96",
-      "id": "F96",
-      "title": "Failure due to the accessible name not containing the visible label text",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.5.3"
-      ]
-    },
-    "F97": {
-      "key": "F97",
-      "id": "F97",
-      "title": "Failure due to locking the orientation to landscape or portrait view",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "1.3.4"
-      ]
-    },
-    "F98": {
-      "key": "F98",
-      "id": "F98",
-      "title": "Failure due to interactions being limited to touch-only on touchscreen devices",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.5.6"
-      ]
-    },
-    "F99": {
-      "key": "F99",
-      "id": "F99",
-      "title": "Failure of Success Criterion 2.1.4 due to implementing character key shortcuts that cannot be turned off or remapped",
-      "technology": "failures",
-      "kind": "failure",
-      "criterionIds": [
-        "2.1.4"
-      ]
-    }
-  }
+   "version": "2.2",
+   "failures": {
+      "1.4.13:failure:failure-to-make-content-dismissible-without-moving-pointer-hover-or-keyboard-focus-potential-future-technique:1": {
+         "key": "1.4.13:failure:failure-to-make-content-dismissible-without-moving-pointer-hover-or-keyboard-focus-potential-future-technique:1",
+         "title": "Failure to make content dismissible without moving pointer hover or keyboard focus (Potential future technique)",
+         "kind": "failure",
+         "criterionIds": ["1.4.13"]
+      },
+      "1.4.13:failure:failure-to-meet-by-content-on-hover-or-focus-not-remaining-visible-until-dismissed-or-invalid-potential-future-technique:2": {
+         "key": "1.4.13:failure:failure-to-meet-by-content-on-hover-or-focus-not-remaining-visible-until-dismissed-or-invalid-potential-future-technique:2",
+         "title": "Failure to meet by content on hover or focus not remaining visible until dismissed or invalid (Potential future technique)",
+         "kind": "failure",
+         "criterionIds": ["1.4.13"]
+      },
+      "2.4.12:failure:a-page-has-a-sticky-footer-attached-to-the-bottom-of-the-viewport-when-tabbing-down-the-page-a-focused-item-is-partially-obscured-by-the-footer-because-content-in-the-viewport-scrolls-without-sufficient-a-href-https-www-w3-org-tr-css-scroll-snap-propdef-scroll-padding-rel-nofollow-scroll-padding-a:1": {
+         "key": "2.4.12:failure:a-page-has-a-sticky-footer-attached-to-the-bottom-of-the-viewport-when-tabbing-down-the-page-a-focused-item-is-partially-obscured-by-the-footer-because-content-in-the-viewport-scrolls-without-sufficient-a-href-https-www-w3-org-tr-css-scroll-snap-propdef-scroll-padding-rel-nofollow-scroll-padding-a:1",
+         "title": "A page has a sticky footer (attached to the bottom of the viewport). When tabbing down the page, a focused item is partially obscured by the footer because content in the viewport scrolls without sufficient <a href=\"https://www.w3.org/TR/css-scroll-snap/#propdef-scroll-padding\" rel=\"nofollow\">scroll padding</a>.",
+         "kind": "failure",
+         "criterionIds": ["2.4.12"]
+      },
+      "2.4.12:failure:an-interaction-that-causes-content-to-appear-over-the-component-with-keyboard-focus-visually-covering-part-of-the-focus-indicator-this-behavior-might-be-encountered-with-advertising-or-promotional-material-meant-to-provide-more-information-about-a-product-as-the-user-navigates-through-a-catalogue:0": {
+         "key": "2.4.12:failure:an-interaction-that-causes-content-to-appear-over-the-component-with-keyboard-focus-visually-covering-part-of-the-focus-indicator-this-behavior-might-be-encountered-with-advertising-or-promotional-material-meant-to-provide-more-information-about-a-product-as-the-user-navigates-through-a-catalogue:0",
+         "title": "An interaction that causes content to appear over the component with keyboard focus, visually covering part of the focus indicator. This behavior might be encountered with advertising or promotional material meant to provide more information about a product as the user navigates through a catalogue.",
+         "kind": "failure",
+         "criterionIds": ["2.4.12"]
+      },
+      "2.5.3:failure:accessible-name-contains-the-visible-label-text-but-one-or-more-other-words-are-interspersed-in-the-label-potential-future-technique:3": {
+         "key": "2.5.3:failure:accessible-name-contains-the-visible-label-text-but-one-or-more-other-words-are-interspersed-in-the-label-potential-future-technique:3",
+         "title": "Accessible name contains the visible label text, but one or more other words are interspersed in the label (Potential future technique)",
+         "kind": "failure",
+         "criterionIds": ["2.5.3"]
+      },
+      "2.5.3:failure:accessible-name-contains-the-visible-label-text-but-the-words-of-the-visible-label-are-not-in-the-same-order-as-they-are-in-the-visible-label-text-potential-future-technique:2": {
+         "key": "2.5.3:failure:accessible-name-contains-the-visible-label-text-but-the-words-of-the-visible-label-are-not-in-the-same-order-as-they-are-in-the-visible-label-text-potential-future-technique:2",
+         "title": "Accessible name contains the visible label text, but the words of the visible label are not in the same order as they are in the visible label text (Potential future technique)",
+         "kind": "failure",
+         "criterionIds": ["2.5.3"]
+      },
+      "2.5.4:failure:fxxx-failure-of-success-criterion-2-5-4-due-to-disrupting-or-disabling-system-level-features-which-allow-the-user-to-disable-motion-actuation:1": {
+         "key": "2.5.4:failure:fxxx-failure-of-success-criterion-2-5-4-due-to-disrupting-or-disabling-system-level-features-which-allow-the-user-to-disable-motion-actuation:1",
+         "title": "FXXX: Failure of Success Criterion 2.5.4 due to disrupting or disabling system level features which allow the user to disable motion actuation",
+         "kind": "failure",
+         "criterionIds": ["2.5.4"]
+      },
+      "2.5.5:failure:failure-of-success-criterion-2-5-5-due-to-target-being-less-than-44-by-44-css-pixels:0": {
+         "key": "2.5.5:failure:failure-of-success-criterion-2-5-5-due-to-target-being-less-than-44-by-44-css-pixels:0",
+         "title": "Failure of Success Criterion 2.5.5 due to target being less than 44 by 44 CSS pixels",
+         "kind": "failure",
+         "criterionIds": ["2.5.5"]
+      },
+      "3.2.6:failure:inconsistent-help-location:0": {
+         "key": "3.2.6:failure:inconsistent-help-location:0",
+         "title": "Inconsistent Help Location",
+         "kind": "failure",
+         "criterionIds": ["3.2.6"]
+      },
+      "4.1.3:failure:using-code-role-alert-code-or-code-aria-live-assertive-code-on-content-which-is-not-important-and-time-sensitive-future-link:1": {
+         "key": "4.1.3:failure:using-code-role-alert-code-or-code-aria-live-assertive-code-on-content-which-is-not-important-and-time-sensitive-future-link:1",
+         "title": "Using <code>role=\"alert\"</code> or <code>aria-live=\"assertive\"</code> on content which is not important and time-sensitive (future link)",
+         "kind": "failure",
+         "criterionIds": ["4.1.3"]
+      },
+      "F1": {
+         "key": "F1",
+         "id": "F1",
+         "title": "Failure of Success Criterion 1.3.2 due to changing the meaning of content by positioning information with CSS",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.2"]
+      },
+      "F10": {
+         "key": "F10",
+         "id": "F10",
+         "title": "Failure of Success Criterion 2.1.2 and Conformance Requirement 5 due to combining multiple content formats in a way that traps users inside one format type",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.1.2"]
+      },
+      "F100": {
+         "key": "F100",
+         "id": "F100",
+         "title": "Failure of Success Criterion 1.3.4 due to showing a message asking to reorient device",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.4"]
+      },
+      "F101": {
+         "key": "F101",
+         "id": "F101",
+         "title": "Failure of Success Criterion 2.5.2 due to activating a control on the down-event",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.5.2"]
+      },
+      "F102": {
+         "key": "F102",
+         "id": "F102",
+         "title": "Failure of Success Criterion 1.4.10 due to content disappearing and not being available when content has reflowed",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.4.10"]
+      },
+      "F103": {
+         "key": "F103",
+         "id": "F103",
+         "title": "Failure of Success Criterion 4.1.3 due to providing status messages that cannot be programmatically determined through role or properties",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["4.1.3"]
+      },
+      "F104": {
+         "key": "F104",
+         "id": "F104",
+         "title": "Failure of Success Criterion 1.4.12 due to clipped or overlapped content when text spacing is adjusted",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.4.12"]
+      },
+      "F105": {
+         "key": "F105",
+         "id": "F105",
+         "title": "Failure of Success Criterion 2.5.1 due to providing functionality via a path-based gesture without simple pointer alternative",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.5.1"]
+      },
+      "F106": {
+         "key": "F106",
+         "id": "F106",
+         "title": "Failure due to inability to deactivate motion actuation",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.5.4"]
+      },
+      "F107": {
+         "key": "F107",
+         "id": "F107",
+         "title": "Failure of Success Criterion 1.3.5 due to incorrect autocomplete attribute values",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.5"]
+      },
+      "F108": {
+         "key": "F108",
+         "id": "F108",
+         "title": "Failure of Success Criterion 2.5.7 Dragging Movements due to not providing a single pointer method that does not require a dragging movement",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.5.7"]
+      },
+      "F109": {
+         "key": "F109",
+         "id": "F109",
+         "title": "Failure of Success Criterion 3.3.8 and 3.3.9 due to preventing password or code re-entry in the same format",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["3.3.8", "3.3.9"]
+      },
+      "F110": {
+         "key": "F110",
+         "id": "F110",
+         "title": "Failure of Success Criterion 2.4.11 Focus Not Obscured (Minimum) due to a sticky footer or header completely hiding focused elements",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.4.11"]
+      },
+      "F111": {
+         "key": "F111",
+         "id": "F111",
+         "title": "Failure of Success Criteria 1.3.1, 2.5.3, and 4.1.2 due to a control with visible label text but no accessible name",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.1", "2.5.3", "4.1.2"]
+      },
+      "F112": {
+         "key": "F112",
+         "id": "F112",
+         "title": "Failure of Success Criterion 2.2.2 due to using blinking content that lasts for more than five seconds without a mechanism to stop it",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.2.2"]
+      },
+      "F113": {
+         "key": "F113",
+         "id": "F113",
+         "title": "Failure of Success Criterion 1.2.5 due to not using available pauses in dialogue to provide audio descriptions of important visual content",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.2.5"]
+      },
+      "F12": {
+         "key": "F12",
+         "id": "F12",
+         "title": "Failure of Success Criterion 2.2.5 due to having a session time limit without a mechanism for saving user's input and re-establishing that information upon re-authentication",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.2.5"]
+      },
+      "F13": {
+         "key": "F13",
+         "id": "F13",
+         "title": "Failure of Success Criterion 1.1.1 and 1.4.1 due to having a text alternative that does not include information that is conveyed by color differences in the image",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.1.1", "1.4.1"]
+      },
+      "F14": {
+         "key": "F14",
+         "id": "F14",
+         "title": "Failure of Success Criterion 1.3.3 due to identifying content only by its shape or location",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.3"]
+      },
+      "F15": {
+         "key": "F15",
+         "id": "F15",
+         "title": "Failure of Success Criterion 4.1.2 due to implementing custom controls that do not use an accessibility API for the technology, or do so incompletely",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["4.1.2"]
+      },
+      "F16": {
+         "key": "F16",
+         "id": "F16",
+         "title": "Failure of Success Criterion 2.2.2 due to including scrolling content where movement is not essential to the activity without also including a mechanism to pause and restart the content",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.2.2"]
+      },
+      "F2": {
+         "key": "F2",
+         "id": "F2",
+         "title": "Failure of Success Criterion 1.3.1 due to using changes in text presentation to convey information without using the appropriate markup or text",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.1"]
+      },
+      "F20": {
+         "key": "F20",
+         "id": "F20",
+         "title": "Failure of Success Criterion 1.1.1 and 4.1.2 due to not updating text alternatives when changes to non-text content occur",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.1.1", "4.1.2"]
+      },
+      "F22": {
+         "key": "F22",
+         "id": "F22",
+         "title": "Failure of Success Criterion 3.2.5 due to opening windows that are not requested by the user",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["3.2.5"]
+      },
+      "F23": {
+         "key": "F23",
+         "id": "F23",
+         "title": "Failure of 1.4.2 due to playing a sound longer than 3 seconds where there is no mechanism to turn it off",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.4.2"]
+      },
+      "F24": {
+         "key": "F24",
+         "id": "F24",
+         "title": "Failure of Success Criterion 1.4.3, 1.4.6 and 1.4.8 due to specifying foreground colors without specifying background colors or vice versa",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.4.3", "1.4.6", "1.4.8"]
+      },
+      "F25": {
+         "key": "F25",
+         "id": "F25",
+         "title": "Failure of Success Criterion 2.4.2 due to the title of a web page not identifying the contents",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.4.2"]
+      },
+      "F26": {
+         "key": "F26",
+         "id": "F26",
+         "title": "Failure of Success Criterion 1.3.3 due to using a graphical symbol alone to convey information",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.3"]
+      },
+      "F3": {
+         "key": "F3",
+         "id": "F3",
+         "title": "Failure of Success Criterion 1.1.1 due to using CSS to include images that convey important information",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.1.1"]
+      },
+      "F30": {
+         "key": "F30",
+         "id": "F30",
+         "title": "Failure of Success Criterion 1.1.1 and 1.2.1 due to using text alternatives that are not alternatives (e.g., filenames or placeholder text)",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.1.1", "1.2.1"]
+      },
+      "F31": {
+         "key": "F31",
+         "id": "F31",
+         "title": "Failure of Success Criterion 3.2.4 due to using two different labels for the same function on different web pages within a set of web pages",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["3.2.4"]
+      },
+      "F32": {
+         "key": "F32",
+         "id": "F32",
+         "title": "Failure of Success Criterion 1.3.2 due to using white space characters to control spacing within a word",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.2"]
+      },
+      "F33": {
+         "key": "F33",
+         "id": "F33",
+         "title": "Failure of Success Criterion 1.3.1 and 1.3.2 due to using white space characters to create multiple columns in plain text content",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.1", "1.3.2"]
+      },
+      "F34": {
+         "key": "F34",
+         "id": "F34",
+         "title": "Failure of Success Criterion 1.3.1 and 1.3.2 due to using white space characters to format tables in plain text content",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.1", "1.3.2"]
+      },
+      "F36": {
+         "key": "F36",
+         "id": "F36",
+         "title": "Failure of Success Criterion 3.2.2 due to automatically submitting a form and presenting new content without prior warning when the last field in the form is given a value",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["3.2.2"]
+      },
+      "F37": {
+         "key": "F37",
+         "id": "F37",
+         "title": "Failure of Success Criterion 3.2.2 due to launching a new window without prior warning when the selection of a radio button, check box or select list is changed",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["3.2.2"]
+      },
+      "F38": {
+         "key": "F38",
+         "id": "F38",
+         "title": "Failure of Success Criterion 1.1.1 due to not marking up decorative images in HTML in a way that allows assistive technology to ignore them",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.1.1"]
+      },
+      "F39": {
+         "key": "F39",
+         "id": "F39",
+         "title": "Failure of Success Criterion 1.1.1 due to providing a text alternative that is not null (e.g., alt=\"spacer\" or alt=\"image\") for images that should be ignored by assistive technology",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.1.1"]
+      },
+      "F40": {
+         "key": "F40",
+         "id": "F40",
+         "title": "Failure due to using meta redirect with a time limit",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.2.1", "2.2.4", "3.2.5"]
+      },
+      "F41": {
+         "key": "F41",
+         "id": "F41",
+         "title": "Failure of Success Criterion 2.2.1, 2.2.4, and 3.2.5 due to using meta refresh to reload the page",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.2.1", "2.2.4", "3.2.5"]
+      },
+      "F42": {
+         "key": "F42",
+         "id": "F42",
+         "title": "Failure of Success Criteria 1.3.1, 2.1.1, 2.1.3, or 4.1.2 when emulating links",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.1", "2.1.1", "4.1.2"]
+      },
+      "F43": {
+         "key": "F43",
+         "id": "F43",
+         "title": "Failure of Success Criterion 1.3.1 due to using structural markup in a way that does not represent relationships in the content",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.1"]
+      },
+      "F44": {
+         "key": "F44",
+         "id": "F44",
+         "title": "Failure of Success Criterion 2.4.3 due to using tabindex to create a tab order that does not preserve meaning and operability",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.4.3"]
+      },
+      "F46": {
+         "key": "F46",
+         "id": "F46",
+         "title": "Failure of Success Criterion 1.3.1 due to using th elements, caption elements, or non-empty summary attributes in layout tables",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.1"]
+      },
+      "F48": {
+         "key": "F48",
+         "id": "F48",
+         "title": "Failure of Success Criterion 1.3.1 due to using the pre element to markup tabular information",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.1"]
+      },
+      "F49": {
+         "key": "F49",
+         "id": "F49",
+         "title": "Failure of Success Criterion 1.3.2 due to using an HTML layout table that does not make sense when linearized",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.2"]
+      },
+      "F50": {
+         "key": "F50",
+         "id": "F50",
+         "title": "Failure of Success Criterion 2.2.2 due to a script that causes a blink effect without a mechanism to stop the blinking at 5 seconds or less",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.2.2"]
+      },
+      "F52": {
+         "key": "F52",
+         "id": "F52",
+         "title": "Failure of Success Criterion 3.2.5 due to opening a new window as soon as a new page is loaded",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["3.2.5"]
+      },
+      "F54": {
+         "key": "F54",
+         "id": "F54",
+         "title": "Failure of Success Criterion 2.1.1 due to using only pointing-device-specific event handlers (including gesture) for a function",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.1.1"]
+      },
+      "F55": {
+         "key": "F55",
+         "id": "F55",
+         "title": "Failure of Success Criteria 2.1.1, 2.4.7, 2.4.13, and 3.2.1 due to using script to remove focus when focus is received",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.1.1", "2.4.7", "2.4.13", "3.2.1"]
+      },
+      "F58": {
+         "key": "F58",
+         "id": "F58",
+         "title": "Failure of Success Criterion 2.2.1 due to using server-side techniques to automatically redirect pages after a time-out",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.2.1"]
+      },
+      "F59": {
+         "key": "F59",
+         "id": "F59",
+         "title": "Failure of Success Criterion 4.1.2 due to using script to make div or span a user interface control in HTML without providing a role for the control",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["4.1.2"]
+      },
+      "F60": {
+         "key": "F60",
+         "id": "F60",
+         "title": "Failure of Success Criterion 3.2.5 due to launching a new window when a user enters text into an input field",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["3.2.5"]
+      },
+      "F61": {
+         "key": "F61",
+         "id": "F61",
+         "title": "Failure of Success Criterion 3.2.5 due to complete change of main content through an automatic update that the user cannot disable from within the content",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["3.2.5"]
+      },
+      "F63": {
+         "key": "F63",
+         "id": "F63",
+         "title": "Failure of Success Criterion 2.4.4 due to providing link context only in content that is not related to the link",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.4.4"]
+      },
+      "F65": {
+         "key": "F65",
+         "id": "F65",
+         "title": "Failure of Success Criterion 1.1.1 due to omitting the alt attribute or text alternative on img elements, area elements, and input elements of type \"image\"",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.1.1"]
+      },
+      "F66": {
+         "key": "F66",
+         "id": "F66",
+         "title": "Failure of Success Criterion 3.2.3 due to presenting navigation links in a different relative order on different pages",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["3.2.3"]
+      },
+      "F67": {
+         "key": "F67",
+         "id": "F67",
+         "title": "Failure of Success Criterion 1.1.1 and 1.2.1 due to providing long descriptions for non-text content that does not serve the same purpose or does not present the same information",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.1.1", "1.2.1"]
+      },
+      "F68": {
+         "key": "F68",
+         "id": "F68",
+         "title": "Failure of Success Criterion 4.1.2 due to a user interface control not having a programmatically determined name",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["4.1.2"]
+      },
+      "F69": {
+         "key": "F69",
+         "id": "F69",
+         "title": "Failure of Success Criterion 1.4.4 when resizing visually rendered text up to 200 percent causes the text, image or controls to be clipped, truncated or obscured",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.4.4"]
+      },
+      "F7": {
+         "key": "F7",
+         "id": "F7",
+         "title": "Failure of Success Criterion 2.2.2 due to an object or applet that has blinking content without a mechanism to pause the content that blinks for more than five seconds",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.2.2"]
+      },
+      "F71": {
+         "key": "F71",
+         "id": "F71",
+         "title": "Failure of Success Criterion 1.1.1 due to using text look-alikes to represent text without providing a text alternative",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.1.1"]
+      },
+      "F72": {
+         "key": "F72",
+         "id": "F72",
+         "title": "Failure of Success Criterion 1.1.1 due to using ASCII art without providing a text alternative",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.1.1"]
+      },
+      "F73": {
+         "key": "F73",
+         "id": "F73",
+         "title": "Failure of Success Criterion 1.4.1 due to creating links that are not visually evident without color vision",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.4.1"]
+      },
+      "F74": {
+         "key": "F74",
+         "id": "F74",
+         "title": "Failure of Success Criterion 1.2.2 and 1.2.8 due to not labeling a synchronized media alternative to text as an alternative",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.2.2", "1.2.8"]
+      },
+      "F75": {
+         "key": "F75",
+         "id": "F75",
+         "title": "Failure of Success Criterion 1.2.2 by providing synchronized media without captions when the synchronized media presents more information than is presented on the page",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.2.2"]
+      },
+      "F78": {
+         "key": "F78",
+         "id": "F78",
+         "title": "Failure of Success Criterion 1.4.11, 2.4.7 and 2.4.13 due to styling element outlines and borders in a way that removes or renders non-visible the visual focus indicator",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.4.11", "2.4.7", "2.4.13"]
+      },
+      "F79": {
+         "key": "F79",
+         "id": "F79",
+         "title": "Failure of Success Criterion 4.1.2 due to the focus state of a user interface component not being programmatically determinable or no notification of change of focus state available",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["4.1.2"]
+      },
+      "F8": {
+         "key": "F8",
+         "id": "F8",
+         "title": "Failure of Success Criterion 1.2.2 due to captions omitting some dialogue or important sound effects",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.2.2"]
+      },
+      "F80": {
+         "key": "F80",
+         "id": "F80",
+         "title": "Failure of Success Criterion 1.4.4 when text-based form controls do not resize when visually rendered text is resized up to 200%",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.4.4"]
+      },
+      "F81": {
+         "key": "F81",
+         "id": "F81",
+         "title": "Failure of Success Criterion 1.4.1 due to identifying required or error fields using color differences only",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.4.1"]
+      },
+      "F82": {
+         "key": "F82",
+         "id": "F82",
+         "title": "Failure of Success Criterion 3.3.2 by visually formatting a set of phone number fields but not including a text label",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["3.3.2"]
+      },
+      "F83": {
+         "key": "F83",
+         "id": "F83",
+         "title": "Failure of Success Criterion 1.4.3 and 1.4.6 due to using background images that do not provide sufficient contrast with foreground text (or images of text)",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.4.3", "1.4.6"]
+      },
+      "F84": {
+         "key": "F84",
+         "id": "F84",
+         "title": "Failure of Success Criterion 2.4.9 due to using a non-specific link such as \"click here\" or \"more\" without a mechanism to change the link text to specific text.",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.4.9"]
+      },
+      "F85": {
+         "key": "F85",
+         "id": "F85",
+         "title": "Failure of Success Criterion 2.4.3 due to using dialogs or menus that are not adjacent to their trigger control in the sequential navigation order",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.4.3"]
+      },
+      "F86": {
+         "key": "F86",
+         "id": "F86",
+         "title": "Failure of Success Criterion 4.1.2 due to not providing names for each part of a multi-part form field, such as a US telephone number",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["4.1.2"]
+      },
+      "F88": {
+         "key": "F88",
+         "id": "F88",
+         "title": "Failure of Success Criterion 1.4.8 due to using text that is justified (aligned to both the left and the right margins)",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.4.8"]
+      },
+      "F89": {
+         "key": "F89",
+         "id": "F89",
+         "title": "Failure of Success Criteria 2.4.4, 2.4.9 and 4.1.2 due to not providing an accessible name for an image which is the only content in a link",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.4.4", "2.4.9", "4.1.2"]
+      },
+      "F9": {
+         "key": "F9",
+         "id": "F9",
+         "title": "Failure of Success Criterion 3.2.5 due to changing the context when the user removes focus from a form element",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["3.2.5"]
+      },
+      "F90": {
+         "key": "F90",
+         "id": "F90",
+         "title": "Failure of Success Criterion 1.3.1 for incorrectly associating table headers and content via the headers and id attributes",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.1"]
+      },
+      "F91": {
+         "key": "F91",
+         "id": "F91",
+         "title": "Failure of Success Criterion 1.3.1 for not correctly marking up table headers",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.1"]
+      },
+      "F92": {
+         "key": "F92",
+         "id": "F92",
+         "title": "Failure of Success Criterion 1.3.1 due to the use of role presentation on content which conveys semantic information",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.1"]
+      },
+      "F93": {
+         "key": "F93",
+         "id": "F93",
+         "title": "Failure of Success Criterion 1.4.2 for absence of a way to pause or stop an HTML5 media element that autoplays",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.4.2"]
+      },
+      "F94": {
+         "key": "F94",
+         "id": "F94",
+         "title": "Failure of Success Criterion 1.4.4 due to incorrect use of viewport units to resize text",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.4.4"]
+      },
+      "F95": {
+         "key": "F95",
+         "id": "F95",
+         "title": "Failure of Success Criterion 1.4.13 due to content shown on hover not being hoverable",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.4.13"]
+      },
+      "F96": {
+         "key": "F96",
+         "id": "F96",
+         "title": "Failure due to the accessible name not containing the visible label text",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.5.3"]
+      },
+      "F97": {
+         "key": "F97",
+         "id": "F97",
+         "title": "Failure due to locking the orientation to landscape or portrait view",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["1.3.4"]
+      },
+      "F98": {
+         "key": "F98",
+         "id": "F98",
+         "title": "Failure due to interactions being limited to touch-only on touchscreen devices",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.5.6"]
+      },
+      "F99": {
+         "key": "F99",
+         "id": "F99",
+         "title": "Failure of Success Criterion 2.1.4 due to implementing character key shortcuts that cannot be turned off or remapped",
+         "technology": "failures",
+         "kind": "failure",
+         "criterionIds": ["2.1.4"]
+      }
+   }
 }

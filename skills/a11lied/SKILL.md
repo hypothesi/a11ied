@@ -18,7 +18,7 @@ Use this skill when the task is specifically about the `a11lied` toolchain.
 7. Prefer the virtual screen reader for quick feedback and deterministic local tests.
 8. Escalate to VoiceOver or NVDA when the task depends on real assistive technology behavior.
 9. Use the MCP server when an agent or editor should call the same runtime programmatically.
-10. Keep output concrete: commands, findings, evidence, and next actions beat generic accessibility advice.
+10.   Keep output concrete: commands, findings, evidence, and next actions beat generic accessibility advice.
 
 ## Current package map
 

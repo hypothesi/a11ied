@@ -1,25 +1,27 @@
 {
-  "name": "@a11lied/core",
-  "version": "0.1.0",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    }
-  },
-  "files": ["dist"],
-  "scripts": {
-    "build": "tsup src/index.ts src/driver-broker.ts --format esm,cjs --clean",
-    "typecheck": "tsc -p ../../tsconfig.typecheck.json --noEmit"
-  },
-  "dependencies": {
-    "@a11lied/contracts": "0.1.0",
-    "@a11lied/guidepup": "0.1.0",
-    "@a11lied/wcag-engine": "0.1.0",
-    "axe-core": "^4.11.2",
-    "playwright": "^1.56.1"
-  }
+   "name": "@a11lied/core",
+   "version": "0.1.0",
+   "files": [
+      "dist"
+   ],
+   "type": "module",
+   "main": "./dist/index.cjs",
+   "module": "./dist/index.js",
+   "exports": {
+      ".": {
+         "import": "./dist/index.js",
+         "require": "./dist/index.cjs"
+      }
+   },
+   "scripts": {
+      "build": "tsup src/index.ts src/driver-broker.ts --format esm,cjs --clean",
+      "typecheck": "tsc -p ../../tsconfig.typecheck.json --noEmit"
+   },
+   "dependencies": {
+      "@a11lied/contracts": "0.1.0",
+      "@a11lied/guidepup": "0.1.0",
+      "@a11lied/wcag-engine": "0.1.0",
+      "axe-core": "^4.11.2",
+      "playwright": "^1.56.1"
+   }
 }

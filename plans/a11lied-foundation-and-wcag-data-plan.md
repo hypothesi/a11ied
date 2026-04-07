@@ -81,22 +81,22 @@ upstream sources
 - Normalize criteria into one canonical object keyed by criterion id, with fields for title, level, normative text, understanding URL, techniques, failures, quickref tags, and coverage summaries.
 - Model coverage separately from criterion text so the engine can refresh coverage logic without rewriting normative source data.
 - Use these exact domain enums in shared contracts:
-  - `CoverageState`: `automated`, `hybrid`, `manual`, `unknown`
-  - `ApplicabilityState`: `applicable`, `likely-applicable`, `not-detected`, `out-of-scope`, `unknown`
-  - `WcagVersion`: `2.2`, `2.1`
+   - `CoverageState`: `automated`, `hybrid`, `manual`, `unknown`
+   - `ApplicabilityState`: `applicable`, `likely-applicable`, `not-detected`, `out-of-scope`, `unknown`
+   - `WcagVersion`: `2.2`, `2.1`
 - The canonical generated outputs must include:
-  - `criteria.<version>.json`
-  - `coverage.<version>.json`
-  - `strategy.<version>.json`
-  - `slug-index.<version>.json`
-  - `tag-index.<version>.json`
+   - `criteria.<version>.json`
+   - `coverage.<version>.json`
+   - `strategy.<version>.json`
+   - `slug-index.<version>.json`
+   - `tag-index.<version>.json`
 - Provide engine APIs for:
-  - `getCriterion(idOrSlug)`
-  - `listCriteriaByLevel(level, version)`
-  - `searchCriteria(query, options)`
-  - `getCoverage(idOrSlug)`
-  - `getQuickrefTags(idOrSlug)`
-  - `getVerificationStrategy(idOrSlug)`
+   - `getCriterion(idOrSlug)`
+   - `listCriteriaByLevel(level, version)`
+   - `searchCriteria(query, options)`
+   - `getCoverage(idOrSlug)`
+   - `getQuickrefTags(idOrSlug)`
+   - `getVerificationStrategy(idOrSlug)`
 - Decisions & trade-offs:
 - Prefer pinned normalized artifacts over parsing raw prose on demand.
 - Prefer a straightforward JSON-backed search index over Tantivy until the corpus or ranking needs prove otherwise.
@@ -115,16 +115,16 @@ Every row in this sub-plan is incomplete until all of the following are true:
 
 ## Task Grid
 
-| Status | ID | Task | Priority | Depends On | Acceptance Criteria |
-| --- | --- | --- | --- | --- | --- |
-| [ ] | FD-01 | Create `packages/wcag-data` workspace and sync layout | H | R-01 | Workspace exists with raw-source, generated, scripts, `standards` root script, mapped Gherkin coverage, AI-agent manual run, and passing standards gate |
-| [ ] | FD-02 | Implement upstream fetchers and provenance validation | H | FD-01 | Source files are fetched, checksummed or validated, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | FD-03 | Normalize WCAG, techniques, failures, and taxonomy data | H | FD-02 | Canonical criterion objects are generated for WCAG 2.2 and 2.1, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | FD-04 | Generate axe and ACT coverage artifacts | H | FD-02, FD-03 | Coverage data is emitted per criterion with explicit source attribution, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | FD-05 | Expand contracts for WCAG and coverage domain models | H | FD-03, FD-04 | Shared schemas are stable and validated with round-trip tests, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | FD-06 | Implement `packages/wcag-engine` lookup and search APIs | H | FD-05 | Engine exposes criterion, level, search, and coverage queries, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | FD-07 | Add applicability metadata APIs and heuristics scaffold | M | FD-05, FD-06 | Engine exposes quickref tags, signal categories, and applicability inputs, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ] | FD-08 | Add fixture tests, validation commands, and update workflow docs | M | FD-01, FD-02, FD-03, FD-04, FD-05, FD-06, FD-07 | Data validation and update steps are documented, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
+| Status | ID    | Task                                                             | Priority | Depends On                                      | Acceptance Criteria                                                                                                                                        |
+| ------ | ----- | ---------------------------------------------------------------- | -------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [ ]    | FD-01 | Create `packages/wcag-data` workspace and sync layout            | H        | R-01                                            | Workspace exists with raw-source, generated, scripts, `standards` root script, mapped Gherkin coverage, AI-agent manual run, and passing standards gate    |
+| [ ]    | FD-02 | Implement upstream fetchers and provenance validation            | H        | FD-01                                           | Source files are fetched, checksummed or validated, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass                        |
+| [ ]    | FD-03 | Normalize WCAG, techniques, failures, and taxonomy data          | H        | FD-02                                           | Canonical criterion objects are generated for WCAG 2.2 and 2.1, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass            |
+| [ ]    | FD-04 | Generate axe and ACT coverage artifacts                          | H        | FD-02, FD-03                                    | Coverage data is emitted per criterion with explicit source attribution, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass   |
+| [ ]    | FD-05 | Expand contracts for WCAG and coverage domain models             | H        | FD-03, FD-04                                    | Shared schemas are stable and validated with round-trip tests, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass             |
+| [ ]    | FD-06 | Implement `packages/wcag-engine` lookup and search APIs          | H        | FD-05                                           | Engine exposes criterion, level, search, and coverage queries, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass             |
+| [ ]    | FD-07 | Add applicability metadata APIs and heuristics scaffold          | M        | FD-05, FD-06                                    | Engine exposes quickref tags, signal categories, and applicability inputs, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
+| [ ]    | FD-08 | Add fixture tests, validation commands, and update workflow docs | M        | FD-01, FD-02, FD-03, FD-04, FD-05, FD-06, FD-07 | Data validation and update steps are documented, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass                           |
 
 ## Task Details
 
@@ -133,6 +133,7 @@ Every row in this sub-plan is incomplete until all of the following are true:
 **Goal:** Create the package skeleton and file layout that all later sync and normalization steps rely on.
 
 **Step-by-step instructions:**
+
 1. Create the package directory and package manifest at:
 
 ```text
@@ -165,6 +166,7 @@ npm run build
 **Goal:** Fetch the approved upstream sources safely and record where each artifact came from.
 
 **Step-by-step instructions:**
+
 1. Implement a sync script that fetches:
 
 ```text
@@ -187,6 +189,7 @@ https://raw.githubusercontent.com/w3c/wai-wcag-quickref/main/_data/tags-sc.yml
 **Goal:** Turn multiple upstream shapes into one criterion-centered dataset.
 
 **Step-by-step instructions:**
+
 1. Define the canonical normalized criterion shape in `packages/contracts/src/`.
 2. Map WCAG 2.2 and 2.1 criterion records into canonical objects keyed by criterion id.
 3. Extract title, level, normative text, details, understanding links, sufficient techniques, advisory techniques when available, and known failures.
@@ -210,6 +213,7 @@ https://raw.githubusercontent.com/w3c/wai-wcag-quickref/main/_data/tags-sc.yml
 **Goal:** Produce an honest machine-readable view of what automation covers and what it does not.
 
 **Step-by-step instructions:**
+
 1. Parse ACT mapping data and index rules by WCAG criterion.
 2. Parse axe metadata and derive criterion coverage from rule tags and local mapping logic.
 3. Emit a per-criterion coverage object with fields for:
@@ -240,6 +244,7 @@ https://raw.githubusercontent.com/w3c/wai-wcag-quickref/main/_data/tags-sc.yml
 **Goal:** Lock the shared schemas before public command handlers depend on them.
 
 **Step-by-step instructions:**
+
 1. Add schemas for criterion metadata, technique metadata, failure metadata, coverage entries, verification-strategy entries, applicability hints, and search results.
 2. Add enum types for coverage state, applicability state, WCAG level, WCAG version, and preferred evidence mode.
 3. Add helper types for id resolution so consumers can accept either canonical ids or slugs.
@@ -254,6 +259,7 @@ https://raw.githubusercontent.com/w3c/wai-wcag-quickref/main/_data/tags-sc.yml
 **Goal:** Expose a stable read API over the normalized standards data.
 
 **Step-by-step instructions:**
+
 1. Create `packages/wcag-engine` and wire it to the generated artifacts from `packages/wcag-data`.
 2. Implement criterion lookup by id and slug.
 3. Implement level listing by WCAG version and conformance level.
@@ -263,13 +269,14 @@ https://raw.githubusercontent.com/w3c/wai-wcag-quickref/main/_data/tags-sc.yml
 7. Add unit tests for id resolution, version filtering, and search ranking.
 8. Implement automated tests for the mapped scenarios in `specs/gherkin/02-wcag-engine-query.feature`.
 9. Run an AI-agent manual acceptance pass from that feature file and record it under `specs/manual-runs/FD-06/`.
-10. Verify `npm run standards` passes before closing the row.
+10.   Verify `npm run standards` passes before closing the row.
 
 ### FD-07 - Add applicability metadata APIs and heuristics scaffold
 
 **Goal:** Prepare the engine to support criterion applicability without tying it to a specific browser runtime yet.
 
 **Step-by-step instructions:**
+
 1. Define the data model for applicability inputs and outputs.
 2. Expose an engine API that can take structural signals such as forms, media, dialogs, auth, live regions, drag-and-drop, and fixed overlays.
 3. Map Quickref tags into first-pass applicability hints.
@@ -284,6 +291,7 @@ https://raw.githubusercontent.com/w3c/wai-wcag-quickref/main/_data/tags-sc.yml
 **Goal:** Make standards-data maintenance boring and repeatable.
 
 **Step-by-step instructions:**
+
 1. Add fixtures that validate criterion counts, known ids, slug resolution, and source metadata.
 2. Add regression tests for representative criteria such as `1.3.1`, `2.4.3`, `3.3.8`, and `4.1.3`.
 3. Document the update workflow in the package README and root docs.
