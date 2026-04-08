@@ -2,12 +2,12 @@ import { intro, log, outro } from '@clack/prompts';
 import { createDoctorReport, listCliCommands, renderDoctorText } from '@a11lied/core';
 import { startMcpServer } from '@a11lied/mcp-server';
 import { Command } from 'commander';
-import { CLI_VERSION, JSON_INDENT, notReady } from './cli-helpers.js';
-import { registerWcagCommands } from './cli-wcag-commands.js';
-import { registerInspectCommands } from './cli-inspect-commands.js';
-import { registerDriveCommands } from './cli-drive-commands.js';
-import { registerRunCommands } from './cli-run-commands.js';
-import { registerVerifyCommands } from './cli-verify-commands.js';
+import { registerDriveCommands } from './commands/drive.js';
+import { registerInspectCommands } from './commands/inspect.js';
+import { registerRunCommands } from './commands/run.js';
+import { registerVerifyCommands } from './commands/verify.js';
+import { registerWcagCommands } from './commands/wcag.js';
+import { CLI_VERSION, JSON_INDENT, notReady } from './lib/helpers.js';
 
 function registerDoctorCommand(program: Command): void {
    program

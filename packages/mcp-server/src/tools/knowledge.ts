@@ -1,0 +1,137 @@
+import {
+   coverageLookupResultSchema,
+   criteriaByLevelResultSchema,
+   criterionLookupKeySchema,
+   criterionLookupResultSchema,
+   criterionSearchResponseSchema,
+   doctorReportSchema,
+   wcagLevelSchema,
+   wcagVersionSchema,
+} from '@a11lied/contracts';
+import {
+   createDoctorReport,
+   listWcagCriteria,
+   searchWcagCriteria,
+   showWcagCoverage,
+   showWcagCriterion,
+} from '@a11lied/core';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { z } from 'zod';
+
+import {
+   DEFAULT_SEARCH_RESULTS,
+   DEFAULT_WCAG_VERSION,
+   MAX_SEARCH_RESULTS,
+   createToolResponse,
+   readOnlyAnnotations,
+} from '../lib/shared.js';
+
+function registerDoctorTool(server: McpServer): void {
+   server.registerTool(
+      'doctor',
+      {
+         title: 'Doctor',
+         description: 'Return runtime details and the current support matrix.',
+         inputSchema: z.object({}),
+         outputSchema: doctorReportSchema,
+         annotations: readOnlyAnnotations,
+      },
+      async () => createToolResponse(doctorReportSchema.parse(createDoctorReport())),
+   );
+}
+
+function registerCriterionLookupTool(server: McpServer): void {
+   server.registerTool(
+      'criterion_lookup',
+      {
+         title: 'Criterion lookup',
+         description: 'Resolve one WCAG criterion by id or slug.',
+         inputSchema: z.object({
+            criterion: criterionLookupKeySchema,
+            version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
+         }),
+         outputSchema: criterionLookupResultSchema,
+         annotations: readOnlyAnnotations,
+      },
+      async ({ criterion, version }) =>
+         createToolResponse(
+            criterionLookupResultSchema.parse(showWcagCriterion(criterion, version)),
+         ),
+   );
+}
+
+function registerLevelLookupTool(server: McpServer): void {
+   server.registerTool(
+      'level_lookup',
+      {
+         title: 'Level lookup',
+         description: 'List all WCAG criteria at one level for a WCAG version.',
+         inputSchema: z.object({
+            level: wcagLevelSchema,
+            version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
+         }),
+         outputSchema: criteriaByLevelResultSchema,
+         annotations: readOnlyAnnotations,
+      },
+      async ({ level, version }) =>
+         createToolResponse(
+            criteriaByLevelResultSchema.parse(listWcagCriteria(level, version)),
+         ),
+   );
+}
+
+function registerSearchTool(server: McpServer): void {
+   server.registerTool(
+      'search',
+      {
+         title: 'Search criteria',
+         description: 'Search the local WCAG corpus and return ranked criterion matches.',
+         inputSchema: z.object({
+            query: z.string().min(1),
+            version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
+            limit: z
+               .number()
+               .int()
+               .positive()
+               .max(MAX_SEARCH_RESULTS)
+               .default(DEFAULT_SEARCH_RESULTS),
+         }),
+         outputSchema: criterionSearchResponseSchema,
+         annotations: readOnlyAnnotations,
+      },
+      async ({ query, version, limit }) =>
+         createToolResponse(
+            criterionSearchResponseSchema.parse(
+               searchWcagCriteria(query, { version, limit }),
+            ),
+         ),
+   );
+}
+
+function registerCoverageLookupTool(server: McpServer): void {
+   server.registerTool(
+      'coverage_lookup',
+      {
+         title: 'Coverage lookup',
+         description: 'Return coverage and verification-strategy data for one criterion.',
+         inputSchema: z.object({
+            criterion: criterionLookupKeySchema,
+            version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
+         }),
+         outputSchema: coverageLookupResultSchema,
+         annotations: readOnlyAnnotations,
+      },
+      async ({ criterion, version }) =>
+         createToolResponse(
+            coverageLookupResultSchema.parse(showWcagCoverage(criterion, version)),
+         ),
+   );
+}
+
+export function registerKnowledgeTools(server: McpServer): void {
+   registerDoctorTool(server);
+   registerCriterionLookupTool(server);
+   registerLevelLookupTool(server);
+   registerSearchTool(server);
+   registerCoverageLookupTool(server);
+}

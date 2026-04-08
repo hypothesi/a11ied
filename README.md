@@ -42,6 +42,13 @@ If the generated diffs look wrong, stop there. The provenance manifests and regr
 
 For the package-level details, see [packages/wcag-data/README.md](/Users/mluedke/code/personal/a11ied/packages/wcag-data/README.md).
 
-```
+## release readiness
 
-```
+The current public release record is [releases/v0.3.0-readiness.md](/Users/mluedke/code/personal/a11ied/releases/v0.3.0-readiness.md).
+
+That file is the one to read before a public minor or major cut. It includes:
+
+- package release order
+- docs publish path
+- Agent Skill release path
+- deferred items that still need an explicit release decision

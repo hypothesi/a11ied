@@ -12,7 +12,7 @@ export {
    searchWcagCriteria,
    showWcagCoverage,
    showWcagCriterion,
-} from './wcag-runtime.js';
+} from './wcag/runtime.js';
 export {
    attachDocumentToDriverSession,
    cleanupStaleDriverSessions,
@@ -24,14 +24,14 @@ export {
    type SessionActionOptions,
    startDriverSession,
    stopDriverSession,
-} from './driver-runtime.js';
-export { runAxe } from './axe-runtime.js';
-export { runInteractionPattern } from './pattern-runtime.js';
-export { verifyCriterion, verifyLevel } from './verification-runtime.js';
+} from './driver/runtime.js';
+export { runAxe } from './axe/runtime.js';
+export { runInteractionPattern } from './patterns/runtime.js';
+export { verifyCriterion, verifyLevel } from './verification/runtime.js';
 export {
    resolveDocumentTarget,
    type ResolveDocumentTargetInput,
-} from './target-runtime.js';
+} from './targets/runtime.js';
 
 const supportedTargets: Target[] = [
    {

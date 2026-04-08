@@ -6,6 +6,7 @@ const rootDir = resolve(import.meta.dirname, '../../..');
 const docsPagesDir = resolve(rootDir, 'apps/docs/src/pages');
 const skillPath = resolve(rootDir, 'skills/a11lied/SKILL.md');
 const workflowPath = resolve(rootDir, '.github/workflows/ci.yml');
+const releaseReadinessPath = resolve(rootDir, 'releases/v0.3.0-readiness.md');
 const requiredRuntimePages = [
    'wcag-data-sources.astro',
    'criterion-lookup.astro',
@@ -69,6 +70,18 @@ function expectReleaseChecklist(): void {
    expect(releaseChecklist).toContain('manual macOS VoiceOver smoke pass');
    expect(releaseChecklist).toContain('manual Windows NVDA smoke pass');
    expect(releaseChecklist).toContain('Wait for all CI checks to pass');
+   expect(releaseChecklist).toContain('Package, docs, and skill flow');
+   expect(releaseChecklist).toContain('Deferred items');
+}
+
+function expectReleaseReadinessRecord(): void {
+   const releaseReadiness = readFileSync(releaseReadinessPath, 'utf8');
+   expect(releaseReadiness).toContain('## release path');
+   expect(releaseReadiness).toContain('### packages');
+   expect(releaseReadiness).toContain('### docs');
+   expect(releaseReadiness).toContain('### agent skill');
+   expect(releaseReadiness).toContain('## deferred items');
+   expect(releaseReadiness).toContain('Package publication is still a manual sequence');
 }
 
 describe('docs, skill guidance, CI, and release checks', () => {
@@ -84,5 +97,6 @@ describe('docs, skill guidance, CI, and release checks', () => {
    it('requires CI and release checks that match the shipping policy', () => {
       expectWorkflowSteps();
       expectReleaseChecklist();
+      expectReleaseReadinessRecord();
    });
 });

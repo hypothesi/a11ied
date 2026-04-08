@@ -24,8 +24,36 @@ const links = [
          <li>Wait for all CI checks to pass.</li>
          <li>Run a manual macOS VoiceOver smoke pass on representative fixtures or demo targets.</li>
          <li>Run a manual Windows NVDA smoke pass on representative fixtures or demo targets.</li>
+         <li>Review the deferred items for the release and make an explicit accept or block decision.</li>
          <li>Record what was exercised and any environment constraints that mattered.</li>
       </ol>
+   </section>
+
+   <section>
+      <h2>Release path</h2>
+      <p>
+         The current release record lives in <code>releases/v0.3.0-readiness.md</code>. It spells out
+         the package release path, the docs publish path, the Agent Skill release path, and the deferred
+         items that still need an explicit call before a public cut.
+      </p>
+   </section>
+
+   <section>
+      <h2>Package, docs, and skill flow</h2>
+      <ul>
+         <li>Packages: publish workspace packages in dependency order after `npm run standards` passes.</li>
+         <li>Docs: build `apps/docs/dist/` and publish the generated static site.</li>
+         <li>Agent Skill: ship `skills/a11lied/` only after the skill text matches the released CLI and MCP behavior.</li>
+      </ul>
+   </section>
+
+   <section>
+      <h2>Deferred items</h2>
+      <p>
+         The current milestone still carries a few accepted rough edges. They are written down on
+         purpose. Real-target smoke is still manual, package publication is still manual, and the core
+         CJS build still prints one `import.meta` warning that needs a later packaging cleanup.
+      </p>
    </section>
 
    <section class="callout">
