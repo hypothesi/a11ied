@@ -10,6 +10,7 @@ import {
    addStorybookTargetOptions,
    addVerboseOption,
 } from '../lib/options.js';
+import { buildCliTargetInput } from '../lib/target-input.js';
 import {
    executeCommand,
    parsePlatform,
@@ -21,32 +22,6 @@ import {
    registerSimpleActions,
    registerTrailingActions,
 } from './drive-actions.js';
-
-function buildTargetInput(options: {
-   url?: string;
-   storybookUrl?: string;
-   storyId?: string;
-}): {
-   url?: string;
-   storybookUrl?: string;
-   storyId?: string;
-} {
-   const input: {
-      url?: string;
-      storybookUrl?: string;
-      storyId?: string;
-   } = {};
-   if (options.url) {
-      input.url = options.url;
-   }
-   if (options.storybookUrl) {
-      input.storybookUrl = options.storybookUrl;
-   }
-   if (options.storyId) {
-      input.storyId = options.storyId;
-   }
-   return input;
-}
 
 async function handleStartAction(options: {
    json?: boolean;
@@ -64,7 +39,7 @@ async function handleStartAction(options: {
       },
       async () => {
          const session = await startDriverSession(parsePlatform(options.target));
-         const resolved = await resolveOptionalCliTarget(buildTargetInput(options));
+         const resolved = await resolveOptionalCliTarget(buildCliTargetInput(options));
          if (resolved) {
             await attachDocumentToDriverSession(session.sessionId, {
                html: resolved.html,

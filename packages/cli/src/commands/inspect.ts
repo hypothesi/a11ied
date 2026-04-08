@@ -7,6 +7,7 @@ import {
    addWcagVersionOption,
 } from '../lib/options.js';
 import { executeCommand, resolveCliTarget } from '../lib/execute.js';
+import { buildCliTargetInput } from '../lib/target-input.js';
 import {
    renderApplicableText,
    renderCriterionApplicabilityText,
@@ -21,28 +22,6 @@ interface InspectOptions {
    storyId?: string;
 }
 
-function buildTargetInput(options: InspectOptions): {
-   url?: string;
-   storybookUrl?: string;
-   storyId?: string;
-} {
-   const input: {
-      url?: string;
-      storybookUrl?: string;
-      storyId?: string;
-   } = {};
-   if (options.url) {
-      input.url = options.url;
-   }
-   if (options.storybookUrl) {
-      input.storybookUrl = options.storybookUrl;
-   }
-   if (options.storyId) {
-      input.storyId = options.storyId;
-   }
-   return input;
-}
-
 async function handleApplicableAction(options: InspectOptions): Promise<void> {
    await executeCommand(
       {
@@ -53,11 +32,9 @@ async function handleApplicableAction(options: InspectOptions): Promise<void> {
          verbose: options.verbose,
       },
       async () => {
-         const resolved = await resolveCliTarget(buildTargetInput(options));
-         const result = await inspectApplicableTarget(
-            buildTargetInput(options),
-            options.version,
-         );
+         const targetInput = buildCliTargetInput(options);
+         const resolved = await resolveCliTarget(targetInput);
+         const result = await inspectApplicableTarget(targetInput, options.version);
          return {
             target: resolved.reportTarget,
             result: result as unknown as Record<string, unknown>,
@@ -97,10 +74,11 @@ async function handleCriterionAction(
          verbose: options.verbose,
       },
       async () => {
-         const resolved = await resolveCliTarget(buildTargetInput(options));
+         const targetInput = buildCliTargetInput(options);
+         const resolved = await resolveCliTarget(targetInput);
          const result = await inspectCriterionTarget(
             criterion,
-            buildTargetInput(options),
+            targetInput,
             options.version,
          );
          return {

@@ -39,6 +39,33 @@ export interface SessionActionOptions {
    cwd?: string;
 }
 
+function createMissingSessionError(
+   sessionId: string,
+   details?: Record<string, unknown>,
+): CliEnvironmentError {
+   return new CliEnvironmentError(
+      'session-not-found',
+      `Driver session "${sessionId}" was not found.`,
+      details ?? { sessionId },
+   );
+}
+
+function parseBrokerActionResult(args: {
+   sessionId: string;
+   actionErrorMessage: string;
+   response: Awaited<ReturnType<typeof connectToBroker>>;
+   details?: Record<string, unknown>;
+}): DriverActionResult {
+   if (!args.response.ok || !args.response.result) {
+      throw new CliEnvironmentError(
+         args.response.error?.code ?? 'driver-broker-error',
+         args.response.error?.message ?? args.actionErrorMessage,
+         args.details ?? { sessionId: args.sessionId },
+      );
+   }
+   return driverActionResultSchema.parse(args.response.result);
+}
+
 function getActiveInMemoryIds(): Set<string> | undefined {
    if (useInMemoryBroker()) {
       return new Set(inMemoryBrokers.keys());
@@ -100,20 +127,13 @@ async function getBrokerSessionStatus(
       const response = await connectToBroker(session.socketPath, {
          command: 'status',
       });
-      if (!response.ok || !response.result) {
-         throw new CliEnvironmentError(
-            response.error?.code ?? 'driver-broker-error',
-            response.error?.message ?? `Could not read driver session "${sessionId}".`,
-            { sessionId },
-         );
-      }
-      return driverActionResultSchema.parse(response.result);
+      return parseBrokerActionResult({
+         sessionId,
+         actionErrorMessage: `Could not read driver session "${sessionId}".`,
+         response,
+      });
    } catch {
-      throw new CliEnvironmentError(
-         'session-not-found',
-         `Driver session "${sessionId}" was not found.`,
-         { sessionId },
-      );
+      throw createMissingSessionError(sessionId);
    }
 }
 
@@ -136,22 +156,16 @@ async function stopBrokerSession(
       const response = await connectToBroker(session.socketPath, {
          command: 'stop',
       });
-      if (!response.ok || !response.result) {
-         throw new CliEnvironmentError(
-            response.error?.code ?? 'driver-broker-error',
-            response.error?.message ?? `Could not stop driver session "${sessionId}".`,
-            { sessionId },
-         );
-      }
+      const result = parseBrokerActionResult({
+         sessionId,
+         actionErrorMessage: `Could not stop driver session "${sessionId}".`,
+         response,
+      });
       await removeSessionArtifacts(session);
-      return driverActionResultSchema.parse(response.result);
+      return result;
    } catch {
       await removeSessionArtifacts(session);
-      throw new CliEnvironmentError(
-         'session-not-found',
-         `Driver session "${sessionId}" was not found.`,
-         { sessionId },
-      );
+      throw createMissingSessionError(sessionId);
    }
 }
 
@@ -185,11 +199,7 @@ async function attachDocumentViaBroker(
          );
       }
    } catch {
-      throw new CliEnvironmentError(
-         'session-not-found',
-         `Driver session "${sessionId}" was not found.`,
-         { sessionId },
-      );
+      throw createMissingSessionError(sessionId);
    }
 }
 
@@ -229,21 +239,14 @@ async function runBrokerAction(
    try {
       const request = buildBrokerActionRequest(action, options?.payload);
       const response = await connectToBroker(session.socketPath, request);
-      if (!response.ok || !response.result) {
-         throw new CliEnvironmentError(
-            response.error?.code ?? 'driver-broker-error',
-            response.error?.message ??
-               `Could not run driver action "${action}" for session "${sessionId}".`,
-            { sessionId, action },
-         );
-      }
-      return driverActionResultSchema.parse(response.result);
+      return parseBrokerActionResult({
+         sessionId,
+         actionErrorMessage: `Could not run driver action "${action}" for session "${sessionId}".`,
+         response,
+         details: { sessionId, action },
+      });
    } catch {
-      throw new CliEnvironmentError(
-         'session-not-found',
-         `Driver session "${sessionId}" was not found.`,
-         { sessionId },
-      );
+      throw createMissingSessionError(sessionId);
    }
 }
 

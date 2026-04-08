@@ -1,12 +1,9 @@
 import { readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import {
-   type TestServerHandle,
-   createTestServer,
-   cleanupTempRoots,
    withTempDir,
    runCli,
    parseJsonOutput,
@@ -14,22 +11,11 @@ import {
    EXIT_USAGE,
    EXIT_ENVIRONMENT,
    TEST_TIMEOUT_SHORT,
+   useTestServer,
 } from './setup.js';
 
-const testServer: TestServerHandle = createTestServer();
 const tempRoots: string[] = [];
-
-beforeAll(async () => {
-   await testServer.start();
-});
-
-afterAll(async () => {
-   await testServer.stop();
-});
-
-afterEach(async () => {
-   await cleanupTempRoots(tempRoots);
-});
+useTestServer(tempRoots);
 
 async function startSession(): Promise<string> {
    const started = await runCli(['drive', 'start', '--target', 'virtual', '--json']);

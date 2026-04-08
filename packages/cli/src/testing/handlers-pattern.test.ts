@@ -1,30 +1,17 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import {
    type TestServerHandle,
-   createTestServer,
-   cleanupTempRoots,
    withTempDir,
    runCli,
    parseJsonOutput,
    EXIT_SUCCESS,
    TEST_TIMEOUT_LONG,
+   useTestServer,
 } from './setup.js';
 
-const testServer: TestServerHandle = createTestServer();
 const tempRoots: string[] = [];
-
-beforeAll(async () => {
-   await testServer.start();
-});
-
-afterAll(async () => {
-   await testServer.stop();
-});
-
-afterEach(async () => {
-   await cleanupTempRoots(tempRoots);
-});
+const testServer: TestServerHandle = useTestServer(tempRoots);
 
 async function assertLandmarkPattern(baseUrl: string): Promise<void> {
    const result = await runCli([

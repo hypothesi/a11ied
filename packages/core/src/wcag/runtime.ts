@@ -1,6 +1,5 @@
 import {
    wcagLevelSchema,
-   wcagVersionSchema,
    type CriterionLookupKey,
    type WcagLevel,
    type WcagVersion,
@@ -22,6 +21,7 @@ import {
    resolveDocumentTarget,
    type ResolveDocumentTargetInput,
 } from '../targets/runtime.js';
+import { parseWcagLevel, parseWcagVersion } from './parsing.js';
 
 export { CliEnvironmentError, CliUsageError } from '../errors/cli-errors.js';
 
@@ -47,46 +47,12 @@ function normalizeEngineError(error: unknown): never {
    throw error;
 }
 
-function parseVersion(version: string): WcagVersion {
-   const parsed = wcagVersionSchema.safeParse(version);
-   if (!parsed.success) {
-      throw new CliUsageError(
-         'validation-error',
-         `WCAG version "${version}" is unsupported.`,
-         {
-            field: 'version',
-            value: version,
-            supportedVersions: [...wcagVersionSchema.options],
-         },
-      );
-   }
-
-   return parsed.data;
-}
-
-function parseLevel(level: string): WcagLevel {
-   const parsed = wcagLevelSchema.safeParse(level);
-   if (!parsed.success) {
-      throw new CliUsageError(
-         'validation-error',
-         `WCAG level "${level}" is unsupported.`,
-         {
-            field: 'level',
-            value: level,
-            supportedLevels: [...wcagLevelSchema.options],
-         },
-      );
-   }
-
-   return parsed.data;
-}
-
 export function listWcagLevels(version: string): {
    version: WcagVersion;
    levels: WcagLevel[];
 } {
    return {
-      version: parseVersion(version),
+      version: parseWcagVersion(version),
       levels: [...wcagLevelSchema.options],
    };
 }
@@ -95,8 +61,8 @@ export function listWcagCriteria(
    level: string,
    version: string,
 ): ReturnType<typeof listCriteriaByLevel> {
-   const parsedLevel = parseLevel(level);
-   const parsedVersion = parseVersion(version);
+   const parsedLevel = parseWcagLevel(level);
+   const parsedVersion = parseWcagVersion(version);
 
    try {
       return listCriteriaByLevel(parsedLevel, parsedVersion);
@@ -109,7 +75,7 @@ export function showWcagCriterion(
    lookupKey: CriterionLookupKey,
    version: string,
 ): ReturnType<typeof getCriterion> {
-   const parsedVersion = parseVersion(version);
+   const parsedVersion = parseWcagVersion(version);
 
    try {
       return getCriterion(lookupKey, { version: parsedVersion });
@@ -122,7 +88,7 @@ export function searchWcagCriteria(
    query: string,
    options: { version: string; limit: number },
 ): ReturnType<typeof searchCriteria> {
-   const parsedVersion = parseVersion(options.version);
+   const parsedVersion = parseWcagVersion(options.version);
    if (!Number.isInteger(options.limit) || options.limit < 1) {
       throw new CliUsageError(
          'validation-error',
@@ -148,7 +114,7 @@ export function showWcagCoverage(
    lookupKey: CriterionLookupKey,
    version: string,
 ): ReturnType<typeof getCoverage> {
-   const parsedVersion = parseVersion(version);
+   const parsedVersion = parseWcagVersion(version);
 
    try {
       return getCoverage(lookupKey, { version: parsedVersion });
@@ -168,7 +134,7 @@ export async function inspectApplicableTarget(
    targetInput: ResolveDocumentTargetInput,
    version: string,
 ): Promise<InspectApplicableTargetResult> {
-   const parsedVersion = parseVersion(version);
+   const parsedVersion = parseWcagVersion(version);
    const resolved = await resolveDocumentTarget(targetInput);
    const input = deriveApplicabilityInputFromHtml(resolved.resolvedUrl, resolved.html, {
       target: resolved.target,
@@ -204,7 +170,7 @@ export async function inspectCriterionTarget(
    targetInput: ResolveDocumentTargetInput,
    version: string,
 ): Promise<CriterionApplicabilityResult> {
-   const parsedVersion = parseVersion(version);
+   const parsedVersion = parseWcagVersion(version);
 
    try {
       getCriterion(lookupKey, { version: parsedVersion });

@@ -1,9 +1,7 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import {
    type TestServerHandle,
-   createTestServer,
-   cleanupTempRoots,
    withTempDir,
    runCli,
    parseJsonOutput,
@@ -11,22 +9,11 @@ import {
    EXIT_ASSERTION,
    TEST_TIMEOUT_LONG,
    TEST_TIMEOUT_MEDIUM,
+   useTestServer,
 } from './setup.js';
 
-const testServer: TestServerHandle = createTestServer();
 const tempRoots: string[] = [];
-
-beforeAll(async () => {
-   await testServer.start();
-});
-
-afterAll(async () => {
-   await testServer.stop();
-});
-
-afterEach(async () => {
-   await cleanupTempRoots(tempRoots);
-});
+const testServer: TestServerHandle = useTestServer(tempRoots);
 
 async function assertFocusVisibilityPattern(baseUrl: string): Promise<void> {
    const result = await runCli([

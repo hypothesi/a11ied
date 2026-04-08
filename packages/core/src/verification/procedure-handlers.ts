@@ -1,5 +1,4 @@
 import {
-   cliMessageSchema,
    verificationEvidenceRecordSchema,
    verificationUncoveredWorkItemSchema,
    type CliMessage,
@@ -9,6 +8,12 @@ import {
    type VerificationSourceReference,
    type VerificationUncoveredWorkItem,
 } from '@a11lied/contracts';
+import { appendProcedureError } from './error-reporting.js';
+import {
+   buildPatternSourceReferences,
+   formatAxeSummary,
+   formatPatternSummary,
+} from './procedure-utils.js';
 
 export function getErrorCause(error: unknown): string {
    if (error instanceof Error) {
@@ -62,13 +67,6 @@ export function createManualEvidence(args: {
    });
 }
 
-function formatAxeSummary(violationCount: number, criterionId: string): string {
-   if (violationCount > 0) {
-      return `Axe found ${violationCount} violation(s) for ${criterionId}.`;
-   }
-   return `Axe did not find mapped violations for ${criterionId}.`;
-}
-
 export function handleAxeScanStep(args: {
    procedureId: string;
    criterionId: string;
@@ -116,25 +114,21 @@ export function handleAxeScanError(args: {
    executionSteps: VerificationExecutionStep[];
    errors: CliMessage[];
 }): void {
+   const cause = getErrorCause(args.error);
    args.executionSteps.push({
       procedureId: args.procedureId,
       kind: 'axe',
       mode: 'automated',
       status: 'error',
-      reason: getErrorCause(args.error),
+      reason: cause,
       sourceReferences: args.baseSourceReferences,
    });
-   args.errors.push(
-      cliMessageSchema.parse({
-         code: 'verification-procedure-error',
-         message: `Procedure "${args.procedureId}" failed for criterion ${args.criterionId}.`,
-         details: {
-            criterionId: args.criterionId,
-            procedureId: args.procedureId,
-            cause: getErrorCause(args.error),
-         },
-      }),
-   );
+   appendProcedureError({
+      criterionId: args.criterionId,
+      procedureId: args.procedureId,
+      cause,
+      errors: args.errors,
+   });
 }
 
 export function handleManualReviewStep(args: {
@@ -172,30 +166,6 @@ export function handleManualReviewStep(args: {
          notes: args.strategyNotes,
       }),
    );
-}
-
-function formatPatternSummary(
-   assertions: Array<{ status: string }>,
-   procedureId: string,
-): string {
-   if (assertions.some((assertion) => assertion.status === 'failed')) {
-      return `Pattern ${procedureId} produced a failing assertion.`;
-   }
-   return `Pattern ${procedureId} completed without failing assertions.`;
-}
-
-function buildPatternSourceReferences(
-   baseSourceReferences: VerificationSourceReference[],
-   procedureId: string,
-): VerificationSourceReference[] {
-   return [
-      ...baseSourceReferences,
-      {
-         kind: 'pattern',
-         id: procedureId,
-         label: procedureId,
-      },
-   ];
 }
 
 export function handlePatternStep(args: {
@@ -248,25 +218,21 @@ export function handlePatternError(args: {
       args.baseSourceReferences,
       args.procedureId,
    );
+   const cause = getErrorCause(args.error);
    args.executionSteps.push({
       procedureId: args.procedureId,
       kind: 'pattern',
       mode: args.evidenceMode,
       status: 'error',
-      reason: getErrorCause(args.error),
+      reason: cause,
       sourceReferences: patternRefs,
    });
-   args.errors.push(
-      cliMessageSchema.parse({
-         code: 'verification-procedure-error',
-         message: `Procedure "${args.procedureId}" failed for criterion ${args.criterionId}.`,
-         details: {
-            criterionId: args.criterionId,
-            procedureId: args.procedureId,
-            cause: getErrorCause(args.error),
-         },
-      }),
-   );
+   appendProcedureError({
+      criterionId: args.criterionId,
+      procedureId: args.procedureId,
+      cause,
+      errors: args.errors,
+   });
 }
 
 export function handleUnrecognizedProcedure(args: {

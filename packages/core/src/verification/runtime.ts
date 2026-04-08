@@ -1,7 +1,6 @@
 import {
    platformSchema,
    verificationReportSchema,
-   wcagLevelSchema,
    type CliMessage,
    type CriterionLookupKey,
    type Platform,
@@ -11,6 +10,7 @@ import {
 } from '@a11lied/contracts';
 
 import { CliUsageError } from '../errors/cli-errors.js';
+import { parseWcagLevel } from '../wcag/parsing.js';
 import { listWcagCriteria } from '../wcag/runtime.js';
 import { buildTarget, createLevelVerificationMessage, createSummary } from './helpers.js';
 import { verifyCriterionResult } from './criterion-process.js';
@@ -39,23 +39,6 @@ function parsePlatform(target: string): Platform {
          value: target,
          supportedTargets: [...platformSchema.options],
       });
-   }
-
-   return parsed.data;
-}
-
-function parseLevel(level: string): WcagLevel {
-   const parsed = wcagLevelSchema.safeParse(level);
-   if (!parsed.success) {
-      throw new CliUsageError(
-         'validation-error',
-         `WCAG level "${level}" is unsupported.`,
-         {
-            field: 'level',
-            value: level,
-            supportedLevels: [...wcagLevelSchema.options],
-         },
-      );
    }
 
    return parsed.data;
@@ -190,7 +173,7 @@ export async function verifyLevel(
    options: VerifyLevelOptions,
 ): Promise<VerificationReport> {
    const parsedTarget = parsePlatform(options.target);
-   const parsedLevel = parseLevel(options.level);
+   const parsedLevel = parseWcagLevel(options.level);
    const criterionIds = expandCriteriaForConformanceLevel(
       parsedLevel,
       options.wcagVersion,

@@ -9,6 +9,7 @@ import {
    addWcagVersionOption,
 } from '../lib/options.js';
 import { executeCommand, parsePlatform, resolveCliTarget } from '../lib/execute.js';
+import { buildCliTargetInput, type CliTargetInputOptions } from '../lib/target-input.js';
 import { renderVerificationText } from '../renderers/verification.js';
 
 function requireTarget(target: string | undefined): Platform {
@@ -20,32 +21,6 @@ function requireTarget(target: string | undefined): Platform {
       );
    }
    return parsePlatform(target);
-}
-
-function buildTargetInput(options: {
-   url?: string;
-   storybookUrl?: string;
-   storyId?: string;
-}): {
-   url?: string;
-   storybookUrl?: string;
-   storyId?: string;
-} {
-   const input: {
-      url?: string;
-      storybookUrl?: string;
-      storyId?: string;
-   } = {};
-   if (options.url) {
-      input.url = options.url;
-   }
-   if (options.storybookUrl) {
-      input.storybookUrl = options.storybookUrl;
-   }
-   if (options.storyId) {
-      input.storyId = options.storyId;
-   }
-   return input;
 }
 
 interface CriterionErrorInput {
@@ -80,25 +55,51 @@ function resolveVerificationExitCode(ok: boolean): number {
    return cliExitCodes.assertion;
 }
 
-async function handleCriterionVerify(
-   criterion: string,
-   options: {
-      version: string;
-      target?: string;
-      url?: string;
-      storybookUrl?: string;
-      storyId?: string;
-   },
-): Promise<{
+interface VerifyCommandOptions extends CliTargetInputOptions {
+   version: string;
+   target?: string;
+}
+
+interface VerifyCommandResult {
    ok: boolean;
    exitCode: number;
    warnings: Array<{ code: string; message: string }>;
    errors: Array<{ code: string; message: string; details: Record<string, unknown> }>;
    target: Record<string, unknown>;
    result: Record<string, unknown>;
+}
+
+async function resolveVerificationContext(options: VerifyCommandOptions): Promise<{
+   target: Platform;
+   resolved: Awaited<ReturnType<typeof resolveCliTarget>>;
 }> {
    const target = requireTarget(options.target);
-   const resolved = await resolveCliTarget(buildTargetInput(options));
+   const resolved = await resolveCliTarget(buildCliTargetInput(options));
+   return { target, resolved };
+}
+
+function buildVerifyCommandResult(args: {
+   ok: boolean;
+   warnings: Array<{ code: string; message: string }>;
+   errors: Array<{ code: string; message: string; details: Record<string, unknown> }>;
+   target: Record<string, unknown>;
+   result: Record<string, unknown>;
+}): VerifyCommandResult {
+   return {
+      ok: args.ok,
+      exitCode: resolveVerificationExitCode(args.ok),
+      warnings: args.warnings,
+      errors: args.errors,
+      target: args.target,
+      result: args.result,
+   };
+}
+
+async function handleCriterionVerify(
+   criterion: string,
+   options: VerifyCommandOptions,
+): Promise<VerifyCommandResult> {
+   const { target, resolved } = await resolveVerificationContext(options);
    const result = await verifyCriterion({
       criterion,
       url: resolved.resolvedUrl,
@@ -113,14 +114,13 @@ async function handleCriterionVerify(
    const verdict = row?.verdict ?? 'error';
    const ok = verdict === 'pass' || verdict === 'not-applicable';
 
-   return {
+   return buildVerifyCommandResult({
       ok,
-      exitCode: resolveVerificationExitCode(ok),
       warnings: result.warnings,
       errors: buildCriterionErrors({ row, criterion, verdict, ok }),
       target: result.target,
       result,
-   };
+   });
 }
 
 function registerCriterionVerifyCommand(verifyCommand: Command): void {
@@ -187,23 +187,9 @@ function buildLevelErrors(
 
 async function handleLevelVerify(
    level: string,
-   options: {
-      version: string;
-      target?: string;
-      url?: string;
-      storybookUrl?: string;
-      storyId?: string;
-   },
-): Promise<{
-   ok: boolean;
-   exitCode: number;
-   warnings: Array<{ code: string; message: string }>;
-   errors: Array<{ code: string; message: string; details: Record<string, unknown> }>;
-   target: Record<string, unknown>;
-   result: Record<string, unknown>;
-}> {
-   const target = requireTarget(options.target);
-   const resolved = await resolveCliTarget(buildTargetInput(options));
+   options: VerifyCommandOptions,
+): Promise<VerifyCommandResult> {
+   const { target, resolved } = await resolveVerificationContext(options);
    const result = await verifyLevel({
       level,
       url: resolved.resolvedUrl,
@@ -216,14 +202,13 @@ async function handleLevelVerify(
    });
    const ok = result.summary.failedCount === 0;
 
-   return {
+   return buildVerifyCommandResult({
       ok,
-      exitCode: resolveVerificationExitCode(ok),
       warnings: result.warnings,
       errors: buildLevelErrors(level, result.summary.failedCount, ok),
       target: result.target,
       result,
-   };
+   });
 }
 
 function registerLevelVerifyCommand(verifyCommand: Command): void {

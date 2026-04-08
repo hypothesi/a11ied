@@ -1,9 +1,7 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import {
    type TestServerHandle,
-   createTestServer,
-   cleanupTempRoots,
    withTempDir,
    runCli,
    parseJsonOutput,
@@ -11,22 +9,11 @@ import {
    EXIT_USAGE,
    EXIT_ASSERTION,
    TEST_TIMEOUT_VERY_LONG,
+   useTestServer,
 } from './setup.js';
 
-const testServer: TestServerHandle = createTestServer();
 const tempRoots: string[] = [];
-
-beforeAll(async () => {
-   await testServer.start();
-});
-
-afterAll(async () => {
-   await testServer.stop();
-});
-
-afterEach(async () => {
-   await cleanupTempRoots(tempRoots);
-});
+const testServer: TestServerHandle = useTestServer(tempRoots);
 
 async function assertVerifyAutomated(baseUrl: string): Promise<void> {
    const result = await runCli([

@@ -9,6 +9,7 @@ import {
    addVerboseOption,
    addWcagVersionOption,
 } from '../lib/options.js';
+import { buildCliTargetInput } from '../lib/target-input.js';
 import {
    executeCommand,
    parsePlatform,
@@ -16,32 +17,6 @@ import {
    resolveRunAxeSelection,
 } from '../lib/execute.js';
 import { renderPatternText, renderRunAxeText } from '../renderers/index.js';
-
-function buildTargetInput(options: {
-   url?: string;
-   storybookUrl?: string;
-   storyId?: string;
-}): {
-   url?: string;
-   storybookUrl?: string;
-   storyId?: string;
-} {
-   const input: {
-      url?: string;
-      storybookUrl?: string;
-      storyId?: string;
-   } = {};
-   if (options.url) {
-      input.url = options.url;
-   }
-   if (options.storybookUrl) {
-      input.storybookUrl = options.storybookUrl;
-   }
-   if (options.storyId) {
-      input.storyId = options.storyId;
-   }
-   return input;
-}
 
 async function runAxeForSelection(
    url: string,
@@ -72,7 +47,7 @@ async function handleAxeAction(options: {
    target: { kind: string; value: string };
    result: Record<string, unknown>;
 }> {
-   const resolved = await resolveCliTarget(buildTargetInput(options));
+   const resolved = await resolveCliTarget(buildCliTargetInput(options));
    const selection = resolveRunAxeSelection(options);
    const result = await runAxeForSelection(
       resolved.resolvedUrl,
@@ -200,7 +175,7 @@ async function handlePatternAction(
    target: { kind: string; value: string };
    result: Record<string, unknown>;
 }> {
-   const resolved = await resolveCliTarget(buildTargetInput(options));
+   const resolved = await resolveCliTarget(buildCliTargetInput(options));
    const patternOptions: {
       url: string;
       target?: string;

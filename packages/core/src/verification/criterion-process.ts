@@ -127,6 +127,34 @@ function buildOutputFromResult(args: {
    };
 }
 
+function buildResultArgs(vctx: VerificationContextResult): {
+   criterion: VerificationCriterionResult['criterion'];
+   applicabilityAssessment: VerificationCriterionResult['applicability'];
+   coverageLookup: VerificationCriterionResult['coverage'] extends infer _T
+      ? VerificationContextResult['coverageLookup']
+      : never;
+   evidenceMode: ProcedureContext['evidenceMode'];
+   evidence: ProcedureContext['evidence'];
+   executionSteps: ProcedureContext['executionSteps'];
+   uncoveredWork: ProcedureContext['uncoveredWork'];
+   notes: string[];
+   errors: ProcedureContext['errors'];
+   baseSourceReferences: ProcedureContext['baseSourceReferences'];
+} {
+   return {
+      criterion: vctx.applicabilityLookup.criterion,
+      applicabilityAssessment: vctx.applicabilityLookup.assessment,
+      coverageLookup: vctx.coverageLookup,
+      evidenceMode: vctx.ctx.evidenceMode,
+      evidence: vctx.ctx.evidence,
+      executionSteps: vctx.ctx.executionSteps,
+      uncoveredWork: vctx.ctx.uncoveredWork,
+      notes: vctx.notes,
+      errors: vctx.ctx.errors,
+      baseSourceReferences: vctx.ctx.baseSourceReferences,
+   };
+}
+
 async function processApplicableCriterion(
    vctx: VerificationContextResult,
 ): Promise<VerifyCriterionResultOutput> {
@@ -143,16 +171,7 @@ async function processApplicableCriterion(
 
    return buildOutputFromResult({
       result: buildFinalResult({
-         criterion,
-         applicabilityAssessment: vctx.applicabilityLookup.assessment,
-         coverageLookup: vctx.coverageLookup,
-         evidenceMode: vctx.ctx.evidenceMode,
-         evidence: vctx.ctx.evidence,
-         executionSteps: vctx.ctx.executionSteps,
-         uncoveredWork: vctx.ctx.uncoveredWork,
-         notes: vctx.notes,
-         errors: vctx.ctx.errors,
-         baseSourceReferences: vctx.ctx.baseSourceReferences,
+         ...buildResultArgs(vctx),
          verdict,
       }),
       criterionId: criterion.id,
@@ -171,16 +190,7 @@ export async function verifyCriterionResult(args: {
    if (!isApplicable(vctx.applicabilityLookup.assessment.state)) {
       return buildOutputFromResult({
          result: buildNotApplicableResult({
-            criterion: vctx.applicabilityLookup.criterion,
-            applicabilityAssessment: vctx.applicabilityLookup.assessment,
-            coverageLookup: vctx.coverageLookup,
-            evidenceMode: vctx.ctx.evidenceMode,
-            evidence: vctx.ctx.evidence,
-            executionSteps: vctx.ctx.executionSteps,
-            uncoveredWork: vctx.ctx.uncoveredWork,
-            notes: vctx.notes,
-            errors: vctx.ctx.errors,
-            baseSourceReferences: vctx.ctx.baseSourceReferences,
+            ...buildResultArgs(vctx),
          }),
          criterionId: vctx.applicabilityLookup.criterion.id,
          target: vctx.target,
