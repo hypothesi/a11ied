@@ -8,7 +8,11 @@ import {
 } from '@a11lied/contracts';
 import { createDriverAdapter } from '@a11lied/guidepup';
 
-import { connectToBroker, spawnBrokerProcess } from './driver-broker-client.js';
+import {
+   connectToBroker,
+   spawnBrokerProcess,
+   waitForBroker,
+} from './driver-broker-client.js';
 import {
    attachToInMemorySession,
    getInMemoryStatus,
@@ -29,11 +33,13 @@ import {
    readSessionMetadata,
    removeSessionArtifacts,
    useInMemoryBroker,
-   waitForBroker,
 } from './driver-session-utils.js';
 import { CliEnvironmentError } from './wcag-runtime.js';
 
-export { getDriverSessionMetadataPath } from './driver-session-utils.js';
+export {
+   getDriverSessionMetadataPath,
+   getDriverSocketPath,
+} from './driver-session-utils.js';
 
 export interface SessionActionOptions {
    payload?: Record<string, unknown>;

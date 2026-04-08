@@ -11,9 +11,15 @@ import { startDriverSession, stopDriverSession } from './driver-runtime.js';
 
 const fixtureRoot = resolve(import.meta.dirname, '../../cli/test/fixtures');
 const repoRoot = process.cwd();
+const HTTP_OK = 200;
+const HTTP_NOT_FOUND = 404;
+const ONE_MINUTE_MS = 60_000;
+const THIRTY_SECONDS_MS = 30_000;
 
 let baseUrl = '';
-let server: ReturnType<typeof createServer>;
+let server: ReturnType<typeof createServer> = undefined as unknown as ReturnType<
+   typeof createServer
+>;
 const tempRoots: string[] = [];
 
 async function createTempRoot(): Promise<string> {
@@ -29,10 +35,12 @@ beforeAll(async () => {
 
       try {
          const html = readFileSync(filePath, 'utf8');
-         response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+         response.writeHead(HTTP_OK, { 'content-type': 'text/html; charset=utf-8' });
          response.end(html);
       } catch {
-         response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
+         response.writeHead(HTTP_NOT_FOUND, {
+            'content-type': 'text/plain; charset=utf-8',
+         });
          response.end('not found');
       }
    });
@@ -64,121 +72,161 @@ afterAll(async () => {
 });
 
 afterEach(async () => {
-   while (tempRoots.length > 0) {
-      const root = tempRoots.pop();
-      if (root) {
-         await rm(root, { recursive: true, force: true });
-      }
-   }
+   await Promise.all(tempRoots.map((root) => rm(root, { recursive: true, force: true })));
+   tempRoots.length = 0;
 });
 
-describe('interaction pattern runtime', () => {
-   it('returns landmark logs and heading order evidence', async () => {
-      const cwd = await createTempRoot();
-      process.chdir(cwd);
+function expectLandmarkLogs(result: {
+   stepLog: unknown[];
+   spokenPhraseLog: unknown[];
+   itemTextLog: unknown[];
+}): void {
+   expect(result.stepLog.length).toBeGreaterThan(0);
+   expect(result.spokenPhraseLog.length).toBeGreaterThan(0);
+   expect(result.itemTextLog.length).toBeGreaterThan(0);
+}
 
-      try {
-         const landmarks = await runInteractionPattern({
-            patternId: 'landmark_sequence',
-            url: `${baseUrl}/basic-page.html`,
-            target: 'virtual',
-         });
+function expectStatusMessageResult(result: {
+   stepLog: Array<{ id: string }>;
+   spokenPhraseLog: string[];
+   targetMetadata: Record<string, unknown>;
+}): void {
+   expect(result.stepLog.some((entry) => entry.id === 'trigger-status-message')).toBe(
+      true,
+   );
+   expect(result.spokenPhraseLog).toContain('Profile saved successfully.');
+   expect(result.targetMetadata.focusChangedUnexpectedly).toBe(false);
+}
 
-         expect(landmarks.stepLog.length).toBeGreaterThan(0);
-         expect(landmarks.spokenPhraseLog.length).toBeGreaterThan(0);
-         expect(landmarks.itemTextLog.length).toBeGreaterThan(0);
+function expectDialogResult(result: {
+   assertions: Array<{ id: string; status: string }>;
+}): void {
+   expect(result.assertions.find((entry) => entry.id === 'focus-entry')?.status).toBe(
+      'passed',
+   );
+   expect(
+      result.assertions.find((entry) => entry.id === 'focus-containment')?.status,
+   ).toBe('passed');
+   expect(result.assertions.find((entry) => entry.id === 'close-behavior')?.status).toBe(
+      'passed',
+   );
+}
 
-         const headings = await runInteractionPattern({
-            patternId: 'heading_sequence',
-            url: `${baseUrl}/basic-page.html`,
-            target: 'virtual',
-         });
+function expectFocusVisibilityResult(result: {
+   assertions: Array<{ id: string; status: string }>;
+   targetMetadata: Record<string, unknown>;
+   browserEvidence: unknown[];
+}): void {
+   expect(result.assertions.length).toBeGreaterThan(0);
+   expect(result.assertions.find((entry) => entry.id === 'focus-visible')?.status).toBe(
+      'passed',
+   );
+   expect(
+      result.assertions.find((entry) => entry.id === 'focus-geometry-collected')?.status,
+   ).toBe('passed');
+   expect(
+      (result.targetMetadata as { overlapPixels?: number }).overlapPixels,
+   ).toBeGreaterThan(0);
+   expect(result.browserEvidence.length).toBeGreaterThan(0);
+}
 
-         expect(
-            (headings.targetMetadata.headings as Array<{ text: string }>)[0]?.text,
-         ).toBe('Basic content page');
-         expect(
-            headings.assertions.some(
-               (entry) => entry.id === 'heading-order' && entry.status === 'passed',
-            ),
-         ).toBe(true);
-      } finally {
-         process.chdir(repoRoot);
-      }
-   }, 60_000);
+describe('interaction pattern landmark and heading evidence', () => {
+   it(
+      'returns landmark logs and heading order evidence',
+      async () => {
+         const cwd = await createTempRoot();
+         process.chdir(cwd);
 
-   it('captures status message, dialog, and focus visibility evidence', async () => {
-      const cwd = await createTempRoot();
-      process.chdir(cwd);
+         try {
+            const landmarks = await runInteractionPattern({
+               patternId: 'landmark_sequence',
+               url: `${baseUrl}/basic-page.html`,
+               target: 'virtual',
+            });
+            expectLandmarkLogs(landmarks);
 
-      try {
-         const status = await runInteractionPattern({
-            patternId: 'status_message_probe',
-            url: `${baseUrl}/status-message.html`,
-            target: 'virtual',
-         });
-         expect(
-            status.stepLog.some((entry) => entry.id === 'trigger-status-message'),
-         ).toBe(true);
-         expect(status.spokenPhraseLog).toContain('Profile saved successfully.');
-         expect(status.targetMetadata.focusChangedUnexpectedly).toBe(false);
+            const headings = await runInteractionPattern({
+               patternId: 'heading_sequence',
+               url: `${baseUrl}/basic-page.html`,
+               target: 'virtual',
+            });
 
-         const dialog = await runInteractionPattern({
-            patternId: 'dialog_probe',
-            url: `${baseUrl}/dialog.html`,
-            target: 'virtual',
-         });
-         expect(
-            dialog.assertions.find((entry) => entry.id === 'focus-entry')?.status,
-         ).toBe('passed');
-         expect(
-            dialog.assertions.find((entry) => entry.id === 'focus-containment')?.status,
-         ).toBe('passed');
-         expect(
-            dialog.assertions.find((entry) => entry.id === 'close-behavior')?.status,
-         ).toBe('passed');
+            expect(
+               (headings.targetMetadata.headings as Array<{ text: string }>)[0]?.text,
+            ).toBe('Basic content page');
+            expect(
+               headings.assertions.some(
+                  (entry) => entry.id === 'heading-order' && entry.status === 'passed',
+               ),
+            ).toBe(true);
+         } finally {
+            process.chdir(repoRoot);
+         }
+      },
+      ONE_MINUTE_MS,
+   );
+});
 
-         const focus = await runInteractionPattern({
-            patternId: 'focus_visibility_probe',
-            url: `${baseUrl}/focus-obscured.html`,
-            target: 'virtual',
-         });
-         expect(focus.assertions.length).toBeGreaterThan(0);
-         expect(
-            focus.assertions.find((entry) => entry.id === 'focus-visible')?.status,
-         ).toBe('passed');
-         expect(
-            focus.assertions.find((entry) => entry.id === 'focus-geometry-collected')
-               ?.status,
-         ).toBe('passed');
-         expect(
-            (focus.targetMetadata as { overlapPixels?: number }).overlapPixels,
-         ).toBeGreaterThan(0);
-         expect(focus.browserEvidence.length).toBeGreaterThan(0);
-      } finally {
-         process.chdir(repoRoot);
-      }
-   }, 60_000);
+describe('interaction pattern status, dialog, and focus evidence', () => {
+   it(
+      'captures status message, dialog, and focus visibility evidence',
+      async () => {
+         const cwd = await createTempRoot();
+         process.chdir(cwd);
 
-   it('reuses an existing session when one is provided', async () => {
-      const cwd = await createTempRoot();
-      process.chdir(cwd);
+         try {
+            const status = await runInteractionPattern({
+               patternId: 'status_message_probe',
+               url: `${baseUrl}/status-message.html`,
+               target: 'virtual',
+            });
+            expectStatusMessageResult(status);
 
-      try {
-         const session = await startDriverSession('virtual');
-         const result = await runInteractionPattern({
-            patternId: 'landmark_sequence',
-            url: `${baseUrl}/basic-page.html`,
-            target: 'virtual',
-            sessionId: session.sessionId,
-         });
+            const dialog = await runInteractionPattern({
+               patternId: 'dialog_probe',
+               url: `${baseUrl}/dialog.html`,
+               target: 'virtual',
+            });
+            expectDialogResult(dialog);
 
-         expect(result.sessionId).toBe(session.sessionId);
-         expect(result.managedSession).toBe(false);
+            const focus = await runInteractionPattern({
+               patternId: 'focus_visibility_probe',
+               url: `${baseUrl}/focus-obscured.html`,
+               target: 'virtual',
+            });
+            expectFocusVisibilityResult(focus);
+         } finally {
+            process.chdir(repoRoot);
+         }
+      },
+      ONE_MINUTE_MS,
+   );
+});
 
-         await stopDriverSession(session.sessionId);
-      } finally {
-         process.chdir(repoRoot);
-      }
-   }, 30_000);
+describe('interaction pattern session reuse', () => {
+   it(
+      'reuses an existing session when one is provided',
+      async () => {
+         const cwd = await createTempRoot();
+         process.chdir(cwd);
+
+         try {
+            const session = await startDriverSession('virtual');
+            const result = await runInteractionPattern({
+               patternId: 'landmark_sequence',
+               url: `${baseUrl}/basic-page.html`,
+               target: 'virtual',
+               sessionId: session.sessionId,
+            });
+
+            expect(result.sessionId).toBe(session.sessionId);
+            expect(result.managedSession).toBe(false);
+
+            await stopDriverSession(session.sessionId);
+         } finally {
+            process.chdir(repoRoot);
+         }
+      },
+      THIRTY_SECONDS_MS,
+   );
 });

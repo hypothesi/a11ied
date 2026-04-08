@@ -3,5 +3,7 @@
    "ignorePatterns": ["**/dist/**", "**/coverage/**", "apps/docs/.astro/**"],
    "printWidth": 90,
    "tabWidth": 3,
-   "singleQuote": true
+   "singleQuote": true,
+   "bracketSameLine": true,
+   "jsdoc": true
 }

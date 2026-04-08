@@ -1,0 +1,38 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+
+const links = [
+   { href: '/', label: 'Overview' },
+   { href: '/wcag-data-sources', label: 'WCAG data sources' },
+   { href: '/criterion-lookup', label: 'Criterion lookup' },
+   { href: '/applicability', label: 'Applicability' },
+   { href: '/driver-usage', label: 'Driver usage' },
+   { href: '/pattern-execution', label: 'Pattern execution' },
+   { href: '/verification-semantics', label: 'Verification semantics' },
+   { href: '/release-checklist', label: 'Release checklist' },
+];
+---
+
+<DocShell
+   title="Release checklist"
+   summary="Public releases need one last reality check. CI covers the fast, repeatable virtual path. It does not replace real assistive technology smoke tests."
+   links={links}
+>
+   <section>
+      <h2>Before a public minor or major release</h2>
+      <ol>
+         <li>Wait for all CI checks to pass.</li>
+         <li>Run a manual macOS VoiceOver smoke pass on representative fixtures or demo targets.</li>
+         <li>Run a manual Windows NVDA smoke pass on representative fixtures or demo targets.</li>
+         <li>Record what was exercised and any environment constraints that mattered.</li>
+      </ol>
+   </section>
+
+   <section class="callout">
+      <h2>Why this page exists</h2>
+      <p>
+         VoiceOver and NVDA are the real target platforms. The virtual reader is valuable, but it is not
+         a substitute for shipping confidence on those platforms.
+      </p>
+   </section>
+</DocShell>

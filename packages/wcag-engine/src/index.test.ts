@@ -23,7 +23,7 @@ import {
 } from './index.js';
 import { getApplicabilityFixture } from './applicability-fixtures.js';
 
-describe('wcag-engine lookup and search', () => {
+describe('wcag-engine lookup', () => {
    it('resolves the same criterion by id and slug', () => {
       resetWcagEngineCache();
       const byId = getCriterion('4.1.3');
@@ -53,7 +53,9 @@ describe('wcag-engine lookup and search', () => {
          ),
       ).toBe(true);
    });
+});
 
+describe('wcag-engine search', () => {
    it('finds the status messages criterion by plain-language query with match metadata', () => {
       const result = searchCriteria('status message');
       const match = result.results.find(
@@ -80,7 +82,9 @@ describe('wcag-engine lookup and search', () => {
          ),
       ).toBe(true);
    });
+});
 
+describe('wcag-engine coverage and strategy', () => {
    it('joins coverage data to the canonical criterion model', () => {
       const result = getCoverage('4.1.2');
 
@@ -107,7 +111,9 @@ describe('wcag-engine lookup and search', () => {
       expect(result.tags.length).toBeGreaterThan(0);
       expect(result.tags).toContain('forms');
    });
+});
 
+describe('wcag-engine error handling', () => {
    it('throws typed not-found errors for unsupported criterion ids', () => {
       expect(() => getCriterion('9.9.9')).toThrowError(WcagEngineNotFoundError);
 
@@ -145,7 +151,7 @@ describe('wcag-engine lookup and search', () => {
    });
 });
 
-describe('wcag-engine applicability heuristics', () => {
+describe('wcag-engine applicability state classification', () => {
    it('exposes the supported applicability states and signal categories', () => {
       expect(supportedApplicabilityStates).toEqual([
          'applicable',
@@ -189,7 +195,9 @@ describe('wcag-engine applicability heuristics', () => {
       expect(result.assessment.state).toBe('applicable');
       expect(result.assessment.reasons.join(' ')).toMatch(/authentication signals/i);
    });
+});
 
+describe('wcag-engine applicability signal matching', () => {
    it('returns dialog-related criteria as relevant for dialog structure', () => {
       const result = listApplicableCriteria(getApplicabilityFixture('dialog.html'));
       const assessments = Object.values(result.assessments);

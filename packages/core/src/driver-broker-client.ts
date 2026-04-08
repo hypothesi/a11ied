@@ -1,4 +1,6 @@
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import net from 'node:net';
 
@@ -10,6 +12,7 @@ import { CliEnvironmentError } from './wcag-runtime.js';
 const SOCKET_TIMEOUT_MS = 1000;
 const BROKER_POLL_DELAY_MS = 100;
 const BROKER_READY_TIMEOUT_MS = 5000;
+const require = createRequire(import.meta.url);
 
 function delay(ms: number): Promise<void> {
    return new Promise((resolvePromise) => {
@@ -112,7 +115,40 @@ function isSourceRuntime(): boolean {
    return getCurrentModulePath().endsWith('.ts');
 }
 
+function resolveCorePackageRoot(): string | undefined {
+   try {
+      const packageEntryPath = require.resolve('@a11lied/core');
+      const packageDir = dirname(packageEntryPath);
+      if (packageDir.endsWith('/dist')) {
+         return dirname(packageDir);
+      }
+      return packageDir;
+   } catch {
+      try {
+         const packageJsonPath = require.resolve('@a11lied/core/package.json');
+         return dirname(packageJsonPath);
+      } catch {
+         return undefined;
+      }
+   }
+}
+
+// The lookup is intentionally defensive because the broker may run from
+// Source, from a built workspace, or from a package entry resolved at runtime.
+// eslint-disable-next-line max-statements
 function getBrokerEntryPath(): string {
+   const packageRoot = resolveCorePackageRoot();
+   if (packageRoot) {
+      const distEntry = resolve(packageRoot, 'dist/driver-broker.js');
+      if (existsSync(distEntry)) {
+         return distEntry;
+      }
+      const sourceEntry = resolve(packageRoot, 'src/driver-broker.ts');
+      if (existsSync(sourceEntry)) {
+         return sourceEntry;
+      }
+   }
+
    const currentFile = getCurrentModulePath();
    const currentDir = dirname(currentFile);
    if (isSourceRuntime()) {
@@ -122,6 +158,10 @@ function getBrokerEntryPath(): string {
 }
 
 function getProjectRoot(): string {
+   const packageRoot = resolveCorePackageRoot();
+   if (packageRoot) {
+      return resolve(packageRoot, '../..');
+   }
    const currentFile = getCurrentModulePath();
    return resolve(dirname(currentFile), '../../..');
 }

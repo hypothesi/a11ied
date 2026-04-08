@@ -1,9 +1,9 @@
 import { chromium, type Page } from 'playwright';
 
-export async function withBrowserPage<T>(
+export async function withBrowserPage<TResult>(
    url: string,
-   callback: (page: Page) => Promise<T>,
-): Promise<T> {
+   callback: (page: Page) => Promise<TResult>,
+): Promise<TResult> {
    const browser = await chromium.launch({ headless: true });
 
    try {
@@ -17,9 +17,9 @@ export async function withBrowserPage<T>(
    }
 }
 
-export async function withLoadedPage<T>(
+export async function withLoadedPage<TResult>(
    url: string,
-   callback: (page: Page) => Promise<T>,
-): Promise<T> {
+   callback: (page: Page) => Promise<TResult>,
+): Promise<TResult> {
    return await withBrowserPage(url, callback);
 }

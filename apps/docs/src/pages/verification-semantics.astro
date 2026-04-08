@@ -1,0 +1,46 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+
+const links = [
+   { href: '/', label: 'Overview' },
+   { href: '/wcag-data-sources', label: 'WCAG data sources' },
+   { href: '/criterion-lookup', label: 'Criterion lookup' },
+   { href: '/applicability', label: 'Applicability' },
+   { href: '/driver-usage', label: 'Driver usage' },
+   { href: '/pattern-execution', label: 'Pattern execution' },
+   { href: '/verification-semantics', label: 'Verification semantics' },
+   { href: '/release-checklist', label: 'Release checklist' },
+];
+---
+
+<DocShell
+   title="Verification semantics"
+   summary="This is the page that keeps the product honest. Verification is allowed to say pass, fail, mixed, manual-only, or not-covered. It is not allowed to bluff."
+   links={links}
+>
+   <section>
+      <h2>Three evidence lanes</h2>
+      <ul>
+         <li><strong>Automated:</strong> the runtime has enough procedure coverage to make a machine verdict.</li>
+         <li><strong>Hybrid:</strong> the runtime can gather evidence, but a human still has to interpret part of it.</li>
+         <li><strong>Manual:</strong> the runtime can explain the criterion and maybe collect context, but it cannot finish the judgment alone.</li>
+      </ul>
+   </section>
+
+   <section>
+      <h2>Level verification</h2>
+      <p>
+         <code>verify level</code> always emits the full criterion matrix. That is deliberate. A conformance
+         target like AA is not one verdict. It is a table of rows, and some of those rows may still be
+         manual or uncovered even when the automated slice looks clean.
+      </p>
+   </section>
+
+   <section class="callout">
+      <h2>What not to say</h2>
+      <p>
+         Do not turn a clean axe run into "WCAG AA compliant." Do not turn a virtual-reader transcript
+         into a VoiceOver or NVDA claim. Keep the evidence type and the claim size matched.
+      </p>
+   </section>
+</DocShell>

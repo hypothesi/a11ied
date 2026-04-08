@@ -7,7 +7,7 @@ import {
 } from '@a11lied/contracts';
 import axe from 'axe-core';
 
-import { CliUsageError } from './wcag-runtime.js';
+import { CliUsageError } from './cli-errors.js';
 import { getCoverage, listCriteriaByLevel } from '@a11lied/wcag-engine';
 import { withLoadedPage } from './browser-helper.js';
 
@@ -59,11 +59,18 @@ interface RawAxeResults {
 
 const axeScriptSource = axe.source;
 
-const levelOrdering: Record<WcagLevel, number> = {
-   A: 1,
-   AA: 2,
-   AAA: 3,
-};
+const LEVEL_ORDER_AA = 2;
+const LEVEL_ORDER_AAA = 3;
+
+function getLevelOrder(level: WcagLevel): number {
+   if (level === 'AA') {
+      return LEVEL_ORDER_AA;
+   }
+   if (level === 'AAA') {
+      return LEVEL_ORDER_AAA;
+   }
+   return 1;
+}
 
 function parseWcagVersion(version: string): WcagVersion {
    if (version === '2.1' || version === '2.2') {
@@ -96,7 +103,7 @@ function parseLevel(level: string): WcagLevel {
 function normalizeRule(rule: RawAxeRule): AxeRuleResult {
    return {
       id: rule.id,
-      impact: rule.impact ?? null,
+      impact: rule.impact ?? undefined,
       description: rule.description,
       help: rule.help,
       helpUrl: rule.helpUrl,
@@ -105,7 +112,7 @@ function normalizeRule(rule: RawAxeRule): AxeRuleResult {
          rule.nodes?.map((node) => ({
             target: node.target ?? [],
             html: node.html ?? '',
-            failureSummary: node.failureSummary ?? null,
+            failureSummary: node.failureSummary ?? undefined,
          })) ?? [],
    };
 }
@@ -116,7 +123,7 @@ function unique(values: Iterable<string>): string[] {
 
 function resolveLevelRuleIds(level: WcagLevel, version: WcagVersion): string[] {
    const criteria = (['A', 'AA', 'AAA'] as const)
-      .filter((entry) => levelOrdering[entry] <= levelOrdering[level])
+      .filter((entry) => getLevelOrder(entry) <= getLevelOrder(level))
       .flatMap((entry) => listCriteriaByLevel(entry, version).criteria);
 
    return unique(
@@ -143,59 +150,90 @@ function ensureRuleIds(ruleIds: string[], context: Record<string, unknown>): str
    return uniqueRuleIds;
 }
 
-export async function runAxe(url: string, options: AxeRunOptions): Promise<AxeRunResult> {
-   let parsedUrl: URL;
+function parseAxeUrl(url: string): URL {
    try {
-      parsedUrl = new URL(url);
+      return new URL(url);
    } catch {
       throw new CliUsageError('invalid-url', `URL "${url}" is invalid.`, { url });
    }
+}
 
-   const wcagVersion = parseWcagVersion(options.wcagVersion);
-
-   let selection: AxeRunResult['selection'];
-   let ruleIds: string[];
-
-   if ('criterion' in options && options.criterion) {
-      ruleIds = ensureRuleIds(resolveCriterionRuleIds(options.criterion, wcagVersion), {
-         criterion: options.criterion,
-         wcagVersion,
-      });
-      selection = {
+function resolveCriterionSelection(
+   criterion: string,
+   wcagVersion: WcagVersion,
+): { selection: AxeRunResult['selection']; ruleIds: string[] } {
+   const ruleIds = ensureRuleIds(resolveCriterionRuleIds(criterion, wcagVersion), {
+      criterion,
+      wcagVersion,
+   });
+   return {
+      selection: {
          kind: 'criterion',
-         criterion: options.criterion,
+         criterion,
          resolvedRuleIds: ruleIds,
-      };
-   } else if ('level' in options && options.level) {
-      const parsedLevel = parseLevel(options.level);
-      ruleIds = ensureRuleIds(resolveLevelRuleIds(parsedLevel, wcagVersion), {
-         level: parsedLevel,
-         wcagVersion,
-      });
-      selection = {
+      },
+      ruleIds,
+   };
+}
+
+function resolveLevelSelection(
+   level: string,
+   wcagVersion: WcagVersion,
+): { selection: AxeRunResult['selection']; ruleIds: string[] } {
+   const parsedLevel = parseLevel(level);
+   const ruleIds = ensureRuleIds(resolveLevelRuleIds(parsedLevel, wcagVersion), {
+      level: parsedLevel,
+      wcagVersion,
+   });
+   return {
+      selection: {
          kind: 'level',
          level: parsedLevel,
          resolvedRuleIds: ruleIds,
-      };
-   } else if ('ruleIds' in options && options.ruleIds) {
-      ruleIds = ensureRuleIds(options.ruleIds, {
-         ruleIds: options.ruleIds,
-      });
-      selection = {
+      },
+      ruleIds,
+   };
+}
+
+function resolveRuleSelection(ruleIds: string[]): {
+   selection: AxeRunResult['selection'];
+   ruleIds: string[];
+} {
+   const uniqueRuleIds = ensureRuleIds(ruleIds, { ruleIds });
+   return {
+      selection: {
          kind: 'rule',
-         ruleIds,
-      };
-   } else {
-      throw new CliUsageError(
-         'missing-selection',
-         'Choose exactly one of --criterion, --level, or --rule.',
-      );
+         ruleIds: uniqueRuleIds,
+      },
+      ruleIds: uniqueRuleIds,
+   };
+}
+
+function resolveAxeSelection(
+   options: AxeRunOptions,
+   wcagVersion: WcagVersion,
+): { selection: AxeRunResult['selection']; ruleIds: string[] } {
+   if ('criterion' in options && options.criterion) {
+      return resolveCriterionSelection(options.criterion, wcagVersion);
    }
 
-   const raw = await withLoadedPage(parsedUrl.toString(), async (page) => {
-      await page.addScriptTag({
-         content: axeScriptSource,
-      });
+   if ('level' in options && options.level) {
+      return resolveLevelSelection(options.level, wcagVersion);
+   }
+
+   if ('ruleIds' in options && options.ruleIds) {
+      return resolveRuleSelection(options.ruleIds);
+   }
+
+   throw new CliUsageError(
+      'missing-selection',
+      'Choose exactly one of --criterion, --level, or --rule.',
+   );
+}
+
+async function executeAxeScan(parsedUrl: URL, ruleIds: string[]): Promise<RawAxeResults> {
+   return withLoadedPage(parsedUrl.toString(), async (page) => {
+      await page.addScriptTag({ content: axeScriptSource });
 
       return await page.evaluate(
          async ({ values }) => {
@@ -207,24 +245,28 @@ export async function runAxe(url: string, options: AxeRunOptions): Promise<AxeRu
                }
             ).axe;
             return await axeRef.run(document, {
-               runOnly: {
-                  type: 'rule',
-                  values,
-               },
+               runOnly: { type: 'rule', values },
             });
          },
          { values: ruleIds },
       );
    });
+}
+
+export async function runAxe(url: string, options: AxeRunOptions): Promise<AxeRunResult> {
+   const parsedUrl = parseAxeUrl(url);
+   const wcagVersion = parseWcagVersion(options.wcagVersion);
+   const { selection, ruleIds } = resolveAxeSelection(options, wcagVersion);
+   const raw = await executeAxeScan(parsedUrl, ruleIds);
 
    return axeRunResultSchema.parse({
       url: parsedUrl.toString(),
       wcagVersion,
       selection,
       ruleIds,
-      violations: (raw.violations ?? []).map(normalizeRule),
-      passes: (raw.passes ?? []).map(normalizeRule),
-      incomplete: (raw.incomplete ?? []).map(normalizeRule),
-      inapplicable: (raw.inapplicable ?? []).map(normalizeRule),
+      violations: (raw.violations ?? []).map((rule) => normalizeRule(rule)),
+      passes: (raw.passes ?? []).map((rule) => normalizeRule(rule)),
+      incomplete: (raw.incomplete ?? []).map((rule) => normalizeRule(rule)),
+      inapplicable: (raw.inapplicable ?? []).map((rule) => normalizeRule(rule)),
    });
 }

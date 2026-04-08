@@ -1,9 +1,7 @@
 {
    "$schema": "./node_modules/oxlint/configuration_schema.json",
-   "plugins": [ "typescript", "unicorn", "oxc" ],
-   "jsPlugins": [
-      "oxlint-plugin-complexity"
-   ],
+   "plugins": ["typescript", "unicorn", "oxc", "node"],
+   "jsPlugins": ["oxlint-plugin-complexity"],
    "categories": {
       "correctness": "error",
       "pedantic": "error",
@@ -22,8 +20,9 @@
       "prefer-destructuring": "off",
       "no-undefined": "off",
       "no-magic-numbers": [
-         "error", {
-            "ignore": [ 0, -1, 1, 10 ]
+         "error",
+         {
+            "ignore": [0, -1, 1, 10]
          }
       ],
       "func-style": "off",

@@ -1,10 +1,6 @@
 import {
-   cliExitCodes,
-   applicabilityInputSchema,
    wcagLevelSchema,
    wcagVersionSchema,
-   type ApplicabilityInput,
-   type ApplicabilitySignal,
    type CriterionLookupKey,
    type WcagLevel,
    type WcagVersion,
@@ -20,31 +16,14 @@ import {
    searchCriteria,
 } from '@a11lied/wcag-engine';
 
-export class CliUsageError extends Error {
-   readonly exitCode = cliExitCodes.usage;
-   readonly code: string;
-   readonly details: Record<string, unknown> | undefined;
+import { CliEnvironmentError, CliUsageError } from './cli-errors.js';
+import { deriveApplicabilityInputFromHtml } from './applicability-html.js';
+import {
+   resolveDocumentTarget,
+   type ResolveDocumentTargetInput,
+} from './target-runtime.js';
 
-   constructor(code: string, message: string, details?: Record<string, unknown>) {
-      super(message);
-      this.name = 'CliUsageError';
-      this.code = code;
-      this.details = details;
-   }
-}
-
-export class CliEnvironmentError extends Error {
-   readonly exitCode = cliExitCodes.environment;
-   readonly code: string;
-   readonly details: Record<string, unknown> | undefined;
-
-   constructor(code: string, message: string, details?: Record<string, unknown>) {
-      super(message);
-      this.name = 'CliEnvironmentError';
-      this.code = code;
-      this.details = details;
-   }
-}
+export { CliEnvironmentError, CliUsageError } from './cli-errors.js';
 
 function normalizeEngineError(error: unknown): never {
    if (
@@ -102,172 +81,6 @@ function parseLevel(level: string): WcagLevel {
    return parsed.data;
 }
 
-function hasMatch(value: string, pattern: RegExp): boolean {
-   return pattern.test(value);
-}
-
-function addSignal(
-   signals: ApplicabilitySignal[],
-   category: ApplicabilitySignal['category'],
-   source: ApplicabilitySignal['source'],
-   value: string,
-   confidence: ApplicabilitySignal['confidence'],
-): void {
-   signals.push({
-      category,
-      source,
-      value,
-      confidence,
-   });
-}
-
-function deriveApplicabilityInputFromHtml(url: string, html: string): ApplicabilityInput {
-   const signals: ApplicabilitySignal[] = [];
-
-   if (
-      hasMatch(html, /<(main|nav|header|footer|aside)\b/i) ||
-      hasMatch(html, /role=["'](?:main|navigation|banner|contentinfo|complementary)["']/i)
-   ) {
-      addSignal(signals, 'landmark', 'dom', 'landmark structure', 'high');
-   }
-
-   if (hasMatch(html, /<h[1-6]\b/i) || hasMatch(html, /role=["']heading["']/i)) {
-      addSignal(signals, 'heading', 'dom', 'heading structure', 'high');
-   }
-
-   if (hasMatch(html, /<form\b/i) || hasMatch(html, /<(input|select|textarea)\b/i)) {
-      addSignal(signals, 'form', 'dom', 'form controls', 'high');
-   }
-
-   if (
-      hasMatch(html, /type=["']password["']/i) ||
-      hasMatch(
-         html,
-         /autocomplete=["'](?:current-password|new-password|username)["']/i,
-      ) ||
-      hasMatch(html, /\b(log in|login|sign in|password recovery|two-factor|otp)\b/i)
-   ) {
-      addSignal(signals, 'auth', 'dom', 'authentication flow', 'high');
-   }
-
-   if (hasMatch(html, /aria-live=["'][^"']+["']/i)) {
-      addSignal(signals, 'live-region', 'dom', 'aria-live region', 'high');
-   }
-
-   if (hasMatch(html, /role=["']status["']/i)) {
-      addSignal(signals, 'live-region', 'a11y-tree', 'role=status', 'high');
-   }
-
-   if (hasMatch(html, /role=["'](?:alert|log)["']/i)) {
-      addSignal(signals, 'live-region', 'a11y-tree', 'alert or log role', 'medium');
-   }
-
-   if (
-      hasMatch(html, /role=["'](?:dialog|alertdialog)["']/i) ||
-      hasMatch(html, /aria-modal=["']true["']/i)
-   ) {
-      addSignal(signals, 'dialog', 'dom', 'dialog structure', 'high');
-   }
-
-   if (
-      hasMatch(html, /\b(modal|overlay)\b/i) ||
-      hasMatch(html, /position\s*:\s*(fixed|sticky)/i)
-   ) {
-      addSignal(signals, 'overlay', 'dom', 'fixed or modal overlay', 'medium');
-   }
-
-   if (hasMatch(html, /<(video|audio)\b/i)) {
-      addSignal(signals, 'media', 'dom', 'audio or video media', 'high');
-   }
-
-   if (hasMatch(html, /\b(draggable|drag|drop)\b/i)) {
-      addSignal(signals, 'drag-and-drop', 'dom', 'drag-and-drop interaction', 'medium');
-   }
-
-   if (
-      hasMatch(html, /\b(menu|menubar)\b/i) ||
-      hasMatch(html, /role=["'](?:menu|menubar|menuitem)["']/i)
-   ) {
-      addSignal(signals, 'menu', 'dom', 'menu structure', 'medium');
-   }
-
-   if (hasMatch(html, /role=["']tablist["']/i)) {
-      addSignal(signals, 'tablist', 'dom', 'tablist structure', 'medium');
-   }
-
-   if (
-      hasMatch(html, /aria-invalid=["']true["']/i) ||
-      hasMatch(html, /\b(error|invalid|required field|validation)\b/i)
-   ) {
-      addSignal(signals, 'validation', 'dom', 'validation messaging', 'medium');
-   }
-
-   if (
-      hasMatch(html, /tabindex=["']0["']/i) ||
-      hasMatch(html, /role=["'](?:button|link|switch|slider|combobox|listbox|tree)["']/i)
-   ) {
-      addSignal(signals, 'widget', 'dom', 'focusable widget', 'medium');
-   }
-
-   return applicabilityInputSchema.parse({
-      target: {
-         kind: 'url',
-         value: url,
-      },
-      signals,
-      metadata: {},
-      userHints: [],
-   });
-}
-
-async function fetchTargetHtml(url: string): Promise<string> {
-   let parsedUrl: URL;
-
-   try {
-      parsedUrl = new URL(url);
-   } catch {
-      throw new CliUsageError('invalid-url', `URL "${url}" is invalid.`, { url });
-   }
-
-   if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-      throw new CliUsageError('invalid-url', `URL "${url}" must use http or https.`, {
-         url,
-      });
-   }
-
-   let response: Response;
-   try {
-      response = await fetch(parsedUrl, {
-         headers: {
-            'user-agent': 'a11lied/0.1.0',
-         },
-      });
-   } catch (error) {
-      throw new CliEnvironmentError(
-         'target-unavailable',
-         `Could not open URL "${url}".`,
-         {
-            url,
-            cause: error instanceof Error ? error.message : String(error),
-         },
-      );
-   }
-
-   if (!response.ok) {
-      throw new CliEnvironmentError(
-         'target-unavailable',
-         `Could not open URL "${url}".`,
-         {
-            url,
-            status: response.status,
-            statusText: response.statusText,
-         },
-      );
-   }
-
-   return response.text();
-}
-
 export function listWcagLevels(version: string): {
    version: WcagVersion;
    levels: WcagLevel[];
@@ -278,7 +91,10 @@ export function listWcagLevels(version: string): {
    };
 }
 
-export function listWcagCriteria(level: string, version: string) {
+export function listWcagCriteria(
+   level: string,
+   version: string,
+): ReturnType<typeof listCriteriaByLevel> {
    const parsedLevel = parseLevel(level);
    const parsedVersion = parseVersion(version);
 
@@ -289,7 +105,10 @@ export function listWcagCriteria(level: string, version: string) {
    }
 }
 
-export function showWcagCriterion(lookupKey: CriterionLookupKey, version: string) {
+export function showWcagCriterion(
+   lookupKey: CriterionLookupKey,
+   version: string,
+): ReturnType<typeof getCriterion> {
    const parsedVersion = parseVersion(version);
 
    try {
@@ -302,7 +121,7 @@ export function showWcagCriterion(lookupKey: CriterionLookupKey, version: string
 export function searchWcagCriteria(
    query: string,
    options: { version: string; limit: number },
-) {
+): ReturnType<typeof searchCriteria> {
    const parsedVersion = parseVersion(options.version);
    if (!Number.isInteger(options.limit) || options.limit < 1) {
       throw new CliUsageError(
@@ -325,7 +144,10 @@ export function searchWcagCriteria(
    }
 }
 
-export function showWcagCoverage(lookupKey: CriterionLookupKey, version: string) {
+export function showWcagCoverage(
+   lookupKey: CriterionLookupKey,
+   version: string,
+): ReturnType<typeof getCoverage> {
    const parsedVersion = parseVersion(version);
 
    try {
@@ -335,10 +157,24 @@ export function showWcagCoverage(lookupKey: CriterionLookupKey, version: string)
    }
 }
 
-export async function inspectApplicableUrl(url: string, version: string) {
+interface InspectApplicableTargetResult {
+   version: WcagVersion;
+   target: { kind: string; value: string };
+   signals: ReturnType<typeof deriveApplicabilityInputFromHtml>['signals'];
+   matrix: ReturnType<typeof listApplicableCriteria>;
+}
+
+export async function inspectApplicableTarget(
+   targetInput: ResolveDocumentTargetInput,
+   version: string,
+): Promise<InspectApplicableTargetResult> {
    const parsedVersion = parseVersion(version);
-   const html = await fetchTargetHtml(url);
-   const input = deriveApplicabilityInputFromHtml(url, html);
+   const resolved = await resolveDocumentTarget(targetInput);
+   const input = deriveApplicabilityInputFromHtml(resolved.resolvedUrl, resolved.html, {
+      target: resolved.target,
+      metadata: resolved.metadata,
+      userHints: resolved.userHints,
+   });
 
    try {
       return {
@@ -352,11 +188,22 @@ export async function inspectApplicableUrl(url: string, version: string) {
    }
 }
 
-export async function inspectCriterionUrl(
-   lookupKey: CriterionLookupKey,
+export async function inspectApplicableUrl(
    url: string,
    version: string,
-) {
+): Promise<InspectApplicableTargetResult> {
+   return inspectApplicableTarget({ url }, version);
+}
+
+type CriterionApplicabilityResult = ReturnType<typeof getCriterionApplicability> & {
+   signals: ReturnType<typeof deriveApplicabilityInputFromHtml>['signals'];
+};
+
+export async function inspectCriterionTarget(
+   lookupKey: CriterionLookupKey,
+   targetInput: ResolveDocumentTargetInput,
+   version: string,
+): Promise<CriterionApplicabilityResult> {
    const parsedVersion = parseVersion(version);
 
    try {
@@ -365,8 +212,12 @@ export async function inspectCriterionUrl(
       normalizeEngineError(error);
    }
 
-   const html = await fetchTargetHtml(url);
-   const input = deriveApplicabilityInputFromHtml(url, html);
+   const resolved = await resolveDocumentTarget(targetInput);
+   const input = deriveApplicabilityInputFromHtml(resolved.resolvedUrl, resolved.html, {
+      target: resolved.target,
+      metadata: resolved.metadata,
+      userHints: resolved.userHints,
+   });
 
    try {
       return {
@@ -376,4 +227,12 @@ export async function inspectCriterionUrl(
    } catch (error) {
       normalizeEngineError(error);
    }
+}
+
+export async function inspectCriterionUrl(
+   lookupKey: CriterionLookupKey,
+   url: string,
+   version: string,
+): Promise<CriterionApplicabilityResult> {
+   return inspectCriterionTarget(lookupKey, { url }, version);
 }

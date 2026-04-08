@@ -18,6 +18,7 @@
       "typecheck": "tsc -p tsconfig.json --noEmit"
    },
    "dependencies": {
+      "@a11lied/contracts": "0.1.0",
       "@a11lied/core": "0.1.0",
       "@modelcontextprotocol/sdk": "^1.29.0",
       "zod": "^4.3.6"

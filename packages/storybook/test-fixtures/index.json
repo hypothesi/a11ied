@@ -1,0 +1,33 @@
+{
+   "entries": {
+      "forms-login--default": {
+         "id": "forms-login--default",
+         "title": "Forms/Login",
+         "name": "Default",
+         "parameters": {
+            "a11lied": {
+               "metadata": {
+                  "flow": "authentication",
+                  "component": "login-form"
+               },
+               "userHints": ["Authentication flow", "Sign-in form"]
+            }
+         }
+      },
+      "forms-login-no-hint--default": {
+         "id": "forms-login-no-hint--default",
+         "title": "Forms/Login",
+         "name": "No Hint"
+      },
+      "dialogs-confirm-delete--default": {
+         "id": "dialogs-confirm-delete--default",
+         "title": "Dialogs/Confirm Delete",
+         "name": "Default"
+      },
+      "status-updates--default": {
+         "id": "status-updates--default",
+         "title": "Status Updates",
+         "name": "Default"
+      }
+   }
+}

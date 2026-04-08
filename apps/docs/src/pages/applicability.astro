@@ -1,0 +1,49 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+
+const links = [
+   { href: '/', label: 'Overview' },
+   { href: '/wcag-data-sources', label: 'WCAG data sources' },
+   { href: '/criterion-lookup', label: 'Criterion lookup' },
+   { href: '/applicability', label: 'Applicability' },
+   { href: '/driver-usage', label: 'Driver usage' },
+   { href: '/pattern-execution', label: 'Pattern execution' },
+   { href: '/verification-semantics', label: 'Verification semantics' },
+   { href: '/release-checklist', label: 'Release checklist' },
+];
+---
+
+<DocShell
+   title="Applicability"
+   summary="Not every criterion applies to every page. a11lied makes that explicit so the report can say why a row matters, why it does not, or why the runtime still needs help from the operator."
+   links={links}
+>
+   <section>
+      <h2>Inputs that matter</h2>
+      <ul>
+         <li>document structure and semantics from the loaded target</li>
+         <li>target hints from Storybook metadata or explicit CLI flags</li>
+         <li>criterion-level rules baked into the WCAG engine</li>
+      </ul>
+   </section>
+
+   <section>
+      <h2>Typical flow</h2>
+      <pre><code>node packages/cli/dist/cli.js inspect applicable --url http://127.0.0.1:6173/auth-login.html --json
+node packages/cli/dist/cli.js inspect criterion 3.3.8 --url http://127.0.0.1:6173/auth-login.html --json</code></pre>
+      <p>
+         The first command asks what matters here. The second asks why one specific criterion is in or
+         out. That sounds small, but it keeps later verification output from looking like a random dump
+         of rows.
+      </p>
+   </section>
+
+   <section class="callout">
+      <h2>Honesty rule</h2>
+      <p>
+         Applicability is not a pass or fail. It is triage. If the runtime says a criterion is
+         applicable but coverage is manual-only, that is not a defect in the engine. It is a warning to
+         stop pretending automation can do more than it can.
+      </p>
+   </section>
+</DocShell>

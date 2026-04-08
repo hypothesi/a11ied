@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <title>a11lied Storybook fixture</title>
+      <style>
+         body {
+            margin: 0;
+            font-family: sans-serif;
+         }
+
+         #storybook-root {
+            padding: 1.5rem;
+         }
+
+         [hidden] {
+            display: none;
+         }
+
+         .backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+         }
+
+         .dialog-panel {
+            position: fixed;
+            inset: 20% auto auto 20%;
+            width: 20rem;
+            padding: 1rem;
+            background: white;
+            border: 2px solid black;
+         }
+
+         .form-shell {
+            display: grid;
+            gap: 1rem;
+            max-width: 24rem;
+         }
+
+         .form-shell label {
+            display: grid;
+            gap: 0.25rem;
+         }
+      </style>
+   </head>
+   <body>
+      <div id="storybook-root"></div>
+      <script id="a11lied-story-metadata" type="application/json"></script>
+      <script>
+         const storyId = new URLSearchParams(window.location.search).get('id') ?? '';
+         const root = document.querySelector('#storybook-root');
+         const metadataNode = document.querySelector('#a11lied-story-metadata');
+
+         const stories = {
+            'forms-login--default': {
+               metadata: {
+                  metadata: {
+                     flow: 'authentication',
+                     component: 'login-form',
+                  },
+                  userHints: ['Authentication flow', 'Login form'],
+               },
+               render() {
+                  root.innerHTML = `
+                     <main>
+                        <h1>Sign in</h1>
+                        <p>Enter your email address and password to access your account.</p>
+                        <form aria-label="Login form" class="form-shell">
+                           <label>
+                              Email
+                              <input type="email" name="email" autocomplete="username" />
+                           </label>
+                           <label>
+                              Password
+                              <input type="password" name="password" autocomplete="current-password" />
+                           </label>
+                           <button type="submit">Sign in</button>
+                        </form>
+                        <p>Use your two-factor verification code if prompted after sign in.</p>
+                     </main>
+                  `;
+               },
+            },
+            'forms-login-no-hint--default': {
+               metadata: {
+                  metadata: {},
+                  userHints: [],
+               },
+               render() {
+                  root.innerHTML = `
+                     <main>
+                        <h1>Sign in</h1>
+                        <p>Enter your email address and password to access your account.</p>
+                        <form aria-label="Login form" class="form-shell">
+                           <label>
+                              Email
+                              <input type="email" name="email" autocomplete="username" />
+                           </label>
+                           <label>
+                              Password
+                              <input type="password" name="password" autocomplete="current-password" />
+                           </label>
+                           <button type="submit">Sign in</button>
+                        </form>
+                        <p>Use your two-factor verification code if prompted after sign in.</p>
+                     </main>
+                  `;
+               },
+            },
+            'dialogs-confirm-delete--default': {
+               metadata: {
+                  metadata: {
+                     component: 'confirm-delete-dialog',
+                  },
+                  userHints: ['Dialog workflow'],
+               },
+               render() {
+                  root.innerHTML = `
+                     <main>
+                        <h1>Dialog demo</h1>
+                        <button type="button" id="open-dialog">Open dialog</button>
+                     </main>
+                     <div id="dialog-root" hidden>
+                        <div class="backdrop"></div>
+                        <div
+                           role="dialog"
+                           aria-modal="true"
+                           aria-label="Confirm delete"
+                           class="dialog-panel">
+                           <h2>Confirm delete</h2>
+                           <p>This action cannot be undone.</p>
+                           <label>
+                              Type DELETE to confirm
+                              <input type="text" id="dialog-name" />
+                           </label>
+                           <button type="button" id="close-dialog">Close</button>
+                        </div>
+                     </div>
+                  `;
+
+                  const dialogRoot = document.querySelector('#dialog-root');
+                  const openButton = document.querySelector('#open-dialog');
+                  const closeButton = document.querySelector('#close-dialog');
+                  const firstField = document.querySelector('#dialog-name');
+
+                  function openDialog() {
+                     dialogRoot.hidden = false;
+                     firstField.focus();
+                  }
+
+                  function closeDialog() {
+                     dialogRoot.hidden = true;
+                     openButton.focus();
+                  }
+
+                  openButton?.addEventListener('click', openDialog);
+                  closeButton?.addEventListener('click', closeDialog);
+                  document.addEventListener('keydown', (event) => {
+                     if (event.key === 'Escape' && !dialogRoot.hidden) {
+                        event.preventDefault();
+                        closeDialog();
+                     }
+                  });
+               },
+            },
+            'status-updates--default': {
+               metadata: {
+                  metadata: {
+                     component: 'status-message-demo',
+                  },
+                  userHints: ['Status message flow'],
+               },
+               render() {
+                  root.innerHTML = `
+                     <main>
+                        <h1>Status message demo</h1>
+                        <form action="/save" method="post" id="profile-form">
+                           <label>
+                              Display name
+                              <input type="text" name="displayName" value="Ada" />
+                           </label>
+                           <button type="submit">Save</button>
+                        </form>
+                        <div role="status" aria-live="polite" id="save-status"></div>
+                     </main>
+                  `;
+
+                  const form = document.querySelector('#profile-form');
+                  const status = document.querySelector('#save-status');
+
+                  form?.addEventListener('submit', (event) => {
+                     event.preventDefault();
+                     if (status) {
+                        status.textContent = 'Profile saved successfully.';
+                     }
+                     event.submitter?.focus();
+                  });
+               },
+            },
+         };
+
+         const story = stories[storyId];
+         if (!story) {
+            document.title = `Missing story: ${storyId}`;
+            root.innerHTML = `<main><h1>Missing story</h1><p>${storyId}</p></main>`;
+         } else {
+            document.title = `Story: ${storyId}`;
+            metadataNode.textContent = JSON.stringify(story.metadata);
+            window.__A11LIED_STORY_METADATA__ = story.metadata;
+            story.render();
+         }
+      </script>
+   </body>
+</html>

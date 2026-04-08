@@ -17,9 +17,9 @@ import {
 import { resolveDriveSession } from './cli-resolvers.js';
 
 export {
-   ensureRunAxeTarget,
-   ensureUrlTarget,
    parsePlatform,
+   resolveCliTarget,
+   resolveOptionalCliTarget,
    resolveRunAxeSelection,
    stripHtml,
 } from './cli-resolvers.js';

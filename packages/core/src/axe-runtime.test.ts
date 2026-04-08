@@ -9,9 +9,13 @@ import { getCoverage } from '@a11lied/wcag-engine';
 import { runAxe } from './axe-runtime.js';
 
 const fixtureRoot = resolve(import.meta.dirname, '../../cli/test/fixtures');
+const HTTP_OK = 200;
+const HTTP_NOT_FOUND = 404;
 
 let baseUrl = '';
-let server: ReturnType<typeof createServer>;
+let server: ReturnType<typeof createServer> = undefined as unknown as ReturnType<
+   typeof createServer
+>;
 
 beforeAll(async () => {
    server = createServer((request, response) => {
@@ -20,10 +24,12 @@ beforeAll(async () => {
 
       try {
          const html = readFileSync(filePath, 'utf8');
-         response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+         response.writeHead(HTTP_OK, { 'content-type': 'text/html; charset=utf-8' });
          response.end(html);
       } catch {
-         response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
+         response.writeHead(HTTP_NOT_FOUND, {
+            'content-type': 'text/plain; charset=utf-8',
+         });
          response.end('not found');
       }
    });
@@ -86,7 +92,9 @@ describe('axe runtime', () => {
       expect(Array.isArray(contrast.passes)).toBe(true);
       expect(Array.isArray(contrast.incomplete)).toBe(true);
    });
+});
 
+describe('axe runtime explicit rules', () => {
    it('preserves incomplete results when the selected rule reports them', async () => {
       const incomplete = await runAxe(`${baseUrl}/basic-page.html`, {
          url: `${baseUrl}/basic-page.html`,

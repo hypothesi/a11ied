@@ -2,11 +2,14 @@ import { describe, expect, it } from 'vitest';
 
 import { createDoctorReport, listCliCommands, listSupportedTargets } from './index.js';
 
+const EXPECTED_TARGET_COUNT = 3;
+const VIRTUAL_TARGET_INDEX = 2;
+
 describe('core scaffolding', () => {
    it('returns the supported target matrix', () => {
       const targets = listSupportedTargets();
 
-      expect(targets).toHaveLength(3);
+      expect(targets).toHaveLength(EXPECTED_TARGET_COUNT);
       expect(targets.map((target) => target.platform)).toEqual([
          'voiceover',
          'nvda',
@@ -27,6 +30,6 @@ describe('core scaffolding', () => {
          'story',
          'mcp',
       ]);
-      expect(createDoctorReport().targets[2]?.status).toBe('ready');
+      expect(createDoctorReport().targets[VIRTUAL_TARGET_INDEX]?.status).toBe('ready');
    });
 });

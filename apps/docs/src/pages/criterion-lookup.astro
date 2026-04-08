@@ -1,0 +1,45 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+
+const links = [
+   { href: '/', label: 'Overview' },
+   { href: '/wcag-data-sources', label: 'WCAG data sources' },
+   { href: '/criterion-lookup', label: 'Criterion lookup' },
+   { href: '/applicability', label: 'Applicability' },
+   { href: '/driver-usage', label: 'Driver usage' },
+   { href: '/pattern-execution', label: 'Pattern execution' },
+   { href: '/verification-semantics', label: 'Verification semantics' },
+   { href: '/release-checklist', label: 'Release checklist' },
+];
+---
+
+<DocShell
+   title="Criterion lookup"
+   summary="Lookup is the front door. If an agent skips it and starts poking at the page blindly, the rest of the run gets sloppy fast."
+   links={links}
+>
+   <section>
+      <h2>CLI and MCP entry points</h2>
+      <pre><code>node packages/cli/dist/cli.js wcag criterion 4.1.3 --json
+node packages/cli/dist/cli.js wcag search "status message" --json
+node packages/cli/dist/cli.js wcag level AA --json</code></pre>
+   </section>
+
+   <section>
+      <h2>What lookup returns</h2>
+      <ul>
+         <li>the criterion id, title, and level</li>
+         <li>coverage state and linked ACT or axe coverage where it exists</li>
+         <li>the verification strategy the runtime will follow</li>
+         <li>enough structured text to explain the criterion without re-scraping W3C pages</li>
+      </ul>
+   </section>
+
+   <section class="callout">
+      <h2>Good habit</h2>
+      <p>
+         Resolve by id when you can. Search is for recovery, not for avoiding specificity. "Check AA"
+         is a reasonable starting point. "Poke around and see what seems accessible" is not.
+      </p>
+   </section>
+</DocShell>

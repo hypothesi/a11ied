@@ -72,7 +72,7 @@ export const cliOutputEnvelopeSchema = z.object({
    ok: z.boolean(),
    command: cliCommandDescriptorSchema,
    target: z.record(z.string(), z.unknown()).nullish(),
-   result: z.record(z.string(), z.unknown()).nullable(),
+   result: z.record(z.string(), z.unknown()).nullish(),
    warnings: z.array(cliMessageSchema),
    errors: z.array(cliMessageSchema),
    meta: cliEnvelopeMetaSchema,

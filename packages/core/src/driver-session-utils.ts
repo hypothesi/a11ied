@@ -14,9 +14,12 @@ import { CliEnvironmentError } from './wcag-runtime.js';
 
 const JSON_INDENT = 2;
 const stateFolder = '.a11lied';
+const UNIX_SOCKET_DIR = '/tmp';
+
+const { env } = process;
 
 export function useInMemoryBroker(): boolean {
-   return process.env.VITEST === 'true';
+   return env.VITEST === 'true';
 }
 
 function getStateRoot(cwd = process.cwd()): string {
@@ -38,11 +41,11 @@ export function getDriverSessionMetadataPath(
    return resolve(getSessionsDirectory(cwd), `${sessionId}.json`);
 }
 
-export function getDriverSocketPath(sessionId: string, cwd = process.cwd()): string {
+export function getDriverSocketPath(sessionId: string, _cwd = process.cwd()): string {
    if (process.platform === 'win32') {
       return `\\\\.\\pipe\\a11lied-${sessionId}`;
    }
-   return resolve(getSocketsDirectory(cwd), `${sessionId}.sock`);
+   return resolve(UNIX_SOCKET_DIR, `a11lied-${sessionId}.sock`);
 }
 
 export async function ensureStateDirectories(cwd = process.cwd()): Promise<void> {

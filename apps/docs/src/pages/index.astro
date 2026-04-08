@@ -1,111 +1,51 @@
 ---
+import DocShell from '../layouts/doc-shell.astro';
+
+const links = [
+   { href: '/', label: 'Overview' },
+   { href: '/wcag-data-sources', label: 'WCAG data sources' },
+   { href: '/criterion-lookup', label: 'Criterion lookup' },
+   { href: '/applicability', label: 'Applicability' },
+   { href: '/driver-usage', label: 'Driver usage' },
+   { href: '/pattern-execution', label: 'Pattern execution' },
+   { href: '/verification-semantics', label: 'Verification semantics' },
+   { href: '/release-checklist', label: 'Release checklist' },
+];
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>a11lied</title>
-    <style>
-      :root {
-        color-scheme: light;
-        --page-bg: #f7f4ea;
-        --ink: #1f1f1b;
-        --accent: #17606d;
-        --muted: #6c675f;
-        --card: rgba(255, 255, 255, 0.72);
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-        min-height: 100vh;
-        font-family: "IBM Plex Sans", "Avenir Next", sans-serif;
-        background:
-          radial-gradient(circle at top left, rgba(23, 96, 109, 0.12), transparent 32rem),
-          linear-gradient(180deg, #fbfaf5 0%, var(--page-bg) 100%);
-        color: var(--ink);
-      }
-
-      main {
-        width: min(72rem, calc(100% - 3rem));
-        margin: 0 auto;
-        padding: 5rem 0 6rem;
-      }
-
-      h1 {
-        font-size: clamp(2.75rem, 7vw, 5rem);
-        line-height: 0.95;
-        margin: 0 0 1rem;
-        letter-spacing: -0.06em;
-      }
-
-      p {
-        max-width: 44rem;
-        font-size: 1.1rem;
-        line-height: 1.6;
-      }
-
-      .eyebrow {
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: var(--accent);
-        font-size: 0.78rem;
-        margin-bottom: 1rem;
-      }
-
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-        gap: 1rem;
-        margin-top: 3rem;
-      }
-
-      .card {
-        padding: 1.25rem;
-        border: 1px solid rgba(31, 31, 27, 0.08);
-        border-radius: 1.25rem;
-        background: var(--card);
-        backdrop-filter: blur(12px);
-      }
-
-      .card strong {
-        display: block;
-        margin-bottom: 0.55rem;
-      }
-
-      .muted {
-        color: var(--muted);
-      }
-    </style>
-  </head>
-  <body>
-    <main>
-      <div class="eyebrow">a11lied</div>
-      <h1>Screen reader automation that starts in the CLI.</h1>
+<DocShell
+   title="Screen reader automation that starts in the CLI"
+   summary="a11lied is built for the awkward middle ground most accessibility tooling skips: not just static rules, not just raw screen reader driving, but a workflow that can explain the criterion, check whether it applies, gather evidence, and stay honest about what is still manual."
+   links={links}
+>
+   <section>
+      <h2>Start here</h2>
       <p>
-        This docs app is a first-pass landing page while the product surface is still being shaped.
-        The real detail lives in the repo: research notes under <code>research/</code>, the plan under
-        <code>plans/</code>, and the initial workspaces under <code>packages/</code>.
+         If you are testing a page or component, resolve the WCAG criterion first. Then decide whether
+         you need lookup, applicability, a low-level driver session, a named pattern, or a verification
+         report. Those are different layers on purpose.
       </p>
+   </section>
 
-      <div class="grid">
-        <section class="card">
-          <strong>CLI first</strong>
-          <span class="muted">Design the command surface before the rest of the product hardens around it.</span>
-        </section>
-        <section class="card">
-          <strong>Guidepup backed</strong>
-          <span class="muted">Use real VoiceOver and NVDA where it matters, virtual automation where speed matters.</span>
-        </section>
-        <section class="card">
-          <strong>Modular by default</strong>
-          <span class="muted">Keep the runtime, MCP server, Storybook bridge, docs, and skill publish path decoupled.</span>
-        </section>
-      </div>
-    </main>
-  </body>
-</html>
+   <section>
+      <h2>What lives where</h2>
+      <ul>
+         <li><a href="/wcag-data-sources">WCAG data sources</a> explains where standards knowledge comes from.</li>
+         <li><a href="/criterion-lookup">Criterion lookup</a> covers search, lookup, and level queries.</li>
+         <li><a href="/applicability">Applicability</a> explains why a criterion matters for a target.</li>
+         <li><a href="/driver-usage">Driver usage</a> covers the low-level accessibility driver.</li>
+         <li><a href="/pattern-execution">Pattern execution</a> covers reusable Guidepup-backed probes.</li>
+         <li><a href="/verification-semantics">Verification semantics</a> explains what the verdicts really mean.</li>
+         <li><a href="/release-checklist">Release checklist</a> keeps public release claims grounded.</li>
+      </ul>
+   </section>
+
+   <section class="callout">
+      <h2>The blunt version</h2>
+      <p>
+         a11lied is allowed to collect strong evidence. It is not allowed to fake certainty. That rule
+         shows up in the CLI, the MCP server, the Storybook path, the docs, and the agent skill because
+         it has to.
+      </p>
+   </section>
+</DocShell>

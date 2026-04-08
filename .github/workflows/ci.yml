@@ -20,10 +20,28 @@ jobs:
               cache: npm
 
          - name: Install dependencies
-           run: npm install
+           run: npm ci
+
+         - name: Data validation
+           run: npm run wcag:validate
+
+         - name: Contract tests
+           run: npx vitest run packages/contracts/src/index.test.ts packages/contracts/src/index.verification.test.ts
+
+         - name: CLI smoke tests
+           run: npx vitest run packages/cli/src/program.test.ts packages/cli/src/command-handlers-wcag.test.ts packages/cli/src/command-handlers-drive.test.ts
+
+         - name: Virtual-target verification smoke tests
+           run: npx vitest run packages/cli/src/command-handlers-verify.test.ts packages/cli/src/command-handlers-verify-level.test.ts packages/core/src/verification-runtime.test.ts
+
+         - name: Docs build
+           run: npm run build --workspace @a11lied/docs
 
          - name: Lint
            run: npm run lint
+
+         - name: Typecheck
+           run: npm run typecheck
 
          - name: Test
            run: npm run test

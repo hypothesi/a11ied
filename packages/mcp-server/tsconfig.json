@@ -3,6 +3,6 @@
    "compilerOptions": {
       "composite": true
    },
-   "references": [{ "path": "../core" }],
+   "references": [{ "path": "../contracts" }, { "path": "../core" }],
    "include": ["src/**/*.ts"]
 }

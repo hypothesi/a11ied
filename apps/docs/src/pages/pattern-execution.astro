@@ -1,0 +1,45 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+
+const links = [
+   { href: '/', label: 'Overview' },
+   { href: '/wcag-data-sources', label: 'WCAG data sources' },
+   { href: '/criterion-lookup', label: 'Criterion lookup' },
+   { href: '/applicability', label: 'Applicability' },
+   { href: '/driver-usage', label: 'Driver usage' },
+   { href: '/pattern-execution', label: 'Pattern execution' },
+   { href: '/verification-semantics', label: 'Verification semantics' },
+   { href: '/release-checklist', label: 'Release checklist' },
+];
+---
+
+<DocShell
+   title="Pattern execution"
+   summary="Patterns sit one level above raw driver actions. They package up repeatable procedures like heading walks, landmark walks, dialog checks, and status message probes so the agent does not reinvent the same brittle steps over and over."
+   links={links}
+>
+   <section>
+      <h2>Examples</h2>
+      <pre><code>node packages/cli/dist/cli.js run pattern landmark_sequence --target virtual --url http://127.0.0.1:6173/landmarks.html --json
+node packages/cli/dist/cli.js run pattern status_message_probe --target virtual --url http://127.0.0.1:6173/status-message.html --json
+node packages/cli/dist/cli.js run pattern focus_obscured_probe --target virtual --url http://127.0.0.1:6173/focus-obscured.html --json</code></pre>
+   </section>
+
+   <section>
+      <h2>Why patterns matter</h2>
+      <ul>
+         <li>They give you named procedures instead of improvised command soup.</li>
+         <li>They produce stable evidence blocks that verification can reuse.</li>
+         <li>They make regressions easier to spot because the procedure shape stays the same.</li>
+      </ul>
+   </section>
+
+   <section class="callout">
+      <h2>Evidence modes</h2>
+      <p>
+         Some patterns are strong automated evidence. Some are hybrid evidence because they still need a
+         human to judge meaning. That distinction matters. The runtime keeps it visible instead of
+         sweeping it under the rug.
+      </p>
+   </section>
+</DocShell>

@@ -1,5 +1,4 @@
 import { nvda, type ScreenReader, voiceOver } from '@guidepup/guidepup';
-import { virtual } from '@guidepup/virtual-screen-reader';
 import {
    driverReadinessSchema,
    driverStateSnapshotSchema,
@@ -9,20 +8,8 @@ import {
    type DriverStateSnapshot,
    type Platform,
 } from '@a11lied/contracts';
-import { JSDOM } from 'jsdom';
 
-const defaultVirtualHtml = `
-<!doctype html>
-<html lang="en">
-  <body>
-    <main>
-      <h1>A11lied virtual target</h1>
-      <p>No live page is attached to this driver session yet.</p>
-      <button type="button">Continue</button>
-    </main>
-  </body>
-</html>
-`;
+import { createVirtualAdapter } from './virtual-adapter.js';
 
 export const driverCapabilities: DriverCapability[] = [
    'start',
@@ -80,7 +67,7 @@ type ScreenReaderLike = Pick<
 > &
    Pick<ScreenReader, 'detect' | 'default'>;
 
-async function buildStateSnapshot(
+export async function buildStateSnapshot(
    reader: {
       lastSpokenPhrase(): Promise<string>;
       itemText(): Promise<string>;
@@ -98,8 +85,8 @@ async function buildStateSnapshot(
       ]);
 
    return driverStateSnapshotSchema.parse({
-      lastSpokenPhrase: lastSpokenPhrase || null,
-      currentItemText: currentItemText || null,
+      lastSpokenPhrase: lastSpokenPhrase || undefined,
+      currentItemText: currentItemText || undefined,
       spokenPhraseLog,
       itemTextLog,
       logCursor: spokenPhraseLog.length,
@@ -107,67 +94,113 @@ async function buildStateSnapshot(
    });
 }
 
+export function guidepupSetupCommand(platform?: Platform): string {
+   if (platform === 'voiceover') {
+      return 'npx @guidepup/setup --ci --record';
+   }
+
+   if (platform === 'nvda') {
+      return 'npx @guidepup/setup';
+   }
+
+   return 'npx @guidepup/setup';
+}
+
+function getPlatformLabel(expectedPlatform: string): string {
+   if (expectedPlatform === 'darwin') {
+      return 'macOS';
+   }
+   return 'Windows';
+}
+
+function getErrorDetail(error: unknown): string {
+   if (error instanceof Error) {
+      return error.message;
+   }
+   return String(error);
+}
+
+function getReadinessDetailForDefault(isDefault: boolean): string {
+   if (isDefault) {
+      return 'The target is the default screen reader for this host.';
+   }
+   return 'The target is installed but not the default screen reader.';
+}
+
+async function checkDetectedReadiness(
+   target: Extract<Platform, 'voiceover' | 'nvda'>,
+   reader: ScreenReaderLike,
+): Promise<DriverReadiness> {
+   const [detected, isDefault] = await Promise.all([reader.detect(), reader.default()]);
+   if (!detected) {
+      return driverReadinessSchema.parse({
+         target,
+         status: 'requires-setup',
+         summary: `${target} is not ready for Guidepup automation yet.`,
+         details: [
+            'Run the Guidepup setup command on the host machine before starting a real screen-reader session.',
+         ],
+         setupCommand: guidepupSetupCommand(target),
+         debug: {
+            detected,
+            isDefault,
+         },
+      });
+   }
+
+   return driverReadinessSchema.parse({
+      target,
+      status: 'ready',
+      summary: `${target} is ready for automation.`,
+      details: [getReadinessDetailForDefault(isDefault)],
+      setupCommand: guidepupSetupCommand(target),
+      debug: {
+         detected,
+         isDefault,
+      },
+   });
+}
+
+function getExpectedPlatform(target: Extract<Platform, 'voiceover' | 'nvda'>): string {
+   if (target === 'voiceover') {
+      return 'darwin';
+   }
+   return 'win32';
+}
+
 class RealScreenReaderAdapter implements DriverAdapter {
-   readonly capabilities = driverCapabilities;
+   readonly capabilities: DriverCapability[] = driverCapabilities;
+   readonly target: Extract<Platform, 'voiceover' | 'nvda'>;
+   private readonly reader: ScreenReaderLike;
 
    constructor(
-      readonly target: Extract<Platform, 'voiceover' | 'nvda'>,
-      private readonly reader: ScreenReaderLike,
-   ) {}
+      target: Extract<Platform, 'voiceover' | 'nvda'>,
+      reader: ScreenReaderLike,
+   ) {
+      this.target = target;
+      this.reader = reader;
+   }
 
    async checkReadiness(): Promise<DriverReadiness> {
-      const expectedPlatform = this.target === 'voiceover' ? 'darwin' : 'win32';
+      const expectedPlatform = getExpectedPlatform(this.target);
       if (process.platform !== expectedPlatform) {
+         const platformLabel = getPlatformLabel(expectedPlatform);
          return driverReadinessSchema.parse({
             target: this.target,
             status: 'unsupported',
-            summary: `${this.target} automation is only available on ${expectedPlatform === 'darwin' ? 'macOS' : 'Windows'}.`,
+            summary: `${this.target} automation is only available on ${platformLabel}.`,
             details: [`Current platform is ${process.platform}.`],
          });
       }
 
       try {
-         const [detected, isDefault] = await Promise.all([
-            this.reader.detect(),
-            this.reader.default(),
-         ]);
-         if (!detected) {
-            return driverReadinessSchema.parse({
-               target: this.target,
-               status: 'requires-setup',
-               summary: `${this.target} is not ready for Guidepup automation yet.`,
-               details: [
-                  'Run the Guidepup setup command on the host machine before starting a real screen-reader session.',
-               ],
-               setupCommand: guidepupSetupCommand(this.target),
-               debug: {
-                  detected,
-                  isDefault,
-               },
-            });
-         }
-
-         return driverReadinessSchema.parse({
-            target: this.target,
-            status: 'ready',
-            summary: `${this.target} is ready for automation.`,
-            details: [
-               isDefault
-                  ? 'The target is the default screen reader for this host.'
-                  : 'The target is installed but not the default screen reader.',
-            ],
-            setupCommand: guidepupSetupCommand(this.target),
-            debug: {
-               detected,
-               isDefault,
-            },
-         });
+         return await checkDetectedReadiness(this.target, this.reader);
       } catch (error) {
          return driverReadinessSchema.parse({
             target: this.target,
             status: 'requires-setup',
             summary: `${this.target} readiness could not be confirmed.`,
-            details: [error instanceof Error ? error.message : String(error)],
+            details: [getErrorDetail(error)],
             setupCommand: guidepupSetupCommand(this.target),
          });
       }
@@ -182,7 +215,11 @@ class RealScreenReaderAdapter implements DriverAdapter {
    }
 
    async attachDocument(): Promise<void> {
-      // Real screen readers operate against the live host environment.
+      // Real screen readers use the live host environment, no document attachment needed.
+      // Verify the adapter is configured before proceeding.
+      if (this.reader === undefined) {
+         throw new Error('Reader is not initialized');
+      }
    }
 
    async next(): Promise<void> {
@@ -226,84 +263,6 @@ class RealScreenReaderAdapter implements DriverAdapter {
    }
 }
 
-class VirtualAdapter implements DriverAdapter {
-   readonly target = 'virtual';
-   readonly capabilities = driverCapabilities;
-   private dom: JSDOM | null = null;
-
-   async checkReadiness(): Promise<DriverReadiness> {
-      return driverReadinessSchema.parse({
-         target: 'virtual',
-         status: 'ready',
-         summary: 'Virtual screen reader is ready.',
-         details: ['Uses an in-memory DOM when no live target is attached.'],
-      });
-   }
-
-   async start(): Promise<void> {
-      await this.attachDocument({
-         html: defaultVirtualHtml,
-         url: 'https://a11lied.local/virtual',
-      });
-   }
-
-   async stop(): Promise<void> {
-      await virtual.stop().catch(() => {});
-      this.dom?.window.close();
-      this.dom = null;
-   }
-
-   async attachDocument(document: { html: string; url: string }): Promise<void> {
-      await virtual.stop().catch(() => {});
-      this.dom?.window.close();
-      this.dom = new JSDOM(document.html, {
-         pretendToBeVisual: true,
-         url: document.url,
-      });
-      await virtual.start({
-         container: this.dom.window.document.body,
-         window: this.dom.window,
-      });
-   }
-
-   async next(): Promise<void> {
-      await virtual.next();
-   }
-
-   async previous(): Promise<void> {
-      await virtual.previous();
-   }
-
-   async press(keys: string): Promise<void> {
-      await virtual.press(keys);
-   }
-
-   async type(text: string): Promise<void> {
-      await virtual.type(text);
-   }
-
-   async interact(): Promise<void> {
-      await virtual.interact();
-   }
-
-   async stopInteracting(): Promise<void> {
-      await virtual.stopInteracting();
-   }
-
-   async activateCurrentItem(): Promise<void> {
-      await virtual.act();
-   }
-
-   async readState(checkpoints: DriverCheckpoint[]): Promise<DriverStateSnapshot> {
-      return buildStateSnapshot(virtual, checkpoints);
-   }
-
-   async clearLogs(checkpoints: DriverCheckpoint[]): Promise<DriverStateSnapshot> {
-      await Promise.all([virtual.clearSpokenPhraseLog(), virtual.clearItemTextLog()]);
-      return buildStateSnapshot(virtual, checkpoints);
-   }
-}
-
 const targetNotes: Record<Platform, string> = {
    nvda: 'Automate the real NVDA screen reader on Windows after `@guidepup/setup` is complete.',
    virtual: 'Use the virtual screen reader in fast local and CI feedback loops.',
@@ -315,21 +274,9 @@ export function describePlatform(platform: Platform): string {
    return targetNotes[platform];
 }
 
-export function guidepupSetupCommand(platform?: Platform): string {
-   if (platform === 'voiceover') {
-      return 'npx @guidepup/setup --ci --record';
-   }
-
-   if (platform === 'nvda') {
-      return 'npx @guidepup/setup';
-   }
-
-   return 'npx @guidepup/setup';
-}
-
 export function createDriverAdapter(target: Platform): DriverAdapter {
    if (target === 'virtual') {
-      return new VirtualAdapter();
+      return createVirtualAdapter();
    }
 
    if (target === 'voiceover') {

@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import { buildCli } from './program.js';
 
-function findCommand(commandName: string) {
+function findCommand(
+   commandName: string,
+): ReturnType<typeof buildCli>['commands'][number] {
    const command = buildCli().commands.find((entry) => entry.name() === commandName);
 
    if (!command) {
@@ -12,7 +14,7 @@ function findCommand(commandName: string) {
    return command;
 }
 
-describe('cli grammar snapshots', () => {
+describe('cli top-level grammar', () => {
    it('keeps the top-level command split stable', () => {
       expect(buildCli().helpInformation()).toMatchInlineSnapshot(`
       "Usage: a11lied [options] [command]
@@ -61,7 +63,9 @@ describe('cli grammar snapshots', () => {
       "
     `);
    });
+});
 
+describe('cli inspect grammar', () => {
    it('keeps inspect applicable options stable', () => {
       const command = findCommand('inspect').commands.find(
          (entry) => entry.name() === 'applicable',
@@ -70,20 +74,23 @@ describe('cli grammar snapshots', () => {
       expect(command?.helpInformation()).toMatchInlineSnapshot(`
       "Usage: a11lied inspect applicable [options]
       
-      List criteria that look relevant for a URL target.
+      List criteria that look relevant for a target.
       
       Options:
-        --url <url>           Inspect a live URL target in this milestone slice.
-        --story-id <storyId>  Reserved for Storybook targets in a later milestone.
-        --version <version>   Use a specific WCAG version. Defaults to 2.2. (default:
-                              "2.2")
-        --json                Print JSON instead of human-readable text.
-        --verbose             Print more detail in text output.
-        -h, --help            display help for command
+        --url <url>            Inspect a live URL target.
+        --storybook-url <url>  Resolve a target from a local Storybook base URL.
+        --story-id <storyId>   Resolve one Storybook story by id.
+        --version <version>    Use a specific WCAG version. Defaults to 2.2. (default:
+                               "2.2")
+        --json                 Print JSON instead of human-readable text.
+        --verbose              Print more detail in text output.
+        -h, --help             display help for command
       "
     `);
    });
+});
 
+describe('cli drive and run grammar', () => {
    it('keeps drive and run subcommand families stable', () => {
       expect(findCommand('drive').helpInformation()).toMatchInlineSnapshot(`
       "Usage: a11lied drive [options] [command]
@@ -124,13 +131,61 @@ describe('cli grammar snapshots', () => {
         -h, --help                     display help for command
       
       Commands:
-        axe [options]                  Run axe-core against a URL target.
+        axe [options]                  Run axe-core against a target.
         pattern [options] <patternId>  Run a named built-in interaction pattern.
         help [command]                 display help for command
       "
     `);
    });
+});
 
+function expectVerifyCriterionOptions(
+   verifyCommand: ReturnType<typeof findCommand>,
+): void {
+   const command = verifyCommand.commands.find((entry) => entry.name() === 'criterion');
+
+   expect(command?.helpInformation()).toMatchInlineSnapshot(`
+   "Usage: a11lied verify criterion [options] <criterion>
+
+   Verify one WCAG criterion for a target.
+
+   Options:
+     --url <url>            Run the verification against one live URL target.
+     --storybook-url <url>  Resolve a target from a local Storybook base URL.
+     --story-id <storyId>   Resolve one Storybook story by id.
+     --version <version>    Use a specific WCAG version. Defaults to 2.2. (default:
+                            "2.2")
+     --target <platform>    Choose one target: virtual, voiceover, or nvda.
+     --json                 Print JSON instead of human-readable text.
+     --verbose              Print more detail in text output.
+     -h, --help             display help for command
+   "
+ `);
+}
+
+function expectVerifyLevelOptions(verifyCommand: ReturnType<typeof findCommand>): void {
+   const command = verifyCommand.commands.find((entry) => entry.name() === 'level');
+
+   expect(command?.helpInformation()).toMatchInlineSnapshot(`
+   "Usage: a11lied verify level [options] <level>
+
+   Verify a WCAG conformance level against a target.
+
+   Options:
+     --url <url>            Run the verification against one live URL target.
+     --storybook-url <url>  Resolve a target from a local Storybook base URL.
+     --story-id <storyId>   Resolve one Storybook story by id.
+     --version <version>    Use a specific WCAG version. Defaults to 2.2. (default:
+                            "2.2")
+     --target <platform>    Choose one target: virtual, voiceover, or nvda.
+     --json                 Print JSON instead of human-readable text.
+     --verbose              Print more detail in text output.
+     -h, --help             display help for command
+   "
+ `);
+}
+
+describe('cli verify grammar', () => {
    it('keeps the verify subcommand grammar stable', () => {
       expect(findCommand('verify').helpInformation()).toMatchInlineSnapshot(`
       "Usage: a11lied verify [options] [command]
@@ -141,69 +196,35 @@ describe('cli grammar snapshots', () => {
         -h, --help                       display help for command
       
       Commands:
-        criterion [options] <criterion>  Verify one WCAG criterion for a live URL
-                                         target.
+        criterion [options] <criterion>  Verify one WCAG criterion for a target.
         level [options] <level>          Verify a WCAG conformance level against a
-                                         live URL target.
+                                         target.
         help [command]                   display help for command
       "
     `);
 
-      const command = findCommand('verify').commands.find(
-         (entry) => entry.name() === 'criterion',
-      );
-
-      expect(command?.helpInformation()).toMatchInlineSnapshot(`
-      "Usage: a11lied verify criterion [options] <criterion>
-
-      Verify one WCAG criterion for a live URL target.
-
-      Options:
-        --url <url>          Run the verification against one live URL target.
-        --version <version>  Use a specific WCAG version. Defaults to 2.2. (default:
-                             "2.2")
-        --target <platform>  Choose one target: virtual, voiceover, or nvda.
-        --json               Print JSON instead of human-readable text.
-        --verbose            Print more detail in text output.
-        -h, --help           display help for command
-      "
-    `);
-
-      const levelCommand = findCommand('verify').commands.find(
-         (entry) => entry.name() === 'level',
-      );
-
-      expect(levelCommand?.helpInformation()).toMatchInlineSnapshot(`
-      "Usage: a11lied verify level [options] <level>
-
-      Verify a WCAG conformance level against a live URL target.
-
-      Options:
-        --url <url>          Run the verification against one live URL target.
-        --version <version>  Use a specific WCAG version. Defaults to 2.2. (default:
-                             "2.2")
-        --target <platform>  Choose one target: virtual, voiceover, or nvda.
-        --json               Print JSON instead of human-readable text.
-        --verbose            Print more detail in text output.
-        -h, --help           display help for command
-      "
-    `);
+      const verifyCommand = findCommand('verify');
+      expectVerifyCriterionOptions(verifyCommand);
+      expectVerifyLevelOptions(verifyCommand);
    });
+});
 
+describe('cli run options grammar', () => {
    it('keeps run axe options stable', () => {
       const command = findCommand('run').commands.find((entry) => entry.name() === 'axe');
 
       expect(command?.helpInformation()).toMatchInlineSnapshot(`
       "Usage: a11lied run axe [options]
 
-      Run axe-core against a URL target.
+      Run axe-core against a target.
 
       Options:
         --url <url>              Run against one live URL target.
-        --story-id <storyId>     Reserved for Storybook targets in a later milestone.
         --level <level>          Limit the run to one WCAG level.
         --criterion <criterion>  Limit the run to one WCAG criterion id or slug.
         --rule <ruleId...>       Limit the run to one or more explicit axe rule ids.
+        --storybook-url <url>    Resolve a target from a local Storybook base URL.
+        --story-id <storyId>     Resolve one Storybook story by id.
         --version <version>      Use a specific WCAG version. Defaults to 2.2.
                                  (default: "2.2")
         --json                   Print JSON instead of human-readable text.
@@ -224,12 +245,14 @@ describe('cli grammar snapshots', () => {
       Run a named built-in interaction pattern.
 
       Options:
-        --url <url>          Run the pattern against one live URL target.
-        --session <id>       Reuse an existing driver session.
-        --target <platform>  Choose one target: virtual, voiceover, or nvda.
-        --json               Print JSON instead of human-readable text.
-        --verbose            Print more detail in text output.
-        -h, --help           display help for command
+        --url <url>            Run the pattern against one live URL target.
+        --storybook-url <url>  Resolve a target from a local Storybook base URL.
+        --story-id <storyId>   Resolve one Storybook story by id.
+        --session <id>         Reuse an existing driver session.
+        --target <platform>    Choose one target: virtual, voiceover, or nvda.
+        --json                 Print JSON instead of human-readable text.
+        --verbose              Print more detail in text output.
+        -h, --help             display help for command
       "
     `);
    });

@@ -3,7 +3,9 @@ import type { CliCommand, DoctorReport, Target } from '@a11lied/contracts';
 export {
    CliEnvironmentError,
    CliUsageError,
+   inspectApplicableTarget,
    inspectApplicableUrl,
+   inspectCriterionTarget,
    inspectCriterionUrl,
    listWcagCriteria,
    listWcagLevels,
@@ -15,6 +17,7 @@ export {
    attachDocumentToDriverSession,
    cleanupStaleDriverSessions,
    getDriverSessionMetadataPath,
+   getDriverSocketPath,
    getDriverSessionStatus,
    runDriverSessionAction,
    runEphemeralDriverAction,
@@ -25,6 +28,10 @@ export {
 export { runAxe } from './axe-runtime.js';
 export { runInteractionPattern } from './pattern-runtime.js';
 export { verifyCriterion, verifyLevel } from './verification-runtime.js';
+export {
+   resolveDocumentTarget,
+   type ResolveDocumentTargetInput,
+} from './target-runtime.js';
 
 const supportedTargets: Target[] = [
    {
@@ -95,11 +102,13 @@ const cliCommands: CliCommand[] = [
    },
 ];
 
+const { env: processEnv } = process;
+
 export function createDoctorReport(): DoctorReport {
    return {
       packageVersion: '0.1.0',
       nodeVersion: process.version,
-      npmVersion: process.env.npm_config_user_agent ?? 'unknown',
+      npmVersion: processEnv.npm_config_user_agent ?? 'unknown',
       targets: supportedTargets,
    };
 }

@@ -1,0 +1,47 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+
+const links = [
+   { href: '/', label: 'Overview' },
+   { href: '/wcag-data-sources', label: 'WCAG data sources' },
+   { href: '/criterion-lookup', label: 'Criterion lookup' },
+   { href: '/applicability', label: 'Applicability' },
+   { href: '/driver-usage', label: 'Driver usage' },
+   { href: '/pattern-execution', label: 'Pattern execution' },
+   { href: '/verification-semantics', label: 'Verification semantics' },
+   { href: '/release-checklist', label: 'Release checklist' },
+];
+---
+
+<DocShell
+   title="WCAG data sources"
+   summary="a11lied keeps its standards knowledge local, versioned, and boring on purpose. That is a feature. If the agent cannot explain where a criterion, technique, or strategy came from, it should not be making claims with confidence."
+   links={links}
+>
+   <section>
+      <h2>What ships in the repo</h2>
+      <p>
+         The source of truth is <code>packages/wcag-data</code>. The sync step pulls structured WCAG,
+         ACT mapping, Quickref technique, and axe rule data, then turns it into generated artifacts
+         the rest of the product can read without scraping prose pages on demand.
+      </p>
+   </section>
+
+   <section>
+      <h2>What the agent should do first</h2>
+      <ol>
+         <li>Resolve the requested WCAG version. The default is 2.2 unless the task says otherwise.</li>
+         <li>Resolve the criterion or target level before opening a browser.</li>
+         <li>Check coverage and verification strategy before promising automation.</li>
+      </ol>
+   </section>
+
+   <section class="callout">
+      <h2>What this does not mean</h2>
+      <p>
+         Having local WCAG data does not mean the tool can prove every criterion automatically. Some
+         rows map cleanly to axe. Some need Guidepup patterns. Some still need a human to look at the
+         thing and make a judgment call.
+      </p>
+   </section>
+</DocShell>

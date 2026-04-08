@@ -52,17 +52,17 @@ function assertAutomatedCriterion(criterion: CriterionResult): void {
 function assertManualCriterion(criterion: CriterionResult): void {
    expect(criterion.verdict).toBe('needs-manual-review');
    expect(criterion.evidenceMode).toBe('manual');
-   expect(
-      criterion.uncoveredWork.some((entry) => entry.kind === 'manual-only'),
-   ).toBe(true);
+   expect(criterion.uncoveredWork.some((entry) => entry.kind === 'manual-only')).toBe(
+      true,
+   );
 }
 
 function assertUncoveredCriterion(criterion: CriterionResult): void {
    expect(criterion.verdict).toBe('not-covered');
    expect(criterion.evidenceMode).toBe('unknown');
-   expect(
-      criterion.uncoveredWork.some((entry) => entry.kind === 'not-covered'),
-   ).toBe(true);
+   expect(criterion.uncoveredWork.some((entry) => entry.kind === 'not-covered')).toBe(
+      true,
+   );
 }
 
 function assertMixedReportStructure(

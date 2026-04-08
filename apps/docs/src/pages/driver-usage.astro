@@ -1,0 +1,45 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+
+const links = [
+   { href: '/', label: 'Overview' },
+   { href: '/wcag-data-sources', label: 'WCAG data sources' },
+   { href: '/criterion-lookup', label: 'Criterion lookup' },
+   { href: '/applicability', label: 'Applicability' },
+   { href: '/driver-usage', label: 'Driver usage' },
+   { href: '/pattern-execution', label: 'Pattern execution' },
+   { href: '/verification-semantics', label: 'Verification semantics' },
+   { href: '/release-checklist', label: 'Release checklist' },
+];
+---
+
+<DocShell
+   title="Driver usage"
+   summary="The low-level driver layer exists so an agent can operate VoiceOver, NVDA, or the virtual reader the way a person would. It is intentionally plain: start a session, move, read, type, checkpoint, stop."
+   links={links}
+>
+   <section>
+      <h2>What the driver is for</h2>
+      <p>
+         Use <code>drive</code> when you need raw control. That means next item, previous item, keyboard
+         chords, interaction mode, reading spoken output, and grabbing logs. If a named pattern already
+         exists, use that instead. Patterns are easier to repeat and much easier to review later.
+      </p>
+   </section>
+
+   <section>
+      <h2>Basic session</h2>
+      <pre><code>node packages/cli/dist/cli.js drive start --target virtual --url http://127.0.0.1:6173/landmarks.html --json
+node packages/cli/dist/cli.js drive next --session drv_example --json
+node packages/cli/dist/cli.js drive read --session drv_example --json
+node packages/cli/dist/cli.js drive stop --session drv_example --json</code></pre>
+   </section>
+
+   <section class="callout">
+      <h2>Important limit</h2>
+      <p>
+         A transcript is evidence, not a verdict. "The virtual reader said X" is useful. "Therefore the
+         page complies with WCAG" is a different statement and often a much bigger one.
+      </p>
+   </section>
+</DocShell>

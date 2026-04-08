@@ -8,6 +8,7 @@ import {
    type CliEnvironmentError,
    cleanupStaleDriverSessions,
    getDriverSessionMetadataPath,
+   getDriverSocketPath,
    getDriverSessionStatus,
    runDriverSessionAction,
    runEphemeralDriverAction,
@@ -16,6 +17,8 @@ import {
 } from './index.js';
 
 const TIMEOUT_MS = 15_000;
+const UNIX_SOCKET_PATH_MAX = 104;
+const WINDOWS_PIPE_PREFIX = String.raw`\\.\pipe\a11lied-`;
 const tempRoots: string[] = [];
 
 async function createTempRoot(): Promise<string> {
@@ -87,6 +90,22 @@ describe('driver runtime sessions', () => {
 });
 
 describe('driver runtime actions', () => {
+   it('keeps unix socket paths short enough for long temp directories', async () => {
+      const cwd = await createTempRoot();
+      const socketPath = getDriverSocketPath(
+         'drv_12345678-1234-1234-1234-123456789abc',
+         resolve(cwd, 'a', 'very', 'long', 'nested', 'directory', 'structure'),
+      );
+
+      if (process.platform === 'win32') {
+         expect(socketPath).toContain(WINDOWS_PIPE_PREFIX);
+         return;
+      }
+
+      expect(socketPath.startsWith('/tmp/a11lied-')).toBe(true);
+      expect(socketPath.length).toBeLessThan(UNIX_SOCKET_PATH_MAX);
+   });
+
    it(
       'cleans up stale session metadata for dead brokers',
       async () => {

@@ -90,8 +90,14 @@ export function createSessionPayload(): TestPayload {
       target: 'virtual',
       startedAt: '2026-04-07T16:00:00.000Z',
       capabilities: [
-         'start', 'stop', 'status', 'next',
-         'previous', 'read', 'logs', 'clear-logs',
+         'start',
+         'stop',
+         'status',
+         'next',
+         'previous',
+         'read',
+         'logs',
+         'clear-logs',
       ],
       logCursor: 2,
       brokerPid: 4242,
@@ -107,9 +113,7 @@ export function createStatePayload(): TestPayload {
       spokenPhraseLog: ['document', 'heading, Sample page, level 1'],
       itemTextLog: ['Sample page'],
       logCursor: 2,
-      checkpoints: [
-         { label: 'initial', createdAt: '2026-04-07T16:00:01.000Z' },
-      ],
+      checkpoints: [{ label: 'initial', createdAt: '2026-04-07T16:00:01.000Z' }],
    };
 }
 

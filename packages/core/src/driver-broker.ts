@@ -264,9 +264,8 @@ async function main(): Promise<void> {
    setupSignalHandlers(server, stopOptions);
 }
 
-try {
-   await main();
-} catch (error: unknown) {
+// oxlint-disable-next-line unicorn/prefer-top-level-await
+main().catch((error: unknown) => {
    process.stderr.write(`${String(error)}\n`);
    process.exitCode = 1;
-}
+});
