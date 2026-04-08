@@ -34,7 +34,7 @@ import {
    createSearchResponsePayload,
    createApplicabilityInputPayload,
    createApplicabilityMatrixPayload,
-} from './index.test-helpers.js';
+} from './testing/helpers.js';
 
 describe('contracts artifact schemas', () => {
    it('round-trips committed WCAG, coverage, and strategy artifacts for both supported versions', async () => {

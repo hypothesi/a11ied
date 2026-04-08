@@ -9,20 +9,16 @@ import type {
    GeneratedProvenanceManifest,
    NormalizedArtifactsResult,
    WcagDataDirectories,
-} from './types.js';
-import { toJsonString } from './utils.js';
-import { ensureWcagDataDirectories, wcagVersions } from './source-definitions.js';
+} from '../shared/types.js';
+import { toJsonString } from '../shared/utils.js';
+import { ensureWcagDataDirectories, wcagVersions } from '../sources/definitions.js';
 import {
    loadQuickrefTags,
    loadRawJson,
    loadRawProvenanceEntries,
    syncRawSources,
-} from './sync.js';
-import {
-   latestSyncedAt,
-   processVersion,
-   writeGeneratedArtifact,
-} from './generate-version.js';
+} from '../sources/sync.js';
+import { latestSyncedAt, processVersion, writeGeneratedArtifact } from './version.js';
 
 async function loadSharedData(directories: WcagDataDirectories): Promise<{
    quickrefTags: Awaited<ReturnType<typeof loadQuickrefTags>>;

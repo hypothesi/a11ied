@@ -8,13 +8,13 @@ import {
    validateGeneratedArtifacts,
    validateRawSyncState,
    type WcagDataDirectories,
-} from './index.js';
+} from '../index.js';
 
 import {
    createActMappingPayload,
    createQuickrefTagsYaml,
    createWcagPayload,
-} from './index.test-fixtures.js';
+} from './fixtures.js';
 
 export const HTTP_OK = 200;
 export const HTTP_NOT_FOUND = 404;
@@ -26,8 +26,11 @@ export const ACCESSIBLE_AUTH_INDEX = 2;
 export const LEVEL_A = 'A';
 export const SYNC_TIMESTAMP = '2026-04-06T19:00:00.000Z';
 
-export const workspaceRoot = resolve(import.meta.dirname, '../../..');
-export const committedGeneratedRoot = resolve(import.meta.dirname, '../data/generated');
+export const workspaceRoot = resolve(import.meta.dirname, '../../../..');
+export const committedGeneratedRoot = resolve(
+   import.meta.dirname,
+   '../../data/generated',
+);
 
 export const EXPECTED_CRITERIA_COUNTS_BY_VERSION = {
    '2.2': EXPECTED_22_CRITERIA_COUNT,

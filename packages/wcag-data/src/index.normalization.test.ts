@@ -4,9 +4,9 @@ import { describe, expect, it } from 'vitest';
 
 import { normalizeCriteriaArtifacts } from './index.js';
 
-import { createWcagPayload } from './index.test-fixtures.js';
+import { createWcagPayload } from './testing/fixtures.js';
 
-import { createTestQuickrefTags, LEVEL_A } from './index.test-helpers.js';
+import { createTestQuickrefTags, LEVEL_A } from './testing/helpers.js';
 
 function assertCriteriaKeysAreCorrect(
    artifacts: ReturnType<typeof normalizeCriteriaArtifacts>,

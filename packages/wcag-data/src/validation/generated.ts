@@ -16,9 +16,9 @@ import type {
    GeneratedArtifactWriteResult,
    GeneratedProvenanceManifest,
    WcagDataDirectories,
-} from './types.js';
-import { sha256 } from './utils.js';
-import { getWcagDataDirectories, wcagVersions } from './source-definitions.js';
+} from '../shared/types.js';
+import { sha256 } from '../shared/utils.js';
+import { getWcagDataDirectories, wcagVersions } from '../sources/definitions.js';
 
 interface SchemaEntry {
    schema: { parse: (data: unknown) => unknown };

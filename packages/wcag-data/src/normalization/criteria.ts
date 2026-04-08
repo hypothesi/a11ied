@@ -14,8 +14,8 @@ import {
    type WcagVersion,
 } from '@a11lied/contracts';
 
-import type { QuickrefTagsPayload, WcagPayload } from './types.js';
-import { normalizeSingleCriterion } from './normalize-techniques.js';
+import type { QuickrefTagsPayload, WcagPayload } from '../shared/types.js';
+import { normalizeSingleCriterion } from './techniques.js';
 
 type CriterionEntry = ReturnType<typeof normalizeSingleCriterion>[1];
 type CriteriaMap = Record<string, CriterionEntry>;

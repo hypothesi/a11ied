@@ -1,12 +1,36 @@
 import { mkdir } from 'node:fs/promises';
+import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
-import { isRecord } from './utils.js';
-import type { RawSourceDefinition, WcagDataDirectories } from './types.js';
+import { isRecord } from '../shared/utils.js';
+import type { RawSourceDefinition, WcagDataDirectories } from '../shared/types.js';
 
-export const packageRoot = resolve(fileURLToPath(new URL('../', import.meta.url)));
+function readPackageName(directory: string): string | undefined {
+   const packageJsonPath = join(directory, 'package.json');
+   if (!existsSync(packageJsonPath)) {
+      return undefined;
+   }
+   return (JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { name?: string }).name;
+}
+
+function parentDirectory(directory: string, packageName: string): string {
+   const parent = resolve(directory, '..');
+   if (parent === directory) {
+      throw new Error(`Unable to locate package root for ${packageName}`);
+   }
+   return parent;
+}
+
+function findPackageRoot(packageName: string): string {
+   let current = import.meta.dirname;
+   while (readPackageName(current) !== packageName) {
+      current = parentDirectory(current, packageName);
+   }
+   return current;
+}
+
+export const packageRoot = findPackageRoot('@a11lied/wcag-data');
 const esmRequire = createRequire(import.meta.url);
 export const axeCorePackage = esmRequire('axe-core/package.json') as { version: string };
 export const wcagVersions = ['2.2', '2.1'] as const;

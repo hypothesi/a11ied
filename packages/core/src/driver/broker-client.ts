@@ -1,8 +1,8 @@
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import net from 'node:net';
+import { fileURLToPath } from 'node:url';
 
 import type { AccessibilityDriverSession, DriverActionResult } from '@a11lied/contracts';
 
@@ -12,7 +12,6 @@ import { CliEnvironmentError } from '../errors/cli-errors.js';
 const SOCKET_TIMEOUT_MS = 1000;
 const BROKER_POLL_DELAY_MS = 100;
 const BROKER_READY_TIMEOUT_MS = 5000;
-const require = createRequire(import.meta.url);
 
 function delay(ms: number): Promise<void> {
    return new Promise((resolvePromise) => {
@@ -115,22 +114,28 @@ function isSourceRuntime(): boolean {
    return getCurrentModulePath().endsWith('.ts');
 }
 
-function resolveCorePackageRoot(): string | undefined {
+function resolveInstalledPackagePath(specifier: string): string | undefined {
    try {
-      const packageEntryPath = require.resolve('@a11lied/core');
-      const packageDir = dirname(packageEntryPath);
-      if (packageDir.endsWith('/dist')) {
-         return dirname(packageDir);
-      }
-      return packageDir;
+      return fileURLToPath(import.meta.resolve(specifier));
    } catch {
-      try {
-         const packageJsonPath = require.resolve('@a11lied/core/package.json');
-         return dirname(packageJsonPath);
-      } catch {
-         return undefined;
-      }
+      return undefined;
    }
+}
+
+function resolveCorePackageRoot(): string | undefined {
+   const packageJsonPath = resolveInstalledPackagePath('@a11lied/core/package.json');
+   if (packageJsonPath) {
+      return dirname(packageJsonPath);
+   }
+   const packageEntryPath = resolveInstalledPackagePath('@a11lied/core');
+   if (!packageEntryPath) {
+      return undefined;
+   }
+   const packageDir = dirname(packageEntryPath);
+   if (packageDir.endsWith('/dist')) {
+      return dirname(packageDir);
+   }
+   return packageDir;
 }
 
 function getBrokerEntryFromPackageRoot(packageRoot: string): string | undefined {

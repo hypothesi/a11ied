@@ -5,13 +5,13 @@ import type {
    RawArtifactWriteResult,
    RawSourceProvenance,
    WcagDataDirectories,
-} from './types.js';
-import { parseSourcePayload, provenanceFileName } from './utils.js';
+} from '../shared/types.js';
+import { parseSourcePayload, provenanceFileName } from '../shared/utils.js';
 import {
    getWcagDataDirectories,
    rawSourceDefinitions,
    validateAxeRulesPayload,
-} from './source-definitions.js';
+} from '../sources/definitions.js';
 
 async function validateSingleDefinition(
    definition: (typeof rawSourceDefinitions)[number],

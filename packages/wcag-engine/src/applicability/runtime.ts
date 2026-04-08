@@ -12,8 +12,7 @@ import {
    type NormalizedCriterion,
 } from '@a11lied/contracts';
 
-import { categoryReasonLabels, strongApplicabilityCategories } from './engine-data.js';
-import { getArtifacts, parseVersion, resolveCriterion } from './engine-artifacts.js';
+import { getArtifacts, parseVersion, resolveCriterion } from '../artifacts/runtime.js';
 import {
    buildNotDetected,
    dedupe,
@@ -21,7 +20,8 @@ import {
    getInteractiveUnknownAssessment,
    getMatchedCategories,
    getMatchedTags,
-} from './engine-utils.js';
+} from '../shared/utils.js';
+import { categoryReasonLabels, strongApplicabilityCategories } from '../shared/data.js';
 
 const MAX_SIGNAL_VALUES = 4;
 

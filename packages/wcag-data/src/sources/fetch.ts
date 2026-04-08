@@ -4,8 +4,12 @@ import {
    type PendingArtifact,
    type RawSourceDefinition,
    type RawSourceProvenance,
-} from './types.js';
-import { parseSourcePayload, sha256, withOptionalStringProperties } from './utils.js';
+} from '../shared/types.js';
+import {
+   parseSourcePayload,
+   sha256,
+   withOptionalStringProperties,
+} from '../shared/utils.js';
 
 const HTTP_NOT_FOUND = 404;
 

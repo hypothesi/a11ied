@@ -9,7 +9,7 @@ import {
    applicabilitySignalTagHints,
    directCriterionCategoryHints,
    interactiveFallbackTags,
-} from './engine-data.js';
+} from './data.js';
 
 const FORMAT_LIST_PAIR_LENGTH = 2;
 

@@ -5,14 +5,14 @@ import {
    type WcagVersion,
 } from '@a11lied/contracts';
 
-import { isRecord } from './utils.js';
+import { isRecord } from '../shared/utils.js';
 import type {
    CriterionPayload,
    QuickrefTagsPayload,
    TechniqueGroupPayload,
    TechniqueKind,
    TechniquePayload,
-} from './types.js';
+} from '../shared/types.js';
 
 interface TechniqueKeyInput {
    criterionId: string;

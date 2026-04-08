@@ -14,9 +14,9 @@ import {
    quickrefTagLookupResultSchema,
    strategyArtifactSchema,
    verificationStrategyLookupResultSchema,
-} from './index.js';
+} from '../index.js';
 
-const generatedRoot = resolve(import.meta.dirname, '../../wcag-data/data/generated');
+const generatedRoot = resolve(import.meta.dirname, '../../../wcag-data/data/generated');
 
 export async function loadGeneratedJson<TData>(fileName: string): Promise<TData> {
    return JSON.parse(await readFile(resolve(generatedRoot, fileName), 'utf8')) as TData;

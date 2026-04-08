@@ -7,7 +7,7 @@ import {
    platformSchema,
    wcagLevelSchema,
    wcagVersionSchema,
-} from './core-schemas.js';
+} from './core.js';
 import {
    axeRunResultSchema,
    criterionCoverageSchema,
@@ -16,8 +16,8 @@ import {
    normalizedCriterionSchema,
    preferredEvidenceModeSchema,
    verificationStrategySchema,
-} from './wcag-schemas.js';
-import { criterionApplicabilitySchema, targetReferenceSchema } from './query-schemas.js';
+} from './wcag.js';
+import { criterionApplicabilitySchema, targetReferenceSchema } from './query.js';
 
 export const verificationVerdictSchema = z.enum([
    'pass',

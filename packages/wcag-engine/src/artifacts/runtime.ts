@@ -22,18 +22,41 @@ import {
    type WcagVersion,
 } from '@a11lied/contracts';
 
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { existsSync, readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 
 import {
    artifactsCache,
    supportedVersions,
    type EngineArtifacts,
-} from './engine-data.js';
-import { WcagEngineNotFoundError, WcagEngineValidationError } from './engine-errors.js';
+} from '../shared/data.js';
+import { WcagEngineNotFoundError, WcagEngineValidationError } from '../errors/index.js';
 
-const packageRoot = resolve(fileURLToPath(new URL('../', import.meta.url)));
+function readPackageName(directory: string): string | undefined {
+   const packageJsonPath = join(directory, 'package.json');
+   if (!existsSync(packageJsonPath)) {
+      return undefined;
+   }
+   return (JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { name?: string }).name;
+}
+
+function parentDirectory(directory: string, packageName: string): string {
+   const parent = resolve(directory, '..');
+   if (parent === directory) {
+      throw new Error(`Unable to locate package root for ${packageName}`);
+   }
+   return parent;
+}
+
+function findPackageRoot(packageName: string): string {
+   let current = import.meta.dirname;
+   while (readPackageName(current) !== packageName) {
+      current = parentDirectory(current, packageName);
+   }
+   return current;
+}
+
+const packageRoot = findPackageRoot('@a11lied/wcag-engine');
 const generatedRoot = resolve(packageRoot, '../wcag-data/data/generated');
 
 function loadArtifact<TResult>(

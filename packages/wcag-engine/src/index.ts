@@ -1,9 +1,9 @@
-export { WcagEngineNotFoundError, WcagEngineValidationError } from './engine-errors.js';
+export { WcagEngineNotFoundError, WcagEngineValidationError } from './errors/index.js';
 
 export {
    supportedApplicabilityStates,
    supportedApplicabilitySignalCategories,
-} from './engine-data.js';
+} from './shared/data.js';
 
 export {
    getCriterion,
@@ -12,11 +12,11 @@ export {
    getQuickrefTags,
    getVerificationStrategy,
    resetWcagEngineCache,
-} from './engine-artifacts.js';
+} from './artifacts/runtime.js';
 
-export { searchCriteria } from './engine-search.js';
+export { searchCriteria } from './search/runtime.js';
 
 export {
    getCriterionApplicability,
    listApplicableCriteria,
-} from './engine-applicability.js';
+} from './applicability/runtime.js';

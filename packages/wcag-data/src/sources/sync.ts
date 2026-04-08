@@ -13,13 +13,13 @@ import type {
    RawSourceProvenance,
    SyncRawSourcesResult,
    WcagDataDirectories,
-} from './types.js';
+} from '../shared/types.js';
 import {
    provenanceFileName,
    sha256,
    toJsonString,
    withOptionalStringProperties,
-} from './utils.js';
+} from '../shared/utils.js';
 import {
    axeCorePackage,
    ensureDataDirectories,
@@ -27,8 +27,8 @@ import {
    listApprovedUpstreamSourceUrls,
    rawSourceDefinitions,
    validateAxeRulesPayload,
-} from './source-definitions.js';
-import { fetchRemoteSource } from './sync-fetch.js';
+} from './definitions.js';
+import { fetchRemoteSource } from './fetch.js';
 
 export function deriveAxeRuleMetadata(): DerivedAxeRule[] {
    const rules = axeCore.getRules().map((rule) => ({

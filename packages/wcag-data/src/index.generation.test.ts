@@ -22,7 +22,7 @@ import {
    EXPECTED_COVERAGE_COUNTS_BY_VERSION,
    EXPECTED_GENERATED_ARTIFACT_COUNT,
    SYNC_TIMESTAMP,
-} from './index.test-helpers.js';
+} from './testing/helpers.js';
 
 function assertGeneratedCriteriaCounts(result: {
    criteriaCountByVersion: Record<string, number>;

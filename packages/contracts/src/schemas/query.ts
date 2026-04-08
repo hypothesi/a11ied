@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { wcagLevelSchema, wcagVersionSchema } from './core-schemas.js';
+import { wcagLevelSchema, wcagVersionSchema } from './core.js';
 import {
    criterionCoverageSchema,
    criterionIdSchema,
@@ -9,7 +9,7 @@ import {
    normalizedCriterionSchema,
    verificationStrategySchema,
    applicabilityStateSchema,
-} from './wcag-schemas.js';
+} from './wcag.js';
 
 export const applicabilitySignalCategorySchema = z.enum([
    'auth',

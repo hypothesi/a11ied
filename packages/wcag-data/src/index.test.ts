@@ -24,7 +24,7 @@ import {
    getFetchUrl,
    SYNC_TIMESTAMP,
    workspaceRoot,
-} from './index.test-helpers.js';
+} from './testing/helpers.js';
 
 function assertRawSyncResultShape(result: {
    fetchList: string[];

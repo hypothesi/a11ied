@@ -8,22 +8,22 @@ export type {
    GeneratedArtifactProvenance,
    GeneratedProvenanceManifest,
    DerivedAxeRule,
-} from './types.js';
+} from './shared/types.js';
 
-export { SyncValidationError } from './types.js';
+export { SyncValidationError } from './shared/types.js';
 
 export {
    getWcagDataDirectories,
    ensureWcagDataDirectories,
    listApprovedUpstreamSourceUrls,
    listRawSourceDefinitions,
-} from './source-definitions.js';
+} from './sources/definitions.js';
 
-export { deriveAxeRuleMetadata, syncRawSources } from './sync.js';
+export { deriveAxeRuleMetadata, syncRawSources } from './sources/sync.js';
 
-export { normalizeCriteriaArtifacts } from './normalize-criteria.js';
+export { normalizeCriteriaArtifacts } from './normalization/criteria.js';
 
-export { generateNormalizedArtifacts, runWcagDataSync } from './generate.js';
+export { generateNormalizedArtifacts, runWcagDataSync } from './generation/build.js';
 
-export { validateRawSyncState } from './validate-raw.js';
-export { validateGeneratedArtifacts } from './validate.js';
+export { validateRawSyncState } from './validation/raw.js';
+export { validateGeneratedArtifacts } from './validation/generated.js';

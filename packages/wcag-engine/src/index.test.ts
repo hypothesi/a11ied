@@ -21,7 +21,7 @@ import {
    supportedApplicabilityStates,
    searchCriteria,
 } from './index.js';
-import { getApplicabilityFixture } from './applicability-fixtures.js';
+import { getApplicabilityFixture } from './applicability/fixtures.js';
 
 describe('wcag-engine lookup', () => {
    it('resolves the same criterion by id and slug', () => {

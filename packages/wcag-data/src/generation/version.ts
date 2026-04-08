@@ -12,11 +12,11 @@ import type {
    RawSourceProvenance,
    WcagDataDirectories,
    WcagPayload,
-} from './types.js';
-import { sha256, toJsonString } from './utils.js';
-import { loadRawJson } from './sync.js';
-import { normalizeCriteriaArtifacts } from './normalize-criteria.js';
-import { buildCoverageArtifacts } from './coverage.js';
+} from '../shared/types.js';
+import { sha256, toJsonString } from '../shared/utils.js';
+import { normalizeCriteriaArtifacts } from '../normalization/criteria.js';
+import { loadRawJson } from '../sources/sync.js';
+import { buildCoverageArtifacts } from '../coverage/build.js';
 
 const CRITERIA_PREFIXES = [
    'criteria.',

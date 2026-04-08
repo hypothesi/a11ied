@@ -6,8 +6,8 @@ import {
    type NormalizedCriterion,
 } from '@a11lied/contracts';
 
-import { searchableFieldWeights, type SearchableField } from './engine-data.js';
-import { getArtifacts, parseVersion } from './engine-artifacts.js';
+import { getArtifacts, parseVersion } from '../artifacts/runtime.js';
+import { searchableFieldWeights, type SearchableField } from '../shared/data.js';
 
 const SUFFIX_IES_LENGTH = 3;
 const SUFFIX_ES_LENGTH = 2;

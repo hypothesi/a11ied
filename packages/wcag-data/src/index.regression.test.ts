@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { committedArtifactRegressionFixture } from '../test/regression-fixtures.js';
 
-import { readCommittedGeneratedJson } from './index.test-helpers.js';
+import { readCommittedGeneratedJson } from './testing/helpers.js';
 
 function assertCommittedCriteriaCounts(
    criteria22: { criteria: Record<string, unknown> },

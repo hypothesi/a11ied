@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { wcagLevelSchema, wcagVersionSchema } from './core-schemas.js';
+import { wcagLevelSchema, wcagVersionSchema } from './core.js';
 
 export const criterionIdSchema = z.string().regex(/^\d+\.\d+\.\d+$/);
 export type CriterionId = z.infer<typeof criterionIdSchema>;
