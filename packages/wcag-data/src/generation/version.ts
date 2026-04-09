@@ -1,7 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import type { CoverageState, WcagVersion } from '@a11lied/contracts';
+import type { CoverageState, WcagVersion } from '@a11ied/contracts';
 
 import type {
    ActMappingPayload,

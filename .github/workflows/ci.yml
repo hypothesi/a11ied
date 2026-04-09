@@ -35,7 +35,7 @@ jobs:
            run: npx vitest run packages/cli/src/command-handlers-verify.test.ts packages/cli/src/command-handlers-verify-level.test.ts packages/core/src/verification-runtime.test.ts
 
          - name: Docs build
-           run: npm run build --workspace @a11lied/docs
+           run: npm run build --workspace @a11ied/docs
 
          - name: Lint
            run: npm run lint

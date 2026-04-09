@@ -30,6 +30,7 @@ import {
 } from './definitions.js';
 import { fetchRemoteSource } from './fetch.js';
 
+/** Derives local axe rule metadata from the installed axe-core package. */
 export function deriveAxeRuleMetadata(): DerivedAxeRule[] {
    const rules = axeCore.getRules().map((rule) => ({
       ruleId: rule.ruleId,
@@ -123,6 +124,7 @@ export async function loadRawProvenanceEntries(
    );
 }
 
+/** Fetches, validates, and writes the approved raw upstream WCAG sources. */
 export async function syncRawSources(options?: {
    directories?: WcagDataDirectories;
    fetchImpl?: FetchLike;

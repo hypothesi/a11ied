@@ -73,6 +73,7 @@ async function assertVerifyTextCriterion(baseUrl: string): Promise<void> {
    expect(output.stdout).toMatchInlineSnapshot(`
       "Scope: criterion=4.1.2
       WCAG: 2.2
+      Recording: none
       4.1.2  Name, Role, Value
       Verdict: fail [automated]
       Procedures: axe_scan

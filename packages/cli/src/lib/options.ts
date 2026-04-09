@@ -34,6 +34,13 @@ export function addTargetOption(command: Command): Command {
    );
 }
 
+export function addRecordingOption(command: Command): Command {
+   return command.option(
+      '--recording <path>',
+      'Write one screen recording to the given .mov or .mp4 path when the target supports it.',
+   );
+}
+
 export function addStorybookTargetOptions(command: Command): Command {
    return command
       .option(

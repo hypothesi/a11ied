@@ -3,7 +3,7 @@ import {
    normalizedTechniqueSchema,
    type NormalizedTechnique,
    type WcagVersion,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 import { isRecord } from '../shared/utils.js';
 import type {

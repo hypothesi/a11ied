@@ -165,7 +165,7 @@ describe('wcag-data raw sync / source listing', () => {
 
 describe('wcag-data raw sync / fetching and provenance', () => {
    it('fetches validated raw sources, writes provenance, and derives axe metadata locally', async () => {
-      const tempRoot = await mkdtemp(join(tmpdir(), 'a11lied-wcag-data-'));
+      const tempRoot = await mkdtemp(join(tmpdir(), 'a11ied-wcag-data-'));
       const directories = createTestDirectories(tempRoot);
       const { fetchCalls, quickrefFallback, fetchImpl } = createTrackedFetchImpl();
 
@@ -188,7 +188,7 @@ describe('wcag-data raw sync / fetching and provenance', () => {
 
 describe('wcag-data raw sync / validation', () => {
    it('fails fast on malformed upstream data without writing updated raw artifacts', async () => {
-      const tempRoot = await mkdtemp(join(tmpdir(), 'a11lied-wcag-data-invalid-'));
+      const tempRoot = await mkdtemp(join(tmpdir(), 'a11ied-wcag-data-invalid-'));
       const directories = createTestDirectories(tempRoot);
 
       const fetchImpl: typeof fetch = async (input) => {

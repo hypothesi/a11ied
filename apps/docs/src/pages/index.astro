@@ -1,51 +1,143 @@
 ---
 import DocShell from '../layouts/doc-shell.astro';
-
-const links = [
-   { href: '/', label: 'Overview' },
-   { href: '/wcag-data-sources', label: 'WCAG data sources' },
-   { href: '/criterion-lookup', label: 'Criterion lookup' },
-   { href: '/applicability', label: 'Applicability' },
-   { href: '/driver-usage', label: 'Driver usage' },
-   { href: '/pattern-execution', label: 'Pattern execution' },
-   { href: '/verification-semantics', label: 'Verification semantics' },
-   { href: '/release-checklist', label: 'Release checklist' },
-];
+import { docsLinks } from '../lib/nav';
 ---
 
 <DocShell
    title="Screen reader automation that starts in the CLI"
-   summary="a11lied is built for the awkward middle ground most accessibility tooling skips: not just static rules, not just raw screen reader driving, but a workflow that can explain the criterion, check whether it applies, gather evidence, and stay honest about what is still manual."
-   links={links}
+   summary="a11ied is built for the awkward middle ground most accessibility tooling skips: not just static rules, not just raw screen reader driving, but a workflow that can explain the criterion, check whether it applies, gather evidence, and stay honest about what is still manual."
+   links={docsLinks}
 >
-   <section>
-      <h2>Start here</h2>
-      <p>
-         If you are testing a page or component, resolve the WCAG criterion first. Then decide whether
-         you need lookup, applicability, a low-level driver session, a named pattern, or a verification
-         report. Those are different layers on purpose.
-      </p>
+   <section class="split panel">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Start from the job</p>
+            <h2>How people actually arrive here</h2>
+         </div>
+         <div class="workflow-list">
+            <div class="workflow-row">
+               <strong><a href="/workflows#check-one-criterion">Check one criterion</a></strong>
+               <span>Look up the rule, scope the target, gather evidence, then make the claim.</span>
+            </div>
+            <div class="workflow-row">
+               <strong><a href="/workflows#verify-a-level">Verify a target level</a></strong>
+               <span>Use the level workflow when you need the whole AA or AAA matrix instead of one rule.</span>
+            </div>
+            <div class="workflow-row">
+               <strong><a href="/workflows#drive-a-session">Drive a reader session</a></strong>
+               <span>Use the low-level driver surface when you need manual control over VoiceOver, NVDA, or the virtual reader.</span>
+            </div>
+            <div class="workflow-row">
+               <strong><a href="/workflows#agent-and-storybook">Use it from an agent or Storybook</a></strong>
+               <span>Start with MCP or Storybook when the target is already wrapped in an editor or component workflow.</span>
+            </div>
+         </div>
+      </div>
+      <div class="split-aside">
+         <div class="tag">field rule</div>
+         <p class="aside-note">
+            The docs are easier to trust when they tell you where to start for a real job, not when they
+            ask you to reverse-engineer the repo architecture first.
+         </p>
+         <p class="aside-note">
+            If you already know the command tree, jump straight to <a href="/cli-reference">CLI
+            reference</a> or <a href="/mcp-usage">MCP usage</a>.
+         </p>
+      </div>
    </section>
 
-   <section>
-      <h2>What lives where</h2>
-      <ul>
-         <li><a href="/wcag-data-sources">WCAG data sources</a> explains where standards knowledge comes from.</li>
-         <li><a href="/criterion-lookup">Criterion lookup</a> covers search, lookup, and level queries.</li>
-         <li><a href="/applicability">Applicability</a> explains why a criterion matters for a target.</li>
-         <li><a href="/driver-usage">Driver usage</a> covers the low-level accessibility driver.</li>
-         <li><a href="/pattern-execution">Pattern execution</a> covers reusable Guidepup-backed probes.</li>
-         <li><a href="/verification-semantics">Verification semantics</a> explains what the verdicts really mean.</li>
-         <li><a href="/release-checklist">Release checklist</a> keeps public release claims grounded.</li>
-      </ul>
+   <section class="ledger">
+      <div class="panel-head">
+         <p class="panel-kicker">Operator ladder</p>
+         <h2>Use the product without getting lost</h2>
+      </div>
+      <div class="mini-grid">
+         <div class="stack">
+            <div class="tag">1. Look up the rule</div>
+            <p>Use <code>wcag</code> first. Pull the criterion, coverage, and strategy before you touch the target.</p>
+         </div>
+         <div class="stack">
+            <div class="tag">2. Scope the target</div>
+            <p>Use <code>inspect</code> to decide whether the rule belongs on this page or story at all.</p>
+         </div>
+         <div class="stack">
+            <div class="tag">3. Gather evidence</div>
+            <p>Use <code>drive</code>, <code>run axe</code>, or <code>run pattern</code> depending on how raw the procedure needs to be.</p>
+         </div>
+         <div class="stack">
+            <div class="tag">4. Make the claim</div>
+            <p>Use <code>verify</code> last, once you know exactly what the runtime did and did not cover.</p>
+         </div>
+      </div>
    </section>
 
-   <section class="callout">
-      <h2>The blunt version</h2>
+   <section class="panel">
+      <div class="panel-head">
+         <p class="panel-kicker">Five-minute path</p>
+         <h2>Fast start</h2>
+      </div>
+      <div class="command-strip">
+         <pre><code>node packages/cli/dist/cli.js doctor
+node packages/cli/dist/cli.js wcag show 4.1.3 --json
+node packages/cli/dist/cli.js inspect criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json
+node packages/cli/dist/cli.js run pattern status_message_probe --target virtual --url http://127.0.0.1:6173/status-message.html --json
+node packages/cli/dist/cli.js verify criterion 4.1.3 --target virtual --url http://127.0.0.1:6173/status-message.html --json</code></pre>
+         <p class="command-note">
+         That ladder is the shape of the product. If you jump from "I think this is a status message
+         issue" straight to <code>verify</code>, the output gets a lot harder to trust.
+         </p>
+      </div>
+   </section>
+
+   <section class="ledger">
+      <div class="panel-head">
+         <p class="panel-kicker">Reference map</p>
+         <h2>What lives where</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row">
+            <strong><a href="/workflows">Workflows</a></strong>
+            <span>The task-first page. Start here if you know the job but not the route names yet.</span>
+         </div>
+         <div class="route-row">
+            <strong><a href="/cli-reference">CLI reference</a></strong>
+            <span>The full command tree, including <code>help-all</code> for agents that want the whole surface in one dump.</span>
+         </div>
+         <div class="route-row">
+            <strong><a href="/wcag-data-sources">WCAG data sources</a></strong>
+            <span>Where the standards data comes from and why the repo keeps it local.</span>
+         </div>
+         <div class="route-row">
+            <strong><a href="/criterion-lookup">Criterion lookup</a> and <a href="/applicability">Applicability</a></strong>
+            <span>The planning layer. Figure out what rule you mean and whether it matters here.</span>
+         </div>
+         <div class="route-row">
+            <strong><a href="/driver-usage">Driver usage</a> and <a href="/pattern-execution">Pattern execution</a></strong>
+            <span>The evidence layer, from raw screen reader control to reusable probes.</span>
+         </div>
+         <div class="route-row">
+            <strong><a href="/verification-semantics">Verification semantics</a></strong>
+            <span>The claim layer. This is where the runtime says pass, fail, mixed, manual-only, or not-covered.</span>
+         </div>
+         <div class="route-row">
+            <strong><a href="/mcp-usage">MCP usage</a> and <a href="/storybook-usage">Storybook usage</a></strong>
+            <span>The agent path and the component path.</span>
+         </div>
+         <div class="route-row">
+            <strong><a href="/api-reference">API reference</a> and <a href="/recording-sessions">Recording sessions</a></strong>
+            <span>The public package map and the real-target video trail.</span>
+         </div>
+      </div>
+   </section>
+
+   <section class="field-note">
+      <div class="panel-head">
+         <p class="panel-kicker">Honesty rule</p>
+         <h2>The rule underneath all of this</h2>
+      </div>
       <p>
-         a11lied is allowed to collect strong evidence. It is not allowed to fake certainty. That rule
-         shows up in the CLI, the MCP server, the Storybook path, the docs, and the agent skill because
-         it has to.
+         a11ied is allowed to collect strong evidence. It is not allowed to bluff. Plenty of tools get
+         mushy here. This repo tries very hard not to.
       </p>
    </section>
 </DocShell>

@@ -16,8 +16,8 @@ Feature: Docs, skill guidance, CI, and release checks
       | pattern execution |
       | verification semantics |
 
-  Scenario: The a11lied skill includes the required guardrails
-    When I read "skills/a11lied/SKILL.md"
+  Scenario: The a11ied skill includes the required guardrails
+    When I read "skills/a11ied/SKILL.md"
     Then it tells the agent to resolve WCAG criteria before testing
     And it distinguishes automated, hybrid, and manual evidence
     And it warns that raw driver transcripts are not the same as compliance verdicts

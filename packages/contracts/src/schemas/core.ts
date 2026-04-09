@@ -34,7 +34,6 @@ export const cliCommandFamilySchema = z.enum([
    'run',
    'verify',
    'doctor',
-   'catalog',
    'mcp',
 ]);
 export type CliCommandFamily = z.infer<typeof cliCommandFamilySchema>;
@@ -132,6 +131,21 @@ export const driverReadinessSchema = z.object({
 });
 export type DriverReadiness = z.infer<typeof driverReadinessSchema>;
 
+export const recordingFormatSchema = z.enum(['mov', 'mp4']);
+export type RecordingFormat = z.infer<typeof recordingFormatSchema>;
+
+export const recordingStatusSchema = z.enum(['active', 'completed']);
+export type RecordingStatus = z.infer<typeof recordingStatusSchema>;
+
+export const sessionRecordingSchema = z.object({
+   path: z.string().min(1),
+   format: recordingFormatSchema,
+   status: recordingStatusSchema,
+   startedAt: z.string().datetime(),
+   stoppedAt: z.string().datetime().optional(),
+});
+export type SessionRecording = z.infer<typeof sessionRecordingSchema>;
+
 export const accessibilityDriverSessionSchema = z.object({
    sessionId: z.string().min(1),
    target: platformSchema,
@@ -141,6 +155,7 @@ export const accessibilityDriverSessionSchema = z.object({
    brokerPid: z.number().int().positive(),
    socketPath: z.string().min(1),
    metadataFile: z.string().min(1),
+   recording: sessionRecordingSchema.optional(),
 });
 export type AccessibilityDriverSession = z.infer<typeof accessibilityDriverSessionSchema>;
 
@@ -253,6 +268,7 @@ export const interactionPatternResultSchema = z.object({
    target: platformSchema,
    sessionId: z.string().min(1),
    managedSession: z.boolean(),
+   recording: sessionRecordingSchema.optional(),
    stepLog: z.array(interactionPatternStepSchema),
    spokenPhraseLog: z.array(z.string()),
    itemTextLog: z.array(z.string()),

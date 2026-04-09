@@ -1,4 +1,4 @@
-import { listSupportedTargets } from '@a11lied/core';
+import { listSupportedTargets } from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import {
@@ -50,13 +50,13 @@ const versionedResourceDefinitions: VersionedResourceDefinition[] = [
 function registerTargetsResource(server: McpServer): void {
    server.registerResource(
       'targets',
-      'a11lied://targets',
+      'a11ied://targets',
       {
          title: 'Supported targets',
          description: 'Read-only list of supported accessibility targets.',
          mimeType: 'application/json',
       },
-      async () => createJsonResource('a11lied://targets', listSupportedTargets()),
+      async () => createJsonResource('a11ied://targets', listSupportedTargets()),
    );
 }
 
@@ -65,7 +65,7 @@ function registerVersionedResource(
    version: SupportedWcagVersion,
    definition: VersionedResourceDefinition,
 ): void {
-   const uri = `a11lied://wcag/${definition.key}/${version}`;
+   const uri = `a11ied://wcag/${definition.key}/${version}`;
    server.registerResource(
       `${definition.key}-${version}`,
       uri,

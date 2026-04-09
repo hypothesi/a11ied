@@ -4,7 +4,7 @@ Checked on 2026-04-06.
 
 ## The design target
 
-I want `a11lied` to answer three different questions cleanly:
+I want `a11ied` to answer three different questions cleanly:
 
 1. "What does WCAG actually require here?"
 2. "Which of those requirements matter for this page, story, or component?"
@@ -30,11 +30,11 @@ These are the "what is the rule?" operations.
 
 ### CLI
 
-- `a11lied wcag levels --version 2.2`
-- `a11lied wcag criteria --level AA --version 2.2`
-- `a11lied wcag show 4.1.3`
-- `a11lied wcag search "status message"`
-- `a11lied wcag coverage 3.3.8`
+- `a11ied wcag levels --version 2.2`
+- `a11ied wcag criteria --level AA --version 2.2`
+- `a11ied wcag show 4.1.3`
+- `a11ied wcag search "status message"`
+- `a11ied wcag coverage 3.3.8`
 
 ### MCP
 
@@ -99,9 +99,9 @@ Use a small explicit enum:
 
 ### CLI
 
-- `a11lied inspect applicable --url https://...`
-- `a11lied inspect applicable --story forms-login--default`
-- `a11lied inspect criterion 4.1.3 --url https://...`
+- `a11ied inspect applicable --url https://...`
+- `a11ied inspect applicable --story forms-login--default`
+- `a11ied inspect criterion 4.1.3 --url https://...`
 
 ### MCP
 
@@ -110,7 +110,7 @@ Use a small explicit enum:
 
 ## 3. driver primitives
 
-These make `a11lied` usable as an accessibility driver, not just a canned auditor.
+These make `a11ied` usable as an accessibility driver, not just a canned auditor.
 
 They matter for three reasons:
 
@@ -122,19 +122,19 @@ The goal is simple: let an agent drive VoiceOver, NVDA, or the virtual screen re
 
 ### CLI
 
-- `a11lied drive start --target voiceover`
-- `a11lied drive start --target nvda`
-- `a11lied drive key --target voiceover --keys "VO+RightArrow"`
-- `a11lied drive key --target nvda --keys "tab"`
-- `a11lied drive type --target nvda --text "hello world"`
-- `a11lied drive next --target voiceover`
-- `a11lied drive previous --target voiceover`
-- `a11lied drive interact --target voiceover`
-- `a11lied drive stop-interacting --target voiceover`
-- `a11lied drive read --target nvda --last-spoken`
-- `a11lied drive logs --target voiceover --spoken`
-- `a11lied drive checkpoint --target nvda --label after-submit`
-- `a11lied drive stop --target nvda`
+- `a11ied drive start --target voiceover`
+- `a11ied drive start --target nvda`
+- `a11ied drive key --target voiceover --keys "VO+RightArrow"`
+- `a11ied drive key --target nvda --keys "tab"`
+- `a11ied drive type --target nvda --text "hello world"`
+- `a11ied drive next --target voiceover`
+- `a11ied drive previous --target voiceover`
+- `a11ied drive interact --target voiceover`
+- `a11ied drive stop-interacting --target voiceover`
+- `a11ied drive read --target nvda --last-spoken`
+- `a11ied drive logs --target voiceover --spoken`
+- `a11ied drive checkpoint --target nvda --label after-submit`
+- `a11ied drive stop --target nvda`
 
 ### MCP
 
@@ -179,8 +179,8 @@ The mistake would be exposing only low-level driver commands or only canned patt
 
 Suggested CLI shape:
 
-- `a11lied run axe --url https://... --criterion 4.1.2`
-- `a11lied run axe --url https://... --level AA`
+- `a11ied run axe --url https://... --criterion 4.1.2`
+- `a11ied run axe --url https://... --level AA`
 
 Suggested MCP tools:
 
@@ -231,9 +231,9 @@ This is the orchestration layer. It answers the compliance question without pret
 
 ### CLI
 
-- `a11lied verify criterion 4.1.3 --url https://... --target nvda`
-- `a11lied verify criterion 3.3.8 --story auth-login--default --target voiceover`
-- `a11lied verify level AA --url https://...`
+- `a11ied verify criterion 4.1.3 --url https://... --target nvda`
+- `a11ied verify criterion 3.3.8 --story auth-login--default --target voiceover`
+- `a11ied verify level AA --url https://...`
 
 ### MCP
 

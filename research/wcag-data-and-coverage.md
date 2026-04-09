@@ -80,7 +80,7 @@ axe-core already gives us two important dimensions:
 - standards tags like `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`
 - criterion tags like `wcag111`, `wcag412`, `wcag258`
 
-That means a11lied can map a criterion or target level to actual axe rules without hand-maintaining a giant rule list.
+That means a11ied can map a criterion or target level to actual axe rules without hand-maintaining a giant rule list.
 
 ## Coverage findings
 

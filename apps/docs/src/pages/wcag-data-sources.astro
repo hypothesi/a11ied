@@ -1,34 +1,34 @@
 ---
 import DocShell from '../layouts/doc-shell.astro';
-
-const links = [
-   { href: '/', label: 'Overview' },
-   { href: '/wcag-data-sources', label: 'WCAG data sources' },
-   { href: '/criterion-lookup', label: 'Criterion lookup' },
-   { href: '/applicability', label: 'Applicability' },
-   { href: '/driver-usage', label: 'Driver usage' },
-   { href: '/pattern-execution', label: 'Pattern execution' },
-   { href: '/verification-semantics', label: 'Verification semantics' },
-   { href: '/release-checklist', label: 'Release checklist' },
-];
+import { docsLinks } from '../lib/nav';
 ---
 
 <DocShell
    title="WCAG data sources"
-   summary="a11lied keeps its standards knowledge local, versioned, and boring on purpose. That is a feature. If the agent cannot explain where a criterion, technique, or strategy came from, it should not be making claims with confidence."
-   links={links}
+   summary="a11ied keeps its standards knowledge local, versioned, and boring on purpose. That is a feature. If the agent cannot explain where a criterion, technique, or strategy came from, it should not be making claims with confidence."
+   links={docsLinks}
 >
    <section>
       <h2>What ships in the repo</h2>
       <p>
          The source of truth is <code>packages/wcag-data</code>. The sync step pulls structured WCAG,
-         ACT mapping, Quickref technique, and axe rule data, then turns it into generated artifacts
-         the rest of the product can read without scraping prose pages on demand.
+         ACT mapping, Quickref technique, and axe rule data, then turns it into generated artifacts the
+         rest of the product can read without scraping prose pages on demand.
       </p>
    </section>
 
    <section>
-      <h2>What the agent should do first</h2>
+      <h2>Upstream sources that matter</h2>
+      <ul>
+         <li>W3C WCAG data for criteria, levels, and normative text</li>
+         <li>W3C ACT mapping for machine-readable rule-to-criterion coverage</li>
+         <li>W3C Quickref technique and failure data</li>
+         <li>Local <code>axe-core</code> rule metadata for automated coverage joins</li>
+      </ul>
+   </section>
+
+   <section>
+      <h2>What the operator should do first</h2>
       <ol>
          <li>Resolve the requested WCAG version. The default is 2.2 unless the task says otherwise.</li>
          <li>Resolve the criterion or target level before opening a browser.</li>
@@ -36,7 +36,7 @@ const links = [
       </ol>
    </section>
 
-   <section class="callout">
+   <section class="field-note">
       <h2>What this does not mean</h2>
       <p>
          Having local WCAG data does not mean the tool can prove every criterion automatically. Some

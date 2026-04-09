@@ -1,6 +1,7 @@
-import { afterAll, afterEach, beforeAll, vi } from 'vitest';
+import { spawn } from 'node:child_process';
+import { resolve } from 'node:path';
+import { afterAll, afterEach, beforeAll } from 'vitest';
 
-import { buildCli } from '../program.js';
 import { cleanupTempRoots, createTestServer, type TestServerHandle } from './fixtures.js';
 export {
    HTTP_STATUS_NOT_FOUND,
@@ -23,9 +24,11 @@ export const TEST_TIMEOUT_MEDIUM = 30_000;
 export const TEST_TIMEOUT_LONG = 60_000;
 export const TEST_TIMEOUT_VERY_LONG = 120_000;
 export const SEARCH_EXCERPT_LINES = 3;
+const { env: processEnv } = process;
 
 export interface CliResult {
    status: number;
+   stderr: string;
    stdout: string;
 }
 
@@ -47,46 +50,98 @@ export function useTestServer(tempRoots: string[]): TestServerHandle {
    return testServer;
 }
 
+function getBuiltCliPath(): string {
+   return resolve(import.meta.dirname, '../../dist/cli.js');
+}
+
 function normalizeOutputChunk(chunk: string | Uint8Array): string {
    if (typeof chunk === 'string') {
       return chunk;
    }
-   return Buffer.from(chunk).toString('utf8');
+   return Buffer.from(chunk).toString();
 }
 
-function captureCliOutput(output: string[]): { restore(): void } {
-   const logSpy = vi.spyOn(console, 'log').mockImplementation((value?: unknown) => {
-      output.push(String(value ?? ''));
-   });
-   const stdoutWriteSpy = vi.spyOn(process.stdout, 'write').mockImplementation(((
-      chunk: string | Uint8Array,
-   ) => {
-      output.push(normalizeOutputChunk(chunk));
+function captureProcessOutput(): {
+   restore: () => void;
+   stderrChunks: string[];
+   stdoutChunks: string[];
+} {
+   const stdoutChunks: string[] = [];
+   const stderrChunks: string[] = [];
+   const stdoutWrite = process.stdout.write.bind(process.stdout);
+   const stderrWrite = process.stderr.write.bind(process.stderr);
+
+   process.stdout.write = ((chunk: string | Uint8Array) => {
+      stdoutChunks.push(normalizeOutputChunk(chunk));
       return true;
-   }) as typeof process.stdout.write);
+   }) as typeof process.stdout.write;
+   process.stderr.write = ((chunk: string | Uint8Array) => {
+      stderrChunks.push(normalizeOutputChunk(chunk));
+      return true;
+   }) as typeof process.stderr.write;
 
    return {
-      restore(): void {
-         stdoutWriteSpy.mockRestore();
-         logSpy.mockRestore();
+      stdoutChunks,
+      stderrChunks,
+      restore: () => {
+         process.stdout.write = stdoutWrite;
+         process.stderr.write = stderrWrite;
       },
    };
 }
 
+function getChildEnv(): NodeJS.ProcessEnv {
+   const childEnv = { ...processEnv };
+   delete childEnv.VITEST;
+   return childEnv;
+}
+
 export async function runCli(args: string[]): Promise<CliResult> {
-   const output: string[] = [];
-   const capturedOutput = captureCliOutput(output);
-   const previousExitCode = process.exitCode;
+   return new Promise((resolveResult, reject) => {
+      const child = spawn(process.execPath, [getBuiltCliPath(), ...args], {
+         cwd: process.cwd(),
+         env: getChildEnv(),
+         stdio: ['ignore', 'pipe', 'pipe'],
+      });
+
+      let stdout = '';
+      let stderr = '';
+
+      child.stdout.on('data', (chunk: Buffer | string) => {
+         stdout += chunk.toString();
+      });
+
+      child.stderr.on('data', (chunk: Buffer | string) => {
+         stderr += chunk.toString();
+      });
+
+      child.on('error', reject);
+      child.on('close', (code) => {
+         resolveResult({
+            status: code ?? 1,
+            stderr,
+            stdout,
+         });
+      });
+   });
+}
+
+export async function runCliInProcess(args: string[]): Promise<CliResult> {
+   const { buildCli } = await import('../program.js');
+   const capture = captureProcessOutput();
+   const originalExitCode = process.exitCode;
    process.exitCode = 0;
+
    try {
       await buildCli().parseAsync(args, { from: 'user' });
       return {
          status: process.exitCode ?? 0,
-         stdout: output.join('\n'),
+         stderr: capture.stderrChunks.join(''),
+         stdout: capture.stdoutChunks.join(''),
       };
    } finally {
-      process.exitCode = previousExitCode;
-      capturedOutput.restore();
+      capture.restore();
+      process.exitCode = originalExitCode;
    }
 }
 

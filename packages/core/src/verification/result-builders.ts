@@ -8,7 +8,7 @@ import {
    type VerificationExecutionStep,
    type VerificationSourceReference,
    type VerificationUncoveredWorkItem,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 import { createStrategyId } from './helpers.js';
 

@@ -1,4 +1,4 @@
-import type { InteractionPatternResult } from '@a11lied/contracts';
+import type { InteractionPatternResult } from '@a11ied/contracts';
 import type { Page } from 'playwright';
 
 import { withBrowserPage } from '../browser/helper.js';

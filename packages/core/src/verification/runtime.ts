@@ -4,12 +4,14 @@ import {
    type CliMessage,
    type CriterionLookupKey,
    type Platform,
+   type AccessibilityDriverSession,
    type WcagLevel,
    type VerificationCriterionResult,
    type VerificationReport,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 import { CliUsageError } from '../errors/cli-errors.js';
+import { startDriverSession, stopDriverSession } from '../driver/runtime.js';
 import { parseWcagLevel } from '../wcag/parsing.js';
 import { listWcagCriteria } from '../wcag/runtime.js';
 import { buildTarget, createLevelVerificationMessage, createSummary } from './helpers.js';
@@ -21,6 +23,7 @@ interface VerifyCriterionOptions {
    target: string;
    wcagVersion: string;
    reportTarget?: VerificationReport['target'];
+   recordingPath?: string;
 }
 
 interface VerifyLevelOptions {
@@ -29,6 +32,7 @@ interface VerifyLevelOptions {
    target: string;
    wcagVersion: string;
    reportTarget?: VerificationReport['target'];
+   recordingPath?: string;
 }
 
 function parsePlatform(target: string): Platform {
@@ -84,16 +88,76 @@ function resolveVersion(
    return fallback as '2.1' | '2.2';
 }
 
+async function withManagedVerificationSession<TResult>(
+   parsedTarget: Platform,
+   recordingPath: string | undefined,
+   run: (session: AccessibilityDriverSession | undefined) => Promise<TResult>,
+): Promise<{ result: TResult; recording: VerificationReport['recording'] | undefined }> {
+   let session: AccessibilityDriverSession | undefined = undefined;
+   let result: TResult | undefined = undefined;
+
+   if (recordingPath) {
+      session = await startDriverSession(parsedTarget, process.cwd(), recordingPath);
+   }
+
+   try {
+      result = await run(session);
+   } finally {
+      if (session) {
+         const stopped = await stopDriverSession(session.sessionId);
+         session = stopped.session;
+      }
+   }
+
+   return {
+      result: result as TResult,
+      recording: session?.recording,
+   };
+}
+
+function resolveVerificationSessionId(
+   session: AccessibilityDriverSession | string,
+): string {
+   if (typeof session === 'string') {
+      return session;
+   }
+
+   return session.sessionId;
+}
+
+function withVerificationSessionId<TArgs extends Record<string, unknown>>(
+   args: TArgs,
+   session: AccessibilityDriverSession | string | undefined,
+): TArgs & { sessionId?: string } {
+   if (session) {
+      const sessionId = resolveVerificationSessionId(session);
+      return {
+         ...args,
+         sessionId,
+      };
+   }
+
+   return args;
+}
+
+/** Verifies one criterion against a target and returns a structured report row. */
 export async function verifyCriterion(
    options: VerifyCriterionOptions,
 ): Promise<VerificationReport> {
    const parsedTarget = parsePlatform(options.target);
-   const verification = await verifyCriterionResult({
-      criterion: options.criterion,
-      url: options.url,
+   const { result: verification, recording } = await withManagedVerificationSession(
       parsedTarget,
-      wcagVersion: options.wcagVersion,
-   });
+      options.recordingPath,
+      async (session) => {
+         const verifyArgs = {
+            criterion: options.criterion,
+            url: options.url,
+            parsedTarget,
+            wcagVersion: options.wcagVersion,
+         };
+         return verifyCriterionResult(withVerificationSessionId(verifyArgs, session));
+      },
+   );
 
    return verificationReportSchema.parse({
       target: options.reportTarget ?? verification.target,
@@ -104,6 +168,7 @@ export async function verifyCriterion(
       },
       summary: createSummary([verification.criterion]),
       criteria: [verification.criterion],
+      recording,
       warnings: toWarningsList(verification.warning),
       errors: [],
    });
@@ -121,15 +186,19 @@ async function processSingleCriterion(
       url: string;
       parsedTarget: Platform;
       wcagVersion: string;
+      sessionId?: string;
    },
    accumulator: CriterionAccumulator,
 ): Promise<void> {
-   const verification = await verifyCriterionResult({
+   const verifyArgs = {
       criterion: criterionId,
       url: args.url,
       parsedTarget: args.parsedTarget,
       wcagVersion: args.wcagVersion,
-   });
+   };
+   const verification = await verifyCriterionResult(
+      withVerificationSessionId(verifyArgs, args.sessionId),
+   );
    accumulator.criteria.push(verification.criterion);
    if (verification.warning) {
       accumulator.warnings.push(verification.warning);
@@ -143,6 +212,7 @@ async function verifyNextCriterion(
       url: string;
       parsedTarget: Platform;
       wcagVersion: string;
+      sessionId?: string;
    },
    index: number,
    accumulator: CriterionAccumulator,
@@ -165,10 +235,12 @@ async function collectLevelVerifications(args: {
    url: string;
    parsedTarget: Platform;
    wcagVersion: string;
+   sessionId?: string;
 }): Promise<CriterionAccumulator> {
    return verifyNextCriterion(args, 0, { criteria: [], warnings: [], target: undefined });
 }
 
+/** Verifies all criteria required for one conformance level and returns a full matrix. */
 export async function verifyLevel(
    options: VerifyLevelOptions,
 ): Promise<VerificationReport> {
@@ -178,12 +250,19 @@ export async function verifyLevel(
       parsedLevel,
       options.wcagVersion,
    );
-   const collected = await collectLevelVerifications({
-      criterionIds,
-      url: options.url,
+   const { result: collected, recording } = await withManagedVerificationSession(
       parsedTarget,
-      wcagVersion: options.wcagVersion,
-   });
+      options.recordingPath,
+      async (session) => {
+         const verifyArgs = {
+            criterionIds,
+            url: options.url,
+            parsedTarget,
+            wcagVersion: options.wcagVersion,
+         };
+         return collectLevelVerifications(withVerificationSessionId(verifyArgs, session));
+      },
+   );
 
    const summary = createSummary(collected.criteria);
    const levelWarning = createLevelVerificationMessage(parsedLevel, summary);
@@ -202,6 +281,7 @@ export async function verifyLevel(
       },
       summary,
       criteria: collected.criteria,
+      recording,
       warnings: collected.warnings,
       errors: [],
    });

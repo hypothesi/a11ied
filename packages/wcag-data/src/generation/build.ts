@@ -1,4 +1,4 @@
-import type { CoverageState, WcagVersion } from '@a11lied/contracts';
+import type { CoverageState, WcagVersion } from '@a11ied/contracts';
 
 import type {
    ActMappingPayload,
@@ -88,6 +88,7 @@ function assembleResults(versionResults: Awaited<ReturnType<typeof processVersio
    };
 }
 
+/** Generates the committed WCAG artifact set from the synced raw sources. */
 export async function generateNormalizedArtifacts(
    directories?: WcagDataDirectories,
 ): Promise<NormalizedArtifactsResult> {
@@ -131,6 +132,7 @@ export async function generateNormalizedArtifacts(
    };
 }
 
+/** Runs the full WCAG data sync pipeline from raw fetch through generated artifacts. */
 export async function runWcagDataSync(options?: {
    directories?: WcagDataDirectories;
    fetchImpl?: FetchLike;

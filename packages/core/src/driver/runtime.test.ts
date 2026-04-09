@@ -1,8 +1,7 @@
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanupTempRoots, createTempRoot } from '../../../cli/src/testing/fixtures.js';
 
 import {
    type CliEnvironmentError,
@@ -18,18 +17,12 @@ import {
 
 const TIMEOUT_MS = 15_000;
 const UNIX_SOCKET_PATH_MAX = 104;
-const WINDOWS_PIPE_PREFIX = String.raw`\\.\pipe\a11lied-`;
+const WINDOWS_PIPE_PREFIX = String.raw`\\.\pipe\a11ied-`;
 const tempRoots: string[] = [];
 
-async function createTempRoot(): Promise<string> {
-   const root = await mkdtemp(resolve(tmpdir(), 'a11lied-driver-'));
-   tempRoots.push(root);
-   return root;
-}
-
 afterEach(async () => {
-   await Promise.all(tempRoots.map((root) => rm(root, { recursive: true, force: true })));
-   tempRoots.length = 0;
+   await cleanupTempRoots(tempRoots);
+   vi.unstubAllEnvs();
 });
 
 function expectValidSession(
@@ -59,7 +52,7 @@ describe('driver runtime sessions', () => {
    it(
       'starts, reports, and stops a virtual session',
       async () => {
-         const cwd = await createTempRoot();
+         const cwd = await createTempRoot(tempRoots);
          const session = await startDriverSession('virtual', cwd);
          expectValidSession(session, cwd);
 
@@ -81,7 +74,7 @@ describe('driver runtime sessions', () => {
    );
 
    it('fails cleanly for an unknown session', async () => {
-      const cwd = await createTempRoot();
+      const cwd = await createTempRoot(tempRoots);
 
       await expect(getDriverSessionStatus('missing-session', cwd)).rejects.toMatchObject({
          code: 'session-not-found',
@@ -91,7 +84,7 @@ describe('driver runtime sessions', () => {
 
 describe('driver runtime actions', () => {
    it('keeps unix socket paths short enough for long temp directories', async () => {
-      const cwd = await createTempRoot();
+      const cwd = await createTempRoot(tempRoots);
       const socketPath = getDriverSocketPath(
          'drv_12345678-1234-1234-1234-123456789abc',
          resolve(cwd, 'a', 'very', 'long', 'nested', 'directory', 'structure'),
@@ -102,14 +95,14 @@ describe('driver runtime actions', () => {
          return;
       }
 
-      expect(socketPath.startsWith('/tmp/a11lied-')).toBe(true);
+      expect(socketPath.startsWith('/tmp/a11ied-')).toBe(true);
       expect(socketPath.length).toBeLessThan(UNIX_SOCKET_PATH_MAX);
    });
 
    it(
       'cleans up stale session metadata for dead brokers',
       async () => {
-         const cwd = await createTempRoot();
+         const cwd = await createTempRoot(tempRoots);
          const session = await startDriverSession('virtual', cwd);
          const stopped = await stopDriverSession(session.sessionId, cwd);
 
@@ -120,9 +113,26 @@ describe('driver runtime actions', () => {
    );
 
    it(
+      'fails fast when persistent recording is unsupported',
+      async () => {
+         const cwd = await createTempRoot(tempRoots);
+         vi.stubEnv('VITEST', 'false');
+
+         await expect(
+            startDriverSession('virtual', cwd, './recordings/session.mov'),
+         ).rejects.toMatchObject({
+            code: 'recording-target-unsupported',
+         } satisfies Partial<CliEnvironmentError>);
+      },
+      TIMEOUT_MS,
+   );
+});
+
+describe('driver runtime execution', () => {
+   it(
       'runs persistent and ephemeral driver actions against the virtual target',
       async () => {
-         const cwd = await createTempRoot();
+         const cwd = await createTempRoot(tempRoots);
          const session = await startDriverSession('virtual', cwd);
          await runAndVerifyDriverActions(session.sessionId, cwd);
 

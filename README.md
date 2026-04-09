@@ -1,6 +1,6 @@
-# a11lied
+# a11ied
 
-`a11lied` is a CLI-first accessibility automation toolkit for real screen reader testing with VoiceOver and NVDA, built on Guidepup.
+`a11ied` is a CLI-first accessibility automation toolkit for real screen reader testing with VoiceOver and NVDA, built on Guidepup.
 
 The repo is split into npm workspaces so the CLI, MCP server, Storybook integration, docs site, and shared runtime can evolve without turning into one giant package.
 
@@ -13,7 +13,7 @@ The repo is split into npm workspaces so the CLI, MCP server, Storybook integrat
 - `packages/mcp-server`: MCP bridge around the core runtime
 - `packages/cli`: end-user command line entrypoint
 - `apps/docs`: Astro Starlight docs site
-- `skills/a11lied`: Agent Skill scaffold
+- `skills/a11ied`: Agent Skill scaffold
 
 ## quick start
 

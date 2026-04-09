@@ -1,35 +1,96 @@
 import type { Command } from 'commander';
-import {
-   attachDocumentToDriverSession,
-   getDriverSessionStatus,
-   startDriverSession,
-   stopDriverSession,
-} from '@a11lied/core';
+import type * as Core from '#core';
+import type { Platform } from '#contracts';
+import type { resolveOptionalCliTarget } from '../lib/execute.js';
 import {
    addJsonOption,
+   addRecordingOption,
    addStorybookTargetOptions,
    addVerboseOption,
 } from '../lib/options.js';
-import { buildCliTargetInput } from '../lib/target-input.js';
-import {
-   executeCommand,
-   parsePlatform,
-   resolveOptionalCliTarget,
-} from '../lib/execute.js';
-import { renderDriveSessionText, renderDriveStatusText } from '../renderers/drive.js';
+import type { buildCliTargetInput, CliTargetInputOptions } from '../lib/target-input.js';
+import type { ResolvedCliTarget } from '../lib/resolvers.js';
 import {
    registerMiddleActions,
    registerSimpleActions,
    registerTrailingActions,
 } from './drive-actions.js';
 
-async function handleStartAction(options: {
+interface StartActionOptions extends CliTargetInputOptions {
    json?: boolean;
    target: string;
-   url?: string;
-   storybookUrl?: string;
-   storyId?: string;
-}): Promise<void> {
+   recording?: string;
+}
+
+async function startDriverSessionForTarget(args: {
+   options: StartActionOptions;
+   parsePlatform: (target: string | undefined) => Platform;
+   core: typeof Core;
+}): Promise<Awaited<ReturnType<typeof Core.startDriverSession>>> {
+   return args.core.startDriverSession(
+      args.parsePlatform(args.options.target),
+      process.cwd(),
+      args.options.recording,
+   );
+}
+
+async function resolveStartTarget(args: {
+   options: StartActionOptions;
+   resolveOptionalCliTarget: typeof resolveOptionalCliTarget;
+   buildCliTargetInput: typeof buildCliTargetInput;
+}): Promise<ResolvedCliTarget | undefined> {
+   return args.resolveOptionalCliTarget(args.buildCliTargetInput(args.options));
+}
+
+async function executeStartAction(args: {
+   options: StartActionOptions;
+   parsePlatform: (target: string | undefined) => Platform;
+   resolveOptionalCliTarget: typeof resolveOptionalCliTarget;
+   buildCliTargetInput: typeof buildCliTargetInput;
+   core: typeof Core;
+}): Promise<{
+   target: ResolvedCliTarget['reportTarget'] | { kind: 'driver-target'; value: string };
+   result: { session: Awaited<ReturnType<typeof Core.startDriverSession>> };
+}> {
+   const session = await startDriverSessionForTarget({
+      options: args.options,
+      parsePlatform: args.parsePlatform,
+      core: args.core,
+   });
+   const resolved = await resolveStartTarget({
+      options: args.options,
+      resolveOptionalCliTarget: args.resolveOptionalCliTarget,
+      buildCliTargetInput: args.buildCliTargetInput,
+   });
+   if (resolved) {
+      await args.core.attachDocumentToDriverSession(session.sessionId, {
+         html: resolved.html,
+         url: resolved.resolvedUrl,
+      });
+   }
+
+   return {
+      target: resolved?.reportTarget ?? {
+         kind: 'driver-target',
+         value: session.target,
+      },
+      result: { session },
+   };
+}
+
+async function handleStartAction(options: StartActionOptions): Promise<void> {
+   const [
+      { executeCommand, parsePlatform, resolveOptionalCliTarget },
+      { buildCliTargetInput },
+      renderers,
+      core,
+   ] = await Promise.all([
+      import('../lib/execute.js'),
+      import('../lib/target-input.js'),
+      import('../renderers/drive.js'),
+      import('#core'),
+   ]);
+
    await executeCommand(
       {
          family: 'drive',
@@ -37,38 +98,31 @@ async function handleStartAction(options: {
          wcagVersion: undefined,
          json: options.json,
       },
-      async () => {
-         const session = await startDriverSession(parsePlatform(options.target));
-         const resolved = await resolveOptionalCliTarget(buildCliTargetInput(options));
-         if (resolved) {
-            await attachDocumentToDriverSession(session.sessionId, {
-               html: resolved.html,
-               url: resolved.resolvedUrl,
-            });
-         }
-         return {
-            target: resolved?.reportTarget ?? {
-               kind: 'driver-target',
-               value: session.target,
-            },
-            result: { session },
-         };
-      },
-      renderDriveSessionText,
+      () =>
+         executeStartAction({
+            options,
+            parsePlatform,
+            resolveOptionalCliTarget,
+            buildCliTargetInput,
+            core,
+         }),
+      renderers.renderDriveSessionText,
    );
 }
 
 function registerStartCommand(driveCommand: Command): void {
    addJsonOption(
       addStorybookTargetOptions(
-         driveCommand
-            .command('start')
-            .description('Start a persistent driver session.')
-            .requiredOption(
-               '--target <platform>',
-               'Choose one target: virtual, voiceover, or nvda.',
-            )
-            .option('--url <url>', 'Attach one live URL target to the new session.'),
+         addRecordingOption(
+            driveCommand
+               .command('start')
+               .description('Start a persistent driver session.')
+               .requiredOption(
+                  '--target <platform>',
+                  'Choose one target: virtual, voiceover, or nvda.',
+               )
+               .option('--url <url>', 'Attach one live URL target to the new session.'),
+         ),
       ),
    ).action(handleStartAction);
 }
@@ -82,6 +136,12 @@ function registerStatusCommand(driveCommand: Command): void {
             .requiredOption('--session <id>', 'Reuse an existing driver session.'),
       ),
    ).action(async (options: { json?: boolean; verbose?: boolean; session: string }) => {
+      const [{ executeCommand }, renderers, core] = await Promise.all([
+         import('../lib/execute.js'),
+         import('../renderers/drive.js'),
+         import('#core'),
+      ]);
+
       await executeCommand(
          {
             family: 'drive',
@@ -91,13 +151,13 @@ function registerStatusCommand(driveCommand: Command): void {
             verbose: options.verbose,
          },
          async () => {
-            const result = await getDriverSessionStatus(options.session);
+            const result = await core.getDriverSessionStatus(options.session);
             return {
                target: { kind: 'driver-session', value: options.session },
                result,
             };
          },
-         renderDriveStatusText,
+         renderers.renderDriveStatusText,
       );
    });
 }
@@ -109,6 +169,12 @@ function registerStopCommand(driveCommand: Command): void {
          .description('Stop a persistent driver session and remove its state file.')
          .requiredOption('--session <id>', 'Reuse an existing driver session.'),
    ).action(async (options: { json?: boolean; session: string }) => {
+      const [{ executeCommand }, renderers, core] = await Promise.all([
+         import('../lib/execute.js'),
+         import('../renderers/drive.js'),
+         import('#core'),
+      ]);
+
       await executeCommand(
          {
             family: 'drive',
@@ -117,13 +183,13 @@ function registerStopCommand(driveCommand: Command): void {
             json: options.json,
          },
          async () => {
-            const result = await stopDriverSession(options.session);
+            const result = await core.stopDriverSession(options.session);
             return {
                target: { kind: 'driver-session', value: options.session },
                result,
             };
          },
-         renderDriveStatusText,
+         renderers.renderDriveStatusText,
       );
    });
 }

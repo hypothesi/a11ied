@@ -4,7 +4,7 @@ import {
    type CriterionSearchResponse,
    type CriterionSearchResult,
    type NormalizedCriterion,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 import { getArtifacts, parseVersion } from '../artifacts/runtime.js';
 import { searchableFieldWeights, type SearchableField } from '../shared/data.js';
@@ -129,6 +129,7 @@ function buildSearchMatches(
    );
 }
 
+/** Searches the generated criterion corpus and returns ranked matches. */
 export function searchCriteria(
    query: string,
    options?: { version?: string; limit?: number },

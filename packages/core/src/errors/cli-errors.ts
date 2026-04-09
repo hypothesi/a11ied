@@ -1,5 +1,6 @@
-import { cliExitCodes } from '@a11lied/contracts';
+import { cliExitCodes } from '@a11ied/contracts';
 
+/** Raised when a caller provides invalid CLI input or an unsupported option mix. */
 export class CliUsageError extends Error {
    readonly exitCode = cliExitCodes.usage;
    readonly code: string;

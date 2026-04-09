@@ -7,8 +7,8 @@ import {
    wcagLevelSchema,
    wcagVersionSchema,
    type Platform,
-} from '@a11lied/contracts';
-import { runAxe, runInteractionPattern } from '@a11lied/core';
+} from '@a11ied/contracts';
+import { runAxe, runInteractionPattern } from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 

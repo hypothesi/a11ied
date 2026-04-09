@@ -1,11 +1,7 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import {
-   cleanupTempRoots,
-   createTempRoot,
-   createTestServer,
-   type TestServerHandle,
-} from '../../../cli/src/testing/fixtures.js';
+import { createTempRoot } from '../../../cli/src/testing/fixtures.js';
+import { useManagedTestServer } from '../../../cli/src/testing/lifecycle.js';
 import { verifyCriterion, verifyLevel } from './runtime.js';
 
 const ONE_MINUTE_MS = 60_000;
@@ -13,23 +9,8 @@ const TWO_MINUTES_MS = 120_000;
 const MIN_AA_CRITERIA = 24;
 
 let baseUrl = '';
-const testServer: TestServerHandle = createTestServer();
 const tempRoots: string[] = [];
-const repoRoot = process.cwd();
-
-beforeAll(async () => {
-   await testServer.start();
-   baseUrl = testServer.getBaseUrl();
-});
-
-afterAll(async () => {
-   await testServer.stop();
-});
-
-afterEach(async () => {
-   process.chdir(repoRoot);
-   await cleanupTempRoots(tempRoots);
-});
+const managedServer = useManagedTestServer(tempRoots);
 
 function expectAutomatedCriterionReport(report: {
    criteria: Array<{
@@ -93,6 +74,7 @@ describe('criterion verification automated and hybrid reports', () => {
       async () => {
          const tempRoot = await createTempRoot(tempRoots);
          process.chdir(tempRoot);
+         baseUrl = managedServer.getBaseUrl();
 
          const automated = await verifyCriterion({
             criterion: '1.3.1',
@@ -128,6 +110,7 @@ describe('criterion verification uncovered notes', () => {
       async () => {
          const tempRoot = await createTempRoot(tempRoots);
          process.chdir(tempRoot);
+         baseUrl = managedServer.getBaseUrl();
 
          const focusOrder = await verifyCriterion({
             criterion: '2.4.3',
@@ -155,6 +138,7 @@ describe('level verification runtime', () => {
       async () => {
          const tempRoot = await createTempRoot(tempRoots);
          process.chdir(tempRoot);
+         baseUrl = managedServer.getBaseUrl();
 
          const report = await verifyLevel({
             level: 'AA',

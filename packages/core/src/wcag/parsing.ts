@@ -3,7 +3,7 @@ import {
    wcagVersionSchema,
    type WcagLevel,
    type WcagVersion,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 import { CliUsageError } from '../errors/cli-errors.js';
 

@@ -12,7 +12,7 @@ import {
    type TagIndexArtifact,
    type TechniqueIndexArtifact,
    type WcagVersion,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 import type { QuickrefTagsPayload, WcagPayload } from '../shared/types.js';
 import { normalizeSingleCriterion } from './techniques.js';
@@ -155,6 +155,7 @@ function assembleCriteriaArtifacts(input: {
    };
 }
 
+/** Normalizes raw WCAG source payloads into the generated criterion artifacts. */
 export function normalizeCriteriaArtifacts(input: {
    version: WcagVersion;
    wcag: WcagPayload;

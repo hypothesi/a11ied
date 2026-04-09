@@ -4,26 +4,19 @@ import {
    criterionSearchResponseSchema,
    type CriterionSearchResult,
    verificationReportSchema,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { z } from 'zod';
-import {
-   cleanupTempRoots,
-   createTempRoot,
-   createTestServer,
-   type TestServerHandle,
-} from '../../cli/src/testing/fixtures.js';
+import { createTempRoot } from '../../cli/src/testing/fixtures.js';
+import { useManagedTestServer } from '../../cli/src/testing/lifecycle.js';
 
 import { createMcpServer } from './index.js';
 
 const ONE_MINUTE_MS = 60_000;
-
-let baseUrl = '';
-const testServer: TestServerHandle = createTestServer();
 const tempRoots: string[] = [];
-const repoRoot = process.cwd();
+const managedServer = useManagedTestServer(tempRoots);
 
 function getInvalidContentText(content: unknown): string {
    if (!Array.isArray(content)) {
@@ -44,7 +37,7 @@ async function createHarness(): Promise<{
 }> {
    const mcpServer = createMcpServer();
    const client = new Client(
-      { name: 'a11lied-mcp-test-client', version: '0.1.0' },
+      { name: 'a11ied-mcp-test-client', version: '0.1.0' },
       { capabilities: {} },
    );
    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -85,19 +78,30 @@ async function startVirtualSession(
    return accessibilityDriverSessionSchema.parse(start.structuredContent);
 }
 
-beforeAll(async () => {
-   await testServer.start();
-   baseUrl = testServer.getBaseUrl();
-});
+async function assertVerificationToolReport(
+   harness: Awaited<ReturnType<typeof createHarness>>,
+   baseUrl: string,
+): Promise<void> {
+   const result = await harness.client.callTool({
+      name: 'verify_criterion',
+      arguments: {
+         criterion: '4.1.2',
+         url: `${baseUrl}/button-name-failure.html`,
+         target: 'virtual',
+         version: '2.2',
+      },
+   });
 
-afterAll(async () => {
-   await testServer.stop();
-});
-
-afterEach(async () => {
-   process.chdir(repoRoot);
-   await cleanupTempRoots(tempRoots);
-});
+   expect(result.isError).toBeFalsy();
+   const report = verificationReportSchema.parse(result.structuredContent);
+   expect(report.target).toHaveProperty('kind');
+   expect(report).toHaveProperty('wcagVersion');
+   expect(report).toHaveProperty('requestedScope');
+   expect(report).toHaveProperty('summary');
+   expect(report).toHaveProperty('criteria');
+   expect(report.criteria[0]?.criterionId).toBe('4.1.2');
+   expect(report.criteria[0]?.verdict).toBe('fail');
+}
 
 describe('criterion lookup tool', () => {
    it('matches CLI lookup semantics', async () => {
@@ -173,25 +177,7 @@ describe('verification tool', () => {
       'returns the same top-level report fields as the CLI report shape',
       async () => {
          await withHarness(async (harness) => {
-            const result = await harness.client.callTool({
-               name: 'verify_criterion',
-               arguments: {
-                  criterion: '4.1.2',
-                  url: `${baseUrl}/button-name-failure.html`,
-                  target: 'virtual',
-                  version: '2.2',
-               },
-            });
-
-            expect(result.isError).toBeFalsy();
-            const report = verificationReportSchema.parse(result.structuredContent);
-            expect(report.target).toHaveProperty('kind');
-            expect(report).toHaveProperty('wcagVersion');
-            expect(report).toHaveProperty('requestedScope');
-            expect(report).toHaveProperty('summary');
-            expect(report).toHaveProperty('criteria');
-            expect(report.criteria[0]?.criterionId).toBe('4.1.2');
-            expect(report.criteria[0]?.verdict).toBe('fail');
+            await assertVerificationToolReport(harness, managedServer.getBaseUrl());
          });
       },
       ONE_MINUTE_MS,
@@ -204,15 +190,15 @@ describe('resource exposure', () => {
          const result = await harness.client.listResources();
          const uris = result.resources.map((entry) => entry.uri);
 
-         expect(uris).toContain('a11lied://wcag/criteria/2.2');
-         expect(uris).toContain('a11lied://wcag/levels/2.2');
-         expect(uris).toContain('a11lied://wcag/coverage/2.2');
-         expect(uris).toContain('a11lied://wcag/verification-strategies/2.2');
+         expect(uris).toContain('a11ied://wcag/criteria/2.2');
+         expect(uris).toContain('a11ied://wcag/levels/2.2');
+         expect(uris).toContain('a11ied://wcag/coverage/2.2');
+         expect(uris).toContain('a11ied://wcag/verification-strategies/2.2');
 
          const readCoverage = await harness.client.readResource({
-            uri: 'a11lied://wcag/coverage/2.2',
+            uri: 'a11ied://wcag/coverage/2.2',
          });
-         expect(readCoverage.contents[0]?.uri).toBe('a11lied://wcag/coverage/2.2');
+         expect(readCoverage.contents[0]?.uri).toBe('a11ied://wcag/coverage/2.2');
       });
    });
 });

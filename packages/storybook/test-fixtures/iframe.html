@@ -2,7 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="utf-8" />
-      <title>a11lied Storybook fixture</title>
+      <title>a11ied Storybook fixture</title>
       <style>
          body {
             margin: 0;
@@ -46,11 +46,11 @@
    </head>
    <body>
       <div id="storybook-root"></div>
-      <script id="a11lied-story-metadata" type="application/json"></script>
+      <script id="a11ied-story-metadata" type="application/json"></script>
       <script>
          const storyId = new URLSearchParams(window.location.search).get('id') ?? '';
          const root = document.querySelector('#storybook-root');
-         const metadataNode = document.querySelector('#a11lied-story-metadata');
+         const metadataNode = document.querySelector('#a11ied-story-metadata');
 
          const stories = {
             'forms-login--default': {
@@ -207,7 +207,7 @@
          } else {
             document.title = `Story: ${storyId}`;
             metadataNode.textContent = JSON.stringify(story.metadata);
-            window.__A11LIED_STORY_METADATA__ = story.metadata;
+            window.__a11ied_STORY_METADATA__ = story.metadata;
             story.render();
          }
       </script>

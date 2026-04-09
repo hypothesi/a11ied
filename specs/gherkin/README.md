@@ -1,4 +1,4 @@
-# a11lied gherkin acceptance suite
+# a11ied gherkin acceptance suite
 
 This directory is the executable acceptance contract for the planned `v0.3.0` milestone.
 

@@ -13,6 +13,7 @@ import {
    TEST_TIMEOUT_SHORT,
    useTestServer,
 } from './setup.js';
+import { expectFirstErrorMessage, expectJsonLogCursor } from './helpers.js';
 
 const tempRoots: string[] = [];
 useTestServer(tempRoots);
@@ -43,11 +44,7 @@ async function assertSessionStart(): Promise<string> {
 
 async function assertSessionStatus(sessionId: string): Promise<void> {
    const result = await runCli(['drive', 'status', '--session', sessionId, '--json']);
-   const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_SUCCESS);
-   expect(
-      (json.result as { state: { logCursor: number } }).state.logCursor,
-   ).toBeGreaterThan(0);
+   const json = expectJsonLogCursor(result);
    expect(
       (json.result as { state: { lastSpokenPhrase: string | null } }).state
          .lastSpokenPhrase,
@@ -80,15 +77,14 @@ async function assertMissingSessionError(): Promise<void> {
 
 async function assertNextRequiresSession(): Promise<void> {
    const result = await runCli(['drive', 'next', '--target', 'virtual', '--json']);
-   const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_USAGE);
-   expect((json.errors as Array<{ message: string }>)[0]?.message).toMatch(
-      /session id is required/i,
-   );
+   expectFirstErrorMessage({
+      result,
+      match: /session id is required/i,
+   });
 }
 
 async function assertNoSessionsDir(tempRoot: string): Promise<void> {
-   const sessionsDir = resolve(tempRoot, '.a11lied/state/sessions');
+   const sessionsDir = resolve(tempRoot, '.a11ied/state/sessions');
    let entries: string[] = [];
    try {
       entries = await readdir(sessionsDir);
@@ -113,13 +109,26 @@ async function assertEphemeralAction(tempRoot: string): Promise<void> {
    await assertNoSessionsDir(tempRoot);
 }
 
+async function assertVirtualRecordingRejected(): Promise<void> {
+   const result = await runCli([
+      'drive',
+      'start',
+      '--target',
+      'virtual',
+      '--recording',
+      './recordings/virtual.mov',
+      '--json',
+   ]);
+   const json = parseJsonOutput(result.stdout);
+   expect(result.status).toBe(EXIT_USAGE);
+   expect((json.errors as Array<{ code: string }>)[0]?.code).toBe(
+      'recording-target-unsupported',
+   );
+}
+
 async function assertReadState(sessionId: string): Promise<void> {
    const result = await runCli(['drive', 'read', '--session', sessionId, '--json']);
-   const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_SUCCESS);
-   expect(
-      (json.result as { state: { logCursor: number } }).state.logCursor,
-   ).toBeGreaterThanOrEqual(1);
+   const json = expectJsonLogCursor(result);
    expect(
       (json.result as { state: { lastSpokenPhrase: string | null } }).state
          .lastSpokenPhrase,
@@ -163,6 +172,7 @@ describe('cli drive lifecycle commands', () => {
       () =>
          withTempDir(tempRoots, async (tempRoot) => {
             await assertNextRequiresSession();
+            await assertVirtualRecordingRejected();
             await assertEphemeralAction(tempRoot);
             const sessionId = await startSession();
             await assertReadState(sessionId);

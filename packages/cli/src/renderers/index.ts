@@ -1,5 +1,5 @@
-import type { CliOutputEnvelope, InteractionPatternResult } from '@a11lied/contracts';
-import { stripHtml } from '../lib/execute.js';
+import type { CliOutputEnvelope, InteractionPatternResult } from '#contracts';
+import { stripHtml } from '../lib/text.js';
 
 export function renderWcagLevelsText(
    envelope: CliOutputEnvelope,
@@ -233,6 +233,18 @@ function formatSessionLabel(managedSession: boolean): string {
    return ' (reused)';
 }
 
+function formatRecordingLine(recording?: {
+   path: string;
+   status: string;
+   format: string;
+}): string {
+   if (!recording) {
+      return 'Recording: none';
+   }
+
+   return `Recording: ${recording.status} ${recording.format} ${recording.path}`;
+}
+
 export function renderPatternText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },
@@ -241,6 +253,7 @@ export function renderPatternText(
    const lines = [
       `Pattern: ${result.patternId}`,
       `Session: ${result.sessionId}${formatSessionLabel(result.managedSession)}`,
+      formatRecordingLine(result.recording),
       `Assertions: ${result.assertions.map((entry) => `${entry.id}=${entry.status}`).join(', ') || 'none'}`,
       `Spoken phrases: ${result.spokenPhraseLog.join(' | ') || 'none'}`,
       `Item text: ${result.itemTextLog.join(' | ') || 'none'}`,

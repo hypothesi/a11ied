@@ -16,17 +16,21 @@
       "forceConsistentCasingInFileNames": true,
       "isolatedModules": true,
       "resolveJsonModule": true,
+      "resolvePackageJsonExports": false,
       "skipLibCheck": true,
       "sourceMap": true,
       "baseUrl": ".",
       "paths": {
-         "@a11lied/contracts": ["packages/contracts/src/index.ts"],
-         "@a11lied/core": ["packages/core/src/index.ts"],
-         "@a11lied/guidepup": ["packages/guidepup/src/index.ts"],
-         "@a11lied/mcp-server": ["packages/mcp-server/src/index.ts"],
-         "@a11lied/storybook": ["packages/storybook/src/index.ts"],
-         "@a11lied/wcag-engine": ["packages/wcag-engine/src/index.ts"],
-         "@a11lied/wcag-data": ["packages/wcag-data/src/index.ts"]
+         "#contracts": ["packages/cli/src/bridges/contracts.ts"],
+         "#core": ["packages/cli/src/bridges/core.ts"],
+         "#mcp-server": ["packages/cli/src/bridges/mcp-server.ts"],
+         "@a11ied/contracts": ["packages/contracts/src/index.ts"],
+         "@a11ied/core": ["packages/core/src/index.ts"],
+         "@a11ied/guidepup": ["packages/guidepup/src/index.ts"],
+         "@a11ied/mcp-server": ["packages/mcp-server/src/index.ts"],
+         "@a11ied/storybook": ["packages/storybook/src/index.ts"],
+         "@a11ied/wcag-engine": ["packages/wcag-engine/src/index.ts"],
+         "@a11ied/wcag-data": ["packages/wcag-data/src/index.ts"]
       }
    }
 }

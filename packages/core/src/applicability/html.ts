@@ -2,7 +2,7 @@ import {
    applicabilityInputSchema,
    type ApplicabilityInput,
    type ApplicabilitySignal,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 interface AddSignalParams {
    category: ApplicabilitySignal['category'];

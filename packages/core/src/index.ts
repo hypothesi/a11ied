@@ -1,4 +1,9 @@
-import type { CliCommand, DoctorReport, Target } from '@a11lied/contracts';
+import { spawnSync } from 'node:child_process';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import type { CliCommand, DoctorReport, Target } from '../../contracts/src/index.js';
 
 export {
    CliEnvironmentError,
@@ -33,6 +38,11 @@ export {
    type ResolveDocumentTargetInput,
 } from './targets/runtime.js';
 
+const DOCTOR_RECORDING_PROBE_SECONDS = 1;
+const DOCTOR_RECORDING_TIMEOUT_MS = 4000;
+const SCREEN_RECORDING_PERMISSION_NOTE =
+   'If the same recording command works from Terminal but fails here, check Screen Recording permission for the current host app.';
+
 const supportedTargets: Target[] = [
    {
       id: 'macos-voiceover',
@@ -61,28 +71,28 @@ const cliCommands: CliCommand[] = [
    {
       name: 'wcag',
       summary: 'Query pinned WCAG criteria, coverage, and verification strategy data.',
-      maturity: 'planned',
+      maturity: 'ready',
    },
    {
       name: 'inspect',
       summary: 'Explain which WCAG criteria are relevant for a specific target.',
-      maturity: 'planned',
+      maturity: 'ready',
    },
    {
       name: 'drive',
       summary:
          'Control VoiceOver, NVDA, or the virtual screen reader through stable sessions.',
-      maturity: 'scaffolded',
+      maturity: 'ready',
    },
    {
       name: 'doctor',
       summary: 'Report runtime details and supported automation targets.',
-      maturity: 'scaffolded',
+      maturity: 'ready',
    },
    {
       name: 'run',
-      summary: 'Execute a saved or inline accessibility scenario.',
-      maturity: 'planned',
+      summary: 'Execute automated rule scans and named interaction patterns.',
+      maturity: 'ready',
    },
    {
       name: 'verify',
@@ -91,39 +101,121 @@ const cliCommands: CliCommand[] = [
       maturity: 'ready',
    },
    {
-      name: 'story',
-      summary: 'Run a Storybook scenario against a local dev server.',
-      maturity: 'planned',
-   },
-   {
       name: 'mcp',
       summary: 'Expose the runtime over an MCP stdio server.',
-      maturity: 'scaffolded',
+      maturity: 'ready',
    },
 ];
 
 const { env: processEnv } = process;
 
+function getBaseVoiceOverNotes(): string[] {
+   return [
+      'Run `npx @guidepup/setup` before the first real-device session.',
+      'a11ied uses native macOS video capture without requesting microphone input.',
+   ];
+}
+
+function probeVoiceOverRecordingFailureNote(args: {
+   status: number | null;
+   stderr: string;
+}): string {
+   if (args.stderr) {
+      return `Recording probe failed: ${args.stderr}`;
+   }
+
+   return `Recording probe failed: screencapture exited with code ${String(args.status ?? 'unknown')} without writing a movie file.`;
+}
+
+function createVoiceOverRecordingProbeNotes(): string[] {
+   const probeDir = mkdtempSync(join(tmpdir(), 'a11ied-doctor-'));
+   const probePath = join(probeDir, 'recording-probe.mov');
+
+   try {
+      const result = spawnSync(
+         '/usr/sbin/screencapture',
+         ['-v', '-V', String(DOCTOR_RECORDING_PROBE_SECONDS), probePath],
+         {
+            encoding: 'utf8',
+            timeout: DOCTOR_RECORDING_TIMEOUT_MS,
+         },
+      );
+      if (result.error) {
+         return [
+            `Recording probe failed: ${result.error.message}`,
+            SCREEN_RECORDING_PERMISSION_NOTE,
+         ];
+      }
+
+      if (result.status === 0 && existsSync(probePath)) {
+         return ['Native screen recording probe passed for the current host app.'];
+      }
+
+      return [
+         probeVoiceOverRecordingFailureNote({
+            status: result.status,
+            stderr: result.stderr.trim(),
+         }),
+         SCREEN_RECORDING_PERMISSION_NOTE,
+      ];
+   } finally {
+      rmSync(probeDir, { recursive: true, force: true });
+   }
+}
+
+function createVoiceOverNotes(): string[] {
+   const notes = getBaseVoiceOverNotes();
+   if (process.platform !== 'darwin') {
+      return notes;
+   }
+
+   return [...notes, ...createVoiceOverRecordingProbeNotes()];
+}
+
+function createSupportedTargets(): Target[] {
+   const targets: Target[] = [];
+
+   for (const target of supportedTargets) {
+      if (target.platform === 'voiceover') {
+         targets.push({
+            id: target.id,
+            platform: target.platform,
+            os: target.os,
+            status: target.status,
+            notes: createVoiceOverNotes(),
+         });
+      } else {
+         targets.push(target);
+      }
+   }
+
+   return targets;
+}
+
+/** Builds the doctor report shown by the public CLI and library surface. */
 export function createDoctorReport(): DoctorReport {
    return {
       packageVersion: '0.1.0',
       nodeVersion: process.version,
       npmVersion: processEnv.npm_config_user_agent ?? 'unknown',
-      targets: supportedTargets,
+      targets: createSupportedTargets(),
    };
 }
 
+/** Lists the shipped top-level CLI command families and their maturity labels. */
 export function listCliCommands(): CliCommand[] {
    return cliCommands;
 }
 
+/** Lists the supported driver targets and their setup expectations. */
 export function listSupportedTargets(): Target[] {
-   return supportedTargets;
+   return createSupportedTargets();
 }
 
+/** Renders a plain-text doctor report for terminal output. */
 export function renderDoctorText(report: DoctorReport): string {
    const lines = [
-      `a11lied ${report.packageVersion}`,
+      `a11ied ${report.packageVersion}`,
       `Node ${report.nodeVersion}`,
       `npm ${report.npmVersion}`,
       '',

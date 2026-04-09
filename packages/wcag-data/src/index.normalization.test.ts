@@ -1,4 +1,4 @@
-import type { NormalizedCriterion } from '@a11lied/contracts';
+import type { NormalizedCriterion } from '@a11ied/contracts';
 
 import { describe, expect, it } from 'vitest';
 

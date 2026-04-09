@@ -4,8 +4,8 @@ import {
    verificationReportSchema,
    wcagLevelSchema,
    wcagVersionSchema,
-} from '@a11lied/contracts';
-import { verifyCriterion, verifyLevel } from '@a11lied/core';
+} from '@a11ied/contracts';
+import { verifyCriterion, verifyLevel } from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import {

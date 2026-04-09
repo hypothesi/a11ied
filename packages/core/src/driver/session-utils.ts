@@ -6,14 +6,15 @@ import {
    accessibilityDriverSessionSchema,
    type AccessibilityDriverSession,
    type Platform,
-} from '@a11lied/contracts';
-import { createDriverAdapter } from '@a11lied/guidepup';
+   type SessionRecording,
+} from '@a11ied/contracts';
+import { createDriverAdapter } from '@a11ied/guidepup';
 
 import { connectToBroker } from './broker-client.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
 
 const JSON_INDENT = 2;
-const stateFolder = '.a11lied';
+const stateFolder = '.a11ied';
 const UNIX_SOCKET_DIR = '/tmp';
 
 const { env } = process;
@@ -43,9 +44,9 @@ export function getDriverSessionMetadataPath(
 
 export function getDriverSocketPath(sessionId: string, _cwd = process.cwd()): string {
    if (process.platform === 'win32') {
-      return `\\\\.\\pipe\\a11lied-${sessionId}`;
+      return `\\\\.\\pipe\\a11ied-${sessionId}`;
    }
-   return resolve(UNIX_SOCKET_DIR, `a11lied-${sessionId}.sock`);
+   return resolve(UNIX_SOCKET_DIR, `a11ied-${sessionId}.sock`);
 }
 
 export async function ensureStateDirectories(cwd = process.cwd()): Promise<void> {
@@ -63,21 +64,23 @@ export async function writeSessionMetadata(
    await writeFile(session.metadataFile, `${json}\n`, 'utf8');
 }
 
-export function buildEphemeralSession(
-   target: Platform,
-   cwd: string,
-   logCursor: number,
-): AccessibilityDriverSession {
+export function buildEphemeralSession(args: {
+   target: Platform;
+   cwd: string;
+   logCursor: number;
+   recording?: SessionRecording;
+}): AccessibilityDriverSession {
    const sessionId = `ephemeral_${crypto.randomUUID()}`;
    return accessibilityDriverSessionSchema.parse({
       sessionId,
-      target,
+      target: args.target,
       startedAt: new Date().toISOString(),
-      capabilities: createDriverAdapter(target).capabilities,
-      logCursor,
+      capabilities: createDriverAdapter(args.target).capabilities,
+      logCursor: args.logCursor,
       brokerPid: process.pid,
       socketPath: `ephemeral://${sessionId}`,
-      metadataFile: getDriverSessionMetadataPath(sessionId, cwd),
+      metadataFile: getDriverSessionMetadataPath(sessionId, args.cwd),
+      recording: args.recording,
    });
 }
 

@@ -4,11 +4,9 @@ import {
    type CliCommandFamily,
    type CliMessage,
    type CliOutputEnvelope,
-} from '@a11lied/contracts';
-import { CliEnvironmentError, CliUsageError } from '@a11lied/core';
-
-export const CLI_VERSION = '0.1.0';
-export const JSON_INDENT = 2;
+} from '#contracts';
+import { CliEnvironmentError, CliUsageError } from '#core';
+import { CLI_VERSION, JSON_INDENT } from './constants.js';
 
 export interface CommandExecution {
    ok?: boolean;
@@ -17,12 +15,6 @@ export interface CommandExecution {
    target?: Record<string, unknown> | undefined;
    warnings?: CliMessage[];
    errors?: CliMessage[];
-}
-
-export function notReady(name: string): never {
-   throw new Error(
-      `${name} is scaffolded but not implemented yet. See plans/a11lied-cli-implementation-plan.md.`,
-   );
 }
 
 function resolveWcagVersion(version: string | undefined): string | undefined {

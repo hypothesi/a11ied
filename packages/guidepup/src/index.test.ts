@@ -46,7 +46,7 @@ describe('guidepup driver adapters', () => {
    });
 
    it('returns setup commands for real targets', () => {
-      expect(guidepupSetupCommand('voiceover')).toContain('@guidepup/setup');
+      expect(guidepupSetupCommand('voiceover')).toBe('npx @guidepup/setup --record');
       expect(guidepupSetupCommand('nvda')).toContain('@guidepup/setup');
    });
 });

@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { getCoverage } from '@a11lied/wcag-engine';
+import { getCoverage } from '@a11ied/wcag-engine';
 import {
    createTestServer,
    type TestServerHandle,

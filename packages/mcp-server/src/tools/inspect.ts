@@ -1,5 +1,5 @@
-import { criterionLookupKeySchema, wcagVersionSchema } from '@a11lied/contracts';
-import { inspectApplicableTarget, inspectCriterionTarget } from '@a11lied/core';
+import { criterionLookupKeySchema, wcagVersionSchema } from '@a11ied/contracts';
+import { inspectApplicableTarget, inspectCriterionTarget } from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import {

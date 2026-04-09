@@ -1,0 +1,121 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+---
+
+<DocShell
+   title="Workflows"
+   summary="This is the fast path for people who know the job they need to do but do not yet know which layer of a11ied owns it."
+   links={docsLinks}
+>
+   <section class="split panel" id="check-one-criterion">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Workflow 1</p>
+            <h2>Check one criterion</h2>
+         </div>
+         <p>
+            Use this when you already know the rule you care about, or when a bug report points at one
+            criterion and you need to prove it cleanly.
+         </p>
+         <pre><code>node packages/cli/dist/cli.js wcag show 4.1.3 --json
+node packages/cli/dist/cli.js inspect criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json
+node packages/cli/dist/cli.js run pattern status_message_probe --target virtual --url http://127.0.0.1:6173/status-message.html --json
+node packages/cli/dist/cli.js verify criterion 4.1.3 --target virtual --url http://127.0.0.1:6173/status-message.html --json</code></pre>
+      </div>
+      <div class="split-aside">
+         <div class="tag">follow-up</div>
+         <p class="aside-note">
+            If you do not know the exact rule yet, start with <a href="/criterion-lookup">criterion
+            lookup</a> or <a href="/applicability">applicability</a>.
+         </p>
+      </div>
+   </section>
+
+   <section class="split panel" id="verify-a-level">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Workflow 2</p>
+            <h2>Verify a target level</h2>
+         </div>
+         <p>
+            Use this when the claim is about A, AA, or AAA for a target. The important part is that
+            <code>verify level</code> expands the criterion matrix; it is not just one big axe run.
+         </p>
+         <pre><code>node packages/cli/dist/cli.js verify level AA --target virtual --url http://127.0.0.1:6173/basic-page.html --json</code></pre>
+      </div>
+      <div class="split-aside">
+         <div class="tag">read this too</div>
+         <p class="aside-note">
+            The verdict semantics matter here. Read <a href="/verification-semantics">verification
+            semantics</a> before you treat a mixed result like a pass.
+         </p>
+      </div>
+   </section>
+
+   <section class="split panel" id="drive-a-session">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Workflow 3</p>
+            <h2>Drive a session manually</h2>
+         </div>
+         <p>
+            Use the driver layer when you need raw control over the reader instead of a prepackaged
+            probe.
+         </p>
+         <pre><code>node packages/cli/dist/cli.js drive start --target virtual --url http://127.0.0.1:6173/basic-page.html --json
+node packages/cli/dist/cli.js drive next --session &lt;sessionId&gt; --json
+node packages/cli/dist/cli.js drive read --session &lt;sessionId&gt; --json
+node packages/cli/dist/cli.js drive stop --session &lt;sessionId&gt; --json</code></pre>
+      </div>
+      <div class="split-aside">
+         <div class="tag">warning</div>
+         <p class="aside-note">
+            Raw transcripts are evidence, not verdicts. If you want a compliance claim, you still need
+            the verification layer afterward.
+         </p>
+      </div>
+   </section>
+
+   <section class="split panel" id="agent-and-storybook">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Workflow 4</p>
+            <h2>Use it from an agent or Storybook</h2>
+         </div>
+         <p>
+            MCP is the agent surface. Storybook is the component surface. Both use the same runtime, but
+            they solve different operator problems.
+         </p>
+         <div class="workflow-list">
+            <div class="workflow-row">
+               <strong><a href="/mcp-usage">MCP usage</a></strong>
+               <span>Use tool calls and read-only resources from an editor or agent host.</span>
+            </div>
+            <div class="workflow-row">
+               <strong><a href="/storybook-usage">Storybook usage</a></strong>
+               <span>Resolve local stories as test targets without inventing extra fixture wiring.</span>
+            </div>
+         </div>
+      </div>
+      <div class="split-aside">
+         <div class="tag">smallest tool first</div>
+         <p class="aside-note">
+            Start with read-only lookup or inspect tools if the agent only needs to decide whether a rule
+            matters. Do not launch a browser just because the server can.
+         </p>
+      </div>
+   </section>
+
+   <section class="field-note">
+      <div class="panel-head">
+         <p class="panel-kicker">Rule of thumb</p>
+         <h2>If you only need one layer, stop there</h2>
+      </div>
+      <p>
+         The product is split on purpose. A rule lookup is not a driver session. A driver session is not
+         a verification verdict. Most of the bad automation stories in this space come from blurring
+         those lines.
+      </p>
+   </section>
+</DocShell>

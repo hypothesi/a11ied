@@ -4,7 +4,7 @@ import {
    type DriverCheckpoint,
    type DriverReadiness,
    type DriverStateSnapshot,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 import { JSDOM } from 'jsdom';
 
 import {
@@ -18,7 +18,7 @@ const defaultVirtualHtml = `
 <html lang="en">
   <body>
     <main>
-      <h1>A11lied virtual target</h1>
+      <h1>a11ied virtual target</h1>
       <p>No live page is attached to this driver session yet.</p>
       <button type="button">Continue</button>
     </main>
@@ -116,7 +116,7 @@ export function createVirtualAdapter(): DriverAdapter {
       start: async () => {
          await attachDocument({
             html: defaultVirtualHtml,
-            url: 'https://a11lied.local/virtual',
+            url: 'https://a11ied.local/virtual',
          });
       },
       stop: stopVirtual,

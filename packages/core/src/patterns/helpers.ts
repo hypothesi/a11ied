@@ -6,7 +6,8 @@ import {
    type InteractionPatternResult,
    type InteractionPatternStep,
    type Platform,
-} from '@a11lied/contracts';
+   type SessionRecording,
+} from '@a11ied/contracts';
 
 import {
    attachDocumentToDriverSession,
@@ -21,6 +22,7 @@ export interface RunPatternOptions {
    patternId: string;
    target?: Platform;
    sessionId?: string;
+   recordingPath?: string;
 }
 
 export interface PatternContext {
@@ -250,6 +252,7 @@ export function buildPatternResult(options: {
    logs: DriverActionResult;
    targetMetadata: Record<string, unknown>;
    spokenPhraseLog?: string[];
+   recording?: SessionRecording;
 }): InteractionPatternResult {
    return interactionPatternResultSchema.parse({
       patternId: options.patternId,
@@ -257,6 +260,7 @@ export function buildPatternResult(options: {
       target: options.context.target,
       sessionId: options.context.sessionId,
       managedSession: options.context.managedSession,
+      recording: options.recording,
       stepLog: options.context.stepLog,
       spokenPhraseLog: options.spokenPhraseLog ?? options.logs.state.spokenPhraseLog,
       itemTextLog: options.logs.state.itemTextLog,

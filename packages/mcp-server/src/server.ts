@@ -7,9 +7,10 @@ import { registerInspectTools } from './tools/inspect.js';
 import { registerKnowledgeTools } from './tools/knowledge.js';
 import { registerVerificationTools } from './tools/verification.js';
 
+/** Creates the MCP server with all shipped tools and read-only resources registered. */
 export function createMcpServer(): McpServer {
    const server = new McpServer({
-      name: 'a11lied',
+      name: 'a11ied',
       version: '0.1.0',
    });
 

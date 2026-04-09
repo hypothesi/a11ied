@@ -1,36 +1,11 @@
 import { mkdir } from 'node:fs/promises';
-import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
 import { isRecord } from '../shared/utils.js';
 import type { RawSourceDefinition, WcagDataDirectories } from '../shared/types.js';
 
-function readPackageName(directory: string): string | undefined {
-   const packageJsonPath = join(directory, 'package.json');
-   if (!existsSync(packageJsonPath)) {
-      return undefined;
-   }
-   return (JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { name?: string }).name;
-}
-
-function parentDirectory(directory: string, packageName: string): string {
-   const parent = resolve(directory, '..');
-   if (parent === directory) {
-      throw new Error(`Unable to locate package root for ${packageName}`);
-   }
-   return parent;
-}
-
-function findPackageRoot(packageName: string): string {
-   let current = import.meta.dirname;
-   while (readPackageName(current) !== packageName) {
-      current = parentDirectory(current, packageName);
-   }
-   return current;
-}
-
-export const packageRoot = findPackageRoot('@a11lied/wcag-data');
+export const packageRoot = resolve(import.meta.dirname, '../..');
 const esmRequire = createRequire(import.meta.url);
 export const axeCorePackage = esmRequire('axe-core/package.json') as { version: string };
 export const wcagVersions = ['2.2', '2.1'] as const;
@@ -122,6 +97,7 @@ export const rawSourceDefinitions: RawSourceDefinition[] = [
    },
 ];
 
+/** Returns the directory layout used by the WCAG data package. */
 export function getWcagDataDirectories(): WcagDataDirectories {
    return {
       packageRoot,
@@ -143,16 +119,19 @@ export async function ensureDataDirectories(
    ]);
 }
 
+/** Creates the WCAG data directory layout when it does not exist yet. */
 export async function ensureWcagDataDirectories(): Promise<WcagDataDirectories> {
    const directories = getWcagDataDirectories();
    await ensureDataDirectories(directories);
    return directories;
 }
 
+/** Lists the approved upstream URLs this package syncs from. */
 export function listApprovedUpstreamSourceUrls(): string[] {
    return rawSourceDefinitions.map((definition) => definition.primaryUrl);
 }
 
+/** Lists the raw source definitions used by the sync pipeline. */
 export function listRawSourceDefinitions(): RawSourceDefinition[] {
    return [...rawSourceDefinitions];
 }

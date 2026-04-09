@@ -10,7 +10,7 @@ import {
    type CriterionApplicabilityLookupResult,
    type CriterionLookupKey,
    type NormalizedCriterion,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 import { getArtifacts, parseVersion, resolveCriterion } from '../artifacts/runtime.js';
 import {
@@ -204,6 +204,7 @@ function evaluateCriterionApplicability(
    return evaluateWidgetOrDefault(ctx);
 }
 
+/** Explains how one criterion applies to one applicability input. */
 export function getCriterionApplicability(
    lookupKey: CriterionLookupKey,
    input: ApplicabilityInput,
@@ -223,6 +224,7 @@ export function getCriterionApplicability(
    });
 }
 
+/** Computes applicability assessments for the full criterion set. */
 export function listApplicableCriteria(
    input: ApplicabilityInput,
    options?: { version?: string },

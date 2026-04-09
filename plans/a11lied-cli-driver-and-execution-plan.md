@@ -1,4 +1,4 @@
-# [a11lied CLI, driver, and execution]: Implementation Plan (v0.3.0 – 2026-04-06)
+# [a11ied CLI, driver, and execution]: Implementation Plan (v0.3.0 – 2026-04-06)
 
 ## Summary
 
@@ -74,7 +74,7 @@ CLI commands
    - session start and stop
    - normalized low-level actions
    - higher-level pattern helpers
-- CLI driver sessions must be backed by a local broker process managed by `packages/core`. Session metadata must be stored under `.a11lied/state/sessions/<sessionId>.json`, and follow-up commands must reattach by `sessionId`.
+- CLI driver sessions must be backed by a local broker process managed by `packages/core`. Session metadata must be stored under `.a11ied/state/sessions/<sessionId>.json`, and follow-up commands must reattach by `sessionId`.
 - URL-based `inspect`, `run`, and later `verify` flows must use an internal Playwright-backed browser helper owned by `packages/core`. This helper is an internal dependency only and is not exposed as a public low-level browser-control CLI.
 - `axe-core` should run through a dedicated execution path so result normalization stays isolated from CLI formatting.
 - In sub-plan 2, public target input support is limited to URL-based targets. Storybook targets are introduced only in sub-plan 3.
@@ -116,10 +116,10 @@ Every row in this sub-plan is incomplete until all of the following are true:
 1. Write an ADR that defines the top-level command split:
 
 ```text
-a11lied wcag
-a11lied inspect
-a11lied drive
-a11lied run
+a11ied wcag
+a11ied inspect
+a11ied drive
+a11ied run
 ```
 
 2. Specify required arguments, optional flags, output modes, and exit codes for each subcommand family.
@@ -149,8 +149,8 @@ a11lied run
 
 **Step-by-step instructions:**
 
-1. Implement `a11lied wcag levels`, `criteria`, `show`, `search`, and `coverage`.
-2. Implement `a11lied inspect applicable` and `inspect criterion` for URL targets only in this sub-plan.
+1. Implement `a11ied wcag levels`, `criteria`, `show`, `search`, and `coverage`.
+2. Implement `a11ied inspect applicable` and `inspect criterion` for URL targets only in this sub-plan.
 3. Wire both command groups to `packages/wcag-engine`.
 4. Keep text output readable and compact, and keep JSON output complete enough for automation.
 5. Add representative CLI snapshots for:
@@ -198,17 +198,17 @@ a11lied run
 2. Implement action commands such as:
 
 ```text
-a11lied drive key
-a11lied drive type
-a11lied drive next
-a11lied drive previous
-a11lied drive interact
-a11lied drive stop-interacting
-a11lied drive click-current-item
-a11lied drive read
-a11lied drive logs
-a11lied drive clear-logs
-a11lied drive checkpoint
+a11ied drive key
+a11ied drive type
+a11ied drive next
+a11ied drive previous
+a11ied drive interact
+a11ied drive stop-interacting
+a11ied drive click-current-item
+a11ied drive read
+a11ied drive logs
+a11ied drive clear-logs
+a11ied drive checkpoint
 ```
 
 3. Require `--session <id>` on every action command unless `--ephemeral` is present.

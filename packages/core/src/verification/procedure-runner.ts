@@ -6,7 +6,7 @@ import {
    type VerificationEvidenceRecord,
    type VerificationExecutionStep,
    type VerificationUncoveredWorkItem,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 import { runAxe } from '../axe/runtime.js';
 import { runInteractionPattern } from '../patterns/runtime.js';
@@ -26,6 +26,7 @@ export interface ProcedureContext {
    url: string;
    parsedTarget: Platform;
    wcagVersion: string;
+   sessionId?: string;
    evidenceMode: VerificationCriterionResult['evidenceMode'];
    baseSourceReferences: VerificationCriterionResult['sourceReferences'];
    axeRuleIds: string[];
@@ -73,13 +74,30 @@ async function processPatternProcedure(
    procedureId: string,
 ): Promise<void> {
    try {
-      const patternResult = await runInteractionPattern({
+      const patternInput = {
          patternId: procedureId as Parameters<
             typeof runInteractionPattern
          >[0]['patternId'],
          url: ctx.url,
          target: ctx.parsedTarget,
-      });
+      };
+      if (ctx.sessionId) {
+         const patternResult = await runInteractionPattern({
+            ...patternInput,
+            sessionId: ctx.sessionId,
+         });
+         handlePatternStep({
+            procedureId,
+            criterionId: ctx.criterionId,
+            baseSourceReferences: ctx.baseSourceReferences,
+            evidenceMode: ctx.evidenceMode,
+            patternResult,
+            executionSteps: ctx.executionSteps,
+            evidence: ctx.evidence,
+         });
+         return;
+      }
+      const patternResult = await runInteractionPattern(patternInput);
       handlePatternStep({
          procedureId,
          criterionId: ctx.criterionId,

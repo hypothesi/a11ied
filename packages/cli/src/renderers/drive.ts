@@ -1,7 +1,52 @@
-import type { CliOutputEnvelope } from '@a11lied/contracts';
+import type { CliOutputEnvelope } from '#contracts';
+
+interface DriveRecording {
+   path: string;
+   status: string;
+   format: string;
+}
+
+interface DriveSessionInfo {
+   sessionId: string;
+   target: string;
+   recording?: DriveRecording;
+}
+
+interface DriveStateWithCursor {
+   logCursor: number;
+   checkpoints?: Array<{ label: string }>;
+}
+
+interface DriveStatusState extends DriveStateWithCursor {
+   lastSpokenPhrase: string | null;
+   currentItemText: string | null;
+}
+
+interface DriveLogsState extends DriveStateWithCursor {
+   spokenPhraseLog: string[];
+   itemTextLog: string[];
+}
+
+interface DriveResult<TState extends DriveStateWithCursor> {
+   action: string;
+   session: DriveSessionInfo;
+   state: TState;
+}
 
 function formatCheckpoints(checkpoints?: Array<{ label: string }>): string {
    return checkpoints?.map((entry) => entry.label).join(', ') || 'none';
+}
+
+function formatRecording(recording?: {
+   path: string;
+   status: string;
+   format: string;
+}): string {
+   if (!recording) {
+      return 'none';
+   }
+
+   return `${recording.status} ${recording.format} ${recording.path}`;
 }
 
 function buildDriveLines(args: {
@@ -43,6 +88,7 @@ export function renderDriveSessionText(
          startedAt: string;
          brokerPid: number;
          socketPath: string;
+         recording?: { path: string; status: string; format: string };
       };
    };
 
@@ -52,6 +98,7 @@ export function renderDriveSessionText(
       `Started: ${result.session.startedAt}`,
       `Broker PID: ${result.session.brokerPid}`,
       `Socket: ${result.session.socketPath}`,
+      `Recording: ${formatRecording(result.session.recording)}`,
    ].join('\n');
 }
 
@@ -59,16 +106,7 @@ export function renderDriveStatusText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },
 ): string {
-   const result = envelope.result as {
-      action: string;
-      session: { sessionId: string; target: string };
-      state: {
-         lastSpokenPhrase: string | null;
-         currentItemText: string | null;
-         logCursor: number;
-         checkpoints?: Array<{ label: string }>;
-      };
-   };
+   const result = envelope.result as unknown as DriveResult<DriveStatusState>;
 
    const lines = buildDriveLines({
       action: result.action,
@@ -82,6 +120,7 @@ export function renderDriveStatusText(
       checkpoints: result.state.checkpoints,
       verbose: options.verbose,
    });
+   lines.push(`Recording: ${formatRecording(result.session.recording)}`);
 
    return lines.join('\n');
 }
@@ -90,16 +129,7 @@ export function renderDriveLogsText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },
 ): string {
-   const result = envelope.result as {
-      action: string;
-      session: { sessionId: string; target: string };
-      state: {
-         spokenPhraseLog: string[];
-         itemTextLog: string[];
-         logCursor: number;
-         checkpoints?: Array<{ label: string }>;
-      };
-   };
+   const result = envelope.result as unknown as DriveResult<DriveLogsState>;
 
    const lines = buildDriveLines({
       action: result.action,
@@ -113,6 +143,7 @@ export function renderDriveLogsText(
       checkpoints: result.state.checkpoints,
       verbose: options.verbose,
    });
+   lines.push(`Recording: ${formatRecording(result.session.recording)}`);
 
    return lines.join('\n');
 }

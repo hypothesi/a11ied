@@ -1,17 +1,10 @@
 import type { Command } from 'commander';
-import { inspectApplicableTarget, inspectCriterionTarget } from '@a11lied/core';
 import {
    addJsonOption,
    addStorybookTargetOptions,
    addVerboseOption,
    addWcagVersionOption,
 } from '../lib/options.js';
-import { executeCommand, resolveCliTarget } from '../lib/execute.js';
-import { buildCliTargetInput } from '../lib/target-input.js';
-import {
-   renderApplicableText,
-   renderCriterionApplicabilityText,
-} from '../renderers/index.js';
 
 interface InspectOptions {
    json?: boolean;
@@ -23,6 +16,18 @@ interface InspectOptions {
 }
 
 async function handleApplicableAction(options: InspectOptions): Promise<void> {
+   const [
+      { executeCommand, resolveCliTarget },
+      { buildCliTargetInput },
+      renderers,
+      core,
+   ] = await Promise.all([
+      import('../lib/execute.js'),
+      import('../lib/target-input.js'),
+      import('../renderers/index.js'),
+      import('#core'),
+   ]);
+
    await executeCommand(
       {
          family: 'inspect',
@@ -34,13 +39,13 @@ async function handleApplicableAction(options: InspectOptions): Promise<void> {
       async () => {
          const targetInput = buildCliTargetInput(options);
          const resolved = await resolveCliTarget(targetInput);
-         const result = await inspectApplicableTarget(targetInput, options.version);
+         const result = await core.inspectApplicableTarget(targetInput, options.version);
          return {
             target: resolved.reportTarget,
             result: result as unknown as Record<string, unknown>,
          };
       },
-      renderApplicableText,
+      renderers.renderApplicableText,
    );
 }
 
@@ -65,6 +70,18 @@ async function handleCriterionAction(
    criterion: string,
    options: InspectOptions,
 ): Promise<void> {
+   const [
+      { executeCommand, resolveCliTarget },
+      { buildCliTargetInput },
+      renderers,
+      core,
+   ] = await Promise.all([
+      import('../lib/execute.js'),
+      import('../lib/target-input.js'),
+      import('../renderers/index.js'),
+      import('#core'),
+   ]);
+
    await executeCommand(
       {
          family: 'inspect',
@@ -76,7 +93,7 @@ async function handleCriterionAction(
       async () => {
          const targetInput = buildCliTargetInput(options);
          const resolved = await resolveCliTarget(targetInput);
-         const result = await inspectCriterionTarget(
+         const result = await core.inspectCriterionTarget(
             criterion,
             targetInput,
             options.version,
@@ -86,7 +103,7 @@ async function handleCriterionAction(
             result: result as unknown as Record<string, unknown>,
          };
       },
-      renderCriterionApplicabilityText,
+      renderers.renderCriterionApplicabilityText,
    );
 }
 

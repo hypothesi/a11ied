@@ -1,4 +1,4 @@
-import { cliMessageSchema, type CliMessage } from '@a11lied/contracts';
+import { cliMessageSchema, type CliMessage } from '@a11ied/contracts';
 
 export function appendProcedureError(args: {
    criterionId: string;

@@ -1,4 +1,4 @@
-# [a11lied roadmap]: Implementation Plan (v0.3.0 – 2026-04-06)
+# [a11ied roadmap]: Implementation Plan (v0.3.0 – 2026-04-06)
 
 ## Summary
 
@@ -6,7 +6,7 @@ Break the original single plan into a staged roadmap with three focused sub-plan
 
 ## Objectives & Scope
 
-- In scope: define a master roadmap that sequences the `a11lied` build into coherent implementation slices.
+- In scope: define a master roadmap that sequences the `a11ied` build into coherent implementation slices.
 - In scope: split the work into sub-plans with tighter scopes, clearer dependencies, and more detailed task steps.
 - In scope: preserve one shared architecture across CLI, MCP, Storybook, docs, and the Agent Skill.
 - In scope: keep low-level accessibility-driver work explicit rather than burying it inside higher-level WCAG verification tasks.
@@ -124,7 +124,7 @@ npm run test
 npm run build
 ```
 
-3. Use the research files in `research/` and the skill file in `skills/a11lied/SKILL.md` as the source material for the sub-plans.
+3. Use the research files in `research/` and the skill file in `skills/a11ied/SKILL.md` as the source material for the sub-plans.
 4. Do not begin implementation work for sub-plan 2 or sub-plan 3 until sub-plan 1 has locked the shared contracts that they consume.
 
 ### R-02 - Execute sub-plan 1: foundation and WCAG data
@@ -133,7 +133,7 @@ npm run build
 
 **Step-by-step instructions:**
 
-1. Open and execute [plans/a11lied-foundation-and-wcag-data-plan.md](plans/a11lied-foundation-and-wcag-data-plan.md).
+1. Open and execute [plans/a11ied-foundation-and-wcag-data-plan.md](plans/a11ied-foundation-and-wcag-data-plan.md).
 2. Finish the data sync pipeline before exposing public WCAG lookup commands.
 3. Freeze criterion, coverage, applicability, and verification-strategy schemas before driver, CLI, or MCP code starts depending on them.
 4. Introduce the root `npm run standards` script in this sub-plan and use it as the universal completion gate from that point forward.
@@ -145,7 +145,7 @@ npm run build
 
 **Step-by-step instructions:**
 
-1. Open and execute [plans/a11lied-cli-driver-and-execution-plan.md](plans/a11lied-cli-driver-and-execution-plan.md).
+1. Open and execute [plans/a11ied-cli-driver-and-execution-plan.md](plans/a11ied-cli-driver-and-execution-plan.md).
 2. Implement CLI UX only after the WCAG data and engine contracts are stable.
 3. Build low-level driver primitives first, then build higher-level reusable patterns on top of them.
 4. Keep CLI JSON output aligned with the same contracts that later power MCP and verification.
@@ -157,7 +157,7 @@ npm run build
 
 **Step-by-step instructions:**
 
-1. Open and execute [plans/a11lied-verification-integrations-and-adoption-plan.md](plans/a11lied-verification-integrations-and-adoption-plan.md).
+1. Open and execute [plans/a11ied-verification-integrations-and-adoption-plan.md](plans/a11ied-verification-integrations-and-adoption-plan.md).
 2. Reuse the contracts and driver layer from the earlier sub-plans instead of inventing integration-specific shapes.
 3. Keep criterion-level evidence explicit so level-based verification never hides uncovered or manual-only criteria.
 4. Finish docs, skill, MCP, and Storybook work against the same reporting model.
@@ -191,10 +191,10 @@ npm run build
 
 ## New Code
 
-- `plans/a11lied-cli-implementation-plan.md`: master roadmap that sequences the work and points to detailed sub-plans.
-- `plans/a11lied-foundation-and-wcag-data-plan.md`: detailed plan for data sync, normalization, contracts, and the WCAG engine.
-- `plans/a11lied-cli-driver-and-execution-plan.md`: detailed plan for CLI UX, driver primitives, and reusable execution procedures.
-- `plans/a11lied-verification-integrations-and-adoption-plan.md`: detailed plan for verification, Storybook, MCP, docs, skill, and release readiness.
+- `plans/a11ied-cli-implementation-plan.md`: master roadmap that sequences the work and points to detailed sub-plans.
+- `plans/a11ied-foundation-and-wcag-data-plan.md`: detailed plan for data sync, normalization, contracts, and the WCAG engine.
+- `plans/a11ied-cli-driver-and-execution-plan.md`: detailed plan for CLI UX, driver primitives, and reusable execution procedures.
+- `plans/a11ied-verification-integrations-and-adoption-plan.md`: detailed plan for verification, Storybook, MCP, docs, skill, and release readiness.
 - `specs/gherkin/traceability.md`: task-to-feature traceability matrix used to prove completion gates.
 - `specs/manual-runs/*`: AI-agent manual acceptance reports tied to the same feature files as the automated tests.
 

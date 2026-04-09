@@ -1,9 +1,5 @@
-import {
-   platformSchema,
-   type Platform,
-   type VerificationReport,
-} from '@a11lied/contracts';
-import { CliUsageError, resolveDocumentTarget } from '@a11lied/core';
+import { platformSchema, type Platform, type VerificationReport } from '#contracts';
+import { CliUsageError, resolveDocumentTarget } from '#core';
 
 export function parsePlatform(target: string | undefined): Platform {
    const parsed = platformSchema.safeParse(target);
@@ -236,11 +232,4 @@ export function resolveRunAxeSelection(options: {
 
    const ruleIds = options.rule ?? [];
    return { kind: 'rule', ruleIds };
-}
-
-export function stripHtml(value: string): string {
-   return value
-      .replaceAll(/<[^>]+>/g, '')
-      .replaceAll(/\s+/g, ' ')
-      .trim();
 }

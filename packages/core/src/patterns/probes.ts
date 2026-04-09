@@ -1,7 +1,7 @@
 import {
    interactionPatternResultSchema,
    type InteractionPatternResult,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 import type { Page } from 'playwright';
 
 import { withBrowserPage } from '../browser/helper.js';

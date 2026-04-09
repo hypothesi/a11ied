@@ -1,4 +1,4 @@
-import type { CliOutputEnvelope } from '@a11lied/contracts';
+import type { CliOutputEnvelope } from '#contracts';
 
 interface VerificationCriterionRow {
    criterionId: string;
@@ -14,6 +14,7 @@ interface VerificationCriterionRow {
 interface VerificationResult {
    requestedScope: { kind: string; criterion?: string; level?: string };
    wcagVersion: string;
+   recording?: { path: string; status: string; format: string };
    criteria: VerificationCriterionRow[];
    summary: {
       totalCriteria: number;
@@ -49,6 +50,18 @@ function formatWarningsLine(envelope: CliOutputEnvelope): string {
    return `Warnings: ${envelope.warnings.map((entry) => entry.code).join(', ') || 'none'}`;
 }
 
+function formatRecordingLine(recording?: {
+   path: string;
+   status: string;
+   format: string;
+}): string {
+   if (!recording) {
+      return 'Recording: none';
+   }
+
+   return `Recording: ${recording.status} ${recording.format} ${recording.path}`;
+}
+
 function appendVerboseDetails(
    lines: string[],
    result: VerificationResult,
@@ -80,6 +93,7 @@ function renderLevelVerificationText(
    const lines = [
       `Scope: ${opts.scopeLabel}`,
       `WCAG: ${result.wcagVersion}`,
+      formatRecordingLine(result.recording),
       `Summary: total=${result.summary.totalCriteria} failed=${result.summary.failedCount}`,
       formatVerdictsLine(result.summary.verdicts),
       formatEvidenceModesLine(result.summary.evidenceModes),
@@ -142,6 +156,7 @@ function renderCriterionVerificationText(
    const lines = [
       `Scope: ${opts.scopeLabel}`,
       `WCAG: ${result.wcagVersion}`,
+      formatRecordingLine(result.recording),
       `${row.criterionId}  ${row.criterion.title}`,
       `Verdict: ${row.verdict} [${row.evidenceMode}]`,
       `Procedures: ${row.procedureIds.join(', ') || 'none'}`,

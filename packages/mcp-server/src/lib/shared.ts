@@ -6,8 +6,8 @@ import {
    wcagVersionSchema,
    type CriteriaByLevelResult,
    type NormalizedCriterion,
-} from '@a11lied/contracts';
-import { listWcagCriteria, resolveDocumentTarget, showWcagCoverage } from '@a11lied/core';
+} from '@a11ied/contracts';
+import { listWcagCriteria, resolveDocumentTarget, showWcagCoverage } from '@a11ied/core';
 import { z } from 'zod';
 
 export const JSON_INDENT = 2;

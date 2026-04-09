@@ -5,7 +5,7 @@ import type {
    PreferredEvidenceMode,
    StrategyArtifact,
    WcagVersion,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 export type SourceFormat = 'json' | 'yaml' | 'derived-json';
 export type JsonRecord = Record<string, unknown>;
@@ -194,6 +194,7 @@ export interface GeneratedCoverageArtifacts {
 
 const SYNC_ERROR_EXIT_CODE = 3;
 
+/** Raised when raw or generated WCAG data fails local validation. */
 export class SyncValidationError extends Error {
    readonly exitCode = SYNC_ERROR_EXIT_CODE;
    readonly sourceId: RawSourceId;

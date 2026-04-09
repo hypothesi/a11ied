@@ -1,4 +1,4 @@
-import type { VerificationSourceReference } from '@a11lied/contracts';
+import type { VerificationSourceReference } from '@a11ied/contracts';
 
 export function formatAxeSummary(violationCount: number, criterionId: string): string {
    if (violationCount > 0) {

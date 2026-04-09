@@ -1,22 +1,12 @@
 ---
 import DocShell from '../layouts/doc-shell.astro';
-
-const links = [
-   { href: '/', label: 'Overview' },
-   { href: '/wcag-data-sources', label: 'WCAG data sources' },
-   { href: '/criterion-lookup', label: 'Criterion lookup' },
-   { href: '/applicability', label: 'Applicability' },
-   { href: '/driver-usage', label: 'Driver usage' },
-   { href: '/pattern-execution', label: 'Pattern execution' },
-   { href: '/verification-semantics', label: 'Verification semantics' },
-   { href: '/release-checklist', label: 'Release checklist' },
-];
+import { docsLinks } from '../lib/nav';
 ---
 
 <DocShell
    title="Release checklist"
    summary="Public releases need one last reality check. CI covers the fast, repeatable virtual path. It does not replace real assistive technology smoke tests."
-   links={links}
+   links={docsLinks}
 >
    <section>
       <h2>Before a public minor or major release</h2>
@@ -27,6 +17,13 @@ const links = [
          <li>Review the deferred items for the release and make an explicit accept or block decision.</li>
          <li>Record what was exercised and any environment constraints that mattered.</li>
       </ol>
+   </section>
+
+   <section>
+      <h2>Do not skip these basic commands</h2>
+      <pre><code>npm run standards
+node packages/cli/dist/cli.js help-all
+node packages/cli/dist/cli.js doctor --json</code></pre>
    </section>
 
    <section>
@@ -41,9 +38,9 @@ const links = [
    <section>
       <h2>Package, docs, and skill flow</h2>
       <ul>
-         <li>Packages: publish workspace packages in dependency order after `npm run standards` passes.</li>
-         <li>Docs: build `apps/docs/dist/` and publish the generated static site.</li>
-         <li>Agent Skill: ship `skills/a11lied/` only after the skill text matches the released CLI and MCP behavior.</li>
+         <li>Packages: publish workspace packages in dependency order after <code>npm run standards</code> passes.</li>
+         <li>Docs: build <code>apps/docs/dist/</code> and publish the generated static site.</li>
+         <li>Agent Skill: ship <code>skills/a11ied/</code> only after the skill text matches the released CLI and MCP behavior.</li>
       </ul>
    </section>
 
@@ -55,7 +52,7 @@ const links = [
       </p>
    </section>
 
-   <section class="callout">
+   <section class="field-note">
       <h2>Why this page exists</h2>
       <p>
          VoiceOver and NVDA are the real target platforms. The virtual reader is valuable, but it is not

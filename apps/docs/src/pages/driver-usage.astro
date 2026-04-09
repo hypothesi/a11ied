@@ -1,22 +1,12 @@
 ---
 import DocShell from '../layouts/doc-shell.astro';
-
-const links = [
-   { href: '/', label: 'Overview' },
-   { href: '/wcag-data-sources', label: 'WCAG data sources' },
-   { href: '/criterion-lookup', label: 'Criterion lookup' },
-   { href: '/applicability', label: 'Applicability' },
-   { href: '/driver-usage', label: 'Driver usage' },
-   { href: '/pattern-execution', label: 'Pattern execution' },
-   { href: '/verification-semantics', label: 'Verification semantics' },
-   { href: '/release-checklist', label: 'Release checklist' },
-];
+import { docsLinks } from '../lib/nav';
 ---
 
 <DocShell
    title="Driver usage"
    summary="The low-level driver layer exists so an agent can operate VoiceOver, NVDA, or the virtual reader the way a person would. It is intentionally plain: start a session, move, read, type, checkpoint, stop."
-   links={links}
+   links={docsLinks}
 >
    <section>
       <h2>What the driver is for</h2>
@@ -24,6 +14,9 @@ const links = [
          Use <code>drive</code> when you need raw control. That means next item, previous item, keyboard
          chords, interaction mode, reading spoken output, and grabbing logs. If a named pattern already
          exists, use that instead. Patterns are easier to repeat and much easier to review later.
+      </p>
+      <p>
+         If you are still deciding whether this is the right layer, start with <a href="/workflows#drive-a-session">the driver workflow</a>.
       </p>
    </section>
 
@@ -35,7 +28,26 @@ node packages/cli/dist/cli.js drive read --session drv_example --json
 node packages/cli/dist/cli.js drive stop --session drv_example --json</code></pre>
    </section>
 
-   <section class="callout">
+   <section>
+      <h2>What the raw actions are</h2>
+      <div class="route-list">
+         <div class="route-row"><code>start</code>, <code>status</code>, <code>stop</code><span>Create, inspect, and tear down a persistent session.</span></div>
+         <div class="route-row"><code>next</code>, <code>previous</code>, <code>interact</code>, <code>stop-interacting</code><span>Move through the target and switch interaction modes.</span></div>
+         <div class="route-row"><code>key</code>, <code>type</code>, <code>click-current-item</code><span>Send direct commands when you need to act like a real operator.</span></div>
+         <div class="route-row"><code>read</code>, <code>logs</code>, <code>clear-logs</code>, <code>checkpoint</code><span>Capture what the screen reader said and keep the run debuggable.</span></div>
+      </div>
+   </section>
+
+   <section>
+      <h2>Persistent versus ephemeral</h2>
+      <p>
+         Most serious runs should use a persistent session so the transcript, checkpoints, and state stay
+         together. The <code>--ephemeral</code> flag is better for one-off actions than for a full review
+         pass.
+      </p>
+   </section>
+
+   <section class="field-note">
       <h2>Important limit</h2>
       <p>
          A transcript is evidence, not a verdict. "The virtual reader said X" is useful. "Therefore the

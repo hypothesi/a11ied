@@ -6,7 +6,7 @@ interface StorybookIndexEntry {
    title?: string;
    name?: string;
    parameters?: {
-      a11lied?: {
+      a11ied?: {
          metadata?: Record<string, unknown>;
          userHints?: unknown[];
       };
@@ -39,7 +39,7 @@ export async function fetchResponse(
    try {
       response = await fetch(url, {
          headers: {
-            'user-agent': 'a11lied/0.1.0',
+            'user-agent': 'a11ied/0.1.0',
          },
       });
    } catch (error) {
@@ -153,14 +153,14 @@ async function extractRuntimeStoryMetadata(iframeUrl: string): Promise<{
       const raw = await page.evaluate((): RawStoryEvaluateResult => {
          const globalMeta = (
             globalThis as typeof globalThis & {
-               __A11LIED_STORY_METADATA__?: {
+               __a11ied_STORY_METADATA__?: {
                   metadata?: Record<string, unknown>;
                   userHints?: unknown[];
                };
             }
-         ).__A11LIED_STORY_METADATA__;
+         ).__a11ied_STORY_METADATA__;
          const metadataScript = document.querySelector(
-            '#a11lied-story-metadata',
+            '#a11ied-story-metadata',
          ) as HTMLScriptElement | null;
 
          let scriptMeta: {
@@ -194,7 +194,7 @@ function mergeHints(args: {
    entry: StorybookIndexEntry;
    runtime: RuntimeStoryMetadata;
 }): { metadata: Record<string, string>; userHints: string[] } {
-   const parameterHints = args.entry.parameters?.a11lied;
+   const parameterHints = args.entry.parameters?.a11ied;
    const metadata = {
       ...toStringMap(parameterHints?.metadata),
       ...args.runtime.metadata,

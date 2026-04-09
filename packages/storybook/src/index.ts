@@ -3,6 +3,7 @@ export interface StoryScenarioRecipe {
    steps: string[];
 }
 
+/** Builds the default operator recipe for exercising one Storybook story. */
 export function createStoryRecipe(storyId: string): StoryScenarioRecipe {
    return {
       storyId,

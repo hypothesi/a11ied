@@ -9,7 +9,7 @@ import {
    type VerificationReport,
    type VerificationSourceReference,
    type VerificationUncoveredWorkItem,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 export {
    createManualEvidence,

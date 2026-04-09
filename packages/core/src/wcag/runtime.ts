@@ -3,7 +3,7 @@ import {
    type CriterionLookupKey,
    type WcagLevel,
    type WcagVersion,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 import {
    WcagEngineNotFoundError,
    WcagEngineValidationError,
@@ -13,7 +13,7 @@ import {
    listApplicableCriteria,
    listCriteriaByLevel,
    searchCriteria,
-} from '@a11lied/wcag-engine';
+} from '@a11ied/wcag-engine';
 
 import { deriveApplicabilityInputFromHtml } from '../applicability/html.js';
 import { CliEnvironmentError, CliUsageError } from '../errors/cli-errors.js';
@@ -47,6 +47,7 @@ function normalizeEngineError(error: unknown): never {
    throw error;
 }
 
+/** Lists the supported WCAG conformance levels for one pinned WCAG version. */
 export function listWcagLevels(version: string): {
    version: WcagVersion;
    levels: WcagLevel[];
@@ -57,6 +58,7 @@ export function listWcagLevels(version: string): {
    };
 }
 
+/** Lists criteria for one conformance level and WCAG version. */
 export function listWcagCriteria(
    level: string,
    version: string,
@@ -71,6 +73,7 @@ export function listWcagCriteria(
    }
 }
 
+/** Resolves one criterion by id or slug for the requested WCAG version. */
 export function showWcagCriterion(
    lookupKey: CriterionLookupKey,
    version: string,
@@ -84,6 +87,7 @@ export function showWcagCriterion(
    }
 }
 
+/** Searches the local criterion corpus with ranked match metadata. */
 export function searchWcagCriteria(
    query: string,
    options: { version: string; limit: number },
@@ -110,6 +114,7 @@ export function searchWcagCriteria(
    }
 }
 
+/** Returns coverage and verification-strategy metadata for one criterion. */
 export function showWcagCoverage(
    lookupKey: CriterionLookupKey,
    version: string,
@@ -130,6 +135,7 @@ interface InspectApplicableTargetResult {
    matrix: ReturnType<typeof listApplicableCriteria>;
 }
 
+/** Runs applicability analysis for a resolved target input. */
 export async function inspectApplicableTarget(
    targetInput: ResolveDocumentTargetInput,
    version: string,
@@ -154,6 +160,7 @@ export async function inspectApplicableTarget(
    }
 }
 
+/** Runs applicability analysis for one live URL target. */
 export async function inspectApplicableUrl(
    url: string,
    version: string,
@@ -165,6 +172,7 @@ type CriterionApplicabilityResult = ReturnType<typeof getCriterionApplicability>
    signals: ReturnType<typeof deriveApplicabilityInputFromHtml>['signals'];
 };
 
+/** Explains the applicability state of one criterion for a resolved target. */
 export async function inspectCriterionTarget(
    lookupKey: CriterionLookupKey,
    targetInput: ResolveDocumentTargetInput,
@@ -195,6 +203,7 @@ export async function inspectCriterionTarget(
    }
 }
 
+/** Explains the applicability state of one criterion for a live URL target. */
 export async function inspectCriterionUrl(
    lookupKey: CriterionLookupKey,
    url: string,

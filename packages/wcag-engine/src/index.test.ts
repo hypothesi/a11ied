@@ -2,7 +2,7 @@ import type {
    CriterionSearchMatch,
    CriterionSearchResult,
    NormalizedCriterion,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 import { describe, expect, it } from 'vitest';
 

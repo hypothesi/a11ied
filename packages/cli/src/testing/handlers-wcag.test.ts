@@ -9,6 +9,7 @@ import {
    EXIT_USAGE,
    SEARCH_EXCERPT_LINES,
 } from './setup.js';
+import { expectFirstErrorMessage } from './helpers.js';
 
 const testServer: TestServerHandle = createTestServer();
 
@@ -163,9 +164,10 @@ async function assertInspectInvalidCriterion(baseUrl: string): Promise<void> {
       `${baseUrl}/basic-page.html`,
       '--json',
    ]);
-   const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_USAGE);
-   expect((json.errors as Array<{ message: string }>)[0]?.message).toMatch(/9.9.9/i);
+   expectFirstErrorMessage({
+      result,
+      match: /9.9.9/i,
+   });
 }
 
 async function assertTextShowSnapshot(): Promise<void> {

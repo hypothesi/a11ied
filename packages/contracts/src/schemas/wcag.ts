@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { wcagLevelSchema, wcagVersionSchema } from './core.js';
+import { fourWayAutomationCountSchema, techniqueReferenceSchema } from './helpers.js';
 
 export const criterionIdSchema = z.string().regex(/^\d+\.\d+\.\d+$/);
 export type CriterionId = z.infer<typeof criterionIdSchema>;
@@ -84,12 +85,7 @@ export const applicabilityStateSchema = z.enum([
 ]);
 export type ApplicabilityState = z.infer<typeof applicabilityStateSchema>;
 
-export const normalizedTechniqueSchema = z.object({
-   key: z.string(),
-   id: z.string().optional(),
-   title: z.string(),
-   technology: z.string().optional(),
-   kind: z.enum(['sufficient', 'advisory', 'failure']),
+export const normalizedTechniqueSchema = techniqueReferenceSchema.extend({
    groupTitle: z.string().optional(),
    groupNote: z.string().optional(),
    suffix: z.string().optional(),
@@ -151,12 +147,7 @@ export const slugIndexArtifactSchema = z.object({
 });
 export type SlugIndexArtifact = z.infer<typeof slugIndexArtifactSchema>;
 
-export const techniqueIndexEntrySchema = z.object({
-   key: z.string(),
-   id: z.string().optional(),
-   title: z.string(),
-   technology: z.string().optional(),
-   kind: z.enum(['sufficient', 'advisory', 'failure']),
+export const techniqueIndexEntrySchema = techniqueReferenceSchema.extend({
    criterionIds: z.array(z.string()),
 });
 export type TechniqueIndexEntry = z.infer<typeof techniqueIndexEntrySchema>;
@@ -211,12 +202,8 @@ export const strategyArtifactSchema = z.object({
 });
 export type StrategyArtifact = z.infer<typeof strategyArtifactSchema>;
 
-const coverageSummaryBucketSchema = z.object({
+const coverageSummaryBucketSchema = fourWayAutomationCountSchema.extend({
    criteria: z.number().int().nonnegative(),
-   automated: z.number().int().nonnegative(),
-   hybrid: z.number().int().nonnegative(),
-   manual: z.number().int().nonnegative(),
-   unknown: z.number().int().nonnegative(),
 });
 
 export const coverageSummaryArtifactSchema = z.object({

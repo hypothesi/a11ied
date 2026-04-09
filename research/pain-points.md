@@ -46,7 +46,7 @@ Too many tools skew hard in one direction.
 
 The virtual screen reader story is genuinely useful. It is also easy to oversell. If a tool does not draw a bright line between "fast simulation" and "real assistive technology run," people will make bad calls with too much confidence.
 
-## What a11lied should do about it
+## What a11ied should do about it
 
 - Put setup health first with `doctor`.
 - Separate infra failures from accessibility findings through clear exit codes.

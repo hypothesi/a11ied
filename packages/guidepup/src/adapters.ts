@@ -7,10 +7,11 @@ import {
    type DriverReadiness,
    type DriverStateSnapshot,
    type Platform,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 import { createVirtualAdapter } from './virtual-adapter.js';
 
+/** Lists the driver actions exposed by the shipped adapter surface. */
 export const driverCapabilities: DriverCapability[] = [
    'start',
    'stop',
@@ -67,6 +68,7 @@ type ScreenReaderLike = Pick<
 > &
    Pick<ScreenReader, 'detect' | 'default'>;
 
+/** Collects a normalized snapshot from the current screen-reader state. */
 export async function buildStateSnapshot(
    reader: {
       lastSpokenPhrase(): Promise<string>;
@@ -94,9 +96,10 @@ export async function buildStateSnapshot(
    });
 }
 
+/** Returns the setup command operators should run before attempting a real-device session. */
 export function guidepupSetupCommand(platform?: Platform): string {
    if (platform === 'voiceover') {
-      return 'npx @guidepup/setup --ci --record';
+      return 'npx @guidepup/setup --record';
    }
 
    if (platform === 'nvda') {
@@ -270,18 +273,18 @@ const targetNotes: Record<Platform, string> = {
       'Automate the real VoiceOver screen reader on macOS after local OS permissions are granted.',
 };
 
+/** Returns a short human-readable label for one supported platform. */
 export function describePlatform(platform: Platform): string {
    return targetNotes[platform];
 }
 
+/** Creates the adapter for one supported driver target. */
 export function createDriverAdapter(target: Platform): DriverAdapter {
    if (target === 'virtual') {
       return createVirtualAdapter();
    }
-
    if (target === 'voiceover') {
       return new RealScreenReaderAdapter('voiceover', voiceOver);
    }
-
    return new RealScreenReaderAdapter('nvda', nvda);
 }

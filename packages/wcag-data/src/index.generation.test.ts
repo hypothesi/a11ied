@@ -199,7 +199,7 @@ async function setupGeneratedArtifacts(): Promise<{
    result: Awaited<ReturnType<typeof generateNormalizedArtifacts>>;
    generatedEntries: string[];
 }> {
-   const tempRoot = await mkdtemp(join(tmpdir(), 'a11lied-wcag-data-generated-'));
+   const tempRoot = await mkdtemp(join(tmpdir(), 'a11ied-wcag-data-generated-'));
    const directories = createTestDirectories(tempRoot);
    await syncRawSources({
       directories,
@@ -239,7 +239,7 @@ describe('wcag-data normalization / artifact generation', () => {
 
 describe('wcag-data normalization / end-to-end determinism', () => {
    it('runs the end-to-end sync command deterministically across repeated executions', async () => {
-      const tempRoot = await mkdtemp(join(tmpdir(), 'a11lied-wcag-data-run-'));
+      const tempRoot = await mkdtemp(join(tmpdir(), 'a11ied-wcag-data-run-'));
       const directories = createTestDirectories(tempRoot);
 
       const first = await runWcagDataSync({

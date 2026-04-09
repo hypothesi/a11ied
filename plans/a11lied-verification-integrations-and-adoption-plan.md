@@ -1,4 +1,4 @@
-# [a11lied verification, integrations, and adoption]: Implementation Plan (v0.3.0 – 2026-04-06)
+# [a11ied verification, integrations, and adoption]: Implementation Plan (v0.3.0 – 2026-04-06)
 
 ## Summary
 
@@ -245,7 +245,7 @@ Every row in this sub-plan is incomplete until all of the following are true:
    - automated evidence
    - hybrid evidence
    - manual review requirements
-3. Update `skills/a11lied/SKILL.md` so it teaches criterion resolution, driver use, evidence selection, and overclaim guardrails.
+3. Update `skills/a11ied/SKILL.md` so it teaches criterion resolution, driver use, evidence selection, and overclaim guardrails.
 4. Implement automated tests for the mapped scenarios in `specs/gherkin/12-docs-and-release.feature`.
 5. Run an AI-agent manual acceptance pass from that feature file and record it under `specs/manual-runs/VI-06/`.
 6. Verify the docs site still builds:
@@ -293,7 +293,7 @@ npm run standards
 - `packages/storybook/src/*`: Storybook target resolution and metadata plumbing.
 - `packages/mcp-server/src/*`: tool handlers, resources, and smoke-test fixtures.
 - `apps/docs/src/pages/*`: docs for verification, driver use, MCP workflows, and coverage semantics.
-- `skills/a11lied/SKILL.md`: updated skill instructions for the final runtime workflow.
+- `skills/a11ied/SKILL.md`: updated skill instructions for the final runtime workflow.
 - `.github/workflows/*`: CI steps for validation, smoke tests, and release readiness.
 - `specs/gherkin/traceability.md`: mapping between verification/integration rows and Gherkin scenarios.
 - `specs/manual-runs/VI-*/*`: AI-agent manual acceptance reports for verification, Storybook, MCP, docs, and release rows.

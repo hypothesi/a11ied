@@ -1,10 +1,10 @@
 node_modules
 dist
-coverage
+.test-coverage/
 .DS_Store
 .astro
 .turbo
-.a11lied
+.a11ied
 *.tsbuildinfo
 
 # Beads / Dolt files (added by bd init)

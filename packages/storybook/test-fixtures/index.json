@@ -5,7 +5,7 @@
          "title": "Forms/Login",
          "name": "Default",
          "parameters": {
-            "a11lied": {
+            "a11ied": {
                "metadata": {
                   "flow": "authentication",
                   "component": "login-form"

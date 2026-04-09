@@ -11,26 +11,17 @@ import {
    TEST_TIMEOUT_MEDIUM,
    useTestServer,
 } from './setup.js';
+import { runPatternWithAssertions } from './helpers.js';
 
 const tempRoots: string[] = [];
 const testServer: TestServerHandle = useTestServer(tempRoots);
 
 async function assertFocusVisibilityPattern(baseUrl: string): Promise<void> {
-   const result = await runCli([
-      'run',
-      'pattern',
-      'focus_visibility_probe',
-      '--url',
-      `${baseUrl}/focus-obscured.html`,
-      '--target',
-      'virtual',
-      '--json',
-   ]);
-   const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_SUCCESS);
-   const assertions = (
-      json.result as { assertions: Array<{ id: string; status: string }> }
-   ).assertions;
+   const { json, assertions } = await runPatternWithAssertions({
+      patternId: 'focus_visibility_probe',
+      url: `${baseUrl}/focus-obscured.html`,
+      target: 'virtual',
+   });
    expect(assertions.length).toBeGreaterThan(0);
    expect(
       assertions.find((entry) => entry.id === 'focus-geometry-collected')?.status,
@@ -45,22 +36,13 @@ async function assertFocusVisibilityPattern(baseUrl: string): Promise<void> {
 }
 
 async function assertFocusObscuredFailure(baseUrl: string): Promise<void> {
-   const result = await runCli([
-      'run',
-      'pattern',
-      'focus_obscured_probe',
-      '--url',
-      `${baseUrl}/focus-obscured.html`,
-      '--target',
-      'virtual',
-      '--json',
-   ]);
-   const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_ASSERTION);
+   const { json, assertions } = await runPatternWithAssertions({
+      patternId: 'focus_obscured_probe',
+      url: `${baseUrl}/focus-obscured.html`,
+      target: 'virtual',
+      expectedStatus: EXIT_ASSERTION,
+   });
    expect(json.ok).toBe(false);
-   const assertions = (
-      json.result as { assertions: Array<{ id: string; status: string }> }
-   ).assertions;
    expect(assertions.find((entry) => entry.id === 'focus-obscured')?.status).toBe(
       'failed',
    );

@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 
 const rootDir = resolve(import.meta.dirname, '../../..');
 const docsPagesDir = resolve(rootDir, 'apps/docs/src/pages');
-const skillPath = resolve(rootDir, 'skills/a11lied/SKILL.md');
+const skillPath = resolve(rootDir, 'skills/a11ied/SKILL.md');
 const workflowPath = resolve(rootDir, '.github/workflows/ci.yml');
 const releaseReadinessPath = resolve(rootDir, 'releases/v0.3.0-readiness.md');
 const requiredRuntimePages = [
@@ -14,14 +14,26 @@ const requiredRuntimePages = [
    'driver-usage.astro',
    'pattern-execution.astro',
    'verification-semantics.astro',
+   'cli-reference.astro',
+   'mcp-usage.astro',
+   'storybook-usage.astro',
+   'workflows.astro',
+   'api-reference.astro',
+   'recording-sessions.astro',
 ] as const;
 const requiredHomeRoutes = [
+   '/workflows',
    '/wcag-data-sources',
    '/criterion-lookup',
    '/applicability',
    '/driver-usage',
    '/pattern-execution',
    '/verification-semantics',
+   '/cli-reference',
+   '/mcp-usage',
+   '/storybook-usage',
+   '/api-reference',
+   '/recording-sessions',
 ] as const;
 const requiredWorkflowSteps = [
    'name: Data validation',
@@ -74,6 +86,24 @@ function expectReleaseChecklist(): void {
    expect(releaseChecklist).toContain('Deferred items');
 }
 
+function readDocsPage(page: string): string {
+   return readFileSync(resolve(docsPagesDir, page), 'utf8');
+}
+
+function expectSurfaceDoc(page: string, requiredText: string): void {
+   expect(readDocsPage(page)).toContain(requiredText);
+}
+
+function expectPublicSurfaceDocs(): void {
+   expectSurfaceDoc('cli-reference.astro', 'Command families');
+   expectSurfaceDoc('mcp-usage.astro', 'What MCP exposes');
+   expectSurfaceDoc('storybook-usage.astro', 'Target shape');
+   expectSurfaceDoc('api-reference.astro', 'Public packages');
+   expectSurfaceDoc('recording-sessions.astro', 'Supported scope');
+   expectSurfaceDoc('recording-sessions.astro', 'voiceover');
+   expectSurfaceDoc('recording-sessions.astro', 'a11ied doctor');
+}
+
 function expectReleaseReadinessRecord(): void {
    const releaseReadiness = readFileSync(releaseReadinessPath, 'utf8');
    expect(releaseReadiness).toContain('## release path');
@@ -88,6 +118,7 @@ describe('docs, skill guidance, CI, and release checks', () => {
    it('covers the required runtime topics through docs routes', () => {
       expectRuntimePages();
       expectHomeRoutes();
+      expectPublicSurfaceDocs();
    });
 
    it('keeps the skill guardrails explicit', () => {

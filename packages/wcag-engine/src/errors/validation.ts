@@ -3,7 +3,7 @@ import {
    type EngineQueryError,
    type WcagLevel,
    type WcagVersion,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 function buildValidationMessage(field: string, value: string): string {
    if (field === 'version') {
@@ -15,6 +15,7 @@ function buildValidationMessage(field: string, value: string): string {
    return `Invalid value "${value}" for field "${field}".`;
 }
 
+/** Raised when a WCAG engine query uses unsupported or malformed input. */
 export class WcagEngineValidationError extends Error {
    readonly payload: EngineQueryError;
 

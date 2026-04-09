@@ -9,6 +9,7 @@ import {
    TEST_TIMEOUT_LONG,
    useTestServer,
 } from './setup.js';
+import { runPatternWithAssertions } from './helpers.js';
 
 const tempRoots: string[] = [];
 const testServer: TestServerHandle = useTestServer(tempRoots);
@@ -89,21 +90,11 @@ async function assertStatusMessagePattern(baseUrl: string): Promise<void> {
 }
 
 async function assertDialogPattern(baseUrl: string): Promise<void> {
-   const result = await runCli([
-      'run',
-      'pattern',
-      'dialog_probe',
-      '--url',
-      `${baseUrl}/dialog.html`,
-      '--target',
-      'virtual',
-      '--json',
-   ]);
-   const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_SUCCESS);
-   const assertions = (
-      json.result as { assertions: Array<{ id: string; status: string }> }
-   ).assertions;
+   const { assertions } = await runPatternWithAssertions({
+      patternId: 'dialog_probe',
+      url: `${baseUrl}/dialog.html`,
+      target: 'virtual',
+   });
    expect(assertions.find((entry) => entry.id === 'focus-entry')?.status).toBe('passed');
    expect(assertions.find((entry) => entry.id === 'focus-containment')?.status).toBe(
       'passed',

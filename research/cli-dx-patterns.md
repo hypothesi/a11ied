@@ -20,7 +20,7 @@ Anything more than that too early turns into taxonomy instead of usability.
 
 ### Support both human and machine output from day one
 
-Pa11y gets this right. It has human-readable output, JSON, CSV, HTML, and clear exit codes. a11lied should copy the principle, not the exact surface.
+Pa11y gets this right. It has human-readable output, JSON, CSV, HTML, and clear exit codes. a11ied should copy the principle, not the exact surface.
 
 The minimum useful shape is:
 
@@ -40,7 +40,7 @@ That means:
 
 ### Exit codes need to say what kind of failure happened
 
-Pa11y uses a simple scheme that is easy to reason about: success, technical failure, or findings. a11lied should keep that same clarity.
+Pa11y uses a simple scheme that is easy to reason about: success, technical failure, or findings. a11ied should keep that same clarity.
 
 Recommended first-pass exit codes:
 

@@ -76,6 +76,7 @@ function checkDefinitionFilesExist(sourceEntries: string[]): void {
    }
 }
 
+/** Validates that the raw synced WCAG sources are present and structurally sound. */
 export async function validateRawSyncState(
    directories: WcagDataDirectories = getWcagDataDirectories(),
 ): Promise<RawArtifactWriteResult[]> {

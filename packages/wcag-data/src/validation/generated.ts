@@ -8,7 +8,7 @@ import {
    strategyArtifactSchema,
    tagIndexArtifactSchema,
    techniqueIndexArtifactSchema,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -139,6 +139,7 @@ async function loadAndValidateManifest(
    return manifest;
 }
 
+/** Validates that the generated WCAG artifacts are present and internally consistent. */
 export async function validateGeneratedArtifacts(
    directories: WcagDataDirectories = getWcagDataDirectories(),
 ): Promise<GeneratedArtifactWriteResult[]> {

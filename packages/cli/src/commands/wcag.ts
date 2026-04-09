@@ -1,20 +1,5 @@
 import type { Command } from 'commander';
-import {
-   listWcagCriteria,
-   listWcagLevels,
-   searchWcagCriteria,
-   showWcagCoverage,
-   showWcagCriterion,
-} from '@a11lied/core';
 import { addJsonOption, addVerboseOption, addWcagVersionOption } from '../lib/options.js';
-import { executeCommand } from '../lib/execute.js';
-import {
-   renderCoverageText,
-   renderCriteriaText,
-   renderSearchText,
-   renderShowCriterionText,
-   renderWcagLevelsText,
-} from '../renderers/index.js';
 
 function registerLevelsCommand(wcagCommand: Command): void {
    addVerboseOption(
@@ -26,6 +11,12 @@ function registerLevelsCommand(wcagCommand: Command): void {
          ),
       ),
    ).action(async (options: { json?: boolean; verbose?: boolean; version: string }) => {
+      const [{ executeCommand }, renderers, core] = await Promise.all([
+         import('../lib/execute.js'),
+         import('../renderers/index.js'),
+         import('#core'),
+      ]);
+
       await executeCommand(
          {
             family: 'wcag',
@@ -35,9 +26,9 @@ function registerLevelsCommand(wcagCommand: Command): void {
             verbose: options.verbose,
          },
          () => ({
-            result: listWcagLevels(options.version),
+            result: core.listWcagLevels(options.version),
          }),
-         renderWcagLevelsText,
+         renderers.renderWcagLevelsText,
       );
    });
 }
@@ -62,6 +53,12 @@ function registerCriteriaCommand(wcagCommand: Command): void {
          version: string;
          level: string;
       }) => {
+         const [{ executeCommand }, renderers, core] = await Promise.all([
+            import('../lib/execute.js'),
+            import('../renderers/index.js'),
+            import('#core'),
+         ]);
+
          await executeCommand(
             {
                family: 'wcag',
@@ -71,9 +68,9 @@ function registerCriteriaCommand(wcagCommand: Command): void {
                verbose: options.verbose,
             },
             () => ({
-               result: listWcagCriteria(options.level, options.version),
+               result: core.listWcagCriteria(options.level, options.version),
             }),
-            renderCriteriaText,
+            renderers.renderCriteriaText,
          );
       },
    );
@@ -93,6 +90,12 @@ function registerShowCommand(wcagCommand: Command): void {
          criterion: string,
          options: { json?: boolean; verbose?: boolean; version: string },
       ) => {
+         const [{ executeCommand }, renderers, core] = await Promise.all([
+            import('../lib/execute.js'),
+            import('../renderers/index.js'),
+            import('#core'),
+         ]);
+
          await executeCommand(
             {
                family: 'wcag',
@@ -102,9 +105,9 @@ function registerShowCommand(wcagCommand: Command): void {
                verbose: options.verbose,
             },
             () => ({
-               result: showWcagCriterion(criterion, options.version),
+               result: core.showWcagCriterion(criterion, options.version),
             }),
-            renderShowCriterionText,
+            renderers.renderShowCriterionText,
          );
       },
    );
@@ -127,6 +130,12 @@ function registerSearchCommand(wcagCommand: Command): void {
          query: string,
          options: { json?: boolean; verbose?: boolean; version: string; limit: string },
       ) => {
+         const [{ executeCommand }, renderers, core] = await Promise.all([
+            import('../lib/execute.js'),
+            import('../renderers/index.js'),
+            import('#core'),
+         ]);
+
          await executeCommand(
             {
                family: 'wcag',
@@ -136,12 +145,12 @@ function registerSearchCommand(wcagCommand: Command): void {
                verbose: options.verbose,
             },
             () => ({
-               result: searchWcagCriteria(query, {
+               result: core.searchWcagCriteria(query, {
                   version: options.version,
                   limit: Number.parseInt(options.limit, 10),
                }),
             }),
-            renderSearchText,
+            renderers.renderSearchText,
          );
       },
    );
@@ -163,6 +172,12 @@ function registerCoverageCommand(wcagCommand: Command): void {
          criterion: string,
          options: { json?: boolean; verbose?: boolean; version: string },
       ) => {
+         const [{ executeCommand }, renderers, core] = await Promise.all([
+            import('../lib/execute.js'),
+            import('../renderers/index.js'),
+            import('#core'),
+         ]);
+
          await executeCommand(
             {
                family: 'wcag',
@@ -172,9 +187,9 @@ function registerCoverageCommand(wcagCommand: Command): void {
                verbose: options.verbose,
             },
             () => ({
-               result: showWcagCoverage(criterion, options.version),
+               result: core.showWcagCoverage(criterion, options.version),
             }),
-            renderCoverageText,
+            renderers.renderCoverageText,
          );
       },
    );

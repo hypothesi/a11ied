@@ -7,14 +7,14 @@ import {
    doctorReportSchema,
    wcagLevelSchema,
    wcagVersionSchema,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 import {
    createDoctorReport,
    listWcagCriteria,
    searchWcagCriteria,
    showWcagCoverage,
    showWcagCriterion,
-} from '@a11lied/core';
+} from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 

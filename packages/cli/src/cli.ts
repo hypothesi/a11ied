@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 
 import { buildCli } from './program.js';
-import { cleanupStaleDriverSessions } from '@a11lied/core';
+import { shouldSkipStartupMaintenance } from './lib/startup.js';
 
-await cleanupStaleDriverSessions().catch(() => {
-   // No-op
-});
+if (!shouldSkipStartupMaintenance(process.argv)) {
+   const { cleanupStaleDriverSessions } = await import('#core');
+   await cleanupStaleDriverSessions().catch(() => {
+      // No-op
+   });
+}
 await buildCli().parseAsync(process.argv);

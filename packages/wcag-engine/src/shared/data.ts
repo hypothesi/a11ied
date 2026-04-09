@@ -9,7 +9,7 @@ import {
    type WcagVersion,
    type coverageArtifactSchema,
    type strategyArtifactSchema,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 export const supportedVersions = wcagVersionSchema.options;
 

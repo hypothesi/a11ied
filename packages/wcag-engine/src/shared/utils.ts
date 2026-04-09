@@ -3,7 +3,7 @@ import type {
    ApplicabilitySignalCategory,
    CriterionApplicability,
    NormalizedCriterion,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 import {
    applicabilitySignalTagHints,

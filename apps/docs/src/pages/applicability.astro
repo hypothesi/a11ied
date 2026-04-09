@@ -1,22 +1,12 @@
 ---
 import DocShell from '../layouts/doc-shell.astro';
-
-const links = [
-   { href: '/', label: 'Overview' },
-   { href: '/wcag-data-sources', label: 'WCAG data sources' },
-   { href: '/criterion-lookup', label: 'Criterion lookup' },
-   { href: '/applicability', label: 'Applicability' },
-   { href: '/driver-usage', label: 'Driver usage' },
-   { href: '/pattern-execution', label: 'Pattern execution' },
-   { href: '/verification-semantics', label: 'Verification semantics' },
-   { href: '/release-checklist', label: 'Release checklist' },
-];
+import { docsLinks } from '../lib/nav';
 ---
 
 <DocShell
    title="Applicability"
-   summary="Not every criterion applies to every page. a11lied makes that explicit so the report can say why a row matters, why it does not, or why the runtime still needs help from the operator."
-   links={links}
+   summary="Not every criterion applies to every page. a11ied makes that explicit so the report can say why a row matters, why it does not, or why the runtime still needs help from the operator."
+   links={docsLinks}
 >
    <section>
       <h2>Inputs that matter</h2>
@@ -38,7 +28,25 @@ node packages/cli/dist/cli.js inspect criterion 3.3.8 --url http://127.0.0.1:617
       </p>
    </section>
 
-   <section class="callout">
+   <section>
+      <h2>What the output is doing</h2>
+      <div class="mini-grid">
+         <div class="stack">
+            <div class="tag">Applicable</div>
+            <p>The target contains cues that make the criterion relevant, like forms, dialogs, headings, landmarks, or live updates.</p>
+         </div>
+         <div class="stack">
+            <div class="tag">Not applicable</div>
+            <p>The page simply does not have the structure or behavior that would trigger the criterion.</p>
+         </div>
+         <div class="stack">
+            <div class="tag">Needs review</div>
+            <p>The target has weak signals and the runtime wants a human to settle the call instead of guessing.</p>
+         </div>
+      </div>
+   </section>
+
+   <section class="field-note">
       <h2>Honesty rule</h2>
       <p>
          Applicability is not a pass or fail. It is triage. If the runtime says a criterion is

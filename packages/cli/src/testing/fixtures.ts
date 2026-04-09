@@ -89,7 +89,7 @@ export function createStorybookTestServer(): TestServerHandle {
 }
 
 export async function createTempRoot(tempRoots: string[]): Promise<string> {
-   const root = await mkdtemp(resolve(tmpdir(), 'a11lied-cli-'));
+   const root = await mkdtemp(resolve(tmpdir(), 'a11ied-cli-'));
    tempRoots.push(root);
    return root;
 }

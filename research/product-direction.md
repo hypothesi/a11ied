@@ -4,7 +4,7 @@ Checked on 2026-04-06.
 
 ## The core product bet
 
-`a11lied` should feel like one runtime with several doors:
+`a11ied` should feel like one runtime with several doors:
 
 - the CLI is the front door
 - Storybook is the fast local side door
@@ -15,27 +15,27 @@ If those surfaces do different things or speak different data shapes, the produc
 
 ## The first CLI I would ship
 
-### `a11lied doctor`
+### `a11ied doctor`
 
 This needs to be boring and solid. Detect the host OS, installed dependencies, Guidepup readiness, and target availability. Print plain English by default. Print JSON when asked.
 
-### `a11lied init`
+### `a11ied init`
 
 Write a config file, a sample scenario, and the right next-step commands for the current machine. Keep it guided when run interactively, quiet when run with flags.
 
-### `a11lied wcag`
+### `a11ied wcag`
 
 This is the knowledge layer. It should list criteria by level, show docs for a criterion, search the local corpus, and explain coverage. Without this, the agent has to keep rediscovering the standards model from scratch.
 
-### `a11lied inspect`
+### `a11ied inspect`
 
 This should answer "which criteria are relevant to this page or story?" The output should be a criterion matrix with applicability reasons, not a vague recommendation blob.
 
-### `a11lied drive`
+### `a11ied drive`
 
 This is the raw accessibility-driver layer. It should let a human or agent start a target, send user keys and screen-reader chords, move next and previous, enter and leave interaction mode, type text, and read back speech or item-text logs. Without this layer, the tool will feel boxed in the first time somebody hits a custom widget or a bug that does not match a canned pattern.
 
-### `a11lied run`
+### `a11ied run`
 
 This is the execution layer. It should support:
 
@@ -50,15 +50,15 @@ The output should include:
 - assertion failures
 - machine-readable result payload
 
-### `a11lied verify`
+### `a11ied verify`
 
 This is the compliance orchestration layer. It should verify a specific criterion or a target level, then report what passed, failed, was not applicable, and was not covered.
 
-### `a11lied story <story-id>`
+### `a11ied story <story-id>`
 
 This should feel like the bridge between component work and real screen reader testing. The command should know how to talk to a local Storybook server and resolve the story iframe without making the user hand-roll URLs every time.
 
-### `a11lied mcp`
+### `a11ied mcp`
 
 This should not invent a new model. It should expose the same lookup, driver, scenario execution, health checks, and results through MCP tools and resources.
 

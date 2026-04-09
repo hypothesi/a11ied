@@ -1,13 +1,5 @@
-import {
-   cliExitCodes,
-   type CliCommandFamily,
-   type CliOutputEnvelope,
-} from '@a11lied/contracts';
-import {
-   CliUsageError,
-   runDriverSessionAction,
-   runEphemeralDriverAction,
-} from '@a11lied/core';
+import { cliExitCodes, type CliCommandFamily, type CliOutputEnvelope } from '#contracts';
+import { CliUsageError, runDriverSessionAction, runEphemeralDriverAction } from '#core';
 import {
    type CommandExecution,
    createEnvelope,
@@ -21,7 +13,6 @@ export {
    resolveCliTarget,
    resolveOptionalCliTarget,
    resolveRunAxeSelection,
-   stripHtml,
 } from './resolvers.js';
 
 function resolveExitCode(execution: CommandExecution, ok: boolean): number {

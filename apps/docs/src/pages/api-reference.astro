@@ -1,0 +1,52 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+---
+
+<DocShell
+   title="API reference"
+   summary="The public package API is intentionally narrow. If you are importing a11ied as a library, start from the package entrypoints and ignore the internal file tree."
+   links={docsLinks}
+>
+   <section>
+      <h2>Public packages</h2>
+      <ul>
+         <li><code>@a11ied/contracts</code>: shared runtime schemas and result shapes</li>
+         <li><code>@a11ied/core</code>: WCAG lookup, target resolution, driver orchestration, pattern execution, and verification</li>
+         <li><code>@a11ied/guidepup</code>: platform adapters for VoiceOver, NVDA, and the virtual reader</li>
+         <li><code>@a11ied/storybook</code>: Storybook recipe helpers</li>
+         <li><code>@a11ied/wcag-data</code>: pinned standards-data sync and normalization</li>
+         <li><code>@a11ied/wcag-engine</code>: lookup, search, coverage, and applicability over generated artifacts</li>
+         <li><code>@a11ied/mcp-server</code>: MCP server entrypoint</li>
+         <li><code>a11ied</code>: CLI entrypoint and command builder</li>
+      </ul>
+   </section>
+
+   <section>
+      <h2>What each package owns</h2>
+      <div class="route-list">
+         <div class="route-row"><code>@a11ied/contracts</code><span>Shared schemas, result types, and command metadata.</span></div>
+         <div class="route-row"><code>@a11ied/wcag-data</code> and <code>@a11ied/wcag-engine</code><span>The standards brain: pinned artifacts, search, lookup, coverage, and applicability rules.</span></div>
+         <div class="route-row"><code>@a11ied/guidepup</code> and <code>@a11ied/core</code><span>The execution brain: targets, sessions, patterns, axe runs, verification, and recording support.</span></div>
+         <div class="route-row"><code>@a11ied/mcp-server</code> and <code>a11ied</code><span>The two operator surfaces: tools over stdio and commands in the terminal.</span></div>
+      </div>
+   </section>
+
+   <section>
+      <h2>What this page is for</h2>
+      <p>
+         This is a map, not a generated API dump. The source-level JSDoc on the public exports is the
+         detailed layer. This page tells you which package owns which job so you do not import an
+         internal helper just because it happened to be nearby.
+      </p>
+   </section>
+
+   <section class="field-note">
+      <h2>Use entrypoints, not implementation paths</h2>
+      <p>
+         If you find yourself importing from deep internal folders, you are probably stepping outside
+         the supported surface. Stick to each package's main export unless you are changing the repo
+         itself.
+      </p>
+   </section>
+</DocShell>

@@ -1,6 +1,6 @@
-# @a11lied/wcag-data
+# @a11ied/wcag-data
 
-`@a11lied/wcag-data` is the pinned local data workspace for WCAG source sync and normalized artifact generation.
+`@a11ied/wcag-data` is the pinned local data workspace for WCAG source sync and normalized artifact generation.
 
 This package is responsible for:
 
@@ -12,8 +12,8 @@ This package is responsible for:
 Current scaffold commands:
 
 ```sh
-npm run sync --workspace @a11lied/wcag-data
-npm run validate --workspace @a11lied/wcag-data
+npm run sync --workspace @a11ied/wcag-data
+npm run validate --workspace @a11ied/wcag-data
 ```
 
 Repository-wide quality gate:
@@ -35,8 +35,8 @@ npm run standards
 If you only want the workspace-local form, these are the equivalent commands:
 
 ```sh
-npm run sync --workspace @a11lied/wcag-data
-npm run validate --workspace @a11lied/wcag-data
+npm run sync --workspace @a11ied/wcag-data
+npm run validate --workspace @a11ied/wcag-data
 npm run standards
 ```
 

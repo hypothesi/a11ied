@@ -1,4 +1,4 @@
-import { applicabilityInputSchema, type ApplicabilityInput } from '@a11lied/contracts';
+import { applicabilityInputSchema, type ApplicabilityInput } from '@a11ied/contracts';
 
 const fixtures = {
    'basic-page.html': {

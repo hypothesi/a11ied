@@ -3,8 +3,9 @@ import {
    type AccessibilityDriverSession,
    type DriverActionResult,
    type DriverCheckpoint,
-} from '@a11lied/contracts';
-import type { createDriverAdapter } from '@a11lied/guidepup';
+   type SessionRecording,
+} from '@a11ied/contracts';
+import type { createDriverAdapter } from '@a11ied/guidepup';
 
 export interface BrokerRequest {
    command: 'ping' | 'status' | 'stop' | 'action' | 'attach-document';
@@ -29,11 +30,33 @@ export interface ActionContext {
 export interface BrokerHandlerContext extends ActionContext {
    session: AccessibilityDriverSession;
    writeMetadata: (session: AccessibilityDriverSession) => Promise<void>;
+   finishRecording?: () => Promise<SessionRecording | undefined>;
 }
 
 export interface HandleResult {
    response: BrokerResponse;
    shouldStop: boolean;
+}
+
+function toBrokerError(error: unknown): BrokerResponse['error'] {
+   if (error instanceof Error && 'code' in error) {
+      return {
+         code: String(error.code),
+         message: error.message,
+      };
+   }
+
+   if (error instanceof Error) {
+      return {
+         code: 'broker-error',
+         message: error.message,
+      };
+   }
+
+   return {
+      code: 'broker-error',
+      message: String(error),
+   };
 }
 
 function getSimpleActionHandler(
@@ -113,6 +136,7 @@ async function buildActionResult(
       ...context.session,
       logCursor: state.logCursor,
    };
+   context.session = updatedSession;
    await context.writeMetadata(updatedSession);
    return driverActionResultSchema.parse({
       session: updatedSession,
@@ -127,9 +151,49 @@ async function handleStatusCommand(context: BrokerHandlerContext): Promise<Handl
    return { response: { ok: true, result }, shouldStop: false };
 }
 
+async function finishStopRecording(
+   context: BrokerHandlerContext,
+): Promise<BrokerResponse['error'] | undefined> {
+   if (!context.finishRecording) {
+      return undefined;
+   }
+
+   try {
+      const completedRecording = await context.finishRecording();
+      if (completedRecording) {
+         context.session = {
+            ...context.session,
+            recording: completedRecording,
+         };
+      }
+      return undefined;
+   } catch (error) {
+      return toBrokerError(error);
+   }
+}
+
+function buildStopHandleResult(
+   result: DriverActionResult,
+   recordingError: BrokerResponse['error'] | undefined,
+): HandleResult {
+   if (!recordingError) {
+      return { response: { ok: true, result }, shouldStop: true };
+   }
+
+   return {
+      response: {
+         ok: false,
+         error: recordingError,
+         result,
+      },
+      shouldStop: true,
+   };
+}
+
 async function handleStopCommand(context: BrokerHandlerContext): Promise<HandleResult> {
+   const recordingError = await finishStopRecording(context);
    const result = await buildActionResult(context, 'stop');
-   return { response: { ok: true, result }, shouldStop: true };
+   return buildStopHandleResult(result, recordingError);
 }
 
 async function handleAttachDocumentCommand(

@@ -4,14 +4,20 @@ import { dirname, resolve } from 'node:path';
 import net from 'node:net';
 import { fileURLToPath } from 'node:url';
 
-import type { AccessibilityDriverSession, DriverActionResult } from '@a11lied/contracts';
+import type {
+   AccessibilityDriverSession,
+   DriverActionResult,
+   Platform,
+} from '@a11ied/contracts';
 
 import type { BrokerRequest, BrokerResponse } from './broker-handlers.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
 
-const SOCKET_TIMEOUT_MS = 1000;
+const DEFAULT_SOCKET_TIMEOUT_MS = 1000;
+const STOP_SOCKET_TIMEOUT_MS = 7000;
 const BROKER_POLL_DELAY_MS = 100;
-const BROKER_READY_TIMEOUT_MS = 5000;
+const DEFAULT_BROKER_READY_TIMEOUT_MS = 5000;
+const REAL_TARGET_BROKER_READY_TIMEOUT_MS = 15_000;
 
 function delay(ms: number): Promise<void> {
    return new Promise((resolvePromise) => {
@@ -22,12 +28,13 @@ function delay(ms: number): Promise<void> {
 export async function connectToBroker(
    socketPath: string,
    request: BrokerRequest,
+   timeoutMs = DEFAULT_SOCKET_TIMEOUT_MS,
 ): Promise<BrokerResponse> {
    return await new Promise<BrokerResponse>((resolvePromise, rejectPromise) => {
       const chunks: Buffer[] = [];
       const client = net.createConnection(socketPath);
 
-      client.setTimeout(SOCKET_TIMEOUT_MS);
+      client.setTimeout(timeoutMs);
 
       client.on('connect', () => {
          client.write(`${JSON.stringify(request)}\n`);
@@ -62,17 +69,28 @@ export async function connectToBroker(
    });
 }
 
+export function resolveBrokerSocketTimeoutMs(
+   request: Pick<BrokerRequest, 'command'>,
+): number {
+   if (request.command === 'stop') {
+      return STOP_SOCKET_TIMEOUT_MS;
+   }
+
+   return DEFAULT_SOCKET_TIMEOUT_MS;
+}
+
 interface PollBrokerOptions {
    sessionId: string;
    cwd: string;
    startedAt: number;
+   timeoutMs: number;
    readSession: (sid: string, cwd: string) => Promise<AccessibilityDriverSession>;
 }
 
 async function pollBrokerConnection(
    options: PollBrokerOptions,
 ): Promise<AccessibilityDriverSession> {
-   if (Date.now() - options.startedAt >= BROKER_READY_TIMEOUT_MS) {
+   if (Date.now() - options.startedAt >= options.timeoutMs) {
       throw new CliEnvironmentError(
          'driver-broker-timeout',
          'Timed out waiting for the driver broker to start.',
@@ -93,16 +111,30 @@ async function pollBrokerConnection(
    return pollBrokerConnection(options);
 }
 
+export function resolveBrokerReadyTimeoutMs(target: Platform): number {
+   if (target === 'virtual') {
+      return DEFAULT_BROKER_READY_TIMEOUT_MS;
+   }
+
+   return REAL_TARGET_BROKER_READY_TIMEOUT_MS;
+}
+
+export interface WaitForBrokerOptions {
+   sessionId: string;
+   cwd: string;
+   readSession: (sid: string, cwdPath: string) => Promise<AccessibilityDriverSession>;
+   timeoutMs?: number;
+}
+
 export async function waitForBroker(
-   sessionId: string,
-   cwd: string,
-   readSession: (sid: string, cwdPath: string) => Promise<AccessibilityDriverSession>,
+   options: WaitForBrokerOptions,
 ): Promise<AccessibilityDriverSession> {
    return pollBrokerConnection({
-      sessionId,
-      cwd,
+      sessionId: options.sessionId,
+      cwd: options.cwd,
       startedAt: Date.now(),
-      readSession,
+      timeoutMs: options.timeoutMs ?? DEFAULT_BROKER_READY_TIMEOUT_MS,
+      readSession: options.readSession,
    });
 }
 
@@ -123,11 +155,11 @@ function resolveInstalledPackagePath(specifier: string): string | undefined {
 }
 
 function resolveCorePackageRoot(): string | undefined {
-   const packageJsonPath = resolveInstalledPackagePath('@a11lied/core/package.json');
+   const packageJsonPath = resolveInstalledPackagePath('@a11ied/core/package.json');
    if (packageJsonPath) {
       return dirname(packageJsonPath);
    }
-   const packageEntryPath = resolveInstalledPackagePath('@a11lied/core');
+   const packageEntryPath = resolveInstalledPackagePath('@a11ied/core');
    if (!packageEntryPath) {
       return undefined;
    }
@@ -138,9 +170,9 @@ function resolveCorePackageRoot(): string | undefined {
    return packageDir;
 }
 
-function getBrokerEntryFromPackageRoot(packageRoot: string): string | undefined {
+export function getBrokerEntryFromPackageRoot(packageRoot: string): string | undefined {
    const entries = [
-      resolve(packageRoot, 'dist/broker.js'),
+      resolve(packageRoot, 'dist/driver/broker.js'),
       resolve(packageRoot, 'src/driver/broker.ts'),
    ];
 
@@ -153,7 +185,7 @@ function getBrokerEntryFromCurrentModule(): string {
       return resolve(currentDir, 'broker.ts');
    }
 
-   return resolve(currentDir, 'broker.js');
+   return resolve(currentDir, 'driver/broker.js');
 }
 
 function getBrokerEntryPath(): string {
@@ -182,6 +214,7 @@ export interface BrokerSpawnOptions {
    target: string;
    metadataFile: string;
    socketPath: string;
+   recordingPath?: string;
 }
 
 function getBaseSpawnArgs(entry: string): string[] {
@@ -195,7 +228,7 @@ function brokerSpawnArgs(options: BrokerSpawnOptions): string[] {
    const entry = getBrokerEntryPath();
    const baseArgs = getBaseSpawnArgs(entry);
 
-   return [
+   const args = [
       ...baseArgs,
       '--session-id',
       options.sessionId,
@@ -206,6 +239,12 @@ function brokerSpawnArgs(options: BrokerSpawnOptions): string[] {
       '--socket-path',
       options.socketPath,
    ];
+
+   if (options.recordingPath) {
+      args.push('--recording-path', options.recordingPath);
+   }
+
+   return args;
 }
 
 export function spawnBrokerProcess(options: BrokerSpawnOptions): void {

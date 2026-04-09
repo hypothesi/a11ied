@@ -1,5 +1,6 @@
-import { cliExitCodes } from '@a11lied/contracts';
+import { cliExitCodes } from '@a11ied/contracts';
 
+/** Raised when the host environment prevents a command from completing. */
 export class CliEnvironmentError extends Error {
    readonly exitCode = cliExitCodes.environment;
    readonly code: string;

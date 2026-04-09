@@ -1,8 +1,9 @@
 import {
    interactionPatternIdSchema,
+   interactionPatternResultSchema,
    type InteractionPatternResult,
    type Platform,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 import { CliUsageError } from '../errors/cli-errors.js';
 import {
@@ -30,6 +31,7 @@ type PatternRunner = (
    context: PatternContext,
    url: string,
 ) => Promise<InteractionPatternResult>;
+type StopSessionResult = Awaited<ReturnType<typeof stopDriverSession>> | undefined;
 
 const patternRunners: Record<string, PatternRunner | undefined> = {
    landmark_sequence: runLandmarkSequence,
@@ -53,6 +55,16 @@ async function resolveSession(options: RunPatternOptions): Promise<{
    managedSession: boolean;
 }> {
    if (options.sessionId) {
+      if (options.recordingPath) {
+         throw new CliUsageError(
+            'recording-session-conflict',
+            'Do not pass --recording when reusing an existing session.',
+            {
+               sessionId: options.sessionId,
+               recordingPath: options.recordingPath,
+            },
+         );
+      }
       const status = await getDriverSessionStatus(options.sessionId);
       if (options.target && options.target !== status.session.target) {
          throw new CliUsageError(
@@ -74,7 +86,7 @@ async function resolveSession(options: RunPatternOptions): Promise<{
    }
 
    const target = options.target ?? 'virtual';
-   const session = await startDriverSession(target);
+   const session = await startDriverSession(target, process.cwd(), options.recordingPath);
    return {
       sessionId: session.sessionId,
       target,
@@ -109,32 +121,72 @@ function parsePatternUrl(url: string): URL {
    }
 }
 
-async function cleanupSession(sessionId: string, managedSession: boolean): Promise<void> {
-   if (managedSession) {
-      await stopDriverSession(sessionId).catch(() => {
-         // No-op: best-effort cleanup
-      });
-   }
+function noopStopFailure(): undefined {
+   return undefined;
 }
 
+async function cleanupSession(
+   sessionId: string,
+   managedSession: boolean,
+): Promise<StopSessionResult> {
+   let stopResult: StopSessionResult = undefined;
+   if (managedSession) {
+      stopResult = await stopDriverSession(sessionId).catch(noopStopFailure);
+   }
+
+   return stopResult;
+}
+
+function getPatternRunner(patternId: string): PatternRunner {
+   const runner = patternRunners[patternId];
+   if (runner) {
+      return runner;
+   }
+   throw new CliUsageError('unknown-pattern', `Pattern "${patternId}" is unsupported.`, {
+      patternId,
+   });
+}
+
+function applyManagedRecording(
+   result: InteractionPatternResult,
+   stopResult: StopSessionResult,
+): InteractionPatternResult {
+   return interactionPatternResultSchema.parse({
+      ...result,
+      recording: stopResult?.session.recording ?? result.recording,
+   });
+}
+
+async function runPatternWithSession(args: {
+   patternId: string;
+   url: string;
+   context: PatternContext;
+   runner: PatternRunner;
+}): Promise<InteractionPatternResult> {
+   let result: InteractionPatternResult | undefined = undefined;
+   let stopResult: StopSessionResult = undefined;
+   try {
+      result = await args.runner(args.context, args.url);
+   } finally {
+      stopResult = await cleanupSession(
+         args.context.sessionId,
+         args.context.managedSession,
+      );
+   }
+   return applyManagedRecording(result as InteractionPatternResult, stopResult);
+}
+
+/** Runs one built-in interaction pattern against a target URL or existing session. */
 export async function runInteractionPattern(
    options: RunPatternOptions,
 ): Promise<InteractionPatternResult> {
    const parsedUrl = parsePatternUrl(options.url);
    const patternId = interactionPatternIdSchema.parse(options.patternId);
    const resolvedSession = await resolveSession(options);
-   const context = buildContext(parsedUrl, resolvedSession);
-   const runner = patternRunners[patternId];
-   if (!runner) {
-      throw new CliUsageError(
-         'unknown-pattern',
-         `Pattern "${patternId}" is unsupported.`,
-         { patternId },
-      );
-   }
-   try {
-      return await runner(context, parsedUrl.toString());
-   } finally {
-      await cleanupSession(resolvedSession.sessionId, resolvedSession.managedSession);
-   }
+   return runPatternWithSession({
+      patternId,
+      url: parsedUrl.toString(),
+      context: buildContext(parsedUrl, resolvedSession),
+      runner: getPatternRunner(patternId),
+   });
 }

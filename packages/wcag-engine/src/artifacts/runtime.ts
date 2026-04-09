@@ -20,10 +20,11 @@ import {
    type VerificationStrategyLookupResult,
    type WcagLevel,
    type WcagVersion,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 import { existsSync, readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import {
    artifactsCache,
@@ -32,32 +33,65 @@ import {
 } from '../shared/data.js';
 import { WcagEngineNotFoundError, WcagEngineValidationError } from '../errors/index.js';
 
-function readPackageName(directory: string): string | undefined {
-   const packageJsonPath = join(directory, 'package.json');
-   if (!existsSync(packageJsonPath)) {
+function resolveInstalledPath(specifier: string): string | undefined {
+   try {
+      return fileURLToPath(import.meta.resolve(specifier));
+   } catch {
       return undefined;
    }
-   return (JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { name?: string }).name;
 }
 
-function parentDirectory(directory: string, packageName: string): string {
-   const parent = resolve(directory, '..');
-   if (parent === directory) {
-      throw new Error(`Unable to locate package root for ${packageName}`);
+function resolveGeneratedRootFromPackage(): string | undefined {
+   const packageJsonPath = resolveInstalledPath('@a11ied/wcag-data/package.json');
+   if (packageJsonPath) {
+      return resolve(dirname(packageJsonPath), 'data/generated');
    }
-   return parent;
-}
 
-function findPackageRoot(packageName: string): string {
-   let current = import.meta.dirname;
-   while (readPackageName(current) !== packageName) {
-      current = parentDirectory(current, packageName);
+   const packageEntryPath = resolveInstalledPath('@a11ied/wcag-data');
+   if (!packageEntryPath) {
+      return undefined;
    }
-   return current;
+   const packageDir = dirname(packageEntryPath);
+   if (packageDir.endsWith('/dist')) {
+      return resolve(packageDir, '../data/generated');
+   }
+   return resolve(packageDir, 'data/generated');
 }
 
-const packageRoot = findPackageRoot('@a11lied/wcag-engine');
-const generatedRoot = resolve(packageRoot, '../wcag-data/data/generated');
+function getGeneratedRootCandidates(): string[] {
+   return [
+      resolve(import.meta.dirname, '../../wcag-data/data/generated'),
+      resolve(import.meta.dirname, '../../../wcag-data/data/generated'),
+      resolve(import.meta.dirname, '../../../packages/wcag-data/data/generated'),
+      resolve(process.cwd(), 'packages/wcag-data/data/generated'),
+   ];
+}
+
+function findExistingGeneratedRoot(candidates: string[]): string | undefined {
+   for (const candidate of candidates) {
+      if (existsSync(candidate)) {
+         return candidate;
+      }
+   }
+   return undefined;
+}
+
+function resolveGeneratedRoot(): string {
+   const packageRoot = resolveGeneratedRootFromPackage();
+   if (packageRoot) {
+      return packageRoot;
+   }
+
+   const candidates = getGeneratedRootCandidates();
+   const existingRoot = findExistingGeneratedRoot(candidates);
+   if (existingRoot) {
+      return existingRoot;
+   }
+
+   return resolve(process.cwd(), 'packages/wcag-data/data/generated');
+}
+
+const generatedRoot = resolveGeneratedRoot();
 
 function loadArtifact<TResult>(
    schema: { parse: (data: unknown) => TResult },
@@ -98,6 +132,7 @@ function buildArtifacts(version: WcagVersion): EngineArtifacts {
    };
 }
 
+/** Loads the generated artifact bundle for one supported WCAG version. */
 export function getArtifacts(version: WcagVersion): EngineArtifacts {
    const cached = artifactsCache.get(version);
    if (cached) {
@@ -109,6 +144,7 @@ export function getArtifacts(version: WcagVersion): EngineArtifacts {
    return nextArtifacts;
 }
 
+/** Parses one supported WCAG version string for artifact access. */
 export function parseVersion(version = '2.2'): WcagVersion {
    const result = wcagVersionSchema.safeParse(version);
    if (!result.success) {
@@ -150,6 +186,7 @@ export function resolveCriterion(
    throw new WcagEngineNotFoundError(lookupKey);
 }
 
+/** Resolves one criterion by id or slug from the generated artifacts. */
 export function getCriterion(
    lookupKey: CriterionLookupKey,
    options?: { version?: string },
@@ -163,6 +200,7 @@ export function getCriterion(
    });
 }
 
+/** Lists criteria for one conformance level from the generated artifacts. */
 export function listCriteriaByLevel(
    level: string,
    version: string,
@@ -179,6 +217,7 @@ export function listCriteriaByLevel(
    });
 }
 
+/** Returns coverage metadata for one criterion from the generated artifacts. */
 export function getCoverage(
    lookupKey: CriterionLookupKey,
    options?: { version?: string },
@@ -201,6 +240,7 @@ export function getCoverage(
    });
 }
 
+/** Returns the indexed Quickref tags for one criterion. */
 export function getQuickrefTags(
    lookupKey: CriterionLookupKey,
    options?: { version?: string },
@@ -215,6 +255,7 @@ export function getQuickrefTags(
    });
 }
 
+/** Returns the generated verification strategy for one criterion. */
 export function getVerificationStrategy(
    lookupKey: CriterionLookupKey,
    options?: { version?: string },
@@ -234,6 +275,7 @@ export function getVerificationStrategy(
    });
 }
 
+/** Clears the in-memory artifact cache used by the WCAG engine. */
 export function resetWcagEngineCache(): void {
    artifactsCache.clear();
 }

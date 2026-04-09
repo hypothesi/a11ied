@@ -1,6 +1,6 @@
 @mcp
 Feature: MCP tools and resources
-  As an editor or agent integrating with a11lied through MCP
+  As an editor or agent integrating with a11ied through MCP
   I want the same runtime semantics exposed through tools and resources
   So that MCP does not become a second product with different behavior
 

@@ -1,4 +1,4 @@
-import type { TargetReference } from '@a11lied/contracts';
+import type { TargetReference } from '@a11ied/contracts';
 
 import { CliUsageError } from '../errors/cli-errors.js';
 import { fetchResponse, resolveStoryDocumentTarget } from './storybook.js';
@@ -56,6 +56,7 @@ async function resolveUrlDocumentTarget(url: string): Promise<ResolvedDocumentTa
    };
 }
 
+/** Resolves either a URL target or Storybook target into HTML plus target metadata. */
 export async function resolveDocumentTarget(
    input: ResolveDocumentTargetInput,
 ): Promise<ResolvedDocumentTarget> {

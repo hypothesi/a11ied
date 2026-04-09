@@ -4,11 +4,11 @@ import {
    type AxeRunResult,
    type WcagLevel,
    type WcagVersion,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 import axe from 'axe-core';
 
 import { CliUsageError } from '../errors/cli-errors.js';
-import { getCoverage, listCriteriaByLevel } from '@a11lied/wcag-engine';
+import { getCoverage, listCriteriaByLevel } from '@a11ied/wcag-engine';
 import { withLoadedPage } from '../browser/helper.js';
 
 type AxeRunOptions =
@@ -253,6 +253,7 @@ async function executeAxeScan(parsedUrl: URL, ruleIds: string[]): Promise<RawAxe
    });
 }
 
+/** Runs axe-core against one URL using a criterion, level, or explicit rule selection. */
 export async function runAxe(url: string, options: AxeRunOptions): Promise<AxeRunResult> {
    const parsedUrl = parseAxeUrl(url);
    const wcagVersion = parseWcagVersion(options.wcagVersion);

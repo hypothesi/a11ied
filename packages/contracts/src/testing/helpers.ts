@@ -101,8 +101,8 @@ export function createSessionPayload(): TestPayload {
       ],
       logCursor: 2,
       brokerPid: 4242,
-      socketPath: '/tmp/a11lied/driver.sock',
-      metadataFile: '/tmp/a11lied/session.json',
+      socketPath: '/tmp/a11ied/driver.sock',
+      metadataFile: '/tmp/a11ied/session.json',
    };
 }
 

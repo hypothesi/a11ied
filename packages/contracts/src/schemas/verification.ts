@@ -5,6 +5,7 @@ import {
    driverActionResultSchema,
    interactionPatternResultSchema,
    platformSchema,
+   sessionRecordingSchema,
    wcagLevelSchema,
    wcagVersionSchema,
 } from './core.js';
@@ -17,6 +18,7 @@ import {
    preferredEvidenceModeSchema,
    verificationStrategySchema,
 } from './wcag.js';
+import { fourWayAutomationCountSchema } from './helpers.js';
 import { criterionApplicabilitySchema, targetReferenceSchema } from './query.js';
 
 export const verificationVerdictSchema = z.enum([
@@ -172,12 +174,7 @@ const verificationVerdictCountSchema = z.object({
    error: z.number().int().nonnegative(),
 });
 
-const verificationEvidenceModeCountSchema = z.object({
-   automated: z.number().int().nonnegative(),
-   hybrid: z.number().int().nonnegative(),
-   manual: z.number().int().nonnegative(),
-   unknown: z.number().int().nonnegative(),
-});
+const verificationEvidenceModeCountSchema = fourWayAutomationCountSchema;
 
 export const verificationReportSummarySchema = z.object({
    totalCriteria: z.number().int().nonnegative(),
@@ -212,6 +209,7 @@ export const verificationReportSchema = z.object({
    requestedScope: verificationRequestedScopeSchema,
    summary: verificationReportSummarySchema,
    criteria: z.array(verificationCriterionResultSchema),
+   recording: sessionRecordingSchema.optional(),
    warnings: z.array(cliMessageSchema),
    errors: z.array(cliMessageSchema),
 });

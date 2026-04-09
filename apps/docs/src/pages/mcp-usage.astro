@@ -1,0 +1,81 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+---
+
+<DocShell
+   title="MCP usage"
+   summary="The MCP server is not a separate product. It is the same runtime the CLI uses, exposed for editors and agents that need tool calls and read-only resources."
+   links={docsLinks}
+>
+   <section class="split panel">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Mental model</p>
+            <h2>What MCP exposes</h2>
+         </div>
+      <p>
+         The server exposes read-only standards resources plus tool calls for lookup, inspection,
+         driver actions, execution, and verification.
+      </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">same runtime</div>
+         <p class="aside-note">
+            If the CLI command exists, the MCP server is usually wrapping the same underlying runtime
+            path instead of inventing a second implementation.
+         </p>
+      </div>
+   </section>
+
+   <section class="ledger">
+      <div class="panel-head">
+         <p class="panel-kicker">Tool families</p>
+         <h2>What agents can actually call</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row"><strong>Knowledge</strong><span><code>doctor</code>, <code>criterion_lookup</code>, <code>level_lookup</code>, <code>search</code>, <code>coverage_lookup</code></span></div>
+         <div class="route-row"><strong>Inspect</strong><span><code>inspect_applicable</code>, <code>inspect_criterion</code></span></div>
+         <div class="route-row"><strong>Driver</strong><span><code>driver_start_session</code>, <code>driver_get_session</code>, <code>driver_stop_session</code>, <code>driver_next_item</code>, <code>driver_previous_item</code>, <code>driver_interact</code>, <code>driver_stop_interacting</code>, <code>driver_click_current_item</code>, <code>driver_read</code>, <code>driver_logs</code>, <code>driver_clear_logs</code>, <code>driver_key</code>, <code>driver_type</code>, <code>driver_checkpoint</code></span></div>
+         <div class="route-row"><strong>Execution and verification</strong><span><code>run_axe</code>, <code>run_pattern</code>, <code>verify_criterion</code>, <code>verify_level</code></span></div>
+      </div>
+   </section>
+
+   <section class="panel">
+      <div class="panel-head">
+         <p class="panel-kicker">Read-only surfaces</p>
+         <h2>Resource uris</h2>
+      </div>
+      <ul>
+         <li><code>a11ied://targets</code></li>
+         <li><code>a11ied://wcag/criteria/&lt;version&gt;</code></li>
+         <li><code>a11ied://wcag/levels/&lt;version&gt;</code></li>
+         <li><code>a11ied://wcag/coverage/&lt;version&gt;</code></li>
+         <li><code>a11ied://wcag/verification-strategies/&lt;version&gt;</code></li>
+      </ul>
+   </section>
+
+   <section>
+      <div class="panel-head">
+         <p class="panel-kicker">Why this split exists</p>
+         <h2>Read-only versus side-effecting operations</h2>
+      </div>
+      <p>
+         Some questions are read-only standards lookups. Some launch browsers or drive assistive
+         technology. The MCP server keeps that split visible so an agent can choose the small, cheap
+         operation before it reaches for the expensive one.
+      </p>
+   </section>
+
+   <section class="field-note">
+      <div class="panel-head">
+         <p class="panel-kicker">Agent rule</p>
+         <h2>Do not hide side effects</h2>
+      </div>
+      <p>
+         The active MCP tools can launch browsers, attach to targets, and drive VoiceOver or NVDA. That
+         is real machine behavior, not just data retrieval. Agents need to treat those tools like
+         execution surfaces, because that is what they are.
+      </p>
+   </section>
+</DocShell>

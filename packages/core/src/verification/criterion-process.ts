@@ -4,7 +4,7 @@ import type {
    Platform,
    VerificationCriterionResult,
    VerificationReport,
-} from '@a11lied/contracts';
+} from '@a11ied/contracts';
 
 import { inspectCriterionUrl, showWcagCoverage } from '../wcag/runtime.js';
 import {
@@ -37,16 +37,51 @@ interface VerificationContextResult {
    target: VerificationReport['target'];
 }
 
+function buildProcedureContextInput(args: {
+   criterion: Awaited<ReturnType<typeof inspectCriterionUrl>>['criterion'];
+   url: string;
+   parsedTarget: Platform;
+   sessionId: string | undefined;
+   evidenceMode: ReturnType<typeof showWcagCoverage>['strategy']['preferredEvidenceMode'];
+   baseRefs: ReturnType<typeof createBaseSourceReferences>;
+   coverageLookup: ReturnType<typeof showWcagCoverage>;
+   assessment: Awaited<ReturnType<typeof inspectCriterionUrl>>['assessment'];
+}): Parameters<typeof buildInitialProcedureContext>[0] {
+   if (args.sessionId) {
+      return {
+         criterion: args.criterion,
+         url: args.url,
+         parsedTarget: args.parsedTarget,
+         sessionId: args.sessionId,
+         evidenceMode: args.evidenceMode,
+         baseRefs: args.baseRefs,
+         coverageLookup: args.coverageLookup,
+         assessment: args.assessment,
+      };
+   }
+
+   return {
+      criterion: args.criterion,
+      url: args.url,
+      parsedTarget: args.parsedTarget,
+      evidenceMode: args.evidenceMode,
+      baseRefs: args.baseRefs,
+      coverageLookup: args.coverageLookup,
+      assessment: args.assessment,
+   };
+}
+
 function buildInitialProcedureContext(args: {
    criterion: { id: string; title: string; wcagVersion: string };
    url: string;
    parsedTarget: Platform;
+   sessionId?: string;
    evidenceMode: ReturnType<typeof showWcagCoverage>['strategy']['preferredEvidenceMode'];
    baseRefs: ReturnType<typeof createBaseSourceReferences>;
    coverageLookup: ReturnType<typeof showWcagCoverage>;
    assessment: Awaited<ReturnType<typeof inspectCriterionUrl>>['assessment'];
 }): ProcedureContext {
-   return {
+   const ctx: ProcedureContext = {
       criterionId: args.criterion.id,
       url: args.url,
       parsedTarget: args.parsedTarget,
@@ -76,6 +111,12 @@ function buildInitialProcedureContext(args: {
       uncoveredWork: [],
       errors: [],
    };
+
+   if (args.sessionId) {
+      ctx.sessionId = args.sessionId;
+   }
+
+   return ctx;
 }
 
 async function buildVerificationContext(args: {
@@ -83,6 +124,7 @@ async function buildVerificationContext(args: {
    url: string;
    parsedTarget: Platform;
    wcagVersion: string;
+   sessionId?: string;
 }): Promise<VerificationContextResult> {
    const coverageLookup = showWcagCoverage(args.criterion, args.wcagVersion);
    const applicabilityLookup = await inspectCriterionUrl(
@@ -101,15 +143,18 @@ async function buildVerificationContext(args: {
    return {
       coverageLookup,
       applicabilityLookup,
-      ctx: buildInitialProcedureContext({
-         criterion,
-         url: args.url,
-         parsedTarget: args.parsedTarget,
-         evidenceMode,
-         baseRefs,
-         coverageLookup,
-         assessment: applicabilityLookup.assessment,
-      }),
+      ctx: buildInitialProcedureContext(
+         buildProcedureContextInput({
+            criterion,
+            url: args.url,
+            parsedTarget: args.parsedTarget,
+            evidenceMode,
+            baseRefs,
+            coverageLookup,
+            assessment: applicabilityLookup.assessment,
+            sessionId: args.sessionId,
+         }),
+      ),
       notes: [...coverageLookup.strategy.notes],
       target: buildTarget(args.url, args.parsedTarget),
    };
@@ -184,6 +229,7 @@ export async function verifyCriterionResult(args: {
    url: string;
    parsedTarget: Platform;
    wcagVersion: string;
+   sessionId?: string;
 }): Promise<VerifyCriterionResultOutput> {
    const vctx = await buildVerificationContext(args);
 

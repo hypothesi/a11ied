@@ -1,4 +1,4 @@
-# [a11lied foundation and WCAG data]: Implementation Plan (v0.3.0 – 2026-04-06)
+# [a11ied foundation and WCAG data]: Implementation Plan (v0.3.0 – 2026-04-06)
 
 ## Summary
 
