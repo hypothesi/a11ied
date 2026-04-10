@@ -111,7 +111,7 @@ function expectReleaseReadinessRecord(): void {
    expect(releaseReadiness).toContain('### docs');
    expect(releaseReadiness).toContain('### agent skill');
    expect(releaseReadiness).toContain('## deferred items');
-   expect(releaseReadiness).toContain('Package publication is still a manual sequence');
+   expect(releaseReadiness).toContain('Package publication is still manual');
 }
 
 describe('docs, skill guidance, CI, and release checks', () => {

@@ -69,15 +69,29 @@ import { docsLinks } from '../lib/nav';
 
    <section class="panel">
       <div class="panel-head">
+         <p class="panel-kicker">Install</p>
+         <h2>Get started</h2>
+      </div>
+      <div class="command-strip">
+         <pre><code>npm install a11ied</code></pre>
+         <p class="command-note">
+         This installs the <code>a1</code> CLI command (also available as <code>a11ied</code>). Use it programmatically too:
+         </p>
+         <pre><code>import {'{'} buildCli {'}'} from 'a11ied';</code></pre>
+      </div>
+   </section>
+
+   <section class="panel">
+      <div class="panel-head">
          <p class="panel-kicker">Quick start</p>
          <h2>Try it in five minutes</h2>
       </div>
       <div class="command-strip">
-         <pre><code>node packages/cli/dist/cli.js doctor
-node packages/cli/dist/cli.js wcag show 4.1.3 --json
-node packages/cli/dist/cli.js inspect criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json
-node packages/cli/dist/cli.js run pattern status_message_probe --target virtual --url http://127.0.0.1:6173/status-message.html --json
-node packages/cli/dist/cli.js verify criterion 4.1.3 --target virtual --url http://127.0.0.1:6173/status-message.html --json</code></pre>
+         <pre><code>a1 doctor
+a1 wcag show 4.1.3 --json
+a1 inspect criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json
+a1 run pattern status_message_probe --target virtual --url http://127.0.0.1:6173/status-message.html --json
+a1 verify criterion 4.1.3 --target virtual --url http://127.0.0.1:6173/status-message.html --json</code></pre>
          <p class="command-note">
          Each step builds on the previous one: look up the rule, check if it applies, run the test,
          then verify.

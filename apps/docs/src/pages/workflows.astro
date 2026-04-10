@@ -18,10 +18,10 @@ import { docsLinks } from '../lib/nav';
             Use this when you know which WCAG rule to test, or when a bug report references a specific
             criterion.
          </p>
-         <pre><code>node packages/cli/dist/cli.js wcag show 4.1.3 --json
-node packages/cli/dist/cli.js inspect criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json
-node packages/cli/dist/cli.js run pattern status_message_probe --target virtual --url http://127.0.0.1:6173/status-message.html --json
-node packages/cli/dist/cli.js verify criterion 4.1.3 --target virtual --url http://127.0.0.1:6173/status-message.html --json</code></pre>
+         <pre><code>a1 wcag show 4.1.3 --json
+a1 inspect criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json
+a1 run pattern status_message_probe --target virtual --url http://127.0.0.1:6173/status-message.html --json
+a1 verify criterion 4.1.3 --target virtual --url http://127.0.0.1:6173/status-message.html --json</code></pre>
       </div>
       <div class="split-aside">
          <div class="tag">see also</div>
@@ -43,7 +43,7 @@ node packages/cli/dist/cli.js verify criterion 4.1.3 --target virtual --url http
             The <code>verify level</code> command expands the full criterion matrix and runs each
             applicable check.
          </p>
-         <pre><code>node packages/cli/dist/cli.js verify level AA --target virtual --url http://127.0.0.1:6173/basic-page.html --json</code></pre>
+         <pre><code>a1 verify level AA --target virtual --url http://127.0.0.1:6173/basic-page.html --json</code></pre>
       </div>
       <div class="split-aside">
          <div class="tag">important</div>
@@ -64,10 +64,10 @@ node packages/cli/dist/cli.js verify criterion 4.1.3 --target virtual --url http
             Use the driver when you need direct control over the screen reader — navigating elements,
             sending keystrokes, and reading spoken output.
          </p>
-         <pre><code>node packages/cli/dist/cli.js drive start --target virtual --url http://127.0.0.1:6173/basic-page.html --json
-node packages/cli/dist/cli.js drive next --session &lt;sessionId&gt; --json
-node packages/cli/dist/cli.js drive read --session &lt;sessionId&gt; --json
-node packages/cli/dist/cli.js drive stop --session &lt;sessionId&gt; --json</code></pre>
+         <pre><code>a1 drive start --target virtual --url http://127.0.0.1:6173/basic-page.html --json
+a1 drive next --session &lt;sessionId&gt; --json
+a1 drive read --session &lt;sessionId&gt; --json
+a1 drive stop --session &lt;sessionId&gt; --json</code></pre>
       </div>
       <div class="split-aside">
          <div class="tag">note</div>

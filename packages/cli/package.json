@@ -2,6 +2,7 @@
    "name": "a11ied",
    "version": "0.1.0",
    "bin": {
+      "a1": "./dist/cli.js",
       "a11ied": "./dist/cli.js"
    },
    "files": [

@@ -23,9 +23,9 @@ import { docsLinks } from '../lib/nav';
 
    <section>
       <h2>Examples</h2>
-      <pre><code>node packages/cli/dist/cli.js drive start --target voiceover --recording ./recordings/voiceover-home.mov
-node packages/cli/dist/cli.js run pattern dialog_probe --target voiceover --url http://127.0.0.1:6173/dialog.html --recording ./recordings/dialog-probe.mov --json
-node packages/cli/dist/cli.js verify criterion 4.1.3 --target voiceover --url http://127.0.0.1:6173/status-message.html --recording ./recordings/status-message.mov --json</code></pre>
+      <pre><code>a1 drive start --target voiceover --recording ./recordings/voiceover-home.mov
+a1 run pattern dialog_probe --target voiceover --url http://127.0.0.1:6173/dialog.html --recording ./recordings/dialog-probe.mov --json
+a1 verify criterion 4.1.3 --target voiceover --url http://127.0.0.1:6173/status-message.html --recording ./recordings/status-message.mov --json</code></pre>
    </section>
 
    <section>
@@ -34,8 +34,8 @@ node packages/cli/dist/cli.js verify criterion 4.1.3 --target voiceover --url ht
          The <code>doctor</code> command checks whether your system can record. On macOS, recording
          failures are usually caused by missing Screen Recording permissions for the host app.
       </p>
-      <pre><code>node packages/cli/dist/cli.js doctor
-node packages/cli/dist/cli.js doctor --json</code></pre>
+      <pre><code>a1 doctor
+a1 doctor --json</code></pre>
    </section>
 
    <section>

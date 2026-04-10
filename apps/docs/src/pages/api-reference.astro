@@ -5,11 +5,41 @@ import { docsLinks } from '../lib/nav';
 
 <DocShell
    title="API reference"
-   summary="a11ied is organized as npm workspaces. Each package has a focused public API. Import from package entrypoints — internal file paths are not part of the supported surface."
+   summary="a11ied is published as a single npm package. Install it to get both the CLI commands and the programmatic API."
    links={docsLinks}
 >
    <section>
+      <h2>Install</h2>
+      <pre><code>npm install a11ied</code></pre>
+      <p>
+         This gives you the <code>a1</code> CLI command (also available as <code>a11ied</code>)
+         and the programmatic API.
+      </p>
+   </section>
+
+   <section>
+      <h2>CLI usage</h2>
+      <pre><code>a1 doctor
+a1 wcag show 4.1.3 --json
+a1 help-all</code></pre>
+      <p>
+         See <a href="/cli-reference">CLI reference</a> for the full command tree.
+      </p>
+   </section>
+
+   <section>
+      <h2>Programmatic usage</h2>
+      <pre><code>import {'{'} buildCli {'}'} from 'a11ied';</code></pre>
+      <p>
+         The package exports the CLI builder for programmatic use.
+         The underlying runtime modules (<code>@a11ied/core</code>, <code>@a11ied/contracts</code>, etc.)
+         are internal workspace packages — import from the top-level <code>a11ied</code> entrypoint.
+      </p>
+   </section>
+
+   <section>
       <h2>Packages</h2>
+      <p>The monorepo is organized into focused internal packages:</p>
       <ul>
          <li><code>@a11ied/contracts</code>: shared runtime schemas and result shapes</li>
          <li><code>@a11ied/core</code>: WCAG lookup, target resolution, driver orchestration, pattern execution, and verification</li>
@@ -18,33 +48,15 @@ import { docsLinks } from '../lib/nav';
          <li><code>@a11ied/wcag-data</code>: standards-data sync and normalization</li>
          <li><code>@a11ied/wcag-engine</code>: lookup, search, coverage, and applicability over generated artifacts</li>
          <li><code>@a11ied/mcp-server</code>: MCP server entrypoint</li>
-         <li><code>a11ied</code>: CLI entrypoint and command builder</li>
       </ul>
-   </section>
-
-   <section>
-      <h2>Package responsibilities</h2>
-      <div class="route-list">
-         <div class="route-row"><code>@a11ied/contracts</code><span>Shared schemas, result types, and command metadata.</span></div>
-         <div class="route-row"><code>@a11ied/wcag-data</code> and <code>@a11ied/wcag-engine</code><span>Standards data: synced artifacts, search, lookup, coverage, and applicability rules.</span></div>
-         <div class="route-row"><code>@a11ied/guidepup</code> and <code>@a11ied/core</code><span>Execution engine: targets, sessions, patterns, axe runs, verification, and recording.</span></div>
-         <div class="route-row"><code>@a11ied/mcp-server</code> and <code>a11ied</code><span>User-facing surfaces: MCP tools over stdio and CLI commands in the terminal.</span></div>
-      </div>
-   </section>
-
-   <section>
-      <h2>About this reference</h2>
-      <p>
-         This page maps which package owns which functionality. For detailed API documentation,
-         see the JSDoc comments on each package's public exports.
-      </p>
+      <p>These are bundled into the published <code>a11ied</code> package — you don't install them separately.</p>
    </section>
 
    <section class="field-note">
-      <h2>Import from entrypoints</h2>
+      <h2>Internal file paths</h2>
       <p>
-         Each package's main export is the supported API surface. Importing from internal file
-         paths may break between releases.
+         Import from the <code>a11ied</code> entrypoint. Internal file paths inside the package
+         may change between releases.
       </p>
    </section>
 </DocShell>

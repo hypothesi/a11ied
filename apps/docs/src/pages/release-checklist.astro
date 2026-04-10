@@ -22,8 +22,8 @@ import { docsLinks } from '../lib/nav';
    <section>
       <h2>Required commands</h2>
       <pre><code>npm run standards
-node packages/cli/dist/cli.js help-all
-node packages/cli/dist/cli.js doctor --json</code></pre>
+a1 help-all
+a1 doctor --json</code></pre>
    </section>
 
    <section>
@@ -38,7 +38,7 @@ node packages/cli/dist/cli.js doctor --json</code></pre>
    <section>
       <h2>Publish order</h2>
       <ul>
-         <li>Packages: publish workspace packages in dependency order after <code>npm run standards</code> passes.</li>
+         <li>Package: publish <code>a11ied</code> to npm after <code>npm run standards</code> passes.</li>
          <li>Docs: build <code>apps/docs/dist/</code> and publish the generated static site.</li>
          <li>Agent Skill: ship <code>skills/a11ied/</code> only after the skill text matches the released CLI and MCP behavior.</li>
       </ul>
