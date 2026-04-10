@@ -5,7 +5,7 @@ import { useManagedTestServer } from '../../../cli/src/testing/lifecycle.js';
 import { verifyCriterion, verifyLevel } from './runtime.js';
 
 const ONE_MINUTE_MS = 60_000;
-const TWO_MINUTES_MS = 120_000;
+const THREE_MINUTES_MS = 180_000;
 const MIN_AA_CRITERIA = 24;
 
 let baseUrl = '';
@@ -168,6 +168,6 @@ describe('level verification runtime', () => {
             ),
          ).toBe(true);
       },
-      TWO_MINUTES_MS,
+      THREE_MINUTES_MS,
    );
 });

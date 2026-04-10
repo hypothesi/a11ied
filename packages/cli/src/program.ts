@@ -11,7 +11,9 @@ import { renderFullHelp } from './lib/help.js';
 function registerDoctorCommand(program: Command): void {
    program
       .command('doctor')
-      .description('Report runtime details and supported automation targets.')
+      .description(
+         'Report runtime details, browser policy, and supported automation targets.',
+      )
       .option('--json', 'Print JSON instead of human-readable text.')
       .action(async (options: { json?: boolean }) => {
          const { createDoctorReport, renderDoctorText } = await import('#core');

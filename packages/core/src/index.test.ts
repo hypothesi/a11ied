@@ -15,13 +15,47 @@ afterEach(() => {
    childProcessMocks.spawnSync.mockReset();
 });
 
+function createSpawnResult(
+   status: number,
+   stdout = '',
+): {
+   error: undefined;
+   status: number;
+   stderr: string;
+   stdout: string;
+} {
+   return {
+      error: undefined,
+      status,
+      stderr: '',
+      stdout,
+   };
+}
+
+function mockSpawnForReadyDoctor(): void {
+   childProcessMocks.spawnSync.mockImplementation((command: string, args: string[]) => {
+      if (command === '/usr/sbin/screencapture') {
+         return createSpawnResult(0);
+      }
+      if (command === 'which' && args[0] === 'google-chrome-stable') {
+         return createSpawnResult(0, '/usr/bin/google-chrome-stable\n');
+      }
+      return createSpawnResult(1);
+   });
+}
+
+function mockSpawnForFailingRecordingProbe(): void {
+   childProcessMocks.spawnSync.mockImplementation((command: string) => {
+      if (command === '/usr/sbin/screencapture') {
+         return createSpawnResult(1);
+      }
+      return createSpawnResult(1);
+   });
+}
+
 describe('core scaffolding', () => {
    it('returns the supported target matrix', async () => {
-      childProcessMocks.spawnSync.mockReturnValue({
-         error: undefined,
-         status: 0,
-         stderr: '',
-      });
+      mockSpawnForReadyDoctor();
       const { listSupportedTargets } = await import('./index.js');
       const targets = listSupportedTargets();
 
@@ -39,13 +73,10 @@ describe('core scaffolding', () => {
    });
 
    it('returns only shipped ready command families in the CLI catalog data', async () => {
-      childProcessMocks.spawnSync.mockReturnValue({
-         error: undefined,
-         status: 1,
-         stderr: '',
-      });
+      mockSpawnForFailingRecordingProbe();
       const { createDoctorReport, listCliCommands } = await import('./index.js');
       const commands = listCliCommands();
+      const report = createDoctorReport();
 
       expect(commands.map((command) => command.name)).toEqual([
          'wcag',
@@ -57,8 +88,12 @@ describe('core scaffolding', () => {
          'mcp',
       ]);
       expect(commands.every((command) => command.maturity === 'ready')).toBe(true);
-      expect(createDoctorReport().targets[VIRTUAL_TARGET_INDEX]?.status).toBe('ready');
-      expect(createDoctorReport().targets[0]?.notes).toContain(
+      expect(report.browserAutomation.policyName).toBe('system-browser-first');
+      expect(report.browserAutomation.installCommand).toBe(
+         'npx playwright install chromium',
+      );
+      expect(report.targets[VIRTUAL_TARGET_INDEX]?.status).toBe('ready');
+      expect(report.targets[0]?.notes).toContain(
          'Recording probe failed: screencapture exited with code 1 without writing a movie file.',
       );
    });

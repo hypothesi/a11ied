@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import type { CliCommand, DoctorReport, Target } from '../../contracts/src/index.js';
+import { createBrowserAutomationPolicy } from './browser/policy.js';
 
 export {
    CliEnvironmentError,
@@ -30,6 +31,7 @@ export {
    startDriverSession,
    stopDriverSession,
 } from './driver/runtime.js';
+export { resolveDefaultTarget } from './driver/default-target.js';
 export { runAxe } from './axe/runtime.js';
 export { runInteractionPattern } from './patterns/runtime.js';
 export { verifyCriterion, verifyLevel } from './verification/runtime.js';
@@ -192,12 +194,49 @@ function createSupportedTargets(): Target[] {
    return targets;
 }
 
+function renderBrowserAutomationLines(report: DoctorReport): string[] {
+   const detectedBrowserLines = report.browserAutomation.candidates.map((candidate) => {
+      let suffix = '';
+      if (candidate.location) {
+         suffix = ` (${candidate.location})`;
+      }
+      return `  - ${candidate.label} [${candidate.launchMode}, ${candidate.source}]${suffix}`;
+   });
+   const lines = [
+      'Browser automation:',
+      `- Policy: ${report.browserAutomation.policyName}`,
+      `- Preferred: ${report.browserAutomation.preferredCandidate?.label ?? 'none detected'}`,
+      `- Fallback install: ${report.browserAutomation.installCommand}`,
+   ];
+
+   if (report.browserAutomation.candidates.length === 0) {
+      lines.push('- Detected browsers: none');
+      return lines;
+   }
+
+   return [...lines, '- Detected browsers:', ...detectedBrowserLines];
+}
+
+function renderTargetLines(report: DoctorReport): string[] {
+   const lines = ['Targets:'];
+
+   for (const target of report.targets) {
+      lines.push(`- ${target.id} [${target.status}]`);
+      for (const note of target.notes) {
+         lines.push(`  ${note}`);
+      }
+   }
+
+   return lines;
+}
+
 /** Builds the doctor report shown by the public CLI and library surface. */
 export function createDoctorReport(): DoctorReport {
    return {
       packageVersion: '0.1.0',
       nodeVersion: process.version,
       npmVersion: processEnv.npm_config_user_agent ?? 'unknown',
+      browserAutomation: createBrowserAutomationPolicy(),
       targets: createSupportedTargets(),
    };
 }
@@ -219,15 +258,10 @@ export function renderDoctorText(report: DoctorReport): string {
       `Node ${report.nodeVersion}`,
       `npm ${report.npmVersion}`,
       '',
-      'Targets:',
+      ...renderBrowserAutomationLines(report),
+      '',
+      ...renderTargetLines(report),
    ];
-
-   for (const target of report.targets) {
-      lines.push(`- ${target.id} [${target.status}]`);
-      for (const note of target.notes) {
-         lines.push(`  ${note}`);
-      }
-   }
 
    return lines.join('\n');
 }

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { browserAutomationPolicySchema } from './browser.js';
 
 export const platformSchema = z.enum(['voiceover', 'nvda', 'virtual']);
 export type Platform = z.infer<typeof platformSchema>;
@@ -16,6 +17,7 @@ export const doctorReportSchema = z.object({
    packageVersion: z.string(),
    nodeVersion: z.string(),
    npmVersion: z.string(),
+   browserAutomation: browserAutomationPolicySchema,
    targets: z.array(targetSchema),
 });
 export type DoctorReport = z.infer<typeof doctorReportSchema>;

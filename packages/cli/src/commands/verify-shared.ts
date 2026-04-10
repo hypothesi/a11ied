@@ -26,11 +26,12 @@ export interface VerifyCommandResult {
 
 export async function requireTarget(target: string | undefined): Promise<Platform> {
    if (!target) {
-      const { CliUsageError } = await import('#core');
+      const { CliUsageError, resolveDefaultTarget } = await import('#core');
+      const fallback = resolveDefaultTarget();
       throw new CliUsageError(
          'validation-error',
-         'Choose one target: virtual, voiceover, or nvda.',
-         { field: 'target', value: target },
+         `${fallback.message} Provide --target to override.`,
+         { field: 'target', value: target, defaultTarget: fallback.target },
       );
    }
 

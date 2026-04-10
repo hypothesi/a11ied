@@ -31,11 +31,13 @@ a1 verify criterion 4.1.3 --target voiceover --url http://127.0.0.1:6173/status-
    <section>
       <h2>Setup with doctor</h2>
       <p>
-         The <code>doctor</code> command checks whether your system can record. On macOS, recording
-         failures are usually caused by missing Screen Recording permissions for the host app.
+         The <code>doctor</code> command checks recording support and also reports how a11ied will
+         handle browser-backed automation. It looks for an existing local Chromium-family browser
+         first, then falls back to Playwright Chromium if it is already installed.
       </p>
       <pre><code>a1 doctor
-a1 doctor --json</code></pre>
+a1 doctor --json
+npx playwright install chromium</code></pre>
    </section>
 
    <section>
@@ -43,7 +45,9 @@ a1 doctor --json</code></pre>
       <p>
          Run <code>doctor</code> first if recording fails. On macOS, a11ied records video without
          microphone input. If recording works from Terminal but fails from your editor or agent,
-         check that the host app has Screen Recording permission in System Settings.
+         check that the host app has Screen Recording permission in System Settings. If a browser-backed
+         command fails before it gets to recording, install Chromium with
+         <code>npx playwright install chromium</code>.
       </p>
    </section>
 

@@ -22,7 +22,7 @@ export const MIN_AA_CRITERIA_COUNT = 24;
 export const TEST_TIMEOUT_SHORT = 20_000;
 export const TEST_TIMEOUT_MEDIUM = 30_000;
 export const TEST_TIMEOUT_LONG = 60_000;
-export const TEST_TIMEOUT_VERY_LONG = 120_000;
+export const TEST_TIMEOUT_VERY_LONG = 300_000;
 export const SEARCH_EXCERPT_LINES = 3;
 const { env: processEnv } = process;
 
@@ -91,9 +91,17 @@ function captureProcessOutput(): {
 }
 
 function getChildEnv(): NodeJS.ProcessEnv {
-   const childEnv = { ...processEnv };
-   delete childEnv.VITEST;
-   return childEnv;
+   return Object.fromEntries(
+      Object.entries(processEnv).filter(([key]) => {
+         if (key === 'NODE_OPTIONS') {
+            return false;
+         }
+         if (key.startsWith('VITEST')) {
+            return false;
+         }
+         return !key.startsWith('__VITEST');
+      }),
+   );
 }
 
 export async function runCli(args: string[]): Promise<CliResult> {

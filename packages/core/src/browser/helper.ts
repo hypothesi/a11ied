@@ -1,10 +1,12 @@
-import { chromium, type Page } from 'playwright';
+import type { Page } from 'playwright';
+
+import { launchAutomationBrowser } from './policy.js';
 
 export async function withBrowserPage<TResult>(
    url: string,
    callback: (page: Page) => Promise<TResult>,
 ): Promise<TResult> {
-   const browser = await chromium.launch({ headless: true });
+   const { browser } = await launchAutomationBrowser();
 
    try {
       const page = await browser.newPage();

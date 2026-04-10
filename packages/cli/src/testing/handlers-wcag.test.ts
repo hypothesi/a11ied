@@ -8,6 +8,7 @@ import {
    EXIT_SUCCESS,
    EXIT_USAGE,
    SEARCH_EXCERPT_LINES,
+   TEST_TIMEOUT_SHORT,
 } from './setup.js';
 import { expectFirstErrorMessage } from './helpers.js';
 
@@ -256,11 +257,15 @@ describe('cli inspect commands', () => {
       await assertInspectInvalidCriterion(testServer.getBaseUrl());
    });
 
-   it('keeps representative text output readable', async () => {
-      const baseUrl = testServer.getBaseUrl();
-      await assertTextShowSnapshot();
-      await assertTextSearchSnapshot();
-      await assertTextCriterionSnapshot(baseUrl);
-      await assertTextVerboseSnapshots(baseUrl);
-   });
+   it(
+      'keeps representative text output readable',
+      async () => {
+         const baseUrl = testServer.getBaseUrl();
+         await assertTextShowSnapshot();
+         await assertTextSearchSnapshot();
+         await assertTextCriterionSnapshot(baseUrl);
+         await assertTextVerboseSnapshots(baseUrl);
+      },
+      TEST_TIMEOUT_SHORT,
+   );
 });

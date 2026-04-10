@@ -17,7 +17,7 @@ import { docsLinks } from '../lib/nav';
          <div class="route-row"><code>wcag</code><span>Look up criteria, levels, search results, and coverage strategy.</span></div>
          <div class="route-row"><code>inspect</code><span>Check which criteria apply to a page or Storybook story.</span></div>
          <div class="route-row"><code>drive</code><span>Control a screen reader session with low-level actions.</span></div>
-         <div class="route-row"><code>doctor</code><span>Report target availability and recording diagnostics.</span></div>
+         <div class="route-row"><code>doctor</code><span>Report runtime details, browser policy, target availability, and recording diagnostics.</span></div>
          <div class="route-row"><code>run</code><span>Execute <code>axe-core</code> scans or named interaction patterns.</span></div>
          <div class="route-row"><code>verify</code><span>Produce criterion or level verdicts from collected evidence.</span></div>
          <div class="route-row"><code>mcp</code><span>Start the stdio MCP server.</span></div>
@@ -79,6 +79,26 @@ a1 verify criterion 4.1.3 --target virtual --url http://127.0.0.1:6173/status-me
 
    <section class="panel">
       <div class="panel-head">
+         <p class="panel-kicker">Browser policy</p>
+         <h2>How browser-backed commands pick Chromium</h2>
+      </div>
+      <p>
+         Browser-backed commands such as <code>run axe</code>, Storybook inspection, and the
+         focus or dialog probes look for an existing local Chromium-family browser first.
+         a11ied prefers Chrome, Edge, Brave, or Chromium if one is already on the machine.
+      </p>
+      <p>
+         If none of those are available, a11ied falls back to Playwright's managed Chromium
+         when it is already installed. If no usable browser is present, the command tells you to run
+         <code>npx playwright install chromium</code>.
+      </p>
+      <pre><code>a1 doctor
+a1 doctor --json
+npx playwright install chromium</code></pre>
+   </section>
+
+   <section class="panel">
+      <div class="panel-head">
          <p class="panel-kicker">Agent support</p>
          <h2>Print the full command tree</h2>
       </div>
@@ -95,7 +115,7 @@ a1 verify criterion 4.1.3 --target virtual --url http://127.0.0.1:6173/status-me
          <h2>Start with the smallest command</h2>
       </div>
       <p>
-         If you only need criterion text, use <code>wcag show</code> — no browser required. The CLI
+         If you only need criterion text, use <code>wcag show</code>. No browser is required. The CLI
          is layered so you can pick the right level of effort for each task.
       </p>
    </section>

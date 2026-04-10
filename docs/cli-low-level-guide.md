@@ -7,7 +7,7 @@ Top-level commands:
 - `wcag`: local WCAG lookup, search, and coverage data
 - `inspect`: explain which criteria look relevant for a page or Storybook story
 - `drive`: low-level screen reader control through a stable session
-- `doctor`: show runtime support and recording diagnostics
+- `doctor`: show runtime support, browser policy, and recording diagnostics
 - `run axe`: run `axe-core`
 - `run pattern`: run higher-level interaction probes built on the driver layer
 - `verify`: turn collected evidence into explicit WCAG criterion or level verdicts
@@ -20,7 +20,11 @@ node packages/cli/dist/cli.js --help
 node packages/cli/dist/cli.js help-all
 node packages/cli/dist/cli.js doctor
 node packages/cli/dist/cli.js doctor --json
+npx playwright install chromium
 ```
+
+Browser-backed commands prefer an installed local Chrome, Edge, Brave, or Chromium browser.
+If none is available, install Playwright Chromium with `npx playwright install chromium`.
 
 ## WCAG lookup
 

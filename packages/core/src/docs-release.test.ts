@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 
 const rootDir = resolve(import.meta.dirname, '../../..');
 const docsPagesDir = resolve(rootDir, 'apps/docs/src/pages');
-const skillPath = resolve(rootDir, 'skills/a11lied/SKILL.md');
+const skillPath = resolve(rootDir, 'skills/a11ied/SKILL.md');
 const workflowPath = resolve(rootDir, '.github/workflows/ci.yml');
 const releaseReadinessPath = resolve(rootDir, 'releases/v0.3.0-readiness.md');
 const requiredRuntimePages = [
@@ -96,12 +96,15 @@ function expectSurfaceDoc(page: string, requiredText: string): void {
 
 function expectPublicSurfaceDocs(): void {
    expectSurfaceDoc('cli-reference.astro', 'Command families');
+   expectSurfaceDoc('cli-reference.astro', 'npx playwright install chromium');
+   expectSurfaceDoc('cli-reference.astro', 'Chrome, Edge, Brave, or Chromium');
    expectSurfaceDoc('mcp-usage.astro', 'What MCP exposes');
    expectSurfaceDoc('storybook-usage.astro', 'Storybook targets');
    expectSurfaceDoc('api-reference.astro', 'Packages');
    expectSurfaceDoc('recording-sessions.astro', 'Supported targets');
    expectSurfaceDoc('recording-sessions.astro', 'voiceover');
    expectSurfaceDoc('recording-sessions.astro', 'doctor');
+   expectSurfaceDoc('recording-sessions.astro', 'npx playwright install chromium');
 }
 
 function expectReleaseReadinessRecord(): void {

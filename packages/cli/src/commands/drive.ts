@@ -1,3 +1,4 @@
+import { log } from '@clack/prompts';
 import type { Command } from 'commander';
 import type * as Core from '#core';
 import type { Platform } from '#contracts';
@@ -18,7 +19,7 @@ import {
 
 interface StartActionOptions extends CliTargetInputOptions {
    json?: boolean;
-   target: string;
+   target?: string;
    recording?: string;
 }
 
@@ -91,6 +92,12 @@ async function handleStartAction(options: StartActionOptions): Promise<void> {
       import('#core'),
    ]);
 
+   if (!options.target) {
+      const fallback = core.resolveDefaultTarget();
+      log.message(fallback.message);
+      options.target = fallback.target;
+   }
+
    await executeCommand(
       {
          family: 'drive',
@@ -117,10 +124,7 @@ function registerStartCommand(driveCommand: Command): void {
             driveCommand
                .command('start')
                .description('Start a persistent driver session.')
-               .requiredOption(
-                  '--target <platform>',
-                  'Choose one target: virtual, voiceover, or nvda.',
-               )
+               .option('--target <platform>', 'Choose one target: voiceover, nvda, or virtual.')
                .option('--url <url>', 'Attach one live URL target to the new session.'),
          ),
       ),

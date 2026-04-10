@@ -30,7 +30,7 @@ export function addEphemeralOption(command: Command): Command {
 export function addTargetOption(command: Command): Command {
    return command.option(
       '--target <platform>',
-      'Choose one target: virtual, voiceover, or nvda.',
+      'Choose one target: voiceover, nvda, or virtual.',
    );
 }
 

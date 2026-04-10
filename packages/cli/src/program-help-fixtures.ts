@@ -21,7 +21,8 @@ export const topLevelHelpCases: HelpCase[] = [
         wcag              Look up pinned WCAG requirements and coverage data.
         inspect           Explain criterion applicability for a target.
         drive             Control a target screen reader through stable sessions.
-        doctor [options]  Report runtime details and supported automation targets.
+        doctor [options]  Report runtime details, browser policy, and supported
+                          automation targets.
         run               Execute automated rule scans and named interaction patterns.
         verify            Turn collected evidence into explicit WCAG verification
                           results.
