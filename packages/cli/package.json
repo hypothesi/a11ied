@@ -22,7 +22,7 @@
    },
    "scripts": {
       "build": "tsup src/index.ts src/cli.ts --format esm --clean --external=@guidepup/guidepup --external=@guidepup/setup --external=@guidepup/virtual-screen-reader --external=@guidepup/record --external=playwright --external=playwright-core --external=chromium-bidi --external=chromium-bidi/lib/cjs/bidiMapper/BidiMapper --external=chromium-bidi/lib/cjs/cdp/CdpConnection --external=jsdom --external=axe-core --external=@modelcontextprotocol/sdk",
-      "typecheck": "tsc -p ../../tsconfig.typecheck.json --noEmit"
+      "typecheck": "tsc -p tsconfig.json --noEmit"
    },
    "dependencies": {
       "@a11ied/contracts": "^0.1.0",

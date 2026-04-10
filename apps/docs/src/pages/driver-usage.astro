@@ -5,18 +5,18 @@ import { docsLinks } from '../lib/nav';
 
 <DocShell
    title="Driver usage"
-   summary="The low-level driver layer exists so an agent can operate VoiceOver, NVDA, or the virtual reader the way a person would. It is intentionally plain: start a session, move, read, type, checkpoint, stop."
+   summary="The driver gives you direct control over VoiceOver, NVDA, or the virtual screen reader. Start a session, navigate elements, send keystrokes, and read spoken output."
    links={docsLinks}
 >
    <section>
-      <h2>What the driver is for</h2>
+      <h2>When to use the driver</h2>
       <p>
-         Use <code>drive</code> when you need raw control. That means next item, previous item, keyboard
-         chords, interaction mode, reading spoken output, and grabbing logs. If a named pattern already
-         exists, use that instead. Patterns are easier to repeat and much easier to review later.
+         Use <code>drive</code> when you need low-level control: navigating items, sending keyboard
+         chords, entering interaction mode, reading spoken output, and capturing logs. For repeatable
+         checks, consider using a <a href="/pattern-execution">named pattern</a> instead.
       </p>
       <p>
-         If you are still deciding whether this is the right layer, start with <a href="/workflows#drive-a-session">the driver workflow</a>.
+         See the <a href="/workflows#drive-a-session">driver workflow</a> for a guided walkthrough.
       </p>
    </section>
 
@@ -29,29 +29,28 @@ node packages/cli/dist/cli.js drive stop --session drv_example --json</code></pr
    </section>
 
    <section>
-      <h2>What the raw actions are</h2>
+      <h2>Available actions</h2>
       <div class="route-list">
-         <div class="route-row"><code>start</code>, <code>status</code>, <code>stop</code><span>Create, inspect, and tear down a persistent session.</span></div>
-         <div class="route-row"><code>next</code>, <code>previous</code>, <code>interact</code>, <code>stop-interacting</code><span>Move through the target and switch interaction modes.</span></div>
-         <div class="route-row"><code>key</code>, <code>type</code>, <code>click-current-item</code><span>Send direct commands when you need to act like a real operator.</span></div>
-         <div class="route-row"><code>read</code>, <code>logs</code>, <code>clear-logs</code>, <code>checkpoint</code><span>Capture what the screen reader said and keep the run debuggable.</span></div>
+         <div class="route-row"><code>start</code>, <code>status</code>, <code>stop</code><span>Create, inspect, and tear down a session.</span></div>
+         <div class="route-row"><code>next</code>, <code>previous</code>, <code>interact</code>, <code>stop-interacting</code><span>Navigate through elements and switch interaction modes.</span></div>
+         <div class="route-row"><code>key</code>, <code>type</code>, <code>click-current-item</code><span>Send keystrokes, type text, and click elements.</span></div>
+         <div class="route-row"><code>read</code>, <code>logs</code>, <code>clear-logs</code>, <code>checkpoint</code><span>Read spoken output, view session logs, and create checkpoints.</span></div>
       </div>
    </section>
 
    <section>
-      <h2>Persistent versus ephemeral</h2>
+      <h2>Persistent vs. ephemeral sessions</h2>
       <p>
-         Most serious runs should use a persistent session so the transcript, checkpoints, and state stay
-         together. The <code>--ephemeral</code> flag is better for one-off actions than for a full review
-         pass.
+         Persistent sessions keep the full transcript, checkpoints, and state together across multiple
+         commands. Use the <code>--ephemeral</code> flag for quick one-off actions.
       </p>
    </section>
 
    <section class="field-note">
-      <h2>Important limit</h2>
+      <h2>Transcripts and verdicts</h2>
       <p>
-         A transcript is evidence, not a verdict. "The virtual reader said X" is useful. "Therefore the
-         page complies with WCAG" is a different statement and often a much bigger one.
+         A driver transcript records what the screen reader said during a session. To produce a
+         conformance verdict from that evidence, use the <a href="/verification-semantics">verification</a> layer.
       </p>
    </section>
 </DocShell>

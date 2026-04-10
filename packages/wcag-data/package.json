@@ -16,7 +16,7 @@
    "scripts": {
       "build": "tsup src/index.ts --format esm --clean",
       "sync": "tsx scripts/sync.ts",
-      "typecheck": "tsc -p ../../tsconfig.typecheck.json --noEmit",
+      "typecheck": "tsc -p tsconfig.json --noEmit",
       "validate": "tsx scripts/validate.ts"
    },
    "dependencies": {

@@ -5,53 +5,52 @@ import { docsLinks } from '../lib/nav';
 
 <DocShell
    title="Applicability"
-   summary="Not every criterion applies to every page. a11ied makes that explicit so the report can say why a row matters, why it does not, or why the runtime still needs help from the operator."
+   summary="Before testing a criterion, check whether it applies to your target. The inspect command analyzes page structure and reports which criteria are relevant, which aren't, and which need human review."
    links={docsLinks}
 >
    <section>
-      <h2>Inputs that matter</h2>
+      <h2>What determines applicability</h2>
       <ul>
-         <li>document structure and semantics from the loaded target</li>
-         <li>target hints from Storybook metadata or explicit CLI flags</li>
-         <li>criterion-level rules baked into the WCAG engine</li>
+         <li>Document structure and semantics from the loaded target</li>
+         <li>Target hints from Storybook metadata or explicit CLI flags</li>
+         <li>Criterion-level rules built into the WCAG engine</li>
       </ul>
    </section>
 
    <section>
-      <h2>Typical flow</h2>
+      <h2>Commands</h2>
       <pre><code>node packages/cli/dist/cli.js inspect applicable --url http://127.0.0.1:6173/auth-login.html --json
 node packages/cli/dist/cli.js inspect criterion 3.3.8 --url http://127.0.0.1:6173/auth-login.html --json</code></pre>
       <p>
-         The first command asks what matters here. The second asks why one specific criterion is in or
-         out. That sounds small, but it keeps later verification output from looking like a random dump
-         of rows.
+         The first command lists all applicable criteria for a target. The second explains why a
+         specific criterion is or isn't relevant.
       </p>
    </section>
 
    <section>
-      <h2>What the output is doing</h2>
+      <h2>Result categories</h2>
       <div class="mini-grid">
          <div class="stack">
             <div class="tag">Applicable</div>
-            <p>The target contains cues that make the criterion relevant, like forms, dialogs, headings, landmarks, or live updates.</p>
+            <p>The target contains elements that trigger this criterion — forms, dialogs, headings, landmarks, or live regions.</p>
          </div>
          <div class="stack">
             <div class="tag">Not applicable</div>
-            <p>The page simply does not have the structure or behavior that would trigger the criterion.</p>
+            <p>The page doesn't have the structure or behavior this criterion checks for.</p>
          </div>
          <div class="stack">
             <div class="tag">Needs review</div>
-            <p>The target has weak signals and the runtime wants a human to settle the call instead of guessing.</p>
+            <p>Weak signals detected. A human should confirm whether the criterion applies.</p>
          </div>
       </div>
    </section>
 
    <section class="field-note">
-      <h2>Honesty rule</h2>
+      <h2>About applicability</h2>
       <p>
-         Applicability is not a pass or fail. It is triage. If the runtime says a criterion is
-         applicable but coverage is manual-only, that is not a defect in the engine. It is a warning to
-         stop pretending automation can do more than it can.
+         Applicability is a triage step. A criterion being applicable doesn't mean it passes or fails —
+         it means the criterion is relevant and should be tested. An applicable criterion with
+         manual-only coverage still needs human review.
       </p>
    </section>
 </DocShell>

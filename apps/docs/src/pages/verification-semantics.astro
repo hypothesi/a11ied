@@ -5,46 +5,47 @@ import { docsLinks } from '../lib/nav';
 
 <DocShell
    title="Verification semantics"
-   summary="This is the page that keeps the product honest. Verification is allowed to say pass, fail, mixed, manual-only, or not-covered. It is not allowed to bluff."
+   summary="Verification produces structured verdicts for each criterion: pass, fail, mixed, manual-only, or not-covered. Every result clearly reports what was tested automatically and what still needs human review."
    links={docsLinks}
 >
    <section>
-      <h2>Three evidence lanes</h2>
+      <h2>Three evidence categories</h2>
       <ul>
-         <li><strong>Automated:</strong> the runtime has enough procedure coverage to make a machine verdict.</li>
-         <li><strong>Hybrid:</strong> the runtime can gather evidence, but a human still has to interpret part of it.</li>
-         <li><strong>Manual:</strong> the runtime can explain the criterion and maybe collect context, but it cannot finish the judgment alone.</li>
+         <li><strong>Automated:</strong> the runtime has full procedure coverage and can produce a machine verdict.</li>
+         <li><strong>Hybrid:</strong> the runtime gathers evidence, but a human needs to interpret part of the result.</li>
+         <li><strong>Manual:</strong> the runtime provides criterion context, but the judgment requires human review.</li>
       </ul>
    </section>
 
    <section>
       <h2>Criterion verdicts</h2>
       <div class="mini-grid">
-         <div class="stack"><div class="tag">pass</div><p>The required procedure coverage ran cleanly for that criterion.</p></div>
-         <div class="stack"><div class="tag">fail</div><p>The runtime collected enough evidence to make a negative call.</p></div>
-         <div class="stack"><div class="tag">mixed</div><p>Some procedure slices passed and others failed or errored.</p></div>
-         <div class="stack"><div class="tag">manual-only</div><p>The runtime can explain the row, but not finish the judgment automatically.</p></div>
-         <div class="stack"><div class="tag">not-covered</div><p>The repo does not yet have a meaningful procedure for this criterion.</p></div>
+         <div class="stack"><div class="tag">pass</div><p>All required checks ran successfully for this criterion.</p></div>
+         <div class="stack"><div class="tag">fail</div><p>The runtime collected evidence that shows a failure.</p></div>
+         <div class="stack"><div class="tag">mixed</div><p>Some checks passed while others failed or produced errors.</p></div>
+         <div class="stack"><div class="tag">manual-only</div><p>The criterion requires human judgment that the runtime cannot automate.</p></div>
+         <div class="stack"><div class="tag">not-covered</div><p>No test procedure exists for this criterion yet.</p></div>
       </div>
    </section>
 
    <section>
       <h2>Level verification</h2>
       <p>
-         <code>verify level</code> always emits the full criterion matrix. That is deliberate. A conformance
-         target like AA is not one verdict. It is a table of rows, and some of those rows may still be
-         manual or uncovered even when the automated slice looks clean.
+         <code>verify level</code> outputs the full criterion matrix for the requested conformance
+         level. Some rows may be manual-only or not-covered even when automated checks pass,
+         so the matrix gives a complete picture of conformance status.
       </p>
       <p>
-         If you need the operator path that gets you here, use <a href="/workflows#verify-a-level">the level-verification workflow</a>.
+         See the <a href="/workflows#verify-a-level">level verification workflow</a> for step-by-step usage.
       </p>
    </section>
 
    <section class="field-note">
-      <h2>What not to say</h2>
+      <h2>Interpreting results</h2>
       <p>
-         Do not turn a clean axe run into "WCAG AA compliant." Do not turn a virtual-reader transcript
-         into a VoiceOver or NVDA claim. Keep the evidence type and the claim size matched.
+         A clean axe run covers static rule checks — it does not equal full WCAG conformance.
+         A virtual reader transcript reflects simulated behavior — it does not represent VoiceOver or
+         NVDA output. Make sure your evidence covers the same scope as the conformance claim you're making.
       </p>
    </section>
 </DocShell>

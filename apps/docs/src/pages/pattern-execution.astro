@@ -5,11 +5,11 @@ import { docsLinks } from '../lib/nav';
 
 <DocShell
    title="Pattern execution"
-   summary="Patterns sit one level above raw driver actions. They package up repeatable procedures like heading walks, landmark walks, dialog checks, and status message probes so the agent does not reinvent the same brittle steps over and over."
+   summary="Patterns are reusable interaction probes — heading walks, landmark scans, dialog checks, and more. They produce consistent, repeatable evidence that the verification layer can use."
    links={docsLinks}
 >
    <section>
-      <h2>Current built-in pattern ids</h2>
+      <h2>Built-in patterns</h2>
       <div class="mini-grid">
          <div class="stack"><code>tab_sequence</code><code>landmark_sequence</code><code>heading_sequence</code></div>
          <div class="stack"><code>form_field_walk</code><code>status_message_probe</code><code>dialog_probe</code></div>
@@ -26,20 +26,20 @@ node packages/cli/dist/cli.js run pattern focus_obscured_probe --target virtual 
    </section>
 
    <section>
-      <h2>Why patterns matter</h2>
+      <h2>Why use patterns</h2>
       <ul>
-         <li>They give you named procedures instead of improvised command soup.</li>
-         <li>They produce stable evidence blocks that verification can reuse.</li>
-         <li>They make regressions easier to spot because the procedure shape stays the same.</li>
+         <li>Named, repeatable procedures instead of ad-hoc driver commands.</li>
+         <li>Produce structured evidence blocks that the verification layer can consume.</li>
+         <li>Make regressions easy to detect because the procedure stays consistent across runs.</li>
       </ul>
    </section>
 
    <section class="field-note">
-      <h2>Evidence modes</h2>
+      <h2>Evidence types</h2>
       <p>
-         Some patterns are strong automated evidence. Some are hybrid evidence because they still need a
-         human to judge meaning. That distinction matters. The runtime keeps it visible instead of
-         sweeping it under the rug.
+         Some patterns produce fully automated evidence. Others produce hybrid evidence where a human
+         needs to review part of the result. The output labels each pattern's evidence type so you
+         know what level of review is needed.
       </p>
    </section>
 </DocShell>

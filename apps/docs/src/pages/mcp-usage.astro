@@ -5,25 +5,26 @@ import { docsLinks } from '../lib/nav';
 
 <DocShell
    title="MCP usage"
-   summary="The MCP server is not a separate product. It is the same runtime the CLI uses, exposed for editors and agents that need tool calls and read-only resources."
+   summary="The MCP server exposes a11ied's full runtime to AI agents and editors through tool calls and read-only resources over stdio."
    links={docsLinks}
 >
    <section class="split panel">
       <div class="stack">
          <div class="panel-head">
-            <p class="panel-kicker">Mental model</p>
+            <p class="panel-kicker">Overview</p>
             <h2>What MCP exposes</h2>
          </div>
       <p>
-         The server exposes read-only standards resources plus tool calls for lookup, inspection,
-         driver actions, execution, and verification.
+         The server provides read-only standards resources plus tool calls for criterion lookup,
+         applicability inspection, driver actions, pattern execution, and verification.
+         It uses the same runtime as the CLI.
       </p>
       </div>
       <div class="split-aside">
          <div class="tag">same runtime</div>
          <p class="aside-note">
-            If the CLI command exists, the MCP server is usually wrapping the same underlying runtime
-            path instead of inventing a second implementation.
+            MCP tools wrap the same underlying functions as the CLI commands — there is one
+            shared implementation.
          </p>
       </div>
    </section>
@@ -31,7 +32,7 @@ import { docsLinks } from '../lib/nav';
    <section class="ledger">
       <div class="panel-head">
          <p class="panel-kicker">Tool families</p>
-         <h2>What agents can actually call</h2>
+         <h2>Available tools</h2>
       </div>
       <div class="route-list">
          <div class="route-row"><strong>Knowledge</strong><span><code>doctor</code>, <code>criterion_lookup</code>, <code>level_lookup</code>, <code>search</code>, <code>coverage_lookup</code></span></div>
@@ -43,8 +44,8 @@ import { docsLinks } from '../lib/nav';
 
    <section class="panel">
       <div class="panel-head">
-         <p class="panel-kicker">Read-only surfaces</p>
-         <h2>Resource uris</h2>
+         <p class="panel-kicker">Resources</p>
+         <h2>Read-only resource URIs</h2>
       </div>
       <ul>
          <li><code>a11ied://targets</code></li>
@@ -57,25 +58,25 @@ import { docsLinks } from '../lib/nav';
 
    <section>
       <div class="panel-head">
-         <p class="panel-kicker">Why this split exists</p>
-         <h2>Read-only versus side-effecting operations</h2>
+         <p class="panel-kicker">Read-only vs. active</p>
+         <h2>Tool categories</h2>
       </div>
       <p>
-         Some questions are read-only standards lookups. Some launch browsers or drive assistive
-         technology. The MCP server keeps that split visible so an agent can choose the small, cheap
-         operation before it reaches for the expensive one.
+         Knowledge and inspect tools are read-only — they query local data without side effects.
+         Driver, execution, and verification tools are active — they can launch browsers and
+         drive assistive technology. The server separates these so agents can choose lightweight
+         queries before committing to heavier operations.
       </p>
    </section>
 
    <section class="field-note">
       <div class="panel-head">
-         <p class="panel-kicker">Agent rule</p>
-         <h2>Do not hide side effects</h2>
+         <p class="panel-kicker">Note</p>
+         <h2>Active tools have side effects</h2>
       </div>
       <p>
-         The active MCP tools can launch browsers, attach to targets, and drive VoiceOver or NVDA. That
-         is real machine behavior, not just data retrieval. Agents need to treat those tools like
-         execution surfaces, because that is what they are.
+         Driver and execution tools launch browsers, attach to targets, and control VoiceOver or
+         NVDA. Treat these as execution operations, not data retrieval.
       </p>
    </section>
 </DocShell>

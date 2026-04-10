@@ -5,7 +5,7 @@ import { docsLinks } from '../lib/nav';
 
 <DocShell
    title="CLI reference"
-   summary="This is the command-family map for the shipped CLI. It is the fast answer to 'which layer am I supposed to use for this?'"
+   summary="Complete command reference for the a11ied CLI. Each command family handles one part of the accessibility testing workflow."
    links={docsLinks}
 >
    <section class="ledger">
@@ -15,20 +15,20 @@ import { docsLinks } from '../lib/nav';
       </div>
       <div class="route-list">
          <div class="route-row"><code>wcag</code><span>Look up criteria, levels, search results, and coverage strategy.</span></div>
-         <div class="route-row"><code>inspect</code><span>Explain which criteria look relevant for a page or Storybook story.</span></div>
-         <div class="route-row"><code>drive</code><span>Run low-level screen reader actions through stable sessions.</span></div>
+         <div class="route-row"><code>inspect</code><span>Check which criteria apply to a page or Storybook story.</span></div>
+         <div class="route-row"><code>drive</code><span>Control a screen reader session with low-level actions.</span></div>
          <div class="route-row"><code>doctor</code><span>Report target availability and recording diagnostics.</span></div>
-         <div class="route-row"><code>run</code><span>Execute <code>axe-core</code> or one named interaction pattern.</span></div>
-         <div class="route-row"><code>verify</code><span>Turn evidence into criterion or level verdicts.</span></div>
+         <div class="route-row"><code>run</code><span>Execute <code>axe-core</code> scans or named interaction patterns.</span></div>
+         <div class="route-row"><code>verify</code><span>Produce criterion or level verdicts from collected evidence.</span></div>
          <div class="route-row"><code>mcp</code><span>Start the stdio MCP server.</span></div>
-         <div class="route-row"><code>help-all</code><span>Print the entire help tree in one shot. This is the easiest starting point for agents.</span></div>
+         <div class="route-row"><code>help-all</code><span>Print the entire command tree in one shot — useful for agents discovering the CLI.</span></div>
       </div>
    </section>
 
    <section class="panel">
       <div class="panel-head">
-         <p class="panel-kicker">High-value cuts</p>
-         <h2>Subcommands worth memorizing</h2>
+         <p class="panel-kicker">Subcommands</p>
+         <h2>Subcommands by family</h2>
       </div>
       <div class="mini-grid">
          <div class="stack">
@@ -41,7 +41,7 @@ import { docsLinks } from '../lib/nav';
          </div>
          <div class="stack">
             <h3>drive</h3>
-            <p><code>start</code>, <code>status</code>, <code>stop</code>, plus raw actions like <code>next</code>, <code>key</code>, <code>read</code>, and <code>logs</code></p>
+            <p><code>start</code>, <code>status</code>, <code>stop</code>, plus <code>next</code>, <code>key</code>, <code>read</code>, <code>logs</code></p>
          </div>
          <div class="stack">
             <h3>run</h3>
@@ -57,7 +57,7 @@ import { docsLinks } from '../lib/nav';
    <section class="split panel">
       <div class="stack">
          <div class="panel-head">
-            <p class="panel-kicker">Typical ladder</p>
+            <p class="panel-kicker">Example</p>
             <h2>One criterion, end to end</h2>
          </div>
       <pre><code>node packages/cli/dist/cli.js wcag show 4.1.3 --json
@@ -65,14 +65,14 @@ node packages/cli/dist/cli.js inspect criterion 4.1.3 --url http://127.0.0.1:617
 node packages/cli/dist/cli.js run pattern status_message_probe --target virtual --url http://127.0.0.1:6173/status-message.html --json
 node packages/cli/dist/cli.js verify criterion 4.1.3 --target virtual --url http://127.0.0.1:6173/status-message.html --json</code></pre>
       <p>
-         That sequence is deliberate. Lookup first, scope second, evidence third, verdict last. Skipping
-         straight to <code>verify</code> is how people end up overstating what the runtime proved.
+         This sequence runs through all four steps: lookup, applicability check, evidence gathering,
+         and verification.
       </p>
       </div>
       <div class="split-aside">
-         <div class="tag">shortcut</div>
+         <div class="tag">see also</div>
          <p class="aside-note">
-            If you are still deciding what layer to use, go back to <a href="/workflows">workflows</a>.
+            For guided walkthroughs, see <a href="/workflows">workflows</a>.
          </p>
       </div>
    </section>
@@ -80,24 +80,23 @@ node packages/cli/dist/cli.js verify criterion 4.1.3 --target virtual --url http
    <section class="panel">
       <div class="panel-head">
          <p class="panel-kicker">Agent support</p>
-         <h2>Print the whole command tree</h2>
+         <h2>Print the full command tree</h2>
       </div>
       <pre><code>node packages/cli/dist/cli.js help-all</code></pre>
       <p>
-         This command dumps every shipped subcommand and flag in one pass. If an agent is exploring the
-         CLI, this is better than crawling help one branch at a time.
+         Outputs every subcommand and flag in one pass. Useful for AI agents exploring the CLI
+         surface programmatically.
       </p>
    </section>
 
    <section class="field-note">
       <div class="panel-head">
-         <p class="panel-kicker">Operating rule</p>
-         <h2>Use the small tool first</h2>
+         <p class="panel-kicker">Tip</p>
+         <h2>Start with the smallest command</h2>
       </div>
       <p>
-         If all you need is the criterion text, do not start a browser. If all you need is raw AT
-         control, do not ask for a verification verdict. The CLI is split into layers so operators and
-         agents do not blur those jobs together.
+         If you only need criterion text, use <code>wcag show</code> — no browser required. The CLI
+         is layered so you can pick the right level of effort for each task.
       </p>
    </section>
 </DocShell>

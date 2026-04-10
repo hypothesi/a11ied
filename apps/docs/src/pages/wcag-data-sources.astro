@@ -5,43 +5,43 @@ import { docsLinks } from '../lib/nav';
 
 <DocShell
    title="WCAG data sources"
-   summary="a11ied keeps its standards knowledge local, versioned, and boring on purpose. That is a feature. If the agent cannot explain where a criterion, technique, or strategy came from, it should not be making claims with confidence."
+   summary="a11ied ships with local, versioned WCAG data so criterion lookups, coverage checks, and applicability queries work offline without scraping the W3C site."
    links={docsLinks}
 >
    <section>
       <h2>What ships in the repo</h2>
       <p>
-         The source of truth is <code>packages/wcag-data</code>. The sync step pulls structured WCAG,
-         ACT mapping, Quickref technique, and axe rule data, then turns it into generated artifacts the
-         rest of the product can read without scraping prose pages on demand.
+         The <code>packages/wcag-data</code> package syncs structured data from upstream W3C and
+         axe-core sources, then generates normalized artifacts that the rest of the toolkit reads
+         at runtime.
       </p>
    </section>
 
    <section>
-      <h2>Upstream sources that matter</h2>
+      <h2>Upstream sources</h2>
       <ul>
-         <li>W3C WCAG data for criteria, levels, and normative text</li>
-         <li>W3C ACT mapping for machine-readable rule-to-criterion coverage</li>
-         <li>W3C Quickref technique and failure data</li>
-         <li>Local <code>axe-core</code> rule metadata for automated coverage joins</li>
+         <li>W3C WCAG data — criteria definitions, conformance levels, and normative text</li>
+         <li>W3C ACT mapping — machine-readable rule-to-criterion coverage</li>
+         <li>W3C Quickref — techniques and documented failure patterns</li>
+         <li>Local axe-core rule metadata — automated coverage mappings</li>
       </ul>
    </section>
 
    <section>
-      <h2>What the operator should do first</h2>
+      <h2>Recommended workflow</h2>
       <ol>
-         <li>Resolve the requested WCAG version. The default is 2.2 unless the task says otherwise.</li>
-         <li>Resolve the criterion or target level before opening a browser.</li>
-         <li>Check coverage and verification strategy before promising automation.</li>
+         <li>Resolve the WCAG version (default: 2.2) before running any checks.</li>
+         <li>Look up the criterion or target level before opening a browser.</li>
+         <li>Check coverage and verification strategy to know what can be automated.</li>
       </ol>
    </section>
 
    <section class="field-note">
-      <h2>What this does not mean</h2>
+      <h2>Coverage limits</h2>
       <p>
-         Having local WCAG data does not mean the tool can prove every criterion automatically. Some
-         rows map cleanly to axe. Some need Guidepup patterns. Some still need a human to look at the
-         thing and make a judgment call.
+         Local WCAG data enables fast lookups, but some criteria require axe rules, some need
+         Guidepup interaction patterns, and some still require human judgment. The
+         <code>wcag coverage</code> command shows which category each criterion falls into.
       </p>
    </section>
 </DocShell>

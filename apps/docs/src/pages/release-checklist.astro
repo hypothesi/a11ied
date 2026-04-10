@@ -5,38 +5,38 @@ import { docsLinks } from '../lib/nav';
 
 <DocShell
    title="Release checklist"
-   summary="Public releases need one last reality check. CI covers the fast, repeatable virtual path. It does not replace real assistive technology smoke tests."
+   summary="Steps to follow before cutting a public minor or major release. CI handles repeatable checks; this page covers the manual verification that CI cannot."
    links={docsLinks}
 >
    <section>
-      <h2>Before a public minor or major release</h2>
+      <h2>Pre-release steps</h2>
       <ol>
          <li>Wait for all CI checks to pass.</li>
          <li>Run a manual macOS VoiceOver smoke pass on representative fixtures or demo targets.</li>
          <li>Run a manual Windows NVDA smoke pass on representative fixtures or demo targets.</li>
-         <li>Review the deferred items for the release and make an explicit accept or block decision.</li>
-         <li>Record what was exercised and any environment constraints that mattered.</li>
+         <li>Review deferred items and make an explicit accept-or-block decision for each.</li>
+         <li>Record what was exercised and any environment constraints that applied.</li>
       </ol>
    </section>
 
    <section>
-      <h2>Do not skip these basic commands</h2>
+      <h2>Required commands</h2>
       <pre><code>npm run standards
 node packages/cli/dist/cli.js help-all
 node packages/cli/dist/cli.js doctor --json</code></pre>
    </section>
 
    <section>
-      <h2>Release path</h2>
+      <h2>Release record</h2>
       <p>
-         The current release record lives in <code>releases/v0.3.0-readiness.md</code>. It spells out
-         the package release path, the docs publish path, the Agent Skill release path, and the deferred
-         items that still need an explicit call before a public cut.
+         The current release record lives in <code>releases/v0.3.0-readiness.md</code>. It documents
+         the package release order, the docs publish path, the Agent Skill release path, and deferred
+         items.
       </p>
    </section>
 
    <section>
-      <h2>Package, docs, and skill flow</h2>
+      <h2>Publish order</h2>
       <ul>
          <li>Packages: publish workspace packages in dependency order after <code>npm run standards</code> passes.</li>
          <li>Docs: build <code>apps/docs/dist/</code> and publish the generated static site.</li>
@@ -45,18 +45,19 @@ node packages/cli/dist/cli.js doctor --json</code></pre>
    </section>
 
    <section>
-      <h2>Deferred items</h2>
+      <h2>Known deferred items</h2>
       <p>
-         The current milestone still carries a few accepted rough edges. They are written down on
-         purpose. Real-target smoke is still manual, and package publication is still manual.
+         Some rough edges are tracked and accepted for the current milestone.
+         Real-target smoke testing is manual, and package publication is manual.
+         See the release record for the full list.
       </p>
    </section>
 
    <section class="field-note">
-      <h2>Why this page exists</h2>
+      <h2>Manual smoke tests are required</h2>
       <p>
-         VoiceOver and NVDA are the real target platforms. The virtual reader is valuable, but it is not
-         a substitute for shipping confidence on those platforms.
+         VoiceOver and NVDA are the primary target platforms. The virtual reader is useful for
+         fast iteration, but releases require confirmation on real assistive technology.
       </p>
    </section>
 </DocShell>

@@ -34,17 +34,5 @@ jobs:
          - name: Virtual-target verification smoke tests
            run: npx vitest run packages/cli/src/command-handlers-verify.test.ts packages/cli/src/command-handlers-verify-level.test.ts packages/core/src/verification-runtime.test.ts
 
-         - name: Docs build
-           run: npm run build --workspace @a11ied/docs
-
-         - name: Lint
-           run: npm run lint
-
-         - name: Typecheck
-           run: npm run typecheck
-
-         - name: Test
-           run: npm run test
-
-         - name: Build
-           run: npm run build
+         - name: Standards (lint, typecheck, build, test)
+           run: npm run standards

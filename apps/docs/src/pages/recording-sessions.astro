@@ -5,19 +5,19 @@ import { docsLinks } from '../lib/nav';
 
 <DocShell
    title="Recording sessions"
-   summary="a11ied can capture real assistive technology sessions as video when the host and target support it. That feature exists to preserve evidence, not to make compliance claims magically bigger."
+   summary="a11ied can record video of real VoiceOver and NVDA sessions, creating a visual evidence trail alongside the transcript and verification data."
    links={docsLinks}
 >
    <section>
-      <h2>Supported scope</h2>
+      <h2>Supported targets</h2>
       <ul>
-         <li>real VoiceOver sessions on macOS</li>
-         <li>real NVDA sessions on Windows</li>
-         <li>commands that own or start a real target session themselves</li>
+         <li>Real VoiceOver sessions on macOS</li>
+         <li>Real NVDA sessions on Windows</li>
+         <li>Any command that starts or owns a real assistive technology session</li>
       </ul>
       <p>
-         The virtual target is not treated as a recording target for this release line. A headless fast
-         path and a real screen recording are different products, so the CLI keeps them separate.
+         The virtual screen reader target does not support recording — it runs headlessly and
+         produces transcript data instead.
       </p>
    </section>
 
@@ -29,45 +29,38 @@ node packages/cli/dist/cli.js verify criterion 4.1.3 --target voiceover --url ht
    </section>
 
    <section>
-      <h2>What doctor is checking</h2>
+      <h2>Setup with doctor</h2>
       <p>
-         The macOS doctor flow probes the native recording path that a11ied actually uses. That matters
-         because recording failures are often host-app permission problems, not Guidepup bugs.
+         The <code>doctor</code> command checks whether your system can record. On macOS, recording
+         failures are usually caused by missing Screen Recording permissions for the host app.
       </p>
       <pre><code>node packages/cli/dist/cli.js doctor
 node packages/cli/dist/cli.js doctor --json</code></pre>
-      <p>The installed CLI exposes the same check as <code>a11ied doctor</code>.</p>
    </section>
 
    <section>
       <h2>Troubleshooting</h2>
       <p>
-         Run <code>doctor</code> before blaming Guidepup. The doctor report now probes the native macOS
-         recording path that a11ied actually uses and tells you when the current host app cannot record
-         its own screen.
-      </p>
-      <p>
-         On macOS, a11ied records video without asking for microphone input. If the same recording
-         command works from Terminal but not from your editor or agent app, the usual problem is
-         app-specific Screen Recording permission.
+         Run <code>doctor</code> first if recording fails. On macOS, a11ied records video without
+         microphone input. If recording works from Terminal but fails from your editor or agent,
+         check that the host app has Screen Recording permission in System Settings.
       </p>
    </section>
 
    <section>
-      <h2>Privacy and review caveats</h2>
+      <h2>Privacy notes</h2>
       <ul>
-         <li>recordings may capture page content, system chrome, and assistive-technology output</li>
-         <li>a recording is evidence of what happened during one run, not proof of general compliance</li>
-         <li>the artifact path belongs in the report so later reviewers can find the exact run that was captured</li>
+         <li>Recordings may capture page content, system chrome, and assistive technology output.</li>
+         <li>A recording documents one specific test run — include the artifact path in reports for traceability.</li>
       </ul>
    </section>
 
    <section class="field-note">
-      <h2>Do not use recording as a shortcut</h2>
+      <h2>Recordings as evidence</h2>
       <p>
-         A video is useful when someone needs to inspect what VoiceOver or NVDA actually did. It does
-         not replace the criterion, the applicability call, or the verdict semantics. It just gives the
-         run a stronger trail.
+         Video recordings supplement the transcript and verification data. They are useful for
+         reviewing what the screen reader actually did, but the verification verdict comes from the
+         <a href="/verification-semantics">verification</a> layer.
       </p>
    </section>
 </DocShell>

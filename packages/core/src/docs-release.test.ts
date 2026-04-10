@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 
 const rootDir = resolve(import.meta.dirname, '../../..');
 const docsPagesDir = resolve(rootDir, 'apps/docs/src/pages');
-const skillPath = resolve(rootDir, 'skills/a11ied/SKILL.md');
+const skillPath = resolve(rootDir, 'skills/a11lied/SKILL.md');
 const workflowPath = resolve(rootDir, '.github/workflows/ci.yml');
 const releaseReadinessPath = resolve(rootDir, 'releases/v0.3.0-readiness.md');
 const requiredRuntimePages = [
@@ -40,7 +40,7 @@ const requiredWorkflowSteps = [
    'name: Contract tests',
    'name: CLI smoke tests',
    'name: Virtual-target verification smoke tests',
-   'name: Docs build',
+   'name: Standards (lint, typecheck, build, test)',
 ] as const;
 
 function expectRuntimePages(): void {
@@ -82,8 +82,8 @@ function expectReleaseChecklist(): void {
    expect(releaseChecklist).toContain('manual macOS VoiceOver smoke pass');
    expect(releaseChecklist).toContain('manual Windows NVDA smoke pass');
    expect(releaseChecklist).toContain('Wait for all CI checks to pass');
-   expect(releaseChecklist).toContain('Package, docs, and skill flow');
-   expect(releaseChecklist).toContain('Deferred items');
+   expect(releaseChecklist).toContain('Publish order');
+   expect(releaseChecklist).toContain('deferred items');
 }
 
 function readDocsPage(page: string): string {
@@ -97,11 +97,11 @@ function expectSurfaceDoc(page: string, requiredText: string): void {
 function expectPublicSurfaceDocs(): void {
    expectSurfaceDoc('cli-reference.astro', 'Command families');
    expectSurfaceDoc('mcp-usage.astro', 'What MCP exposes');
-   expectSurfaceDoc('storybook-usage.astro', 'Target shape');
-   expectSurfaceDoc('api-reference.astro', 'Public packages');
-   expectSurfaceDoc('recording-sessions.astro', 'Supported scope');
+   expectSurfaceDoc('storybook-usage.astro', 'Storybook targets');
+   expectSurfaceDoc('api-reference.astro', 'Packages');
+   expectSurfaceDoc('recording-sessions.astro', 'Supported targets');
    expectSurfaceDoc('recording-sessions.astro', 'voiceover');
-   expectSurfaceDoc('recording-sessions.astro', 'a11ied doctor');
+   expectSurfaceDoc('recording-sessions.astro', 'doctor');
 }
 
 function expectReleaseReadinessRecord(): void {
