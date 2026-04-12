@@ -6,6 +6,7 @@ import {
 import {
    attachDocumentToDriverSession,
    getDriverSessionStatus,
+   resolveDefaultTarget,
    runDriverSessionAction,
    startDriverSession,
    stopDriverSession,
@@ -21,77 +22,64 @@ import {
    type TargetInput,
 } from '../lib/shared.js';
 
-type SimpleDriverAction =
-   | 'next'
-   | 'previous'
-   | 'interact'
-   | 'stop-interacting'
-   | 'click-current-item'
-   | 'read'
-   | 'logs'
-   | 'clear-logs';
-
-interface SimpleDriverToolDefinition {
-   name: string;
-   action: SimpleDriverAction;
-   description: string;
-}
-
 const driverStartInputSchema = z.object({
-   target: platformSchema.default('virtual'),
+   target: platformSchema.optional(),
    url: z.string().url().optional(),
    storybookUrl: z.string().url().optional(),
    storyId: z.string().min(1).optional(),
 });
 
-const simpleDriverTools: SimpleDriverToolDefinition[] = [
-   {
-      name: 'driver_next_item',
-      action: 'next',
-      description:
-         'Move to the next item in the current accessibility-driver session. This may drive assistive technology.',
-   },
-   {
-      name: 'driver_previous_item',
-      action: 'previous',
-      description:
-         'Move to the previous item in the current accessibility-driver session. This may drive assistive technology.',
-   },
-   {
-      name: 'driver_interact',
-      action: 'interact',
-      description:
-         'Enter interaction mode in the current accessibility-driver session. This may drive assistive technology.',
-   },
-   {
-      name: 'driver_stop_interacting',
-      action: 'stop-interacting',
-      description:
-         'Leave interaction mode in the current accessibility-driver session. This may drive assistive technology.',
-   },
-   {
-      name: 'driver_click_current_item',
-      action: 'click-current-item',
-      description:
-         'Activate the current item in the accessibility-driver session. This may drive assistive technology.',
-   },
-   {
-      name: 'driver_read',
-      action: 'read',
-      description:
-         'Read the current driver snapshot, including spoken and item-text logs.',
-   },
-   {
-      name: 'driver_logs',
-      action: 'logs',
-      description: 'Read the current spoken and item-text logs for a driver session.',
-   },
-   {
-      name: 'driver_clear_logs',
-      action: 'clear-logs',
-      description: 'Clear accumulated spoken and item-text logs for a driver session.',
-   },
-];
+const driverActionInputSchema = z.discriminatedUnion('action', [
+   z.object({
+      sessionId: z.string().min(1),
+      action: z.literal('next'),
+   }),
+   z.object({
+      sessionId: z.string().min(1),
+      action: z.literal('previous'),
+   }),
+   z.object({
+      sessionId: z.string().min(1),
+      action: z.literal('interact'),
+   }),
+   z.object({
+      sessionId: z.string().min(1),
+      action: z.literal('stop-interacting'),
+   }),
+   z.object({
+      sessionId: z.string().min(1),
+      action: z.literal('click-current-item'),
+   }),
+   z.object({
+      sessionId: z.string().min(1),
+      action: z.literal('read'),
+   }),
+   z.object({
+      sessionId: z.string().min(1),
+      action: z.literal('logs'),
+   }),
+   z.object({
+      sessionId: z.string().min(1),
+      action: z.literal('clear-logs'),
+   }),
+   z.object({
+      sessionId: z.string().min(1),
+      action: z.literal('key'),
+      key: z.string().min(1),
+   }),
+   z.object({
+      sessionId: z.string().min(1),
+      action: z.literal('type'),
+      text: z.string(),
+   }),
+   z.object({
+      sessionId: z.string().min(1),
+      action: z.literal('checkpoint'),
+      label: z.string().min(1),
+   }),
+]);
+
+type DriverActionInput = z.infer<typeof driverActionInputSchema>;
 
 function hasDocumentTarget(input: TargetInput): boolean {
    return (
@@ -122,13 +110,18 @@ function registerDriverStartTool(server: McpServer): void {
       {
          title: 'Start driver session',
          description:
-            'Start a persistent accessibility-driver session. This may launch or drive assistive technology and persist local session state.',
+            'Start a persistent accessibility-driver session. ' +
+            'On macOS the default target is VoiceOver (a real screen reader); on Windows it is NVDA (a real screen reader). ' +
+            'If neither is available, the target falls back to "virtual", which is a SIMULATION — it models screen reader behavior in memory but does NOT test real assistive technology. ' +
+            'The response includes a targetType field ("real" or "simulated") so you always know the fidelity of results. ' +
+            'Prefer real screen readers whenever possible.',
          inputSchema: driverStartInputSchema,
          outputSchema: accessibilityDriverSessionSchema,
          annotations: activeAnnotations,
       },
       async ({ target, ...targetInput }) => {
-         const session = await startDriverSession(target);
+         const resolvedTarget = target ?? resolveDefaultTarget().target;
+         const session = await startDriverSession(resolvedTarget);
          await attachResolvedDocument(session.sessionId, targetInput);
          return createToolResponse(accessibilityDriverSessionSchema.parse(session));
       },
@@ -174,100 +167,47 @@ function registerDriverStopTool(server: McpServer): void {
    );
 }
 
-function registerSimpleDriverTool(
-   server: McpServer,
-   definition: SimpleDriverToolDefinition,
-): void {
-   server.registerTool(
-      definition.name,
-      {
-         title: definition.name,
-         description: definition.description,
-         inputSchema: z.object({
-            sessionId: z.string().min(1),
-         }),
-         outputSchema: driverActionResultSchema,
-         annotations: activeAnnotations,
-      },
-      async ({ sessionId }) =>
-         createToolResponse(
-            driverActionResultSchema.parse(
-               await runDriverSessionAction(sessionId, definition.action),
-            ),
-         ),
-   );
+async function runDriverAction(input: DriverActionInput): Promise<unknown> {
+   if (input.action === 'key') {
+      return runDriverSessionAction(input.sessionId, 'key', {
+         payload: { key: input.key },
+      });
+   }
+
+   if (input.action === 'type') {
+      return runDriverSessionAction(input.sessionId, 'type', {
+         payload: { text: input.text },
+      });
+   }
+
+   if (input.action === 'checkpoint') {
+      return runDriverSessionAction(input.sessionId, 'checkpoint', {
+         payload: { label: input.label },
+      });
+   }
+
+   return runDriverSessionAction(input.sessionId, input.action);
 }
 
-function registerDriverKeyTool(server: McpServer): void {
+function registerDriverActionTool(server: McpServer): void {
    server.registerTool(
-      'driver_key',
+      'driver_action',
       {
-         title: 'Send key',
+         title: 'Driver action',
          description:
-            'Send a key chord through the current accessibility-driver session. This may drive assistive technology.',
-         inputSchema: z.object({
-            sessionId: z.string().min(1),
-            key: z.string().min(1),
-         }),
+            'Run one action against an accessibility-driver session. ' +
+            'For real screen reader sessions (VoiceOver/NVDA), actions drive the actual assistive technology and return real speech output. ' +
+            'For virtual sessions, actions are simulated in memory. ' +
+            'Check the session targetType to know which mode is active. ' +
+            'The response includes actionDurationMs showing how long the operation took.',
+         inputSchema: driverActionInputSchema,
          outputSchema: driverActionResultSchema,
          annotations: activeAnnotations,
       },
-      async ({ sessionId, key }) =>
+      async (input) =>
          createToolResponse(
             driverActionResultSchema.parse(
-               await runDriverSessionAction(sessionId, 'key', {
-                  payload: { key },
-               }),
-            ),
-         ),
-   );
-}
-
-function registerDriverTypeTool(server: McpServer): void {
-   server.registerTool(
-      'driver_type',
-      {
-         title: 'Type text',
-         description:
-            'Type text through the current accessibility-driver session. This may drive assistive technology.',
-         inputSchema: z.object({
-            sessionId: z.string().min(1),
-            text: z.string(),
-         }),
-         outputSchema: driverActionResultSchema,
-         annotations: activeAnnotations,
-      },
-      async ({ sessionId, text }) =>
-         createToolResponse(
-            driverActionResultSchema.parse(
-               await runDriverSessionAction(sessionId, 'type', {
-                  payload: { text },
-               }),
-            ),
-         ),
-   );
-}
-
-function registerDriverCheckpointTool(server: McpServer): void {
-   server.registerTool(
-      'driver_checkpoint',
-      {
-         title: 'Create checkpoint',
-         description:
-            'Create a named checkpoint in the current accessibility-driver session.',
-         inputSchema: z.object({
-            sessionId: z.string().min(1),
-            label: z.string().min(1),
-         }),
-         outputSchema: driverActionResultSchema,
-         annotations: activeAnnotations,
-      },
-      async ({ sessionId, label }) =>
-         createToolResponse(
-            driverActionResultSchema.parse(
-               await runDriverSessionAction(sessionId, 'checkpoint', {
-                  payload: { label },
-               }),
+               await runDriverAction(input as DriverActionInput),
             ),
          ),
    );
@@ -277,10 +217,5 @@ export function registerDriverTools(server: McpServer): void {
    registerDriverStartTool(server);
    registerDriverGetTool(server);
    registerDriverStopTool(server);
-   for (const definition of simpleDriverTools) {
-      registerSimpleDriverTool(server, definition);
-   }
-   registerDriverKeyTool(server);
-   registerDriverTypeTool(server);
-   registerDriverCheckpointTool(server);
+   registerDriverActionTool(server);
 }

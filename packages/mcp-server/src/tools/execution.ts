@@ -8,7 +8,7 @@ import {
    wcagVersionSchema,
    type Platform,
 } from '@a11ied/contracts';
-import { runAxe, runInteractionPattern } from '@a11ied/core';
+import { resolveDefaultTarget, runAxe, runInteractionPattern } from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
@@ -92,16 +92,17 @@ function registerRunAxeTool(server: McpServer): void {
    );
 }
 
+const patternInputSchema = targetInputSchema.extend({
+   patternId: interactionPatternIdSchema,
+   target: platformSchema.optional(),
+   sessionId: z.string().min(1).optional(),
+});
+
+type PatternToolInput = z.infer<typeof patternInputSchema>;
+type PatternInputWithTarget = Omit<PatternToolInput, 'target'> & { target: Platform };
+
 function buildPatternInput(
-   input: z.infer<
-      ReturnType<
-         typeof targetInputSchema.extend<{
-            patternId: typeof interactionPatternIdSchema;
-            target: ReturnType<typeof platformSchema.default>;
-            sessionId: z.ZodOptional<z.ZodString>;
-         }>
-      >
-   >,
+   input: PatternInputWithTarget,
    resolvedUrl: string,
 ): {
    patternId: z.infer<typeof interactionPatternIdSchema>;
@@ -127,26 +128,27 @@ function buildPatternInput(
    return patternInput;
 }
 
-const patternInputSchema = targetInputSchema.extend({
-   patternId: interactionPatternIdSchema,
-   target: platformSchema.default('virtual'),
-   sessionId: z.string().min(1).optional(),
-});
-
 function registerRunPatternTool(server: McpServer): void {
    server.registerTool(
       'run_pattern',
       {
          title: 'Run pattern',
          description:
-            'Run a built-in interaction pattern against a URL or Storybook story target. This may launch browsers or drive assistive technology.',
+            'Run a built-in interaction pattern against a URL or Storybook story target. ' +
+            'On macOS the default target is VoiceOver (real); on Windows it is NVDA (real). ' +
+            'The "virtual" target is a SIMULATION that does not test real assistive technology. ' +
+            'Prefer real screen readers for accurate accessibility testing.',
          inputSchema: patternInputSchema,
          outputSchema: interactionPatternResultSchema,
          annotations: activeAnnotations,
       },
       async (input) => {
          const resolved = await resolveExecutionTarget(input);
-         const patternInput = buildPatternInput(input, resolved.resolvedUrl);
+         const resolvedTarget = input.target ?? resolveDefaultTarget().target;
+         const patternInput = buildPatternInput(
+            { ...input, target: resolvedTarget },
+            resolved.resolvedUrl,
+         );
          return createToolResponse(
             interactionPatternResultSchema.parse(
                await runInteractionPattern(patternInput),

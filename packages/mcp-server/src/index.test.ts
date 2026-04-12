@@ -151,8 +151,8 @@ describe('driver session tools', () => {
             expect(session.sessionId).toMatch(/^drv_/);
 
             const invalid = await harness.client.callTool({
-               name: 'driver_next_item',
-               arguments: {},
+               name: 'driver_action',
+               arguments: { action: 'next' },
             });
 
             expect(invalid.isError).toBe(true);
@@ -215,8 +215,9 @@ describe('tool metadata', () => {
          );
 
          expect(driverTool?.description).toContain(
-            'may launch or drive assistive technology',
+            'real screen reader',
          );
+         expect(driverTool?.description).toContain('targetType');
          expect(verificationTool?.description).toContain(
             'may launch browsers, run automation, and drive assistive technology',
          );
