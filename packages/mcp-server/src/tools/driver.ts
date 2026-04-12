@@ -24,12 +24,22 @@ import {
    type TargetInput,
 } from '../lib/shared.js';
 
-const driverStartInputSchema = z.object({
+/* ------------------------------------------------------------------ */
+/*  driver_session — unified start / status / stop                    */
+/* ------------------------------------------------------------------ */
+
+const driverSessionInputSchema = z.object({
+   action: z.enum(['start', 'status', 'stop']),
+   sessionId: z.string().min(1).optional(),
    target: platformSchema.optional(),
    url: z.string().url().optional(),
    storybookUrl: z.string().url().optional(),
    storyId: z.string().min(1).optional(),
 });
+
+/* ------------------------------------------------------------------ */
+/*  driver_action — per-session action dispatch                       */
+/* ------------------------------------------------------------------ */
 
 const driverActionInputSchema = z.discriminatedUnion('action', [
    z.object({
@@ -83,6 +93,10 @@ const driverActionInputSchema = z.discriminatedUnion('action', [
 
 type DriverActionInput = z.infer<typeof driverActionInputSchema>;
 
+/* ------------------------------------------------------------------ */
+/*  Helpers                                                           */
+/* ------------------------------------------------------------------ */
+
 function hasDocumentTarget(input: TargetInput): boolean {
    return (
       input.url !== undefined ||
@@ -113,72 +127,6 @@ async function attachResolvedDocument(
    });
 }
 
-function registerDriverStartTool(server: McpServer): void {
-   server.registerTool(
-      'driver_start_session',
-      {
-         title: 'Start driver session',
-         description:
-            'Start a persistent accessibility-driver session. ' +
-            'On macOS the default target is VoiceOver (a real screen reader); on Windows it is NVDA (a real screen reader). ' +
-            'If neither is available, the target falls back to "virtual", which is a SIMULATION — it models screen reader behavior in memory but does NOT test real assistive technology. ' +
-            'The response includes a targetType field ("real" or "simulated") so you always know the fidelity of results. ' +
-            'Prefer real screen readers whenever possible. ' +
-            'For real screen readers (VoiceOver/NVDA): YOU must open a browser and navigate to the page BEFORE starting the session. ' +
-            'The screen reader will read whatever browser window is focused. ' +
-            'For virtual (simulated): pass url/storybookUrl/storyId and a11ied will inject the HTML automatically.',
-         inputSchema: driverStartInputSchema,
-         outputSchema: accessibilityDriverSessionSchema,
-         annotations: activeAnnotations,
-      },
-      async ({ target, ...targetInput }) => {
-         const resolvedTarget = target ?? resolveDefaultTarget().target;
-         const session = await startDriverSession(resolvedTarget);
-         await attachResolvedDocument(session.sessionId, targetInput, resolvedTarget);
-         return createToolResponse(accessibilityDriverSessionSchema.parse(session));
-      },
-   );
-}
-
-function registerDriverGetTool(server: McpServer): void {
-   server.registerTool(
-      'driver_get_session',
-      {
-         title: 'Get driver session',
-         description: 'Read driver session state and logs for an existing session.',
-         inputSchema: z.object({
-            sessionId: z.string().min(1),
-         }),
-         outputSchema: driverActionResultSchema,
-         annotations: activeAnnotations,
-      },
-      async ({ sessionId }) =>
-         createToolResponse(
-            driverActionResultSchema.parse(await getDriverSessionStatus(sessionId)),
-         ),
-   );
-}
-
-function registerDriverStopTool(server: McpServer): void {
-   server.registerTool(
-      'driver_stop_session',
-      {
-         title: 'Stop driver session',
-         description:
-            'Stop a persistent accessibility-driver session and remove its local session state.',
-         inputSchema: z.object({
-            sessionId: z.string().min(1),
-         }),
-         outputSchema: driverActionResultSchema,
-         annotations: activeAnnotations,
-      },
-      async ({ sessionId }) =>
-         createToolResponse(
-            driverActionResultSchema.parse(await stopDriverSession(sessionId)),
-         ),
-   );
-}
-
 async function runDriverAction(input: DriverActionInput): Promise<unknown> {
    if (input.action === 'key') {
       return runDriverSessionAction(input.sessionId, 'key', {
@@ -201,7 +149,56 @@ async function runDriverAction(input: DriverActionInput): Promise<unknown> {
    return runDriverSessionAction(input.sessionId, input.action);
 }
 
-function registerDriverActionTool(server: McpServer): void {
+/* ------------------------------------------------------------------ */
+/*  Registration                                                      */
+/* ------------------------------------------------------------------ */
+
+export function registerDriverTools(server: McpServer): void {
+   server.registerTool(
+      'driver_session',
+      {
+         title: 'Driver session',
+         description:
+            'Manage accessibility-driver sessions. ' +
+            'action "start": create a new session (returns sessionId and targetType). ' +
+            'action "status": read current session state and logs. ' +
+            'action "stop": tear down the session. ' +
+            'On macOS the default target is VoiceOver (real); on Windows it is NVDA (real). ' +
+            'If neither is available, the target falls back to "virtual" (SIMULATION). ' +
+            'The response includes a targetType field ("real" or "simulated"). ' +
+            'For real screen readers: open a browser and navigate to the page BEFORE starting. ' +
+            'For virtual: pass url/storybookUrl/storyId and a11ied injects HTML automatically.',
+         inputSchema: driverSessionInputSchema,
+         annotations: activeAnnotations,
+      },
+      async (input) => {
+         if (input.action === 'start') {
+            const { target, ...targetInput } = input;
+            const resolvedTarget = target ?? resolveDefaultTarget().target;
+            const session = await startDriverSession(resolvedTarget);
+            await attachResolvedDocument(session.sessionId, targetInput, resolvedTarget);
+            return createToolResponse(accessibilityDriverSessionSchema.parse(session));
+         }
+
+         if (!input.sessionId) {
+            throw new Error('sessionId is required for status and stop actions');
+         }
+
+         if (input.action === 'status') {
+            return createToolResponse(
+               driverActionResultSchema.parse(
+                  await getDriverSessionStatus(input.sessionId),
+               ),
+            );
+         }
+
+         // stop
+         return createToolResponse(
+            driverActionResultSchema.parse(await stopDriverSession(input.sessionId)),
+         );
+      },
+   );
+
    server.registerTool(
       'driver_action',
       {
@@ -223,11 +220,4 @@ function registerDriverActionTool(server: McpServer): void {
             ),
          ),
    );
-}
-
-export function registerDriverTools(server: McpServer): void {
-   registerDriverStartTool(server);
-   registerDriverGetTool(server);
-   registerDriverStopTool(server);
-   registerDriverActionTool(server);
 }
