@@ -14,7 +14,8 @@ import type { BrokerRequest, BrokerResponse } from './broker-handlers.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
 
 const VIRTUAL_SOCKET_TIMEOUT_MS = 2_000;
-const REAL_TARGET_SOCKET_TIMEOUT_MS = 15_000;
+// Must cover: guidepup op (up to 15s) + speech stabilization (5s) + retries
+const REAL_TARGET_SOCKET_TIMEOUT_MS = 30_000;
 const REAL_TARGET_STOP_SOCKET_TIMEOUT_MS = 20_000;
 const VIRTUAL_STOP_SOCKET_TIMEOUT_MS = 7_000;
 const BROKER_POLL_DELAY_MS = 100;
