@@ -2,11 +2,13 @@ import {
    accessibilityDriverSessionSchema,
    driverActionResultSchema,
    platformSchema,
+   type Platform,
 } from '@a11ied/contracts';
 import {
    attachDocumentToDriverSession,
    getDriverSessionStatus,
    resolveDefaultTarget,
+   resolveTargetType,
    runDriverSessionAction,
    startDriverSession,
    stopDriverSession,
@@ -92,7 +94,14 @@ function hasDocumentTarget(input: TargetInput): boolean {
 async function attachResolvedDocument(
    sessionId: string,
    input: TargetInput,
+   target: Platform,
 ): Promise<void> {
+   // Real screen readers use the host environment browser — the agent is
+   // responsible for navigating to the page. Document attachment only
+   // applies to the virtual (simulated) target.
+   if (resolveTargetType(target) === 'real') {
+      return;
+   }
    if (!hasDocumentTarget(input)) {
       return;
    }
@@ -114,7 +123,10 @@ function registerDriverStartTool(server: McpServer): void {
             'On macOS the default target is VoiceOver (a real screen reader); on Windows it is NVDA (a real screen reader). ' +
             'If neither is available, the target falls back to "virtual", which is a SIMULATION — it models screen reader behavior in memory but does NOT test real assistive technology. ' +
             'The response includes a targetType field ("real" or "simulated") so you always know the fidelity of results. ' +
-            'Prefer real screen readers whenever possible.',
+            'Prefer real screen readers whenever possible. ' +
+            'For real screen readers (VoiceOver/NVDA): YOU must open a browser and navigate to the page BEFORE starting the session. ' +
+            'The screen reader will read whatever browser window is focused. ' +
+            'For virtual (simulated): pass url/storybookUrl/storyId and a11ied will inject the HTML automatically.',
          inputSchema: driverStartInputSchema,
          outputSchema: accessibilityDriverSessionSchema,
          annotations: activeAnnotations,
@@ -122,7 +134,7 @@ function registerDriverStartTool(server: McpServer): void {
       async ({ target, ...targetInput }) => {
          const resolvedTarget = target ?? resolveDefaultTarget().target;
          const session = await startDriverSession(resolvedTarget);
-         await attachResolvedDocument(session.sessionId, targetInput);
+         await attachResolvedDocument(session.sessionId, targetInput, resolvedTarget);
          return createToolResponse(accessibilityDriverSessionSchema.parse(session));
       },
    );

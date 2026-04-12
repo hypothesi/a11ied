@@ -3,6 +3,7 @@ import type { Command } from 'commander';
 import type * as Core from '#core';
 import type { Platform } from '#contracts';
 import type { resolveOptionalCliTarget } from '../lib/execute.js';
+import type { CommandExecution } from '../lib/helpers.js';
 import {
    addJsonOption,
    addRecordingOption,
@@ -21,6 +22,37 @@ interface StartActionOptions extends CliTargetInputOptions {
    json?: boolean;
    target?: string;
    recording?: string;
+}
+
+function applyDefaultDriverTarget(
+   options: StartActionOptions,
+   core: typeof Core,
+): { warnings?: Array<{ code: string; message: string }> } {
+   if (options.target) {
+      return {};
+   }
+
+   const fallback = core.resolveDefaultTarget();
+   if (!options.json) {
+      log.message(fallback.message);
+      if (fallback.warning) {
+         log.warn(fallback.warning);
+      }
+   }
+   options.target = fallback.target;
+   const warnings: Array<{ code: string; message: string }> = [
+      {
+         code: 'default-target-selected',
+         message: fallback.message,
+      },
+   ];
+   if (fallback.warning) {
+      warnings.push({
+         code: 'virtual-target-simulation-warning',
+         message: fallback.warning,
+      });
+   }
+   return { warnings };
 }
 
 async function startDriverSessionForTarget(args: {
@@ -63,7 +95,7 @@ async function executeStartAction(args: {
       resolveOptionalCliTarget: args.resolveOptionalCliTarget,
       buildCliTargetInput: args.buildCliTargetInput,
    });
-   if (resolved) {
+   if (resolved && session.targetType !== 'real') {
       await args.core.attachDocumentToDriverSession(session.sessionId, {
          html: resolved.html,
          url: resolved.resolvedUrl,
@@ -92,11 +124,7 @@ async function handleStartAction(options: StartActionOptions): Promise<void> {
       import('#core'),
    ]);
 
-   if (!options.target) {
-      const fallback = core.resolveDefaultTarget();
-      log.message(fallback.message);
-      options.target = fallback.target;
-   }
+   const { warnings } = applyDefaultDriverTarget(options, core);
 
    await executeCommand(
       {
@@ -105,14 +133,20 @@ async function handleStartAction(options: StartActionOptions): Promise<void> {
          wcagVersion: undefined,
          json: options.json,
       },
-      () =>
-         executeStartAction({
+      async () => {
+         const result = await executeStartAction({
             options,
             parsePlatform,
             resolveOptionalCliTarget,
             buildCliTargetInput,
             core,
-         }),
+         });
+         const execution: CommandExecution = { ...result };
+         if (warnings) {
+            execution.warnings = warnings;
+         }
+         return execution;
+      },
       renderers.renderDriveSessionText,
    );
 }
@@ -124,7 +158,10 @@ function registerStartCommand(driveCommand: Command): void {
             driveCommand
                .command('start')
                .description('Start a persistent driver session.')
-               .option('--target <platform>', 'Choose one target: voiceover, nvda, or virtual.')
+               .option(
+                  '--target <platform>',
+                  'Choose one target: voiceover, nvda, or virtual. Defaults to VoiceOver on macOS, NVDA on Windows, or virtual elsewhere.',
+               )
                .option('--url <url>', 'Attach one live URL target to the new session.'),
          ),
       ),

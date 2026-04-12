@@ -1,4 +1,5 @@
 import type { Command } from 'commander';
+import type { Platform } from '#contracts';
 import {
    addJsonOption,
    addRecordingOption,
@@ -14,6 +15,7 @@ import {
    type VerifyCommandOptions,
    type VerifyCommandResult,
 } from './verify-shared.js';
+import type { ResolvedCliTarget } from '../lib/resolvers.js';
 
 function buildCriterionErrors(args: {
    row: { criterionId: string; verdict: string } | undefined;
@@ -37,31 +39,64 @@ function buildCriterionErrors(args: {
    ];
 }
 
+function buildCriterionVerifyOptions(args: {
+   criterion: string;
+   resolved: ResolvedCliTarget;
+   target: Platform;
+   defaulted: boolean;
+   wcagVersion: string;
+}): Parameters<typeof runCriterionVerification>[0] {
+   const verifyOptions: Parameters<typeof runCriterionVerification>[0] = {
+      criterion: args.criterion,
+      url: args.resolved.resolvedUrl,
+      wcagVersion: args.wcagVersion,
+      reportTarget: {
+         ...args.resolved.reportTarget,
+         platform: args.target,
+      },
+   };
+   if (!args.defaulted) {
+      verifyOptions.target = args.target;
+   }
+   return verifyOptions;
+}
+
+function resolveCriterionVerdict(
+   result: Awaited<ReturnType<typeof runCriterionVerification>>,
+): {
+   row: { criterionId: string; verdict: string } | undefined;
+   verdict: string;
+   ok: boolean;
+} {
+   const row = result.criteria[0];
+   const verdict = row?.verdict ?? 'error';
+   const ok = verdict === 'pass' || verdict === 'not-applicable';
+   return { row, verdict, ok };
+}
+
 async function handleCriterionVerify(
    criterion: string,
    options: VerifyCommandOptions,
 ): Promise<VerifyCommandResult> {
-   const { target, resolved } = await resolveVerificationContext(options);
-   const result = await runCriterionVerification(
-      {
-         criterion,
-         url: resolved.resolvedUrl,
-         target,
-         wcagVersion: options.version,
-         reportTarget: {
-            ...resolved.reportTarget,
-            platform: target,
-         },
-      },
-      options.recording,
-   );
-   const row = result.criteria[0];
-   const verdict = row?.verdict ?? 'error';
-   const ok = verdict === 'pass' || verdict === 'not-applicable';
+   const { target, resolved, defaulted, warning } = await resolveVerificationContext(options);
+   const verifyOptions = buildCriterionVerifyOptions({
+      criterion,
+      resolved,
+      target,
+      defaulted,
+      wcagVersion: options.version,
+   });
+   const result = await runCriterionVerification(verifyOptions, options.recording);
+   const { row, verdict, ok } = resolveCriterionVerdict(result);
+
+   const warnings = [...result.warnings];
+   if (warning) {
+      warnings.push({ code: 'virtual-target-simulation-warning', message: warning });
+   }
 
    return buildVerifyCommandResult({
       ok,
-      warnings: result.warnings,
+      warnings,
       errors: buildCriterionErrors({ row, criterion, verdict, ok }),
       target: result.target,
       result,

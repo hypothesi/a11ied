@@ -1,5 +1,15 @@
-import { cliExitCodes, type CliCommandFamily, type CliOutputEnvelope } from '#contracts';
-import { CliUsageError, runDriverSessionAction, runEphemeralDriverAction } from '#core';
+import {
+   cliExitCodes,
+   type CliCommandFamily,
+   type CliOutputEnvelope,
+   type Platform,
+} from '#contracts';
+import {
+   CliUsageError,
+   resolveDefaultTarget,
+   runDriverSessionAction,
+   runEphemeralDriverAction,
+} from '#core';
 import {
    type CommandExecution,
    createEnvelope,
@@ -147,25 +157,51 @@ export interface DriveActionCommandInput {
    renderText: (envelope: CliOutputEnvelope, options: { verbose: boolean }) => string;
 }
 
+function resolveEphemeralTarget(resolved: { target?: Platform }): {
+   target: Platform;
+   warnings?: Array<{ code: string; message: string }>;
+} {
+   if (resolved.target) {
+      return { target: resolved.target };
+   }
+
+   const fallback = resolveDefaultTarget();
+   const warnings: Array<{ code: string; message: string }> = [
+      {
+         code: 'default-target-selected',
+         message: fallback.message,
+      },
+   ];
+   if (fallback.warning) {
+      warnings.push({
+         code: 'virtual-target-simulation-warning',
+         message: fallback.warning,
+      });
+   }
+   return { target: fallback.target, warnings };
+}
+
+async function runEphemeralAction(
+   input: DriveActionCommandInput,
+   resolved: { target?: Platform },
+): Promise<CommandExecution> {
+   const { target, warnings } = resolveEphemeralTarget(resolved);
+   const result = await runEphemeralDriverAction(target, input.action, input.payload);
+   const execution: CommandExecution = {
+      target: { kind: 'driver-target', value: target },
+      result,
+   };
+   if (warnings) {
+      execution.warnings = warnings;
+   }
+   return execution;
+}
+
 async function runDriveAction(input: DriveActionCommandInput): Promise<CommandExecution> {
    const resolved = resolveDriveSession(input.options);
 
    if (resolved.ephemeral) {
-      if (!resolved.target) {
-         throw new CliUsageError(
-            'missing-target',
-            'Target is required for ephemeral actions.',
-         );
-      }
-      const result = await runEphemeralDriverAction(
-         resolved.target,
-         input.action,
-         input.payload,
-      );
-      return {
-         target: { kind: 'driver-target', value: resolved.target },
-         result,
-      };
+      return runEphemeralAction(input, resolved);
    }
 
    if (!resolved.sessionId) {

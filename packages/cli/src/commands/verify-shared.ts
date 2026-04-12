@@ -24,34 +24,49 @@ export interface VerifyCommandResult {
    result: Record<string, unknown>;
 }
 
-export async function requireTarget(target: string | undefined): Promise<Platform> {
+export async function resolveTarget(
+   target: string | undefined,
+): Promise<{ target: Platform; defaulted: boolean; warning?: string }> {
    if (!target) {
-      const { CliUsageError, resolveDefaultTarget } = await import('#core');
+      const { resolveDefaultTarget } = await import('#core');
       const fallback = resolveDefaultTarget();
-      throw new CliUsageError(
-         'validation-error',
-         `${fallback.message} Provide --target to override.`,
-         { field: 'target', value: target, defaultTarget: fallback.target },
-      );
+      const result: { target: Platform; defaulted: boolean; warning?: string } = {
+         target: fallback.target,
+         defaulted: true,
+      };
+      if (fallback.warning) {
+         result.warning = fallback.warning;
+      }
+      return result;
    }
 
    const { parsePlatform } = await import('../lib/execute.js');
-   return parsePlatform(target);
+   return { target: parsePlatform(target), defaulted: false };
 }
 
 export async function resolveVerificationContext(options: VerifyCommandOptions): Promise<{
    target: Platform;
    resolved: ResolvedCliTarget;
+   defaulted: boolean;
+   warning?: string;
 }> {
    const [{ resolveCliTarget }, { buildCliTargetInput }] = await Promise.all([
       import('../lib/execute.js'),
       import('../lib/target-input.js'),
    ]);
 
-   const target = await requireTarget(options.target);
+   const { target, defaulted, warning } = await resolveTarget(options.target);
    const resolved = await resolveCliTarget(buildCliTargetInput(options));
 
-   return { target, resolved };
+   const result: { target: Platform; resolved: ResolvedCliTarget; defaulted: boolean; warning?: string } = {
+      target,
+      resolved,
+      defaulted,
+   };
+   if (warning) {
+      result.warning = warning;
+   }
+   return result;
 }
 
 export function buildVerifyCommandResult(args: {
@@ -80,7 +95,7 @@ export async function runCriterionVerification(
    verifyOptions: {
       criterion: string;
       url: string;
-      target: Platform;
+      target?: Platform;
       wcagVersion: string;
       reportTarget: VerificationTarget;
    },
@@ -102,7 +117,7 @@ export async function runLevelVerification(
    verifyOptions: {
       level: string;
       url: string;
-      target: Platform;
+      target?: Platform;
       wcagVersion: string;
       reportTarget: VerificationTarget;
    },

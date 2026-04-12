@@ -37,25 +37,34 @@ async function handleLevelVerify(
    level: string,
    options: VerifyCommandOptions,
 ): Promise<VerifyCommandResult> {
-   const { target, resolved } = await resolveVerificationContext(options);
-   const result = await runLevelVerification(
-      {
-         level,
-         url: resolved.resolvedUrl,
-         target,
-         wcagVersion: options.version,
-         reportTarget: {
-            ...resolved.reportTarget,
-            platform: target,
-         },
+   const { target, resolved, defaulted, warning } = await resolveVerificationContext(options);
+   let verificationTarget: typeof target | undefined = undefined;
+   if (!defaulted) {
+      verificationTarget = target;
+   }
+   const verifyOptions: Parameters<typeof runLevelVerification>[0] = {
+      level,
+      url: resolved.resolvedUrl,
+      wcagVersion: options.version,
+      reportTarget: {
+         ...resolved.reportTarget,
+         platform: target,
       },
-      options.recording,
-   );
+   };
+   if (verificationTarget) {
+      verifyOptions.target = verificationTarget;
+   }
+   const result = await runLevelVerification(verifyOptions, options.recording);
    const ok = result.summary.failedCount === 0;
+
+   const warnings = [...result.warnings];
+   if (warning) {
+      warnings.push({ code: 'virtual-target-simulation-warning', message: warning });
+   }
 
    return buildVerifyCommandResult({
       ok,
-      warnings: result.warnings,
+      warnings,
       errors: buildLevelErrors(level, result.summary.failedCount, ok),
       target: result.target,
       result,
