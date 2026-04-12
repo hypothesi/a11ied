@@ -12,8 +12,10 @@ import {
 
 const DEFAULT_READY_TIMEOUT_MS = 5000;
 const REAL_TARGET_READY_TIMEOUT_MS = 15_000;
-const STOP_REQUEST_TIMEOUT_MS = 7000;
-const DEFAULT_REQUEST_TIMEOUT_MS = 1000;
+const VIRTUAL_SOCKET_TIMEOUT_MS = 2_000;
+const VIRTUAL_STOP_SOCKET_TIMEOUT_MS = 7_000;
+const REAL_TARGET_SOCKET_TIMEOUT_MS = 15_000;
+const REAL_TARGET_STOP_SOCKET_TIMEOUT_MS = 20_000;
 
 const tempRoots: string[] = [];
 
@@ -53,10 +55,34 @@ describe('broker startup timing', () => {
 
    it('gives stop requests enough time to flush recording state', () => {
       expect(resolveBrokerSocketTimeoutMs({ command: 'stop' })).toBe(
-         STOP_REQUEST_TIMEOUT_MS,
+         VIRTUAL_STOP_SOCKET_TIMEOUT_MS,
       );
+      expect(resolveBrokerSocketTimeoutMs({ command: 'stop' }, 'voiceover')).toBe(
+         REAL_TARGET_STOP_SOCKET_TIMEOUT_MS,
+      );
+      expect(resolveBrokerSocketTimeoutMs({ command: 'stop' }, 'nvda')).toBe(
+         REAL_TARGET_STOP_SOCKET_TIMEOUT_MS,
+      );
+   });
+
+   it('uses short timeouts for virtual targets', () => {
       expect(resolveBrokerSocketTimeoutMs({ command: 'status' })).toBe(
-         DEFAULT_REQUEST_TIMEOUT_MS,
+         VIRTUAL_SOCKET_TIMEOUT_MS,
+      );
+      expect(resolveBrokerSocketTimeoutMs({ command: 'action' })).toBe(
+         VIRTUAL_SOCKET_TIMEOUT_MS,
+      );
+      expect(resolveBrokerSocketTimeoutMs({ command: 'status' }, 'virtual')).toBe(
+         VIRTUAL_SOCKET_TIMEOUT_MS,
+      );
+   });
+
+   it('gives real screen readers longer timeouts for actions', () => {
+      expect(resolveBrokerSocketTimeoutMs({ command: 'action' }, 'voiceover')).toBe(
+         REAL_TARGET_SOCKET_TIMEOUT_MS,
+      );
+      expect(resolveBrokerSocketTimeoutMs({ command: 'status' }, 'nvda')).toBe(
+         REAL_TARGET_SOCKET_TIMEOUT_MS,
       );
    });
 });

@@ -16,9 +16,11 @@ export async function getBrokerSessionStatus(
 ): Promise<DriverActionResult> {
    const session = await readSessionMetadata(sessionId, cwd);
    try {
-      const response = await connectToBroker(session.socketPath, {
-         command: 'status',
-      });
+      const response = await connectToBroker(
+         session.socketPath,
+         { command: 'status' },
+         resolveBrokerSocketTimeoutMs({ command: 'status' }, session.target),
+      );
       return parseBrokerActionResult({
          sessionId,
          actionErrorMessage: `Could not read driver session "${sessionId}".`,
@@ -40,7 +42,7 @@ async function requestBrokerStop(
          {
             command: 'stop',
          },
-         resolveBrokerSocketTimeoutMs({ command: 'stop' }),
+         resolveBrokerSocketTimeoutMs({ command: 'stop' }, session.target),
       );
    } catch {
       await removeSessionArtifacts(session);
@@ -70,10 +72,14 @@ export async function attachDocumentViaBroker(
 ): Promise<void> {
    const session = await readSessionMetadata(sessionId, cwd);
    try {
-      const response = await connectToBroker(session.socketPath, {
-         command: 'attach-document',
-         payload: document,
-      });
+      const response = await connectToBroker(
+         session.socketPath,
+         {
+            command: 'attach-document',
+            payload: document,
+         },
+         resolveBrokerSocketTimeoutMs({ command: 'attach-document' }, session.target),
+      );
       if (!response.ok) {
          throw new CliEnvironmentError(
             response.error?.code ?? 'driver-broker-error',
@@ -110,7 +116,11 @@ export async function runBrokerAction(
    const session = await readSessionMetadata(sessionId, cwd);
    try {
       const request = buildBrokerActionRequest(action, options?.payload);
-      const response = await connectToBroker(session.socketPath, request);
+      const response = await connectToBroker(
+         session.socketPath,
+         request,
+         resolveBrokerSocketTimeoutMs({ command: 'action' }, session.target),
+      );
       return parseBrokerActionResult({
          sessionId,
          actionErrorMessage: `Could not run driver action "${action}" for session "${sessionId}".`,

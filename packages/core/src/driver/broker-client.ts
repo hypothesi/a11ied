@@ -13,10 +13,12 @@ import type {
 import type { BrokerRequest, BrokerResponse } from './broker-handlers.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
 
-const DEFAULT_SOCKET_TIMEOUT_MS = 1000;
-const STOP_SOCKET_TIMEOUT_MS = 7000;
+const VIRTUAL_SOCKET_TIMEOUT_MS = 2_000;
+const REAL_TARGET_SOCKET_TIMEOUT_MS = 15_000;
+const REAL_TARGET_STOP_SOCKET_TIMEOUT_MS = 20_000;
+const VIRTUAL_STOP_SOCKET_TIMEOUT_MS = 7_000;
 const BROKER_POLL_DELAY_MS = 100;
-const DEFAULT_BROKER_READY_TIMEOUT_MS = 5000;
+const DEFAULT_BROKER_READY_TIMEOUT_MS = 5_000;
 const REAL_TARGET_BROKER_READY_TIMEOUT_MS = 15_000;
 
 function delay(ms: number): Promise<void> {
@@ -28,7 +30,7 @@ function delay(ms: number): Promise<void> {
 export async function connectToBroker(
    socketPath: string,
    request: BrokerRequest,
-   timeoutMs = DEFAULT_SOCKET_TIMEOUT_MS,
+   timeoutMs = VIRTUAL_SOCKET_TIMEOUT_MS,
 ): Promise<BrokerResponse> {
    return await new Promise<BrokerResponse>((resolvePromise, rejectPromise) => {
       const chunks: Buffer[] = [];
@@ -71,12 +73,15 @@ export async function connectToBroker(
 
 export function resolveBrokerSocketTimeoutMs(
    request: Pick<BrokerRequest, 'command'>,
+   target?: Platform,
 ): number {
+   const isReal = target === 'voiceover' || target === 'nvda';
+
    if (request.command === 'stop') {
-      return STOP_SOCKET_TIMEOUT_MS;
+      return isReal ? REAL_TARGET_STOP_SOCKET_TIMEOUT_MS : VIRTUAL_STOP_SOCKET_TIMEOUT_MS;
    }
 
-   return DEFAULT_SOCKET_TIMEOUT_MS;
+   return isReal ? REAL_TARGET_SOCKET_TIMEOUT_MS : VIRTUAL_SOCKET_TIMEOUT_MS;
 }
 
 interface PollBrokerOptions {
