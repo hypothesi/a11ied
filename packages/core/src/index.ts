@@ -31,7 +31,8 @@ export {
    startDriverSession,
    stopDriverSession,
 } from './driver/runtime.js';
-export { resolveDefaultTarget } from './driver/default-target.js';
+export { resolveDefaultTarget, resolveTargetType } from './driver/default-target.js';
+export type { TargetType } from './driver/default-target.js';
 export { runAxe } from './axe/runtime.js';
 export { runInteractionPattern } from './patterns/runtime.js';
 export { verifyCriterion, verifyLevel } from './verification/runtime.js';
