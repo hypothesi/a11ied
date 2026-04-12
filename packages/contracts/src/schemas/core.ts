@@ -148,9 +148,13 @@ export const sessionRecordingSchema = z.object({
 });
 export type SessionRecording = z.infer<typeof sessionRecordingSchema>;
 
+export const targetTypeSchema = z.enum(['real', 'simulated']);
+export type TargetType = z.infer<typeof targetTypeSchema>;
+
 export const accessibilityDriverSessionSchema = z.object({
    sessionId: z.string().min(1),
    target: platformSchema,
+   targetType: targetTypeSchema.default('simulated'),
    startedAt: z.string().datetime(),
    capabilities: z.array(driverCapabilitySchema),
    logCursor: z.number().int().nonnegative(),

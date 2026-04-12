@@ -73,6 +73,7 @@ function createInMemorySessionRecord(args: {
    return accessibilityDriverSessionSchema.parse({
       sessionId: args.options.sessionId,
       target: args.options.target,
+      targetType: args.options.target === 'virtual' ? 'simulated' : 'real',
       startedAt: new Date().toISOString(),
       capabilities: args.adapter.capabilities,
       logCursor: args.logCursor,

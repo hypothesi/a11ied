@@ -138,6 +138,7 @@ async function createBrokerSession(args: {
    const session = accessibilityDriverSessionSchema.parse({
       sessionId: args.brokerArgs.sessionId,
       target: args.brokerArgs.target,
+      targetType: args.brokerArgs.target === 'virtual' ? 'simulated' : 'real',
       startedAt: new Date().toISOString(),
       capabilities: args.adapter.capabilities,
       logCursor: initialState.logCursor,

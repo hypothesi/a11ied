@@ -74,6 +74,7 @@ export function buildEphemeralSession(args: {
    return accessibilityDriverSessionSchema.parse({
       sessionId,
       target: args.target,
+      targetType: args.target === 'virtual' ? 'simulated' : 'real',
       startedAt: new Date().toISOString(),
       capabilities: createDriverAdapter(args.target).capabilities,
       logCursor: args.logCursor,
