@@ -201,6 +201,7 @@ export const driverActionResultSchema = z.object({
    action: driverActionNameSchema,
    state: driverStateSnapshotSchema,
    details: z.record(z.string(), z.unknown()).optional(),
+   actionDurationMs: z.number().nonnegative().optional(),
 });
 export type DriverActionResult = z.infer<typeof driverActionResultSchema>;
 

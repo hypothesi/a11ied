@@ -220,6 +220,7 @@ export async function runInMemoryAction(
    payload?: Record<string, unknown>,
 ): Promise<DriverActionResult> {
    const broker = getInMemoryBroker(sessionId);
+   const startTime = Date.now();
    const handled = await executeAction(
       { adapter: broker.adapter, checkpoints: broker.checkpoints },
       action,
@@ -235,7 +236,10 @@ export async function runInMemoryAction(
    if (handled && SPEECH_TRIGGERING_ACTIONS.has(action)) {
       await broker.adapter.waitForSpeechStabilization();
    }
-   return buildInMemoryResult(broker, action, payload);
+   const actionDurationMs = Date.now() - startTime;
+   const result = await buildInMemoryResult(broker, action, payload);
+   result.actionDurationMs = actionDurationMs;
+   return result;
 }
 
 interface EphemeralResultOptions {
@@ -288,11 +292,13 @@ export async function runEphemeralAction(
    const recording = createEphemeralRecording(options);
    await adapter.start();
    try {
+      const startTime = Date.now();
       await executeAction({ adapter, checkpoints }, options.action, options.payload);
       if (SPEECH_TRIGGERING_ACTIONS.has(options.action)) {
          await adapter.waitForSpeechStabilization();
       }
-      return buildEphemeralResult({
+      const actionDurationMs = Date.now() - startTime;
+      const result = await buildEphemeralResult({
          adapter,
          checkpoints,
          target: options.target,
@@ -301,6 +307,8 @@ export async function runEphemeralAction(
          cwd: options.cwd,
          recording,
       });
+      result.actionDurationMs = actionDurationMs;
+      return result;
    } finally {
       await adapter.stop().catch((error: unknown) => error);
    }

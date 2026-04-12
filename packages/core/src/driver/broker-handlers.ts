@@ -221,6 +221,7 @@ async function handleActionCommand(
    request: BrokerRequest,
 ): Promise<HandleResult> {
    const action = request.action ?? 'read';
+   const startTime = Date.now();
    const handled = await executeAction(context, action, request.payload);
    if (!handled && !BROKER_NO_OP_ACTIONS.has(String(action))) {
       return {
@@ -237,7 +238,9 @@ async function handleActionCommand(
    if (handled && SPEECH_TRIGGERING_ACTIONS.has(String(action))) {
       await context.adapter.waitForSpeechStabilization();
    }
+   const actionDurationMs = Date.now() - startTime;
    const result = await buildActionResult(context, action, request.payload);
+   result.actionDurationMs = actionDurationMs;
    return { response: { ok: true, result }, shouldStop: false };
 }
 
