@@ -142,6 +142,34 @@ node packages/cli/dist/cli.js verify criterion 4.1.3 --target virtual --storyboo
 node packages/cli/dist/cli.js mcp
 ```
 
+The MCP server exposes 10 tools:
+
+| Tool | Purpose |
+|---|---|
+| `doctor` | Runtime environment details |
+| `wcag_lookup` | Look up a criterion (optionally with coverage data) |
+| `wcag_search` | Search criteria by keyword |
+| `wcag_levels` | List criteria at a conformance level |
+| `inspect` | Inspect applicable criteria for a URL/story (optionally for one criterion) |
+| `driver_session` | Start, query status, or stop an accessibility-driver session |
+| `driver_action` | Run a single action (next, previous, read, key, etc.) against a driver session |
+| `run_axe` | Run axe-core against a target |
+| `run_pattern` | Run ARIA interaction patterns against a target |
+| `verify` | Verify a single criterion or full conformance level |
+
+### Real vs simulated screen readers
+
+On macOS the default target is **VoiceOver** (real). On Windows it is **NVDA** (real).
+If neither is available the target falls back to `virtual`, which is a **simulation** — it
+models screen reader behavior in memory but does not test real assistive technology.
+
+Every `driver_session` start response includes a `targetType` field (`"real"` or `"simulated"`)
+so agents always know the fidelity of their results.
+
+For **real** screen reader sessions the agent must open a browser and navigate to the page
+*before* starting the session. The screen reader reads whatever browser window is focused.
+For **virtual** sessions, pass `url`/`storybookUrl`/`storyId` and a11ied injects HTML automatically.
+
 ## Practical note
 
 Use `--json` most of the time. The text output is fine for a quick read, but the JSON is the stable machine-facing interface.

@@ -8,26 +8,26 @@ Feature: MCP tools and resources
     Given the MCP server is running from "packages/mcp-server"
 
   Scenario: Criterion lookup tool matches CLI lookup semantics
-    When I call the MCP tool "criterion lookup" for criterion "4.1.3"
+    When I call the MCP tool "wcag_lookup" for criterion "4.1.3"
     Then the tool succeeds
     And the returned criterion id is "4.1.3"
     And the payload shape matches the shared contracts used by CLI JSON output
 
   Scenario: Search tool returns ranked criteria
-    When I call the MCP search tool with query "status message"
+    When I call the MCP tool "wcag_search" with query "status message"
     Then the tool succeeds
     And the results include criterion "4.1.3"
     And the response includes match metadata
 
   Scenario: Driver sessions require a session id after session start
-    When I call the MCP tool "driver_start_session" with target "virtual"
+    When I call the MCP tool "driver_session" with action "start" and target "virtual"
     Then the tool succeeds
     And the result includes a "sessionId"
-    When I call the MCP tool "driver_next_item" without a session id
+    When I call the MCP tool "driver_action" with action "next" without a session id
     Then the tool fails with a validation error
 
   Scenario: Verification tool returns the same top-level report fields as the CLI
-    When I call the MCP verification tool for criterion "4.1.2" on the button-name fixture
+    When I call the MCP tool "verify" for criterion "4.1.2" on the button-name fixture
     Then the tool call succeeds at the transport level
     And the top-level payload includes "target"
     And the top-level payload includes "wcagVersion"
