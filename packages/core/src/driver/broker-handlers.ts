@@ -124,6 +124,11 @@ export async function executeAction(
    return await executePayloadAction(context, action, payload);
 }
 
+const SPEECH_TRIGGERING_ACTIONS = new Set([
+   'next', 'previous', 'key', 'type', 'interact',
+   'stop-interacting', 'click-current-item',
+]);
+
 const BROKER_NO_OP_ACTIONS = new Set(['read', 'logs', 'attach-document']);
 
 async function buildActionResult(
@@ -228,6 +233,9 @@ async function handleActionCommand(
          },
          shouldStop: false,
       };
+   }
+   if (handled && SPEECH_TRIGGERING_ACTIONS.has(String(action))) {
+      await context.adapter.waitForSpeechStabilization();
    }
    const result = await buildActionResult(context, action, request.payload);
    return { response: { ok: true, result }, shouldStop: false };

@@ -123,6 +123,9 @@ export function createVirtualAdapter(): DriverAdapter {
       attachDocument,
       readState: virtualReadState,
       clearLogs: virtualClearLogs,
+      waitForSpeechStabilization: async () => {
+         // Virtual screen reader is synchronous — no stabilization needed.
+      },
       ...createNavigationMethods(),
    };
 }

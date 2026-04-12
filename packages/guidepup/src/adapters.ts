@@ -11,6 +11,10 @@ import {
 
 import { createVirtualAdapter } from './virtual-adapter.js';
 
+const SPEECH_POLL_INTERVAL_MS = 150;
+const SPEECH_STABLE_THRESHOLD_MS = 300;
+const SPEECH_STABILIZATION_TIMEOUT_MS = 5_000;
+
 /** Lists the driver actions exposed by the shipped adapter surface. */
 export const driverCapabilities: DriverCapability[] = [
    'start',
@@ -46,6 +50,8 @@ export interface DriverAdapter {
    activateCurrentItem(): Promise<void>;
    readState(checkpoints: DriverCheckpoint[]): Promise<DriverStateSnapshot>;
    clearLogs(checkpoints: DriverCheckpoint[]): Promise<DriverStateSnapshot>;
+   /** Waits for screen reader speech to settle after an action. No-op for virtual targets. */
+   waitForSpeechStabilization(): Promise<void>;
 }
 
 type ScreenReaderLike = Pick<
@@ -263,6 +269,25 @@ class RealScreenReaderAdapter implements DriverAdapter {
          this.reader.clearItemTextLog(),
       ]);
       return buildStateSnapshot(this.reader, checkpoints);
+   }
+
+   async waitForSpeechStabilization(): Promise<void> {
+      const startedAt = Date.now();
+      let lastPhrase = '';
+      let stableSince = Date.now();
+
+      while (Date.now() - startedAt < SPEECH_STABILIZATION_TIMEOUT_MS) {
+         const phrase = await this.reader.lastSpokenPhrase().catch(() => '');
+         if (phrase && phrase === lastPhrase) {
+            if (Date.now() - stableSince >= SPEECH_STABLE_THRESHOLD_MS) {
+               return;
+            }
+         } else {
+            lastPhrase = phrase;
+            stableSince = Date.now();
+         }
+         await new Promise((resolve) => setTimeout(resolve, SPEECH_POLL_INTERVAL_MS));
+      }
    }
 }
 

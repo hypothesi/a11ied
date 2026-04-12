@@ -29,6 +29,11 @@ export const inMemoryBrokers = new Map<string, InMemoryBroker>();
 
 const SESSION_NO_OP_ACTIONS = new Set(['read', 'logs']);
 
+const SPEECH_TRIGGERING_ACTIONS = new Set([
+   'next', 'previous', 'key', 'type', 'interact',
+   'stop-interacting', 'click-current-item',
+]);
+
 export function getInMemoryBroker(sessionId: string): InMemoryBroker {
    const broker = inMemoryBrokers.get(sessionId);
    if (!broker) {
@@ -227,6 +232,9 @@ export async function runInMemoryAction(
          { action },
       );
    }
+   if (handled && SPEECH_TRIGGERING_ACTIONS.has(action)) {
+      await broker.adapter.waitForSpeechStabilization();
+   }
    return buildInMemoryResult(broker, action, payload);
 }
 
@@ -281,6 +289,9 @@ export async function runEphemeralAction(
    await adapter.start();
    try {
       await executeAction({ adapter, checkpoints }, options.action, options.payload);
+      if (SPEECH_TRIGGERING_ACTIONS.has(options.action)) {
+         await adapter.waitForSpeechStabilization();
+      }
       return buildEphemeralResult({
          adapter,
          checkpoints,
