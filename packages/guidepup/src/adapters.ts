@@ -15,6 +15,20 @@ const SPEECH_POLL_INTERVAL_MS = 150;
 const SPEECH_STABLE_THRESHOLD_MS = 300;
 const SPEECH_STABILIZATION_TIMEOUT_MS = 5_000;
 
+const REAL_TARGET_NAV_TIMEOUT_MS = 10_000;
+const REAL_TARGET_INPUT_TIMEOUT_MS = 15_000;
+const REAL_TARGET_RETRIES = 2;
+
+const navCommandOptions = {
+   timeout: REAL_TARGET_NAV_TIMEOUT_MS,
+   retries: REAL_TARGET_RETRIES,
+};
+
+const inputCommandOptions = {
+   timeout: REAL_TARGET_INPUT_TIMEOUT_MS,
+   retries: REAL_TARGET_RETRIES,
+};
+
 /** Lists the driver actions exposed by the shipped adapter surface. */
 export const driverCapabilities: DriverCapability[] = [
    'start',
@@ -216,11 +230,11 @@ class RealScreenReaderAdapter implements DriverAdapter {
    }
 
    async start(): Promise<void> {
-      await this.reader.start();
+      await this.reader.start({ timeout: REAL_TARGET_INPUT_TIMEOUT_MS });
    }
 
    async stop(): Promise<void> {
-      await this.reader.stop();
+      await this.reader.stop({ timeout: REAL_TARGET_INPUT_TIMEOUT_MS });
    }
 
    async attachDocument(): Promise<void> {
@@ -232,31 +246,31 @@ class RealScreenReaderAdapter implements DriverAdapter {
    }
 
    async next(): Promise<void> {
-      await this.reader.next();
+      await this.reader.next(navCommandOptions);
    }
 
    async previous(): Promise<void> {
-      await this.reader.previous();
+      await this.reader.previous(navCommandOptions);
    }
 
    async press(keys: string): Promise<void> {
-      await this.reader.press(keys);
+      await this.reader.press(keys, inputCommandOptions);
    }
 
    async type(text: string): Promise<void> {
-      await this.reader.type(text);
+      await this.reader.type(text, inputCommandOptions);
    }
 
    async interact(): Promise<void> {
-      await this.reader.interact();
+      await this.reader.interact(navCommandOptions);
    }
 
    async stopInteracting(): Promise<void> {
-      await this.reader.stopInteracting();
+      await this.reader.stopInteracting(navCommandOptions);
    }
 
    async activateCurrentItem(): Promise<void> {
-      await this.reader.act();
+      await this.reader.act(navCommandOptions);
    }
 
    async readState(checkpoints: DriverCheckpoint[]): Promise<DriverStateSnapshot> {
