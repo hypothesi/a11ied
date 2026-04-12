@@ -4,6 +4,7 @@ import {
    criterionSearchResponseSchema,
    type CriterionSearchResult,
    verificationReportSchema,
+   wcagLookupResultSchema,
 } from '@a11ied/contracts';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
@@ -103,28 +104,43 @@ async function assertVerificationToolReport(
    expect(report.criteria[0]?.verdict).toBe('fail');
 }
 
-describe('criterion lookup tool', () => {
+describe('wcag lookup tool', () => {
    it('matches CLI lookup semantics', async () => {
       await withHarness(async (harness) => {
          const result = await harness.client.callTool({
-            name: 'criterion_lookup',
+            name: 'wcag_lookup',
             arguments: { criterion: '4.1.3', version: '2.2' },
          });
 
          expect(result.isError).toBeFalsy();
-         const payload = criterionLookupResultSchema.parse(result.structuredContent);
+         const payload = wcagLookupResultSchema.parse(result.structuredContent);
          expect(payload.lookupKey).toBe('4.1.3');
          expect(payload.criterion.id).toBe('4.1.3');
          expect(payload.criterion.slug).toBe('status-messages');
+         expect(payload.coverage).toBeUndefined();
+      });
+   });
+
+   it('includes coverage when requested', async () => {
+      await withHarness(async (harness) => {
+         const result = await harness.client.callTool({
+            name: 'wcag_lookup',
+            arguments: { criterion: '4.1.3', version: '2.2', include_coverage: true },
+         });
+
+         expect(result.isError).toBeFalsy();
+         const payload = wcagLookupResultSchema.parse(result.structuredContent);
+         expect(payload.coverage).toBeDefined();
+         expect(payload.strategy).toBeDefined();
       });
    });
 });
 
-describe('search tool', () => {
+describe('wcag search tool', () => {
    it('returns ranked criteria with match metadata', async () => {
       await withHarness(async (harness) => {
          const result = await harness.client.callTool({
-            name: 'search',
+            name: 'wcag_search',
             arguments: { query: 'status message', version: '2.2', limit: 5 },
          });
 

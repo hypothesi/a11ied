@@ -155,6 +155,14 @@ export const coverageLookupResultSchema = z.object({
 });
 export type CoverageLookupResult = z.infer<typeof coverageLookupResultSchema>;
 
+export const wcagLookupResultSchema = z.object({
+   lookupKey: criterionLookupKeySchema,
+   criterion: normalizedCriterionSchema,
+   coverage: criterionCoverageSchema.optional(),
+   strategy: verificationStrategySchema.optional(),
+});
+export type WcagLookupResult = z.infer<typeof wcagLookupResultSchema>;
+
 export const verificationStrategyLookupResultSchema = z.object({
    lookupKey: criterionLookupKeySchema,
    criterionId: criterionIdSchema,

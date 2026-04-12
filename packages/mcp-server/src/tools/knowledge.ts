@@ -6,6 +6,7 @@ import {
    criterionSearchResponseSchema,
    doctorReportSchema,
    wcagLevelSchema,
+   wcagLookupResultSchema,
    wcagVersionSchema,
 } from '@a11ied/contracts';
 import {
@@ -40,31 +41,50 @@ function registerDoctorTool(server: McpServer): void {
    );
 }
 
-function registerCriterionLookupTool(server: McpServer): void {
+function registerWcagLookupTool(server: McpServer): void {
    server.registerTool(
-      'criterion_lookup',
+      'wcag_lookup',
       {
-         title: 'Criterion lookup',
-         description: 'Resolve one WCAG criterion by id or slug.',
+         title: 'WCAG lookup',
+         description:
+            'Look up one WCAG criterion by id or slug. ' +
+            'Set include_coverage to true to also return coverage and verification-strategy data.',
          inputSchema: z.object({
             criterion: criterionLookupKeySchema,
             version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
+            include_coverage: z.boolean().default(false),
          }),
-         outputSchema: criterionLookupResultSchema,
+         outputSchema: wcagLookupResultSchema,
          annotations: readOnlyAnnotations,
       },
-      async ({ criterion, version }) =>
-         createToolResponse(
-            criterionLookupResultSchema.parse(showWcagCriterion(criterion, version)),
-         ),
+      async ({ criterion, version, include_coverage }) => {
+         const base = criterionLookupResultSchema.parse(
+            showWcagCriterion(criterion, version),
+         );
+         if (!include_coverage) {
+            return createToolResponse(
+               wcagLookupResultSchema.parse(base),
+            );
+         }
+         const coverage = coverageLookupResultSchema.parse(
+            showWcagCoverage(criterion, version),
+         );
+         return createToolResponse(
+            wcagLookupResultSchema.parse({
+               ...base,
+               coverage: coverage.coverage,
+               strategy: coverage.strategy,
+            }),
+         );
+      },
    );
 }
 
-function registerLevelLookupTool(server: McpServer): void {
+function registerWcagLevelsTool(server: McpServer): void {
    server.registerTool(
-      'level_lookup',
+      'wcag_levels',
       {
-         title: 'Level lookup',
+         title: 'WCAG levels',
          description: 'List all WCAG criteria at one level for a WCAG version.',
          inputSchema: z.object({
             level: wcagLevelSchema,
@@ -80,11 +100,11 @@ function registerLevelLookupTool(server: McpServer): void {
    );
 }
 
-function registerSearchTool(server: McpServer): void {
+function registerWcagSearchTool(server: McpServer): void {
    server.registerTool(
-      'search',
+      'wcag_search',
       {
-         title: 'Search criteria',
+         title: 'WCAG search',
          description: 'Search the local WCAG corpus and return ranked criterion matches.',
          inputSchema: z.object({
             query: z.string().min(1),
@@ -108,30 +128,9 @@ function registerSearchTool(server: McpServer): void {
    );
 }
 
-function registerCoverageLookupTool(server: McpServer): void {
-   server.registerTool(
-      'coverage_lookup',
-      {
-         title: 'Coverage lookup',
-         description: 'Return coverage and verification-strategy data for one criterion.',
-         inputSchema: z.object({
-            criterion: criterionLookupKeySchema,
-            version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
-         }),
-         outputSchema: coverageLookupResultSchema,
-         annotations: readOnlyAnnotations,
-      },
-      async ({ criterion, version }) =>
-         createToolResponse(
-            coverageLookupResultSchema.parse(showWcagCoverage(criterion, version)),
-         ),
-   );
-}
-
 export function registerKnowledgeTools(server: McpServer): void {
    registerDoctorTool(server);
-   registerCriterionLookupTool(server);
-   registerLevelLookupTool(server);
-   registerSearchTool(server);
-   registerCoverageLookupTool(server);
+   registerWcagLookupTool(server);
+   registerWcagLevelsTool(server);
+   registerWcagSearchTool(server);
 }
