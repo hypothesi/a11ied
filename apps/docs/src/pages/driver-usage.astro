@@ -22,16 +22,28 @@ import { docsLinks } from '../lib/nav';
 
    <section>
       <h2>Basic session</h2>
-      <pre><code>a1 drive start --target virtual --url http://127.0.0.1:6173/landmarks.html --json
+      <pre><code>a1 drive start --json
+a1 drive focus --session drv_example --app "Google Chrome" --json
 a1 drive next --session drv_example --json
 a1 drive read --session drv_example --json
 a1 drive stop --session drv_example --json</code></pre>
+      <p>
+         If you leave off <code>--target</code>, a11ied chooses VoiceOver on macOS, NVDA on Windows,
+         or the virtual driver elsewhere. Use <code>--target virtual</code> with
+         <code>--allow-virtual</code> when you want a simulated run. For real sessions, open the
+         browser and navigate to the page before starting the driver.
+      </p>
+      <p>
+         When you do want the virtual target, pass <code>--target virtual</code>,
+         <code>--allow-virtual</code>, plus <code>--url</code> so a11ied can load the HTML.
+      </p>
    </section>
 
    <section>
       <h2>Available actions</h2>
       <div class="route-list">
          <div class="route-row"><code>start</code>, <code>status</code>, <code>stop</code><span>Create, inspect, and tear down a session.</span></div>
+         <div class="route-row"><code>focus</code><span>Bring a target window to the front so the screen reader reads the right app.</span></div>
          <div class="route-row"><code>next</code>, <code>previous</code>, <code>interact</code>, <code>stop-interacting</code><span>Navigate through elements and switch interaction modes.</span></div>
          <div class="route-row"><code>key</code>, <code>type</code>, <code>click-current-item</code><span>Send keystrokes, type text, and click elements.</span></div>
          <div class="route-row"><code>read</code>, <code>logs</code>, <code>clear-logs</code>, <code>checkpoint</code><span>Read spoken output, view session logs, and create checkpoints.</span></div>

@@ -10,7 +10,7 @@ import {
    type VerificationUncoveredWorkItem,
 } from '@a11ied/contracts';
 
-import { createStrategyId } from './helpers.js';
+import { createStrategyId } from './strategy.js';
 
 interface VerificationResultArgs {
    criterion: VerificationCriterionResult['criterion'];

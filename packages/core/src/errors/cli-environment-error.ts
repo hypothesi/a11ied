@@ -2,6 +2,7 @@ import { cliExitCodes } from '@a11ied/contracts';
 
 /** Raised when the host environment prevents a command from completing. */
 export class CliEnvironmentError extends Error {
+   // Fallow-ignore-next-line unused-class-member
    readonly exitCode = cliExitCodes.environment;
    readonly code: string;
    readonly details: Record<string, unknown> | undefined;

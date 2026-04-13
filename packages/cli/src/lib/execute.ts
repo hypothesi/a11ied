@@ -18,12 +18,11 @@ import {
 } from './helpers.js';
 import { resolveDriveSession } from './resolvers.js';
 
-export {
-   parsePlatform,
-   resolveCliTarget,
-   resolveOptionalCliTarget,
-   resolveRunAxeSelection,
-} from './resolvers.js';
+export { parsePlatform, resolveOptionalCliTarget } from './resolvers.js';
+// Fallow-ignore-next-line unused-export
+export { resolveCliTarget } from './resolvers.js';
+// Fallow-ignore-next-line unused-export
+export { resolveRunAxeSelection } from './resolvers.js';
 
 function resolveExitCode(execution: CommandExecution, ok: boolean): number {
    if (execution.exitCode !== undefined) {
@@ -95,6 +94,7 @@ function renderErrorText(failedEnvelope: CliOutputEnvelope): string {
    return `Error (${code}): ${message}`;
 }
 
+// Fallow-ignore-next-line unused-export
 export async function executeCommand(
    args: {
       family: CliCommandFamily;
@@ -130,7 +130,7 @@ export async function executeCommand(
    }
 }
 
-export type DriveAction =
+type DriveAction =
    | 'next'
    | 'previous'
    | 'key'
@@ -141,9 +141,10 @@ export type DriveAction =
    | 'read'
    | 'logs'
    | 'clear-logs'
-   | 'checkpoint';
+   | 'checkpoint'
+   | 'focus';
 
-export interface DriveActionCommandInput {
+interface DriveActionCommandInput {
    subcommand: string;
    action: DriveAction;
    options: {
@@ -152,6 +153,7 @@ export interface DriveActionCommandInput {
       session?: string;
       target?: string;
       ephemeral?: boolean;
+      allowVirtual?: boolean;
    };
    payload: Record<string, unknown> | undefined;
    renderText: (envelope: CliOutputEnvelope, options: { verbose: boolean }) => string;
@@ -186,7 +188,11 @@ async function runEphemeralAction(
    resolved: { target?: Platform },
 ): Promise<CommandExecution> {
    const { target, warnings } = resolveEphemeralTarget(resolved);
-   const result = await runEphemeralDriverAction(target, input.action, input.payload);
+   let actionOptions: { payload: Record<string, unknown> } | undefined = undefined;
+   if (input.payload) {
+      actionOptions = { payload: input.payload };
+   }
+   const result = await runEphemeralDriverAction(target, input.action, actionOptions);
    const execution: CommandExecution = {
       target: { kind: 'driver-target', value: target },
       result,
@@ -207,10 +213,14 @@ async function runDriveAction(input: DriveActionCommandInput): Promise<CommandEx
    if (!resolved.sessionId) {
       throw new CliUsageError('missing-session', 'Session ID is required.');
    }
+   let actionOptions: { payload: Record<string, unknown> } | undefined = undefined;
+   if (input.payload) {
+      actionOptions = { payload: input.payload };
+   }
    const result = await runDriverSessionAction(
       resolved.sessionId,
       input.action,
-      input.payload,
+      actionOptions,
    );
    return {
       target: { kind: 'driver-session', value: resolved.sessionId },
@@ -218,6 +228,7 @@ async function runDriveAction(input: DriveActionCommandInput): Promise<CommandEx
    };
 }
 
+// Fallow-ignore-next-line unused-export
 export async function executeDriveActionCommand(
    input: DriveActionCommandInput,
 ): Promise<void> {

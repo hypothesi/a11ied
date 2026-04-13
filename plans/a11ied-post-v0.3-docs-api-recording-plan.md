@@ -6,7 +6,7 @@ Close three obvious gaps left after the first milestone: finish the operator doc
 
 ## Objectives & Scope
 
-- In scope: docs-site coverage for CLI, MCP, Storybook, public package APIs, and recording workflows.
+- In scope: docs-site coverage for CLI, MCP, public package APIs, and recording workflows.
 - In scope: JSDoc blocks for public exported functions and classes in workspace packages that ship a public `exports` entrypoint.
 - In scope: CLI and core-runtime support for starting and stopping Guidepup-backed video recordings for real screen-reader sessions.
 - In scope: acceptance specs, automated tests, manual runs, traceability updates, and bead tracking for this follow-up work.
@@ -25,7 +25,7 @@ Close three obvious gaps left after the first milestone: finish the operator doc
 
 ### Functional Requirements
 
-- FR-1: The docs site must document every public surface that ships in `v0.3.x`: CLI usage, MCP usage, Storybook usage, public package APIs, and recording support.
+- FR-1: The docs site must document every public surface that ships in `v0.3.x`: CLI usage, MCP usage, public package APIs, and recording support.
 - FR-2: Public exported functions and classes in workspace entrypoints must carry JSDoc blocks that explain purpose, key inputs, and return behavior.
 - FR-3: The CLI must support video recording for real screen-reader sessions using the installed Guidepup recording package.
 - FR-4: Recording support must work for persistent driver sessions and managed higher-level runs that create their own real target session.
@@ -65,7 +65,6 @@ CLI flags -> core driver/pattern/verification runtime -> Guidepup record adapter
 - The docs site should add route-level coverage for:
    - CLI reference
    - MCP usage
-   - Storybook usage
    - API reference
    - recording sessions
 - Decisions & trade-offs:
@@ -87,7 +86,7 @@ Every row in this follow-up plan is incomplete until all of the following are tr
 
 | Status | ID    | Task                                           | Priority | Depends On | Acceptance Criteria                                                                                                                                                               |
 | ------ | ----- | ---------------------------------------------- | -------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [✓]    | PD-01 | Finish docs-site coverage for shipped surfaces | H        | —          | Docs cover CLI, MCP, Storybook, public API, and recording usage; mapped Gherkin tests exist; AI-agent manual run is recorded; and standards pass                                  |
+| [✓]    | PD-01 | Finish docs-site coverage for shipped surfaces | H        | —          | Docs cover CLI, MCP, public API, and recording usage; mapped Gherkin tests exist; AI-agent manual run is recorded; and standards pass                                             |
 | [✓]    | PD-02 | Enforce JSDoc coverage for public exported API | H        | PD-01      | Public exported functions and classes have JSDoc and a regression test enforces that; mapped Gherkin tests exist; AI-agent manual run is recorded; standards pass                 |
 | [?]    | PD-03 | Add Guidepup-backed recording support          | H        | PD-01      | CLI and core runtime expose explicit recording support for real AT sessions with structured metadata; mapped Gherkin tests exist; AI-agent manual run is recorded; standards pass |
 
@@ -102,7 +101,6 @@ Every row in this follow-up plan is incomplete until all of the following are tr
 1. Add docs routes for:
    - CLI reference
    - MCP usage
-   - Storybook usage
    - public API reference
    - recording sessions
 2. Update the home page and shell navigation so those routes are discoverable.

@@ -10,7 +10,7 @@ Build the public runtime surface that agents and humans actually use. This sub-p
 - In scope: wiring `wcag` and `inspect` commands to the stable WCAG engine APIs from sub-plan 1.
 - In scope: target adapters for `virtual`, `voiceover`, and `nvda`.
 - In scope: tying each testable CLI, driver, and execution row to `specs/gherkin/04-08` with both automated tests and AI-agent manual runs.
-- Out of scope: criterion-level verdict logic, level aggregation, Storybook bridge, MCP tools, docs expansion, and release workflow hardening.
+- Out of scope: criterion-level verdict logic, level aggregation, MCP tools, docs expansion, and release workflow hardening.
 
 ## Assumptions & Open Questions
 
@@ -77,7 +77,7 @@ CLI commands
 - CLI driver sessions must be backed by a local broker process managed by `packages/core`. Session metadata must be stored under `.a11ied/state/sessions/<sessionId>.json`, and follow-up commands must reattach by `sessionId`.
 - URL-based `inspect`, `run`, and later `verify` flows must use an internal Playwright-backed browser helper owned by `packages/core`. This helper is an internal dependency only and is not exposed as a public low-level browser-control CLI.
 - `axe-core` should run through a dedicated execution path so result normalization stays isolated from CLI formatting.
-- In sub-plan 2, public target input support is limited to URL-based targets. Storybook targets are introduced only in sub-plan 3.
+- In sub-plan 2, public target input support is limited to URL-based targets.
 - Decisions & trade-offs:
 - Prefer explicit subcommands over overloaded flags so agents can script the tool without guessing which mode they are in.
 - Prefer raw driver access as a first-class escape hatch, but keep named patterns as the default for repeated workflows.

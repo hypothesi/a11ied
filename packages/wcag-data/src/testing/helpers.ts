@@ -16,21 +16,17 @@ import {
    createWcagPayload,
 } from './fixtures.js';
 
-export const HTTP_OK = 200;
-export const HTTP_NOT_FOUND = 404;
+const HTTP_OK = 200;
+const HTTP_NOT_FOUND = 404;
 export const EXPECTED_RAW_SOURCE_COUNT = 5;
 export const EXPECTED_GENERATED_ARTIFACT_COUNT = 19;
-export const EXPECTED_22_CRITERIA_COUNT = 6;
-export const EXPECTED_21_CRITERIA_COUNT = 3;
-export const ACCESSIBLE_AUTH_INDEX = 2;
+const EXPECTED_22_CRITERIA_COUNT = 6;
+const EXPECTED_21_CRITERIA_COUNT = 3;
 export const LEVEL_A = 'A';
 export const SYNC_TIMESTAMP = '2026-04-06T19:00:00.000Z';
 
 export const workspaceRoot = resolve(import.meta.dirname, '../../../..');
-export const committedGeneratedRoot = resolve(
-   import.meta.dirname,
-   '../../data/generated',
-);
+const committedGeneratedRoot = resolve(import.meta.dirname, '../../data/generated');
 
 export const EXPECTED_CRITERIA_COUNTS_BY_VERSION = {
    '2.2': EXPECTED_22_CRITERIA_COUNT,
@@ -43,7 +39,7 @@ export const EXPECTED_22_COVERAGE_COUNTS = {
    manual: 2,
    unknown: 0,
 };
-export const EXPECTED_21_COVERAGE_COUNTS = {
+const EXPECTED_21_COVERAGE_COUNTS = {
    automated: 1,
    hybrid: 2,
    manual: 0,
@@ -75,7 +71,7 @@ export function createJsonResponse(body: unknown): Response {
    });
 }
 
-export function createTextResponse(body: string): Response {
+function createTextResponse(body: string): Response {
    return new Response(body, {
       status: HTTP_OK,
       headers: {

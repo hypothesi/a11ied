@@ -27,7 +27,7 @@ interface MockVerifyCriterionRow {
    errors: never[];
 }
 
-export function createRecordingSummary(): {
+function createRecordingSummary(): {
    totalCriteria: number;
    verdicts: Record<string, number>;
    evidenceModes: Record<string, number>;

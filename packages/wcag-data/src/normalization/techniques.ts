@@ -35,12 +35,12 @@ const WCAG_VERSION_TOKENS: Record<string, string> = {
    '2.1': 'WCAG21',
 };
 
-export function understandingUrl(version: WcagVersion, slug: string): string {
+function understandingUrl(version: WcagVersion, slug: string): string {
    const versionToken = WCAG_VERSION_TOKENS[version] ?? 'WCAG21';
    return `https://www.w3.org/WAI/${versionToken}/Understanding/${slug}`;
 }
 
-export function normalizeTags(tagPayload: Record<string, string> | undefined): string[] {
+function normalizeTags(tagPayload: Record<string, string> | undefined): string[] {
    if (!tagPayload) {
       return [];
    }
@@ -107,7 +107,7 @@ function extractDetailText(value: unknown): string[] {
    );
 }
 
-export function normalizeDetails(details: unknown[] | undefined): string[] {
+function normalizeDetails(details: unknown[] | undefined): string[] {
    if (!details) {
       return [];
    }
@@ -173,7 +173,7 @@ function normalizeTechniqueTree(input: NormalizeTechniqueInput): NormalizedTechn
    return [normalized, ...children];
 }
 
-export function normalizeTechniqueGroups(
+function normalizeTechniqueGroups(
    criterionId: string,
    kind: Extract<TechniqueKind, 'sufficient' | 'advisory'>,
    groups: TechniqueGroupPayload[] | undefined,
@@ -195,7 +195,7 @@ export function normalizeTechniqueGroups(
    );
 }
 
-export function normalizeFailureTechniques(
+function normalizeFailureTechniques(
    criterionId: string,
    techniques: TechniquePayload[] | undefined,
 ): NormalizedTechnique[] {
@@ -214,7 +214,7 @@ export function normalizeFailureTechniques(
    );
 }
 
-export function sortTechniques(techniques: NormalizedTechnique[]): NormalizedTechnique[] {
+function sortTechniques(techniques: NormalizedTechnique[]): NormalizedTechnique[] {
    return [...techniques].toSorted((left, right) => left.key.localeCompare(right.key));
 }
 

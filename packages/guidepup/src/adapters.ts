@@ -1,19 +1,32 @@
-import { nvda, type ScreenReader, voiceOver } from '@guidepup/guidepup';
-import {
-   driverReadinessSchema,
-   driverStateSnapshotSchema,
-   type DriverCapability,
-   type DriverCheckpoint,
-   type DriverReadiness,
-   type DriverStateSnapshot,
-   type Platform,
+import { nvda, voiceOver } from '@guidepup/guidepup';
+import type {
+   DriverCheckpoint,
+   DriverFocusResult,
+   DriverFocusTarget,
+   DriverReadiness,
+   DriverStateSnapshot,
+   Platform,
 } from '@a11ied/contracts';
 
+import { focusMacTarget, focusWindowsTarget } from './focus.js';
+import {
+   checkDetectedReadiness,
+   createReadinessError,
+   createUnsupportedReadiness,
+   getExpectedPlatform,
+   type ScreenReaderLike,
+} from './readiness.js';
+import {
+   buildStateSnapshot,
+   driverCapabilities,
+   type DriverAdapter,
+} from './adapter-shared.js';
+import { normalizeDriverKeys } from './key-aliases.js';
 import { createVirtualAdapter } from './virtual-adapter.js';
 
 const SPEECH_POLL_INTERVAL_MS = 150;
 const SPEECH_STABLE_THRESHOLD_MS = 300;
-const SPEECH_STABILIZATION_TIMEOUT_MS = 5_000;
+const SPEECH_STABILIZATION_TIMEOUT_MS = 5000;
 
 const REAL_TARGET_NAV_TIMEOUT_MS = 10_000;
 const REAL_TARGET_INPUT_TIMEOUT_MS = 15_000;
@@ -29,170 +42,79 @@ const inputCommandOptions = {
    retries: REAL_TARGET_RETRIES,
 };
 
-/** Lists the driver actions exposed by the shipped adapter surface. */
-export const driverCapabilities: DriverCapability[] = [
-   'start',
-   'stop',
-   'status',
-   'attach-document',
-   'next',
-   'previous',
-   'key',
-   'type',
-   'interact',
-   'stop-interacting',
-   'click-current-item',
-   'read',
-   'logs',
-   'clear-logs',
-   'checkpoint',
-];
-
-export interface DriverAdapter {
-   target: Platform;
-   capabilities: DriverCapability[];
-   checkReadiness(): Promise<DriverReadiness>;
-   start(): Promise<void>;
-   stop(): Promise<void>;
-   attachDocument(document: { html: string; url: string }): Promise<void>;
-   next(): Promise<void>;
-   previous(): Promise<void>;
-   press(keys: string): Promise<void>;
-   type(text: string): Promise<void>;
-   interact(): Promise<void>;
-   stopInteracting(): Promise<void>;
-   activateCurrentItem(): Promise<void>;
-   readState(checkpoints: DriverCheckpoint[]): Promise<DriverStateSnapshot>;
-   clearLogs(checkpoints: DriverCheckpoint[]): Promise<DriverStateSnapshot>;
-   /** Waits for screen reader speech to settle after an action. No-op for virtual targets. */
-   waitForSpeechStabilization(): Promise<void>;
-}
-
-type ScreenReaderLike = Pick<
-   ScreenReader,
-   | 'start'
-   | 'stop'
-   | 'next'
-   | 'previous'
-   | 'press'
-   | 'type'
-   | 'act'
-   | 'interact'
-   | 'stopInteracting'
-   | 'lastSpokenPhrase'
-   | 'itemText'
-   | 'spokenPhraseLog'
-   | 'itemTextLog'
-   | 'clearSpokenPhraseLog'
-   | 'clearItemTextLog'
-> &
-   Pick<ScreenReader, 'detect' | 'default'>;
-
-/** Collects a normalized snapshot from the current screen-reader state. */
-export async function buildStateSnapshot(
-   reader: {
-      lastSpokenPhrase(): Promise<string>;
-      itemText(): Promise<string>;
-      spokenPhraseLog(): Promise<string[]>;
-      itemTextLog(): Promise<string[]>;
-   },
-   checkpoints: DriverCheckpoint[],
-): Promise<DriverStateSnapshot> {
-   const [lastSpokenPhrase, currentItemText, spokenPhraseLog, itemTextLog] =
-      await Promise.all([
-         reader.lastSpokenPhrase().catch(() => ''),
-         reader.itemText().catch(() => ''),
-         reader.spokenPhraseLog().catch(() => []),
-         reader.itemTextLog().catch(() => []),
-      ]);
-
-   return driverStateSnapshotSchema.parse({
-      lastSpokenPhrase: lastSpokenPhrase || undefined,
-      currentItemText: currentItemText || undefined,
-      spokenPhraseLog,
-      itemTextLog,
-      logCursor: spokenPhraseLog.length,
-      checkpoints,
+function delay(ms: number): Promise<void> {
+   return new Promise((resolve) => {
+      setTimeout(resolve, ms);
    });
 }
 
-/** Returns the setup command operators should run before attempting a real-device session. */
-export function guidepupSetupCommand(platform?: Platform): string {
-   if (platform === 'voiceover') {
-      return 'npx @guidepup/setup --record';
-   }
-
-   if (platform === 'nvda') {
-      return 'npx @guidepup/setup';
-   }
-
-   return 'npx @guidepup/setup';
+interface SpeechPollState {
+   startedAt: number;
+   lastPhrase: string;
+   stableSince: number;
 }
 
-function getPlatformLabel(expectedPlatform: string): string {
-   if (expectedPlatform === 'darwin') {
-      return 'macOS';
-   }
-   return 'Windows';
-}
-
-function getErrorDetail(error: unknown): string {
-   if (error instanceof Error) {
-      return error.message;
-   }
-   return String(error);
-}
-
-function getReadinessDetailForDefault(isDefault: boolean): string {
-   if (isDefault) {
-      return 'The target is the default screen reader for this host.';
-   }
-   return 'The target is installed but not the default screen reader.';
-}
-
-async function checkDetectedReadiness(
-   target: Extract<Platform, 'voiceover' | 'nvda'>,
-   reader: ScreenReaderLike,
-): Promise<DriverReadiness> {
-   const [detected, isDefault] = await Promise.all([reader.detect(), reader.default()]);
-   if (!detected) {
-      return driverReadinessSchema.parse({
-         target,
-         status: 'requires-setup',
-         summary: `${target} is not ready for Guidepup automation yet.`,
-         details: [
-            'Run the Guidepup setup command on the host machine before starting a real screen-reader session.',
-         ],
-         setupCommand: guidepupSetupCommand(target),
-         debug: {
-            detected,
-            isDefault,
+function updateSpeechState(
+   state: SpeechPollState,
+   phrase: string,
+   now: number,
+): { next: SpeechPollState; isStable: boolean } {
+   if (phrase !== '' && phrase === state.lastPhrase) {
+      return {
+         next: {
+            startedAt: state.startedAt,
+            lastPhrase: state.lastPhrase,
+            stableSince: state.stableSince,
          },
-      });
+         isStable: true,
+      };
    }
 
-   return driverReadinessSchema.parse({
-      target,
-      status: 'ready',
-      summary: `${target} is ready for automation.`,
-      details: [getReadinessDetailForDefault(isDefault)],
-      setupCommand: guidepupSetupCommand(target),
-      debug: {
-         detected,
-         isDefault,
+   return {
+      next: {
+         startedAt: state.startedAt,
+         lastPhrase: phrase,
+         stableSince: now,
       },
-   });
+      isStable: false,
+   };
 }
 
-function getExpectedPlatform(target: Extract<Platform, 'voiceover' | 'nvda'>): string {
-   if (target === 'voiceover') {
-      return 'darwin';
+function shouldStopPolling(
+   state: SpeechPollState,
+   now: number,
+   isStable: boolean,
+): boolean {
+   if (isStable && now - state.stableSince >= SPEECH_STABLE_THRESHOLD_MS) {
+      return true;
    }
-   return 'win32';
+   return now - state.startedAt >= SPEECH_STABILIZATION_TIMEOUT_MS;
+}
+
+async function waitForSpeechStabilization(reader: ScreenReaderLike): Promise<void> {
+   const startedAt = Date.now();
+   const initialState = {
+      startedAt,
+      lastPhrase: '',
+      stableSince: startedAt,
+   };
+
+   async function poll(state: SpeechPollState): Promise<void> {
+      const phrase = await reader.lastSpokenPhrase().catch(() => '');
+      const now = Date.now();
+      const { next, isStable } = updateSpeechState(state, phrase, now);
+      if (shouldStopPolling(next, now, isStable)) {
+         return;
+      }
+      await delay(SPEECH_POLL_INTERVAL_MS);
+      return poll(next);
+   }
+
+   await poll(initialState);
 }
 
 class RealScreenReaderAdapter implements DriverAdapter {
-   readonly capabilities: DriverCapability[] = driverCapabilities;
+   readonly capabilities = driverCapabilities;
    readonly target: Extract<Platform, 'voiceover' | 'nvda'>;
    private readonly reader: ScreenReaderLike;
 
@@ -207,25 +129,13 @@ class RealScreenReaderAdapter implements DriverAdapter {
    async checkReadiness(): Promise<DriverReadiness> {
       const expectedPlatform = getExpectedPlatform(this.target);
       if (process.platform !== expectedPlatform) {
-         const platformLabel = getPlatformLabel(expectedPlatform);
-         return driverReadinessSchema.parse({
-            target: this.target,
-            status: 'unsupported',
-            summary: `${this.target} automation is only available on ${platformLabel}.`,
-            details: [`Current platform is ${process.platform}.`],
-         });
+         return createUnsupportedReadiness(this.target, expectedPlatform);
       }
 
       try {
          return await checkDetectedReadiness(this.target, this.reader);
       } catch (error) {
-         return driverReadinessSchema.parse({
-            target: this.target,
-            status: 'requires-setup',
-            summary: `${this.target} readiness could not be confirmed.`,
-            details: [getErrorDetail(error)],
-            setupCommand: guidepupSetupCommand(this.target),
-         });
+         return createReadinessError(this.target, error);
       }
    }
 
@@ -245,6 +155,13 @@ class RealScreenReaderAdapter implements DriverAdapter {
       }
    }
 
+   async focus(target: DriverFocusTarget): Promise<DriverFocusResult> {
+      if (this.target === 'voiceover') {
+         return focusMacTarget(target);
+      }
+      return focusWindowsTarget(target);
+   }
+
    async next(): Promise<void> {
       await this.reader.next(navCommandOptions);
    }
@@ -254,7 +171,10 @@ class RealScreenReaderAdapter implements DriverAdapter {
    }
 
    async press(keys: string): Promise<void> {
-      await this.reader.press(keys, inputCommandOptions);
+      await this.reader.press(
+         normalizeDriverKeys(keys, this.target),
+         inputCommandOptions,
+      );
    }
 
    async type(text: string): Promise<void> {
@@ -286,35 +206,8 @@ class RealScreenReaderAdapter implements DriverAdapter {
    }
 
    async waitForSpeechStabilization(): Promise<void> {
-      const startedAt = Date.now();
-      let lastPhrase = '';
-      let stableSince = Date.now();
-
-      while (Date.now() - startedAt < SPEECH_STABILIZATION_TIMEOUT_MS) {
-         const phrase = await this.reader.lastSpokenPhrase().catch(() => '');
-         if (phrase && phrase === lastPhrase) {
-            if (Date.now() - stableSince >= SPEECH_STABLE_THRESHOLD_MS) {
-               return;
-            }
-         } else {
-            lastPhrase = phrase;
-            stableSince = Date.now();
-         }
-         await new Promise((resolve) => setTimeout(resolve, SPEECH_POLL_INTERVAL_MS));
-      }
+      await waitForSpeechStabilization(this.reader);
    }
-}
-
-const targetNotes: Record<Platform, string> = {
-   nvda: 'Automate the real NVDA screen reader on Windows after `@guidepup/setup` is complete.',
-   virtual: 'Use the virtual screen reader in fast local and CI feedback loops.',
-   voiceover:
-      'Automate the real VoiceOver screen reader on macOS after local OS permissions are granted.',
-};
-
-/** Returns a short human-readable label for one supported platform. */
-export function describePlatform(platform: Platform): string {
-   return targetNotes[platform];
 }
 
 /** Creates the adapter for one supported driver target. */

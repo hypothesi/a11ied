@@ -26,10 +26,10 @@ Feature: CLI axe execution commands
     Then the command exits with code 0
     And the result includes only the requested rule ids
 
-  Scenario: Run axe rejects unsupported target input forms in sub-plan 2
-    When I run `a11ied run axe --story-id forms-login--default --criterion 4.1.2 --json`
+  Scenario: Run axe rejects missing URL input
+    When I run `a11ied run axe --criterion 4.1.2 --json`
     Then the command exits with code 2
-    And the first error explains that Storybook targets are not available in this slice
+    And the first error explains that a URL target is required
 
   Scenario: Run axe preserves incomplete findings
     Given the page under test produces one or more axe incomplete results

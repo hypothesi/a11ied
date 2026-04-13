@@ -5,12 +5,16 @@ import {
    type VerificationTarget,
 } from '#contracts';
 import type { CliTargetInputOptions } from '../lib/target-input.js';
-import type { ResolvedCliTarget } from '../lib/resolvers.js';
+import {
+   buildVirtualTargetGuardOptions,
+   type ResolvedCliTarget,
+} from '../lib/resolvers.js';
 
 export interface VerifyCommandOptions extends CliTargetInputOptions {
    version: string;
    target?: string;
    recording?: string;
+   allowVirtual?: boolean;
    json?: boolean;
    verbose?: boolean;
 }
@@ -24,8 +28,9 @@ export interface VerifyCommandResult {
    result: Record<string, unknown>;
 }
 
-export async function resolveTarget(
+async function resolveTarget(
    target: string | undefined,
+   options?: { allowVirtual?: boolean },
 ): Promise<{ target: Platform; defaulted: boolean; warning?: string }> {
    if (!target) {
       const { resolveDefaultTarget } = await import('#core');
@@ -41,7 +46,13 @@ export async function resolveTarget(
    }
 
    const { parsePlatform } = await import('../lib/execute.js');
-   return { target: parsePlatform(target), defaulted: false };
+   return {
+      target: parsePlatform(
+         target,
+         buildVirtualTargetGuardOptions(options?.allowVirtual),
+      ),
+      defaulted: false,
+   };
 }
 
 export async function resolveVerificationContext(options: VerifyCommandOptions): Promise<{
@@ -55,10 +66,18 @@ export async function resolveVerificationContext(options: VerifyCommandOptions):
       import('../lib/target-input.js'),
    ]);
 
-   const { target, defaulted, warning } = await resolveTarget(options.target);
+   const { target, defaulted, warning } = await resolveTarget(
+      options.target,
+      buildVirtualTargetGuardOptions(options.allowVirtual),
+   );
    const resolved = await resolveCliTarget(buildCliTargetInput(options));
 
-   const result: { target: Platform; resolved: ResolvedCliTarget; defaulted: boolean; warning?: string } = {
+   const result: {
+      target: Platform;
+      resolved: ResolvedCliTarget;
+      defaulted: boolean;
+      warning?: string;
+   } = {
       target,
       resolved,
       defaulted,

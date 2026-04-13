@@ -1,1 +1,36 @@
-export { buildCli } from './program.js';
+export {
+   attachDocumentToDriverSession,
+   cleanupStaleDriverSessions,
+   getDriverSessionMetadataPath,
+   getDriverSessionStatus,
+   getDriverSocketPath,
+   inspectApplicableTarget,
+   inspectApplicableUrl,
+   inspectCriterionTarget,
+   inspectCriterionUrl,
+   listSupportedTargets,
+   listWcagCriteria,
+   listWcagLevels,
+   resolveDefaultTarget,
+   resolveDocumentTarget,
+   resolveTargetType,
+   runAxe,
+   runDriverSessionAction,
+   runEphemeralDriverAction,
+   runInteractionPattern,
+   searchWcagCriteria,
+   showWcagCoverage,
+   showWcagCriterion,
+   startDriverSession,
+   stopDriverSession,
+   verifyCriterion,
+   verifyLevel,
+   CliEnvironmentError,
+   CliUsageError,
+} from '@a11ied/core';
+
+export type {
+   ResolveDocumentTargetInput,
+   SessionActionOptions,
+   TargetType,
+} from '@a11ied/core';

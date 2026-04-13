@@ -1,18 +1,11 @@
 import type { Command } from 'commander';
-import {
-   addJsonOption,
-   addStorybookTargetOptions,
-   addVerboseOption,
-   addWcagVersionOption,
-} from '../lib/options.js';
+import { addJsonOption, addVerboseOption, addWcagVersionOption } from '../lib/options.js';
 
 interface InspectOptions {
    json?: boolean;
    verbose?: boolean;
    version: string;
    url?: string;
-   storybookUrl?: string;
-   storyId?: string;
 }
 
 async function handleApplicableAction(options: InspectOptions): Promise<void> {
@@ -53,12 +46,10 @@ function registerApplicableCommand(inspectCommand: Command): void {
    addVerboseOption(
       addJsonOption(
          addWcagVersionOption(
-            addStorybookTargetOptions(
-               inspectCommand
-                  .command('applicable')
-                  .description('List criteria that look relevant for a target.')
-                  .option('--url <url>', 'Inspect a live URL target.'),
-            ),
+            inspectCommand
+               .command('applicable')
+               .description('List criteria that look relevant for a target.')
+               .option('--url <url>', 'Inspect a live URL target.'),
          ),
       ),
    ).action(async (options: InspectOptions) => {
@@ -111,12 +102,10 @@ function registerCriterionInspectCommand(inspectCommand: Command): void {
    addVerboseOption(
       addJsonOption(
          addWcagVersionOption(
-            addStorybookTargetOptions(
-               inspectCommand
-                  .command('criterion <criterion>')
-                  .description('Explain one criterion for a target.')
-                  .option('--url <url>', 'Inspect a live URL target.'),
-            ),
+            inspectCommand
+               .command('criterion <criterion>')
+               .description('Explain one criterion for a target.')
+               .option('--url <url>', 'Inspect a live URL target.'),
          ),
       ),
    ).action(async (criterion: string, options: InspectOptions) => {

@@ -1,40 +1,33 @@
-import { cliExitCodes } from '#contracts';
-
+import { cliExitCodes, type CliMessage } from '#contracts';
+import { buildVirtualTargetGuardOptions } from '../lib/resolvers.js';
 export interface AxeActionOptions {
    json?: boolean;
    verbose?: boolean;
    url?: string;
-   storybookUrl?: string;
-   storyId?: string;
    version: string;
    criterion?: string;
    level?: string;
    rule?: string[];
 }
-
 export interface PatternActionOptions {
    json?: boolean;
    verbose?: boolean;
    url?: string;
-   storybookUrl?: string;
-   storyId?: string;
    target?: string;
    session?: string;
    recording?: string;
+   allowVirtual?: boolean;
 }
-
 type RunAxeSelection =
    | { kind: 'criterion'; criterion: string }
    | { kind: 'level'; level: string }
    | { kind: 'rule'; ruleIds: string[] };
-
 async function runAxeForSelection(args: {
    url: string;
    selection: RunAxeSelection;
    wcagVersion: string;
 }): Promise<Record<string, unknown>> {
    const { runAxe } = await import('#core');
-
    if (args.selection.kind === 'criterion') {
       return runAxe(args.url, {
          url: args.url,
@@ -42,7 +35,6 @@ async function runAxeForSelection(args: {
          criterion: args.selection.criterion,
       });
    }
-
    if (args.selection.kind === 'level') {
       return runAxe(args.url, {
          url: args.url,
@@ -50,21 +42,18 @@ async function runAxeForSelection(args: {
          level: args.selection.level,
       });
    }
-
    return runAxe(args.url, {
       url: args.url,
       wcagVersion: args.wcagVersion,
       ruleIds: args.selection.ruleIds,
    });
 }
-
 export async function handleAxeAction(options: AxeActionOptions): Promise<{
    target: { kind: string; value: string };
    result: Record<string, unknown>;
 }> {
    const [{ resolveCliTarget, resolveRunAxeSelection }, { buildCliTargetInput }] =
       await Promise.all([import('../lib/execute.js'), import('../lib/target-input.js')]);
-
    const resolved = await resolveCliTarget(buildCliTargetInput(options));
    const selection = resolveRunAxeSelection(options);
    const result = await runAxeForSelection({
@@ -72,10 +61,8 @@ export async function handleAxeAction(options: AxeActionOptions): Promise<{
       selection,
       wcagVersion: options.version,
    });
-
    return { target: resolved.reportTarget, result };
 }
-
 function buildPatternErrors(result: {
    assertions: Array<{ id: string; status: string }>;
 }): Array<{ code: string; message: string; details: { failedAssertionIds: string[] } }> {
@@ -83,7 +70,6 @@ function buildPatternErrors(result: {
    if (!hasFailed) {
       return [];
    }
-
    return [
       {
          code: 'pattern-assertion-failed',
@@ -96,26 +82,22 @@ function buildPatternErrors(result: {
       },
    ];
 }
-
 async function resolvePatternTarget(
    target: string | undefined,
+   allowVirtual?: boolean,
 ): Promise<string | undefined> {
    if (!target) {
       return undefined;
    }
-
    const { parsePlatform } = await import('../lib/execute.js');
-   return parsePlatform(target);
+   return parsePlatform(target, buildVirtualTargetGuardOptions(allowVirtual));
 }
-
 function resolvePatternExitCode(hasFailed: boolean): number {
    if (hasFailed) {
       return cliExitCodes.assertion;
    }
-
    return cliExitCodes.success;
 }
-
 function buildPatternInput(args: {
    patternId: string;
    url: string;
@@ -147,14 +129,16 @@ async function buildPatternRuntimeInput(args: {
    target?: string;
    session?: string;
    recording?: string;
+   allowVirtual?: boolean;
 }): Promise<Record<string, unknown>> {
-   const parsedTarget = await resolvePatternTarget(args.target);
+   const parsedTarget = await resolvePatternTarget(args.target, args.allowVirtual);
    const inputArgs: {
       patternId: string;
       url: string;
       target?: string;
       session?: string;
       recording?: string;
+      allowVirtual?: boolean;
    } = {
       patternId: args.patternId,
       url: args.url,
@@ -182,6 +166,7 @@ function buildPatternRuntimeArgs(args: {
    target?: string;
    session?: string;
    recording?: string;
+   allowVirtual?: boolean;
 } {
    const inputArgs: {
       patternId: string;
@@ -189,6 +174,7 @@ function buildPatternRuntimeArgs(args: {
       target?: string;
       session?: string;
       recording?: string;
+      allowVirtual?: boolean;
    } = {
       patternId: args.patternId,
       url: args.url,
@@ -203,6 +189,9 @@ function buildPatternRuntimeArgs(args: {
    if (args.options.recording) {
       inputArgs.recording = args.options.recording;
    }
+   if (args.options.allowVirtual) {
+      inputArgs.allowVirtual = args.options.allowVirtual;
+   }
 
    return inputArgs;
 }
@@ -212,6 +201,7 @@ function buildPatternCommandResult(args: {
    result: {
       assertions: Array<{ id: string; status: string }>;
    } & Record<string, unknown>;
+   warnings?: CliMessage[];
 }): {
    ok: boolean;
    exitCode: number;
@@ -221,13 +211,49 @@ function buildPatternCommandResult(args: {
 } {
    const hasFailed = args.result.assertions.some((entry) => entry.status === 'failed');
 
-   return {
+   const response: {
+      ok: boolean;
+      exitCode: number;
+      errors: Array<{ code: string; message: string; details: Record<string, unknown> }>;
+      warnings?: CliMessage[];
+      target: { kind: string; value: string };
+      result: Record<string, unknown>;
+   } = {
       ok: !hasFailed,
       exitCode: resolvePatternExitCode(hasFailed),
       errors: buildPatternErrors(args.result),
       target: args.resolvedTarget,
       result: args.result,
    };
+   if (args.warnings) {
+      response.warnings = args.warnings;
+   }
+   return response;
+}
+
+function resolvePatternExecutionOptions(
+   core: { resolveDefaultTarget: () => { target: string; message: string } },
+   options: PatternActionOptions,
+): {
+   resolvedOptions: PatternActionOptions;
+   warnings?: CliMessage[];
+} {
+   const resolvedOptions: PatternActionOptions = { ...options };
+   if (!options.target && !options.session) {
+      const fallback = core.resolveDefaultTarget();
+      resolvedOptions.target = fallback.target;
+      return {
+         resolvedOptions,
+         warnings: [
+            {
+               code: 'default-target-selected',
+               message: fallback.message,
+            },
+         ],
+      };
+   }
+
+   return { resolvedOptions };
 }
 
 export async function handlePatternAction(
@@ -246,19 +272,24 @@ export async function handlePatternAction(
       import('#core'),
    ]);
 
+   const { resolvedOptions, warnings } = resolvePatternExecutionOptions(core, options);
    const resolved = await resolveCliTarget(buildCliTargetInput(options));
    const input = await buildPatternRuntimeInput(
       buildPatternRuntimeArgs({
          patternId,
          url: resolved.resolvedUrl,
-         options,
+         options: resolvedOptions,
       }),
    );
    const result = await core.runInteractionPattern(
       input as unknown as Parameters<typeof core.runInteractionPattern>[0],
    );
-   return buildPatternCommandResult({
+   const commandArgs: Parameters<typeof buildPatternCommandResult>[0] = {
       resolvedTarget: resolved.reportTarget,
       result,
-   });
+   };
+   if (warnings) {
+      commandArgs.warnings = warnings;
+   }
+   return buildPatternCommandResult(commandArgs);
 }

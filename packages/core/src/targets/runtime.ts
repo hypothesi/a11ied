@@ -1,24 +1,29 @@
 import type { TargetReference } from '@a11ied/contracts';
 
-import { CliUsageError } from '../errors/cli-errors.js';
-import { fetchResponse, resolveStoryDocumentTarget } from './storybook.js';
+import { CliEnvironmentError, CliUsageError } from '../errors/cli-errors.js';
 
-export interface ResolvedDocumentTarget {
+interface ResolvedDocumentTarget {
    target: TargetReference;
    resolvedUrl: string;
    html: string;
    metadata: Record<string, string>;
    userHints: string[];
-   storybookBaseUrl?: string;
 }
 
 export interface ResolveDocumentTargetInput {
    url?: string;
-   storybookUrl?: string;
-   storyId?: string;
 }
 
-function parseHttpUrl(url: string, field: 'url' | 'storybookUrl'): URL {
+const resolvedTargetCache = new Map<string, Promise<ResolvedDocumentTarget>>();
+
+function buildCacheKey(input: ResolveDocumentTargetInput): string | undefined {
+   if (input.url) {
+      return `url:${input.url}`;
+   }
+   return undefined;
+}
+
+function parseHttpUrl(url: string, field: 'url'): URL {
    let parsedUrl: URL | undefined = undefined;
    try {
       parsedUrl = new URL(url);
@@ -39,6 +44,48 @@ function parseHttpUrl(url: string, field: 'url' | 'storybookUrl'): URL {
    return parsedUrl;
 }
 
+async function fetchResponse(
+   url: string,
+   context: Record<string, unknown>,
+): Promise<Response> {
+   let response: Response | undefined = undefined;
+
+   try {
+      response = await fetch(url, {
+         headers: {
+            'user-agent': 'a11ied/0.1.0',
+         },
+      });
+   } catch (error) {
+      let causeMessage = String(error);
+      if (error instanceof Error) {
+         causeMessage = error.message;
+      }
+      throw new CliEnvironmentError(
+         'target-unavailable',
+         `Could not open URL "${url}".`,
+         {
+            ...context,
+            cause: causeMessage,
+         },
+      );
+   }
+
+   if (!response.ok) {
+      throw new CliEnvironmentError(
+         'target-unavailable',
+         `Could not open URL "${url}".`,
+         {
+            ...context,
+            status: response.status,
+            statusText: response.statusText,
+         },
+      );
+   }
+
+   return response;
+}
+
 async function resolveUrlDocumentTarget(url: string): Promise<ResolvedDocumentTarget> {
    const parsedUrl = parseHttpUrl(url, 'url');
    const response = await fetchResponse(parsedUrl.toString(), { url });
@@ -56,38 +103,55 @@ async function resolveUrlDocumentTarget(url: string): Promise<ResolvedDocumentTa
    };
 }
 
-/** Resolves either a URL target or Storybook target into HTML plus target metadata. */
-export async function resolveDocumentTarget(
+async function resolveDocumentTargetUncached(
    input: ResolveDocumentTargetInput,
 ): Promise<ResolvedDocumentTarget> {
    if (input.url) {
       return resolveUrlDocumentTarget(input.url);
    }
 
-   if (input.storybookUrl && input.storyId) {
-      const storybookBaseUrl = new URL(
-         '.',
-         parseHttpUrl(input.storybookUrl, 'storybookUrl'),
-      ).toString();
-      const result = await resolveStoryDocumentTarget({
-         storybookBaseUrl,
-         storybookUrl: input.storybookUrl,
-         storyId: input.storyId,
-         fetchResponseFn: fetchResponse,
-      });
-
-      return {
-         target: {
-            kind: 'story',
-            value: input.storyId,
-         },
-         storybookBaseUrl,
-         ...result,
-      };
-   }
-
    throw new CliUsageError(
       'missing-target',
-      'Provide either --url or --storybook-url with --story-id.',
+      'Provide a --url to resolve a document target.',
    );
+}
+
+async function readCachedResolution(
+   cacheKey: string | undefined,
+   resolutionPromise: Promise<ResolvedDocumentTarget>,
+): Promise<ResolvedDocumentTarget> {
+   try {
+      return await resolutionPromise;
+   } catch (error) {
+      if (cacheKey) {
+         resolvedTargetCache.delete(cacheKey);
+      }
+      throw error;
+   }
+}
+
+async function resolveDocumentTargetWithCache(
+   input: ResolveDocumentTargetInput,
+): Promise<ResolvedDocumentTarget> {
+   const cacheKey = buildCacheKey(input);
+   let cached: Promise<ResolvedDocumentTarget> | undefined = undefined;
+   if (cacheKey) {
+      cached = resolvedTargetCache.get(cacheKey);
+   }
+   if (cached) {
+      return cached;
+   }
+
+   const resolutionPromise = resolveDocumentTargetUncached(input);
+   if (cacheKey) {
+      resolvedTargetCache.set(cacheKey, resolutionPromise);
+   }
+   return await readCachedResolution(cacheKey, resolutionPromise);
+}
+
+/** Resolves a URL target into HTML plus target metadata. */
+export async function resolveDocumentTarget(
+   input: ResolveDocumentTargetInput,
+): Promise<ResolvedDocumentTarget> {
+   return resolveDocumentTargetWithCache(input);
 }

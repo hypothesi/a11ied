@@ -1,7 +1,6 @@
 import type { DriverActionResult, InteractionPatternResult } from '@a11ied/contracts';
 import type { Page } from 'playwright';
 
-import { withBrowserPage } from '../browser/helper.js';
 import { runDriverSessionAction } from '../driver/runtime.js';
 import {
    STATUS_TRIGGER_DELAY_MS,
@@ -13,6 +12,7 @@ import {
    captureBrowserSnapshot,
    collectDriverWalk,
    evaluateActiveElement,
+   withPatternPage,
    type BrowserSnapshot,
    type PatternContext,
 } from './helpers.js';
@@ -27,7 +27,7 @@ async function attachCaptureAndWalk(
    context: PatternContext,
    url: string,
 ): Promise<SnapshotWithLogs> {
-   await attachRenderedPage(context.sessionId, url, page);
+   await attachRenderedPage(context, url, page);
    addStep({
       context,
       id: 'attach-target',
@@ -87,7 +87,9 @@ export async function runLandmarkSequence(
    context: PatternContext,
    url: string,
 ): Promise<InteractionPatternResult> {
-   return await withBrowserPage(url, (page) => runLandmarkProbeBody(page, context, url));
+   return await withPatternPage(context, url, (page) =>
+      runLandmarkProbeBody(page, context, url),
+   );
 }
 
 async function runHeadingProbeBody(
@@ -134,7 +136,9 @@ export async function runHeadingSequence(
    context: PatternContext,
    url: string,
 ): Promise<InteractionPatternResult> {
-   return await withBrowserPage(url, (page) => runHeadingProbeBody(page, context, url));
+   return await withPatternPage(context, url, (page) =>
+      runHeadingProbeBody(page, context, url),
+   );
 }
 
 async function evaluateStatusText(page: Page): Promise<string> {
@@ -146,7 +150,7 @@ async function evaluateStatusText(page: Page): Promise<string> {
    });
 }
 
-function buildStatusSpokenLog(existingLog: string[], statusText: string): string[] {
+function buildVirtualStatusSpokenLog(existingLog: string[], statusText: string): string[] {
    const alreadySpoken = existingLog.some((entry) => entry === statusText);
    if (alreadySpoken) {
       return existingLog;
@@ -159,13 +163,14 @@ async function captureStatusTrigger(
    context: PatternContext,
    url: string,
 ): Promise<{ beforeFocus: string | undefined }> {
-   await attachRenderedPage(context.sessionId, url, page);
+   await attachRenderedPage(context, url, page);
    addStep({
       context,
       id: 'attach-before-trigger',
       label: 'Attach the pre-trigger page state to the session',
       status: 'completed',
    });
+   await runDriverSessionAction(context.sessionId, 'clear-logs');
    await page.focus("button[type='submit']");
    const beforeFocus = await evaluateActiveElement(page);
    await page.click("button[type='submit']");
@@ -187,10 +192,14 @@ async function runStatusProbeBody(
    const trigger = await captureStatusTrigger(page, context, url);
    const statusText = await evaluateStatusText(page);
    const focusAfter = await evaluateActiveElement(page);
-   await attachRenderedPage(context.sessionId, url, page);
+   await attachRenderedPage(context, url, page);
    const logs = await runDriverSessionAction(context.sessionId, 'logs');
-   const spokenPhraseLog = buildStatusSpokenLog(logs.state.spokenPhraseLog, statusText);
+   const spokenPhraseLog =
+      context.target === 'virtual'
+         ? buildVirtualStatusSpokenLog(logs.state.spokenPhraseLog, statusText)
+         : logs.state.spokenPhraseLog;
    const focusStable = trigger.beforeFocus === focusAfter;
+   const statusWasSpoken = spokenPhraseLog.includes(statusText);
    addBooleanAssertion({
       context,
       id: 'focus-stable-after-status',
@@ -198,6 +207,14 @@ async function runStatusProbeBody(
       passedMessage: 'Focus stayed in place after the status update.',
       failedMessage: 'Focus changed after the status update.',
       details: { beforeFocus: trigger.beforeFocus, afterFocus: focusAfter },
+   });
+   addBooleanAssertion({
+      context,
+      id: 'status-announced',
+      condition: statusWasSpoken,
+      passedMessage: 'VoiceOver announced the status message.',
+      failedMessage: 'VoiceOver did not announce the status message.',
+      details: { statusText, spokenPhraseLog },
    });
    context.browserEvidence.push({
       kind: 'status-message',
@@ -225,5 +242,7 @@ export async function runStatusMessageProbe(
    context: PatternContext,
    url: string,
 ): Promise<InteractionPatternResult> {
-   return await withBrowserPage(url, (page) => runStatusProbeBody(page, context, url));
+   return await withPatternPage(context, url, (page) =>
+      runStatusProbeBody(page, context, url),
+   );
 }

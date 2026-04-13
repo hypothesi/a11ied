@@ -74,7 +74,7 @@ Use a small explicit enum:
 
 ### Inputs
 
-- target URL or Storybook story
+- target URL
 - DOM and accessibility-tree signals
 - page or component metadata
 - optional user hint like "this is a login flow" or "this is a drag-and-drop widget"
@@ -95,12 +95,11 @@ Use a small explicit enum:
 
 - Quickref tag taxonomy for category hints
 - DOM heuristics from the target page or story
-- optional framework or Storybook annotations
+- optional framework annotations
 
 ### CLI
 
 - `a11ied inspect applicable --url https://...`
-- `a11ied inspect applicable --story forms-login--default`
 - `a11ied inspect criterion 4.1.3 --url https://...`
 
 ### MCP
@@ -280,7 +279,7 @@ The Agent Skill should teach this exact loop:
 
 1. Resolve the WCAG target.
 2. Look up the criterion or level requirements locally.
-3. Determine applicability for the page or story.
+3. Determine applicability for the page.
 4. Check coverage before testing.
 5. Use `drive` primitives when the agent needs to manually operate the UI or screen reader.
 6. Use axe where automation exists.
@@ -306,7 +305,7 @@ Add two packages to the future design:
 - `packages/wcag-data`: fetch, normalize, and snapshot WCAG, ACT, Quickref, and axe metadata
 - `packages/wcag-engine`: search, lookup, applicability, coverage, and verification planning
 
-That keeps the CLI, MCP server, Storybook bridge, and skill all reading from the same source of truth.
+That keeps the CLI, MCP server, and skill all reading from the same source of truth.
 
 ## Sources
 

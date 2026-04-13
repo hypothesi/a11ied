@@ -62,9 +62,7 @@ function registerWcagLookupTool(server: McpServer): void {
             showWcagCriterion(criterion, version),
          );
          if (!include_coverage) {
-            return createToolResponse(
-               wcagLookupResultSchema.parse(base),
-            );
+            return createToolResponse(wcagLookupResultSchema.parse(base));
          }
          const coverage = coverageLookupResultSchema.parse(
             showWcagCoverage(criterion, version),

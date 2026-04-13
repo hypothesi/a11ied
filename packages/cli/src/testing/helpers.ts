@@ -50,14 +50,17 @@ export async function runPatternWithAssertions(args: {
    json: Record<string, unknown>;
    assertions: Array<{ id: string; status: string }>;
 }> {
+   const targetArgs = ['--target', args.target];
+   if (args.target === 'virtual') {
+      targetArgs.push('--allow-virtual');
+   }
    const result = await runCli([
       'run',
       'pattern',
       args.patternId,
       '--url',
       args.url,
-      '--target',
-      args.target,
+      ...targetArgs,
       '--json',
    ]);
    const json = parseJsonOutput(result.stdout);

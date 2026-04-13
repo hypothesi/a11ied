@@ -12,6 +12,12 @@ interface VerificationCriterionRow {
 }
 
 interface VerificationResult {
+   target?: {
+      kind?: string;
+      value?: string;
+      platform?: string;
+      resolvedUrl?: string;
+   };
    requestedScope: { kind: string; criterion?: string; level?: string };
    wcagVersion: string;
    recording?: { path: string; status: string; format: string };
@@ -48,6 +54,15 @@ function formatEvidenceModesLine(modes: Record<string, number>): string {
 
 function formatWarningsLine(envelope: CliOutputEnvelope): string {
    return `Warnings: ${envelope.warnings.map((entry) => entry.code).join(', ') || 'none'}`;
+}
+
+function formatTargetLine(target?: { value?: string; platform?: string }): string {
+   const targetValue = target?.value ?? 'unknown';
+   let platform = '';
+   if (target?.platform) {
+      platform = ` (${target.platform})`;
+   }
+   return `Target: ${targetValue}${platform}`;
 }
 
 function formatRecordingLine(recording?: {
@@ -92,6 +107,7 @@ function renderLevelVerificationText(
       .map((row) => row.criterionId);
    const lines = [
       `Scope: ${opts.scopeLabel}`,
+      formatTargetLine(result.target),
       `WCAG: ${result.wcagVersion}`,
       formatRecordingLine(result.recording),
       `Summary: total=${result.summary.totalCriteria} failed=${result.summary.failedCount}`,
@@ -108,7 +124,7 @@ function renderLevelVerificationText(
 
    if (opts.verbose) {
       appendVerboseDetails(lines, result, envelope);
-   } else if (!envelope.ok) {
+   } else if (envelope.warnings.length > 0) {
       lines.push(formatWarningsLine(envelope));
    }
 
@@ -137,7 +153,7 @@ function appendCriterionDetails(
       );
    }
 
-   if (!opts.envelope.ok) {
+   if (opts.envelope.warnings.length > 0) {
       lines.push(formatWarningsLine(opts.envelope));
    }
 }
@@ -155,6 +171,7 @@ function renderCriterionVerificationText(
 
    const lines = [
       `Scope: ${opts.scopeLabel}`,
+      formatTargetLine(result.target),
       `WCAG: ${result.wcagVersion}`,
       formatRecordingLine(result.recording),
       `${row.criterionId}  ${row.criterion.title}`,
@@ -173,6 +190,7 @@ function renderCriterionVerificationText(
    return lines.join('\n');
 }
 
+// Fallow-ignore-next-line unused-export
 export function renderVerificationText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },

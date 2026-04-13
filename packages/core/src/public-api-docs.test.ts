@@ -12,10 +12,6 @@ interface PublicApiExpectation {
 
 const publicApiExpectations: PublicApiExpectation[] = [
    {
-      file: 'packages/cli/src/program.ts',
-      functions: ['buildCli'],
-   },
-   {
       file: 'packages/mcp-server/src/index.ts',
       functions: ['startMcpServer'],
    },
@@ -24,17 +20,16 @@ const publicApiExpectations: PublicApiExpectation[] = [
       functions: ['createMcpServer'],
    },
    {
-      file: 'packages/storybook/src/index.ts',
-      functions: ['createStoryRecipe'],
+      file: 'packages/guidepup/src/adapters.ts',
+      functions: ['createDriverAdapter'],
    },
    {
-      file: 'packages/guidepup/src/adapters.ts',
-      functions: [
-         'buildStateSnapshot',
-         'guidepupSetupCommand',
-         'describePlatform',
-         'createDriverAdapter',
-      ],
+      file: 'packages/guidepup/src/adapter-shared.ts',
+      functions: ['buildStateSnapshot'],
+   },
+   {
+      file: 'packages/guidepup/src/readiness.ts',
+      functions: ['guidepupSetupCommand', 'describePlatform'],
    },
    {
       file: 'packages/core/src/errors/cli-environment-error.ts',

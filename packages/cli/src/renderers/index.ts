@@ -1,6 +1,7 @@
 import type { CliOutputEnvelope, InteractionPatternResult } from '#contracts';
 import { stripHtml } from '../lib/text.js';
 
+// Fallow-ignore-next-line unused-export
 export function renderWcagLevelsText(
    envelope: CliOutputEnvelope,
    _options: { verbose: boolean },
@@ -9,6 +10,7 @@ export function renderWcagLevelsText(
    return [`WCAG ${result.version}`, `Levels: ${result.levels.join(', ')}`].join('\n');
 }
 
+// Fallow-ignore-next-line unused-export
 export function renderCriteriaText(
    envelope: CliOutputEnvelope,
    _options: { verbose: boolean },
@@ -16,17 +18,21 @@ export function renderCriteriaText(
    const result = envelope.result as {
       version: string;
       level: string;
-      criteria: Array<{ id: string; title: string }>;
+      criteria: Array<{ id: string; title: string; level?: string }>;
    };
-   const lines = [`WCAG ${result.version} ${result.level}`, ''];
+   const listsAllLevels = result.level === 'all';
+   const scope = listsAllLevels ? 'all levels' : result.level;
+   const lines = [`WCAG ${result.version} ${scope}`, ''];
 
    for (const criterion of result.criteria) {
-      lines.push(`${criterion.id}  ${criterion.title}`);
+      const level = listsAllLevels && criterion.level ? ` [${criterion.level}]` : '';
+      lines.push(`${criterion.id}  ${criterion.title}${level}`);
    }
 
    return lines.join('\n');
 }
 
+// Fallow-ignore-next-line unused-export
 export function renderShowCriterionText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },
@@ -64,6 +70,7 @@ export function renderShowCriterionText(
    return lines.join('\n');
 }
 
+// Fallow-ignore-next-line unused-export
 export function renderSearchText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },
@@ -94,6 +101,7 @@ export function renderSearchText(
    return lines.join('\n');
 }
 
+// Fallow-ignore-next-line unused-export
 export function renderCoverageText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },
@@ -123,6 +131,7 @@ export function renderCoverageText(
    return lines.join('\n');
 }
 
+// Fallow-ignore-next-line unused-export
 export function renderApplicableText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },
@@ -148,6 +157,7 @@ export function renderApplicableText(
    return lines.join('\n');
 }
 
+// Fallow-ignore-next-line unused-export
 export function renderCriterionApplicabilityText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },
@@ -194,6 +204,7 @@ function formatRunAxeSelector(selection: {
    return `rules=${selection.ruleIds?.join(',')}`;
 }
 
+// Fallow-ignore-next-line unused-export
 export function renderRunAxeText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },
@@ -245,6 +256,7 @@ function formatRecordingLine(recording?: {
    return `Recording: ${recording.status} ${recording.format} ${recording.path}`;
 }
 
+// Fallow-ignore-next-line unused-export
 export function renderPatternText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },
@@ -252,6 +264,7 @@ export function renderPatternText(
    const result = envelope.result as InteractionPatternResult;
    const lines = [
       `Pattern: ${result.patternId}`,
+      `Target: ${result.target}`,
       `Session: ${result.sessionId}${formatSessionLabel(result.managedSession)}`,
       formatRecordingLine(result.recording),
       `Assertions: ${result.assertions.map((entry) => `${entry.id}=${entry.status}`).join(', ') || 'none'}`,
@@ -269,6 +282,12 @@ export function renderPatternText(
    if (!envelope.ok) {
       lines.push(
          `Errors: ${envelope.errors.map((entry) => entry.code).join(', ') || 'none'}`,
+      );
+   }
+
+   if (envelope.warnings.length > 0) {
+      lines.push(
+         `Warnings: ${envelope.warnings.map((entry) => entry.code).join(', ') || 'none'}`,
       );
    }
 

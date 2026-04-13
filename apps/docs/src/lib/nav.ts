@@ -1,9 +1,9 @@
-export interface DocLink {
+interface DocLink {
    href: string;
    label: string;
 }
 
-export interface DocSection {
+interface DocSection {
    title: string;
    links: DocLink[];
 }
@@ -32,7 +32,6 @@ export const docsLinks: DocSection[] = [
       links: [
          { href: '/driver-usage', label: 'Driver usage' },
          { href: '/pattern-execution', label: 'Pattern execution' },
-         { href: '/storybook-usage', label: 'Storybook usage' },
          { href: '/recording-sessions', label: 'Recording sessions' },
       ],
    },

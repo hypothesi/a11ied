@@ -11,9 +11,9 @@ export type SourceFormat = 'json' | 'yaml' | 'derived-json';
 export type JsonRecord = Record<string, unknown>;
 export type TechniqueKind = 'sufficient' | 'advisory' | 'failure';
 
-export type RemoteSourceId = 'wcag22' | 'wcag21' | 'act-mapping' | 'quickref-tags';
-export type LocalSourceId = 'axe-rules';
-export type RawSourceId = RemoteSourceId | LocalSourceId;
+type RemoteSourceId = 'wcag22' | 'wcag21' | 'act-mapping' | 'quickref-tags';
+type LocalSourceId = 'axe-rules';
+type RawSourceId = RemoteSourceId | LocalSourceId;
 
 export type FetchLike = typeof fetch;
 
@@ -52,7 +52,7 @@ export interface CriterionPayload {
    };
 }
 
-export interface GuidelinePayload {
+interface GuidelinePayload {
    id: string;
    num: string;
    handle: string;
@@ -60,7 +60,7 @@ export interface GuidelinePayload {
    successcriteria: CriterionPayload[];
 }
 
-export interface PrinciplePayload {
+interface PrinciplePayload {
    id: string;
    num: string;
    handle: string;
@@ -90,10 +90,11 @@ export interface WcagPayload {
    terms: unknown;
 }
 
-export interface ActAccessibilityRequirementPayload {
+interface ActAccessibilityRequirementPayload {
    secondary?: string;
 }
 
+// Fallow-ignore-next-line unused-type
 export interface ActRulePayload {
    title: string;
    permalink?: string;
@@ -179,6 +180,7 @@ export interface DerivedAxeRule {
    actIds: string[];
 }
 
+// Fallow-ignore-next-line unused-type
 export interface StrategySeed {
    preferredEvidenceMode: PreferredEvidenceMode;
    procedureIds: string[];
@@ -186,6 +188,7 @@ export interface StrategySeed {
    notes: string[];
 }
 
+// Fallow-ignore-next-line unused-type
 export interface GeneratedCoverageArtifacts {
    coverageArtifact: CoverageArtifact;
    strategyArtifact: StrategyArtifact;
@@ -196,6 +199,7 @@ const SYNC_ERROR_EXIT_CODE = 3;
 
 /** Raised when raw or generated WCAG data fails local validation. */
 export class SyncValidationError extends Error {
+   // Fallow-ignore-next-line unused-class-member
    readonly exitCode = SYNC_ERROR_EXIT_CODE;
    readonly sourceId: RawSourceId;
    readonly sourceUrl: string;

@@ -2,14 +2,17 @@ import {
    axeRunResultSchema,
    type AxeRuleResult,
    type AxeRunResult,
-   type WcagLevel,
    type WcagVersion,
 } from '@a11ied/contracts';
 import axe from 'axe-core';
 
 import { CliUsageError } from '../errors/cli-errors.js';
-import { getCoverage, listCriteriaByLevel } from '@a11ied/wcag-engine';
 import { withLoadedPage } from '../browser/helper.js';
+import {
+   resolveCriterionSelection,
+   resolveLevelSelection,
+   resolveRuleSelection,
+} from './selection.js';
 
 type AxeRunOptions =
    | {
@@ -59,45 +62,54 @@ interface RawAxeResults {
 
 const axeScriptSource = axe.source;
 
-const LEVEL_ORDER_AA = 2;
-const LEVEL_ORDER_AAA = 3;
-
-function getLevelOrder(level: WcagLevel): number {
-   if (level === 'AA') {
-      return LEVEL_ORDER_AA;
-   }
-   if (level === 'AAA') {
-      return LEVEL_ORDER_AAA;
-   }
-   return 1;
+interface CachedAxeResult {
+   ruleIds: string[];
+   result: AxeRunResult;
 }
 
-function parseWcagVersion(version: string): WcagVersion {
-   if (version === '2.1' || version === '2.2') {
-      return version;
-   }
+const axeResultCache = new Map<string, CachedAxeResult>();
 
-   throw new CliUsageError(
-      'validation-error',
-      `WCAG version "${version}" is unsupported.`,
-      {
-         field: 'version',
-         value: version,
-         supportedVersions: ['2.2', '2.1'],
-      },
-   );
+function buildAxeCacheKey(url: string, wcagVersion: WcagVersion): string {
+   return `${url}::${wcagVersion}`;
 }
 
-function parseLevel(level: string): WcagLevel {
-   if (level === 'A' || level === 'AA' || level === 'AAA') {
-      return level;
+function isSuperset(haystack: string[], needles: string[]): boolean {
+   if (needles.length === 0) {
+      return true;
    }
+   const ruleSet = new Set(haystack);
+   return needles.every((ruleId) => ruleSet.has(ruleId));
+}
 
-   throw new CliUsageError('validation-error', `WCAG level "${level}" is unsupported.`, {
-      field: 'level',
-      value: level,
-      supportedLevels: ['A', 'AA', 'AAA'],
+function filterAxeResult(
+   cached: AxeRunResult,
+   ruleIds: string[],
+   selection: AxeRunResult['selection'],
+): AxeRunResult {
+   const ruleSet = new Set(ruleIds);
+   const filterRules = (rules: AxeRuleResult[]): AxeRuleResult[] =>
+      rules.filter((rule) => ruleSet.has(rule.id));
+   return axeRunResultSchema.parse({
+      ...cached,
+      selection,
+      ruleIds,
+      violations: filterRules(cached.violations),
+      passes: filterRules(cached.passes),
+      incomplete: filterRules(cached.incomplete),
+      inapplicable: filterRules(cached.inapplicable),
    });
+}
+
+function getCachedAxeResult(args: {
+   cacheKey: string;
+   ruleIds: string[];
+   selection: AxeRunResult['selection'];
+}): AxeRunResult | undefined {
+   const cached = axeResultCache.get(args.cacheKey);
+   if (cached && isSuperset(cached.ruleIds, args.ruleIds)) {
+      return filterAxeResult(cached.result, args.ruleIds, args.selection);
+   }
+   return undefined;
 }
 
 function normalizeRule(rule: RawAxeRule): AxeRuleResult {
@@ -117,37 +129,50 @@ function normalizeRule(rule: RawAxeRule): AxeRuleResult {
    };
 }
 
-function unique(values: Iterable<string>): string[] {
-   return [...new Set(values)].toSorted();
+function buildParsedAxeResult(args: {
+   url: string;
+   wcagVersion: WcagVersion;
+   selection: AxeRunResult['selection'];
+   ruleIds: string[];
+   raw: RawAxeResults;
+}): AxeRunResult {
+   return axeRunResultSchema.parse({
+      url: args.url,
+      wcagVersion: args.wcagVersion,
+      selection: args.selection,
+      ruleIds: args.ruleIds,
+      violations: (args.raw.violations ?? []).map((rule) => normalizeRule(rule)),
+      passes: (args.raw.passes ?? []).map((rule) => normalizeRule(rule)),
+      incomplete: (args.raw.incomplete ?? []).map((rule) => normalizeRule(rule)),
+      inapplicable: (args.raw.inapplicable ?? []).map((rule) => normalizeRule(rule)),
+   });
 }
 
-function resolveLevelRuleIds(level: WcagLevel, version: WcagVersion): string[] {
-   const criteria = (['A', 'AA', 'AAA'] as const)
-      .filter((entry) => getLevelOrder(entry) <= getLevelOrder(level))
-      .flatMap((entry) => listCriteriaByLevel(entry, version).criteria);
-
-   return unique(
-      criteria.flatMap(
-         (criterion) => getCoverage(criterion.id, { version }).coverage.axeRuleIds,
-      ),
-   );
+function updateAxeCache(args: {
+   cacheKey: string;
+   ruleIds: string[];
+   result: AxeRunResult;
+}): void {
+   const cached = axeResultCache.get(args.cacheKey);
+   if (!cached || isSuperset(args.ruleIds, cached.ruleIds)) {
+      axeResultCache.set(args.cacheKey, { ruleIds: args.ruleIds, result: args.result });
+   }
 }
 
-function resolveCriterionRuleIds(criterion: string, version: WcagVersion): string[] {
-   return getCoverage(criterion, { version }).coverage.axeRuleIds;
-}
-
-function ensureRuleIds(ruleIds: string[], context: Record<string, unknown>): string[] {
-   const uniqueRuleIds = unique(ruleIds);
-   if (uniqueRuleIds.length === 0) {
-      throw new CliUsageError(
-         'no-axe-rules',
-         'No axe-core rules are mapped for this selection.',
-         context,
-      );
+function parseWcagVersion(version: string): WcagVersion {
+   if (version === '2.1' || version === '2.2') {
+      return version;
    }
 
-   return uniqueRuleIds;
+   throw new CliUsageError(
+      'validation-error',
+      `WCAG version "${version}" is unsupported.`,
+      {
+         field: 'version',
+         value: version,
+         supportedVersions: ['2.2', '2.1'],
+      },
+   );
 }
 
 function parseAxeUrl(url: string): URL {
@@ -156,57 +181,6 @@ function parseAxeUrl(url: string): URL {
    } catch {
       throw new CliUsageError('invalid-url', `URL "${url}" is invalid.`, { url });
    }
-}
-
-function resolveCriterionSelection(
-   criterion: string,
-   wcagVersion: WcagVersion,
-): { selection: AxeRunResult['selection']; ruleIds: string[] } {
-   const ruleIds = ensureRuleIds(resolveCriterionRuleIds(criterion, wcagVersion), {
-      criterion,
-      wcagVersion,
-   });
-   return {
-      selection: {
-         kind: 'criterion',
-         criterion,
-         resolvedRuleIds: ruleIds,
-      },
-      ruleIds,
-   };
-}
-
-function resolveLevelSelection(
-   level: string,
-   wcagVersion: WcagVersion,
-): { selection: AxeRunResult['selection']; ruleIds: string[] } {
-   const parsedLevel = parseLevel(level);
-   const ruleIds = ensureRuleIds(resolveLevelRuleIds(parsedLevel, wcagVersion), {
-      level: parsedLevel,
-      wcagVersion,
-   });
-   return {
-      selection: {
-         kind: 'level',
-         level: parsedLevel,
-         resolvedRuleIds: ruleIds,
-      },
-      ruleIds,
-   };
-}
-
-function resolveRuleSelection(ruleIds: string[]): {
-   selection: AxeRunResult['selection'];
-   ruleIds: string[];
-} {
-   const uniqueRuleIds = ensureRuleIds(ruleIds, { ruleIds });
-   return {
-      selection: {
-         kind: 'rule',
-         ruleIds: uniqueRuleIds,
-      },
-      ruleIds: uniqueRuleIds,
-   };
 }
 
 function resolveAxeSelection(
@@ -253,21 +227,51 @@ async function executeAxeScan(parsedUrl: URL, ruleIds: string[]): Promise<RawAxe
    });
 }
 
-/** Runs axe-core against one URL using a criterion, level, or explicit rule selection. */
-export async function runAxe(url: string, options: AxeRunOptions): Promise<AxeRunResult> {
+function resolveAxeInput(
+   url: string,
+   options: AxeRunOptions,
+): {
+   parsedUrl: URL;
+   wcagVersion: WcagVersion;
+   selection: AxeRunResult['selection'];
+   ruleIds: string[];
+   cacheKey: string;
+} {
    const parsedUrl = parseAxeUrl(url);
    const wcagVersion = parseWcagVersion(options.wcagVersion);
    const { selection, ruleIds } = resolveAxeSelection(options, wcagVersion);
-   const raw = await executeAxeScan(parsedUrl, ruleIds);
-
-   return axeRunResultSchema.parse({
-      url: parsedUrl.toString(),
+   return {
+      parsedUrl,
       wcagVersion,
       selection,
       ruleIds,
-      violations: (raw.violations ?? []).map((rule) => normalizeRule(rule)),
-      passes: (raw.passes ?? []).map((rule) => normalizeRule(rule)),
-      incomplete: (raw.incomplete ?? []).map((rule) => normalizeRule(rule)),
-      inapplicable: (raw.inapplicable ?? []).map((rule) => normalizeRule(rule)),
+      cacheKey: buildAxeCacheKey(parsedUrl.toString(), wcagVersion),
+   };
+}
+
+/** Runs axe-core against one URL using a criterion, level, or explicit rule selection. */
+export async function runAxe(url: string, options: AxeRunOptions): Promise<AxeRunResult> {
+   const resolved = resolveAxeInput(url, options);
+   const cached = getCachedAxeResult({
+      cacheKey: resolved.cacheKey,
+      ruleIds: resolved.ruleIds,
+      selection: resolved.selection,
    });
+   if (cached) {
+      return cached;
+   }
+   const raw = await executeAxeScan(resolved.parsedUrl, resolved.ruleIds);
+   const parsed = buildParsedAxeResult({
+      url: resolved.parsedUrl.toString(),
+      wcagVersion: resolved.wcagVersion,
+      selection: resolved.selection,
+      ruleIds: resolved.ruleIds,
+      raw,
+   });
+   updateAxeCache({
+      cacheKey: resolved.cacheKey,
+      ruleIds: resolved.ruleIds,
+      result: parsed,
+   });
+   return parsed;
 }

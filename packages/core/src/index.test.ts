@@ -1,11 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { expectReadyCommands } from './release-test-helpers.js';
+
 const childProcessMocks = vi.hoisted(() => ({
    spawnSync: vi.fn(),
 }));
 
 vi.mock('node:child_process', () => ({
    spawnSync: childProcessMocks.spawnSync,
+   execFile: vi.fn(),
 }));
 
 const EXPECTED_TARGET_COUNT = 3;
@@ -78,16 +81,7 @@ describe('core scaffolding', () => {
       const commands = listCliCommands();
       const report = createDoctorReport();
 
-      expect(commands.map((command) => command.name)).toEqual([
-         'wcag',
-         'inspect',
-         'drive',
-         'doctor',
-         'run',
-         'verify',
-         'mcp',
-      ]);
-      expect(commands.every((command) => command.maturity === 'ready')).toBe(true);
+      expectReadyCommands(commands);
       expect(report.browserAutomation.policyName).toBe('system-browser-first');
       expect(report.browserAutomation.installCommand).toBe(
          'npx playwright install chromium',

@@ -13,6 +13,7 @@ import {
 
 const tempRoots: string[] = [];
 const testServer: TestServerHandle = useTestServer(tempRoots);
+const virtualTargetArgs = ['--target', 'virtual', '--allow-virtual'];
 
 function assertLevelCriteria(json: Record<string, unknown>): void {
    const criteria = (
@@ -42,8 +43,7 @@ async function assertVerifyLevel(baseUrl: string): Promise<void> {
       'AA',
       '--url',
       `${baseUrl}/auth-login.html`,
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
       '--json',
    ]);
    const json = parseJsonOutput(result.stdout);
@@ -67,10 +67,19 @@ async function assertVerifyTextCriterion(baseUrl: string): Promise<void> {
       '4.1.2',
       '--url',
       `${baseUrl}/button-name-failure.html`,
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
    ]);
-   expect(output.stdout).toMatchInlineSnapshot(`
+   const targetLine = output.stdout
+      .split('\n')
+      .find((line) => line.startsWith('Target: '));
+   expect(targetLine).toMatch(
+      /^Target: http:\/\/127\.0\.0\.1:\d+\/button-name-failure\.html \(virtual\)$/,
+   );
+   const withoutTarget = output.stdout
+      .split('\n')
+      .filter((line) => !line.includes('Target: '))
+      .join('\n');
+   expect(withoutTarget).toMatchInlineSnapshot(`
       "Scope: criterion=4.1.2
       WCAG: 2.2
       Recording: none
@@ -90,8 +99,7 @@ async function assertVerifyTextVerbose(baseUrl: string): Promise<void> {
       '3.3.8',
       '--url',
       `${baseUrl}/auth-login.html`,
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
       '--verbose',
    ]);
    expect(verbose.stdout).toContain('Uncovered work:');
@@ -105,8 +113,7 @@ async function assertVerifyTextLevel(baseUrl: string): Promise<void> {
       'AA',
       '--url',
       `${baseUrl}/auth-login.html`,
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
    ]);
    expect(level.stdout).toContain('Scope: level=AA');
    expect(level.stdout).toContain('Summary: total=');

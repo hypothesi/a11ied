@@ -4,10 +4,6 @@ import { afterAll, afterEach, beforeAll } from 'vitest';
 
 import { cleanupTempRoots, createTestServer, type TestServerHandle } from './fixtures.js';
 export {
-   HTTP_STATUS_NOT_FOUND,
-   HTTP_STATUS_OK,
-   createStorybookTestServer,
-   createTempRoot,
    createTestServer,
    cleanupTempRoots,
    type TestServerHandle,

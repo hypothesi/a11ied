@@ -22,10 +22,10 @@ Feature: CLI inspect commands
     And the result includes one explicit applicability state
     And the result includes the signals that produced that state
 
-  Scenario: Inspect does not expose Storybook inputs in sub-plan 2
-    When I run `a11ied inspect applicable --story-id forms-login--default --json`
+  Scenario: Inspect rejects missing URL input
+    When I run `a11ied inspect applicable --json`
     Then the command exits with code 2
-    And the first error explains that Storybook targets are not available in this milestone slice
+    And the first error explains that a URL target is required
 
   Scenario: Inspect rejects invalid criteria deterministically
     When I run `a11ied inspect criterion 9.9.9 --url http://127.0.0.1:4173/basic-page.html --json`

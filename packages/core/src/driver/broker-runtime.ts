@@ -5,9 +5,54 @@ import { readSessionMetadata, removeSessionArtifacts } from './session-utils.js'
 import { createMissingSessionError, parseBrokerActionResult } from './runtime-support.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
 
-export interface BrokerSessionActionOptions {
+interface BrokerSessionActionOptions {
    payload?: Record<string, unknown>;
    cwd?: string;
+}
+
+function normalizeBrokerTransportError(args: {
+   error: unknown;
+   sessionId: string;
+   action?: string;
+}): CliEnvironmentError {
+   if (args.error instanceof CliEnvironmentError) {
+      return args.error;
+   }
+
+   if (
+      typeof args.error === 'object' &&
+      args.error !== null &&
+      'code' in args.error &&
+      (args.error as { code?: string }).code &&
+      ['ENOENT', 'ECONNREFUSED', 'ECONNRESET'].includes(
+         String((args.error as { code?: string }).code),
+      )
+   ) {
+      return createMissingSessionError(args.sessionId);
+   }
+
+   const message =
+      args.error instanceof Error ? args.error.message : String(args.error);
+
+   if (message.includes('Broker connection timed out')) {
+      return new CliEnvironmentError(
+         'driver-broker-timeout',
+         `Timed out waiting for the driver broker response${args.action ? ` during "${args.action}"` : ''}.`,
+         {
+            sessionId: args.sessionId,
+            action: args.action,
+         },
+      );
+   }
+
+   return new CliEnvironmentError(
+      'driver-broker-error',
+      message,
+      {
+         sessionId: args.sessionId,
+         action: args.action,
+      },
+   );
 }
 
 export async function getBrokerSessionStatus(
@@ -26,8 +71,8 @@ export async function getBrokerSessionStatus(
          actionErrorMessage: `Could not read driver session "${sessionId}".`,
          response,
       });
-   } catch {
-      throw createMissingSessionError(sessionId);
+   } catch (error) {
+      throw normalizeBrokerTransportError({ error, sessionId });
    }
 }
 
@@ -88,8 +133,12 @@ export async function attachDocumentViaBroker(
             { sessionId },
          );
       }
-   } catch {
-      throw createMissingSessionError(sessionId);
+   } catch (error) {
+      throw normalizeBrokerTransportError({
+         error,
+         sessionId,
+         action: 'attach-document',
+      });
    }
 }
 
@@ -127,7 +176,7 @@ export async function runBrokerAction(
          response,
          details: { sessionId, action },
       });
-   } catch {
-      throw createMissingSessionError(sessionId);
+   } catch (error) {
+      throw normalizeBrokerTransportError({ error, sessionId, action });
    }
 }

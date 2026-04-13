@@ -1,31 +1,24 @@
 import type { Command } from 'commander';
-import {
-   addJsonOption,
-   addStorybookTargetOptions,
-   addVerboseOption,
-   addWcagVersionOption,
-} from '../lib/options.js';
+import { addJsonOption, addVerboseOption, addWcagVersionOption } from '../lib/options.js';
 import { handleAxeAction, type AxeActionOptions } from './run-actions.js';
 
 function buildAxeCommand(runCommand: Command): Command {
    return addVerboseOption(
       addJsonOption(
          addWcagVersionOption(
-            addStorybookTargetOptions(
-               runCommand
-                  .command('axe')
-                  .description('Run axe-core against a target.')
-                  .option('--url <url>', 'Run against one live URL target.')
-                  .option('--level <level>', 'Limit the run to one WCAG level.')
-                  .option(
-                     '--criterion <criterion>',
-                     'Limit the run to one WCAG criterion id or slug.',
-                  )
-                  .option(
-                     '--rule <ruleId...>',
-                     'Limit the run to one or more explicit axe rule ids.',
-                  ),
-            ),
+            runCommand
+               .command('axe')
+               .description('Run axe-core against a target.')
+               .option('--url <url>', 'Run against one live URL target.')
+               .option('--level <level>', 'Limit the run to one WCAG level.')
+               .option(
+                  '--criterion <criterion>',
+                  'Limit the run to one WCAG criterion id or slug.',
+               )
+               .option(
+                  '--rule <ruleId...>',
+                  'Limit the run to one or more explicit axe rule ids.',
+               ),
          ),
       ),
    );

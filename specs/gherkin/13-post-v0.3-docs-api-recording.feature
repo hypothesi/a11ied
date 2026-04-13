@@ -6,7 +6,6 @@ Feature: Post-v0.3 docs, API docs, and recording support
     When I inspect the docs routes and home navigation
     Then the docs site should cover CLI usage
     And the docs site should cover MCP usage
-    And the docs site should cover Storybook usage
     And the docs site should cover public API usage
     And the docs site should cover recording sessions
 

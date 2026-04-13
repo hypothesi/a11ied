@@ -1,42 +1,17 @@
+import { driverActionResultSchema, type DriverActionResult } from '@a11ied/contracts';
+
+import type {
+   ActionExecutionResult,
+   BrokerHandlerContext,
+   BrokerRequest,
+   BrokerResponse,
+   HandleResult,
+} from './broker-types.js';
 import {
-   driverActionResultSchema,
-   type AccessibilityDriverSession,
-   type DriverActionResult,
-   type DriverCheckpoint,
-   type SessionRecording,
-} from '@a11ied/contracts';
-import type { createDriverAdapter } from '@a11ied/guidepup';
-
-export interface BrokerRequest {
-   command: 'ping' | 'status' | 'stop' | 'action' | 'attach-document';
-   action?: DriverActionResult['action'];
-   payload?: Record<string, unknown>;
-}
-
-export interface BrokerResponse {
-   ok: boolean;
-   result?: DriverActionResult;
-   error?: {
-      code: string;
-      message: string;
-   };
-}
-
-export interface ActionContext {
-   adapter: ReturnType<typeof createDriverAdapter>;
-   checkpoints: DriverCheckpoint[];
-}
-
-export interface BrokerHandlerContext extends ActionContext {
-   session: AccessibilityDriverSession;
-   writeMetadata: (session: AccessibilityDriverSession) => Promise<void>;
-   finishRecording?: () => Promise<SessionRecording | undefined>;
-}
-
-export interface HandleResult {
-   response: BrokerResponse;
-   shouldStop: boolean;
-}
+   executeAction,
+   isUnknownAction,
+   maybeStabilizeSpeech,
+} from './broker-actions.js';
 
 function toBrokerError(error: unknown): BrokerResponse['error'] {
    if (error instanceof Error && 'code' in error) {
@@ -59,77 +34,13 @@ function toBrokerError(error: unknown): BrokerResponse['error'] {
    };
 }
 
-function getSimpleActionHandler(
-   adapter: ReturnType<typeof createDriverAdapter>,
-   action: DriverActionResult['action'] | undefined,
-): (() => Promise<void>) | undefined {
-   const handlers: Record<string, () => Promise<void>> = {
-      next: () => adapter.next(),
-      previous: () => adapter.previous(),
-      interact: () => adapter.interact(),
-      'stop-interacting': () => adapter.stopInteracting(),
-      'click-current-item': () => adapter.activateCurrentItem(),
-   };
-   return handlers[String(action)];
+function attachActionDuration(
+   result: DriverActionResult,
+   actionDurationMs: number,
+): DriverActionResult {
+   result.actionDurationMs = actionDurationMs;
+   return result;
 }
-
-function addCheckpoint(
-   checkpoints: DriverCheckpoint[],
-   payload?: Record<string, unknown>,
-): void {
-   checkpoints.push({
-      label: String(payload?.label ?? 'checkpoint'),
-      createdAt: new Date().toISOString(),
-   });
-}
-
-async function executePayloadAction(
-   context: ActionContext,
-   action: DriverActionResult['action'] | undefined,
-   payload?: Record<string, unknown>,
-): Promise<boolean> {
-   switch (action) {
-      case 'key': {
-         await context.adapter.press(String(payload?.keys ?? ''));
-         return true;
-      }
-      case 'type': {
-         await context.adapter.type(String(payload?.text ?? ''));
-         return true;
-      }
-      case 'clear-logs': {
-         await context.adapter.clearLogs(context.checkpoints);
-         return true;
-      }
-      case 'checkpoint': {
-         addCheckpoint(context.checkpoints, payload);
-         return true;
-      }
-      default: {
-         return false;
-      }
-   }
-}
-
-export async function executeAction(
-   context: ActionContext,
-   action: DriverActionResult['action'] | undefined,
-   payload?: Record<string, unknown>,
-): Promise<boolean> {
-   const simpleHandler = getSimpleActionHandler(context.adapter, action);
-   if (simpleHandler) {
-      await simpleHandler();
-      return true;
-   }
-   return await executePayloadAction(context, action, payload);
-}
-
-const SPEECH_TRIGGERING_ACTIONS = new Set([
-   'next', 'previous', 'key', 'type', 'interact',
-   'stop-interacting', 'click-current-item',
-]);
-
-const BROKER_NO_OP_ACTIONS = new Set(['read', 'logs', 'attach-document']);
 
 async function buildActionResult(
    context: BrokerHandlerContext,
@@ -149,6 +60,22 @@ async function buildActionResult(
       state,
       details,
    });
+}
+
+async function buildActionHandleResult(args: {
+   context: BrokerHandlerContext;
+   action: DriverActionResult['action'];
+   payload: Record<string, unknown> | undefined;
+   execution: ActionExecutionResult;
+   startedAt: number;
+}): Promise<HandleResult> {
+   const result = await buildActionResult(
+      args.context,
+      args.action,
+      args.execution.details ?? args.payload,
+   );
+   attachActionDuration(result, Date.now() - args.startedAt);
+   return { response: { ok: true, result }, shouldStop: false };
 }
 
 async function handleStatusCommand(context: BrokerHandlerContext): Promise<HandleResult> {
@@ -222,8 +149,8 @@ async function handleActionCommand(
 ): Promise<HandleResult> {
    const action = request.action ?? 'read';
    const startTime = Date.now();
-   const handled = await executeAction(context, action, request.payload);
-   if (!handled && !BROKER_NO_OP_ACTIONS.has(String(action))) {
+   const execution = await executeAction(context, action, request.payload);
+   if (isUnknownAction(action, execution.handled)) {
       return {
          response: {
             ok: false,
@@ -235,13 +162,14 @@ async function handleActionCommand(
          shouldStop: false,
       };
    }
-   if (handled && SPEECH_TRIGGERING_ACTIONS.has(String(action))) {
-      await context.adapter.waitForSpeechStabilization();
-   }
-   const actionDurationMs = Date.now() - startTime;
-   const result = await buildActionResult(context, action, request.payload);
-   result.actionDurationMs = actionDurationMs;
-   return { response: { ok: true, result }, shouldStop: false };
+   await maybeStabilizeSpeech(context.adapter, action, execution.handled);
+   return buildActionHandleResult({
+      context,
+      action,
+      payload: request.payload,
+      execution,
+      startedAt: startTime,
+   });
 }
 
 function buildUnknownCommandResponse(command: string): HandleResult {

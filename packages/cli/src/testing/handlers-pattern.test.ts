@@ -13,6 +13,7 @@ import { runPatternWithAssertions } from './helpers.js';
 
 const tempRoots: string[] = [];
 const testServer: TestServerHandle = useTestServer(tempRoots);
+const virtualTargetArgs = ['--target', 'virtual', '--allow-virtual'];
 
 async function assertLandmarkPattern(baseUrl: string): Promise<void> {
    const result = await runCli([
@@ -21,8 +22,7 @@ async function assertLandmarkPattern(baseUrl: string): Promise<void> {
       'landmark_sequence',
       '--url',
       `${baseUrl}/basic-page.html`,
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
       '--json',
    ]);
    const json = parseJsonOutput(result.stdout);
@@ -43,8 +43,7 @@ async function assertHeadingPattern(baseUrl: string): Promise<void> {
       'heading_sequence',
       '--url',
       `${baseUrl}/basic-page.html`,
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
       '--json',
    ]);
    const json = parseJsonOutput(result.stdout);
@@ -69,8 +68,7 @@ async function assertStatusMessagePattern(baseUrl: string): Promise<void> {
       'status_message_probe',
       '--url',
       `${baseUrl}/status-message.html`,
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
       '--json',
    ]);
    const json = parseJsonOutput(result.stdout);

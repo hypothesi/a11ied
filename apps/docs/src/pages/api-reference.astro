@@ -31,10 +31,11 @@ a1 help-all</code></pre>
 
    <section>
       <h2>Programmatic usage</h2>
-      <pre><code>import {'{'} buildCli {'}'} from 'a11ied';</code></pre>
+      <pre><code>import {'{'} listWcagCriteria, runAxe, verifyCriterion {'}'} from 'a11ied';</code></pre>
       <p>
-         The package exports the CLI builder for programmatic use.
-         The underlying runtime modules (<code>@a11ied/core</code>, <code>@a11ied/contracts</code>, etc.)
+         Import the runtime helpers you need from <code>a11ied</code>.
+         CLI plumbing (like the command builder) stays internal.
+         The runtime modules (<code>@a11ied/core</code>, <code>@a11ied/contracts</code>, etc.)
          are internal workspace packages — import from the top-level <code>a11ied</code> entrypoint.
       </p>
    </section>
@@ -46,7 +47,6 @@ a1 help-all</code></pre>
          <li><code>@a11ied/contracts</code>: shared runtime schemas and result shapes</li>
          <li><code>@a11ied/core</code>: WCAG lookup, target resolution, driver orchestration, pattern execution, and verification</li>
          <li><code>@a11ied/guidepup</code>: platform adapters for VoiceOver, NVDA, and the virtual reader</li>
-         <li><code>@a11ied/storybook</code>: Storybook recipe helpers</li>
          <li><code>@a11ied/wcag-data</code>: standards-data sync and normalization</li>
          <li><code>@a11ied/wcag-engine</code>: lookup, search, coverage, and applicability over generated artifacts</li>
          <li><code>@a11ied/mcp-server</code>: MCP server entrypoint</li>

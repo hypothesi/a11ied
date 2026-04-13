@@ -4,22 +4,18 @@ import { dirname, resolve } from 'node:path';
 import net from 'node:net';
 import { fileURLToPath } from 'node:url';
 
-import type {
-   AccessibilityDriverSession,
-   DriverActionResult,
-   Platform,
-} from '@a11ied/contracts';
+import type { AccessibilityDriverSession, Platform } from '@a11ied/contracts';
 
-import type { BrokerRequest, BrokerResponse } from './broker-handlers.js';
+import type { BrokerRequest, BrokerResponse } from './broker-types.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
 
-const VIRTUAL_SOCKET_TIMEOUT_MS = 2_000;
+const VIRTUAL_SOCKET_TIMEOUT_MS = 2000;
 // Must cover: guidepup op (up to 15s) + speech stabilization (5s) + retries
 const REAL_TARGET_SOCKET_TIMEOUT_MS = 30_000;
 const REAL_TARGET_STOP_SOCKET_TIMEOUT_MS = 20_000;
-const VIRTUAL_STOP_SOCKET_TIMEOUT_MS = 7_000;
+const VIRTUAL_STOP_SOCKET_TIMEOUT_MS = 7000;
 const BROKER_POLL_DELAY_MS = 100;
-const DEFAULT_BROKER_READY_TIMEOUT_MS = 5_000;
+const DEFAULT_BROKER_READY_TIMEOUT_MS = 5000;
 const REAL_TARGET_BROKER_READY_TIMEOUT_MS = 15_000;
 
 function delay(ms: number): Promise<void> {
@@ -79,10 +75,16 @@ export function resolveBrokerSocketTimeoutMs(
    const isReal = target === 'voiceover' || target === 'nvda';
 
    if (request.command === 'stop') {
-      return isReal ? REAL_TARGET_STOP_SOCKET_TIMEOUT_MS : VIRTUAL_STOP_SOCKET_TIMEOUT_MS;
+      if (isReal) {
+         return REAL_TARGET_STOP_SOCKET_TIMEOUT_MS;
+      }
+      return VIRTUAL_STOP_SOCKET_TIMEOUT_MS;
    }
 
-   return isReal ? REAL_TARGET_SOCKET_TIMEOUT_MS : VIRTUAL_SOCKET_TIMEOUT_MS;
+   if (isReal) {
+      return REAL_TARGET_SOCKET_TIMEOUT_MS;
+   }
+   return VIRTUAL_SOCKET_TIMEOUT_MS;
 }
 
 interface PollBrokerOptions {
@@ -125,7 +127,7 @@ export function resolveBrokerReadyTimeoutMs(target: Platform): number {
    return REAL_TARGET_BROKER_READY_TIMEOUT_MS;
 }
 
-export interface WaitForBrokerOptions {
+interface WaitForBrokerOptions {
    sessionId: string;
    cwd: string;
    readSession: (sid: string, cwdPath: string) => Promise<AccessibilityDriverSession>;
@@ -215,7 +217,7 @@ function getProjectRoot(): string {
    return resolve(dirname(currentFile), '../../..');
 }
 
-export interface BrokerSpawnOptions {
+interface BrokerSpawnOptions {
    sessionId: string;
    target: string;
    metadataFile: string;
@@ -260,19 +262,4 @@ export function spawnBrokerProcess(options: BrokerSpawnOptions): void {
       stdio: 'ignore',
    });
    child.unref();
-}
-
-export async function sendBrokerCommand(
-   socketPath: string,
-   action: DriverActionResult['action'],
-   payload?: Record<string, unknown>,
-): Promise<BrokerResponse> {
-   const request: BrokerRequest = {
-      command: 'action',
-      action,
-   };
-   if (payload) {
-      request.payload = payload;
-   }
-   return connectToBroker(socketPath, request);
 }

@@ -10,7 +10,7 @@ A bead is not complete until its manual run exists.
 
 If the bead adds or changes a user-facing surface, the manual run must explicitly exercise that changed surface itself. That means:
 
-- run the built CLI command, docs flow, MCP tool, Storybook flow, or other user-facing entrypoint
+- run the built CLI command, docs flow, MCP tool, or other user-facing entrypoint
 - record the exact commands or steps used
 - record the observed result
 

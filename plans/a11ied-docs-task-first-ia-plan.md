@@ -38,7 +38,7 @@ Rework the docs entry path so readers can start from jobs like "check a criterio
    - check one criterion
    - verify a target level
    - drive a reader manually
-   - use a11ied from an agent or Storybook
+   - use a11ied from an agent
 - Use the existing route map as the detailed layer beneath these starting points.
 
 ## Task grid
@@ -59,7 +59,7 @@ Rework the docs entry path so readers can start from jobs like "check a criterio
 
 1. Rewrite the homepage so the first decisions are task based, not architecture based.
 2. Add one workflow-focused route or major page section if the homepage alone is too crowded.
-3. Include concrete paths for CLI, MCP, Storybook, and manual-driver use where they fit.
+3. Include concrete paths for CLI, MCP, and manual-driver use where they fit.
 4. Keep the command examples real and aligned with the shipped surface.
 
 ### IA-02 - Audit route accuracy and cross-linking

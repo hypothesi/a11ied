@@ -30,7 +30,7 @@ Change browser-backed automation so a11ied prefers Chromium-family browsers alre
 - NFR-1 (Performance): Browser detection should be cheap enough to run on every browser-backed command without becoming the main source of latency.
 - NFR-2 (Security): Detection must stay local. Do not phone home or mutate system browser installs.
 - NFR-3 (Observability): Tests must pin launch-order behavior, failure messages, and doctor output.
-- NFR-4 (Maintainability): The launch policy must live in one shared browser module instead of being duplicated across axe, Storybook, and pattern code.
+- NFR-4 (Maintainability): The launch policy must live in one shared browser module instead of being duplicated across axe and pattern code.
 
 ## Architecture & design overview
 
@@ -70,7 +70,7 @@ Change browser-backed automation so a11ied prefers Chromium-family browsers alre
 2. Detect common Chrome, Edge, Brave, and Chromium installs on macOS, Linux, and Windows using stable local path checks and path lookup where appropriate.
 3. Detect whether Playwright-managed Chromium is already installed.
 4. Return one preferred launch target using the defined launch order.
-5. Update the shared Playwright helper so axe, Storybook, and browser-backed pattern probes all use the new policy automatically.
+5. Update the shared Playwright helper so axe and browser-backed pattern probes all use the new policy automatically.
 6. Fail with a deterministic environment error when no usable browser is found, and include `npx playwright install chromium` in the error details.
 7. Add automated tests for detection, launch selection, and the no-browser failure path.
 8. Manually exercise the built CLI against a real local URL and record the commands and observations under `specs/manual-runs/BR-01/`.

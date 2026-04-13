@@ -7,8 +7,7 @@ Checked on 2026-04-06.
 `a11ied` should feel like one runtime with several doors:
 
 - the CLI is the front door
-- Storybook is the fast local side door
-- MCP is the agent door
+- the MCP server is the agent door
 - the docs site explains the system without becoming the system
 
 If those surfaces do different things or speak different data shapes, the product will get messy almost immediately.
@@ -54,10 +53,6 @@ The output should include:
 
 This is the compliance orchestration layer. It should verify a specific criterion or a target level, then report what passed, failed, was not applicable, and was not covered.
 
-### `a11ied story <story-id>`
-
-This should feel like the bridge between component work and real screen reader testing. The command should know how to talk to a local Storybook server and resolve the story iframe without making the user hand-roll URLs every time.
-
 ### `a11ied mcp`
 
 This should not invent a new model. It should expose the same lookup, driver, scenario execution, health checks, and results through MCP tools and resources.
@@ -94,7 +89,6 @@ That is the line that keeps the whole repo honest.
 - TypeScript: 6.0.2
 - Vitest: 4.1.2
 - Astro: 6.1.4
-- Storybook core: 10.3.4
 - MCP SDK: 1.29.0
 - Guidepup core: 0.24.1
 - axe-core docs reviewed against 4.11

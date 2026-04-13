@@ -16,7 +16,6 @@ const requiredRuntimePages = [
    'verification-semantics.astro',
    'cli-reference.astro',
    'mcp-usage.astro',
-   'storybook-usage.astro',
    'workflows.astro',
    'api-reference.astro',
    'recording-sessions.astro',
@@ -31,7 +30,6 @@ const requiredHomeRoutes = [
    '/verification-semantics',
    '/cli-reference',
    '/mcp-usage',
-   '/storybook-usage',
    '/api-reference',
    '/recording-sessions',
 ] as const;
@@ -99,7 +97,6 @@ function expectPublicSurfaceDocs(): void {
    expectSurfaceDoc('cli-reference.astro', 'npx playwright install chromium');
    expectSurfaceDoc('cli-reference.astro', 'Chrome, Edge, Brave, or Chromium');
    expectSurfaceDoc('mcp-usage.astro', 'What MCP exposes');
-   expectSurfaceDoc('storybook-usage.astro', 'Storybook targets');
    expectSurfaceDoc('api-reference.astro', 'Packages');
    expectSurfaceDoc('recording-sessions.astro', 'Supported targets');
    expectSurfaceDoc('recording-sessions.astro', 'voiceover');

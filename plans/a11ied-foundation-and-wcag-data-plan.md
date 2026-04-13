@@ -8,9 +8,9 @@ Build the standards and engine layer first. This sub-plan turns WAI WCAG JSON, A
 
 - In scope: `packages/wcag-data`, `packages/wcag-engine`, supporting contract updates, and data validation workflows.
 - In scope: source sync, normalization, provenance, coverage synthesis, lightweight search, and criterion resolution.
-- In scope: stable data and engine APIs that later CLI, MCP, Storybook, and verification code can consume.
+- In scope: stable data and engine APIs that later CLI, MCP, and verification code can consume.
 - In scope: adding the root `npm run standards` command and making Gherkin-traced automation the acceptance contract for testable foundation work.
-- Out of scope: low-level driver actions, Guidepup execution patterns, Storybook target resolution, MCP handlers, and verification reporters.
+- Out of scope: low-level driver actions, Guidepup execution patterns, MCP handlers, and verification reporters.
 
 ## Assumptions & Open Questions
 
@@ -73,7 +73,7 @@ upstream sources
   packages/wcag-engine APIs
           |
           v
-  CLI / MCP / Storybook / verification consumers
+  CLI / MCP / verification consumers
 ```
 
 - Data flow, key interfaces, schemas, external services:
@@ -280,7 +280,7 @@ https://raw.githubusercontent.com/w3c/wai-wcag-quickref/main/_data/tags-sc.yml
 1. Define the data model for applicability inputs and outputs.
 2. Expose an engine API that can take structural signals such as forms, media, dialogs, auth, live regions, drag-and-drop, and fixed overlays.
 3. Map Quickref tags into first-pass applicability hints.
-4. Keep the heuristics pure and testable so later browser or Storybook integrations only need to supply signals.
+4. Keep the heuristics pure and testable so later browser integrations only need to supply signals.
 5. Add fixtures that prove the engine can classify obvious cases without overclaiming relevance.
 6. Implement automated tests for the mapped scenarios in `specs/gherkin/03-wcag-applicability.feature`.
 7. Run an AI-agent manual acceptance pass from that feature file and record it under `specs/manual-runs/FD-07/`.

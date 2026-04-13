@@ -4,14 +4,10 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { extname, resolve } from 'node:path';
 
-export const HTTP_STATUS_OK = 200;
-export const HTTP_STATUS_NOT_FOUND = 404;
+const HTTP_STATUS_OK = 200;
+const HTTP_STATUS_NOT_FOUND = 404;
 
 const fixtureRoot = resolve(import.meta.dirname, '../../test/fixtures');
-const storybookFixtureRoot = resolve(
-   import.meta.dirname,
-   '../../../storybook/test-fixtures',
-);
 
 export interface TestServerHandle {
    server: ReturnType<typeof createServer>;
@@ -82,10 +78,6 @@ function createStaticServer(root: string): TestServerHandle {
 
 export function createTestServer(): TestServerHandle {
    return createStaticServer(fixtureRoot);
-}
-
-export function createStorybookTestServer(): TestServerHandle {
-   return createStaticServer(storybookFixtureRoot);
 }
 
 export async function createTempRoot(tempRoots: string[]): Promise<string> {

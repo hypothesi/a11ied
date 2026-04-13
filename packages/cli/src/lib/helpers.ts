@@ -78,7 +78,7 @@ export function createEnvelope(args: {
    });
 }
 
-export interface PrintOutputOptions {
+interface PrintOutputOptions {
    json: boolean | undefined;
    verbose: boolean | undefined;
    envelope: CliOutputEnvelope;

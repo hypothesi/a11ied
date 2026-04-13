@@ -4,7 +4,6 @@ import {
 } from '@a11ied/contracts';
 import type { Page } from 'playwright';
 
-import { withBrowserPage } from '../browser/helper.js';
 import { runDriverSessionAction } from '../driver/runtime.js';
 import {
    addBooleanAssertion,
@@ -12,6 +11,7 @@ import {
    attachRenderedPage,
    buildPatternResult,
    collectDriverWalk,
+   withPatternPage,
    type PatternContext,
 } from './helpers.js';
 
@@ -34,7 +34,7 @@ async function runTabSequenceBody(
                element.tagName.toLowerCase(),
          ),
    );
-   await attachRenderedPage(context.sessionId, url, page);
+   await attachRenderedPage(context, url, page);
    const logs = await collectDriverWalk(
       context.sessionId,
       Math.max(tabbables.length + 1, 1),
@@ -69,7 +69,9 @@ export async function runTabSequence(
    context: PatternContext,
    url: string,
 ): Promise<InteractionPatternResult> {
-   return await withBrowserPage(url, (page) => runTabSequenceBody(page, context, url));
+   return await withPatternPage(context, url, (page) =>
+      runTabSequenceBody(page, context, url),
+   );
 }
 
 async function runFormFieldBody(
@@ -88,7 +90,7 @@ async function runFormFieldBody(
             type: field.getAttribute('type') ?? field.tagName.toLowerCase(),
          })),
    );
-   await attachRenderedPage(context.sessionId, url, page);
+   await attachRenderedPage(context, url, page);
    const logs = await collectDriverWalk(
       context.sessionId,
       Math.max(fields.length + 1, 1),
@@ -116,7 +118,9 @@ export async function runFormFieldWalk(
    context: PatternContext,
    url: string,
 ): Promise<InteractionPatternResult> {
-   return await withBrowserPage(url, (page) => runFormFieldBody(page, context, url));
+   return await withPatternPage(context, url, (page) =>
+      runFormFieldBody(page, context, url),
+   );
 }
 
 export async function runFocusOrderProbe(
@@ -151,7 +155,7 @@ async function runAuthFlowBody(
          ),
       }),
    );
-   await attachRenderedPage(context.sessionId, url, page);
+   await attachRenderedPage(context, url, page);
    const logs = await runDriverSessionAction(context.sessionId, 'logs');
 
    addBooleanAssertion({
@@ -178,7 +182,9 @@ export async function runAuthFlowProbe(
    context: PatternContext,
    url: string,
 ): Promise<InteractionPatternResult> {
-   return await withBrowserPage(url, (page) => runAuthFlowBody(page, context, url));
+   return await withPatternPage(context, url, (page) =>
+      runAuthFlowBody(page, context, url),
+   );
 }
 
 async function runRedundantEntryBody(
@@ -199,7 +205,7 @@ async function runRedundantEntryBody(
       ...new Set(fieldNames.filter((name, index) => fieldNames.indexOf(name) !== index)),
    ];
 
-   await attachRenderedPage(context.sessionId, url, page);
+   await attachRenderedPage(context, url, page);
    const logs = await runDriverSessionAction(context.sessionId, 'logs');
 
    addBooleanAssertion({
@@ -224,5 +230,7 @@ export async function runRedundantEntryProbe(
    context: PatternContext,
    url: string,
 ): Promise<InteractionPatternResult> {
-   return await withBrowserPage(url, (page) => runRedundantEntryBody(page, context, url));
+   return await withPatternPage(context, url, (page) =>
+      runRedundantEntryBody(page, context, url),
+   );
 }

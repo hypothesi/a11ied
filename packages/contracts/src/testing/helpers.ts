@@ -18,7 +18,7 @@ import {
 
 const generatedRoot = resolve(import.meta.dirname, '../../../wcag-data/data/generated');
 
-export async function loadGeneratedJson<TData>(fileName: string): Promise<TData> {
+async function loadGeneratedJson<TData>(fileName: string): Promise<TData> {
    return JSON.parse(await readFile(resolve(generatedRoot, fileName), 'utf8')) as TData;
 }
 
@@ -117,7 +117,7 @@ export function createStatePayload(): TestPayload {
    };
 }
 
-export interface EngineTestArtifacts {
+interface EngineTestArtifacts {
    criteriaArtifact: ReturnType<typeof normalizedCriteriaArtifactSchema.parse>;
    coverageArtifact: ReturnType<typeof coverageArtifactSchema.parse>;
    strategyArtifact: ReturnType<typeof strategyArtifactSchema.parse>;

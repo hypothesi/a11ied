@@ -71,10 +71,14 @@ export function buildEphemeralSession(args: {
    recording?: SessionRecording;
 }): AccessibilityDriverSession {
    const sessionId = `ephemeral_${crypto.randomUUID()}`;
+   let targetType: AccessibilityDriverSession['targetType'] = 'real';
+   if (args.target === 'virtual') {
+      targetType = 'simulated';
+   }
    return accessibilityDriverSessionSchema.parse({
       sessionId,
       target: args.target,
-      targetType: args.target === 'virtual' ? 'simulated' : 'real',
+      targetType,
       startedAt: new Date().toISOString(),
       capabilities: createDriverAdapter(args.target).capabilities,
       logCursor: args.logCursor,
@@ -85,7 +89,7 @@ export function buildEphemeralSession(args: {
    });
 }
 
-export function isProcessRunning(pid: number): boolean {
+function isProcessRunning(pid: number): boolean {
    try {
       process.kill(pid, 0);
       return true;

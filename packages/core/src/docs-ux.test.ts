@@ -28,11 +28,11 @@ function expectShellNavigationModel(shell: string): void {
 function expectTaskFirstEntryPoints(homePage: string, workflowsPage: string): void {
    expect(homePage).toContain('/workflows#check-one-criterion');
    expect(homePage).toContain('/workflows#drive-a-session');
-   expect(homePage).toContain('/workflows#agent-and-storybook');
+   expect(homePage).toContain('/workflows#agent-and-mcp');
    expect(workflowsPage).toContain('Check one criterion');
    expect(workflowsPage).toContain('Verify a target level');
    expect(workflowsPage).toContain('Drive a session manually');
-   expect(workflowsPage).toContain('Use it from an agent or Storybook');
+   expect(workflowsPage).toContain('Use it from an agent');
 }
 
 function expectDocsFilesFreeOfLegacyCallouts(files: readonly string[]): void {
@@ -60,11 +60,9 @@ describe('docs UX remediation guardrails', () => {
 
    it('keeps the updated reference pages tied back to the task-first route', () => {
       const driverPage = readDocsPage('driver-usage.astro');
-      const storybookPage = readDocsPage('storybook-usage.astro');
       const verificationPage = readDocsPage('verification-semantics.astro');
 
       expect(driverPage).toContain('/workflows#drive-a-session');
-      expect(storybookPage).toContain('/workflows#agent-and-storybook');
       expect(verificationPage).toContain('/workflows#verify-a-level');
    });
 

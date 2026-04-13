@@ -18,7 +18,7 @@ export function registerInspectTools(server: McpServer): void {
       {
          title: 'Inspect',
          description:
-            'Inspect a URL or Storybook story for WCAG applicability. ' +
+            'Inspect a URL for WCAG applicability. ' +
             'Without a criterion, returns all applicable criteria. ' +
             'With a criterion, explains that specific criterion against the target.',
          inputSchema: targetInputSchema.extend({

@@ -129,7 +129,7 @@ const fixtures = {
    },
 } satisfies Record<string, ApplicabilityInput>;
 
-export const applicabilityFixtures = Object.fromEntries(
+const applicabilityFixtures = Object.fromEntries(
    Object.entries(fixtures).map(([name, input]) => [
       name,
       applicabilityInputSchema.parse(input),

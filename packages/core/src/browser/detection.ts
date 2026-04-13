@@ -18,6 +18,10 @@ export interface BrowserLaunchOptions {
    headless: boolean;
 }
 
+export interface BrowserLaunchPreference {
+   headless?: boolean;
+}
+
 export interface BrowserPolicyDeps {
    env: NodeJS.ProcessEnv;
    existsSync: (path: string) => boolean;
@@ -29,7 +33,7 @@ export interface BrowserPolicyDeps {
 
 import { browserDefinitions } from './locations.js';
 
-export const BROWSER_POLICY_NAME = 'system-browser-first';
+const BROWSER_POLICY_NAME = 'system-browser-first';
 export const PLAYWRIGHT_INSTALL_CHROMIUM_COMMAND = 'npx playwright install chromium';
 
 function splitLookupOutput(stdout: string): string[] {
@@ -113,7 +117,7 @@ function toCandidate(
    };
 }
 
-export function detectBrowserAutomationCandidates(
+function detectBrowserAutomationCandidates(
    deps: BrowserPolicyDeps = createDefaultBrowserPolicyDeps(),
 ): BrowserAutomationCandidate[] {
    const candidates: BrowserAutomationCandidate[] = [];
@@ -143,13 +147,18 @@ export function createBrowserAutomationPolicy(
 
 export function getBrowserLaunchOptions(
    candidate: BrowserAutomationCandidate,
+   preference?: BrowserLaunchPreference,
 ): BrowserLaunchOptions {
+   const headless = preference?.headless ?? true;
    const definition = browserDefinitions.find((entry) => entry.id === candidate.id);
    if (!definition) {
       return {
-         headless: true,
+         headless,
       };
    }
 
-   return definition.toLaunchOptions(candidate.location);
+   return {
+      ...definition.toLaunchOptions(candidate.location),
+      headless,
+   };
 }

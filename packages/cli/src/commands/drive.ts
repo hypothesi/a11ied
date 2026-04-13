@@ -5,13 +5,16 @@ import type { Platform } from '#contracts';
 import type { resolveOptionalCliTarget } from '../lib/execute.js';
 import type { CommandExecution } from '../lib/helpers.js';
 import {
+   addAllowVirtualOption,
    addJsonOption,
    addRecordingOption,
-   addStorybookTargetOptions,
    addVerboseOption,
 } from '../lib/options.js';
 import type { buildCliTargetInput, CliTargetInputOptions } from '../lib/target-input.js';
-import type { ResolvedCliTarget } from '../lib/resolvers.js';
+import {
+   buildVirtualTargetGuardOptions,
+   type ResolvedCliTarget,
+} from '../lib/resolvers.js';
 import {
    registerMiddleActions,
    registerSimpleActions,
@@ -22,24 +25,25 @@ interface StartActionOptions extends CliTargetInputOptions {
    json?: boolean;
    target?: string;
    recording?: string;
+   allowVirtual?: boolean;
 }
 
-function applyDefaultDriverTarget(
-   options: StartActionOptions,
-   core: typeof Core,
-): { warnings?: Array<{ code: string; message: string }> } {
-   if (options.target) {
-      return {};
+function emitDefaultTargetNotice(
+   fallback: ReturnType<typeof Core.resolveDefaultTarget>,
+   json: boolean | undefined,
+): void {
+   if (json) {
+      return;
    }
+   log.message(fallback.message);
+   if (fallback.warning) {
+      log.warn(fallback.warning);
+   }
+}
 
-   const fallback = core.resolveDefaultTarget();
-   if (!options.json) {
-      log.message(fallback.message);
-      if (fallback.warning) {
-         log.warn(fallback.warning);
-      }
-   }
-   options.target = fallback.target;
+function buildDefaultTargetWarnings(
+   fallback: ReturnType<typeof Core.resolveDefaultTarget>,
+): Array<{ code: string; message: string }> {
    const warnings: Array<{ code: string; message: string }> = [
       {
          code: 'default-target-selected',
@@ -52,16 +56,34 @@ function applyDefaultDriverTarget(
          message: fallback.warning,
       });
    }
-   return { warnings };
+   return warnings;
+}
+
+function applyDefaultDriverTarget(
+   options: StartActionOptions,
+   core: typeof Core,
+): { warnings?: Array<{ code: string; message: string }> } {
+   if (options.target) {
+      return {};
+   }
+
+   const fallback = core.resolveDefaultTarget();
+   emitDefaultTargetNotice(fallback, options.json);
+   options.target = fallback.target;
+   return { warnings: buildDefaultTargetWarnings(fallback) };
 }
 
 async function startDriverSessionForTarget(args: {
    options: StartActionOptions;
-   parsePlatform: (target: string | undefined) => Platform;
+   parsePlatform: (
+      target: string | undefined,
+      options?: { allowVirtual?: boolean },
+   ) => Platform;
    core: typeof Core;
 }): Promise<Awaited<ReturnType<typeof Core.startDriverSession>>> {
+   const guardOptions = buildVirtualTargetGuardOptions(args.options.allowVirtual);
    return args.core.startDriverSession(
-      args.parsePlatform(args.options.target),
+      args.parsePlatform(args.options.target, guardOptions),
       process.cwd(),
       args.options.recording,
    );
@@ -77,7 +99,10 @@ async function resolveStartTarget(args: {
 
 async function executeStartAction(args: {
    options: StartActionOptions;
-   parsePlatform: (target: string | undefined) => Platform;
+   parsePlatform: (
+      target: string | undefined,
+      options?: { allowVirtual?: boolean },
+   ) => Platform;
    resolveOptionalCliTarget: typeof resolveOptionalCliTarget;
    buildCliTargetInput: typeof buildCliTargetInput;
    core: typeof Core;
@@ -85,21 +110,43 @@ async function executeStartAction(args: {
    target: ResolvedCliTarget['reportTarget'] | { kind: 'driver-target'; value: string };
    result: { session: Awaited<ReturnType<typeof Core.startDriverSession>> };
 }> {
-   const session = await startDriverSessionForTarget({
-      options: args.options,
-      parsePlatform: args.parsePlatform,
-      core: args.core,
-   });
    const resolved = await resolveStartTarget({
       options: args.options,
       resolveOptionalCliTarget: args.resolveOptionalCliTarget,
       buildCliTargetInput: args.buildCliTargetInput,
    });
-   if (resolved && session.targetType !== 'real') {
-      await args.core.attachDocumentToDriverSession(session.sessionId, {
-         html: resolved.html,
-         url: resolved.resolvedUrl,
-      });
+   const target = args.parsePlatform(
+      args.options.target,
+      buildVirtualTargetGuardOptions(args.options.allowVirtual),
+   );
+   let openedBrowser:
+      | Awaited<ReturnType<typeof args.core.openUrlInSystemAutomationBrowser>>
+      | undefined;
+   if (resolved && target !== 'virtual') {
+      openedBrowser = await args.core.openUrlInSystemAutomationBrowser(
+         resolved.resolvedUrl,
+      );
+      await new Promise((resolvePromise) => setTimeout(resolvePromise, 1000));
+   }
+   const session = await startDriverSessionForTarget({
+      options: args.options,
+      parsePlatform: args.parsePlatform,
+      core: args.core,
+   });
+   if (resolved) {
+      if (session.targetType !== 'real') {
+         await args.core.attachDocumentToDriverSession(session.sessionId, {
+            html: resolved.html,
+            url: resolved.resolvedUrl,
+         });
+      } else {
+         if (openedBrowser?.focusTarget) {
+            await new Promise((resolve) => setTimeout(resolve, 750));
+            await args.core.runDriverSessionAction(session.sessionId, 'focus', {
+               payload: openedBrowser.focusTarget,
+            });
+         }
+      }
    }
 
    return {
@@ -153,14 +200,14 @@ async function handleStartAction(options: StartActionOptions): Promise<void> {
 
 function registerStartCommand(driveCommand: Command): void {
    addJsonOption(
-      addStorybookTargetOptions(
-         addRecordingOption(
+      addRecordingOption(
+         addAllowVirtualOption(
             driveCommand
                .command('start')
                .description('Start a persistent driver session.')
                .option(
                   '--target <platform>',
-                  'Choose one target: voiceover, nvda, or virtual. Defaults to VoiceOver on macOS, NVDA on Windows, or virtual elsewhere.',
+                  'Choose one target: voiceover, nvda, or virtual. Defaults to VoiceOver on macOS, NVDA on Windows, or virtual elsewhere. Use virtual only for simulation (requires --allow-virtual).',
                )
                .option('--url <url>', 'Attach one live URL target to the new session.'),
          ),

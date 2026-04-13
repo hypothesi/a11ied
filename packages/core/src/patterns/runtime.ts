@@ -6,11 +6,13 @@ import {
 } from '@a11ied/contracts';
 
 import { CliUsageError } from '../errors/cli-errors.js';
+import { withInteractiveBrowserPage } from '../browser/helper.js';
 import {
    getDriverSessionStatus,
    startDriverSession,
    stopDriverSession,
 } from '../driver/runtime.js';
+import { resolveDefaultTarget } from '../driver/default-target.js';
 import type { PatternContext, RunPatternOptions } from './helpers.js';
 import {
    runLandmarkSequence,
@@ -32,6 +34,7 @@ type PatternRunner = (
    url: string,
 ) => Promise<InteractionPatternResult>;
 type StopSessionResult = Awaited<ReturnType<typeof stopDriverSession>> | undefined;
+const REAL_TARGET_BROWSER_PRIME_MS = 1000;
 
 const patternRunners: Record<string, PatternRunner | undefined> = {
    landmark_sequence: runLandmarkSequence,
@@ -85,7 +88,7 @@ async function resolveSession(options: RunPatternOptions): Promise<{
       };
    }
 
-   const target = options.target ?? 'virtual';
+   const target = options.target ?? resolveDefaultTarget().target;
    const session = await startDriverSession(target, process.cwd(), options.recordingPath);
    return {
       sessionId: session.sessionId,
@@ -101,8 +104,9 @@ function buildContext(
       target: Platform;
       managedSession: boolean;
    },
+   providedPage?: PatternContext['providedPage'],
 ): PatternContext {
-   return {
+   const context: PatternContext = {
       url: parsedUrl.toString(),
       sessionId: resolvedSession.sessionId,
       target: resolvedSession.target,
@@ -111,6 +115,10 @@ function buildContext(
       assertions: [],
       browserEvidence: [],
    };
+   if (providedPage) {
+      context.providedPage = providedPage;
+   }
+   return context;
 }
 
 function parsePatternUrl(url: string): URL {
@@ -182,11 +190,44 @@ export async function runInteractionPattern(
 ): Promise<InteractionPatternResult> {
    const parsedUrl = parsePatternUrl(options.url);
    const patternId = interactionPatternIdSchema.parse(options.patternId);
+   const runner = getPatternRunner(patternId);
+   if (!options.sessionId) {
+      const target = options.target ?? resolveDefaultTarget().target;
+      if (target !== 'virtual') {
+         return await withInteractiveBrowserPage(parsedUrl.toString(), async (page) => {
+            await page.waitForTimeout(REAL_TARGET_BROWSER_PRIME_MS);
+            const session = await startDriverSession(
+               target,
+               process.cwd(),
+               options.recordingPath,
+            );
+            let result: InteractionPatternResult | undefined = undefined;
+            let stopResult: StopSessionResult = undefined;
+            try {
+               result = await runner(
+                  buildContext(
+                     parsedUrl,
+                     {
+                        sessionId: session.sessionId,
+                        target,
+                        managedSession: true,
+                     },
+                     page,
+                  ),
+                  parsedUrl.toString(),
+               );
+            } finally {
+               stopResult = await cleanupSession(session.sessionId, true);
+            }
+            return applyManagedRecording(result as InteractionPatternResult, stopResult);
+         });
+      }
+   }
    const resolvedSession = await resolveSession(options);
    return runPatternWithSession({
       patternId,
       url: parsedUrl.toString(),
       context: buildContext(parsedUrl, resolvedSession),
-      runner: getPatternRunner(patternId),
+      runner,
    });
 }

@@ -62,9 +62,7 @@ export function buildCli(): Command {
 
    program
       .name('a11ied')
-      .description(
-         'CLI-first accessibility automation for VoiceOver, NVDA, Storybook, and MCP.',
-      )
+      .description('CLI-first accessibility automation for VoiceOver, NVDA, and MCP.')
       .version(CLI_VERSION)
       .enablePositionalOptions()
       .configureHelp({

@@ -1,8 +1,8 @@
 import type { Command } from 'commander';
 import {
+   addAllowVirtualOption,
    addJsonOption,
    addRecordingOption,
-   addStorybookTargetOptions,
    addTargetOption,
    addVerboseOption,
    addWcagVersionOption,
@@ -14,6 +14,8 @@ import {
    type VerifyCommandOptions,
    type VerifyCommandResult,
 } from './verify-shared.js';
+
+type VerificationContext = Awaited<ReturnType<typeof resolveVerificationContext>>;
 
 function buildLevelErrors(
    level: string,
@@ -33,34 +35,46 @@ function buildLevelErrors(
    ];
 }
 
+function buildLevelVerifyOptions(
+   level: string,
+   options: VerifyCommandOptions,
+   context: VerificationContext,
+): Parameters<typeof runLevelVerification>[0] {
+   const verifyOptions: Parameters<typeof runLevelVerification>[0] = {
+      level,
+      url: context.resolved.resolvedUrl,
+      wcagVersion: options.version,
+      reportTarget: {
+         ...context.resolved.reportTarget,
+         platform: context.target,
+      },
+   };
+   if (!context.defaulted) {
+      verifyOptions.target = context.target;
+   }
+   return verifyOptions;
+}
+
+function buildLevelWarnings(
+   warnings: VerifyCommandResult['warnings'],
+   warning: VerificationContext['warning'],
+): VerifyCommandResult['warnings'] {
+   if (!warning) {
+      return warnings;
+   }
+   return [...warnings, { code: 'virtual-target-simulation-warning', message: warning }];
+}
+
 async function handleLevelVerify(
    level: string,
    options: VerifyCommandOptions,
 ): Promise<VerifyCommandResult> {
-   const { target, resolved, defaulted, warning } = await resolveVerificationContext(options);
-   let verificationTarget: typeof target | undefined = undefined;
-   if (!defaulted) {
-      verificationTarget = target;
-   }
-   const verifyOptions: Parameters<typeof runLevelVerification>[0] = {
-      level,
-      url: resolved.resolvedUrl,
-      wcagVersion: options.version,
-      reportTarget: {
-         ...resolved.reportTarget,
-         platform: target,
-      },
-   };
-   if (verificationTarget) {
-      verifyOptions.target = verificationTarget;
-   }
+   const context = await resolveVerificationContext(options);
+   const verifyOptions = buildLevelVerifyOptions(level, options, context);
    const result = await runLevelVerification(verifyOptions, options.recording);
    const ok = result.summary.failedCount === 0;
 
-   const warnings = [...result.warnings];
-   if (warning) {
-      warnings.push({ code: 'virtual-target-simulation-warning', message: warning });
-   }
+   const warnings = buildLevelWarnings(result.warnings, context.warning);
 
    return buildVerifyCommandResult({
       ok,
@@ -74,9 +88,9 @@ async function handleLevelVerify(
 function buildLevelCommand(verifyCommand: Command): Command {
    return addVerboseOption(
       addJsonOption(
-         addTargetOption(
-            addWcagVersionOption(
-               addStorybookTargetOptions(
+         addAllowVirtualOption(
+            addTargetOption(
+               addWcagVersionOption(
                   addRecordingOption(
                      verifyCommand
                         .command('level <level>')

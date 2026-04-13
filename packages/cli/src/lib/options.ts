@@ -30,7 +30,14 @@ export function addEphemeralOption(command: Command): Command {
 export function addTargetOption(command: Command): Command {
    return command.option(
       '--target <platform>',
-      'Choose one target: voiceover, nvda, or virtual.',
+      'Choose one target: voiceover, nvda, or virtual. Defaults to VoiceOver on macOS, NVDA on Windows, or virtual elsewhere. Use --allow-virtual to permit simulation.',
+   );
+}
+
+export function addAllowVirtualOption(command: Command): Command {
+   return command.option(
+      '--allow-virtual',
+      'Allow the virtual (simulated) screen reader when a real target is available.',
    );
 }
 
@@ -39,13 +46,4 @@ export function addRecordingOption(command: Command): Command {
       '--recording <path>',
       'Write one screen recording to the given .mov or .mp4 path when the target supports it.',
    );
-}
-
-export function addStorybookTargetOptions(command: Command): Command {
-   return command
-      .option(
-         '--storybook-url <url>',
-         'Resolve a target from a local Storybook base URL.',
-      )
-      .option('--story-id <storyId>', 'Resolve one Storybook story by id.');
 }

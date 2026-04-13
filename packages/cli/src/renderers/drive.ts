@@ -31,6 +31,12 @@ interface DriveResult<TState extends DriveStateWithCursor> {
    action: string;
    session: DriveSessionInfo;
    state: TState;
+   details?: {
+      focus?: {
+         status?: string;
+         details?: string[];
+      };
+   };
 }
 
 function formatCheckpoints(checkpoints?: Array<{ label: string }>): string {
@@ -77,6 +83,7 @@ function buildDriveLines(args: {
    return lines;
 }
 
+// Fallow-ignore-next-line unused-export
 export function renderDriveSessionText(
    envelope: CliOutputEnvelope,
    _options: { verbose: boolean },
@@ -102,6 +109,7 @@ export function renderDriveSessionText(
    ].join('\n');
 }
 
+// Fallow-ignore-next-line unused-export
 export function renderDriveStatusText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },
@@ -120,11 +128,20 @@ export function renderDriveStatusText(
       checkpoints: result.state.checkpoints,
       verbose: options.verbose,
    });
+
+   if (result.action === 'focus' && result.details?.focus) {
+      const status = result.details.focus.status ?? 'unknown';
+      lines.push(`Focus status: ${status}`);
+      if (options.verbose && result.details.focus.details?.length) {
+         lines.push(`Focus notes: ${result.details.focus.details.join(' | ')}`);
+      }
+   }
    lines.push(`Recording: ${formatRecording(result.session.recording)}`);
 
    return lines.join('\n');
 }
 
+// Fallow-ignore-next-line unused-export
 export function renderDriveLogsText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },

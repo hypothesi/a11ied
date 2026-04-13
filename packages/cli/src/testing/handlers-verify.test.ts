@@ -14,6 +14,7 @@ import {
 
 const tempRoots: string[] = [];
 const testServer: TestServerHandle = useTestServer(tempRoots);
+const virtualTargetArgs = ['--target', 'virtual', '--allow-virtual'];
 
 async function assertVerifyAutomated(baseUrl: string): Promise<void> {
    const result = await runCli([
@@ -22,8 +23,7 @@ async function assertVerifyAutomated(baseUrl: string): Promise<void> {
       '4.1.2',
       '--url',
       `${baseUrl}/button-name-failure.html`,
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
       '--json',
    ]);
    const json = parseJsonOutput(result.stdout);
@@ -59,8 +59,7 @@ async function assertVerifyHybrid(baseUrl: string): Promise<void> {
       '4.1.3',
       '--url',
       `${baseUrl}/status-message.html`,
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
       '--json',
    ]);
    const json = parseJsonOutput(result.stdout);
@@ -96,8 +95,7 @@ async function assertVerifyManual(baseUrl: string): Promise<void> {
       '3.3.8',
       '--url',
       `${baseUrl}/auth-login.html`,
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
       '--json',
    ]);
    const json = parseJsonOutput(result.stdout);
@@ -124,8 +122,7 @@ async function assertVerifyInvalid(baseUrl: string): Promise<void> {
       '9.9.9',
       '--url',
       `${baseUrl}/basic-page.html`,
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
       '--json',
    ]);
    const json = parseJsonOutput(result.stdout);

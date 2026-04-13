@@ -15,6 +15,7 @@ import { runPatternWithAssertions } from './helpers.js';
 
 const tempRoots: string[] = [];
 const testServer: TestServerHandle = useTestServer(tempRoots);
+const virtualTargetArgs = ['--target', 'virtual', '--allow-virtual'];
 
 async function assertFocusVisibilityPattern(baseUrl: string): Promise<void> {
    const { json, assertions } = await runPatternWithAssertions({
@@ -56,7 +57,7 @@ async function assertFocusObscuredFailure(baseUrl: string): Promise<void> {
 }
 
 async function assertSessionReuse(baseUrl: string): Promise<void> {
-   const started = await runCli(['drive', 'start', '--target', 'virtual', '--json']);
+   const started = await runCli(['drive', 'start', ...virtualTargetArgs, '--json']);
    const startedJson = parseJsonOutput(started.stdout);
    const session = (startedJson.result as { session: { sessionId: string } }).session;
    const reused = await runCli([
@@ -65,8 +66,7 @@ async function assertSessionReuse(baseUrl: string): Promise<void> {
       'landmark_sequence',
       '--url',
       `${baseUrl}/basic-page.html`,
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
       '--session',
       session.sessionId,
       '--json',
@@ -85,8 +85,7 @@ async function assertPatternTextOutput(baseUrl: string): Promise<void> {
       'landmark_sequence',
       '--url',
       `${baseUrl}/basic-page.html`,
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
    ]);
    expect(output.stdout).toMatch(/^Pattern: landmark_sequence\n/);
    expect(output.stdout).toMatch(/Session: drv_[a-f0-9-]+ \(managed\)/);
@@ -102,8 +101,7 @@ async function assertPatternVerboseOutput(baseUrl: string): Promise<void> {
       'landmark_sequence',
       '--url',
       `${baseUrl}/basic-page.html`,
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
       '--verbose',
    ]);
    expect(verbose.stdout).toContain('Steps:');

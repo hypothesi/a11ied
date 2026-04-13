@@ -10,7 +10,7 @@ import {
 } from '@a11ied/contracts';
 import { createDriverAdapter } from '@a11ied/guidepup';
 
-import type { BrokerHandlerContext } from './broker-handlers.js';
+import type { BrokerHandlerContext } from './broker-types.js';
 import {
    createBrokerServer,
    setupSignalHandlers,
@@ -135,10 +135,14 @@ async function createBrokerSession(args: {
    recording: ActiveSessionRecording | undefined;
 }): Promise<InitializedBroker> {
    const initialState = await args.adapter.readState(args.checkpoints);
+   let targetType: AccessibilityDriverSession['targetType'] = 'real';
+   if (args.brokerArgs.target === 'virtual') {
+      targetType = 'simulated';
+   }
    const session = accessibilityDriverSessionSchema.parse({
       sessionId: args.brokerArgs.sessionId,
       target: args.brokerArgs.target,
-      targetType: args.brokerArgs.target === 'virtual' ? 'simulated' : 'real',
+      targetType,
       startedAt: new Date().toISOString(),
       capabilities: args.adapter.capabilities,
       logCursor: initialState.logCursor,

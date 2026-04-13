@@ -50,7 +50,7 @@ export const applicabilitySignalSchema = z.object({
 export type ApplicabilitySignal = z.infer<typeof applicabilitySignalSchema>;
 
 export const targetReferenceSchema = z.object({
-   kind: z.enum(['url', 'story']),
+   kind: z.literal('url'),
    value: z.string(),
 });
 export type TargetReference = z.infer<typeof targetReferenceSchema>;

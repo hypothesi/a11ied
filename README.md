@@ -16,10 +16,10 @@ a1 wcag show 4.1.3 --json
 a1 help-all
 ```
 
-Use it programmatically:
+Use the runtime API:
 
 ```js
-import { buildCli } from 'a11ied';
+import { runAxe, verifyCriterion } from 'a11ied';
 ```
 
 ## workspaces
@@ -29,7 +29,6 @@ The repo is split into internal npm workspaces. Only the top-level `a11ied` pack
 - `packages/contracts`: shared schemas and result shapes
 - `packages/core`: orchestration and product-level domain logic
 - `packages/guidepup`: adapter layer for real and virtual screen reader automation
-- `packages/storybook`: Storybook-facing helpers and recipes
 - `packages/mcp-server`: MCP bridge around the core runtime
 - `packages/cli`: end-user command line entrypoint (published as `a11ied`)
 - `apps/docs`: Astro docs site

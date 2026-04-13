@@ -1,7 +1,6 @@
 import type { InteractionPatternResult } from '@a11ied/contracts';
 import type { Page } from 'playwright';
 
-import { withBrowserPage } from '../browser/helper.js';
 import { runDriverSessionAction } from '../driver/runtime.js';
 import {
    addBooleanAssertion,
@@ -10,6 +9,7 @@ import {
    buildPatternResult,
    type EvaluablePage,
    type PatternContext,
+   withPatternPage,
 } from './helpers.js';
 
 interface RectData {
@@ -162,7 +162,7 @@ async function runFocusVisibilityBody(
 ): Promise<InteractionPatternResult> {
    await page.focus('#obscured-action');
    const analysis = await evaluateFocusVisibility(page);
-   await attachRenderedPage(options.context.sessionId, options.url, page);
+   await attachRenderedPage(options.context, options.url, page);
    const logs = await runDriverSessionAction(options.context.sessionId, 'logs');
    addStep({
       context: options.context,
@@ -194,7 +194,7 @@ export async function runFocusVisibilityProbe(
    url: string,
    patternId: 'focus_visibility_probe' | 'focus_obscured_probe',
 ): Promise<InteractionPatternResult> {
-   return await withBrowserPage(url, (page) =>
+   return await withPatternPage(context, url, (page) =>
       runFocusVisibilityBody(page, { context, url, patternId }),
    );
 }

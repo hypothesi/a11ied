@@ -15,7 +15,7 @@ import {
    formatPatternSummary,
 } from './procedure-utils.js';
 
-export function getErrorCause(error: unknown): string {
+function getErrorCause(error: unknown): string {
    if (error instanceof Error) {
       return error.message;
    }
@@ -48,7 +48,7 @@ export function createUncoveredWork(args: {
    return verificationUncoveredWorkItemSchema.parse(buildUncoveredWorkPayload(args));
 }
 
-export function createManualEvidence(args: {
+function createManualEvidence(args: {
    criterionId: string;
    summary: string;
    sourceReferences: VerificationSourceReference[];

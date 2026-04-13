@@ -1,7 +1,6 @@
 import type { InteractionPatternResult } from '@a11ied/contracts';
 import type { Page } from 'playwright';
 
-import { withBrowserPage } from '../browser/helper.js';
 import { runDriverSessionAction } from '../driver/runtime.js';
 import {
    addBooleanAssertion,
@@ -9,6 +8,7 @@ import {
    attachRenderedPage,
    buildPatternResult,
    evaluateActiveElement,
+   withPatternPage,
    type PatternContext,
 } from './helpers.js';
 
@@ -190,7 +190,7 @@ async function runDialogProbeBody(
    context: PatternContext,
    url: string,
 ): Promise<InteractionPatternResult> {
-   await attachRenderedPage(context.sessionId, url, page);
+   await attachRenderedPage(context, url, page);
    addStep({
       context,
       id: 'attach-before-open',
@@ -202,7 +202,7 @@ async function runDialogProbeBody(
    const tabState = await captureDialogTabPhase(page, context);
    const closeActive = await captureDialogClosePhase(page, context);
 
-   await attachRenderedPage(context.sessionId, url, page);
+   await attachRenderedPage(context, url, page);
    const logs = await runDriverSessionAction(context.sessionId, 'logs');
 
    recordDialogEvidence({ context, openResult, tabState, closeActive });
@@ -220,5 +220,7 @@ export async function runDialogProbe(
    context: PatternContext,
    url: string,
 ): Promise<InteractionPatternResult> {
-   return await withBrowserPage(url, (page) => runDialogProbeBody(page, context, url));
+   return await withPatternPage(context, url, (page) =>
+      runDialogProbeBody(page, context, url),
+   );
 }

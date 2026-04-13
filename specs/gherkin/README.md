@@ -13,13 +13,12 @@ The feature files are grouped by product layer:
 - `07-cli-run-axe.feature`
 - `08-cli-run-patterns.feature`
 - `09-cli-verify.feature`
-- `10-storybook-integration.feature`
 - `11-mcp.feature`
 - `12-docs-and-release.feature`
 
 ## Shared fixture assumptions
 
-These feature files assume the acceptance harness provides a deterministic local fixture site and Storybook instance.
+These feature files assume the acceptance harness provides a deterministic local fixture site.
 
 ### Fixture pages
 
@@ -31,13 +30,6 @@ These feature files assume the acceptance harness provides a deterministic local
 - `focus-order.html`: a page where tab order is intentionally correct
 - `focus-obscured.html`: a page where fixed chrome can obscure focused elements
 - `contrast-failure.html`: a page that fails color-contrast checks
-
-### Storybook stories
-
-- `layout-landmarks--default`
-- `forms-login--default`
-- `dialogs-confirm-delete--default`
-- `status-updates--default`
 
 ## Shared output assumptions
 
@@ -72,7 +64,6 @@ CLI exit codes:
 - `@axe`
 - `@pattern`
 - `@verify`
-- `@storybook`
 - `@mcp`
 - `@docs`
 - `@release`

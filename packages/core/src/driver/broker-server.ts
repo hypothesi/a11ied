@@ -1,11 +1,11 @@
 import net from 'node:net';
 
-import {
-   handleBrokerRequest,
-   type BrokerHandlerContext,
-   type BrokerRequest,
-   type BrokerResponse,
-} from './broker-handlers.js';
+import { handleBrokerRequest } from './broker-handlers.js';
+import type {
+   BrokerHandlerContext,
+   BrokerRequest,
+   BrokerResponse,
+} from './broker-types.js';
 
 function formatErrorMessage(error: unknown): string {
    if (error instanceof Error) {

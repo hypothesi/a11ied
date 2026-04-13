@@ -56,7 +56,6 @@ a11ied inspect criterion <criterion> --url <url> [--version <version>] [--json]
 Rules:
 
 - Default `--version` to `2.2`.
-- Accept `--story-id` in the grammar as a reserved future flag, but reject it at runtime in sub-plan 2 with a usage error that says Storybook targets are not available in this milestone slice.
 - Keep URL targets as the only supported public target kind in sub-plan 2.
 
 ### `a11ied drive`

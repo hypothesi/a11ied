@@ -3,6 +3,7 @@ import type {
    DriverActionResult,
    Platform,
 } from '@a11ied/contracts';
+import { CliEnvironmentError } from '../errors/cli-errors.js';
 
 import { resolveBrokerReadyTimeoutMs, waitForBroker } from './broker-client.js';
 import {
@@ -37,6 +38,7 @@ import {
    getActiveInMemoryIds,
    spawnPersistentBroker,
 } from './runtime-support.js';
+import { resolveDefaultTarget } from './default-target.js';
 
 export { getDriverSessionMetadataPath, getDriverSocketPath } from './session-utils.js';
 
@@ -111,25 +113,69 @@ function createPersistentBrokerOptions(args: {
    return options;
 }
 
+async function prepareDriverSessionStart(args: {
+   target: Platform | undefined;
+   cwd: string;
+   recordingPath: string | undefined;
+}): Promise<Platform> {
+   await ensureStateDirectories(args.cwd);
+   await cleanupStaleDriverSessions(args.cwd);
+   const resolvedTarget = args.target ?? resolveDefaultTarget().target;
+   if (resolvedTarget !== 'virtual') {
+      const entries = await listSessionEntries(args.cwd);
+      if (entries) {
+         for (const entry of entries) {
+            if (!entry.endsWith('.json')) {
+               continue;
+            }
+            const sessionId = entry.replace(/\.json$/u, '');
+            try {
+               const session = await readSessionMetadata(sessionId, args.cwd);
+               if (session.target === resolvedTarget) {
+                  throw new CliEnvironmentError(
+                     'target-busy',
+                     `A ${resolvedTarget} session is already active. Stop it before starting another one.`,
+                     {
+                        target: resolvedTarget,
+                        activeSessionId: session.sessionId,
+                     },
+                  );
+               }
+            } catch (error) {
+               if (
+                  error instanceof CliEnvironmentError &&
+                  error.code !== 'session-not-found'
+               ) {
+                  throw error;
+               }
+            }
+         }
+      }
+   }
+   await assertTargetReady(resolvedTarget);
+   if (args.recordingPath) {
+      validateRecordingRequest(resolvedTarget, args.recordingPath, args.cwd);
+   }
+   return resolvedTarget;
+}
+
 /** Starts a persistent driver session for one target and returns its session metadata. */
 export async function startDriverSession(
-   target: Platform,
+   target: Platform | undefined,
    cwd = process.cwd(),
    recordingPath?: string,
 ): Promise<AccessibilityDriverSession> {
-   await ensureStateDirectories(cwd);
-   await cleanupStaleDriverSessions(cwd);
-   await assertTargetReady(target);
-   if (recordingPath) {
-      validateRecordingRequest(target, recordingPath, cwd);
-   }
-
+   const resolvedTarget = await prepareDriverSessionStart({
+      target,
+      cwd,
+      recordingPath,
+   });
    const paths = buildSessionPaths(cwd);
 
    if (useInMemoryBroker()) {
       return startInMemorySession(
          createInMemorySessionStartOptions({
-            target,
+            target: resolvedTarget,
             sessionId: paths.sessionId,
             metadataFile: paths.metadataFile,
             cwd,
@@ -140,7 +186,7 @@ export async function startDriverSession(
 
    spawnPersistentBroker(
       createPersistentBrokerOptions({
-         target,
+         target: resolvedTarget,
          sessionId: paths.sessionId,
          metadataFile: paths.metadataFile,
          socketPath: paths.socketPath,
@@ -151,7 +197,7 @@ export async function startDriverSession(
       sessionId: paths.sessionId,
       cwd,
       readSession: readSessionMetadata,
-      timeoutMs: resolveBrokerReadyTimeoutMs(target),
+      timeoutMs: resolveBrokerReadyTimeoutMs(resolvedTarget),
    });
 }
 
@@ -204,14 +250,15 @@ export async function runDriverSessionAction(
 
 /** Runs one action against a short-lived, non-persistent driver session. */
 export async function runEphemeralDriverAction(
-   target: Platform,
+   target: Platform | undefined,
    action: DriverActionResult['action'],
    options?: SessionActionOptions,
 ): Promise<DriverActionResult> {
-   await assertTargetReady(target);
+   const resolvedTarget = target ?? resolveDefaultTarget().target;
+   await assertTargetReady(resolvedTarget);
    const cwd = options?.cwd ?? process.cwd();
    const actionOptions = {
-      target,
+      target: resolvedTarget,
       action,
       payload: options?.payload,
       cwd,

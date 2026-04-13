@@ -1,9 +1,9 @@
 import type { Platform } from '@a11ied/contracts';
 
-export type DefaultTargetReason = 'platform-default' | 'platform-fallback';
+type DefaultTargetReason = 'platform-default' | 'platform-fallback';
 export type TargetType = 'real' | 'simulated';
 
-export interface DefaultTargetSelection {
+interface DefaultTargetSelection {
    target: Platform;
    targetType: TargetType;
    reason: DefaultTargetReason;
@@ -12,7 +12,10 @@ export interface DefaultTargetSelection {
 }
 
 export function resolveTargetType(target: Platform): TargetType {
-   return target === 'virtual' ? 'simulated' : 'real';
+   if (target === 'virtual') {
+      return 'simulated';
+   }
+   return 'real';
 }
 
 function resolvePreferredTarget(): Platform | undefined {

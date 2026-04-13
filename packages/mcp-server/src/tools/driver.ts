@@ -1,6 +1,8 @@
 import {
    accessibilityDriverSessionSchema,
    driverActionResultSchema,
+   driverFocusTargetFieldsSchema,
+   driverFocusTargetRefinement,
    platformSchema,
    type Platform,
 } from '@a11ied/contracts';
@@ -19,26 +21,27 @@ import { z } from 'zod';
 import {
    activeAnnotations,
    createToolResponse,
+   ensureVirtualTargetAllowed,
    resolveExecutionTarget,
    targetInputSchema,
+   type ToolResponse,
    type TargetInput,
 } from '../lib/shared.js';
 
 /* ------------------------------------------------------------------ */
-/*  driver_session — unified start / status / stop                    */
+/*  Driver session — unified start / status / stop                    */
 /* ------------------------------------------------------------------ */
 
 const driverSessionInputSchema = z.object({
    action: z.enum(['start', 'status', 'stop']),
    sessionId: z.string().min(1).optional(),
    target: platformSchema.optional(),
+   allowVirtual: z.boolean().optional(),
    url: z.string().url().optional(),
-   storybookUrl: z.string().url().optional(),
-   storyId: z.string().min(1).optional(),
 });
 
 /* ------------------------------------------------------------------ */
-/*  driver_action — per-session action dispatch                       */
+/*  Driver action — per-session action dispatch                       */
 /* ------------------------------------------------------------------ */
 
 const driverActionInputSchema = z.discriminatedUnion('action', [
@@ -89,20 +92,24 @@ const driverActionInputSchema = z.discriminatedUnion('action', [
       action: z.literal('checkpoint'),
       label: z.string().min(1),
    }),
+   driverFocusTargetFieldsSchema
+      .extend({
+         sessionId: z.string().min(1),
+         action: z.literal('focus'),
+      })
+      .superRefine(driverFocusTargetRefinement),
 ]);
 
 type DriverActionInput = z.infer<typeof driverActionInputSchema>;
+type DriverSessionInput = z.infer<typeof driverSessionInputSchema>;
+type DriverSessionToolResponse = ToolResponse<Record<string, unknown>>;
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                           */
 /* ------------------------------------------------------------------ */
 
 function hasDocumentTarget(input: TargetInput): boolean {
-   return (
-      input.url !== undefined ||
-      input.storybookUrl !== undefined ||
-      input.storyId !== undefined
-   );
+   return input.url !== undefined;
 }
 
 async function attachResolvedDocument(
@@ -110,9 +117,8 @@ async function attachResolvedDocument(
    input: TargetInput,
    target: Platform,
 ): Promise<void> {
-   // Real screen readers use the host environment browser — the agent is
-   // responsible for navigating to the page. Document attachment only
-   // applies to the virtual (simulated) target.
+   // Real screen readers use the host environment browser; the agent must
+   // Navigate to the page. Document attachment only applies to the virtual target.
    if (resolveTargetType(target) === 'real') {
       return;
    }
@@ -126,6 +132,59 @@ async function attachResolvedDocument(
       url: resolved.resolvedUrl,
    });
 }
+
+function requireSessionId(input: DriverSessionInput): string {
+   if (!input.sessionId) {
+      throw new Error('sessionId is required for status and stop actions');
+   }
+   return input.sessionId;
+}
+
+async function handleDriverSessionStart(
+   input: DriverSessionInput,
+): Promise<DriverSessionToolResponse> {
+   const {
+      target,
+      action: _action,
+      sessionId: _sessionId,
+      allowVirtual: _allowVirtual,
+      ...targetInput
+   } = input;
+   const resolvedTarget = target ?? resolveDefaultTarget().target;
+   ensureVirtualTargetAllowed(resolvedTarget, input.allowVirtual);
+   const session = await startDriverSession(resolvedTarget);
+   await attachResolvedDocument(session.sessionId, targetInput, resolvedTarget);
+   return createToolResponse<Record<string, unknown>>(
+      accessibilityDriverSessionSchema.parse(session),
+   );
+}
+
+async function handleDriverSessionStatus(
+   input: DriverSessionInput,
+): Promise<DriverSessionToolResponse> {
+   const sessionId = requireSessionId(input);
+   return createToolResponse<Record<string, unknown>>(
+      driverActionResultSchema.parse(await getDriverSessionStatus(sessionId)),
+   );
+}
+
+async function handleDriverSessionStop(
+   input: DriverSessionInput,
+): Promise<DriverSessionToolResponse> {
+   const sessionId = requireSessionId(input);
+   return createToolResponse<Record<string, unknown>>(
+      driverActionResultSchema.parse(await stopDriverSession(sessionId)),
+   );
+}
+
+const driverSessionHandlers: Record<
+   DriverSessionInput['action'],
+   (input: DriverSessionInput) => Promise<DriverSessionToolResponse>
+> = {
+   start: handleDriverSessionStart,
+   status: handleDriverSessionStatus,
+   stop: handleDriverSessionStop,
+};
 
 async function runDriverAction(input: DriverActionInput): Promise<unknown> {
    if (input.action === 'key') {
@@ -143,6 +202,13 @@ async function runDriverAction(input: DriverActionInput): Promise<unknown> {
    if (input.action === 'checkpoint') {
       return runDriverSessionAction(input.sessionId, 'checkpoint', {
          payload: { label: input.label },
+      });
+   }
+
+   if (input.action === 'focus') {
+      const { sessionId, action: _action, ...focusTarget } = input;
+      return runDriverSessionAction(sessionId, 'focus', {
+         payload: focusTarget,
       });
    }
 
@@ -165,38 +231,14 @@ export function registerDriverTools(server: McpServer): void {
             'action "stop": tear down the session. ' +
             'On macOS the default target is VoiceOver (real); on Windows it is NVDA (real). ' +
             'If neither is available, the target falls back to "virtual" (SIMULATION). ' +
+            'Only request the virtual target when you explicitly want simulation; set allowVirtual=true to proceed. ' +
             'The response includes a targetType field ("real" or "simulated"). ' +
             'For real screen readers: open a browser and navigate to the page BEFORE starting. ' +
-            'For virtual: pass url/storybookUrl/storyId and a11ied injects HTML automatically.',
+            'For virtual: pass url and a11ied injects HTML automatically.',
          inputSchema: driverSessionInputSchema,
          annotations: activeAnnotations,
       },
-      async (input) => {
-         if (input.action === 'start') {
-            const { target, ...targetInput } = input;
-            const resolvedTarget = target ?? resolveDefaultTarget().target;
-            const session = await startDriverSession(resolvedTarget);
-            await attachResolvedDocument(session.sessionId, targetInput, resolvedTarget);
-            return createToolResponse(accessibilityDriverSessionSchema.parse(session));
-         }
-
-         if (!input.sessionId) {
-            throw new Error('sessionId is required for status and stop actions');
-         }
-
-         if (input.action === 'status') {
-            return createToolResponse(
-               driverActionResultSchema.parse(
-                  await getDriverSessionStatus(input.sessionId),
-               ),
-            );
-         }
-
-         // stop
-         return createToolResponse(
-            driverActionResultSchema.parse(await stopDriverSession(input.sessionId)),
-         );
-      },
+      async (input) => driverSessionHandlers[input.action](input),
    );
 
    server.registerTool(
@@ -208,6 +250,7 @@ export function registerDriverTools(server: McpServer): void {
             'For real screen reader sessions (VoiceOver/NVDA), actions drive the actual assistive technology and return real speech output. ' +
             'For virtual sessions, actions are simulated in memory. ' +
             'Check the session targetType to know which mode is active. ' +
+            'Use action "focus" with appName, bundleId, processName, pid, or windowTitle to bring the target window to the front. ' +
             'The response includes actionDurationMs showing how long the operation took.',
          inputSchema: driverActionInputSchema,
          outputSchema: driverActionResultSchema,

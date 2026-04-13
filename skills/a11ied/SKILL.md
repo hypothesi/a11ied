@@ -1,6 +1,6 @@
 ---
 name: a11ied
-description: Use when you need to plan, script, or execute accessibility checks with the a11ied CLI, Storybook integration, or MCP server. Focus on screen reader behavior first, use Guidepup-backed targets when real assistive technology matters, and fall back to the virtual screen reader for fast local feedback.
+description: Use when you need to plan, script, or execute accessibility checks with the a11ied CLI or MCP server. Focus on screen reader behavior first, use Guidepup-backed targets when real assistive technology matters, and fall back to the virtual screen reader for fast local feedback.
 ---
 
 # a11ied
@@ -29,7 +29,6 @@ Use this skill when the task is specifically about the `a11ied` toolchain.
 - `packages/contracts`: shared schemas
 - `packages/core`: orchestration and product rules
 - `packages/guidepup`: platform adapters
-- `packages/storybook`: Storybook bridge
 - `packages/mcp-server`: MCP server entrypoint
 - `packages/cli`: CLI entrypoint
 - `apps/docs`: docs site

@@ -1,7 +1,9 @@
 import { virtual } from '@guidepup/virtual-screen-reader';
 import {
+   driverFocusResultSchema,
    driverReadinessSchema,
    type DriverCheckpoint,
+   type DriverFocusTarget,
    type DriverReadiness,
    type DriverStateSnapshot,
 } from '@a11ied/contracts';
@@ -11,7 +13,8 @@ import {
    buildStateSnapshot,
    driverCapabilities,
    type DriverAdapter,
-} from './adapters.js';
+} from './adapter-shared.js';
+import { normalizeDriverKeys } from './key-aliases.js';
 
 const defaultVirtualHtml = `
 <!doctype html>
@@ -48,6 +51,17 @@ async function virtualClearLogs(
    return buildStateSnapshot(virtual, checkpoints);
 }
 
+async function virtualFocus(
+   target: DriverFocusTarget,
+): Promise<ReturnType<typeof driverFocusResultSchema.parse>> {
+   return driverFocusResultSchema.parse({
+      status: 'skipped',
+      target,
+      platform: 'virtual',
+      details: ['Virtual target has no OS window to focus.'],
+   });
+}
+
 function createNavigationMethods(): Pick<
    DriverAdapter,
    | 'next'
@@ -66,7 +80,7 @@ function createNavigationMethods(): Pick<
          await virtual.previous();
       },
       press: async (keys: string) => {
-         await virtual.press(keys);
+         await virtual.press(normalizeDriverKeys(keys, 'virtual'));
       },
       type: async (text: string) => {
          await virtual.type(text);
@@ -121,6 +135,7 @@ export function createVirtualAdapter(): DriverAdapter {
       },
       stop: stopVirtual,
       attachDocument,
+      focus: virtualFocus,
       readState: virtualReadState,
       clearLogs: virtualClearLogs,
       waitForSpeechStabilization: async () => {

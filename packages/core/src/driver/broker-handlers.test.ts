@@ -8,7 +8,8 @@ import type {
    SessionRecording,
 } from '@a11ied/contracts';
 
-import { handleBrokerRequest, type BrokerHandlerContext } from './broker-handlers.js';
+import { handleBrokerRequest } from './broker-handlers.js';
+import type { BrokerHandlerContext } from './broker-types.js';
 
 const COMPLETED_RECORDING: SessionRecording = {
    path: '/tmp/session.mov',
@@ -32,6 +33,7 @@ function createSession(): AccessibilityDriverSession {
          'stop',
          'status',
          'attach-document',
+         'focus',
          'next',
          'previous',
          'key',

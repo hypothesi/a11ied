@@ -11,6 +11,7 @@ import {
    createDefaultBrowserPolicyDeps,
    getBrowserLaunchOptions,
    PLAYWRIGHT_INSTALL_CHROMIUM_COMMAND,
+   type BrowserLaunchPreference,
    type BrowserPolicyDeps,
    type BrowserLaunchOptions,
 } from './detection.js';
@@ -80,6 +81,7 @@ async function launchCandidateChain(args: {
    deps: BrowserRuntimeDeps;
    failures: BrowserLaunchAttemptFailure[];
    policy: BrowserAutomationPolicy;
+   preference: BrowserLaunchPreference | undefined;
 }): Promise<BrowserLaunchResult> {
    const [candidate, ...remaining] = args.candidates;
    if (!candidate) {
@@ -90,7 +92,9 @@ async function launchCandidateChain(args: {
    }
 
    try {
-      const browser = await args.deps.launch(getBrowserLaunchOptions(candidate));
+      const browser = await args.deps.launch(
+         getBrowserLaunchOptions(candidate, args.preference),
+      );
       return {
          browser,
          candidate,
@@ -102,12 +106,14 @@ async function launchCandidateChain(args: {
          deps: args.deps,
          failures: [...args.failures, toFailure(candidate.id, error)],
          policy: args.policy,
+         preference: args.preference,
       });
    }
 }
 
 export async function launchAutomationBrowser(
    deps: BrowserRuntimeDeps = createDefaultBrowserRuntimeDeps(),
+   preference?: BrowserLaunchPreference,
 ): Promise<BrowserLaunchResult> {
    const policy = createBrowserAutomationPolicy(deps);
 
@@ -116,5 +122,6 @@ export async function launchAutomationBrowser(
       deps,
       failures: [],
       policy,
+      preference,
    });
 }

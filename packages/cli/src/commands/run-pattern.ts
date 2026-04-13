@@ -1,9 +1,9 @@
 import type { Command } from 'commander';
 import {
+   addAllowVirtualOption,
    addJsonOption,
    addRecordingOption,
    addSessionOption,
-   addStorybookTargetOptions,
    addTargetOption,
    addVerboseOption,
 } from '../lib/options.js';
@@ -12,9 +12,9 @@ import { handlePatternAction, type PatternActionOptions } from './run-actions.js
 function buildPatternCommand(runCommand: Command): Command {
    return addVerboseOption(
       addJsonOption(
-         addTargetOption(
-            addSessionOption(
-               addStorybookTargetOptions(
+         addAllowVirtualOption(
+            addTargetOption(
+               addSessionOption(
                   addRecordingOption(
                      runCommand
                         .command('pattern <patternId>')

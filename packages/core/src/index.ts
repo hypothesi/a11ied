@@ -36,6 +36,7 @@ export type { TargetType } from './driver/default-target.js';
 export { runAxe } from './axe/runtime.js';
 export { runInteractionPattern } from './patterns/runtime.js';
 export { verifyCriterion, verifyLevel } from './verification/runtime.js';
+export { openUrlInSystemAutomationBrowser } from './browser/helper.js';
 export {
    resolveDocumentTarget,
    type ResolveDocumentTargetInput,

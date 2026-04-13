@@ -1,7 +1,4 @@
-export {
-   createDriverAdapter,
-   describePlatform,
-   driverCapabilities,
-   guidepupSetupCommand,
-   type DriverAdapter,
-} from './adapters.js';
+export { createDriverAdapter } from './adapters.js';
+export { driverCapabilities, type DriverAdapter } from './adapter-shared.js';
+
+export { describePlatform, guidepupSetupCommand } from './readiness.js';

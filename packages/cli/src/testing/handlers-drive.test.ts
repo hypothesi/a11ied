@@ -17,9 +17,10 @@ import { expectFirstErrorMessage, expectJsonLogCursor } from './helpers.js';
 
 const tempRoots: string[] = [];
 useTestServer(tempRoots);
+const virtualTargetArgs = ['--target', 'virtual', '--allow-virtual'];
 
 async function startSession(): Promise<string> {
-   const started = await runCli(['drive', 'start', '--target', 'virtual', '--json']);
+   const started = await runCli(['drive', 'start', ...virtualTargetArgs, '--json']);
    const json = parseJsonOutput(started.stdout);
    return (json.result as { session: { sessionId: string } }).session.sessionId;
 }
@@ -29,7 +30,7 @@ async function stopSession(sessionId: string): Promise<void> {
 }
 
 async function assertSessionStart(): Promise<string> {
-   const started = await runCli(['drive', 'start', '--target', 'virtual', '--json']);
+   const started = await runCli(['drive', 'start', ...virtualTargetArgs, '--json']);
    const json = parseJsonOutput(started.stdout);
    const session = (
       json.result as {
@@ -76,7 +77,7 @@ async function assertMissingSessionError(): Promise<void> {
 }
 
 async function assertNextRequiresSession(): Promise<void> {
-   const result = await runCli(['drive', 'next', '--target', 'virtual', '--json']);
+   const result = await runCli(['drive', 'next', ...virtualTargetArgs, '--json']);
    expectFirstErrorMessage({
       result,
       match: /session id is required/i,
@@ -98,8 +99,7 @@ async function assertEphemeralAction(tempRoot: string): Promise<void> {
    const result = await runCli([
       'drive',
       'next',
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
       '--ephemeral',
       '--json',
    ]);
@@ -113,8 +113,7 @@ async function assertVirtualRecordingRejected(): Promise<void> {
    const result = await runCli([
       'drive',
       'start',
-      '--target',
-      'virtual',
+      ...virtualTargetArgs,
       '--recording',
       './recordings/virtual.mov',
       '--json',
@@ -141,6 +140,25 @@ async function assertClearLogs(sessionId: string): Promise<void> {
    const json = parseJsonOutput(result.stdout);
    expect(result.status).toBe(EXIT_SUCCESS);
    expect((json.result as { action: string }).action).toBe('clear-logs');
+}
+
+async function assertFocus(sessionId: string): Promise<void> {
+   const result = await runCli([
+      'drive',
+      'focus',
+      '--session',
+      sessionId,
+      '--app',
+      'Test App',
+      '--json',
+   ]);
+   const json = parseJsonOutput(result.stdout);
+   expect(result.status).toBe(EXIT_SUCCESS);
+   expect((json.result as { action: string }).action).toBe('focus');
+   expect(
+      (json.result as { details?: { focus?: { status?: string } } }).details?.focus
+         ?.status,
+   ).toBe('skipped');
 }
 
 async function assertLogsAfterClear(sessionId: string): Promise<void> {
@@ -177,6 +195,7 @@ describe('cli drive lifecycle commands', () => {
             const sessionId = await startSession();
             await assertReadState(sessionId);
             await assertClearLogs(sessionId);
+            await assertFocus(sessionId);
             await assertLogsAfterClear(sessionId);
             await stopSession(sessionId);
          }),

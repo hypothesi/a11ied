@@ -1,6 +1,5 @@
 import {
    accessibilityDriverSessionSchema,
-   criterionLookupResultSchema,
    criterionSearchResponseSchema,
    type CriterionSearchResult,
    verificationReportSchema,
@@ -72,7 +71,7 @@ async function startVirtualSession(
 ): Promise<z.infer<typeof accessibilityDriverSessionSchema>> {
    const start = await client.callTool({
       name: 'driver_session',
-      arguments: { action: 'start', target: 'virtual' },
+      arguments: { action: 'start', target: 'virtual', allowVirtual: true },
    });
 
    expect(start.isError).toBeFalsy();
@@ -89,6 +88,7 @@ async function assertVerificationToolReport(
          criterion: '4.1.2',
          url: `${baseUrl}/button-name-failure.html`,
          target: 'virtual',
+         allowVirtual: true,
          version: '2.2',
       },
    });
@@ -223,16 +223,10 @@ describe('tool metadata', () => {
    it('documents side effects for active tools', async () => {
       await withHarness(async (harness) => {
          const result = await harness.client.listTools();
-         const driverTool = result.tools.find(
-            (entry) => entry.name === 'driver_session',
-         );
-         const verificationTool = result.tools.find(
-            (entry) => entry.name === 'verify',
-         );
+         const driverTool = result.tools.find((entry) => entry.name === 'driver_session');
+         const verificationTool = result.tools.find((entry) => entry.name === 'verify');
 
-         expect(driverTool?.description).toContain(
-            'real',
-         );
+         expect(driverTool?.description).toContain('real');
          expect(driverTool?.description).toContain('targetType');
          expect(verificationTool?.description).toContain(
             'may launch browsers, run automation, and drive assistive technology',

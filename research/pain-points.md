@@ -14,11 +14,7 @@ W3C still says the quiet part out loud: some checks cannot be automated, some to
 
 Pa11y and axe-core are useful, but they are not built to tell you whether focus order feels coherent, whether live region timing is understandable, or whether a particular VoiceOver or NVDA announcement is confusing in context.
 
-### 2. Storybook is great for speed and bad for final truth
-
-Storybook add-ons are good at giving developers immediate feedback while they are building components. They are not good enough for sign-off. Even the screen-reader simulation add-ons say so. They cannot access the OS accessibility tree, they do not model browse mode, and they do not claim parity with VoiceOver.
-
-### 3. Real screen reader automation has setup friction
+### 2. Real screen reader automation has setup friction
 
 Guidepup is powerful, but it is not plug-and-play in the way most frontend tooling is.
 
@@ -29,11 +25,11 @@ Guidepup is powerful, but it is not plug-and-play in the way most frontend tooli
 
 If the tool does not help users separate "your app is wrong" from "your machine is not ready," it becomes exhausting fast.
 
-### 4. The workflow is split across too many abstractions
+### 3. The workflow is split across too many abstractions
 
 Teams end up with one tool for lint-like accessibility scans, another for component tests, another for browser automation, another for CI reporting, and now potentially another for MCP or agent use. That is a lot of context switching for one job.
 
-### 5. Results are often too technical or too vague
+### 4. Results are often too technical or too vague
 
 Developers need both:
 
@@ -42,7 +38,7 @@ Developers need both:
 
 Too many tools skew hard in one direction.
 
-### 6. Teams blur simulation and reality
+### 5. Teams blur simulation and reality
 
 The virtual screen reader story is genuinely useful. It is also easy to oversell. If a tool does not draw a bright line between "fast simulation" and "real assistive technology run," people will make bad calls with too much confidence.
 
@@ -51,7 +47,7 @@ The virtual screen reader story is genuinely useful. It is also easy to oversell
 - Put setup health first with `doctor`.
 - Separate infra failures from accessibility findings through clear exit codes.
 - Make virtual, VoiceOver, and NVDA targets explicit in both config and output.
-- Keep one execution engine, then expose it through CLI, Storybook, and MCP.
+- Keep one execution engine, then expose it through CLI and MCP.
 - Default to concise summaries, but always keep the raw spoken phrase log available.
 
 ## Sources
@@ -60,4 +56,3 @@ The virtual screen reader story is genuinely useful. It is also easy to oversell
 - Pa11y README: https://github.com/pa11y/pa11y
 - Guidepup Setup README: https://www.npmjs.com/package/@guidepup/setup
 - Guidepup Virtual Screen Reader README: https://www.npmjs.com/package/@guidepup/virtual-screen-reader
-- storybook-screen-reader limitations: https://www.npmjs.com/package/storybook-screen-reader

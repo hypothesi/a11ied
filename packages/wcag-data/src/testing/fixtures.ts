@@ -1,6 +1,7 @@
-import { ACCESSIBLE_AUTH_INDEX } from './helpers.js';
 export { createQuickrefTagsYaml, createActMappingPayload } from './fixtures-data.js';
 import { createAccessibleAuthCriterion } from './fixtures-data.js';
+
+const ACCESSIBLE_AUTH_INDEX = 2;
 
 function createTextAlternativeCriterion(): unknown {
    return {

@@ -199,7 +199,6 @@ export type LevelVerificationResult = z.infer<typeof levelVerificationResultSche
 export const verificationTargetSchema = targetReferenceSchema.extend({
    platform: platformSchema.optional(),
    resolvedUrl: z.string().url().optional(),
-   storybookBaseUrl: z.string().url().optional(),
 });
 export type VerificationTarget = z.infer<typeof verificationTargetSchema>;
 

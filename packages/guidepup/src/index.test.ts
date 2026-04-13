@@ -5,6 +5,7 @@ import {
    driverCapabilities,
    guidepupSetupCommand,
 } from './index.js';
+import { normalizeDriverKeys } from './key-aliases.js';
 
 describe('guidepup driver adapters', () => {
    it('exposes one normalized capability set across all targets', () => {
@@ -48,5 +49,16 @@ describe('guidepup driver adapters', () => {
    it('returns setup commands for real targets', () => {
       expect(guidepupSetupCommand('voiceover')).toBe('npx @guidepup/setup --record');
       expect(guidepupSetupCommand('nvda')).toContain('@guidepup/setup');
+   });
+
+   it('normalizes documented driver key aliases before dispatch', () => {
+      expect(normalizeDriverKeys('VO+RightArrow', 'voiceover')).toBe(
+         'Control+Option+ArrowRight',
+      );
+      expect(normalizeDriverKeys('VO+Shift+DownArrow', 'voiceover')).toBe(
+         'Control+Option+Shift+ArrowDown',
+      );
+      expect(normalizeDriverKeys('NVDA+N', 'nvda')).toBe('Insert+N');
+      expect(normalizeDriverKeys('Nvda+NumPad5', 'nvda')).toBe('Insert+NumPad5');
    });
 });

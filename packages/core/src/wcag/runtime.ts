@@ -58,15 +58,30 @@ export function listWcagLevels(version: string): {
    };
 }
 
-/** Lists criteria for one conformance level and WCAG version. */
+type WcagCriteriaListing = Omit<ReturnType<typeof listCriteriaByLevel>, 'level'> & {
+   level: WcagLevel | 'all';
+};
+
+/** Lists criteria for one conformance level, or all levels when omitted. */
 export function listWcagCriteria(
-   level: string,
+   level: string | undefined,
    version: string,
-): ReturnType<typeof listCriteriaByLevel> {
-   const parsedLevel = parseWcagLevel(level);
+): WcagCriteriaListing {
    const parsedVersion = parseWcagVersion(version);
 
    try {
+      if (level === undefined) {
+         const criteria = wcagLevelSchema.options.flatMap(
+            (entry) => listCriteriaByLevel(entry, parsedVersion).criteria,
+         );
+         return {
+            version: parsedVersion,
+            level: 'all',
+            criteria,
+         };
+      }
+
+      const parsedLevel = parseWcagLevel(level);
       return listCriteriaByLevel(parsedLevel, parsedVersion);
    } catch (error) {
       normalizeEngineError(error);

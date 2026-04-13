@@ -11,7 +11,7 @@ export const topLevelHelpCases: HelpCase[] = [
       expected: `
       "Usage: a11ied [options] [command]
 
-      CLI-first accessibility automation for VoiceOver, NVDA, Storybook, and MCP.
+      CLI-first accessibility automation for VoiceOver, NVDA, and MCP.
 
       Options:
         -V, --version     output the version number
@@ -45,8 +45,8 @@ export const topLevelHelpCases: HelpCase[] = [
 
       Commands:
         levels [options]                List the available conformance levels.
-        criteria [options]              List criteria for a specific conformance
-                                        level.
+        criteria [options]              List criteria, optionally filtered to one
+                                        conformance level.
         show [options] <criterion>      Show one criterion by id or slug.
         search [options] <query>        Search criterion titles, summaries,
                                         techniques, failures, and tags.
@@ -68,14 +68,12 @@ export const inspectHelpCases: HelpCase[] = [
       List criteria that look relevant for a target.
 
       Options:
-        --url <url>            Inspect a live URL target.
-        --storybook-url <url>  Resolve a target from a local Storybook base URL.
-        --story-id <storyId>   Resolve one Storybook story by id.
-        --version <version>    Use a specific WCAG version. Defaults to 2.2. (default:
-                               "2.2")
-        --json                 Print JSON instead of human-readable text.
-        --verbose              Print more detail in text output.
-        -h, --help             display help for command
+        --url <url>          Inspect a live URL target.
+        --version <version>  Use a specific WCAG version. Defaults to 2.2. (default:
+                             "2.2")
+        --json               Print JSON instead of human-readable text.
+        --verbose            Print more detail in text output.
+        -h, --help           display help for command
       "
     `,
    },
@@ -103,6 +101,8 @@ export const driveRunHelpCases: HelpCase[] = [
         previous [options]            Move to the previous item.
         key [options]                 Send one or more target-specific key chords.
         type [options]                Type text through the active driver target.
+        focus [options]               Focus a window so the screen reader follows the
+                                      right app.
         interact [options]            Enter interaction mode.
         stop-interacting [options]    Leave interaction mode.
         click-current-item [options]  Activate the current item.
@@ -130,6 +130,63 @@ export const driveRunHelpCases: HelpCase[] = [
         axe [options]                  Run axe-core against a target.
         pattern [options] <patternId>  Run a named built-in interaction pattern.
         help [command]                 display help for command
+      "
+    `,
+   },
+   {
+      name: 'lists supported drive key tokens',
+      args: ['drive', 'key', '--help'],
+      expected: `
+      "Usage: a11ied drive key [options]
+
+      Send one or more target-specific key chords.
+
+      Options:
+        --keys <keys>        Send keys such as VO+ArrowRight or Tab.
+        --session <id>       Reuse an existing driver session.
+        --target <platform>  Choose one target: voiceover, nvda, or virtual. Defaults
+                             to VoiceOver on macOS, NVDA on Windows, or virtual
+                             elsewhere. Use --allow-virtual to permit simulation.
+        --allow-virtual      Allow the virtual (simulated) screen reader when a real
+                             target is available.
+        --ephemeral          Run one action in a temporary session and tear it down
+                             immediately.
+        --json               Print JSON instead of human-readable text.
+        --verbose            Print more detail in text output.
+        -h, --help           display help for command
+
+      Supported key tokens:
+        Chord syntax: join tokens with "+", for example Tab, Shift+Tab, Control+F,
+        VO+ArrowRight, or NVDA+N.
+
+        Common:
+          Modifiers: Shift, Control, Alt
+          Letters: a-z, A-Z, KeyA-KeyZ
+          Digits: 0-9, Digit0-Digit9
+          Arrows: ArrowUp, ArrowDown, ArrowLeft, ArrowRight
+          Arrow aliases: Up, Down, Left, Right, UpArrow, DownArrow, LeftArrow, RightArrow
+          Navigation/editing: Backspace, Tab, Enter, Escape, Space, Spacebar, Delete,
+            ForwardDelete, Home, End, PageUp, PageDown, Insert, Help, Clear, CapsLock
+          Functions: F1-F20
+          Punctuation: Backquote, Backtick, Minus, Dash, Equal, Equals, Backslash,
+            LeftSquareBracket, RightSquareBracket, SingleQuote, Comma, Period, FullStop,
+            Tilde, Plus
+
+        VoiceOver (macOS):
+          Modifier aliases: VO (Control+Option), Command, CommandLeft, CommandRight,
+            Meta, Option, OptionLeft, OptionRight
+          macOS-only keys: Fn, SectionSign, LineFeed, Return, VolumeUp, VolumeDown,
+            Mute, Add, Subtract, Multiply, Divide, Decimal
+          Examples: VO+ArrowRight, VO+ArrowLeft, VO+Shift+ArrowDown, VO+Space,
+            Command+F5
+
+        NVDA (Windows):
+          Modifier aliases: NVDA or Nvda (Insert), Windows
+          Windows-only keys: Application, Pause, Break, PrintScreen, ScrollLock,
+            Numlock, NumPad0, NumPad1, NumPad2, NumPad3, NumPad4, NumPad5, NumPad6,
+            NumPad7, NumPad8, NumPad9, NumPadEnter, NumPadDelete, NumPadDivide,
+            NumPadMinus, NumPadMultiply, NumPadPlus
+          Examples: NVDA+N, NVDA+ArrowDown, NVDA+NumPad5, Control+Alt+N
       "
     `,
    },
@@ -164,17 +221,19 @@ export const verifyHelpCases: HelpCase[] = [
    Verify one WCAG criterion for a target.
 
    Options:
-     --url <url>            Run the verification against one live URL target.
-     --recording <path>     Write one screen recording to the given .mov or .mp4
-                            path when the target supports it.
-     --storybook-url <url>  Resolve a target from a local Storybook base URL.
-     --story-id <storyId>   Resolve one Storybook story by id.
-     --version <version>    Use a specific WCAG version. Defaults to 2.2. (default:
-                            "2.2")
-     --target <platform>    Choose one target: virtual, voiceover, or nvda.
-     --json                 Print JSON instead of human-readable text.
-     --verbose              Print more detail in text output.
-     -h, --help             display help for command
+     --url <url>          Run the verification against one live URL target.
+     --recording <path>   Write one screen recording to the given .mov or .mp4 path
+                          when the target supports it.
+     --version <version>  Use a specific WCAG version. Defaults to 2.2. (default:
+                          "2.2")
+     --target <platform>  Choose one target: voiceover, nvda, or virtual. Defaults
+                          to VoiceOver on macOS, NVDA on Windows, or virtual
+                          elsewhere. Use --allow-virtual to permit simulation.
+     --allow-virtual      Allow the virtual (simulated) screen reader when a real
+                          target is available.
+     --json               Print JSON instead of human-readable text.
+     --verbose            Print more detail in text output.
+     -h, --help           display help for command
    "
  `,
    },
@@ -187,17 +246,19 @@ export const verifyHelpCases: HelpCase[] = [
    Verify a WCAG conformance level against a target.
 
    Options:
-     --url <url>            Run the verification against one live URL target.
-     --recording <path>     Write one screen recording to the given .mov or .mp4
-                            path when the target supports it.
-     --storybook-url <url>  Resolve a target from a local Storybook base URL.
-     --story-id <storyId>   Resolve one Storybook story by id.
-     --version <version>    Use a specific WCAG version. Defaults to 2.2. (default:
-                            "2.2")
-     --target <platform>    Choose one target: virtual, voiceover, or nvda.
-     --json                 Print JSON instead of human-readable text.
-     --verbose              Print more detail in text output.
-     -h, --help             display help for command
+     --url <url>          Run the verification against one live URL target.
+     --recording <path>   Write one screen recording to the given .mov or .mp4 path
+                          when the target supports it.
+     --version <version>  Use a specific WCAG version. Defaults to 2.2. (default:
+                          "2.2")
+     --target <platform>  Choose one target: voiceover, nvda, or virtual. Defaults
+                          to VoiceOver on macOS, NVDA on Windows, or virtual
+                          elsewhere. Use --allow-virtual to permit simulation.
+     --allow-virtual      Allow the virtual (simulated) screen reader when a real
+                          target is available.
+     --json               Print JSON instead of human-readable text.
+     --verbose            Print more detail in text output.
+     -h, --help           display help for command
    "
  `,
    },
@@ -217,8 +278,6 @@ export const runOptionCases: HelpCase[] = [
         --level <level>          Limit the run to one WCAG level.
         --criterion <criterion>  Limit the run to one WCAG criterion id or slug.
         --rule <ruleId...>       Limit the run to one or more explicit axe rule ids.
-        --storybook-url <url>    Resolve a target from a local Storybook base URL.
-        --story-id <storyId>     Resolve one Storybook story by id.
         --version <version>      Use a specific WCAG version. Defaults to 2.2.
                                  (default: "2.2")
         --json                   Print JSON instead of human-readable text.
@@ -236,16 +295,18 @@ export const runOptionCases: HelpCase[] = [
       Run a named built-in interaction pattern.
 
       Options:
-        --url <url>            Run the pattern against one live URL target.
-        --recording <path>     Write one screen recording to the given .mov or .mp4
-                               path when the target supports it.
-        --storybook-url <url>  Resolve a target from a local Storybook base URL.
-        --story-id <storyId>   Resolve one Storybook story by id.
-        --session <id>         Reuse an existing driver session.
-        --target <platform>    Choose one target: virtual, voiceover, or nvda.
-        --json                 Print JSON instead of human-readable text.
-        --verbose              Print more detail in text output.
-        -h, --help             display help for command
+        --url <url>          Run the pattern against one live URL target.
+        --recording <path>   Write one screen recording to the given .mov or .mp4 path
+                             when the target supports it.
+        --session <id>       Reuse an existing driver session.
+        --target <platform>  Choose one target: voiceover, nvda, or virtual. Defaults
+                             to VoiceOver on macOS, NVDA on Windows, or virtual
+                             elsewhere. Use --allow-virtual to permit simulation.
+        --allow-virtual      Allow the virtual (simulated) screen reader when a real
+                             target is available.
+        --json               Print JSON instead of human-readable text.
+        --verbose            Print more detail in text output.
+        -h, --help           display help for command
       "
     `,
    },
@@ -259,6 +320,5 @@ export const helpAllExpectations = [
    '# a11ied run axe',
    '# a11ied verify criterion',
    '# a11ied help-all',
-   '--storybook-url <url>',
    '--recording <path>',
 ];

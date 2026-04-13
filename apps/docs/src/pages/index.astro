@@ -5,7 +5,7 @@ import { docsLinks } from '../lib/nav';
 
 <DocShell
    title="Automate real screen reader testing"
-   summary="a11ied is a CLI-first toolkit that lets you test with VoiceOver, NVDA, and a fast virtual screen reader — from the terminal, an AI agent, or Storybook. Look up WCAG criteria, check applicability, run interaction patterns, and verify conformance in one workflow."
+   summary="a11ied is a CLI-first toolkit that lets you test with VoiceOver, NVDA, and a fast virtual screen reader — from the terminal or an AI agent. Look up WCAG criteria, check applicability, run interaction patterns, and verify conformance in one workflow."
    links={docsLinks}
 >
    <section class="split panel">
@@ -28,8 +28,8 @@ import { docsLinks } from '../lib/nav';
                <span>Control VoiceOver, NVDA, or the virtual reader directly with low-level commands.</span>
             </div>
             <div class="workflow-row">
-               <strong><a href="/workflows#agent-and-storybook">Use it from an agent or Storybook</a></strong>
-               <span>Call the same runtime through MCP tool calls or against local Storybook stories.</span>
+               <strong><a href="/workflows#agent-and-mcp">Use it from an agent</a></strong>
+               <span>Call the same runtime through MCP tool calls or from automated scripts.</span>
             </div>
          </div>
       </div>
@@ -75,9 +75,9 @@ import { docsLinks } from '../lib/nav';
       <div class="command-strip">
          <pre><code>npm install a11ied</code></pre>
          <p class="command-note">
-         This installs the <code>a1</code> CLI command (also available as <code>a11ied</code>). Use it programmatically too:
+         This installs the <code>a1</code> CLI command (also available as <code>a11ied</code>). Use the runtime API too:
          </p>
-         <pre><code>import {'{'} buildCli {'}'} from 'a11ied';</code></pre>
+         <pre><code>import {'{'} runAxe, verifyCriterion {'}'} from 'a11ied';</code></pre>
       </div>
    </section>
 
@@ -90,8 +90,8 @@ import { docsLinks } from '../lib/nav';
          <pre><code>a1 doctor
 a1 wcag show 4.1.3 --json
 a1 inspect criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json
-a1 run pattern status_message_probe --target virtual --url http://127.0.0.1:6173/status-message.html --json
-a1 verify criterion 4.1.3 --target virtual --url http://127.0.0.1:6173/status-message.html --json</code></pre>
+a1 run pattern status_message_probe --target virtual --allow-virtual --url http://127.0.0.1:6173/status-message.html --json
+a1 verify criterion 4.1.3 --target virtual --allow-virtual --url http://127.0.0.1:6173/status-message.html --json</code></pre>
          <p class="command-note">
          Each step builds on the previous one: look up the rule, check if it applies, run the test,
          then verify.
@@ -129,10 +129,10 @@ a1 verify criterion 4.1.3 --target virtual --url http://127.0.0.1:6173/status-me
             <strong><a href="/verification-semantics">Verification semantics</a></strong>
             <span>How verdicts work: pass, fail, mixed, manual-only, and not-covered.</span>
          </div>
-         <div class="route-row">
-            <strong><a href="/mcp-usage">MCP usage</a> and <a href="/storybook-usage">Storybook usage</a></strong>
-            <span>Use a11ied from an AI agent (MCP) or against Storybook components.</span>
-         </div>
+            <div class="route-row">
+            <strong><a href="/mcp-usage">MCP usage</a></strong>
+            <span>Use a11ied from an AI agent with tool calls.</span>
+            </div>
          <div class="route-row">
             <strong><a href="/api-reference">API reference</a> and <a href="/recording-sessions">Recording sessions</a></strong>
             <span>Public package API and video recording of real assistive technology sessions.</span>

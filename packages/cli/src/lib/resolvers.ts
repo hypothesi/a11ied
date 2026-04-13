@@ -1,7 +1,63 @@
 import { platformSchema, type Platform, type VerificationReport } from '#contracts';
-import { CliUsageError, resolveDocumentTarget } from '#core';
+import { CliUsageError, resolveDefaultTarget, resolveDocumentTarget } from '#core';
 
-export function parsePlatform(target: string | undefined): Platform {
+interface VirtualTargetGuardOptions {
+   allowVirtual?: boolean;
+}
+
+export function buildVirtualTargetGuardOptions(
+   allowVirtual?: boolean,
+): VirtualTargetGuardOptions | undefined {
+   if (allowVirtual) {
+      return { allowVirtual: true };
+   }
+   return undefined;
+}
+
+function ensureVirtualTargetAllowed(
+   target: Platform,
+   options?: VirtualTargetGuardOptions,
+): void {
+   if (target !== 'virtual') {
+      return;
+   }
+
+   const fallback = resolveDefaultTarget();
+   if (fallback.target === 'virtual') {
+      return;
+   }
+
+   if (options?.allowVirtual) {
+      return;
+   }
+
+   throw new CliUsageError(
+      'virtual-target-disallowed',
+      'The virtual target is a simulation. Omit --target to use VoiceOver or NVDA, or pass --allow-virtual to proceed.',
+      {
+         target,
+         defaultTarget: fallback.target,
+      },
+   );
+}
+
+export function parsePlatform(
+   target: string | undefined,
+   options?: VirtualTargetGuardOptions,
+): Platform {
+   if (!target) {
+      const fallback = resolveDefaultTarget();
+      throw new CliUsageError(
+         'validation-error',
+         `${fallback.message} Provide --target to override.`,
+         {
+            field: 'target',
+            value: target ?? undefined,
+            defaultTarget: fallback.target,
+         },
+      );
+   }
+
    const parsed = platformSchema.safeParse(target);
    if (!parsed.success) {
       throw new CliUsageError(
@@ -15,6 +71,7 @@ export function parsePlatform(target: string | undefined): Platform {
       );
    }
 
+   ensureVirtualTargetAllowed(parsed.data, options);
    return parsed.data;
 }
 
@@ -22,6 +79,7 @@ export function resolveDriveSession(options: {
    session?: string;
    target?: string;
    ephemeral?: boolean;
+   allowVirtual?: boolean;
 }): {
    sessionId?: string;
    target?: Platform;
@@ -36,16 +94,18 @@ export function resolveDriveSession(options: {
    }
 
    if (options.ephemeral) {
-      if (!options.target) {
-         throw new CliUsageError(
-            'missing-target',
-            'A driver target is required when --ephemeral is present.',
-         );
+      if (options.target) {
+         return {
+            ephemeral: true,
+            target: parsePlatform(
+               options.target,
+               buildVirtualTargetGuardOptions(options.allowVirtual),
+            ),
+         };
       }
 
       return {
          ephemeral: true,
-         target: parsePlatform(options.target),
       };
    }
 
@@ -70,44 +130,9 @@ export interface ResolvedCliTarget {
    reportTarget: VerificationReport['target'];
 }
 
-function hasStorybookInput(options: {
-   storybookUrl?: string;
-   storyId?: string;
-}): boolean {
-   return Boolean(options.storybookUrl || options.storyId);
-}
-
-function requireStorybookPair(options: {
-   storybookUrl?: string;
-   storyId?: string;
-}): void {
-   if (!options.storybookUrl) {
-      throw new CliUsageError(
-         'missing-storybook-url',
-         'A Storybook base URL is required when --story-id is present.',
-      );
-   }
-
-   if (!options.storyId) {
-      throw new CliUsageError(
-         'missing-story-id',
-         'A story id is required when --storybook-url is present.',
-      );
-   }
-}
-
 function buildReportTarget(
    resolved: Awaited<ReturnType<typeof resolveDocumentTarget>>,
 ): VerificationReport['target'] {
-   if (resolved.target.kind === 'story') {
-      return {
-         kind: 'story',
-         value: resolved.target.value,
-         resolvedUrl: resolved.resolvedUrl,
-         storybookBaseUrl: resolved.storybookBaseUrl,
-      };
-   }
-
    return {
       kind: 'url',
       value: resolved.target.value,
@@ -127,51 +152,12 @@ function toCliTarget(
    };
 }
 
-async function resolveStorybookCliTarget(options: {
-   storybookUrl?: string;
-   storyId?: string;
-}): Promise<ResolvedCliTarget> {
-   requireStorybookPair(options);
-   const storybookUrl = options.storybookUrl;
-   const storyId = options.storyId;
-   if (!storybookUrl || !storyId) {
-      throw new CliUsageError(
-         'missing-target',
-         'Provide either --url or --storybook-url with --story-id.',
-      );
-   }
-   return toCliTarget(await resolveDocumentTarget({ storybookUrl, storyId }));
-}
-
-function validateNoConflictingInputs(options: {
-   url?: string;
-   storybookUrl?: string;
-   storyId?: string;
-}): void {
-   if (options.url && hasStorybookInput(options)) {
-      throw new CliUsageError(
-         'conflicting-target-inputs',
-         'Use either --url or --storybook-url with --story-id, not both.',
-      );
-   }
-}
-
+// Fallow-ignore-next-line unused-export
 export async function resolveCliTarget(options: {
    url?: string;
-   storybookUrl?: string;
-   storyId?: string;
 }): Promise<ResolvedCliTarget> {
-   validateNoConflictingInputs(options);
-
-   if (hasStorybookInput(options)) {
-      return resolveStorybookCliTarget(options);
-   }
-
    if (!options.url) {
-      throw new CliUsageError(
-         'missing-target',
-         'Provide either --url or --storybook-url with --story-id.',
-      );
+      throw new CliUsageError('missing-target', 'Provide a --url to resolve the target.');
    }
 
    return toCliTarget(await resolveDocumentTarget({ url: options.url }));
@@ -179,10 +165,8 @@ export async function resolveCliTarget(options: {
 
 export async function resolveOptionalCliTarget(options: {
    url?: string;
-   storybookUrl?: string;
-   storyId?: string;
 }): Promise<ResolvedCliTarget | undefined> {
-   if (!options.url && !options.storybookUrl && !options.storyId) {
+   if (!options.url) {
       return undefined;
    }
 
@@ -207,6 +191,7 @@ function countSelectors(options: {
    return count;
 }
 
+// Fallow-ignore-next-line unused-export
 export function resolveRunAxeSelection(options: {
    criterion?: string;
    level?: string;

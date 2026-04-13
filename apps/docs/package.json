@@ -5,12 +5,11 @@
    "type": "module",
    "scripts": {
       "build": "astro build",
-      "dev": "astro dev",
+      "dev": "astro dev --host",
       "preview": "astro preview",
       "typecheck": "astro-check"
    },
    "dependencies": {
-      "@astrojs/starlight": "^0.38.2",
       "astro": "^6.1.4"
    },
    "devDependencies": {

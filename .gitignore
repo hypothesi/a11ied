@@ -5,6 +5,7 @@ dist
 .astro
 .turbo
 .a11ied
+.fallow
 *.tsbuildinfo
 
 # Beads / Dolt files (added by bd init)

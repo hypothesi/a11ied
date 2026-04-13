@@ -31,6 +31,21 @@ async function assertWcagLevels(): Promise<void> {
 }
 
 async function assertWcagCriteria(): Promise<void> {
+   const allResult = await runCli(['wcag', 'criteria', '--version', '2.1', '--json']);
+   const allCriteria = parseJsonOutput(allResult.stdout);
+   expect(allResult.status).toBe(EXIT_SUCCESS);
+   expect(allCriteria.ok).toBe(true);
+   expect((allCriteria.result as { level: string }).level).toBe('all');
+   const allEntries = (
+      allCriteria.result as { criteria: Array<{ wcagVersion: string; level: string }> }
+   ).criteria;
+   expect(allEntries.every((entry) => entry.wcagVersion === '2.1')).toBe(true);
+   expect([...new Set(allEntries.map((entry) => entry.level))].sort()).toEqual([
+      'A',
+      'AA',
+      'AAA',
+   ]);
+
    const result = await runCli([
       'wcag',
       'criteria',

@@ -1,9 +1,9 @@
 import type { Command } from 'commander';
 import type { Platform } from '#contracts';
 import {
+   addAllowVirtualOption,
    addJsonOption,
    addRecordingOption,
-   addStorybookTargetOptions,
    addTargetOption,
    addVerboseOption,
    addWcagVersionOption,
@@ -78,7 +78,8 @@ async function handleCriterionVerify(
    criterion: string,
    options: VerifyCommandOptions,
 ): Promise<VerifyCommandResult> {
-   const { target, resolved, defaulted, warning } = await resolveVerificationContext(options);
+   const { target, resolved, defaulted, warning } =
+      await resolveVerificationContext(options);
    const verifyOptions = buildCriterionVerifyOptions({
       criterion,
       resolved,
@@ -106,9 +107,9 @@ async function handleCriterionVerify(
 function buildCriterionCommand(verifyCommand: Command): Command {
    return addVerboseOption(
       addJsonOption(
-         addTargetOption(
-            addWcagVersionOption(
-               addStorybookTargetOptions(
+         addAllowVirtualOption(
+            addTargetOption(
+               addWcagVersionOption(
                   addRecordingOption(
                      verifyCommand
                         .command('criterion <criterion>')

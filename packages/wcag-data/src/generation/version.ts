@@ -128,7 +128,7 @@ function resolveSourceUrls(input: {
    return [...input.sourceUrls];
 }
 
-export function buildManifestEntries(input: {
+function buildManifestEntries(input: {
    artifactBodies: Array<{ fileName: string; body: string }>;
    version: WcagVersion;
    criteriaFileNames: string[];

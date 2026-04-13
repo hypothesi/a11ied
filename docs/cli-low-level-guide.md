@@ -5,7 +5,7 @@ This is the current shipped CLI surface.
 Top-level commands:
 
 - `wcag`: local WCAG lookup, search, and coverage data
-- `inspect`: explain which criteria look relevant for a page or Storybook story
+- `inspect`: explain which criteria look relevant for a page
 - `drive`: low-level screen reader control through a stable session
 - `doctor`: show runtime support, browser policy, and recording diagnostics
 - `run axe`: run `axe-core`
@@ -57,7 +57,7 @@ node packages/cli/dist/cli.js inspect criterion 4.1.3 --url http://127.0.0.1:617
 Start a session, keep the `sessionId`, then drive it:
 
 ```sh
-node packages/cli/dist/cli.js drive start --target virtual --url http://127.0.0.1:6173/basic-page.html --json
+node packages/cli/dist/cli.js drive start --target virtual --allow-virtual --url http://127.0.0.1:6173/basic-page.html --json
 node packages/cli/dist/cli.js drive status --session <sessionId> --json
 node packages/cli/dist/cli.js drive next --session <sessionId> --json
 node packages/cli/dist/cli.js drive previous --session <sessionId> --json
@@ -104,36 +104,19 @@ Current built-in pattern ids:
 Examples:
 
 ```sh
-node packages/cli/dist/cli.js run pattern landmark_sequence --target virtual --url http://127.0.0.1:6173/basic-page.html --json
-node packages/cli/dist/cli.js run pattern status_message_probe --target virtual --url http://127.0.0.1:6173/status-message.html --json
-node packages/cli/dist/cli.js run pattern dialog_probe --target virtual --url http://127.0.0.1:6173/dialog.html --json
-node packages/cli/dist/cli.js run pattern focus_obscured_probe --target virtual --url http://127.0.0.1:6173/focus-obscured.html --json
-node packages/cli/dist/cli.js run pattern auth_flow_probe --target virtual --url http://127.0.0.1:6173/auth-login.html --json
+node packages/cli/dist/cli.js run pattern landmark_sequence --target virtual --allow-virtual --url http://127.0.0.1:6173/basic-page.html --json
+node packages/cli/dist/cli.js run pattern status_message_probe --target virtual --allow-virtual --url http://127.0.0.1:6173/status-message.html --json
+node packages/cli/dist/cli.js run pattern dialog_probe --target virtual --allow-virtual --url http://127.0.0.1:6173/dialog.html --json
+node packages/cli/dist/cli.js run pattern focus_obscured_probe --target virtual --allow-virtual --url http://127.0.0.1:6173/focus-obscured.html --json
+node packages/cli/dist/cli.js run pattern auth_flow_probe --target virtual --allow-virtual --url http://127.0.0.1:6173/auth-login.html --json
 ```
 
 ## verify
 
 ```sh
-node packages/cli/dist/cli.js verify criterion 4.1.3 --target virtual --url http://127.0.0.1:6173/status-message.html --json
-node packages/cli/dist/cli.js verify criterion 3.3.8 --target virtual --url http://127.0.0.1:6173/auth-login.html --json
-node packages/cli/dist/cli.js verify level AA --target virtual --url http://127.0.0.1:6173/basic-page.html --json
-```
-
-## Storybook fixture server
-
-Serve the Storybook fixture in this repo:
-
-```sh
-python3 -m http.server 6006 --bind 127.0.0.1 --directory /Users/mluedke/code/personal/a11ied/packages/storybook/test-fixtures
-```
-
-Then run:
-
-```sh
-node packages/cli/dist/cli.js inspect applicable --storybook-url http://127.0.0.1:6006 --story-id forms-login--default --json
-node packages/cli/dist/cli.js drive start --target virtual --storybook-url http://127.0.0.1:6006 --story-id dialogs-confirm-delete--default --json
-node packages/cli/dist/cli.js run axe --storybook-url http://127.0.0.1:6006 --story-id forms-login--default --criterion 4.1.2 --json
-node packages/cli/dist/cli.js verify criterion 4.1.3 --target virtual --storybook-url http://127.0.0.1:6006 --story-id status-updates--default --json
+node packages/cli/dist/cli.js verify criterion 4.1.3 --target virtual --allow-virtual --url http://127.0.0.1:6173/status-message.html --json
+node packages/cli/dist/cli.js verify criterion 3.3.8 --target virtual --allow-virtual --url http://127.0.0.1:6173/auth-login.html --json
+node packages/cli/dist/cli.js verify level AA --target virtual --allow-virtual --url http://127.0.0.1:6173/basic-page.html --json
 ```
 
 ## MCP
@@ -144,31 +127,33 @@ node packages/cli/dist/cli.js mcp
 
 The MCP server exposes 10 tools:
 
-| Tool | Purpose |
-|---|---|
-| `doctor` | Runtime environment details |
-| `wcag_lookup` | Look up a criterion (optionally with coverage data) |
-| `wcag_search` | Search criteria by keyword |
-| `wcag_levels` | List criteria at a conformance level |
-| `inspect` | Inspect applicable criteria for a URL/story (optionally for one criterion) |
-| `driver_session` | Start, query status, or stop an accessibility-driver session |
-| `driver_action` | Run a single action (next, previous, read, key, etc.) against a driver session |
-| `run_axe` | Run axe-core against a target |
-| `run_pattern` | Run ARIA interaction patterns against a target |
-| `verify` | Verify a single criterion or full conformance level |
+| Tool             | Purpose                                                                        |
+| ---------------- | ------------------------------------------------------------------------------ |
+| `doctor`         | Runtime environment details                                                    |
+| `wcag_lookup`    | Look up a criterion (optionally with coverage data)                            |
+| `wcag_search`    | Search criteria by keyword                                                     |
+| `wcag_levels`    | List criteria at a conformance level                                           |
+| `inspect`        | Inspect applicable criteria for a URL (optionally for one criterion)           |
+| `driver_session` | Start, query status, or stop an accessibility-driver session                   |
+| `driver_action`  | Run a single action (next, previous, read, key, etc.) against a driver session |
+| `run_axe`        | Run axe-core against a target                                                  |
+| `run_pattern`    | Run ARIA interaction patterns against a target                                 |
+| `verify`         | Verify a single criterion or full conformance level                            |
 
 ### Real vs simulated screen readers
 
 On macOS the default target is **VoiceOver** (real). On Windows it is **NVDA** (real).
 If neither is available the target falls back to `virtual`, which is a **simulation** — it
 models screen reader behavior in memory but does not test real assistive technology.
+On macOS and Windows, `virtual` is allowed only when you opt in with `--allow-virtual`
+(CLI) or `allowVirtual=true` (MCP).
 
 Every `driver_session` start response includes a `targetType` field (`"real"` or `"simulated"`)
 so agents always know the fidelity of their results.
 
 For **real** screen reader sessions the agent must open a browser and navigate to the page
-*before* starting the session. The screen reader reads whatever browser window is focused.
-For **virtual** sessions, pass `url`/`storybookUrl`/`storyId` and a11ied injects HTML automatically.
+_before_ starting the session. The screen reader reads whatever browser window is focused.
+For **virtual** sessions, pass `url` and a11ied injects HTML automatically.
 
 ## Practical note
 

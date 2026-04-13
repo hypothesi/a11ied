@@ -2,14 +2,14 @@
 
 ## Summary
 
-Turn raw WCAG knowledge and execution evidence into useful outcomes. This sub-plan implements criterion and level verification, Storybook integration, MCP exposure, docs and Agent Skill guidance, and the CI and release work needed to ship the system with some confidence.
+Turn raw WCAG knowledge and execution evidence into useful outcomes. This sub-plan implements criterion and level verification, MCP exposure, docs and Agent Skill guidance, and the CI and release work needed to ship the system with some confidence.
 
 ## Objectives & Scope
 
-- In scope: verification orchestration, evidence and verdict schemas, Storybook bridge, MCP tools and resources, docs updates, Agent Skill updates, CI hardening, and release-path documentation.
+- In scope: verification orchestration, evidence and verdict schemas, MCP tools and resources, docs updates, Agent Skill updates, CI hardening, and release-path documentation.
 - In scope: criterion-level and level-level verification that preserves uncovered and manual-only criteria explicitly.
 - In scope: adoption work that teaches humans and agents how to use the tool without bluffing about compliance.
-- In scope: tying each testable verification, Storybook, MCP, docs, and release row to `specs/gherkin/09-12` with both automated tests and AI-agent manual runs.
+- In scope: tying each testable verification, MCP, docs, and release row to `specs/gherkin/09-12` with both automated tests and AI-agent manual runs.
 - Out of scope: redesigning the WCAG data engine, changing CLI driver contracts, or replacing the built-in execution patterns from earlier sub-plans.
 
 ## Assumptions & Open Questions
@@ -17,7 +17,6 @@ Turn raw WCAG knowledge and execution evidence into useful outcomes. This sub-pl
 - Assumptions:
 - The data engine from sub-plan 1 and the CLI plus driver layer from sub-plan 2 are available and stable enough to compose.
 - Verification must never collapse raw evidence into a fake single "compliant" boolean.
-- Storybook should reuse the same target abstraction as URL-based runs.
 - Open Questions:
 - None at this stage. Verification and release behavior are locked for `v0.3.0`.
 - Resolved Decisions:
@@ -31,8 +30,7 @@ Turn raw WCAG knowledge and execution evidence into useful outcomes. This sub-pl
 
 - FR-1: Implement criterion-level verification that resolves a criterion, checks applicability, chooses the right evidence path, runs it, and emits an explicit verdict.
 - FR-2: Implement level-based verification that expands A, AA, or AAA into criteria and aggregates results without hiding manual-only or uncovered rows.
-- FR-3: Reuse the same result and evidence model across CLI, Storybook, and MCP surfaces.
-- FR-4: Implement Storybook target resolution so stories can flow through inspect, drive, run, and verify paths.
+- FR-3: Reuse the same result and evidence model across CLI and MCP surfaces.
 - FR-5: Expose MCP tools and resources for lookup, applicability, driver control, execution, and verification without separate business logic.
 - FR-6: Expand docs and the Agent Skill so the workflow for criterion selection, driver use, and evidence interpretation is obvious.
 - FR-7: Add CI and release checks that prove the system still works end to end after changes.
@@ -47,7 +45,7 @@ Turn raw WCAG knowledge and execution evidence into useful outcomes. This sub-pl
 - NFR-4 (Accessibility): Verification reports, docs pages, and MCP text resources must remain readable and useful with screen readers.
 - NFR-5 (Observability): Every verification result must preserve sources used, procedures run, timing, and uncovered work.
 - NFR-6 (Reliability): CI must distinguish between broken setup, broken automation, and actual accessibility failures.
-- NFR-7 (Maintainability): Docs, MCP, CLI, and Storybook should all consume the same verification and evidence contracts.
+- NFR-7 (Maintainability): Docs, MCP, and CLI should all consume the same verification and evidence contracts.
 - NFR-8 (Traceability): Every completed row must point to the exact feature files, automated tests, and manual AI-agent runs that prove it.
 
 ## Architecture & Design Overview
@@ -63,7 +61,7 @@ wcag-engine + driver + execution results
    ---------------------------------
    |               |               |
    v               v               v
- CLI reports   Storybook bridge   MCP tools/resources
+ CLI reports   MCP tools/resources
                 |
                 v
          docs + skill guidance
@@ -92,7 +90,6 @@ wcag-engine + driver + execution results
    - `warnings`
    - `errors`
 - The verification layer must not invent its own criterion-to-procedure mapping. It must use the generated verification-strategy artifact from sub-plan 1.
-- Storybook should normalize story ids and iframe URLs into the same target abstraction used elsewhere.
 - MCP should expose both tools for active execution and resources for read-only standards material.
 - Decisions & trade-offs:
 - Prefer full criterion matrices over short "AA passed" summaries.
@@ -103,7 +100,7 @@ wcag-engine + driver + execution results
 
 Every row in this sub-plan is incomplete until all of the following are true:
 
-1. The row is mapped to one or more scenarios in `specs/gherkin/09-cli-verify.feature`, `10-storybook-integration.feature`, `11-mcp.feature`, or `12-docs-and-release.feature`.
+1. The row is mapped to one or more scenarios in `specs/gherkin/09-cli-verify.feature`, `11-mcp.feature`, or `12-docs-and-release.feature`.
 2. Automated implementation tests exist for the mapped scenarios.
 3. An AI agent has run a manual acceptance pass from the same feature file or files and recorded the run under `specs/manual-runs/<task-id>/`.
    If the row adds or changes any user-facing surface, that manual run must explicitly exercise the changed surface itself. Automated tests and `npm run standards` remain required, but they do not count as that surface exercise.
@@ -111,15 +108,14 @@ Every row in this sub-plan is incomplete until all of the following are true:
 
 ## Task Grid
 
-| Status | ID    | Task                                                 | Priority | Depends On                        | Acceptance Criteria                                                                                                                                                  |
-| ------ | ----- | ---------------------------------------------------- | -------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [ ]    | VI-01 | Lock evidence, verdict, and report schemas           | H        | R-02, R-03                        | Shared verification payloads are stable across CLI, Storybook, and MCP, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass              |
-| [ ]    | VI-02 | Implement criterion-level verification orchestration | H        | VI-01, R-02, R-03                 | `verify criterion` produces explicit verdicts with evidence and coverage notes, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass      |
-| [ ]    | VI-03 | Implement level-based verification aggregation       | H        | VI-02                             | `verify level` emits a criterion matrix with aggregate summaries and uncovered rows, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
-| [ ]    | VI-04 | Implement Storybook bridge and target resolution     | M        | VI-01, R-03                       | Stories can be inspected, driven, run, and verified through the shared runtime, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass      |
-| [ ]    | VI-05 | Implement MCP tools and resources                    | M        | VI-01, VI-02, VI-03, R-03         | MCP exposes knowledge, driver, execution, and verification with contract parity, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass     |
-| [ ]    | VI-06 | Expand docs site and Agent Skill                     | M        | VI-02, VI-03, VI-04, VI-05        | Docs and skill teach the workflow and call out evidence limits clearly, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass              |
-| [ ]    | VI-07 | Harden CI, smoke tests, and release path             | M        | VI-02, VI-03, VI-04, VI-05, VI-06 | Release readiness has repeatable smoke tests, mapped Gherkin tests, AI-agent manual run, and passing standards gate                                                  |
+| Status | ID    | Task                                                 | Priority | Depends On                 | Acceptance Criteria                                                                                                                                                  |
+| ------ | ----- | ---------------------------------------------------- | -------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [ ]    | VI-01 | Lock evidence, verdict, and report schemas           | H        | R-02, R-03                 | Shared verification payloads are stable across CLI and MCP, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass                          |
+| [ ]    | VI-02 | Implement criterion-level verification orchestration | H        | VI-01, R-02, R-03          | `verify criterion` produces explicit verdicts with evidence and coverage notes, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass      |
+| [ ]    | VI-03 | Implement level-based verification aggregation       | H        | VI-02                      | `verify level` emits a criterion matrix with aggregate summaries and uncovered rows, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass |
+| [ ]    | VI-05 | Implement MCP tools and resources                    | M        | VI-01, VI-02, VI-03, R-03  | MCP exposes knowledge, driver, execution, and verification with contract parity, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass     |
+| [ ]    | VI-06 | Expand docs site and Agent Skill                     | M        | VI-02, VI-03, VI-05        | Docs and skill teach the workflow and call out evidence limits clearly, mapped Gherkin tests exist, AI-agent manual run is recorded, and standards pass              |
+| [ ]    | VI-07 | Harden CI, smoke tests, and release path             | M        | VI-02, VI-03, VI-05, VI-06 | Release readiness has repeatable smoke tests, mapped Gherkin tests, AI-agent manual run, and passing standards gate                                                  |
 
 ## Task Details
 
@@ -188,21 +184,6 @@ Every row in this sub-plan is incomplete until all of the following are true:
 5. Add tests for mixed outcomes where one level contains passes, fails, non-applicable rows, and manual-only rows.
 6. Implement automated tests for the mapped scenarios in `specs/gherkin/09-cli-verify.feature`.
 7. Run an AI-agent manual acceptance pass from that feature file and record it under `specs/manual-runs/VI-03/`.
-8. Verify `npm run standards` passes before closing the row.
-
-### VI-04 - Implement Storybook bridge and target resolution
-
-**Goal:** Make local component work flow through the same verification engine as page-level targets.
-
-**Step-by-step instructions:**
-
-1. Implement Storybook target resolution from `--storybook-url <baseUrl> --story-id <id>` to iframe URL and page metadata by reusing the same internal Playwright-backed browser helper used for URL targets.
-2. Reuse the same target abstraction used by URL-based commands.
-3. Allow Storybook metadata or parameters to supply optional applicability hints.
-4. Ensure `inspect`, `drive`, `run`, and `verify` can all accept Storybook targets through the same core orchestration path.
-5. Add a minimal Storybook fixture app and integration tests.
-6. Implement automated tests for the mapped scenarios in `specs/gherkin/10-storybook-integration.feature`.
-7. Run an AI-agent manual acceptance pass from that feature file and record it under `specs/manual-runs/VI-04/`.
 8. Verify `npm run standards` passes before closing the row.
 
 ### VI-05 - Implement MCP tools and resources
@@ -289,20 +270,18 @@ npm run standards
 
 - `packages/contracts/src/*`: evidence, verdict, and report schemas.
 - `packages/core/src/*`: verification orchestration and target reuse logic.
-- `packages/core/src/browser/*`: shared Playwright-backed browser target helper reused by URL and Storybook verification flows.
-- `packages/storybook/src/*`: Storybook target resolution and metadata plumbing.
+- `packages/core/src/browser/*`: shared Playwright-backed browser target helper reused by URL verification flows.
 - `packages/mcp-server/src/*`: tool handlers, resources, and smoke-test fixtures.
 - `apps/docs/src/pages/*`: docs for verification, driver use, MCP workflows, and coverage semantics.
 - `skills/a11ied/SKILL.md`: updated skill instructions for the final runtime workflow.
 - `.github/workflows/*`: CI steps for validation, smoke tests, and release readiness.
 - `specs/gherkin/traceability.md`: mapping between verification/integration rows and Gherkin scenarios.
-- `specs/manual-runs/VI-*/*`: AI-agent manual acceptance reports for verification, Storybook, MCP, docs, and release rows.
+- `specs/manual-runs/VI-*/*`: AI-agent manual acceptance reports for verification, MCP, docs, and release rows.
 
 ## Tests
 
 - Add criterion verification tests for purely automated, hybrid, manual-only, and uncovered criteria.
 - Add level verification tests that prove aggregate summaries do not hide failing or uncovered rows.
-- Add Storybook integration tests for inspect, drive, run, and verify paths.
 - Add MCP smoke tests for read-only lookup, driver actions, and verification calls.
 - Add docs build checks and skill regression review as part of release readiness.
 - Add cross-surface parity tests so CLI JSON and MCP tool payloads stay aligned.

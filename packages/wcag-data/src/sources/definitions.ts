@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { isRecord } from '../shared/utils.js';
 import type { RawSourceDefinition, WcagDataDirectories } from '../shared/types.js';
 
-export const packageRoot = resolve(import.meta.dirname, '../..');
+const packageRoot = resolve(import.meta.dirname, '../..');
 const esmRequire = createRequire(import.meta.url);
 export const axeCorePackage = esmRequire('axe-core/package.json') as { version: string };
 export const wcagVersions = ['2.2', '2.1'] as const;

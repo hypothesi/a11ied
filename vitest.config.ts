@@ -26,10 +26,6 @@ export default defineConfig({
             import.meta.dirname,
             'packages/mcp-server/src/index.ts',
          ),
-         '@a11ied/storybook': resolve(
-            import.meta.dirname,
-            'packages/storybook/src/index.ts',
-         ),
          '@a11ied/wcag-engine': resolve(
             import.meta.dirname,
             'packages/wcag-engine/src/index.ts',

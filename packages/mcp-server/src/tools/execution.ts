@@ -16,6 +16,7 @@ import {
    DEFAULT_WCAG_VERSION,
    activeAnnotations,
    createToolResponse,
+   ensureVirtualTargetAllowed,
    readOnlyAnnotations,
    resolveExecutionTarget,
    targetInputSchema,
@@ -83,7 +84,7 @@ function registerRunAxeTool(server: McpServer): void {
       'run_axe',
       {
          title: 'Run axe',
-         description: 'Run axe-core against a URL or Storybook story target.',
+         description: 'Run axe-core against a URL target.',
          inputSchema: axeSelectionInputSchema,
          outputSchema: axeRunResultSchema,
          annotations: { ...readOnlyAnnotations, openWorldHint: true },
@@ -96,6 +97,7 @@ const patternInputSchema = targetInputSchema.extend({
    patternId: interactionPatternIdSchema,
    target: platformSchema.optional(),
    sessionId: z.string().min(1).optional(),
+   allowVirtual: z.boolean().optional(),
 });
 
 type PatternToolInput = z.infer<typeof patternInputSchema>;
@@ -134,17 +136,19 @@ function registerRunPatternTool(server: McpServer): void {
       {
          title: 'Run pattern',
          description:
-            'Run a built-in interaction pattern against a URL or Storybook story target. ' +
+            'Run a built-in interaction pattern against a URL target. ' +
             'On macOS the default target is VoiceOver (real); on Windows it is NVDA (real). ' +
             'The "virtual" target is a SIMULATION that does not test real assistive technology. ' +
-            'Prefer real screen readers for accurate accessibility testing.',
+            'Set allowVirtual=true only when you explicitly want simulation.',
          inputSchema: patternInputSchema,
          outputSchema: interactionPatternResultSchema,
          annotations: activeAnnotations,
       },
       async (input) => {
-         const resolved = await resolveExecutionTarget(input);
+         const { allowVirtual, ...targetInput } = input;
+         const resolved = await resolveExecutionTarget(targetInput);
          const resolvedTarget = input.target ?? resolveDefaultTarget().target;
+         ensureVirtualTargetAllowed(resolvedTarget, allowVirtual);
          const patternInput = buildPatternInput(
             { ...input, target: resolvedTarget },
             resolved.resolvedUrl,

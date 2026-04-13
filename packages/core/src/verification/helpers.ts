@@ -12,9 +12,7 @@ import {
 } from '@a11ied/contracts';
 
 export {
-   createManualEvidence,
    createUncoveredWork,
-   getErrorCause,
    handleAxeScanError,
    handleAxeScanStep,
    handleManualReviewStep,
@@ -24,10 +22,6 @@ export {
 } from './procedure-handlers.js';
 
 export { buildFinalResult, buildNotApplicableResult } from './result-builders.js';
-
-export function createStrategyId(wcagVersion: string, criterionId: string): string {
-   return `wcag-${wcagVersion}:${criterionId}`;
-}
 
 export function createBaseSourceReferences(
    criterionId: string,

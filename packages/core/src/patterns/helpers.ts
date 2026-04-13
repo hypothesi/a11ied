@@ -8,7 +8,14 @@ import {
    type Platform,
    type SessionRecording,
 } from '@a11ied/contracts';
+import type { Page } from 'playwright';
 
+import {
+   bringBrowserPageToFront,
+   getActiveBrowserFocusTarget,
+   withBrowserPage,
+   withInteractiveBrowserPage,
+} from '../browser/helper.js';
 import {
    attachDocumentToDriverSession,
    runDriverSessionAction,
@@ -33,6 +40,7 @@ export interface PatternContext {
    stepLog: InteractionPatternStep[];
    assertions: InteractionPatternAssertion[];
    browserEvidence: InteractionPatternBrowserEvidence[];
+   providedPage?: Page;
 }
 
 export interface BrowserSnapshot {
@@ -71,7 +79,7 @@ export function addStep(options: AddStepOptions): void {
    }
 }
 
-export function addAssertion(options: AddAssertionOptions): void {
+function addAssertion(options: AddAssertionOptions): void {
    const base = {
       id: options.id,
       status: options.status,
@@ -120,14 +128,35 @@ export function addBooleanAssertion(options: {
 }
 
 export async function attachRenderedPage(
-   sessionId: string,
+   context: PatternContext,
    url: string,
-   page: { content(): Promise<string> },
+   page: {
+      content(): Promise<string>;
+      bringToFront?: () => Promise<void>;
+      title?: () => Promise<string>;
+   },
 ): Promise<void> {
-   await attachDocumentToDriverSession(sessionId, {
+   await attachDocumentToDriverSession(context.sessionId, {
       html: await page.content(),
       url,
    });
+   if (context.target !== 'virtual' && page.bringToFront) {
+      await bringBrowserPageToFront(page as Page);
+      const focusTarget = getActiveBrowserFocusTarget();
+      if (focusTarget) {
+         const title = page.title ? await page.title() : '';
+         const payload = {
+            ...focusTarget,
+         } as Record<string, unknown>;
+         if (title.trim().length > 0) {
+            payload.windowTitle = title;
+            payload.match = 'contains';
+         }
+         await runDriverSessionAction(context.sessionId, 'focus', {
+            payload,
+         });
+      }
+   }
 }
 
 async function walkDriverSteps(sessionId: string, steps: number): Promise<void> {
@@ -144,9 +173,24 @@ export async function collectDriverWalk(
    sessionId: string,
    steps: number,
 ): Promise<DriverActionResult> {
+   await runDriverSessionAction(sessionId, 'clear-logs');
    await runDriverSessionAction(sessionId, 'read');
    await walkDriverSteps(sessionId, steps);
    return await runDriverSessionAction(sessionId, 'logs');
+}
+
+export async function withPatternPage<TResult>(
+   context: PatternContext,
+   url: string,
+   callback: (page: Page) => Promise<TResult>,
+): Promise<TResult> {
+   if (context.providedPage) {
+      return await callback(context.providedPage);
+   }
+   if (context.target === 'virtual') {
+      return await withBrowserPage(url, callback);
+   }
+   return await withInteractiveBrowserPage(url, callback);
 }
 
 export interface EvaluablePage {

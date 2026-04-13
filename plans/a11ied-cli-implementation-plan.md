@@ -8,7 +8,7 @@ Break the original single plan into a staged roadmap with three focused sub-plan
 
 - In scope: define a master roadmap that sequences the `a11ied` build into coherent implementation slices.
 - In scope: split the work into sub-plans with tighter scopes, clearer dependencies, and more detailed task steps.
-- In scope: preserve one shared architecture across CLI, MCP, Storybook, docs, and the Agent Skill.
+- In scope: preserve one shared architecture across CLI, MCP, docs, and the Agent Skill.
 - In scope: keep low-level accessibility-driver work explicit rather than burying it inside higher-level WCAG verification tasks.
 - In scope: make `specs/gherkin/` the acceptance source of truth for testable behavior and require implementation traceability back to those feature files.
 - Out of scope: replacing the research files, changing the product direction, or implementing the planned packages in this document-only pass.
@@ -31,7 +31,7 @@ Break the original single plan into a staged roadmap with three focused sub-plan
 
 - FR-1: The roadmap must split the program into sub-plans that can be executed with minimal ambiguity.
 - FR-2: The roadmap must define dependencies between sub-plans so package and interface ordering stay stable.
-- FR-3: The roadmap must keep CLI, MCP, Storybook, docs, and skill work tied to one shared runtime model.
+- FR-3: The roadmap must keep CLI, MCP, docs, and skill work tied to one shared runtime model.
 - FR-4: The roadmap must treat low-level accessibility-driver work as a first-class deliverable.
 - FR-5: The roadmap must point to the detailed sub-plan document for each implementation slice.
 - FR-6: The roadmap must require every testable implementation item to map to one or more feature files under `specs/gherkin/`.
@@ -66,7 +66,7 @@ roadmap
 - Data flow, key interfaces, schemas, external services:
 - Sub-plan 1 owns `packages/wcag-data`, `packages/wcag-engine`, normalized artifacts, lookup, search, and coverage resolution.
 - Sub-plan 2 owns the public CLI surface for `wcag`, `inspect`, `drive`, and `run`, plus low-level accessibility-driver sessions and reusable execution patterns.
-- Sub-plan 3 owns verification orchestration, Storybook bridging, MCP tools and resources, docs, skill guidance, CI hardening, and release framing.
+- Sub-plan 3 owns verification orchestration, MCP tools and resources, docs, skill guidance, CI hardening, and release framing.
 - The shared contracts package sits underneath all three sub-plans and should only change in controlled, reviewed steps.
 - Decisions & trade-offs:
 - Prefer one roadmap plus multiple sub-plans over one giant plan that mixes package design, CLI UX, verification logic, and release work in the same task list.
@@ -103,7 +103,7 @@ specs/gherkin/traceability.md
 | [✓]    | R-01 | Establish scaffold and research baseline                     | H        | —                | Monorepo, research notes, and initial design direction exist and are verified              |
 | [ ]    | R-02 | Execute sub-plan 1: foundation and WCAG data                 | H        | R-01             | WCAG source sync, coverage artifacts, contracts, and engine APIs are stable                |
 | [ ]    | R-03 | Execute sub-plan 2: CLI, driver, and execution               | H        | R-02             | CLI surfaces and driver primitives work against the stable engine contracts                |
-| [ ]    | R-04 | Execute sub-plan 3: verification, integrations, and adoption | H        | R-02, R-03       | Verification, Storybook, MCP, docs, and release readiness are wired to the same runtime    |
+| [ ]    | R-04 | Execute sub-plan 3: verification, integrations, and adoption | H        | R-02, R-03       | Verification, MCP, docs, and release readiness are wired to the same runtime               |
 | [ ]    | R-05 | Run cross-plan integration and milestone review              | M        | R-02, R-03, R-04 | The combined system passes smoke tests and the roadmap can close with clear residual risks |
 
 ## Task Details
@@ -160,8 +160,8 @@ npm run build
 1. Open and execute [plans/a11ied-verification-integrations-and-adoption-plan.md](plans/a11ied-verification-integrations-and-adoption-plan.md).
 2. Reuse the contracts and driver layer from the earlier sub-plans instead of inventing integration-specific shapes.
 3. Keep criterion-level evidence explicit so level-based verification never hides uncovered or manual-only criteria.
-4. Finish docs, skill, MCP, and Storybook work against the same reporting model.
-5. Do not mark any verification, Storybook, MCP, docs, or release row complete until its mapped Gherkin scenarios have both automated coverage and an AI-agent manual run, and `npm run standards` passes.
+4. Finish docs, skill, and MCP work against the same reporting model.
+5. Do not mark any verification, MCP, docs, or release row complete until its mapped Gherkin scenarios have both automated coverage and an AI-agent manual run, and `npm run standards` passes.
 
 ### R-05 - Run cross-plan integration and milestone review
 
@@ -182,7 +182,6 @@ npm run build
    - CLI WCAG lookup
    - CLI driver action
    - CLI verification flow
-   - Storybook target resolution
    - MCP tool invocation
 3. Verify that every completed implementation row in the sub-plans links to automated tests and an AI-agent manual run based on the mapped Gherkin features.
 4. Run `npm run standards`.
@@ -194,7 +193,7 @@ npm run build
 - `plans/a11ied-cli-implementation-plan.md`: master roadmap that sequences the work and points to detailed sub-plans.
 - `plans/a11ied-foundation-and-wcag-data-plan.md`: detailed plan for data sync, normalization, contracts, and the WCAG engine.
 - `plans/a11ied-cli-driver-and-execution-plan.md`: detailed plan for CLI UX, driver primitives, and reusable execution procedures.
-- `plans/a11ied-verification-integrations-and-adoption-plan.md`: detailed plan for verification, Storybook, MCP, docs, skill, and release readiness.
+- `plans/a11ied-verification-integrations-and-adoption-plan.md`: detailed plan for verification, MCP, docs, skill, and release readiness.
 - `specs/gherkin/traceability.md`: task-to-feature traceability matrix used to prove completion gates.
 - `specs/manual-runs/*`: AI-agent manual acceptance reports tied to the same feature files as the automated tests.
 

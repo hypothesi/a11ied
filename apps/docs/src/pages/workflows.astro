@@ -20,8 +20,8 @@ import { docsLinks } from '../lib/nav';
          </p>
          <pre><code>a1 wcag show 4.1.3 --json
 a1 inspect criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json
-a1 run pattern status_message_probe --target virtual --url http://127.0.0.1:6173/status-message.html --json
-a1 verify criterion 4.1.3 --target virtual --url http://127.0.0.1:6173/status-message.html --json</code></pre>
+a1 run pattern status_message_probe --target virtual --allow-virtual --url http://127.0.0.1:6173/status-message.html --json
+a1 verify criterion 4.1.3 --target virtual --allow-virtual --url http://127.0.0.1:6173/status-message.html --json</code></pre>
       </div>
       <div class="split-aside">
          <div class="tag">see also</div>
@@ -43,7 +43,7 @@ a1 verify criterion 4.1.3 --target virtual --url http://127.0.0.1:6173/status-me
             The <code>verify level</code> command expands the full criterion matrix and runs each
             applicable check.
          </p>
-         <pre><code>a1 verify level AA --target virtual --url http://127.0.0.1:6173/basic-page.html --json</code></pre>
+         <pre><code>a1 verify level AA --target virtual --allow-virtual --url http://127.0.0.1:6173/basic-page.html --json</code></pre>
       </div>
       <div class="split-aside">
          <div class="tag">important</div>
@@ -64,7 +64,8 @@ a1 verify criterion 4.1.3 --target virtual --url http://127.0.0.1:6173/status-me
             Use the driver when you need direct control over the screen reader — navigating elements,
             sending keystrokes, and reading spoken output.
          </p>
-         <pre><code>a1 drive start --target virtual --url http://127.0.0.1:6173/basic-page.html --json
+         <pre><code>a1 drive start --json
+a1 drive focus --session &lt;sessionId&gt; --app "Google Chrome" --json
 a1 drive next --session &lt;sessionId&gt; --json
 a1 drive read --session &lt;sessionId&gt; --json
 a1 drive stop --session &lt;sessionId&gt; --json</code></pre>
@@ -75,27 +76,27 @@ a1 drive stop --session &lt;sessionId&gt; --json</code></pre>
             Driver transcripts capture what the screen reader said. To make a conformance claim,
             follow up with the <a href="/verification-semantics">verification</a> layer.
          </p>
+         <p class="aside-note">
+            If you want a simulated run, add <code>--target virtual</code>,
+            <code>--allow-virtual</code>, and a <code>--url</code> so the HTML can be loaded
+            automatically.
+         </p>
       </div>
    </section>
 
-   <section class="split panel" id="agent-and-storybook">
+   <section class="split panel" id="agent-and-mcp">
       <div class="stack">
          <div class="panel-head">
             <p class="panel-kicker">Workflow 4</p>
-            <h2>Use it from an agent or Storybook</h2>
+            <h2>Use it from an agent</h2>
          </div>
          <p>
-            The MCP server exposes a11ied to AI agents and editors. The Storybook integration lets you
-            test individual components without a full app.
+            The MCP server exposes a11ied to AI agents and editors.
          </p>
          <div class="workflow-list">
             <div class="workflow-row">
                <strong><a href="/mcp-usage">MCP usage</a></strong>
                <span>Tool calls and read-only resources for editors and AI agents.</span>
-            </div>
-            <div class="workflow-row">
-               <strong><a href="/storybook-usage">Storybook usage</a></strong>
-               <span>Test Storybook stories as accessibility targets.</span>
             </div>
          </div>
       </div>
