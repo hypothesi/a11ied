@@ -36,10 +36,7 @@ export const docsLinks: DocSection[] = [
       ],
    },
    {
-      title: 'Packages and release',
-      links: [
-         { href: '/api-reference', label: 'API reference' },
-         { href: '/release-checklist', label: 'Release checklist' },
-      ],
+      title: 'Packages',
+      links: [{ href: '/api-reference', label: 'API reference' }],
    },
 ];

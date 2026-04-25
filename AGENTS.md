@@ -2,6 +2,8 @@
 
 This project uses **bd** (beads) for issue tracking. Run `bd onboard` to get started.
 
+Maintainer release workflow reference: `docs/maintainer-release-checklist.md`
+
 ## Quick Reference
 
 ```bash

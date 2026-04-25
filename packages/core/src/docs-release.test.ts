@@ -4,6 +4,10 @@ import { resolve } from 'node:path';
 
 const rootDir = resolve(import.meta.dirname, '../../..');
 const docsPagesDir = resolve(rootDir, 'apps/docs/src/pages');
+const maintainerReleaseChecklistPath = resolve(
+   rootDir,
+   'docs/maintainer-release-checklist.md',
+);
 const skillPath = resolve(rootDir, 'skills/a11ied/SKILL.md');
 const ciWorkflowPath = resolve(rootDir, '.github/workflows/ci.yml');
 const publishWorkflowPath = resolve(rootDir, '.github/workflows/publish.yml');
@@ -84,10 +88,7 @@ function expectWorkflowSteps(): void {
 }
 
 function expectReleaseChecklist(): void {
-   const releaseChecklist = readFileSync(
-      resolve(docsPagesDir, 'release-checklist.astro'),
-      'utf8',
-   );
+   const releaseChecklist = readFileSync(maintainerReleaseChecklistPath, 'utf8');
    expect(releaseChecklist).toContain('manual macOS VoiceOver smoke pass');
    expect(releaseChecklist).toContain('manual Windows NVDA smoke pass');
    expect(releaseChecklist).toContain('Wait for all CI checks to pass');
@@ -115,6 +116,7 @@ function expectPublicSurfaceDocs(): void {
    expectSurfaceDoc('recording-sessions.astro', 'voiceover');
    expectSurfaceDoc('recording-sessions.astro', 'doctor');
    expectSurfaceDoc('recording-sessions.astro', 'npx playwright install chromium');
+   expect(existsSync(resolve(docsPagesDir, 'release-checklist.astro'))).toBe(false);
 }
 
 function expectReleaseReadinessRecord(): void {
