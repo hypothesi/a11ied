@@ -1,7 +1,14 @@
 {
    "$schema": "./node_modules/oxlint/configuration_schema.json",
-   "plugins": ["typescript", "unicorn", "oxc", "node"],
-   "jsPlugins": ["oxlint-plugin-complexity"],
+   "plugins": [
+      "typescript",
+      "unicorn",
+      "oxc",
+      "node"
+   ],
+   "jsPlugins": [
+      "oxlint-plugin-complexity"
+   ],
    "categories": {
       "correctness": "error",
       "pedantic": "error",
@@ -18,11 +25,37 @@
       "array-type": "off",
       "sort-imports": "off",
       "prefer-destructuring": "off",
+      "no-continue": "off",
+      "no-ternary": "off",
+      "no-nested-ternary": "error",
+      "max-lines": [
+         "error",
+         {
+            "max": 350
+         }
+      ],
+      "max-lines-per-function": [
+         "error",
+         {
+            "max": 60
+         }
+      ],
+      "max-statements": [
+         "error",
+         {
+            "max": 15
+         }
+      ],
       "no-undefined": "off",
       "no-magic-numbers": [
          "error",
          {
-            "ignore": [0, -1, 1, 10]
+            "ignore": [
+               0,
+               -1,
+               1,
+               10
+            ]
          }
       ],
       "func-style": "off",
