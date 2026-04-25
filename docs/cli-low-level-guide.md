@@ -63,6 +63,8 @@ node packages/cli/dist/cli.js drive next --session <sessionId> --json
 node packages/cli/dist/cli.js drive previous --session <sessionId> --json
 node packages/cli/dist/cli.js drive key --session <sessionId> --keys Tab --json
 node packages/cli/dist/cli.js drive type --session <sessionId> --text "hello world" --json
+node packages/cli/dist/cli.js drive commands --target voiceover --command-set voiceover-commander
+node packages/cli/dist/cli.js drive perform move-right --session <sessionId> --json
 node packages/cli/dist/cli.js drive read --session <sessionId> --json
 node packages/cli/dist/cli.js drive logs --session <sessionId> --json
 node packages/cli/dist/cli.js drive checkpoint --session <sessionId> --label smoke-1 --json
@@ -75,6 +77,16 @@ Real targets:
 node packages/cli/dist/cli.js drive start --target voiceover --url http://127.0.0.1:6173/basic-page.html --json
 node packages/cli/dist/cli.js drive start --target nvda --url http://127.0.0.1:6173/basic-page.html --json
 ```
+
+Named command sets:
+
+- `portable`: stable aliases such as `next`, `previous`, `interact`, and `activate`
+- `voiceover-commander`: Guidepup VoiceOver Commander commands, used by default for VoiceOver
+- `voiceover-keycode`: Guidepup VoiceOver keyboard command objects
+- `nvda-keycode`: Guidepup NVDA keyboard command objects, used by default for NVDA
+
+Use `drive commands` for the complete list. `help-all` also includes the complete list.
+Invalid target and command-set combinations fail before any screen reader command runs.
 
 ## run axe
 

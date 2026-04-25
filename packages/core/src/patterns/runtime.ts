@@ -201,8 +201,8 @@ export async function runInteractionPattern(
                process.cwd(),
                options.recordingPath,
             );
-            let result: InteractionPatternResult | undefined = undefined;
-            let stopResult: StopSessionResult = undefined;
+            let result;
+            let stopResult;
             try {
                result = await runner(
                   buildContext(

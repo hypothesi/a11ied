@@ -8,7 +8,7 @@ import { launchAutomationBrowser } from './policy.js';
 import { createBrowserAutomationPolicy } from './detection.js';
 
 const SHARED_BROWSER_IDLE_MS = 250;
-const BROWSER_OPEN_TIMEOUT_MS = 5_000;
+const BROWSER_OPEN_TIMEOUT_MS = 5000;
 
 let sharedBrowser: Browser | undefined = globalThis.undefined;
 let sharedBrowserPromise: Promise<Browser> | undefined = globalThis.undefined;
@@ -99,7 +99,7 @@ function waitForChildExit(
 }
 
 function escapeAppleScriptString(value: string): string {
-   return value.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+   return value.replaceAll('\\', String.raw`\\`).replaceAll('"', String.raw`\"`);
 }
 
 async function openUrlOnMac(

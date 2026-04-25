@@ -33,6 +33,19 @@ export {
 } from './driver/runtime.js';
 export { resolveDefaultTarget, resolveTargetType } from './driver/default-target.js';
 export type { TargetType } from './driver/default-target.js';
+export {
+   DriverCommandError,
+   driverCommandSets,
+   isDriverCommandSet,
+   listDriverCommands,
+   parseDriverCommandSet,
+   resolveDriverCommand,
+   type ConcreteDriverCommandSet,
+   type DriverCommandList,
+   type DriverCommandSet,
+   type ListDriverCommandsOptions,
+   type SerializableDriverCommand,
+} from '@a11ied/guidepup';
 export { runAxe } from './axe/runtime.js';
 export { runInteractionPattern } from './patterns/runtime.js';
 export { verifyCriterion, verifyLevel } from './verification/runtime.js';

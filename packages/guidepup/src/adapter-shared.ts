@@ -8,6 +8,7 @@ import {
    type DriverStateSnapshot,
    type Platform,
 } from '@a11ied/contracts';
+import type { SerializableDriverCommand } from './command-registry.js';
 
 /** Lists the driver actions exposed by the shipped adapter surface. */
 export const driverCapabilities: DriverCapability[] = [
@@ -20,6 +21,7 @@ export const driverCapabilities: DriverCapability[] = [
    'previous',
    'key',
    'type',
+   'perform',
    'interact',
    'stop-interacting',
    'click-current-item',
@@ -41,6 +43,10 @@ export interface DriverAdapter {
    previous(): Promise<void>;
    press(keys: string): Promise<void>;
    type(text: string): Promise<void>;
+   performCommand(command: {
+      command: string;
+      commandSet?: string;
+   }): Promise<SerializableDriverCommand & { requestedCommand: string }>;
    interact(): Promise<void>;
    stopInteracting(): Promise<void>;
    activateCurrentItem(): Promise<void>;

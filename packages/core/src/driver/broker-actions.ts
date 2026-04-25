@@ -4,7 +4,7 @@ import {
    type DriverCheckpoint,
    type DriverFocusTarget,
 } from '@a11ied/contracts';
-import type { createDriverAdapter } from '@a11ied/guidepup';
+import { DriverCommandError, type createDriverAdapter } from '@a11ied/guidepup';
 
 import { CliUsageError } from '../errors/cli-errors.js';
 import type { ActionContext, ActionExecutionResult } from './broker-types.js';
@@ -14,6 +14,7 @@ const SPEECH_TRIGGERING_ACTIONS = new Set([
    'previous',
    'key',
    'type',
+   'perform',
    'interact',
    'stop-interacting',
    'click-current-item',
@@ -66,6 +67,50 @@ async function handleTypeAction(
 ): Promise<ActionExecutionResult> {
    await context.adapter.type(String(payload?.text ?? ''));
    return createPayloadResult(payload);
+}
+
+function parsePerformPayload(payload?: Record<string, unknown>): {
+   command: string;
+   commandSet?: string;
+} {
+   const command = String(payload?.command ?? '').trim();
+   if (!command) {
+      throw new CliUsageError('validation-error', 'Command is required.', {
+         field: 'command',
+      });
+   }
+
+   const commandSet = payload?.commandSet;
+   if (commandSet === undefined || commandSet === '') {
+      return { command };
+   }
+   if (typeof commandSet !== 'string') {
+      throw new CliUsageError('validation-error', 'Command set must be a string.', {
+         field: 'commandSet',
+      });
+   }
+   return { command, commandSet };
+}
+
+async function handlePerformAction(
+   context: ActionContext,
+   payload?: Record<string, unknown>,
+): Promise<ActionExecutionResult> {
+   const request = parsePerformPayload(payload);
+   try {
+      const performed = await context.adapter.performCommand(request);
+      return {
+         handled: true,
+         details: {
+            command: performed,
+         },
+      };
+   } catch (error) {
+      if (error instanceof DriverCommandError) {
+         throw new CliUsageError(error.code, error.message, error.details);
+      }
+      throw error;
+   }
 }
 
 async function handleClearLogsAction(
@@ -122,6 +167,7 @@ const payloadActionHandlers: Record<
 > = {
    key: handleKeyAction,
    type: handleTypeAction,
+   perform: handlePerformAction,
    'clear-logs': handleClearLogsAction,
    checkpoint: handleCheckpointAction,
    focus: handleFocusAction,

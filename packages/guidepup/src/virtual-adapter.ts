@@ -15,6 +15,7 @@ import {
    type DriverAdapter,
 } from './adapter-shared.js';
 import { normalizeDriverKeys } from './key-aliases.js';
+import { DriverCommandError } from './command-registry.js';
 
 const defaultVirtualHtml = `
 <!doctype html>
@@ -60,6 +61,17 @@ async function virtualFocus(
       platform: 'virtual',
       details: ['Virtual target has no OS window to focus.'],
    });
+}
+
+async function virtualPerformCommand(command: { command: string }): Promise<never> {
+   throw new DriverCommandError(
+      'driver-command-target-unsupported',
+      'Named driver commands require a real VoiceOver or NVDA target.',
+      {
+         target: 'virtual',
+         command: command.command,
+      },
+   );
 }
 
 function createNavigationMethods(): Pick<
@@ -138,6 +150,7 @@ export function createVirtualAdapter(): DriverAdapter {
       focus: virtualFocus,
       readState: virtualReadState,
       clearLogs: virtualClearLogs,
+      performCommand: virtualPerformCommand,
       waitForSpeechStabilization: async () => {
          // Virtual screen reader is synchronous — no stabilization needed.
       },

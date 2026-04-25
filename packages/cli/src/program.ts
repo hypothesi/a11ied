@@ -40,8 +40,17 @@ function registerHelpAllCommand(program: Command): void {
    program
       .command('help-all')
       .description('Print help for the full command tree in one shot.')
-      .action(() => {
-         process.stdout.write(`${renderFullHelp(program)}\n`);
+      .action(async () => {
+         const [core, renderers] = await Promise.all([
+            import('#core'),
+            import('./renderers/drive.js'),
+         ]);
+         const driveCommands = renderers.formatDriveCommands(core.listDriverCommands());
+         process.stdout.write(
+            `${renderFullHelp(program, {
+               extraBlocks: [`# complete driver command list\n\n${driveCommands}`],
+            })}\n`,
+         );
       });
 }
 

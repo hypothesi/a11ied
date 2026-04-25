@@ -38,6 +38,7 @@ function createSession(): AccessibilityDriverSession {
          'previous',
          'key',
          'type',
+         'perform',
          'interact',
          'stop-interacting',
          'click-current-item',
@@ -79,7 +80,15 @@ function createContext(args: {
 
    return {
       adapter: {
+         performCommand: vi.fn().mockResolvedValue({
+            target: 'voiceover',
+            commandSet: 'voiceover-commander',
+            alias: 'move-right',
+            upstreamKey: 'MOVE_RIGHT',
+            requestedCommand: 'move-right',
+         }),
          readState: vi.fn().mockResolvedValue(createState()),
+         waitForSpeechStabilization: vi.fn(),
       } as unknown as BrokerHandlerContext['adapter'],
       checkpoints,
       session,
@@ -130,5 +139,31 @@ describe('broker stop handling', () => {
             logCursor: 1,
          }),
       );
+   });
+});
+
+describe('broker action handling', () => {
+   it('performs named driver commands through the adapter', async () => {
+      const context = createContext({});
+
+      const result = await handleBrokerRequest(context, {
+         command: 'action',
+         action: 'perform',
+         payload: {
+            command: 'move-right',
+            commandSet: 'voiceover-commander',
+         },
+      });
+
+      expect(result.response.ok).toBe(true);
+      expect(context.adapter.performCommand).toHaveBeenCalledWith({
+         command: 'move-right',
+         commandSet: 'voiceover-commander',
+      });
+      expect(context.adapter.waitForSpeechStabilization).toHaveBeenCalled();
+      expect(result.response.result?.details?.command).toMatchObject({
+         alias: 'move-right',
+         commandSet: 'voiceover-commander',
+      });
    });
 });

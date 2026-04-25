@@ -7,13 +7,15 @@ import {
 } from './index.js';
 import { normalizeDriverKeys } from './key-aliases.js';
 
-describe('guidepup driver adapters', () => {
+describe('guidepup driver adapter capabilities', () => {
    it('exposes one normalized capability set across all targets', () => {
       expect(createDriverAdapter('virtual').capabilities).toEqual(driverCapabilities);
       expect(createDriverAdapter('voiceover').capabilities).toEqual(driverCapabilities);
       expect(createDriverAdapter('nvda').capabilities).toEqual(driverCapabilities);
    });
+});
 
+describe('guidepup driver adapter readiness', () => {
    it('reports readiness clearly for the virtual target', async () => {
       const readiness = await createDriverAdapter('virtual').checkReadiness();
 
@@ -34,7 +36,9 @@ describe('guidepup driver adapters', () => {
          expect(readiness.summary).toContain('Windows');
       }
    });
+});
 
+describe('guidepup virtual driver adapter', () => {
    it('can start a virtual adapter and read normalized state', async () => {
       const adapter = createDriverAdapter('virtual');
       await adapter.start();
@@ -45,7 +49,9 @@ describe('guidepup driver adapters', () => {
 
       await adapter.stop();
    });
+});
 
+describe('guidepup driver setup and keys', () => {
    it('returns setup commands for real targets', () => {
       expect(guidepupSetupCommand('voiceover')).toBe('npx @guidepup/setup --record');
       expect(guidepupSetupCommand('nvda')).toContain('@guidepup/setup');

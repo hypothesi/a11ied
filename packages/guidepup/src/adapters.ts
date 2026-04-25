@@ -1,6 +1,7 @@
 import { nvda, voiceOver } from '@guidepup/guidepup';
 import type {
    DriverCheckpoint,
+   DriverActionName,
    DriverFocusResult,
    DriverFocusTarget,
    DriverReadiness,
@@ -22,6 +23,12 @@ import {
    type DriverAdapter,
 } from './adapter-shared.js';
 import { normalizeDriverKeys } from './key-aliases.js';
+import {
+   parseDriverCommandSet,
+   resolveDriverCommand,
+   serializeResolvedDriverCommand,
+   type DriverCommandSet,
+} from './command-registry.js';
 import { createVirtualAdapter } from './virtual-adapter.js';
 
 const SPEECH_POLL_INTERVAL_MS = 150;
@@ -179,6 +186,41 @@ class RealScreenReaderAdapter implements DriverAdapter {
 
    async type(text: string): Promise<void> {
       await this.reader.type(text, inputCommandOptions);
+   }
+
+   async performCommand(command: {
+      command: string;
+      commandSet?: string;
+   }): Promise<ReturnType<typeof serializeResolvedDriverCommand>> {
+      let commandSet: DriverCommandSet = 'auto';
+      if (command.commandSet) {
+         commandSet = parseDriverCommandSet(command.commandSet);
+      }
+      const resolved = resolveDriverCommand({
+         target: this.target,
+         command: command.command,
+         commandSet,
+      });
+      if (!resolved.portableAction) {
+         await this.reader.perform(resolved.command, inputCommandOptions);
+         return serializeResolvedDriverCommand(resolved);
+      }
+      await this.performPortableAction(resolved.portableAction);
+      return serializeResolvedDriverCommand(resolved);
+   }
+
+   private async performPortableAction(action: DriverActionName): Promise<void> {
+      const handlers: Partial<Record<DriverActionName, () => Promise<void>>> = {
+         next: () => this.next(),
+         previous: () => this.previous(),
+         interact: () => this.interact(),
+         'stop-interacting': () => this.stopInteracting(),
+         'click-current-item': () => this.activateCurrentItem(),
+      };
+      const handler = handlers[action];
+      if (handler) {
+         await handler();
+      }
    }
 
    async interact(): Promise<void> {

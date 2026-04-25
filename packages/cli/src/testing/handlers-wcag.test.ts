@@ -40,7 +40,7 @@ async function assertWcagCriteria(): Promise<void> {
       allCriteria.result as { criteria: Array<{ wcagVersion: string; level: string }> }
    ).criteria;
    expect(allEntries.every((entry) => entry.wcagVersion === '2.1')).toBe(true);
-   expect([...new Set(allEntries.map((entry) => entry.level))].sort()).toEqual([
+   expect([...new Set(allEntries.map((entry) => entry.level))].toSorted()).toEqual([
       'A',
       'AA',
       'AAA',

@@ -62,3 +62,23 @@ describe('cli aggregate help', () => {
       }
    });
 });
+
+describe('cli drive command listing', () => {
+   it('lists supported driver commands without requiring a session', async () => {
+      const result = await runCli([
+         'drive',
+         'commands',
+         '--target',
+         'voiceover',
+         '--command-set',
+         'voiceover-commander',
+         '--query',
+         'move-right',
+      ]);
+
+      expect(result.status).toBe(EXIT_SUCCESS);
+      expect(result.stdout).toContain('voiceover / voiceover-commander');
+      expect(result.stdout).toContain('move-right');
+      expect(result.stdout).toContain('MOVE_RIGHT');
+   });
+});

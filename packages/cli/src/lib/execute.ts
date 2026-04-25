@@ -135,6 +135,7 @@ type DriveAction =
    | 'previous'
    | 'key'
    | 'type'
+   | 'perform'
    | 'interact'
    | 'stop-interacting'
    | 'click-current-item'

@@ -34,6 +34,19 @@ Feature: CLI accessibility-driver commands
     And the result includes "currentItemText" when available
     And the result includes "logCursor"
 
+  Scenario: Listing named driver commands does not require a session
+    When I run `a11ied drive commands --target voiceover --command-set voiceover-commander --query move-right`
+    Then the command exits with code 0
+    And the output lists the "voiceover-commander" command set
+    And the output includes the command alias "move-right"
+
+  Scenario: Performing a named driver command uses the real target command set
+    Given I started a VoiceOver driver session and saved its session id as the active session id
+    When I run `a11ied drive perform move-right --session $ACTIVE_SESSION_ID --json`
+    Then the command exits with code 0
+    And the result includes the performed command alias "move-right"
+    And the result includes the command set "voiceover-commander"
+
   Scenario: Clearing logs resets later log reads
     Given I started a virtual driver session and saved its session id as the active session id
     And I performed one or more actions that produced speech logs

@@ -1,4 +1,5 @@
 import type { CliOutputEnvelope } from '#contracts';
+import type { DriverCommandList, SerializableDriverCommand } from '#core';
 
 interface DriveRecording {
    path: string;
@@ -36,6 +37,7 @@ interface DriveResult<TState extends DriveStateWithCursor> {
          status?: string;
          details?: string[];
       };
+      command?: SerializableDriverCommand & { requestedCommand: string };
    };
 }
 
@@ -81,6 +83,73 @@ function buildDriveLines(args: {
    }
 
    return lines;
+}
+
+function appendFocusDetails(
+   lines: string[],
+   result: DriveResult<DriveStatusState>,
+   verbose: boolean,
+): void {
+   if (result.action !== 'focus' || !result.details?.focus) {
+      return;
+   }
+   const status = result.details.focus.status ?? 'unknown';
+   lines.push(`Focus status: ${status}`);
+   if (verbose && result.details.focus.details?.length) {
+      lines.push(`Focus notes: ${result.details.focus.details.join(' | ')}`);
+   }
+}
+
+function appendPerformDetails(
+   lines: string[],
+   result: DriveResult<DriveStatusState>,
+   verbose: boolean,
+): void {
+   if (result.action !== 'perform' || !result.details?.command) {
+      return;
+   }
+   const command = result.details.command;
+   lines.push(`Command: ${command.alias} (${command.commandSet})`);
+   lines.push(`Requested command: ${command.requestedCommand}`);
+   lines.push(`Upstream key: ${command.upstreamKey}`);
+   if (verbose && command.representation) {
+      lines.push(`Key sequence: ${command.representation}`);
+   }
+   if (verbose && command.upstreamValue) {
+      lines.push(`Upstream value: ${command.upstreamValue}`);
+   }
+}
+
+function formatCommandLine(command: SerializableDriverCommand): string {
+   const parts = [command.alias];
+   if (command.upstreamKey !== command.alias) {
+      parts.push(`(${command.upstreamKey})`);
+   }
+   if (command.representation) {
+      parts.push(`=> ${command.representation}`);
+   } else if (command.upstreamValue) {
+      parts.push(`=> ${command.upstreamValue}`);
+   }
+   if (command.description) {
+      parts.push(`- ${command.description}`);
+   }
+   return `  ${parts.join(' ')}`;
+}
+
+// Fallow-ignore-next-line unused-export
+export function formatDriveCommands(result: DriverCommandList): string {
+   if (result.commandSets.length === 0) {
+      return 'No driver commands matched.';
+   }
+
+   const lines = ['Driver commands:'];
+   for (const group of result.commandSets) {
+      lines.push('', `${group.target} / ${group.commandSet}`);
+      for (const command of group.commands) {
+         lines.push(formatCommandLine(command));
+      }
+   }
+   return lines.join('\n');
 }
 
 // Fallow-ignore-next-line unused-export
@@ -129,16 +198,19 @@ export function renderDriveStatusText(
       verbose: options.verbose,
    });
 
-   if (result.action === 'focus' && result.details?.focus) {
-      const status = result.details.focus.status ?? 'unknown';
-      lines.push(`Focus status: ${status}`);
-      if (options.verbose && result.details.focus.details?.length) {
-         lines.push(`Focus notes: ${result.details.focus.details.join(' | ')}`);
-      }
-   }
+   appendFocusDetails(lines, result, options.verbose);
+   appendPerformDetails(lines, result, options.verbose);
    lines.push(`Recording: ${formatRecording(result.session.recording)}`);
 
    return lines.join('\n');
+}
+
+// Fallow-ignore-next-line unused-export
+export function renderDriveCommandsText(
+   envelope: CliOutputEnvelope,
+   _options: { verbose: boolean },
+): string {
+   return formatDriveCommands(envelope.result as unknown as DriverCommandList);
 }
 
 // Fallow-ignore-next-line unused-export

@@ -13,6 +13,7 @@ export type ScreenReaderLike = Pick<
    | 'previous'
    | 'press'
    | 'type'
+   | 'perform'
    | 'act'
    | 'interact'
    | 'stopInteracting'

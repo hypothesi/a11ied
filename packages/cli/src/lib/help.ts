@@ -29,8 +29,12 @@ function collectHelpBlocks(command: Command, blocks: string[]): void {
    }
 }
 
-export function renderFullHelp(command: Command): string {
+export function renderFullHelp(
+   command: Command,
+   options: { extraBlocks?: string[] } = {},
+): string {
    const blocks: string[] = [];
    collectHelpBlocks(command, blocks);
+   blocks.push(...(options.extraBlocks ?? []));
    return blocks.join('\n\n---\n\n');
 }
