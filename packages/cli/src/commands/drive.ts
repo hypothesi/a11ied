@@ -28,6 +28,15 @@ interface StartActionOptions extends CliTargetInputOptions {
    allowVirtual?: boolean;
 }
 
+const REAL_BROWSER_LAUNCH_DELAY_MS = 1000;
+const REAL_BROWSER_FOCUS_DELAY_MS = 750;
+
+function delay(ms: number): Promise<void> {
+   return new Promise((resolvePromise) => {
+      setTimeout(() => resolvePromise(), ms);
+   });
+}
+
 function emitDefaultTargetNotice(
    fallback: ReturnType<typeof Core.resolveDefaultTarget>,
    json: boolean | undefined,
@@ -121,12 +130,12 @@ async function executeStartAction(args: {
    );
    let openedBrowser:
       | Awaited<ReturnType<typeof args.core.openUrlInSystemAutomationBrowser>>
-      | undefined;
+      | undefined = undefined;
    if (resolved && target !== 'virtual') {
       openedBrowser = await args.core.openUrlInSystemAutomationBrowser(
          resolved.resolvedUrl,
       );
-      await new Promise((resolvePromise) => setTimeout(resolvePromise, 1000));
+      await delay(REAL_BROWSER_LAUNCH_DELAY_MS);
    }
    const session = await startDriverSessionForTarget({
       options: args.options,
@@ -134,18 +143,18 @@ async function executeStartAction(args: {
       core: args.core,
    });
    if (resolved) {
-      if (session.targetType !== 'real') {
-         await args.core.attachDocumentToDriverSession(session.sessionId, {
-            html: resolved.html,
-            url: resolved.resolvedUrl,
-         });
-      } else {
+      if (session.targetType === 'real') {
          if (openedBrowser?.focusTarget) {
-            await new Promise((resolve) => setTimeout(resolve, 750));
+            await delay(REAL_BROWSER_FOCUS_DELAY_MS);
             await args.core.runDriverSessionAction(session.sessionId, 'focus', {
                payload: openedBrowser.focusTarget,
             });
          }
+      } else {
+         await args.core.attachDocumentToDriverSession(session.sessionId, {
+            html: resolved.html,
+            url: resolved.resolvedUrl,
+         });
       }
    }
 

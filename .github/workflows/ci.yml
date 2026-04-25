@@ -6,8 +6,11 @@ on:
       branches:
          - main
 
+permissions:
+   contents: read
+
 jobs:
-   verify:
+   standards:
       runs-on: ubuntu-latest
       steps:
          - name: Check out repo
@@ -25,14 +28,44 @@ jobs:
          - name: Data validation
            run: npm run wcag:validate
 
-         - name: Contract tests
-           run: npx vitest run packages/contracts/src/index.test.ts packages/contracts/src/index.verification.test.ts
-
-         - name: CLI smoke tests
-           run: npx vitest run packages/cli/src/program.test.ts packages/cli/src/command-handlers-wcag.test.ts packages/cli/src/command-handlers-drive.test.ts
-
-         - name: Virtual-target verification smoke tests
-           run: npx vitest run packages/cli/src/command-handlers-verify.test.ts packages/cli/src/command-handlers-verify-level.test.ts packages/core/src/verification-runtime.test.ts
-
-         - name: Standards (lint, typecheck, build, test)
+         - name: Standards
            run: npm run standards
+
+   test:
+      runs-on: ubuntu-latest
+      steps:
+         - name: Check out repo
+           uses: actions/checkout@v4
+
+         - name: Set up Node.js
+           uses: actions/setup-node@v4
+           with:
+              node-version: 24
+              cache: npm
+
+         - name: Install dependencies
+           run: npm ci
+
+         - name: Test
+           run: npm test
+
+   pack:
+      needs:
+         - standards
+         - test
+      runs-on: ubuntu-latest
+      steps:
+         - name: Check out repo
+           uses: actions/checkout@v4
+
+         - name: Set up Node.js
+           uses: actions/setup-node@v4
+           with:
+              node-version: 24
+              cache: npm
+
+         - name: Install dependencies
+           run: npm ci
+
+         - name: Pack public workspaces
+           run: npm run pack:check

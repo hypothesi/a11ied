@@ -100,7 +100,9 @@ function registerCriteriaCommand(wcagCommand: Command): void {
          addWcagVersionOption(
             wcagCommand
                .command('criteria')
-               .description('List criteria, optionally filtered to one conformance level.')
+               .description(
+                  'List criteria, optionally filtered to one conformance level.',
+               )
                .option(
                   '--level <level>',
                   'Filter criteria to one WCAG level: A, AA, or AAA.',

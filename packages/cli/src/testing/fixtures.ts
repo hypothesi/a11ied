@@ -8,6 +8,11 @@ const HTTP_STATUS_OK = 200;
 const HTTP_STATUS_NOT_FOUND = 404;
 
 const fixtureRoot = resolve(import.meta.dirname, '../../test/fixtures');
+let cwdLock: Promise<void> = Promise.resolve();
+
+function noopReleaseLock(): void {
+   /* Noop. */
+}
 
 export interface TestServerHandle {
    server: ReturnType<typeof createServer>;
@@ -96,11 +101,18 @@ export async function withTempDir(
    fn: (tempRoot: string) => Promise<void>,
 ): Promise<void> {
    const tempRoot = await createTempRoot(tempRoots);
+   let releaseLock: () => void = noopReleaseLock;
+   const priorLock = cwdLock;
+   cwdLock = new Promise<void>((resolveLock) => {
+      releaseLock = resolveLock;
+   });
+   await priorLock;
    const previousCwd = process.cwd();
    process.chdir(tempRoot);
    try {
       await fn(tempRoot);
    } finally {
       process.chdir(previousCwd);
+      releaseLock();
    }
 }

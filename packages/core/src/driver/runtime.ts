@@ -113,6 +113,47 @@ function createPersistentBrokerOptions(args: {
    return options;
 }
 
+async function readExistingSession(
+   sessionId: string,
+   cwd: string,
+): Promise<AccessibilityDriverSession | undefined> {
+   try {
+      return await readSessionMetadata(sessionId, cwd);
+   } catch (error) {
+      if (error instanceof CliEnvironmentError && error.code === 'session-not-found') {
+         return undefined;
+      }
+      throw error;
+   }
+}
+
+async function assertTargetIsAvailable(target: Platform, cwd: string): Promise<void> {
+   const entries = await listSessionEntries(cwd);
+   if (!entries) {
+      return;
+   }
+
+   const sessions = await Promise.all(
+      entries
+         .filter((entry) => entry.endsWith('.json'))
+         .map(async (entry) => {
+            const sessionId = entry.replace(/\.json$/u, '');
+            return readExistingSession(sessionId, cwd);
+         }),
+   );
+   const activeSession = sessions.find((session) => session?.target === target);
+   if (activeSession) {
+      throw new CliEnvironmentError(
+         'target-busy',
+         `A ${target} session is already active. Stop it before starting another one.`,
+         {
+            target,
+            activeSessionId: activeSession.sessionId,
+         },
+      );
+   }
+}
+
 async function prepareDriverSessionStart(args: {
    target: Platform | undefined;
    cwd: string;
@@ -122,35 +163,7 @@ async function prepareDriverSessionStart(args: {
    await cleanupStaleDriverSessions(args.cwd);
    const resolvedTarget = args.target ?? resolveDefaultTarget().target;
    if (resolvedTarget !== 'virtual') {
-      const entries = await listSessionEntries(args.cwd);
-      if (entries) {
-         for (const entry of entries) {
-            if (!entry.endsWith('.json')) {
-               continue;
-            }
-            const sessionId = entry.replace(/\.json$/u, '');
-            try {
-               const session = await readSessionMetadata(sessionId, args.cwd);
-               if (session.target === resolvedTarget) {
-                  throw new CliEnvironmentError(
-                     'target-busy',
-                     `A ${resolvedTarget} session is already active. Stop it before starting another one.`,
-                     {
-                        target: resolvedTarget,
-                        activeSessionId: session.sessionId,
-                     },
-                  );
-               }
-            } catch (error) {
-               if (
-                  error instanceof CliEnvironmentError &&
-                  error.code !== 'session-not-found'
-               ) {
-                  throw error;
-               }
-            }
-         }
-      }
+      await assertTargetIsAvailable(resolvedTarget, args.cwd);
    }
    await assertTargetReady(resolvedTarget);
    if (args.recordingPath) {

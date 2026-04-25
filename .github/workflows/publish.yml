@@ -1,0 +1,68 @@
+name: publish-packages
+
+on:
+   workflow_dispatch:
+   release:
+      types:
+         - published
+
+permissions:
+   contents: read
+   id-token: write
+
+jobs:
+   publish:
+      runs-on: ubuntu-latest
+      environment: npm
+      steps:
+         - name: Check out repo
+           uses: actions/checkout@v4
+
+         - name: Set up Node.js
+           uses: actions/setup-node@v4
+           with:
+              node-version: 24
+              cache: npm
+              registry-url: https://registry.npmjs.org
+
+         - name: Install dependencies
+           run: npm ci
+
+         - name: Data validation
+           run: npm run wcag:validate
+
+         - name: Standards
+           run: npm run standards
+
+         - name: Test
+           run: npm test
+
+         - name: Pack public workspaces
+           run: npm run pack:check
+
+         - name: Publish public workspaces
+           env:
+              NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+           run: |
+              set -euo pipefail
+              workspaces=(
+                packages/contracts
+                packages/wcag-data
+                packages/wcag-engine
+                packages/guidepup
+                packages/core
+                packages/mcp-server
+                packages/cli
+              )
+
+              for workspace in "${workspaces[@]}"; do
+                name="$(node -p "require('./${workspace}/package.json').name")"
+                version="$(node -p "require('./${workspace}/package.json').version")"
+
+                if npm view "${name}@${version}" version >/dev/null 2>&1; then
+                  echo "Skipping ${name}@${version}; already published."
+                  continue
+                fi
+
+                npm publish --workspace "${workspace}" --provenance
+              done

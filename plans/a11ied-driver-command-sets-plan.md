@@ -195,11 +195,7 @@ Resolved command model:
 ```ts
 interface ResolvedDriverCommand {
    target: 'voiceover' | 'nvda' | 'portable';
-   commandSet:
-      | 'portable'
-      | 'voiceover-commander'
-      | 'voiceover-keycode'
-      | 'nvda-keycode';
+   commandSet: 'portable' | 'voiceover-commander' | 'voiceover-keycode' | 'nvda-keycode';
    requestedCommand: string;
    resolvedAlias: string;
    upstreamKey: string;
@@ -245,19 +241,19 @@ Relevant documentation:
 
 ## Task Grid
 
-| Status | ID | Task | Priority | Depends On | Acceptance Criteria |
-|---|---|---|---|---|---|
-| [ ] | T-01 | Finalize CLI grammar and command naming | H | - | Command grammar, aliases, defaults, and invalid combinations are documented |
-| [ ] | T-02 | Add contract support for command execution | H | T-01 | `perform` is a valid driver action and capability |
-| [ ] | T-03 | Implement Guidepup command registry | H | T-02 | Registry lists and resolves portable, VoiceOver Commander, VoiceOver key code, and NVDA key code commands |
-| [ ] | T-04 | Add adapter command execution | H | T-03 | Real adapters call `perform`; virtual adapter rejects named command sets |
-| [ ] | T-05 | Refactor core driver action routing | H | T-04 | `perform` works through persistent, in-memory, and ephemeral paths |
-| [ ] | T-06 | Refactor high-level aliases onto portable commands | M | T-05 | Existing high-level commands still work and route through shared command handling where appropriate |
-| [ ] | T-07 | Add CLI command discovery and execution | H | T-05 | `drive perform` and `drive commands` work in text and JSON modes |
-| [ ] | T-08 | Update help, help-all, and renderers | H | T-07 | `help-all` includes complete command lists grouped by driver and command set |
-| [ ] | T-09 | Add automated tests | H | T-08 | Registry, adapter, core, CLI, and help tests cover success and failure paths |
-| [ ] | T-10 | Update docs and Gherkin stories | M | T-09 | Docs explain `key` vs `perform`; stories cover all new command sets |
-| [ ] | T-11 | Run quality gates and manual smoke checks | H | T-10 | Build, typecheck, tests, formatting, and CLI smoke checks pass |
+| Status | ID   | Task                                               | Priority | Depends On | Acceptance Criteria                                                                                       |
+| ------ | ---- | -------------------------------------------------- | -------- | ---------- | --------------------------------------------------------------------------------------------------------- |
+| [ ]    | T-01 | Finalize CLI grammar and command naming            | H        | -          | Command grammar, aliases, defaults, and invalid combinations are documented                               |
+| [ ]    | T-02 | Add contract support for command execution         | H        | T-01       | `perform` is a valid driver action and capability                                                         |
+| [ ]    | T-03 | Implement Guidepup command registry                | H        | T-02       | Registry lists and resolves portable, VoiceOver Commander, VoiceOver key code, and NVDA key code commands |
+| [ ]    | T-04 | Add adapter command execution                      | H        | T-03       | Real adapters call `perform`; virtual adapter rejects named command sets                                  |
+| [ ]    | T-05 | Refactor core driver action routing                | H        | T-04       | `perform` works through persistent, in-memory, and ephemeral paths                                        |
+| [ ]    | T-06 | Refactor high-level aliases onto portable commands | M        | T-05       | Existing high-level commands still work and route through shared command handling where appropriate       |
+| [ ]    | T-07 | Add CLI command discovery and execution            | H        | T-05       | `drive perform` and `drive commands` work in text and JSON modes                                          |
+| [ ]    | T-08 | Update help, help-all, and renderers               | H        | T-07       | `help-all` includes complete command lists grouped by driver and command set                              |
+| [ ]    | T-09 | Add automated tests                                | H        | T-08       | Registry, adapter, core, CLI, and help tests cover success and failure paths                              |
+| [ ]    | T-10 | Update docs and Gherkin stories                    | M        | T-09       | Docs explain `key` vs `perform`; stories cover all new command sets                                       |
+| [ ]    | T-11 | Run quality gates and manual smoke checks          | H        | T-10       | Build, typecheck, tests, formatting, and CLI smoke checks pass                                            |
 
 ## Task Details
 
@@ -393,11 +389,11 @@ import {
 7. Implement `listDriverCommands(options)`.
 8. Implement `resolveDriverCommand(request)`.
 9. Make `resolveDriverCommand(...)` reject invalid target/set combinations before lookup.
-10. Make `resolveDriverCommand(...)` support namespaced prefixes.
-11. Make `resolveDriverCommand(...)` support target default selection.
-12. Make `resolveDriverCommand(...)` reject ambiguity with suggestions.
-13. Export serializable command metadata types.
-14. Export only serializable command lists from public listing APIs.
+10.   Make `resolveDriverCommand(...)` support namespaced prefixes.
+11.   Make `resolveDriverCommand(...)` support target default selection.
+12.   Make `resolveDriverCommand(...)` reject ambiguity with suggestions.
+13.   Export serializable command metadata types.
+14.   Export only serializable command lists from public listing APIs.
 
 ### T-04 - Add adapter command execution
 
@@ -532,11 +528,11 @@ node packages/cli/dist/cli.js help-all | rg "voiceover-commander|voiceover-keyco
 7. Test upstream value lookup.
 8. Test namespaced lookup.
 9. Test invalid target/command-set combinations.
-10. Test virtual rejection.
-11. Test ambiguity handling.
-12. Add core tests for `perform` action routing.
-13. Add CLI tests for command listing.
-14. Add help tests for `drive perform`, `drive commands`, and `help-all`.
+10.   Test virtual rejection.
+11.   Test ambiguity handling.
+12.   Add core tests for `perform` action routing.
+13.   Add CLI tests for command listing.
+14.   Add help tests for `drive perform`, `drive commands`, and `help-all`.
 
 ### T-10 - Update docs and Gherkin stories
 
@@ -553,7 +549,7 @@ node packages/cli/dist/cli.js help-all | rg "voiceover-commander|voiceover-keyco
 7. Explain NVDA key code commands.
 8. Explain command discovery.
 9. Add Gherkin scenarios for command discovery and invalid command-set combinations.
-10. Update traceability.
+10.   Update traceability.
 
 ### T-11 - Run quality gates and manual smoke checks
 

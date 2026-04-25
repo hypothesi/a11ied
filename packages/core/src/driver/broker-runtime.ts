@@ -31,8 +31,7 @@ function normalizeBrokerTransportError(args: {
       return createMissingSessionError(args.sessionId);
    }
 
-   const message =
-      args.error instanceof Error ? args.error.message : String(args.error);
+   const message = args.error instanceof Error ? args.error.message : String(args.error);
 
    if (message.includes('Broker connection timed out')) {
       return new CliEnvironmentError(
@@ -45,14 +44,10 @@ function normalizeBrokerTransportError(args: {
       );
    }
 
-   return new CliEnvironmentError(
-      'driver-broker-error',
-      message,
-      {
-         sessionId: args.sessionId,
-         action: args.action,
-      },
-   );
+   return new CliEnvironmentError('driver-broker-error', message, {
+      sessionId: args.sessionId,
+      action: args.action,
+   });
 }
 
 export async function getBrokerSessionStatus(

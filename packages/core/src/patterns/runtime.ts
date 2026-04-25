@@ -201,25 +201,20 @@ export async function runInteractionPattern(
                process.cwd(),
                options.recordingPath,
             );
-            let result;
-            let stopResult;
-            try {
-               result = await runner(
-                  buildContext(
-                     parsedUrl,
-                     {
-                        sessionId: session.sessionId,
-                        target,
-                        managedSession: true,
-                     },
-                     page,
-                  ),
-                  parsedUrl.toString(),
-               );
-            } finally {
-               stopResult = await cleanupSession(session.sessionId, true);
-            }
-            return applyManagedRecording(result as InteractionPatternResult, stopResult);
+            return await runPatternWithSession({
+               patternId,
+               url: parsedUrl.toString(),
+               context: buildContext(
+                  parsedUrl,
+                  {
+                     sessionId: session.sessionId,
+                     target,
+                     managedSession: true,
+                  },
+                  page,
+               ),
+               runner,
+            });
          });
       }
    }

@@ -19,12 +19,14 @@ import { docsLinks } from '../lib/nav';
       </ol>
    </section>
 
-   <section>
-      <h2>Required commands</h2>
-      <pre><code>npm run standards
+    <section>
+       <h2>Required commands</h2>
+       <pre><code>npm run standards
+npm test
+npm run pack:check
 a1 help-all
 a1 doctor --json</code></pre>
-   </section>
+    </section>
 
    <section>
       <h2>Release record</h2>
@@ -35,23 +37,23 @@ a1 doctor --json</code></pre>
       </p>
    </section>
 
-   <section>
-      <h2>Publish order</h2>
-      <ul>
-         <li>Package: publish <code>a11ied</code> to npm after <code>npm run standards</code> passes.</li>
+    <section>
+       <h2>Publish order</h2>
+       <ul>
+         <li>Packages: publish <code>@a11ied/contracts</code>, <code>@a11ied/wcag-data</code>, <code>@a11ied/wcag-engine</code>, <code>@a11ied/guidepup</code>, <code>@a11ied/core</code>, <code>@a11ied/mcp-server</code>, then <code>a11ied</code> through the <code>publish-packages</code> workflow after <code>npm run standards</code>, <code>npm test</code>, and <code>npm run pack:check</code> pass.</li>
          <li>Docs: build <code>apps/docs/dist/</code> and publish the generated static site.</li>
          <li>Agent Skill: ship <code>skills/a11ied/</code> only after the skill text matches the released CLI and MCP behavior.</li>
-      </ul>
+       </ul>
    </section>
 
-   <section>
-      <h2>Known deferred items</h2>
-      <p>
-         Some rough edges are tracked and accepted for the current milestone.
-         Real-target smoke testing is manual, and package publication is manual.
-         See the release record for the full list.
-      </p>
-   </section>
+    <section>
+       <h2>Known deferred items</h2>
+       <p>
+          Some rough edges are tracked and accepted for the current milestone.
+          Real-target smoke testing is manual, even though package publication now runs through GitHub Actions.
+          See the release record for the full list.
+       </p>
+    </section>
 
    <section class="field-note">
       <h2>Manual smoke tests are required</h2>

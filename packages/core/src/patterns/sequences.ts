@@ -150,7 +150,10 @@ async function evaluateStatusText(page: Page): Promise<string> {
    });
 }
 
-function buildVirtualStatusSpokenLog(existingLog: string[], statusText: string): string[] {
+function buildVirtualStatusSpokenLog(
+   existingLog: string[],
+   statusText: string,
+): string[] {
    const alreadySpoken = existingLog.some((entry) => entry === statusText);
    if (alreadySpoken) {
       return existingLog;

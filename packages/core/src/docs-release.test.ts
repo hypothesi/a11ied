@@ -5,7 +5,8 @@ import { resolve } from 'node:path';
 const rootDir = resolve(import.meta.dirname, '../../..');
 const docsPagesDir = resolve(rootDir, 'apps/docs/src/pages');
 const skillPath = resolve(rootDir, 'skills/a11ied/SKILL.md');
-const workflowPath = resolve(rootDir, '.github/workflows/ci.yml');
+const ciWorkflowPath = resolve(rootDir, '.github/workflows/ci.yml');
+const publishWorkflowPath = resolve(rootDir, '.github/workflows/publish.yml');
 const releaseReadinessPath = resolve(rootDir, 'releases/v0.3.0-readiness.md');
 const requiredRuntimePages = [
    'wcag-data-sources.astro',
@@ -33,12 +34,18 @@ const requiredHomeRoutes = [
    '/api-reference',
    '/recording-sessions',
 ] as const;
-const requiredWorkflowSteps = [
+const requiredCiWorkflowSteps = [
    'name: Data validation',
-   'name: Contract tests',
-   'name: CLI smoke tests',
-   'name: Virtual-target verification smoke tests',
-   'name: Standards (lint, typecheck, build, test)',
+   'name: Standards',
+   'name: Test',
+   'name: Pack public workspaces',
+] as const;
+const requiredPublishWorkflowSteps = [
+   'name: Data validation',
+   'name: Standards',
+   'name: Test',
+   'name: Pack public workspaces',
+   'name: Publish public workspaces',
 ] as const;
 
 function expectRuntimePages(): void {
@@ -66,9 +73,13 @@ function expectSkillGuardrails(): void {
 }
 
 function expectWorkflowSteps(): void {
-   const workflow = readFileSync(workflowPath, 'utf8');
-   for (const step of requiredWorkflowSteps) {
-      expect(workflow).toContain(step);
+   const ciWorkflow = readFileSync(ciWorkflowPath, 'utf8');
+   const publishWorkflow = readFileSync(publishWorkflowPath, 'utf8');
+   for (const step of requiredCiWorkflowSteps) {
+      expect(ciWorkflow).toContain(step);
+   }
+   for (const step of requiredPublishWorkflowSteps) {
+      expect(publishWorkflow).toContain(step);
    }
 }
 
@@ -80,6 +91,8 @@ function expectReleaseChecklist(): void {
    expect(releaseChecklist).toContain('manual macOS VoiceOver smoke pass');
    expect(releaseChecklist).toContain('manual Windows NVDA smoke pass');
    expect(releaseChecklist).toContain('Wait for all CI checks to pass');
+   expect(releaseChecklist).toContain('npm test');
+   expect(releaseChecklist).toContain('npm run pack:check');
    expect(releaseChecklist).toContain('Publish order');
    expect(releaseChecklist).toContain('deferred items');
 }
@@ -111,7 +124,8 @@ function expectReleaseReadinessRecord(): void {
    expect(releaseReadiness).toContain('### docs');
    expect(releaseReadiness).toContain('### agent skill');
    expect(releaseReadiness).toContain('## deferred items');
-   expect(releaseReadiness).toContain('Package publication is still manual');
+   expect(releaseReadiness).toContain('publish-packages');
+   expect(releaseReadiness).toContain('npm run pack:check');
 }
 
 describe('docs, skill guidance, CI, and release checks', () => {

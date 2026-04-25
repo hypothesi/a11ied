@@ -9,6 +9,8 @@ import { createBrowserAutomationPolicy } from './detection.js';
 
 const SHARED_BROWSER_IDLE_MS = 250;
 const BROWSER_OPEN_TIMEOUT_MS = 5000;
+const INTERACTIVE_BROWSER_READY_MS = 250;
+const BRING_TO_FRONT_SETTLE_MS = 150;
 
 let sharedBrowser: Browser | undefined = globalThis.undefined;
 let sharedBrowserPromise: Promise<Browser> | undefined = globalThis.undefined;
@@ -18,6 +20,16 @@ let sharedPage: Page | undefined = globalThis.undefined;
 let sharedPageUrl: string | undefined = globalThis.undefined;
 let sharedPageUsers = 0;
 let sharedBrowserFocusTarget: DriverFocusTarget | undefined = globalThis.undefined;
+
+function resolveBundleId(candidate: BrowserAutomationCandidate): string | undefined {
+   const bundleIds: Partial<Record<BrowserAutomationCandidate['id'], string>> = {
+      chrome: 'com.google.Chrome',
+      msedge: 'com.microsoft.edgemac',
+      brave: 'com.brave.Browser',
+      chromium: 'org.chromium.Chromium',
+   };
+   return bundleIds[candidate.id];
+}
 
 function deriveFocusTarget(
    candidate: BrowserAutomationCandidate,
@@ -41,18 +53,6 @@ function deriveFocusTarget(
    }
 
    return undefined;
-}
-
-function resolveBundleId(
-   candidate: BrowserAutomationCandidate,
-): string | undefined {
-   const bundleIds: Partial<Record<BrowserAutomationCandidate['id'], string>> = {
-      chrome: 'com.google.Chrome',
-      msedge: 'com.microsoft.edgemac',
-      brave: 'com.brave.Browser',
-      chromium: 'org.chromium.Chromium',
-   };
-   return bundleIds[candidate.id];
 }
 
 function selectSystemBrowserCandidate(): BrowserAutomationCandidate | undefined {
@@ -145,7 +145,9 @@ export async function openUrlInSystemAutomationBrowser(url: string): Promise<{
 }> {
    const candidate = selectSystemBrowserCandidate();
    if (!candidate) {
-      throw new Error('No system browser candidate is available to open a real browser window.');
+      throw new Error(
+         'No system browser candidate is available to open a real browser window.',
+      );
    }
 
    if (process.platform === 'darwin') {
@@ -174,7 +176,7 @@ async function closeSharedBrowser(): Promise<void> {
    sharedPage = globalThis.undefined;
    sharedPageUrl = globalThis.undefined;
    sharedPageUsers = 0;
-    sharedBrowserFocusTarget = globalThis.undefined;
+   sharedBrowserFocusTarget = globalThis.undefined;
    await browser.close();
 }
 
@@ -323,7 +325,7 @@ export async function withInteractiveBrowserPage<TResult>(
    try {
       await page.goto(url, { waitUntil: 'networkidle' });
       await page.bringToFront();
-      await page.waitForTimeout(250);
+      await page.waitForTimeout(INTERACTIVE_BROWSER_READY_MS);
       return await callback(page);
    } finally {
       await page.close().catch(() => globalThis.undefined);
@@ -334,7 +336,7 @@ export async function withInteractiveBrowserPage<TResult>(
 
 export async function bringBrowserPageToFront(page: Page): Promise<void> {
    await page.bringToFront();
-   await page.waitForTimeout(150);
+   await page.waitForTimeout(BRING_TO_FRONT_SETTLE_MS);
 }
 
 export function getActiveBrowserFocusTarget(): DriverFocusTarget | undefined {

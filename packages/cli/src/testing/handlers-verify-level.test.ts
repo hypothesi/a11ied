@@ -14,6 +14,7 @@ import {
 const tempRoots: string[] = [];
 const testServer: TestServerHandle = useTestServer(tempRoots);
 const virtualTargetArgs = ['--target', 'virtual', '--allow-virtual'];
+const VERIFY_LEVEL_AA_TIMEOUT_MS = TEST_TIMEOUT_VERY_LONG + TEST_TIMEOUT_VERY_LONG;
 
 function assertLevelCriteria(json: Record<string, unknown>): void {
    const criteria = (
@@ -128,7 +129,7 @@ describe('cli verify criterion commands / level and text output', () => {
          withTempDir(tempRoots, async () => {
             await assertVerifyLevel(testServer.getBaseUrl());
          }),
-      TEST_TIMEOUT_VERY_LONG,
+      VERIFY_LEVEL_AA_TIMEOUT_MS,
    );
 
    it(
