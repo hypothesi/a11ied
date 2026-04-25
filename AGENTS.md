@@ -11,7 +11,6 @@ bd ready              # Find available work
 bd show <id>          # View issue details
 bd update <id> --claim  # Claim work atomically
 bd close <id>         # Complete work
-bd dolt push          # Push beads data to remote
 ```
 
 ## Non-Interactive Shell Commands
@@ -63,28 +62,15 @@ bd close <id>         # Complete work
 
 ## Session Completion
 
-**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
-
-**MANDATORY WORKFLOW:**
+**Default workflow:**
 
 1. **File issues for remaining work** - Create issues for anything that needs follow-up
 2. **Run quality gates** (if code changed) - Tests, linters, builds
 3. **Update issue status** - Close finished work, update in-progress items
-4. **PUSH TO REMOTE** - This is MANDATORY:
-   ```bash
-   git pull --rebase
-   bd dolt push
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
-5. **Clean up** - Clear stashes, prune remote branches
-6. **Verify** - All changes committed AND pushed
-7. **Hand off** - Provide context for next session
+4. **Hand off** - Provide context for next session
 
-**CRITICAL RULES:**
+**Sync policy:**
 
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
-- If push fails, resolve and retry until it succeeds
+- Do **not** run `bd dolt push`, `git push`, or other remote sync commands unless the user explicitly asks for that in the current task.
+- Local commits are allowed when requested, but remote pushes are opt-in.
  <!-- END BEADS INTEGRATION -->
