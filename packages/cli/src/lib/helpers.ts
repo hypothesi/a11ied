@@ -7,6 +7,7 @@ import {
 } from '#contracts';
 import { CliEnvironmentError, CliUsageError } from '#core';
 import { CLI_VERSION, JSON_INDENT } from './constants.js';
+import { styleCommandText } from './text.js';
 
 export interface CommandExecution {
    ok?: boolean;
@@ -92,7 +93,7 @@ export function printOutput(opts: PrintOutputOptions): void {
    }
 
    process.stdout.write(
-      `${opts.renderText(opts.envelope, { verbose: Boolean(opts.verbose) })}\n`,
+      `${styleCommandText(opts.renderText(opts.envelope, { verbose: Boolean(opts.verbose) }))}\n`,
    );
 }
 

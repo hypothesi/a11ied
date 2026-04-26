@@ -34,7 +34,8 @@ export const runOptionCases: HelpCase[] = [
         --url <url>          Run the pattern against one live URL target.
         --recording <path>   Write one screen recording to the given .mov or .mp4 path
                              when the target supports it.
-        --session <id>       Reuse an existing driver session.
+        --session <id>       Reuse an existing driver session. Defaults to the current
+                             drive session or $A11IED_DRIVE_SESSION when available.
         --target <platform>  Choose one target: voiceover, nvda, or virtual. Defaults
                              to VoiceOver on macOS, NVDA on Windows, or virtual
                              elsewhere. Use --allow-virtual to permit simulation.

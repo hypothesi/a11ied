@@ -1,5 +1,11 @@
 import { cliExitCodes, type CliMessage } from '#contracts';
+import { resolveImplicitDriveSession } from '../lib/drive-session.js';
 import { buildVirtualTargetGuardOptions } from '../lib/resolvers.js';
+import {
+   buildPatternSessionOptions,
+   buildResolvedPatternOptions,
+   runPatternCommand,
+} from './pattern-session.js';
 export interface AxeActionOptions {
    json?: boolean;
    verbose?: boolean;
@@ -18,6 +24,7 @@ export interface PatternActionOptions {
    recording?: string;
    allowVirtual?: boolean;
 }
+
 type RunAxeSelection =
    | { kind: 'criterion'; criterion: string }
    | { kind: 'level'; level: string }
@@ -272,7 +279,23 @@ export async function handlePatternAction(
       import('#core'),
    ]);
 
-   const { resolvedOptions, warnings } = resolvePatternExecutionOptions(core, options);
+   const resolvedSession = await resolveImplicitDriveSession(
+      buildPatternSessionOptions(options),
+   );
+   const resolvedPatternArgs: { options: PatternActionOptions; sessionId?: string } = {
+      options,
+   };
+
+   if (resolvedSession.sessionId) {
+      resolvedPatternArgs.sessionId = resolvedSession.sessionId;
+   }
+
+   const resolvedPatternOptions = buildResolvedPatternOptions(resolvedPatternArgs);
+
+   const { resolvedOptions, warnings } = resolvePatternExecutionOptions(
+      core,
+      resolvedPatternOptions,
+   );
    const resolved = await resolveCliTarget(buildCliTargetInput(options));
    const input = await buildPatternRuntimeInput(
       buildPatternRuntimeArgs({
@@ -281,9 +304,12 @@ export async function handlePatternAction(
          options: resolvedOptions,
       }),
    );
-   const result = await core.runInteractionPattern(
-      input as unknown as Parameters<typeof core.runInteractionPattern>[0],
-   );
+   const result = await runPatternCommand({
+      core,
+      input,
+      sessionSource: resolvedSession.source,
+   });
+
    const commandArgs: Parameters<typeof buildPatternCommandResult>[0] = {
       resolvedTarget: resolved.reportTarget,
       result,

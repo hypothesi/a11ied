@@ -8,13 +8,20 @@ import {
    addAllowVirtualOption,
    addJsonOption,
    addRecordingOption,
+   addSessionOption,
    addVerboseOption,
 } from '../lib/options.js';
 import type { buildCliTargetInput, CliTargetInputOptions } from '../lib/target-input.js';
 import {
    buildVirtualTargetGuardOptions,
+   resolveDriveSession,
    type ResolvedCliTarget,
 } from '../lib/resolvers.js';
+import {
+   clearImplicitDriveSessionIfMatches,
+   persistImplicitDriveSession,
+   withImplicitDriveSessionGuard,
+} from '../lib/drive-session.js';
 import {
    registerMiddleActions,
    registerSimpleActions,
@@ -197,6 +204,7 @@ async function handleStartAction(options: StartActionOptions): Promise<void> {
             buildCliTargetInput,
             core,
          });
+         await persistImplicitDriveSession(result.result.session.sessionId);
          const execution: CommandExecution = { ...result };
          if (warnings) {
             execution.warnings = warnings;
@@ -227,12 +235,13 @@ function registerStartCommand(driveCommand: Command): void {
 function registerStatusCommand(driveCommand: Command): void {
    addVerboseOption(
       addJsonOption(
-         driveCommand
-            .command('status')
-            .description('Show persisted session state and capability metadata.')
-            .requiredOption('--session <id>', 'Reuse an existing driver session.'),
+         addSessionOption(
+            driveCommand
+               .command('status')
+               .description('Show persisted session state and capability metadata.'),
+         ),
       ),
-   ).action(async (options: { json?: boolean; verbose?: boolean; session: string }) => {
+   ).action(async (options: { json?: boolean; verbose?: boolean; session?: string }) => {
       const [{ executeCommand }, renderers, core] = await Promise.all([
          import('../lib/execute.js'),
          import('../renderers/drive.js'),
@@ -248,9 +257,15 @@ function registerStatusCommand(driveCommand: Command): void {
             verbose: options.verbose,
          },
          async () => {
-            const result = await core.getDriverSessionStatus(options.session);
+            const resolved = await resolveDriveSession(options);
+            const sessionId = resolved.sessionId ?? '';
+            const result = await withImplicitDriveSessionGuard({
+               source: resolved.sessionSource,
+               run: () => core.getDriverSessionStatus(sessionId),
+            });
+
             return {
-               target: { kind: 'driver-session', value: options.session },
+               target: { kind: 'driver-session', value: sessionId },
                result,
             };
          },
@@ -261,11 +276,12 @@ function registerStatusCommand(driveCommand: Command): void {
 
 function registerStopCommand(driveCommand: Command): void {
    addJsonOption(
-      driveCommand
-         .command('stop')
-         .description('Stop a persistent driver session and remove its state file.')
-         .requiredOption('--session <id>', 'Reuse an existing driver session.'),
-   ).action(async (options: { json?: boolean; session: string }) => {
+      addSessionOption(
+         driveCommand
+            .command('stop')
+            .description('Stop a persistent driver session and remove its state file.'),
+      ),
+   ).action(async (options: { json?: boolean; session?: string }) => {
       const [{ executeCommand }, renderers, core] = await Promise.all([
          import('../lib/execute.js'),
          import('../renderers/drive.js'),
@@ -280,9 +296,16 @@ function registerStopCommand(driveCommand: Command): void {
             json: options.json,
          },
          async () => {
-            const result = await core.stopDriverSession(options.session);
+            const resolved = await resolveDriveSession(options);
+            const sessionId = resolved.sessionId ?? '';
+            const result = await withImplicitDriveSessionGuard({
+               source: resolved.sessionSource,
+               run: () => core.stopDriverSession(sessionId),
+            });
+
+            await clearImplicitDriveSessionIfMatches(sessionId);
             return {
-               target: { kind: 'driver-session', value: options.session },
+               target: { kind: 'driver-session', value: sessionId },
                result,
             };
          },

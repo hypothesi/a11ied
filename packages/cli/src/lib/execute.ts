@@ -10,6 +10,7 @@ import {
    runDriverSessionAction,
    runEphemeralDriverAction,
 } from '#core';
+import { withImplicitDriveSessionGuard } from './drive-session.js';
 import {
    type CommandExecution,
    createEnvelope,
@@ -205,7 +206,7 @@ async function runEphemeralAction(
 }
 
 async function runDriveAction(input: DriveActionCommandInput): Promise<CommandExecution> {
-   const resolved = resolveDriveSession(input.options);
+   const resolved = await resolveDriveSession(input.options);
 
    if (resolved.ephemeral) {
       return runEphemeralAction(input, resolved);
@@ -214,17 +215,18 @@ async function runDriveAction(input: DriveActionCommandInput): Promise<CommandEx
    if (!resolved.sessionId) {
       throw new CliUsageError('missing-session', 'Session ID is required.');
    }
+   const sessionId = resolved.sessionId;
    let actionOptions: { payload: Record<string, unknown> } | undefined = undefined;
    if (input.payload) {
       actionOptions = { payload: input.payload };
    }
-   const result = await runDriverSessionAction(
-      resolved.sessionId,
-      input.action,
-      actionOptions,
-   );
+   const result = await withImplicitDriveSessionGuard({
+      source: resolved.sessionSource,
+      run: () => runDriverSessionAction(sessionId, input.action, actionOptions),
+   });
+
    return {
-      target: { kind: 'driver-session', value: resolved.sessionId },
+      target: { kind: 'driver-session', value: sessionId },
       result,
    };
 }

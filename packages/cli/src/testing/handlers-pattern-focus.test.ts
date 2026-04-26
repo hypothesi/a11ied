@@ -72,6 +72,28 @@ async function assertSessionReuse(baseUrl: string): Promise<void> {
       '--json',
    ]);
    const reusedJson = parseJsonOutput(reused.stdout);
+
+   expect(reused.status).toBe(EXIT_SUCCESS);
+   expect((reusedJson.result as { sessionId: string }).sessionId).toBe(session.sessionId);
+   expect((reusedJson.result as { managedSession: boolean }).managedSession).toBe(false);
+   await runCli(['drive', 'stop', '--session', session.sessionId, '--json']);
+}
+
+async function assertImplicitSessionReuse(baseUrl: string): Promise<void> {
+   const started = await runCli(['drive', 'start', ...virtualTargetArgs, '--json']);
+   const startedJson = parseJsonOutput(started.stdout);
+   const session = (startedJson.result as { session: { sessionId: string } }).session;
+   const reused = await runCli([
+      'run',
+      'pattern',
+      'landmark_sequence',
+      '--url',
+      `${baseUrl}/basic-page.html`,
+      ...virtualTargetArgs,
+      '--json',
+   ]);
+   const reusedJson = parseJsonOutput(reused.stdout);
+
    expect(reused.status).toBe(EXIT_SUCCESS);
    expect((reusedJson.result as { sessionId: string }).sessionId).toBe(session.sessionId);
    expect((reusedJson.result as { managedSession: boolean }).managedSession).toBe(false);
@@ -131,6 +153,15 @@ describe('cli run pattern commands / focus and sessions', () => {
       () =>
          withTempDir(tempRoots, async () => {
             await assertSessionReuse(testServer.getBaseUrl());
+         }),
+      TEST_TIMEOUT_LONG,
+   );
+
+   it(
+      'reuses the implicit current session',
+      () =>
+         withTempDir(tempRoots, async () => {
+            await assertImplicitSessionReuse(testServer.getBaseUrl());
          }),
       TEST_TIMEOUT_LONG,
    );

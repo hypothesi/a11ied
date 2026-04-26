@@ -7,6 +7,7 @@ import { registerVerifyCommands } from './commands/verify.js';
 import { registerWcagCommands } from './commands/wcag.js';
 import { CLI_VERSION, JSON_INDENT } from './lib/constants.js';
 import { renderFullHelp } from './lib/help.js';
+import { styleCommandText } from './lib/text.js';
 
 function registerDoctorCommand(program: Command): void {
    program
@@ -18,10 +19,10 @@ function registerDoctorCommand(program: Command): void {
       .action(async (options: { json?: boolean }) => {
          const { createDoctorReport, renderDoctorText } = await import('#core');
          const report = createDoctorReport();
-         let output = renderDoctorText(report);
-         if (options.json) {
-            output = JSON.stringify(report, undefined, JSON_INDENT);
-         }
+         const renderedText = renderDoctorText(report);
+         const output = options.json
+            ? JSON.stringify(report, undefined, JSON_INDENT)
+            : styleCommandText(renderedText);
          log.message(output);
       });
 }

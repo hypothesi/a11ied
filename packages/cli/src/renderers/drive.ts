@@ -169,7 +169,9 @@ export function renderDriveSessionText(
    };
 
    return [
-      `Session: ${result.session.sessionId}`,
+      'Drive session ready',
+      '',
+      `Session ID: ${result.session.sessionId}`,
       `Target: ${result.session.target}`,
       `Started: ${result.session.startedAt}`,
       `Broker PID: ${result.session.brokerPid}`,

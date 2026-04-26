@@ -177,12 +177,13 @@ function registerFocusCommand(driveCommand: Command): void {
 function registerClearLogsCommand(driveCommand: Command): void {
    addVerboseOption(
       addJsonOption(
-         driveCommand
-            .command('clear-logs')
-            .description('Clear captured speech and action logs.')
-            .requiredOption('--session <id>', 'Reuse an existing driver session.'),
+         addSessionOption(
+            driveCommand
+               .command('clear-logs')
+               .description('Clear captured speech and action logs.'),
+         ),
       ),
-   ).action(async (options: { json?: boolean; verbose?: boolean; session: string }) => {
+   ).action(async (options: { json?: boolean; verbose?: boolean; session?: string }) => {
       const [{ executeDriveActionCommand }, renderers] = await Promise.all([
          import('../lib/execute.js'),
          import('../renderers/drive.js'),

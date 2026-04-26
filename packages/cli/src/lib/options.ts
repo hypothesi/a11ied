@@ -1,5 +1,8 @@
 import type { Command } from 'commander';
 
+const SESSION_OPTION_DESCRIPTION =
+   'Reuse an existing driver session. Defaults to the current drive session or $A11IED_DRIVE_SESSION when available.';
+
 export function addJsonOption(command: Command): Command {
    return command.option('--json', 'Print JSON instead of human-readable text.');
 }
@@ -17,7 +20,7 @@ export function addWcagVersionOption(command: Command): Command {
 }
 
 export function addSessionOption(command: Command): Command {
-   return command.option('--session <id>', 'Reuse an existing driver session.');
+   return command.option('--session <id>', SESSION_OPTION_DESCRIPTION);
 }
 
 export function addEphemeralOption(command: Command): Command {

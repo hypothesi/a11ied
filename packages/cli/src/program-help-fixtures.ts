@@ -145,7 +145,8 @@ export const driveRunHelpCases: HelpCase[] = [
 
       Options:
         --keys <keys>        Send keys such as VO+ArrowRight or Tab.
-        --session <id>       Reuse an existing driver session.
+        --session <id>       Reuse an existing driver session. Defaults to the current
+                             drive session or $A11IED_DRIVE_SESSION when available.
         --target <platform>  Choose one target: voiceover, nvda, or virtual. Defaults
                              to VoiceOver on macOS, NVDA on Windows, or virtual
                              elsewhere. Use --allow-virtual to permit simulation.

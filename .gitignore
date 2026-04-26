@@ -13,5 +13,14 @@ dist
 *.db
 .beads-credential-key
 
+## AI Config
+.github/prompts
+.github/skills
+.github/instructions
+.claude
+.cursor
+.gemini
+.agents
+
 # bv (beads viewer) local config and caches
 .bv/

@@ -1,5 +1,6 @@
 import { platformSchema, type Platform, type VerificationReport } from '#contracts';
 import { CliUsageError, resolveDefaultTarget, resolveDocumentTarget } from '#core';
+import { resolveImplicitDriveSession, type DriveSessionSource } from './drive-session.js';
 
 interface VirtualTargetGuardOptions {
    allowVirtual?: boolean;
@@ -75,16 +76,55 @@ export function parsePlatform(
    return parsed.data;
 }
 
-export function resolveDriveSession(options: {
+function buildResolvedSessionOptions(options: { session?: string; cwd?: string }): {
+   session?: string;
+   cwd?: string;
+} {
+   const sessionOptions: { session?: string; cwd?: string } = {};
+
+   if (options.session) {
+      sessionOptions.session = options.session;
+   }
+   if (options.cwd) {
+      sessionOptions.cwd = options.cwd;
+   }
+
+   return sessionOptions;
+}
+
+function resolveEphemeralDriveSession(options: {
+   target?: string;
+   allowVirtual?: boolean;
+}): { target?: Platform; ephemeral: true; sessionSource: 'none' } {
+   if (!options.target) {
+      return {
+         ephemeral: true,
+         sessionSource: 'none',
+      };
+   }
+
+   return {
+      ephemeral: true,
+      sessionSource: 'none',
+      target: parsePlatform(
+         options.target,
+         buildVirtualTargetGuardOptions(options.allowVirtual),
+      ),
+   };
+}
+
+export async function resolveDriveSession(options: {
    session?: string;
    target?: string;
    ephemeral?: boolean;
    allowVirtual?: boolean;
-}): {
+   cwd?: string;
+}): Promise<{
    sessionId?: string;
    target?: Platform;
    ephemeral: boolean;
-} {
+   sessionSource: DriveSessionSource;
+}> {
    if (options.ephemeral && options.session) {
       throw new CliUsageError(
          'ephemeral-session-conflict',
@@ -94,22 +134,14 @@ export function resolveDriveSession(options: {
    }
 
    if (options.ephemeral) {
-      if (options.target) {
-         return {
-            ephemeral: true,
-            target: parsePlatform(
-               options.target,
-               buildVirtualTargetGuardOptions(options.allowVirtual),
-            ),
-         };
-      }
-
-      return {
-         ephemeral: true,
-      };
+      return resolveEphemeralDriveSession(options);
    }
 
-   if (!options.session) {
+   const resolvedSession = await resolveImplicitDriveSession(
+      buildResolvedSessionOptions(options),
+   );
+
+   if (!resolvedSession.sessionId) {
       throw new CliUsageError(
          'missing-session',
          'A session id is required unless --ephemeral is present.',
@@ -118,7 +150,8 @@ export function resolveDriveSession(options: {
 
    return {
       ephemeral: false,
-      sessionId: options.session,
+      sessionId: resolvedSession.sessionId,
+      sessionSource: resolvedSession.source,
    };
 }
 
