@@ -22,6 +22,10 @@ function buildPatternCommand(runCommand: Command): Command {
                         .option(
                            '--url <url>',
                            'Run the pattern against one live URL target.',
+                        )
+                        .addHelpText(
+                           'after',
+                           '\nRun "a1 run patterns" to list all available pattern IDs.',
                         ),
                   ),
                ),

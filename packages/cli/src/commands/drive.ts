@@ -14,14 +14,11 @@ import {
 import type { buildCliTargetInput, CliTargetInputOptions } from '../lib/target-input.js';
 import {
    buildVirtualTargetGuardOptions,
-   resolveDriveSession,
    type ResolvedCliTarget,
 } from '../lib/resolvers.js';
-import {
-   persistImplicitDriveSession,
-   withImplicitDriveSessionGuard,
-} from '../lib/drive-session.js';
+import { persistImplicitDriveSession } from '../lib/drive-session.js';
 import { executeStopAction } from './drive-stop.js';
+import { executeStatusAction } from './drive-status.js';
 import {
    registerMiddleActions,
    registerSimpleActions,
@@ -245,10 +242,9 @@ function registerStatusCommand(driveCommand: Command): void {
          ),
       ),
    ).action(async (options: { json?: boolean; verbose?: boolean; session?: string }) => {
-      const [{ executeCommand }, renderers, core] = await Promise.all([
+      const [{ executeCommand }, renderers] = await Promise.all([
          import('../lib/execute.js'),
          import('../renderers/drive.js'),
-         import('#core'),
       ]);
 
       await executeCommand(
@@ -259,19 +255,7 @@ function registerStatusCommand(driveCommand: Command): void {
             json: options.json,
             verbose: options.verbose,
          },
-         async () => {
-            const resolved = await resolveDriveSession(options);
-            const sessionId = resolved.sessionId ?? '';
-            const result = await withImplicitDriveSessionGuard({
-               source: resolved.sessionSource,
-               run: () => core.getDriverSessionStatus(sessionId),
-            });
-
-            return {
-               target: { kind: 'driver-session', value: sessionId },
-               result,
-            };
-         },
+         () => executeStatusAction(options),
          renderers.renderDriveStatusText,
       );
    });

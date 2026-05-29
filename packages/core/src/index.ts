@@ -51,7 +51,7 @@ export {
    type SerializableDriverCommand,
 } from '@a11ied/guidepup';
 export { runAxe } from './axe/runtime.js';
-export { runInteractionPattern } from './patterns/runtime.js';
+export { runInteractionPattern, listInteractionPatterns } from './patterns/runtime.js';
 export { openUrlInSystemAutomationBrowser } from './browser/helper.js';
 export {
    resolveDocumentTarget,
@@ -120,8 +120,6 @@ const cliCommands: CliCommand[] = [
       maturity: 'ready',
    },
 ];
-
-const { env: processEnv } = process;
 
 function getBaseVoiceOverNotes(): string[] {
    return [
@@ -242,12 +240,20 @@ function renderTargetLines(report: DoctorReport): string[] {
    return lines;
 }
 
+function resolveNpmVersion(): string {
+   const result = spawnSync('npm', ['--version'], { encoding: 'utf8', timeout: 5000 });
+   if (result.error || result.status !== 0) {
+      return 'unknown';
+   }
+   return result.stdout.trim() || 'unknown';
+}
+
 /** Builds the doctor report shown by the public CLI and library surface. */
 export function createDoctorReport(): DoctorReport {
    return {
       packageVersion: '0.1.0',
       nodeVersion: process.version,
-      npmVersion: processEnv.npm_config_user_agent ?? 'unknown',
+      npmVersion: resolveNpmVersion(),
       browserAutomation: createBrowserAutomationPolicy(),
       targets: createSupportedTargets(),
    };

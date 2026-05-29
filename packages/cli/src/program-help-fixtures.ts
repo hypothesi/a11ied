@@ -129,6 +129,8 @@ export const driveRunHelpCases: HelpCase[] = [
       Commands:
         axe [options]                  Run axe-core against a target.
         pattern [options] <patternId>  Run a named built-in interaction pattern.
+        patterns [options]             List all built-in interaction pattern IDs. Pass
+                                       a pattern ID to "a1 run pattern <patternId>".
         help [command]                 display help for command
       "
     `,

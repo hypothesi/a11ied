@@ -45,6 +45,8 @@ export const runOptionCases: HelpCase[] = [
         --json               Print JSON instead of human-readable text.
         --verbose            Print more detail in text output.
         -h, --help           display help for command
+
+      Run "a1 run patterns" to list all available pattern IDs.
       "
     `,
    },
@@ -56,6 +58,7 @@ export const helpAllExpectations = [
    'a11ied inspect applicable\n',
    'a11ied session start\n',
    'a11ied run axe\n',
+   'a11ied run patterns\n',
    'a11ied help-all\n',
    '--recording <path>',
 ];

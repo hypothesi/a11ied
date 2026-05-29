@@ -1,6 +1,7 @@
 import type { Command } from 'commander';
 import { registerAxeCommand } from './run-axe.js';
 import { registerPatternCommand } from './run-pattern.js';
+import { registerPatternsListCommand } from './run-patterns.js';
 
 export function registerRunCommands(program: Command): void {
    const runCommand = program
@@ -10,4 +11,5 @@ export function registerRunCommands(program: Command): void {
 
    registerAxeCommand(runCommand);
    registerPatternCommand(runCommand);
+   registerPatternsListCommand(runCommand);
 }

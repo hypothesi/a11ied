@@ -1,6 +1,7 @@
 import {
    interactionPatternIdSchema,
    interactionPatternResultSchema,
+   type InteractionPatternId,
    type InteractionPatternResult,
    type Platform,
 } from '@a11ied/contracts';
@@ -36,7 +37,24 @@ type PatternRunner = (
 type StopSessionResult = Awaited<ReturnType<typeof stopDriverSession>> | undefined;
 const REAL_TARGET_BROWSER_PRIME_MS = 1000;
 
-const patternRunners: Record<string, PatternRunner | undefined> = {
+const PATTERN_DESCRIPTIONS: Record<InteractionPatternId, string> = {
+   tab_sequence: 'Navigate the page tab sequence and record focus order.',
+   landmark_sequence: 'Navigate page landmarks using screen reader landmark commands.',
+   heading_sequence: 'Navigate page headings using screen reader heading commands.',
+   form_field_walk: 'Walk through form fields in order and record their labels.',
+   status_message_probe:
+      'Trigger a status message and verify the screen reader announces it.',
+   dialog_probe: 'Open a modal dialog and verify the screen reader announces it.',
+   focus_order_probe: 'Verify that focus order follows the visual and DOM layout.',
+   focus_visibility_probe: 'Verify keyboard focus is visible as the user navigates.',
+   focus_obscured_probe: 'Verify keyboard focus is not hidden behind sticky elements.',
+   auth_flow_probe:
+      'Test authentication form fields and error handling for accessibility.',
+   redundant_entry_probe:
+      'Verify the page does not ask users to re-enter previously provided information.',
+};
+
+const patternRunners: Record<InteractionPatternId, PatternRunner> = {
    landmark_sequence: runLandmarkSequence,
    heading_sequence: runHeadingSequence,
    status_message_probe: runStatusMessageProbe,
@@ -51,6 +69,17 @@ const patternRunners: Record<string, PatternRunner | undefined> = {
    auth_flow_probe: runAuthFlowProbe,
    redundant_entry_probe: runRedundantEntryProbe,
 };
+
+/** Returns all built-in interaction pattern IDs with their descriptions. */
+export function listInteractionPatterns(): Array<{
+   id: InteractionPatternId;
+   description: string;
+}> {
+   return (Object.keys(PATTERN_DESCRIPTIONS) as InteractionPatternId[]).map((id) => ({
+      id,
+      description: PATTERN_DESCRIPTIONS[id],
+   }));
+}
 
 async function resolveSession(options: RunPatternOptions): Promise<{
    sessionId: string;
@@ -148,14 +177,8 @@ async function cleanupSession(
    return stopResult;
 }
 
-function getPatternRunner(patternId: string): PatternRunner {
-   const runner = patternRunners[patternId];
-   if (runner) {
-      return runner;
-   }
-   throw new CliUsageError('unknown-pattern', `Pattern "${patternId}" is unsupported.`, {
-      patternId,
-   });
+function getPatternRunner(patternId: InteractionPatternId): PatternRunner {
+   return patternRunners[patternId];
 }
 
 function applyManagedRecording(

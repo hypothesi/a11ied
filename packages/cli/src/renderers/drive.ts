@@ -201,7 +201,13 @@ export function renderDriveStatusText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },
 ): string {
-   const result = envelope.result as unknown as DriveResult<DriveStatusState>;
+   const result = envelope.result as unknown as DriveResult<DriveStatusState> & {
+      noSession?: boolean;
+   };
+
+   if (result.noSession) {
+      return ['No active session.', '', 'Start one with: a1 session start'].join('\n');
+   }
 
    const lines = buildDriveLines({
       action: result.action,

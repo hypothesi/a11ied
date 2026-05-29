@@ -296,3 +296,20 @@ export function renderPatternText(
 
    return lines.join('\n');
 }
+
+// Fallow-ignore-next-line unused-export
+export function renderPatternsListText(
+   envelope: CliOutputEnvelope,
+   _options: { verbose: boolean },
+): string {
+   const result = envelope.result as {
+      patterns: Array<{ id: string; description: string }>;
+   };
+   const idWidth = Math.max(...result.patterns.map((pt) => pt.id.length));
+   const lines = ['Built-in interaction patterns:', ''];
+   for (const pattern of result.patterns) {
+      lines.push(`  ${pattern.id.padEnd(idWidth)}  ${pattern.description}`);
+   }
+   lines.push('', 'Run: a1 run pattern <patternId> --url <url>');
+   return lines.join('\n');
+}
