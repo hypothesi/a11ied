@@ -9,7 +9,7 @@ import {
 import {
    attachDocumentToDriverSession,
    getDriverSessionStatus,
-   resolveDefaultTarget,
+   resolveAvailableDefaultTarget,
    resolveTargetType,
    runDriverSessionAction,
    startDriverSession,
@@ -150,8 +150,11 @@ async function handleDriverSessionStart(
       allowVirtual: _allowVirtual,
       ...targetInput
    } = input;
-   const resolvedTarget = target ?? resolveDefaultTarget().target;
-   ensureVirtualTargetAllowed(resolvedTarget, input.allowVirtual);
+   const defaultTarget = target ? undefined : await resolveAvailableDefaultTarget();
+   const resolvedTarget = target ?? defaultTarget?.target ?? 'virtual';
+   if (target) {
+      ensureVirtualTargetAllowed(resolvedTarget, input.allowVirtual);
+   }
    const session = await startDriverSession(resolvedTarget);
    await attachResolvedDocument(session.sessionId, targetInput, resolvedTarget);
    return createToolResponse<Record<string, unknown>>(

@@ -11,13 +11,7 @@ describe('startup maintenance preflight', () => {
    it('skips maintenance for help-like invocations', () => {
       expect(shouldSkipStartupMaintenance(['node', 'cli.js', '--help'])).toBe(true);
       expect(
-         shouldSkipStartupMaintenance([
-            'node',
-            'cli.js',
-            'verify',
-            'criterion',
-            '--help',
-         ]),
+         shouldSkipStartupMaintenance(['node', 'cli.js', 'run', 'axe', '--help']),
       ).toBe(true);
       expect(shouldSkipStartupMaintenance(['node', 'cli.js', 'help-all'])).toBe(true);
    });

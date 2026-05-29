@@ -195,6 +195,9 @@ function formatRunAxeSelector(selection: {
    level?: string;
    ruleIds?: string[];
 }): string {
+   if (selection.kind === 'all') {
+      return 'all mapped axe rules';
+   }
    if (selection.kind === 'criterion') {
       return `criterion=${selection.criterion}`;
    }

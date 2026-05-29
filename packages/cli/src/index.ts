@@ -23,8 +23,6 @@ export {
    showWcagCriterion,
    startDriverSession,
    stopDriverSession,
-   verifyCriterion,
-   verifyLevel,
    CliEnvironmentError,
    CliUsageError,
 } from '@a11ied/core';

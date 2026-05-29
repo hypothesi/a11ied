@@ -20,12 +20,10 @@ export const topLevelHelpCases: HelpCase[] = [
       Commands:
         wcag              Look up pinned WCAG requirements and coverage data.
         inspect           Explain criterion applicability for a target.
-        drive             Control a target screen reader through stable sessions.
+        session           Control a target screen reader through stable sessions.
         doctor [options]  Report runtime details, browser policy, and supported
                           automation targets.
         run               Execute automated rule scans and named interaction patterns.
-        verify            Turn collected evidence into explicit WCAG verification
-                          results.
         mcp               Start the MCP stdio server.
         help-all          Print help for the full command tree in one shot.
         help [command]    display help for command
@@ -81,10 +79,10 @@ export const inspectHelpCases: HelpCase[] = [
 
 export const driveRunHelpCases: HelpCase[] = [
    {
-      name: 'keeps drive subcommand families stable',
-      args: ['drive', '--help'],
+      name: 'keeps session subcommand families stable',
+      args: ['session', '--help'],
       expected: `
-      "Usage: a11ied drive [options] [command]
+      "Usage: a11ied session [options] [command]
 
       Control a target screen reader through stable sessions.
 
@@ -136,20 +134,21 @@ export const driveRunHelpCases: HelpCase[] = [
     `,
    },
    {
-      name: 'lists supported drive key tokens',
-      args: ['drive', 'key', '--help'],
+      name: 'lists supported session key tokens',
+      args: ['session', 'key', '--help'],
       expected: `
-      "Usage: a11ied drive key [options]
+      "Usage: a11ied session key [options]
 
       Send one or more target-specific key chords.
 
       Options:
         --keys <keys>        Send keys such as VO+ArrowRight or Tab.
-        --session <id>       Reuse an existing driver session. Defaults to the current
-                             drive session or $A11IED_DRIVE_SESSION when available.
+        --session <id>       Reuse an existing screen-reader session. Defaults to the
+                             current session or $A11IED_DRIVE_SESSION when available.
         --target <platform>  Choose one target: voiceover, nvda, or virtual. Defaults
-                             to VoiceOver on macOS, NVDA on Windows, or virtual
-                             elsewhere. Use --allow-virtual to permit simulation.
+                             to an available VoiceOver or NVDA target, then falls back
+                             to virtual as a last resort. Use --allow-virtual to
+                             explicitly request simulation.
         --allow-virtual      Allow the virtual (simulated) screen reader when a real
                              target is available.
         --ephemeral          Run one action in a temporary session and tear it down
@@ -192,78 +191,6 @@ export const driveRunHelpCases: HelpCase[] = [
           Examples: NVDA+N, NVDA+ArrowDown, NVDA+NumPad5, Control+Alt+N
       "
     `,
-   },
-];
-
-export const verifyHelpCases: HelpCase[] = [
-   {
-      name: 'keeps the verify family stable',
-      args: ['verify', '--help'],
-      expected: `
-      "Usage: a11ied verify [options] [command]
-
-      Turn collected evidence into explicit WCAG verification results.
-
-      Options:
-        -h, --help                       display help for command
-
-      Commands:
-        criterion [options] <criterion>  Verify one WCAG criterion for a target.
-        level [options] <level>          Verify a WCAG conformance level against a
-                                         target.
-        help [command]                   display help for command
-      "
-    `,
-   },
-   {
-      name: 'keeps verify criterion options stable',
-      args: ['verify', 'criterion', '--help'],
-      expected: `
-   "Usage: a11ied verify criterion [options] <criterion>
-
-   Verify one WCAG criterion for a target.
-
-   Options:
-     --url <url>          Run the verification against one live URL target.
-     --recording <path>   Write one screen recording to the given .mov or .mp4 path
-                          when the target supports it.
-     --version <version>  Use a specific WCAG version. Defaults to 2.2. (default:
-                          "2.2")
-     --target <platform>  Choose one target: voiceover, nvda, or virtual. Defaults
-                          to VoiceOver on macOS, NVDA on Windows, or virtual
-                          elsewhere. Use --allow-virtual to permit simulation.
-     --allow-virtual      Allow the virtual (simulated) screen reader when a real
-                          target is available.
-     --json               Print JSON instead of human-readable text.
-     --verbose            Print more detail in text output.
-     -h, --help           display help for command
-   "
- `,
-   },
-   {
-      name: 'keeps verify level options stable',
-      args: ['verify', 'level', '--help'],
-      expected: `
-   "Usage: a11ied verify level [options] <level>
-
-   Verify a WCAG conformance level against a target.
-
-   Options:
-     --url <url>          Run the verification against one live URL target.
-     --recording <path>   Write one screen recording to the given .mov or .mp4 path
-                          when the target supports it.
-     --version <version>  Use a specific WCAG version. Defaults to 2.2. (default:
-                          "2.2")
-     --target <platform>  Choose one target: voiceover, nvda, or virtual. Defaults
-                          to VoiceOver on macOS, NVDA on Windows, or virtual
-                          elsewhere. Use --allow-virtual to permit simulation.
-     --allow-virtual      Allow the virtual (simulated) screen reader when a real
-                          target is available.
-     --json               Print JSON instead of human-readable text.
-     --verbose            Print more detail in text output.
-     -h, --help           display help for command
-   "
- `,
    },
 ];
 

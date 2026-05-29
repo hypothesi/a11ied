@@ -5,7 +5,6 @@ import { registerDriverTools } from './tools/driver.js';
 import { registerExecutionTools } from './tools/execution.js';
 import { registerInspectTools } from './tools/inspect.js';
 import { registerKnowledgeTools } from './tools/knowledge.js';
-import { registerVerificationTools } from './tools/verification.js';
 
 /** Creates the MCP server with all shipped tools and read-only resources registered. */
 export function createMcpServer(): McpServer {
@@ -19,7 +18,6 @@ export function createMcpServer(): McpServer {
    registerInspectTools(server);
    registerDriverTools(server);
    registerExecutionTools(server);
-   registerVerificationTools(server);
 
    return server;
 }
