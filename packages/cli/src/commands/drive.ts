@@ -18,10 +18,10 @@ import {
    type ResolvedCliTarget,
 } from '../lib/resolvers.js';
 import {
-   clearImplicitDriveSessionIfMatches,
    persistImplicitDriveSession,
    withImplicitDriveSessionGuard,
 } from '../lib/drive-session.js';
+import { executeStopAction } from './drive-stop.js';
 import {
    registerMiddleActions,
    registerSimpleActions,
@@ -45,7 +45,7 @@ function delay(ms: number): Promise<void> {
 }
 
 function emitDefaultTargetNotice(
-   fallback: ReturnType<typeof Core.resolveDefaultTarget>,
+   fallback: Awaited<ReturnType<typeof Core.resolveAvailableDefaultTarget>>,
    json: boolean | undefined,
 ): void {
    if (json) {
@@ -58,7 +58,7 @@ function emitDefaultTargetNotice(
 }
 
 function buildDefaultTargetWarnings(
-   fallback: ReturnType<typeof Core.resolveDefaultTarget>,
+   fallback: Awaited<ReturnType<typeof Core.resolveAvailableDefaultTarget>>,
 ): Array<{ code: string; message: string }> {
    const warnings: Array<{ code: string; message: string }> = [
       {
@@ -75,17 +75,20 @@ function buildDefaultTargetWarnings(
    return warnings;
 }
 
-function applyDefaultDriverTarget(
+async function applyDefaultDriverTarget(
    options: StartActionOptions,
    core: typeof Core,
-): { warnings?: Array<{ code: string; message: string }> } {
+): Promise<{ warnings?: Array<{ code: string; message: string }> }> {
    if (options.target) {
       return {};
    }
 
-   const fallback = core.resolveDefaultTarget();
+   const fallback = await core.resolveAvailableDefaultTarget();
    emitDefaultTargetNotice(fallback, options.json);
    options.target = fallback.target;
+   if (fallback.target === 'virtual') {
+      options.allowVirtual = true;
+   }
    return { warnings: buildDefaultTargetWarnings(fallback) };
 }
 
@@ -187,11 +190,11 @@ async function handleStartAction(options: StartActionOptions): Promise<void> {
       import('#core'),
    ]);
 
-   const { warnings } = applyDefaultDriverTarget(options, core);
+   const { warnings } = await applyDefaultDriverTarget(options, core);
 
    await executeCommand(
       {
-         family: 'drive',
+         family: 'session',
          subcommand: 'start',
          wcagVersion: undefined,
          json: options.json,
@@ -224,7 +227,7 @@ function registerStartCommand(driveCommand: Command): void {
                .description('Start a persistent driver session.')
                .option(
                   '--target <platform>',
-                  'Choose one target: voiceover, nvda, or virtual. Defaults to VoiceOver on macOS, NVDA on Windows, or virtual elsewhere. Use virtual only for simulation (requires --allow-virtual).',
+                  'Choose one target: voiceover, nvda, or virtual. Defaults to an available VoiceOver or NVDA target, then falls back to virtual as a last resort. Use --allow-virtual to explicitly request simulation.',
                )
                .option('--url <url>', 'Attach one live URL target to the new session.'),
          ),
@@ -250,7 +253,7 @@ function registerStatusCommand(driveCommand: Command): void {
 
       await executeCommand(
          {
-            family: 'drive',
+            family: 'session',
             subcommand: 'status',
             wcagVersion: undefined,
             json: options.json,
@@ -282,41 +285,31 @@ function registerStopCommand(driveCommand: Command): void {
             .description('Stop a persistent driver session and remove its state file.'),
       ),
    ).action(async (options: { json?: boolean; session?: string }) => {
-      const [{ executeCommand }, renderers, core] = await Promise.all([
+      const [{ executeCommand }, renderers] = await Promise.all([
          import('../lib/execute.js'),
          import('../renderers/drive.js'),
-         import('#core'),
       ]);
 
       await executeCommand(
          {
-            family: 'drive',
+            family: 'session',
             subcommand: 'stop',
             wcagVersion: undefined,
             json: options.json,
          },
-         async () => {
-            const resolved = await resolveDriveSession(options);
-            const sessionId = resolved.sessionId ?? '';
-            const result = await withImplicitDriveSessionGuard({
-               source: resolved.sessionSource,
-               run: () => core.stopDriverSession(sessionId),
-            });
-
-            await clearImplicitDriveSessionIfMatches(sessionId);
-            return {
-               target: { kind: 'driver-session', value: sessionId },
-               result,
-            };
-         },
-         renderers.renderDriveStatusText,
+         () => executeStopAction(options),
+         renderers.renderDriveStopText,
       );
    });
 }
 
-export function registerDriveCommands(program: Command): void {
+function registerDriverCommands(
+   program: Command,
+   commandName: string,
+   options?: { noHelp?: boolean },
+): void {
    const driveCommand = program
-      .command('drive')
+      .command(commandName, options)
       .description('Control a target screen reader through stable sessions.');
 
    registerStartCommand(driveCommand);
@@ -325,4 +318,9 @@ export function registerDriveCommands(program: Command): void {
    registerSimpleActions(driveCommand);
    registerMiddleActions(driveCommand);
    registerTrailingActions(driveCommand);
+}
+
+export function registerSessionCommands(program: Command): void {
+   registerDriverCommands(program, 'session');
+   registerDriverCommands(program, 'drive', { noHelp: true });
 }

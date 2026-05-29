@@ -7,7 +7,6 @@ import {
    type HelpCase,
    runOptionCases,
    topLevelHelpCases,
-   verifyHelpCases,
 } from './program-help-fixtures.js';
 import { EXIT_SUCCESS, runCli } from './testing/setup.js';
 
@@ -48,8 +47,7 @@ function registerHelpCases(suiteName: string, helpCases: HelpCase[]): void {
 
 registerHelpCases('cli top-level grammar', topLevelHelpCases);
 registerHelpCases('cli inspect grammar', inspectHelpCases);
-registerHelpCases('cli drive and run grammar', driveRunHelpCases);
-registerHelpCases('cli verify grammar', verifyHelpCases);
+registerHelpCases('cli session and run grammar', driveRunHelpCases);
 registerHelpCases('cli run options grammar', runOptionCases);
 
 describe('cli aggregate help', () => {
@@ -63,10 +61,10 @@ describe('cli aggregate help', () => {
    });
 });
 
-describe('cli drive command listing', () => {
+describe('cli session command listing', () => {
    it('lists supported driver commands without requiring a session', async () => {
       const result = await runCli([
-         'drive',
+         'session',
          'commands',
          '--target',
          'voiceover',
@@ -77,8 +75,8 @@ describe('cli drive command listing', () => {
       ]);
 
       expect(result.status).toBe(EXIT_SUCCESS);
-      expect(result.stdout).toContain('voiceover / voiceover-commander');
+      expect(result.stdout).toContain('VoiceOver — Commander');
       expect(result.stdout).toContain('move-right');
-      expect(result.stdout).toContain('MOVE_RIGHT');
+      expect(result.stdout).toContain('move right');
    });
 });

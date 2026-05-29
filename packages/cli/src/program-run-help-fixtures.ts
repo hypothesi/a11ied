@@ -34,11 +34,12 @@ export const runOptionCases: HelpCase[] = [
         --url <url>          Run the pattern against one live URL target.
         --recording <path>   Write one screen recording to the given .mov or .mp4 path
                              when the target supports it.
-        --session <id>       Reuse an existing driver session. Defaults to the current
-                             drive session or $A11IED_DRIVE_SESSION when available.
+        --session <id>       Reuse an existing screen-reader session. Defaults to the
+                             current session or $A11IED_DRIVE_SESSION when available.
         --target <platform>  Choose one target: voiceover, nvda, or virtual. Defaults
-                             to VoiceOver on macOS, NVDA on Windows, or virtual
-                             elsewhere. Use --allow-virtual to permit simulation.
+                             to an available VoiceOver or NVDA target, then falls back
+                             to virtual as a last resort. Use --allow-virtual to
+                             explicitly request simulation.
         --allow-virtual      Allow the virtual (simulated) screen reader when a real
                              target is available.
         --json               Print JSON instead of human-readable text.
@@ -50,12 +51,11 @@ export const runOptionCases: HelpCase[] = [
 ];
 
 export const helpAllExpectations = [
-   '# a11ied',
-   '# a11ied wcag',
-   '# a11ied inspect applicable',
-   '# a11ied drive start',
-   '# a11ied run axe',
-   '# a11ied verify criterion',
-   '# a11ied help-all',
+   'a11ied\n',
+   'a11ied wcag\n',
+   'a11ied inspect applicable\n',
+   'a11ied session start\n',
+   'a11ied run axe\n',
+   'a11ied help-all\n',
    '--recording <path>',
 ];

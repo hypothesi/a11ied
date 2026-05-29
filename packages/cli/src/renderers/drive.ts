@@ -1,5 +1,13 @@
+import chalk from 'chalk';
 import type { CliOutputEnvelope } from '#contracts';
 import type { DriverCommandList, SerializableDriverCommand } from '#core';
+
+const COMMAND_SET_LABELS: Readonly<Record<string, string>> = {
+   portable: 'Portable',
+   'voiceover-commander': 'VoiceOver — Commander',
+   'voiceover-keycode': 'VoiceOver — Key Codes',
+   'nvda-keycode': 'NVDA — Key Codes',
+} as const;
 
 interface DriveRecording {
    path: string;
@@ -120,20 +128,23 @@ function appendPerformDetails(
    }
 }
 
-function formatCommandLine(command: SerializableDriverCommand): string {
-   const parts = [command.alias];
-   if (command.upstreamKey !== command.alias) {
-      parts.push(`(${command.upstreamKey})`);
+function formatCommandLine(
+   command: SerializableDriverCommand,
+   aliasWidth: number,
+): string {
+   const paddedAlias = command.alias.padEnd(aliasWidth);
+   const parts = [chalk.cyan(paddedAlias)];
+
+   const keySeq = command.representation ?? command.upstreamValue ?? '';
+   if (keySeq) {
+      parts.push(chalk.yellow(keySeq));
    }
-   if (command.representation) {
-      parts.push(`=> ${command.representation}`);
-   } else if (command.upstreamValue) {
-      parts.push(`=> ${command.upstreamValue}`);
-   }
+
    if (command.description) {
-      parts.push(`- ${command.description}`);
+      parts.push(chalk.dim(command.description));
    }
-   return `  ${parts.join(' ')}`;
+
+   return `  ${parts.join('  ')}`;
 }
 
 // Fallow-ignore-next-line unused-export
@@ -144,9 +155,12 @@ export function formatDriveCommands(result: DriverCommandList): string {
 
    const lines = ['Driver commands:'];
    for (const group of result.commandSets) {
-      lines.push('', `${group.target} / ${group.commandSet}`);
+      const label =
+         COMMAND_SET_LABELS[group.commandSet] ?? `${group.target} / ${group.commandSet}`;
+      const aliasWidth = Math.max(...group.commands.map((cmd) => cmd.alias.length));
+      lines.push('', chalk.bold(label));
       for (const command of group.commands) {
-         lines.push(formatCommandLine(command));
+         lines.push(formatCommandLine(command, aliasWidth));
       }
    }
    return lines.join('\n');
@@ -177,6 +191,8 @@ export function renderDriveSessionText(
       `Broker PID: ${result.session.brokerPid}`,
       `Socket: ${result.session.socketPath}`,
       `Recording: ${formatRecording(result.session.recording)}`,
+      '',
+      chalk.dim('Session cached \u2014 run session commands without --session'),
    ].join('\n');
 }
 
@@ -205,6 +221,35 @@ export function renderDriveStatusText(
    lines.push(`Recording: ${formatRecording(result.session.recording)}`);
 
    return lines.join('\n');
+}
+
+// Fallow-ignore-next-line unused-export
+export function renderDriveStopText(
+   envelope: CliOutputEnvelope,
+   _options: { verbose: boolean },
+): string {
+   const result = envelope.result as {
+      action: string;
+      session: { sessionId: string; target: string; recording?: DriveRecording };
+      details?: { alreadyGone?: boolean };
+   };
+
+   if (result.details?.alreadyGone) {
+      return [
+         'Drive session stopped',
+         '',
+         `Session ID: ${result.session.sessionId}`,
+         'Note: Session was already ended.',
+      ].join('\n');
+   }
+
+   return [
+      'Drive session stopped',
+      '',
+      `Session ID: ${result.session.sessionId}`,
+      `Target: ${result.session.target}`,
+      `Recording: ${formatRecording(result.session.recording)}`,
+   ].join('\n');
 }
 
 // Fallow-ignore-next-line unused-export
