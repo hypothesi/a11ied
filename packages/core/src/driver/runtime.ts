@@ -38,7 +38,7 @@ import {
    getActiveInMemoryIds,
    spawnPersistentBroker,
 } from './runtime-support.js';
-import { resolveDefaultTarget } from './default-target.js';
+import { resolveAvailableDefaultTarget } from './default-target.js';
 
 export { getDriverSessionMetadataPath, getDriverSocketPath } from './session-utils.js';
 
@@ -161,7 +161,8 @@ async function prepareDriverSessionStart(args: {
 }): Promise<Platform> {
    await ensureStateDirectories(args.cwd);
    await cleanupStaleDriverSessions(args.cwd);
-   const resolvedTarget = args.target ?? resolveDefaultTarget().target;
+   const defaultTarget = args.target ? undefined : await resolveAvailableDefaultTarget();
+   const resolvedTarget = args.target ?? defaultTarget?.target ?? 'virtual';
    if (resolvedTarget !== 'virtual') {
       await assertTargetIsAvailable(resolvedTarget, args.cwd);
    }
@@ -267,7 +268,8 @@ export async function runEphemeralDriverAction(
    action: DriverActionResult['action'],
    options?: SessionActionOptions,
 ): Promise<DriverActionResult> {
-   const resolvedTarget = target ?? resolveDefaultTarget().target;
+   const defaultTarget = target ? undefined : await resolveAvailableDefaultTarget();
+   const resolvedTarget = target ?? defaultTarget?.target ?? 'virtual';
    await assertTargetReady(resolvedTarget);
    const cwd = options?.cwd ?? process.cwd();
    const actionOptions = {

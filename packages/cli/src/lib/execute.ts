@@ -6,7 +6,7 @@ import {
 } from '#contracts';
 import {
    CliUsageError,
-   resolveDefaultTarget,
+   resolveAvailableDefaultTarget,
    runDriverSessionAction,
    runEphemeralDriverAction,
 } from '#core';
@@ -161,15 +161,15 @@ interface DriveActionCommandInput {
    renderText: (envelope: CliOutputEnvelope, options: { verbose: boolean }) => string;
 }
 
-function resolveEphemeralTarget(resolved: { target?: Platform }): {
+async function resolveEphemeralTarget(resolved: { target?: Platform }): Promise<{
    target: Platform;
    warnings?: Array<{ code: string; message: string }>;
-} {
+}> {
    if (resolved.target) {
       return { target: resolved.target };
    }
 
-   const fallback = resolveDefaultTarget();
+   const fallback = await resolveAvailableDefaultTarget();
    const warnings: Array<{ code: string; message: string }> = [
       {
          code: 'default-target-selected',
@@ -189,7 +189,7 @@ async function runEphemeralAction(
    input: DriveActionCommandInput,
    resolved: { target?: Platform },
 ): Promise<CommandExecution> {
-   const { target, warnings } = resolveEphemeralTarget(resolved);
+   const { target, warnings } = await resolveEphemeralTarget(resolved);
    let actionOptions: { payload: Record<string, unknown> } | undefined = undefined;
    if (input.payload) {
       actionOptions = { payload: input.payload };
@@ -237,7 +237,7 @@ export async function executeDriveActionCommand(
 ): Promise<void> {
    await executeCommand(
       {
-         family: 'drive',
+         family: 'session',
          subcommand: input.subcommand,
          wcagVersion: undefined,
          json: input.options.json,

@@ -230,14 +230,20 @@ export function resolveRunAxeSelection(options: {
    level?: string;
    rule?: string[];
 }):
+   | { kind: 'all' }
    | { kind: 'criterion'; criterion: string }
    | { kind: 'level'; level: string }
    | { kind: 'rule'; ruleIds: string[] } {
-   if (countSelectors(options) !== 1) {
+   const selectionCount = countSelectors(options);
+   if (selectionCount > 1) {
       throw new CliUsageError(
          'invalid-selection',
-         'Choose exactly one of --criterion, --level, or --rule.',
+         'Choose at most one of --criterion, --level, or --rule.',
       );
+   }
+
+   if (selectionCount === 0) {
+      return { kind: 'all' };
    }
 
    if (options.criterion) {

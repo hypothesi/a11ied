@@ -23,6 +23,22 @@ afterAll(async () => {
 
 describe('axe runtime', () => {
    it(
+      'runs all mapped axe rules when no selector is provided',
+      async () => {
+         const result = await runAxe(`${baseUrl}/basic-page.html`, {
+            url: `${baseUrl}/basic-page.html`,
+            wcagVersion: '2.2',
+         });
+
+         expect(result.selection.kind).toBe('all');
+         expect(result.ruleIds.length).toBeGreaterThan(10);
+         expect(Array.isArray(result.passes)).toBe(true);
+         expect(Array.isArray(result.incomplete)).toBe(true);
+      },
+      AXE_RUNTIME_TIMEOUT_MS,
+   );
+
+   it(
       'runs criterion-mapped axe rules and preserves normalized details',
       async () => {
          const result = await runAxe(`${baseUrl}/button-name-failure.html`, {

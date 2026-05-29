@@ -2,7 +2,6 @@ import {
    accessibilityDriverSessionSchema,
    criterionSearchResponseSchema,
    type CriterionSearchResult,
-   verificationReportSchema,
    wcagLookupResultSchema,
 } from '@a11ied/contracts';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -10,13 +9,11 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { describe, expect, it } from 'vitest';
 import type { z } from 'zod';
 import { createTempRoot } from '../../cli/src/testing/fixtures.js';
-import { useManagedTestServer } from '../../cli/src/testing/lifecycle.js';
 
 import { createMcpServer } from './index.js';
 
 const ONE_MINUTE_MS = 60_000;
 const tempRoots: string[] = [];
-const managedServer = useManagedTestServer(tempRoots);
 
 function getInvalidContentText(content: unknown): string {
    if (!Array.isArray(content)) {
@@ -76,32 +73,6 @@ async function startVirtualSession(
 
    expect(start.isError).toBeFalsy();
    return accessibilityDriverSessionSchema.parse(start.structuredContent);
-}
-
-async function assertVerificationToolReport(
-   harness: Awaited<ReturnType<typeof createHarness>>,
-   baseUrl: string,
-): Promise<void> {
-   const result = await harness.client.callTool({
-      name: 'verify',
-      arguments: {
-         criterion: '4.1.2',
-         url: `${baseUrl}/button-name-failure.html`,
-         target: 'virtual',
-         allowVirtual: true,
-         version: '2.2',
-      },
-   });
-
-   expect(result.isError).toBeFalsy();
-   const report = verificationReportSchema.parse(result.structuredContent);
-   expect(report.target).toHaveProperty('kind');
-   expect(report).toHaveProperty('wcagVersion');
-   expect(report).toHaveProperty('requestedScope');
-   expect(report).toHaveProperty('summary');
-   expect(report).toHaveProperty('criteria');
-   expect(report.criteria[0]?.criterionId).toBe('4.1.2');
-   expect(report.criteria[0]?.verdict).toBe('fail');
 }
 
 describe('wcag lookup tool', () => {
@@ -188,18 +159,6 @@ describe('driver session tools', () => {
    );
 });
 
-describe('verification tool', () => {
-   it(
-      'returns the same top-level report fields as the CLI report shape',
-      async () => {
-         await withHarness(async (harness) => {
-            await assertVerificationToolReport(harness, managedServer.getBaseUrl());
-         });
-      },
-      ONE_MINUTE_MS,
-   );
-});
-
 describe('resource exposure', () => {
    it('lists read-only resources for standards material', async () => {
       await withHarness(async (harness) => {
@@ -224,13 +183,10 @@ describe('tool metadata', () => {
       await withHarness(async (harness) => {
          const result = await harness.client.listTools();
          const driverTool = result.tools.find((entry) => entry.name === 'driver_session');
-         const verificationTool = result.tools.find((entry) => entry.name === 'verify');
 
          expect(driverTool?.description).toContain('real');
          expect(driverTool?.description).toContain('targetType');
-         expect(verificationTool?.description).toContain(
-            'may launch browsers, run automation, and drive assistive technology',
-         );
+         expect(result.tools.some((entry) => entry.name === 'verify')).toBe(false);
       });
    });
 });

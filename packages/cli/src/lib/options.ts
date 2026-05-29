@@ -1,7 +1,7 @@
 import type { Command } from 'commander';
 
 const SESSION_OPTION_DESCRIPTION =
-   'Reuse an existing driver session. Defaults to the current drive session or $A11IED_DRIVE_SESSION when available.';
+   'Reuse an existing screen-reader session. Defaults to the current session or $A11IED_DRIVE_SESSION when available.';
 
 export function addJsonOption(command: Command): Command {
    return command.option('--json', 'Print JSON instead of human-readable text.');
@@ -33,7 +33,7 @@ export function addEphemeralOption(command: Command): Command {
 export function addTargetOption(command: Command): Command {
    return command.option(
       '--target <platform>',
-      'Choose one target: voiceover, nvda, or virtual. Defaults to VoiceOver on macOS, NVDA on Windows, or virtual elsewhere. Use --allow-virtual to permit simulation.',
+      'Choose one target: voiceover, nvda, or virtual. Defaults to an available VoiceOver or NVDA target, then falls back to virtual as a last resort. Use --allow-virtual to explicitly request simulation.',
    );
 }
 

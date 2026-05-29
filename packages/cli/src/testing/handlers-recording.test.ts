@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import {
-   createMockDriveSession,
-   createMockPatternResult,
-   createMockVerifyCriterionReport,
-} from './recording-fixtures.js';
+import { createMockDriveSession, createMockPatternResult } from './recording-fixtures.js';
 import {
    type TestServerHandle,
    EXIT_SUCCESS,
@@ -18,7 +14,6 @@ import {
 const coreMocks = vi.hoisted(() => ({
    startDriverSessionMock: vi.fn(),
    runInteractionPatternMock: vi.fn(),
-   verifyCriterionMock: vi.fn(),
 }));
 
 vi.mock('#core', async () => {
@@ -28,7 +23,6 @@ vi.mock('#core', async () => {
       ...actual,
       startDriverSession: coreMocks.startDriverSessionMock,
       runInteractionPattern: coreMocks.runInteractionPatternMock,
-      verifyCriterion: coreMocks.verifyCriterionMock,
    };
 });
 
@@ -38,7 +32,6 @@ const testServer: TestServerHandle = useTestServer(tempRoots);
 afterEach(() => {
    coreMocks.startDriverSessionMock.mockReset();
    coreMocks.runInteractionPatternMock.mockReset();
-   coreMocks.verifyCriterionMock.mockReset();
 });
 
 async function runDriveRecordingSmoke(): Promise<void> {
@@ -73,9 +66,6 @@ async function runManagedRecordingSmoke(baseUrl: string): Promise<void> {
    coreMocks.runInteractionPatternMock.mockResolvedValueOnce(
       createMockPatternResult(baseUrl, process.cwd()),
    );
-   coreMocks.verifyCriterionMock.mockResolvedValueOnce(
-      createMockVerifyCriterionReport(baseUrl, process.cwd()),
-   );
 
    const patternResult = await runCliInProcess([
       'run',
@@ -89,29 +79,11 @@ async function runManagedRecordingSmoke(baseUrl: string): Promise<void> {
       './recordings/pattern.mov',
       '--json',
    ]);
-   const verifyResult = await runCliInProcess([
-      'verify',
-      'criterion',
-      '4.1.3',
-      '--url',
-      `${baseUrl}/status-message.html`,
-      '--target',
-      'voiceover',
-      '--recording',
-      './recordings/verify.mov',
-      '--json',
-   ]);
 
    expect(patternResult.status).toBe(EXIT_SUCCESS);
-   expect(verifyResult.status).toBe(EXIT_SUCCESS);
    expect(coreMocks.runInteractionPatternMock).toHaveBeenCalledWith(
       expect.objectContaining({
          recordingPath: './recordings/pattern.mov',
-      }),
-   );
-   expect(coreMocks.verifyCriterionMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-         recordingPath: './recordings/verify.mov',
       }),
    );
 }
@@ -124,7 +96,7 @@ describe('cli recording flag wiring', () => {
    );
 
    it(
-      'passes recording through run pattern and verify criterion',
+      'passes recording through run pattern',
       () =>
          withTempDir(tempRoots, async () =>
             runManagedRecordingSmoke(testServer.getBaseUrl()),

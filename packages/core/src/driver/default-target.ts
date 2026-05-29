@@ -1,6 +1,10 @@
 import type { Platform } from '@a11ied/contracts';
+import { createDriverAdapter } from '@a11ied/guidepup';
 
-type DefaultTargetReason = 'platform-default' | 'platform-fallback';
+type DefaultTargetReason =
+   | 'platform-default'
+   | 'platform-fallback'
+   | 'readiness-fallback';
 export type TargetType = 'real' | 'simulated';
 
 interface DefaultTargetSelection {
@@ -38,6 +42,11 @@ function buildDefaultMessage(target: Platform): string {
    return 'No --target provided; this platform does not support VoiceOver or NVDA, falling back to the virtual (simulated) screen reader.';
 }
 
+function buildReadinessFallbackMessage(target: Platform, summary: string): string {
+   const label = target === 'voiceover' ? 'VoiceOver' : 'NVDA';
+   return `No --target provided; ${label} is not ready for automation (${summary}). Falling back to the virtual (simulated) screen reader.`;
+}
+
 const VIRTUAL_FALLBACK_WARNING =
    'WARNING: Using the "virtual" target, which is a SIMULATED screen reader. ' +
    'Results do NOT reflect real assistive technology behavior. ' +
@@ -59,6 +68,31 @@ export function resolveDefaultTarget(): DefaultTargetSelection {
       targetType: 'simulated',
       reason: 'platform-fallback',
       message: buildDefaultMessage('virtual'),
+      warning: VIRTUAL_FALLBACK_WARNING,
+   };
+}
+
+export async function resolveAvailableDefaultTarget(): Promise<DefaultTargetSelection> {
+   const preferred = resolvePreferredTarget();
+   if (!preferred) {
+      return resolveDefaultTarget();
+   }
+
+   const readiness = await createDriverAdapter(preferred).checkReadiness();
+   if (readiness.status === 'ready') {
+      return {
+         target: preferred,
+         targetType: 'real',
+         reason: 'platform-default',
+         message: buildDefaultMessage(preferred),
+      };
+   }
+
+   return {
+      target: 'virtual',
+      targetType: 'simulated',
+      reason: 'readiness-fallback',
+      message: buildReadinessFallbackMessage(preferred, readiness.summary),
       warning: VIRTUAL_FALLBACK_WARNING,
    };
 }

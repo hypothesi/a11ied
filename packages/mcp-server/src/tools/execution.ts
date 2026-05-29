@@ -8,7 +8,11 @@ import {
    wcagVersionSchema,
    type Platform,
 } from '@a11ied/contracts';
-import { resolveDefaultTarget, runAxe, runInteractionPattern } from '@a11ied/core';
+import {
+   resolveAvailableDefaultTarget,
+   runAxe,
+   runInteractionPattern,
+} from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
@@ -147,8 +151,13 @@ function registerRunPatternTool(server: McpServer): void {
       async (input) => {
          const { allowVirtual, ...targetInput } = input;
          const resolved = await resolveExecutionTarget(targetInput);
-         const resolvedTarget = input.target ?? resolveDefaultTarget().target;
-         ensureVirtualTargetAllowed(resolvedTarget, allowVirtual);
+         const defaultTarget = input.target
+            ? undefined
+            : await resolveAvailableDefaultTarget();
+         const resolvedTarget = input.target ?? defaultTarget?.target ?? 'virtual';
+         if (input.target) {
+            ensureVirtualTargetAllowed(resolvedTarget, allowVirtual);
+         }
          const patternInput = buildPatternInput(
             { ...input, target: resolvedTarget },
             resolved.resolvedUrl,

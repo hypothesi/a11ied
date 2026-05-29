@@ -215,8 +215,14 @@ async function runStatusProbeBody(
       context,
       id: 'status-announced',
       condition: statusWasSpoken,
-      passedMessage: 'VoiceOver announced the status message.',
-      failedMessage: 'VoiceOver did not announce the status message.',
+      passedMessage:
+         context.target === 'virtual'
+            ? 'The virtual screen reader model reported the status message.'
+            : 'The screen reader announced the status message.',
+      failedMessage:
+         context.target === 'virtual'
+            ? 'The virtual screen reader model did not report the status message.'
+            : 'The screen reader did not announce the status message.',
       details: { statusText, spokenPhraseLog },
    });
    context.browserEvidence.push({

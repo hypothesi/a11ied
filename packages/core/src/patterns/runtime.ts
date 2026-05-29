@@ -12,7 +12,7 @@ import {
    startDriverSession,
    stopDriverSession,
 } from '../driver/runtime.js';
-import { resolveDefaultTarget } from '../driver/default-target.js';
+import { resolveAvailableDefaultTarget } from '../driver/default-target.js';
 import type { PatternContext, RunPatternOptions } from './helpers.js';
 import {
    runLandmarkSequence,
@@ -88,7 +88,10 @@ async function resolveSession(options: RunPatternOptions): Promise<{
       };
    }
 
-   const target = options.target ?? resolveDefaultTarget().target;
+   const defaultTarget = options.target
+      ? undefined
+      : await resolveAvailableDefaultTarget();
+   const target = options.target ?? defaultTarget?.target ?? 'virtual';
    const session = await startDriverSession(target, process.cwd(), options.recordingPath);
    return {
       sessionId: session.sessionId,
@@ -192,7 +195,10 @@ export async function runInteractionPattern(
    const patternId = interactionPatternIdSchema.parse(options.patternId);
    const runner = getPatternRunner(patternId);
    if (!options.sessionId) {
-      const target = options.target ?? resolveDefaultTarget().target;
+      const defaultTarget = options.target
+         ? undefined
+         : await resolveAvailableDefaultTarget();
+      const target = options.target ?? defaultTarget?.target ?? 'virtual';
       if (target !== 'virtual') {
          return await withInteractiveBrowserPage(parsedUrl.toString(), async (page) => {
             await page.waitForTimeout(REAL_TARGET_BROWSER_PRIME_MS);

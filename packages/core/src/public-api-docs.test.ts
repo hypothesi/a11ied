@@ -83,10 +83,6 @@ const publicApiExpectations: PublicApiExpectation[] = [
       functions: ['runInteractionPattern'],
    },
    {
-      file: 'packages/core/src/verification/runtime.ts',
-      functions: ['verifyCriterion', 'verifyLevel'],
-   },
-   {
       file: 'packages/core/src/targets/runtime.ts',
       functions: ['resolveDocumentTarget'],
    },

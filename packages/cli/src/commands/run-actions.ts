@@ -26,6 +26,7 @@ export interface PatternActionOptions {
 }
 
 type RunAxeSelection =
+   | { kind: 'all' }
    | { kind: 'criterion'; criterion: string }
    | { kind: 'level'; level: string }
    | { kind: 'rule'; ruleIds: string[] };
@@ -47,6 +48,12 @@ async function runAxeForSelection(args: {
          url: args.url,
          wcagVersion: args.wcagVersion,
          level: args.selection.level,
+      });
+   }
+   if (args.selection.kind === 'all') {
+      return runAxe(args.url, {
+         url: args.url,
+         wcagVersion: args.wcagVersion,
       });
    }
    return runAxe(args.url, {
@@ -238,25 +245,41 @@ function buildPatternCommandResult(args: {
    return response;
 }
 
-function resolvePatternExecutionOptions(
-   core: { resolveDefaultTarget: () => { target: string; message: string } },
+async function resolvePatternExecutionOptions(
+   core: {
+      resolveAvailableDefaultTarget: () => Promise<{
+         target: string;
+         message: string;
+         warning?: string;
+      }>;
+   },
    options: PatternActionOptions,
-): {
+): Promise<{
    resolvedOptions: PatternActionOptions;
    warnings?: CliMessage[];
-} {
+}> {
    const resolvedOptions: PatternActionOptions = { ...options };
    if (!options.target && !options.session) {
-      const fallback = core.resolveDefaultTarget();
+      const fallback = await core.resolveAvailableDefaultTarget();
       resolvedOptions.target = fallback.target;
+      if (fallback.target === 'virtual') {
+         resolvedOptions.allowVirtual = true;
+      }
+      const warnings: CliMessage[] = [
+         {
+            code: 'default-target-selected',
+            message: fallback.message,
+         },
+      ];
+      if (fallback.warning) {
+         warnings.push({
+            code: 'virtual-target-simulation-warning',
+            message: fallback.warning,
+         });
+      }
       return {
          resolvedOptions,
-         warnings: [
-            {
-               code: 'default-target-selected',
-               message: fallback.message,
-            },
-         ],
+         warnings,
       };
    }
 
@@ -292,7 +315,7 @@ export async function handlePatternAction(
 
    const resolvedPatternOptions = buildResolvedPatternOptions(resolvedPatternArgs);
 
-   const { resolvedOptions, warnings } = resolvePatternExecutionOptions(
+   const { resolvedOptions, warnings } = await resolvePatternExecutionOptions(
       core,
       resolvedPatternOptions,
    );

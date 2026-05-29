@@ -31,7 +31,11 @@ export {
    startDriverSession,
    stopDriverSession,
 } from './driver/runtime.js';
-export { resolveDefaultTarget, resolveTargetType } from './driver/default-target.js';
+export {
+   resolveAvailableDefaultTarget,
+   resolveDefaultTarget,
+   resolveTargetType,
+} from './driver/default-target.js';
 export type { TargetType } from './driver/default-target.js';
 export {
    DriverCommandError,
@@ -48,7 +52,6 @@ export {
 } from '@a11ied/guidepup';
 export { runAxe } from './axe/runtime.js';
 export { runInteractionPattern } from './patterns/runtime.js';
-export { verifyCriterion, verifyLevel } from './verification/runtime.js';
 export { openUrlInSystemAutomationBrowser } from './browser/helper.js';
 export {
    resolveDocumentTarget,
@@ -87,7 +90,7 @@ const supportedTargets: Target[] = [
 const cliCommands: CliCommand[] = [
    {
       name: 'wcag',
-      summary: 'Query pinned WCAG criteria, coverage, and verification strategy data.',
+      summary: 'Query pinned WCAG criteria, coverage, and testing strategy data.',
       maturity: 'ready',
    },
    {
@@ -96,7 +99,7 @@ const cliCommands: CliCommand[] = [
       maturity: 'ready',
    },
    {
-      name: 'drive',
+      name: 'session',
       summary:
          'Control VoiceOver, NVDA, or the virtual screen reader through stable sessions.',
       maturity: 'ready',
@@ -109,12 +112,6 @@ const cliCommands: CliCommand[] = [
    {
       name: 'run',
       summary: 'Execute automated rule scans and named interaction patterns.',
-      maturity: 'ready',
-   },
-   {
-      name: 'verify',
-      summary:
-         'Turn collected accessibility evidence into explicit WCAG criterion and level verdicts.',
       maturity: 'ready',
    },
    {

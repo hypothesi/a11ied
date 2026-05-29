@@ -48,6 +48,16 @@ function resolveCriterionRuleIds(criterion: string, version: WcagVersion): strin
    return getCoverage(criterion, { version }).coverage.axeRuleIds;
 }
 
+function resolveAllRuleIds(version: WcagVersion): string[] {
+   return unique(
+      (['A', 'AA', 'AAA'] as const).flatMap((level) =>
+         listCriteriaByLevel(level, version).criteria.flatMap(
+            (criterion) => getCoverage(criterion.id, { version }).coverage.axeRuleIds,
+         ),
+      ),
+   );
+}
+
 function ensureRuleIds(ruleIds: string[], context: Record<string, unknown>): string[] {
    const uniqueRuleIds = unique(ruleIds);
    if (uniqueRuleIds.length === 0) {
@@ -73,6 +83,20 @@ export function resolveCriterionSelection(
       selection: {
          kind: 'criterion',
          criterion,
+         resolvedRuleIds: ruleIds,
+      },
+      ruleIds,
+   };
+}
+
+export function resolveAllSelection(wcagVersion: WcagVersion): {
+   selection: AxeRunResult['selection'];
+   ruleIds: string[];
+} {
+   const ruleIds = ensureRuleIds(resolveAllRuleIds(wcagVersion), { wcagVersion });
+   return {
+      selection: {
+         kind: 'all',
          resolvedRuleIds: ruleIds,
       },
       ruleIds,

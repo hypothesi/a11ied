@@ -37,6 +37,10 @@ export type AxeRuleResult = z.infer<typeof axeRuleResultSchema>;
 
 export const axeSelectionSchema = z.discriminatedUnion('kind', [
    z.object({
+      kind: z.literal('all'),
+      resolvedRuleIds: z.array(z.string()),
+   }),
+   z.object({
       kind: z.literal('criterion'),
       criterion: criterionLookupKeySchema,
       resolvedRuleIds: z.array(z.string()),

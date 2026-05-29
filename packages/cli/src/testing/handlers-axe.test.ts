@@ -19,6 +19,28 @@ afterAll(async () => {
    await testServer.stop();
 });
 
+async function assertAxeFullScan(baseUrl: string): Promise<void> {
+   const result = await runCli([
+      'run',
+      'axe',
+      '--url',
+      `${baseUrl}/basic-page.html`,
+      '--json',
+   ]);
+   const json = parseJsonOutput(result.stdout);
+   expect(result.status).toBe(EXIT_SUCCESS);
+   const axeResult = json.result as {
+      selection: { kind: string };
+      ruleIds: string[];
+      passes: unknown[];
+      incomplete: unknown[];
+   };
+   expect(axeResult.selection.kind).toBe('all');
+   expect(axeResult.ruleIds.length).toBeGreaterThan(10);
+   expect(Array.isArray(axeResult.passes)).toBe(true);
+   expect(Array.isArray(axeResult.incomplete)).toBe(true);
+}
+
 async function assertAxeCriterionScan(baseUrl: string): Promise<void> {
    const result = await runCli([
       'run',
@@ -149,6 +171,14 @@ async function assertAxeVerboseOutput(baseUrl: string): Promise<void> {
 }
 
 describe('cli run axe / scan commands', () => {
+   it(
+      'scans all mapped axe rules by default',
+      async () => {
+         await assertAxeFullScan(testServer.getBaseUrl());
+      },
+      TEST_TIMEOUT_MEDIUM,
+   );
+
    it(
       'scans with criterion filter',
       async () => {

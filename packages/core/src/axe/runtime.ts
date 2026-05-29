@@ -10,11 +10,19 @@ import { CliUsageError } from '../errors/cli-errors.js';
 import { withLoadedPage } from '../browser/helper.js';
 import {
    resolveCriterionSelection,
+   resolveAllSelection,
    resolveLevelSelection,
    resolveRuleSelection,
 } from './selection.js';
 
 type AxeRunOptions =
+   | {
+        url: string;
+        wcagVersion: string;
+        criterion?: undefined;
+        level?: undefined;
+        ruleIds?: undefined;
+     }
    | {
         url: string;
         wcagVersion: string;
@@ -199,10 +207,7 @@ function resolveAxeSelection(
       return resolveRuleSelection(options.ruleIds);
    }
 
-   throw new CliUsageError(
-      'missing-selection',
-      'Choose exactly one of --criterion, --level, or --rule.',
-   );
+   return resolveAllSelection(wcagVersion);
 }
 
 async function executeAxeScan(parsedUrl: URL, ruleIds: string[]): Promise<RawAxeResults> {
