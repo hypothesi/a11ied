@@ -9,15 +9,23 @@ import {
    resolveAvailableDefaultTarget,
    runDriverSessionAction,
    runEphemeralDriverAction,
+   startDriverSession,
 } from '#core';
-import { withImplicitDriveSessionGuard } from './drive-session.js';
+import {
+   persistImplicitDriveSession,
+   withImplicitDriveSessionGuard,
+} from './drive-session.js';
 import {
    type CommandExecution,
    createEnvelope,
    normalizeError,
    printOutput,
 } from './helpers.js';
-import { resolveDriveSession } from './resolvers.js';
+import {
+   buildVirtualTargetGuardOptions,
+   parsePlatform,
+   resolveDriveSession,
+} from './resolvers.js';
 
 export { parsePlatform, resolveOptionalCliTarget } from './resolvers.js';
 // Fallow-ignore-next-line unused-export
@@ -149,6 +157,7 @@ type DriveAction =
 interface DriveActionCommandInput {
    subcommand: string;
    action: DriveAction;
+   autoStart?: boolean;
    options: {
       json?: boolean;
       verbose?: boolean;
@@ -205,14 +214,76 @@ async function runEphemeralAction(
    return execution;
 }
 
+async function resolveAutoStartTarget(options: {
+   target?: string;
+   allowVirtual?: boolean;
+}): Promise<{ platform: Platform; warnings: Array<{ code: string; message: string }> }> {
+   let targetStr = options.target;
+   let allowVirtual = options.allowVirtual;
+   const warnings: Array<{ code: string; message: string }> = [];
+
+   if (!targetStr) {
+      const fallback = await resolveAvailableDefaultTarget();
+      warnings.push({ code: 'default-target-selected', message: fallback.message });
+      if (fallback.warning) {
+         warnings.push({
+            code: 'virtual-target-simulation-warning',
+            message: fallback.warning,
+         });
+      }
+      targetStr = fallback.target;
+      if (fallback.target === 'virtual') {
+         allowVirtual = true;
+      }
+   }
+
+   return {
+      platform: parsePlatform(targetStr, buildVirtualTargetGuardOptions(allowVirtual)),
+      warnings,
+   };
+}
+
+async function runAutoStartAction(
+   input: DriveActionCommandInput,
+): Promise<CommandExecution> {
+   const { platform, warnings } = await resolveAutoStartTarget(input.options);
+   const session = await startDriverSession(platform, process.cwd());
+   await persistImplicitDriveSession(session.sessionId);
+
+   let actionOptions: { payload: Record<string, unknown> } | undefined = undefined;
+   if (input.payload) {
+      actionOptions = { payload: input.payload };
+   }
+   const result = await runDriverSessionAction(
+      session.sessionId,
+      input.action,
+      actionOptions,
+   );
+
+   const execution: CommandExecution = {
+      target: { kind: 'driver-session', value: session.sessionId },
+      result,
+   };
+   if (warnings.length > 0) {
+      execution.warnings = warnings;
+   }
+   return execution;
+}
+
 async function runDriveAction(input: DriveActionCommandInput): Promise<CommandExecution> {
-   const resolved = await resolveDriveSession(input.options);
+   const sessionOptions = input.autoStart
+      ? { ...input.options, allowMissing: true as const }
+      : input.options;
+   const resolved = await resolveDriveSession(sessionOptions);
 
    if (resolved.ephemeral) {
       return runEphemeralAction(input, resolved);
    }
 
    if (!resolved.sessionId) {
+      if (input.autoStart) {
+         return runAutoStartAction(input);
+      }
       throw new CliUsageError('missing-session', 'Session ID is required.');
    }
    const sessionId = resolved.sessionId;

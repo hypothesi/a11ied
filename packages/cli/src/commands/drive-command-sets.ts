@@ -130,11 +130,13 @@ function buildDoExamples(): string {
    return `\nExamples:\n${examples.join('\n')}\n\nUse "a11ied sr list" to see every available command.\n`;
 }
 
-function registerPerformCommand(driveCommand: Command): void {
+export function registerDoCommand(driveCommand: Command): void {
    addDrivePerformOptions(
       driveCommand
          .command('do <command>')
-         .description('Run a named screen-reader command.')
+         .description(
+            'Run a named screen-reader command. Use sr list for all available commands.',
+         )
          .option('--command-set <set>', DRIVE_COMMAND_SET_HELP, 'auto')
          .addHelpText('after', buildDoExamples()),
    ).action(
@@ -147,6 +149,7 @@ function registerPerformCommand(driveCommand: Command): void {
          await executeDriveActionCommand({
             subcommand: 'do',
             action: 'perform',
+            autoStart: true,
             options,
             payload: { command, commandSet: options.commandSet },
             renderText: renderers.renderDriveStatusText,
@@ -155,7 +158,7 @@ function registerPerformCommand(driveCommand: Command): void {
    );
 }
 
-function registerCommandsCommand(driveCommand: Command): void {
+export function registerListCommand(driveCommand: Command): void {
    addVerboseOption(
       addJsonOption(
          driveCommand
@@ -187,6 +190,6 @@ function registerCommandsCommand(driveCommand: Command): void {
 }
 
 export function registerCommandSetActions(driveCommand: Command): void {
-   registerPerformCommand(driveCommand);
-   registerCommandsCommand(driveCommand);
+   registerDoCommand(driveCommand);
+   registerListCommand(driveCommand);
 }

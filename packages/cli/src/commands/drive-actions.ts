@@ -7,7 +7,6 @@ import {
    addTargetOption,
    addVerboseOption,
 } from '../lib/options.js';
-import { registerCommandSetActions } from './drive-command-sets.js';
 import { getDriveKeyHelp } from './drive-key-help.js';
 
 interface DriveActionOptions {
@@ -67,7 +66,7 @@ function registerSimpleAction(driveCommand: Command, config: SimpleActionConfig)
    });
 }
 
-function registerKeyCommand(driveCommand: Command): void {
+export function registerPressCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('press <keys>')
@@ -82,6 +81,7 @@ function registerKeyCommand(driveCommand: Command): void {
       await executeDriveActionCommand({
          subcommand: 'press',
          action: 'key',
+         autoStart: true,
          options,
          payload: { keys },
          renderText: renderers.renderDriveStatusText,
@@ -89,7 +89,7 @@ function registerKeyCommand(driveCommand: Command): void {
    });
 }
 
-function registerTypeCommand(driveCommand: Command): void {
+export function registerTypeCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('type <text>')
@@ -103,6 +103,7 @@ function registerTypeCommand(driveCommand: Command): void {
       await executeDriveActionCommand({
          subcommand: 'type',
          action: 'type',
+         autoStart: true,
          options,
          payload: { text },
          renderText: renderers.renderDriveStatusText,
@@ -145,7 +146,7 @@ function buildFocusPayload(options: FocusActionOptions): Record<string, unknown>
    return payload;
 }
 
-function registerFocusCommand(driveCommand: Command): void {
+export function registerFocusCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('focus')
@@ -172,7 +173,7 @@ function registerFocusCommand(driveCommand: Command): void {
    });
 }
 
-function registerClearLogsCommand(driveCommand: Command): void {
+export function registerClearLogsCommand(driveCommand: Command): void {
    addVerboseOption(
       addJsonOption(
          addSessionOption(
@@ -197,7 +198,7 @@ function registerClearLogsCommand(driveCommand: Command): void {
    });
 }
 
-function registerCheckpointCommand(driveCommand: Command): void {
+export function registerCheckpointCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('checkpoint <label>')
@@ -218,28 +219,18 @@ function registerCheckpointCommand(driveCommand: Command): void {
    });
 }
 
-export function registerSimpleActions(_driveCommand: Command): void {
-   // Portable commands (next, previous, interact, etc.) are accessible via `sr do <command>`.
-}
-
-export function registerMiddleActions(driveCommand: Command): void {
-   registerKeyCommand(driveCommand);
-   registerTypeCommand(driveCommand);
-   registerCommandSetActions(driveCommand);
-   registerFocusCommand(driveCommand);
+export function registerReadCommand(driveCommand: Command): void {
    registerSimpleAction(driveCommand, {
       name: 'read',
       description: 'Read the current driver state.',
       renderer: 'status',
    });
+}
+
+export function registerLogsCommand(driveCommand: Command): void {
    registerSimpleAction(driveCommand, {
       name: 'logs',
       description: 'Read captured speech and action logs.',
       renderer: 'logs',
    });
-}
-
-export function registerTrailingActions(driveCommand: Command): void {
-   registerClearLogsCommand(driveCommand);
-   registerCheckpointCommand(driveCommand);
 }

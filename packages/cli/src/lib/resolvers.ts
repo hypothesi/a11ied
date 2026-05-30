@@ -120,6 +120,7 @@ export async function resolveDriveSession(options: {
    ephemeral?: boolean;
    allowVirtual?: boolean;
    cwd?: string;
+   allowMissing?: boolean;
 }): Promise<{
    sessionId?: string;
    target?: Platform;
@@ -143,6 +144,12 @@ export async function resolveDriveSession(options: {
    );
 
    if (!resolvedSession.sessionId) {
+      if (options.allowMissing) {
+         return {
+            ephemeral: false,
+            sessionSource: 'none',
+         };
+      }
       throw new CliUsageError(
          'missing-session',
          'A session id is required unless --ephemeral is present.',

@@ -90,17 +90,17 @@ export const driveRunHelpCases: HelpCase[] = [
         -h, --help                    display help for command
 
       Commands:
-        start [options]               Start a persistent driver session.
-        status [options]              Show persisted session state and capability
-                                      metadata.
-        stop [options]                Stop a persistent driver session and remove its
-                                      state file.
+        do [options] <command>        Run a named screen-reader command. Use sr list
+                                      for all available commands.
         press [options] <keys>        Send one or more key chords to the screen
                                       reader.
         type [options] <text>         Type text through the active driver target.
-        do [options] <command>        Run a named screen-reader command.
-        list [options]                List all named commands available for the
-                                      current target.
+        start [options]               Start a persistent driver session. press, type,
+                                      and do auto-start a session if none is active.
+        stop [options]                Stop a persistent driver session and remove its
+                                      state file.
+        status [options]              Show persisted session state and capability
+                                      metadata.
         focus [options]               Focus a window so the screen reader follows the
                                       right app.
         read [options]                Read the current driver state.
@@ -108,6 +108,8 @@ export const driveRunHelpCases: HelpCase[] = [
         clear-logs [options]          Clear captured speech and action logs.
         checkpoint [options] <label>  Record a named checkpoint in the current
                                       session.
+        list [options]                List all named commands available for the
+                                      current target.
         help [command]                display help for command
       "
     `,

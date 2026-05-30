@@ -21,10 +21,15 @@ import { executeStopAction } from './drive-stop.js';
 import { executeStatusAction } from './drive-status.js';
 import { getPlatformScreenReaders, getPlatformTargets } from './drive-key-help.js';
 import {
-   registerMiddleActions,
-   registerSimpleActions,
-   registerTrailingActions,
+   registerCheckpointCommand,
+   registerClearLogsCommand,
+   registerFocusCommand,
+   registerLogsCommand,
+   registerPressCommand,
+   registerReadCommand,
+   registerTypeCommand,
 } from './drive-actions.js';
+import { registerDoCommand, registerListCommand } from './drive-command-sets.js';
 
 interface StartActionOptions extends CliTargetInputOptions {
    json?: boolean;
@@ -222,7 +227,9 @@ function registerStartCommand(driveCommand: Command): void {
          addAllowVirtualOption(
             driveCommand
                .command('start')
-               .description('Start a persistent driver session.')
+               .description(
+                  'Start a persistent driver session. press, type, and do auto-start a session if none is active.',
+               )
                .option(
                   '--target <platform>',
                   `Choose one target: ${getPlatformTargets()}. Defaults to an available ${getPlatformScreenReaders()} target, then falls back to virtual as a last resort. Use --allow-virtual to explicitly request simulation.`,
@@ -297,12 +304,18 @@ function registerDriverCommands(
       .command(commandName, options)
       .description('Control a target screen reader through stable sessions.');
 
+   registerDoCommand(driveCommand);
+   registerPressCommand(driveCommand);
+   registerTypeCommand(driveCommand);
    registerStartCommand(driveCommand);
-   registerStatusCommand(driveCommand);
    registerStopCommand(driveCommand);
-   registerSimpleActions(driveCommand);
-   registerMiddleActions(driveCommand);
-   registerTrailingActions(driveCommand);
+   registerStatusCommand(driveCommand);
+   registerFocusCommand(driveCommand);
+   registerReadCommand(driveCommand);
+   registerLogsCommand(driveCommand);
+   registerClearLogsCommand(driveCommand);
+   registerCheckpointCommand(driveCommand);
+   registerListCommand(driveCommand);
 }
 
 export function registerSessionCommands(program: Command): void {
