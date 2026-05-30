@@ -47,8 +47,8 @@ function registerHelpCases(suiteName: string, helpCases: HelpCase[]): void {
 
 registerHelpCases('cli top-level grammar', topLevelHelpCases);
 registerHelpCases('cli inspect grammar', inspectHelpCases);
-registerHelpCases('cli session and run grammar', driveRunHelpCases);
-registerHelpCases('cli run options grammar', runOptionCases);
+registerHelpCases('cli sr grammar', driveRunHelpCases);
+registerHelpCases('cli command options grammar', runOptionCases);
 
 describe('cli aggregate help', () => {
    it('prints the full command tree in one shot', async () => {
@@ -61,10 +61,10 @@ describe('cli aggregate help', () => {
    });
 });
 
-describe('cli session command listing', () => {
+describe('cli sr command listing', () => {
    it('lists supported driver commands without requiring a session', async () => {
       const result = await runCli([
-         'session',
+         'sr',
          'commands',
          '--target',
          'voiceover',

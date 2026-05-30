@@ -17,7 +17,6 @@ export {
    runAxe,
    runDriverSessionAction,
    runEphemeralDriverAction,
-   runInteractionPattern,
    searchWcagCriteria,
    showWcagCoverage,
    showWcagCriterion,

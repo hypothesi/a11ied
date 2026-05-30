@@ -187,6 +187,7 @@ describe('tool metadata', () => {
          expect(driverTool?.description).toContain('real');
          expect(driverTool?.description).toContain('targetType');
          expect(result.tools.some((entry) => entry.name === 'verify')).toBe(false);
+         expect(result.tools.some((entry) => entry.name === 'run_pattern')).toBe(false);
       });
    });
 });

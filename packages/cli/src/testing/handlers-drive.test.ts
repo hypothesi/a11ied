@@ -9,7 +9,6 @@ import {
    parseJsonOutput,
    EXIT_SUCCESS,
    EXIT_USAGE,
-   EXIT_ENVIRONMENT,
    TEST_TIMEOUT_SHORT,
    useTestServer,
 } from './setup.js';
@@ -24,17 +23,17 @@ function getImplicitDriveSessionFile(): string {
 }
 
 async function startSession(): Promise<string> {
-   const started = await runCli(['drive', 'start', ...virtualTargetArgs, '--json']);
+   const started = await runCli(['sr', 'start', ...virtualTargetArgs, '--json']);
    const json = parseJsonOutput(started.stdout);
    return (json.result as { session: { sessionId: string } }).session.sessionId;
 }
 
 async function stopSession(sessionId: string): Promise<void> {
-   await runCli(['drive', 'stop', '--session', sessionId, '--json']);
+   await runCli(['sr', 'stop', '--session', sessionId, '--json']);
 }
 
 async function assertSessionStart(): Promise<string> {
-   const started = await runCli(['drive', 'start', ...virtualTargetArgs, '--json']);
+   const started = await runCli(['sr', 'start', ...virtualTargetArgs, '--json']);
    const json = parseJsonOutput(started.stdout);
    const session = (
       json.result as {
@@ -48,7 +47,7 @@ async function assertSessionStart(): Promise<string> {
 }
 
 async function assertSessionStatus(sessionId: string): Promise<void> {
-   const result = await runCli(['drive', 'status', '--session', sessionId, '--json']);
+   const result = await runCli(['sr', 'status', '--session', sessionId, '--json']);
    const json = expectJsonLogCursor(result);
    expect(
       (json.result as { state: { lastSpokenPhrase: string | null } }).state
@@ -57,7 +56,7 @@ async function assertSessionStatus(sessionId: string): Promise<void> {
 }
 
 async function assertSessionStop(sessionId: string): Promise<void> {
-   const result = await runCli(['drive', 'stop', '--session', sessionId, '--json']);
+   const result = await runCli(['sr', 'stop', '--session', sessionId, '--json']);
    const json = parseJsonOutput(result.stdout);
 
    expect(result.status).toBe(EXIT_SUCCESS);
@@ -67,7 +66,7 @@ async function assertSessionStop(sessionId: string): Promise<void> {
 }
 
 async function assertStartTextOutput(): Promise<void> {
-   const result = await runCli(['drive', 'start', ...virtualTargetArgs]);
+   const result = await runCli(['sr', 'start', ...virtualTargetArgs]);
    const sessionId = result.stdout.match(/Session ID: (drv_[a-f0-9-]+)/)?.[1];
 
    expect(result.status).toBe(EXIT_SUCCESS);
@@ -76,26 +75,25 @@ async function assertStartTextOutput(): Promise<void> {
    expect(result.stdout).toContain('Broker PID:');
    expect(sessionId).toBeTruthy();
 
-   await runCli(['drive', 'stop', '--session', sessionId ?? '', '--json']);
+   await runCli(['sr', 'stop', '--session', sessionId ?? '', '--json']);
 }
 
 async function assertMissingSessionError(): Promise<void> {
    const result = await runCli([
-      'drive',
+      'sr',
       'status',
       '--session',
       'missing-session',
       '--json',
    ]);
    const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_ENVIRONMENT);
-   expect((json.errors as Array<{ message: string }>)[0]?.message).toMatch(
-      /missing-session/i,
-   );
+
+   expect(result.status).toBe(EXIT_SUCCESS);
+   expect((json.result as { noSession?: boolean }).noSession).toBe(true);
 }
 
 async function assertNextRequiresSession(): Promise<void> {
-   const result = await runCli(['drive', 'next', ...virtualTargetArgs, '--json']);
+   const result = await runCli(['sr', 'next', ...virtualTargetArgs, '--json']);
    expectFirstErrorMessage({
       result,
       match: /session id is required/i,
@@ -115,7 +113,7 @@ async function assertNoSessionsDir(tempRoot: string): Promise<void> {
 
 async function assertEphemeralAction(tempRoot: string): Promise<void> {
    const result = await runCli([
-      'drive',
+      'sr',
       'next',
       ...virtualTargetArgs,
       '--ephemeral',
@@ -129,7 +127,7 @@ async function assertEphemeralAction(tempRoot: string): Promise<void> {
 
 async function assertVirtualRecordingRejected(): Promise<void> {
    const result = await runCli([
-      'drive',
+      'sr',
       'start',
       ...virtualTargetArgs,
       '--recording',
@@ -144,7 +142,7 @@ async function assertVirtualRecordingRejected(): Promise<void> {
 }
 
 async function assertReadState(sessionId: string): Promise<void> {
-   const result = await runCli(['drive', 'read', '--session', sessionId, '--json']);
+   const result = await runCli(['sr', 'read', '--session', sessionId, '--json']);
    const json = expectJsonLogCursor(result);
    expect(
       (json.result as { state: { lastSpokenPhrase: string | null } }).state
@@ -153,8 +151,8 @@ async function assertReadState(sessionId: string): Promise<void> {
 }
 
 async function assertClearLogs(sessionId: string): Promise<void> {
-   await runCli(['drive', 'next', '--session', sessionId, '--json']);
-   const result = await runCli(['drive', 'clear-logs', '--session', sessionId, '--json']);
+   await runCli(['sr', 'next', '--session', sessionId, '--json']);
+   const result = await runCli(['sr', 'clear-logs', '--session', sessionId, '--json']);
    const json = parseJsonOutput(result.stdout);
    expect(result.status).toBe(EXIT_SUCCESS);
    expect((json.result as { action: string }).action).toBe('clear-logs');
@@ -162,7 +160,7 @@ async function assertClearLogs(sessionId: string): Promise<void> {
 
 async function assertFocus(sessionId: string): Promise<void> {
    const result = await runCli([
-      'drive',
+      'sr',
       'focus',
       '--session',
       sessionId,
@@ -180,22 +178,22 @@ async function assertFocus(sessionId: string): Promise<void> {
 }
 
 async function assertLogsAfterClear(sessionId: string): Promise<void> {
-   const result = await runCli(['drive', 'logs', '--session', sessionId, '--json']);
+   const result = await runCli(['sr', 'logs', '--session', sessionId, '--json']);
    const json = parseJsonOutput(result.stdout);
 
    expect(result.status).toBe(EXIT_SUCCESS);
    expect(
       (json.result as { state: { spokenPhraseLog: string[] } }).state.spokenPhraseLog,
    ).toEqual([]);
-   const verbose = await runCli(['drive', 'logs', '--session', sessionId, '--verbose']);
+   const verbose = await runCli(['sr', 'logs', '--session', sessionId, '--verbose']);
    expect(verbose.stdout).toContain('Checkpoints:');
 }
 
 async function assertImplicitSessionReuse(): Promise<void> {
    const sessionId = await startSession();
-   const status = await runCli(['drive', 'status', '--json']);
+   const status = await runCli(['sr', 'status', '--json']);
    const statusJson = parseJsonOutput(status.stdout);
-   const stopped = await runCli(['drive', 'stop', '--json']);
+   const stopped = await runCli(['sr', 'stop', '--json']);
    const stoppedJson = parseJsonOutput(stopped.stdout);
 
    expect(status.status).toBe(EXIT_SUCCESS);
@@ -213,13 +211,15 @@ async function assertStaleImplicitSessionClears(): Promise<void> {
 
    await mkdir(resolve(process.cwd(), '.a11ied/state'), { recursive: true });
    await writeFile(implicitDriveSessionFile, 'missing-session\n', 'utf8');
-   const result = await runCli(['drive', 'status', '--json']);
+   const result = await runCli(['sr', 'status', '--json']);
+   const json = parseJsonOutput(result.stdout);
 
-   expect(result.status).toBe(EXIT_ENVIRONMENT);
+   expect(result.status).toBe(EXIT_SUCCESS);
+   expect((json.result as { noSession?: boolean }).noSession).toBe(true);
    await expect(readFile(implicitDriveSessionFile, 'utf8')).rejects.toThrow();
 }
 
-describe('cli drive lifecycle commands', () => {
+describe('cli sr lifecycle commands', () => {
    it(
       'starts, checks status, and stops a session',
       () =>

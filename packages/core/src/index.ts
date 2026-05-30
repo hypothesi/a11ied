@@ -51,7 +51,6 @@ export {
    type SerializableDriverCommand,
 } from '@a11ied/guidepup';
 export { runAxe } from './axe/runtime.js';
-export { runInteractionPattern, listInteractionPatterns } from './patterns/runtime.js';
 export { openUrlInSystemAutomationBrowser } from './browser/helper.js';
 export {
    resolveDocumentTarget,
@@ -99,9 +98,9 @@ const cliCommands: CliCommand[] = [
       maturity: 'ready',
    },
    {
-      name: 'session',
+      name: 'sr',
       summary:
-         'Control VoiceOver, NVDA, or the virtual screen reader through stable sessions.',
+         'Control VoiceOver, NVDA, or the virtual screen reader through stable screen-reader sessions.',
       maturity: 'ready',
    },
    {
@@ -110,8 +109,8 @@ const cliCommands: CliCommand[] = [
       maturity: 'ready',
    },
    {
-      name: 'run',
-      summary: 'Execute automated rule scans and named interaction patterns.',
+      name: 'axe',
+      summary: 'Run axe-core accessibility scans.',
       maturity: 'ready',
    },
    {

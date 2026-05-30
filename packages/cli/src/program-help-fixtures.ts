@@ -20,10 +20,10 @@ export const topLevelHelpCases: HelpCase[] = [
       Commands:
         wcag              Look up pinned WCAG requirements and coverage data.
         inspect           Explain criterion applicability for a target.
-        session           Control a target screen reader through stable sessions.
+        sr                Control a target screen reader through stable sessions.
         doctor [options]  Report runtime details, browser policy, and supported
                           automation targets.
-        run               Execute automated rule scans and named interaction patterns.
+        axe [options]     Run axe-core against a target.
         mcp               Start the MCP stdio server.
         help-all          Print help for the full command tree in one shot.
         help [command]    display help for command
@@ -79,10 +79,10 @@ export const inspectHelpCases: HelpCase[] = [
 
 export const driveRunHelpCases: HelpCase[] = [
    {
-      name: 'keeps session subcommand families stable',
-      args: ['session', '--help'],
+      name: 'keeps the sr subcommand family stable',
+      args: ['sr', '--help'],
       expected: `
-      "Usage: a11ied session [options] [command]
+      "Usage: a11ied sr [options] [command]
 
       Control a target screen reader through stable sessions.
 
@@ -116,30 +116,10 @@ export const driveRunHelpCases: HelpCase[] = [
     `,
    },
    {
-      name: 'keeps the run subcommand family stable',
-      args: ['run', '--help'],
+      name: 'lists supported sr key tokens',
+      args: ['sr', 'key', '--help'],
       expected: `
-      "Usage: a11ied run [options] [command]
-
-      Execute automated rule scans and named interaction patterns.
-
-      Options:
-        -h, --help                     display help for command
-
-      Commands:
-        axe [options]                  Run axe-core against a target.
-        pattern [options] <patternId>  Run a named built-in interaction pattern.
-        patterns [options]             List all built-in interaction pattern IDs. Pass
-                                       a pattern ID to "a1 run pattern <patternId>".
-        help [command]                 display help for command
-      "
-    `,
-   },
-   {
-      name: 'lists supported session key tokens',
-      args: ['session', 'key', '--help'],
-      expected: `
-      "Usage: a11ied session key [options]
+      "Usage: a11ied sr key [options]
 
       Send one or more target-specific key chords.
 
@@ -183,14 +163,6 @@ export const driveRunHelpCases: HelpCase[] = [
             Mute, Add, Subtract, Multiply, Divide, Decimal
           Examples: VO+ArrowRight, VO+ArrowLeft, VO+Shift+ArrowDown, VO+Space,
             Command+F5
-
-        NVDA (Windows):
-          Modifier aliases: NVDA or Nvda (Insert), Windows
-          Windows-only keys: Application, Pause, Break, PrintScreen, ScrollLock,
-            Numlock, NumPad0, NumPad1, NumPad2, NumPad3, NumPad4, NumPad5, NumPad6,
-            NumPad7, NumPad8, NumPad9, NumPadEnter, NumPadDelete, NumPadDivide,
-            NumPadMinus, NumPadMultiply, NumPadPlus
-          Examples: NVDA+N, NVDA+ArrowDown, NVDA+NumPad5, Control+Alt+N
       "
     `,
    },

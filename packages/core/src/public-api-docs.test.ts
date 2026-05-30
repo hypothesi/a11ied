@@ -79,10 +79,6 @@ const publicApiExpectations: PublicApiExpectation[] = [
       functions: ['runAxe'],
    },
    {
-      file: 'packages/core/src/patterns/runtime.ts',
-      functions: ['runInteractionPattern'],
-   },
-   {
       file: 'packages/core/src/targets/runtime.ts',
       functions: ['resolveDocumentTarget'],
    },

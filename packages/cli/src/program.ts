@@ -2,7 +2,7 @@ import { log } from '@clack/prompts';
 import { Command } from 'commander';
 import { registerSessionCommands } from './commands/drive.js';
 import { registerInspectCommands } from './commands/inspect.js';
-import { registerRunCommands } from './commands/run.js';
+import { registerAxeCommand } from './commands/axe.js';
 import { registerWcagCommands } from './commands/wcag.js';
 import { CLI_VERSION, JSON_INDENT } from './lib/constants.js';
 import { renderFullHelp } from './lib/help.js';
@@ -59,7 +59,7 @@ function registerAllCommands(program: Command): void {
    registerInspectCommands(program);
    registerSessionCommands(program);
    registerDoctorCommand(program);
-   registerRunCommands(program);
+   registerAxeCommand(program);
    registerMcpCommand(program);
    registerHelpAllCommand(program);
 }

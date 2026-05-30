@@ -1,19 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { createMockDriveSession, createMockPatternResult } from './recording-fixtures.js';
+import { createMockDriveSession } from './recording-fixtures.js';
 import {
-   type TestServerHandle,
    EXIT_SUCCESS,
    TEST_TIMEOUT_SHORT,
    parseJsonOutput,
    runCliInProcess,
-   useTestServer,
    withTempDir,
 } from './setup.js';
 
 const coreMocks = vi.hoisted(() => ({
    startDriverSessionMock: vi.fn(),
-   runInteractionPatternMock: vi.fn(),
 }));
 
 vi.mock('#core', async () => {
@@ -22,16 +19,13 @@ vi.mock('#core', async () => {
    return {
       ...actual,
       startDriverSession: coreMocks.startDriverSessionMock,
-      runInteractionPattern: coreMocks.runInteractionPatternMock,
    };
 });
 
 const tempRoots: string[] = [];
-const testServer: TestServerHandle = useTestServer(tempRoots);
 
 afterEach(() => {
    coreMocks.startDriverSessionMock.mockReset();
-   coreMocks.runInteractionPatternMock.mockReset();
 });
 
 async function runDriveRecordingSmoke(): Promise<void> {
@@ -40,7 +34,7 @@ async function runDriveRecordingSmoke(): Promise<void> {
    );
 
    const result = await runCliInProcess([
-      'drive',
+      'sr',
       'start',
       '--target',
       'voiceover',
@@ -50,6 +44,7 @@ async function runDriveRecordingSmoke(): Promise<void> {
    ]);
 
    const json = parseJsonOutput(result.stdout);
+
    expect(result.status).toBe(EXIT_SUCCESS);
    expect(coreMocks.startDriverSessionMock).toHaveBeenCalledWith(
       'voiceover',
@@ -62,45 +57,10 @@ async function runDriveRecordingSmoke(): Promise<void> {
    ).toContain('recordings/voiceover.mov');
 }
 
-async function runManagedRecordingSmoke(baseUrl: string): Promise<void> {
-   coreMocks.runInteractionPatternMock.mockResolvedValueOnce(
-      createMockPatternResult(baseUrl, process.cwd()),
-   );
-
-   const patternResult = await runCliInProcess([
-      'run',
-      'pattern',
-      'landmark_sequence',
-      '--url',
-      `${baseUrl}/basic-page.html`,
-      '--target',
-      'voiceover',
-      '--recording',
-      './recordings/pattern.mov',
-      '--json',
-   ]);
-
-   expect(patternResult.status).toBe(EXIT_SUCCESS);
-   expect(coreMocks.runInteractionPatternMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-         recordingPath: './recordings/pattern.mov',
-      }),
-   );
-}
-
 describe('cli recording flag wiring', () => {
    it(
-      'passes recording through drive start',
+      'passes recording through sr start',
       () => withTempDir(tempRoots, runDriveRecordingSmoke),
-      TEST_TIMEOUT_SHORT,
-   );
-
-   it(
-      'passes recording through run pattern',
-      () =>
-         withTempDir(tempRoots, async () =>
-            runManagedRecordingSmoke(testServer.getBaseUrl()),
-         ),
       TEST_TIMEOUT_SHORT,
    );
 });

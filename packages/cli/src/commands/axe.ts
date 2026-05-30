@@ -1,12 +1,12 @@
 import type { Command } from 'commander';
 import { addJsonOption, addVerboseOption, addWcagVersionOption } from '../lib/options.js';
-import { handleAxeAction, type AxeActionOptions } from './run-actions.js';
+import { handleAxeAction, type AxeActionOptions } from './axe-actions.js';
 
-function buildAxeCommand(runCommand: Command): Command {
+function buildAxeCommand(program: Command): Command {
    return addVerboseOption(
       addJsonOption(
          addWcagVersionOption(
-            runCommand
+            program
                .command('axe')
                .description('Run axe-core against a target.')
                .option('--url <url>', 'Run against one live URL target.')
@@ -24,8 +24,8 @@ function buildAxeCommand(runCommand: Command): Command {
    );
 }
 
-export function registerAxeCommand(runCommand: Command): void {
-   buildAxeCommand(runCommand).action(async (options: AxeActionOptions) => {
+export function registerAxeCommand(program: Command): void {
+   buildAxeCommand(program).action(async (options: AxeActionOptions) => {
       const [{ executeCommand }, renderers] = await Promise.all([
          import('../lib/execute.js'),
          import('../renderers/index.js'),
@@ -33,7 +33,7 @@ export function registerAxeCommand(runCommand: Command): void {
 
       await executeCommand(
          {
-            family: 'run',
+            family: 'axe',
             subcommand: 'axe',
             wcagVersion: options.version,
             json: options.json,

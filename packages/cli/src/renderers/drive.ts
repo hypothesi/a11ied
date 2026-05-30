@@ -192,7 +192,7 @@ export function renderDriveSessionText(
       `Socket: ${result.session.socketPath}`,
       `Recording: ${formatRecording(result.session.recording)}`,
       '',
-      chalk.dim('Session cached \u2014 run session commands without --session'),
+      chalk.dim('Session cached \u2014 run sr commands without --session'),
    ].join('\n');
 }
 
@@ -206,7 +206,7 @@ export function renderDriveStatusText(
    };
 
    if (result.noSession) {
-      return ['No active session.', '', 'Start one with: a1 session start'].join('\n');
+      return ['No active session.', '', 'Start one with: a11ied sr start'].join('\n');
    }
 
    const lines = buildDriveLines({

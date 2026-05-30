@@ -1,4 +1,4 @@
-import type { CliOutputEnvelope, InteractionPatternResult } from '#contracts';
+import type { CliOutputEnvelope } from '#contracts';
 import { stripHtml } from '../lib/text.js';
 
 // Fallow-ignore-next-line unused-export
@@ -237,79 +237,5 @@ export function renderRunAxeText(
       );
    }
 
-   return lines.join('\n');
-}
-
-function formatSessionLabel(managedSession: boolean): string {
-   if (managedSession) {
-      return ' (managed)';
-   }
-   return ' (reused)';
-}
-
-function formatRecordingLine(recording?: {
-   path: string;
-   status: string;
-   format: string;
-}): string {
-   if (!recording) {
-      return 'Recording: none';
-   }
-
-   return `Recording: ${recording.status} ${recording.format} ${recording.path}`;
-}
-
-// Fallow-ignore-next-line unused-export
-export function renderPatternText(
-   envelope: CliOutputEnvelope,
-   options: { verbose: boolean },
-): string {
-   const result = envelope.result as InteractionPatternResult;
-   const lines = [
-      `Pattern: ${result.patternId}`,
-      `Target: ${result.target}`,
-      `Session: ${result.sessionId}${formatSessionLabel(result.managedSession)}`,
-      formatRecordingLine(result.recording),
-      `Assertions: ${result.assertions.map((entry) => `${entry.id}=${entry.status}`).join(', ') || 'none'}`,
-      `Spoken phrases: ${result.spokenPhraseLog.join(' | ') || 'none'}`,
-      `Item text: ${result.itemTextLog.join(' | ') || 'none'}`,
-   ];
-
-   if (options.verbose) {
-      lines.push(
-         `Steps: ${result.stepLog.map((entry) => entry.id).join(', ') || 'none'}`,
-         `Browser evidence: ${result.browserEvidence.map((entry) => entry.kind).join(', ') || 'none'}`,
-      );
-   }
-
-   if (!envelope.ok) {
-      lines.push(
-         `Errors: ${envelope.errors.map((entry) => entry.code).join(', ') || 'none'}`,
-      );
-   }
-
-   if (envelope.warnings.length > 0) {
-      lines.push(
-         `Warnings: ${envelope.warnings.map((entry) => entry.code).join(', ') || 'none'}`,
-      );
-   }
-
-   return lines.join('\n');
-}
-
-// Fallow-ignore-next-line unused-export
-export function renderPatternsListText(
-   envelope: CliOutputEnvelope,
-   _options: { verbose: boolean },
-): string {
-   const result = envelope.result as {
-      patterns: Array<{ id: string; description: string }>;
-   };
-   const idWidth = Math.max(...result.patterns.map((pt) => pt.id.length));
-   const lines = ['Built-in interaction patterns:', ''];
-   for (const pattern of result.patterns) {
-      lines.push(`  ${pattern.id.padEnd(idWidth)}  ${pattern.description}`);
-   }
-   lines.push('', 'Run: a1 run pattern <patternId> --url <url>');
    return lines.join('\n');
 }

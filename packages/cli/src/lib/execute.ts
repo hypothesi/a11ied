@@ -237,7 +237,7 @@ export async function executeDriveActionCommand(
 ): Promise<void> {
    await executeCommand(
       {
-         family: 'session',
+         family: 'sr',
          subcommand: input.subcommand,
          wcagVersion: undefined,
          json: input.options.json,

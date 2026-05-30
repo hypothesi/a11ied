@@ -6,10 +6,9 @@ Top-level commands:
 
 - `wcag`: local WCAG lookup, search, and coverage data
 - `inspect`: explain which criteria look relevant for a page
-- `drive`: low-level screen reader control through a stable session
+- `sr`: low-level screen reader control through a stable session
 - `doctor`: show runtime support, browser policy, and recording diagnostics
-- `run axe`: run `axe-core`
-- `run pattern`: run higher-level interaction probes built on the driver layer
+- `axe`: run `axe-core`
 - `verify`: turn collected evidence into explicit WCAG criterion or level verdicts
 - `mcp`: expose the same core capabilities over MCP stdio
 
@@ -52,30 +51,30 @@ node packages/cli/dist/cli.js inspect applicable --url http://127.0.0.1:6173/bas
 node packages/cli/dist/cli.js inspect criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json
 ```
 
-## Drive
+## sr
 
 Start a session, keep the `sessionId`, then drive it:
 
 ```sh
-node packages/cli/dist/cli.js drive start --target virtual --allow-virtual --url http://127.0.0.1:6173/basic-page.html --json
-node packages/cli/dist/cli.js drive status --session <sessionId> --json
-node packages/cli/dist/cli.js drive next --session <sessionId> --json
-node packages/cli/dist/cli.js drive previous --session <sessionId> --json
-node packages/cli/dist/cli.js drive key --session <sessionId> --keys Tab --json
-node packages/cli/dist/cli.js drive type --session <sessionId> --text "hello world" --json
-node packages/cli/dist/cli.js drive commands --target voiceover --command-set voiceover-commander
-node packages/cli/dist/cli.js drive perform move-right --session <sessionId> --json
-node packages/cli/dist/cli.js drive read --session <sessionId> --json
-node packages/cli/dist/cli.js drive logs --session <sessionId> --json
-node packages/cli/dist/cli.js drive checkpoint --session <sessionId> --label smoke-1 --json
-node packages/cli/dist/cli.js drive stop --session <sessionId> --json
+node packages/cli/dist/cli.js sr start --target virtual --allow-virtual --url http://127.0.0.1:6173/basic-page.html --json
+node packages/cli/dist/cli.js sr status --session <sessionId> --json
+node packages/cli/dist/cli.js sr next --session <sessionId> --json
+node packages/cli/dist/cli.js sr previous --session <sessionId> --json
+node packages/cli/dist/cli.js sr key --session <sessionId> --keys Tab --json
+node packages/cli/dist/cli.js sr type --session <sessionId> --text "hello world" --json
+node packages/cli/dist/cli.js sr commands --target voiceover --command-set voiceover-commander
+node packages/cli/dist/cli.js sr perform move-right --session <sessionId> --json
+node packages/cli/dist/cli.js sr read --session <sessionId> --json
+node packages/cli/dist/cli.js sr logs --session <sessionId> --json
+node packages/cli/dist/cli.js sr checkpoint --session <sessionId> --label smoke-1 --json
+node packages/cli/dist/cli.js sr stop --session <sessionId> --json
 ```
 
 Real targets:
 
 ```sh
-node packages/cli/dist/cli.js drive start --target voiceover --url http://127.0.0.1:6173/basic-page.html --json
-node packages/cli/dist/cli.js drive start --target nvda --url http://127.0.0.1:6173/basic-page.html --json
+node packages/cli/dist/cli.js sr start --target voiceover --url http://127.0.0.1:6173/basic-page.html --json
+node packages/cli/dist/cli.js sr start --target nvda --url http://127.0.0.1:6173/basic-page.html --json
 ```
 
 Named command sets:
@@ -85,42 +84,16 @@ Named command sets:
 - `voiceover-keycode`: Guidepup VoiceOver keyboard command objects
 - `nvda-keycode`: Guidepup NVDA keyboard command objects, used by default for NVDA
 
-Use `drive commands` for the complete list. `help-all` also includes the complete list.
+Use `sr commands` for the complete list. `help-all` also includes the complete list.
 Invalid target and command-set combinations fail before any screen reader command runs.
 
-## run axe
+## axe
 
 ```sh
-node packages/cli/dist/cli.js run axe --url http://127.0.0.1:6173/basic-page.html --json
-node packages/cli/dist/cli.js run axe --url http://127.0.0.1:6173/contrast-failure.html --level AA --json
-node packages/cli/dist/cli.js run axe --url http://127.0.0.1:6173/button-name-failure.html --criterion 4.1.2 --json
-node packages/cli/dist/cli.js run axe --url http://127.0.0.1:6173/basic-page.html --rule button-name color-contrast --json
-```
-
-## run pattern
-
-Current built-in pattern ids:
-
-- `tab_sequence`
-- `landmark_sequence`
-- `heading_sequence`
-- `form_field_walk`
-- `status_message_probe`
-- `dialog_probe`
-- `focus_order_probe`
-- `focus_visibility_probe`
-- `focus_obscured_probe`
-- `auth_flow_probe`
-- `redundant_entry_probe`
-
-Examples:
-
-```sh
-node packages/cli/dist/cli.js run pattern landmark_sequence --target virtual --allow-virtual --url http://127.0.0.1:6173/basic-page.html --json
-node packages/cli/dist/cli.js run pattern status_message_probe --target virtual --allow-virtual --url http://127.0.0.1:6173/status-message.html --json
-node packages/cli/dist/cli.js run pattern dialog_probe --target virtual --allow-virtual --url http://127.0.0.1:6173/dialog.html --json
-node packages/cli/dist/cli.js run pattern focus_obscured_probe --target virtual --allow-virtual --url http://127.0.0.1:6173/focus-obscured.html --json
-node packages/cli/dist/cli.js run pattern auth_flow_probe --target virtual --allow-virtual --url http://127.0.0.1:6173/auth-login.html --json
+node packages/cli/dist/cli.js axe --url http://127.0.0.1:6173/basic-page.html --json
+node packages/cli/dist/cli.js axe --url http://127.0.0.1:6173/contrast-failure.html --level AA --json
+node packages/cli/dist/cli.js axe --url http://127.0.0.1:6173/button-name-failure.html --criterion 4.1.2 --json
+node packages/cli/dist/cli.js axe --url http://127.0.0.1:6173/basic-page.html --rule button-name color-contrast --json
 ```
 
 ## verify
@@ -137,7 +110,7 @@ node packages/cli/dist/cli.js verify level AA --target virtual --allow-virtual -
 node packages/cli/dist/cli.js mcp
 ```
 
-The MCP server exposes 10 tools:
+The MCP server exposes 9 tools:
 
 | Tool             | Purpose                                                                        |
 | ---------------- | ------------------------------------------------------------------------------ |
@@ -149,13 +122,12 @@ The MCP server exposes 10 tools:
 | `driver_session` | Start, query status, or stop an accessibility-driver session                   |
 | `driver_action`  | Run a single action (next, previous, read, key, etc.) against a driver session |
 | `run_axe`        | Run axe-core against a target                                                  |
-| `run_pattern`    | Run ARIA interaction patterns against a target                                 |
 | `verify`         | Verify a single criterion or full conformance level                            |
 
 ### Real vs simulated screen readers
 
 On macOS the default target is **VoiceOver** (real). On Windows it is **NVDA** (real).
-If neither is available the target falls back to `virtual`, which is a **simulation** — it
+If neither is available the target falls back to `virtual`, which is a **simulation** - it
 models screen reader behavior in memory but does not test real assistive technology.
 On macOS and Windows, `virtual` is allowed only when you opt in with `--allow-virtual`
 (CLI) or `allowVirtual=true` (MCP).

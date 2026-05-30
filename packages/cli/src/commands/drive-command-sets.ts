@@ -126,11 +126,11 @@ function registerPerformCommand(driveCommand: Command): void {
             'after',
             `
 Examples:
-  a11ied session perform move-right --target voiceover --ephemeral
-  a11ied session perform voiceover-keycode:next --target voiceover --ephemeral
-  a11ied session perform report-current-focus --target nvda --ephemeral
+  a11ied sr perform move-right --target voiceover --ephemeral
+  a11ied sr perform voiceover-keycode:next --target voiceover --ephemeral
+  a11ied sr perform report-current-focus --target nvda --ephemeral
 
-Use "a11ied session commands" to list every supported command.
+Use "a11ied sr commands" to list every supported command.
 `,
          ),
    ).action(
@@ -170,7 +170,7 @@ function registerCommandsCommand(driveCommand: Command): void {
 
       await executeCommand(
          {
-            family: 'session',
+            family: 'sr',
             subcommand: 'commands',
             wcagVersion: undefined,
             json: options.json,

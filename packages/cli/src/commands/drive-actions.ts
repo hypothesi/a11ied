@@ -8,7 +8,7 @@ import {
    addVerboseOption,
 } from '../lib/options.js';
 import { registerCommandSetActions } from './drive-command-sets.js';
-import { DRIVE_KEY_HELP } from './drive-key-help.js';
+import { getDriveKeyHelp } from './drive-key-help.js';
 
 interface DriveActionOptions {
    json?: boolean;
@@ -73,7 +73,7 @@ function registerKeyCommand(driveCommand: Command): void {
          .command('key')
          .description('Send one or more target-specific key chords.')
          .requiredOption('--keys <keys>', 'Send keys such as VO+ArrowRight or Tab.')
-         .addHelpText('after', DRIVE_KEY_HELP),
+         .addHelpText('after', () => getDriveKeyHelp()),
    ).action(async (options: DriveActionOptions & { keys: string }) => {
       const [{ executeDriveActionCommand }, renderers] = await Promise.all([
          import('../lib/execute.js'),

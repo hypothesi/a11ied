@@ -1,21 +1,11 @@
 import { expect } from 'vitest';
 
-import {
-   EXIT_SUCCESS,
-   EXIT_USAGE,
-   type CliResult,
-   parseJsonOutput,
-   runCli,
-} from './setup.js';
+import { EXIT_SUCCESS, EXIT_USAGE, type CliResult, parseJsonOutput } from './setup.js';
 
 interface JsonStateWithLogCursor {
    state: {
       logCursor: number;
    };
-}
-
-interface JsonPatternResult {
-   assertions: Array<{ id: string; status: string }>;
 }
 
 export function expectJsonLogCursor(
@@ -39,34 +29,4 @@ export function expectFirstErrorMessage(args: {
    expect(args.result.status).toBe(args.expectedStatus ?? EXIT_USAGE);
    expect((json.errors as Array<{ message: string }>)[0]?.message).toMatch(args.match);
    return json;
-}
-
-export async function runPatternWithAssertions(args: {
-   patternId: string;
-   url: string;
-   target: 'virtual' | 'voiceover' | 'nvda';
-   expectedStatus?: number;
-}): Promise<{
-   json: Record<string, unknown>;
-   assertions: Array<{ id: string; status: string }>;
-}> {
-   const targetArgs = ['--target', args.target];
-   if (args.target === 'virtual') {
-      targetArgs.push('--allow-virtual');
-   }
-   const result = await runCli([
-      'run',
-      'pattern',
-      args.patternId,
-      '--url',
-      args.url,
-      ...targetArgs,
-      '--json',
-   ]);
-   const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(args.expectedStatus ?? EXIT_SUCCESS);
-   return {
-      json,
-      assertions: (json.result as JsonPatternResult).assertions,
-   };
 }

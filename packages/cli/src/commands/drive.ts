@@ -191,7 +191,7 @@ async function handleStartAction(options: StartActionOptions): Promise<void> {
 
    await executeCommand(
       {
-         family: 'session',
+         family: 'sr',
          subcommand: 'start',
          wcagVersion: undefined,
          json: options.json,
@@ -249,7 +249,7 @@ function registerStatusCommand(driveCommand: Command): void {
 
       await executeCommand(
          {
-            family: 'session',
+            family: 'sr',
             subcommand: 'status',
             wcagVersion: undefined,
             json: options.json,
@@ -276,7 +276,7 @@ function registerStopCommand(driveCommand: Command): void {
 
       await executeCommand(
          {
-            family: 'session',
+            family: 'sr',
             subcommand: 'stop',
             wcagVersion: undefined,
             json: options.json,
@@ -305,6 +305,5 @@ function registerDriverCommands(
 }
 
 export function registerSessionCommands(program: Command): void {
-   registerDriverCommands(program, 'session');
-   registerDriverCommands(program, 'drive', { noHelp: true });
+   registerDriverCommands(program, 'sr');
 }
