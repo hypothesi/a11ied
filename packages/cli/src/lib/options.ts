@@ -1,4 +1,5 @@
 import type { Command } from 'commander';
+import { getPlatformScreenReaders, getPlatformTargets } from '../commands/drive-key-help.js';
 
 const SESSION_OPTION_DESCRIPTION =
    'Reuse an existing screen-reader session. Defaults to the current session or $A11IED_DRIVE_SESSION when available.';
@@ -33,7 +34,7 @@ export function addEphemeralOption(command: Command): Command {
 export function addTargetOption(command: Command): Command {
    return command.option(
       '--target <platform>',
-      'Choose one target: voiceover, nvda, or virtual. Defaults to an available VoiceOver or NVDA target, then falls back to virtual as a last resort. Use --allow-virtual to explicitly request simulation.',
+      `Choose one target: ${getPlatformTargets()}. Defaults to an available ${getPlatformScreenReaders()} target, then falls back to virtual as a last resort. Use --allow-virtual to explicitly request simulation.`,
    );
 }
 

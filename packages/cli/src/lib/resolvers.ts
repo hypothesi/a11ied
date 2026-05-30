@@ -1,6 +1,7 @@
 import { platformSchema, type Platform, type VerificationReport } from '#contracts';
 import { CliUsageError, resolveDefaultTarget, resolveDocumentTarget } from '#core';
 import { resolveImplicitDriveSession, type DriveSessionSource } from './drive-session.js';
+import { getPlatformScreenReaders } from '../commands/drive-key-help.js';
 
 interface VirtualTargetGuardOptions {
    allowVirtual?: boolean;
@@ -34,7 +35,7 @@ function ensureVirtualTargetAllowed(
 
    throw new CliUsageError(
       'virtual-target-disallowed',
-      'The virtual target is a simulation. Omit --target to use VoiceOver or NVDA, or pass --allow-virtual to proceed.',
+      `The virtual target is a simulation. Omit --target to use ${getPlatformScreenReaders()}, or pass --allow-virtual to proceed.`,
       {
          target,
          defaultTarget: fallback.target,

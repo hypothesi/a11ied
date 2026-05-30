@@ -127,10 +127,10 @@ export const driveRunHelpCases: HelpCase[] = [
         --keys <keys>        Send keys such as VO+ArrowRight or Tab.
         --session <id>       Reuse an existing screen-reader session. Defaults to the
                              current session or $A11IED_DRIVE_SESSION when available.
-        --target <platform>  Choose one target: voiceover, nvda, or virtual. Defaults
-                             to an available VoiceOver or NVDA target, then falls back
-                             to virtual as a last resort. Use --allow-virtual to
-                             explicitly request simulation.
+        --target <platform>  Choose one target: voiceover or virtual. Defaults to an
+                             available VoiceOver target, then falls back to virtual as
+                             a last resort. Use --allow-virtual to explicitly request
+                             simulation.
         --allow-virtual      Allow the virtual (simulated) screen reader when a real
                              target is available.
         --ephemeral          Run one action in a temporary session and tear it down

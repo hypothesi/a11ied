@@ -37,6 +37,36 @@ const NVDA_KEY_HELP_LINES = [
    '    Examples: NVDA+N, NVDA+ArrowDown, NVDA+NumPad5, Control+Alt+N',
 ];
 
+export function getPlatformScreenReaders(): string {
+   if (process.platform === 'darwin') {
+      return 'VoiceOver';
+   }
+   if (process.platform === 'win32') {
+      return 'NVDA';
+   }
+   return 'VoiceOver or NVDA';
+}
+
+export function getPlatformTargets(): string {
+   if (process.platform === 'darwin') {
+      return 'voiceover or virtual';
+   }
+   if (process.platform === 'win32') {
+      return 'nvda or virtual';
+   }
+   return 'voiceover, nvda, or virtual';
+}
+
+export function getPlatformCommandSets(): string {
+   if (process.platform === 'darwin') {
+      return 'auto, portable, voiceover-commander, or voiceover-keycode';
+   }
+   if (process.platform === 'win32') {
+      return 'auto, portable, or nvda-keycode';
+   }
+   return 'auto, portable, voiceover-commander, voiceover-keycode, or nvda-keycode';
+}
+
 export function getDriveKeyHelp(): string {
    const lines = [...COMMON_KEY_HELP_LINES];
 

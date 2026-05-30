@@ -19,6 +19,7 @@ import {
 import { persistImplicitDriveSession } from '../lib/drive-session.js';
 import { executeStopAction } from './drive-stop.js';
 import { executeStatusAction } from './drive-status.js';
+import { getPlatformScreenReaders, getPlatformTargets } from './drive-key-help.js';
 import {
    registerMiddleActions,
    registerSimpleActions,
@@ -224,7 +225,7 @@ function registerStartCommand(driveCommand: Command): void {
                .description('Start a persistent driver session.')
                .option(
                   '--target <platform>',
-                  'Choose one target: voiceover, nvda, or virtual. Defaults to an available VoiceOver or NVDA target, then falls back to virtual as a last resort. Use --allow-virtual to explicitly request simulation.',
+                  `Choose one target: ${getPlatformTargets()}. Defaults to an available ${getPlatformScreenReaders()} target, then falls back to virtual as a last resort. Use --allow-virtual to explicitly request simulation.`,
                )
                .option('--url <url>', 'Attach one live URL target to the new session.'),
          ),
