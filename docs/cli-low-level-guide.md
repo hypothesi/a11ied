@@ -58,15 +58,16 @@ Start a session, keep the `sessionId`, then drive it:
 ```sh
 node packages/cli/dist/cli.js sr start --target virtual --allow-virtual --url http://127.0.0.1:6173/basic-page.html --json
 node packages/cli/dist/cli.js sr status --session <sessionId> --json
-node packages/cli/dist/cli.js sr next --session <sessionId> --json
-node packages/cli/dist/cli.js sr previous --session <sessionId> --json
-node packages/cli/dist/cli.js sr key --session <sessionId> --keys Tab --json
-node packages/cli/dist/cli.js sr type --session <sessionId> --text "hello world" --json
-node packages/cli/dist/cli.js sr commands --target voiceover --command-set voiceover-commander
-node packages/cli/dist/cli.js sr perform move-right --session <sessionId> --json
+node packages/cli/dist/cli.js sr do next --session <sessionId> --json
+node packages/cli/dist/cli.js sr do previous --session <sessionId> --json
+node packages/cli/dist/cli.js sr press Tab --session <sessionId> --json
+node packages/cli/dist/cli.js sr type "hello world" --session <sessionId> --json
+node packages/cli/dist/cli.js sr list --target voiceover --command-set voiceover-commander
+node packages/cli/dist/cli.js sr do move-right --session <sessionId> --json
+node packages/cli/dist/cli.js sr do move-to-area-bottom --session <sessionId> --json
 node packages/cli/dist/cli.js sr read --session <sessionId> --json
 node packages/cli/dist/cli.js sr logs --session <sessionId> --json
-node packages/cli/dist/cli.js sr checkpoint --session <sessionId> --label smoke-1 --json
+node packages/cli/dist/cli.js sr checkpoint smoke-1 --session <sessionId> --json
 node packages/cli/dist/cli.js sr stop --session <sessionId> --json
 ```
 
@@ -84,7 +85,7 @@ Named command sets:
 - `voiceover-keycode`: Guidepup VoiceOver keyboard command objects
 - `nvda-keycode`: Guidepup NVDA keyboard command objects, used by default for NVDA
 
-Use `sr commands` for the complete list. `help-all` also includes the complete list.
+Use `sr list` for the complete list. `help-all` also includes the complete list.
 Invalid target and command-set combinations fail before any screen reader command runs.
 
 ## axe

@@ -95,21 +95,18 @@ export const driveRunHelpCases: HelpCase[] = [
                                       metadata.
         stop [options]                Stop a persistent driver session and remove its
                                       state file.
-        next [options]                Move to the next item.
-        previous [options]            Move to the previous item.
-        key [options]                 Send one or more target-specific key chords.
-        type [options]                Type text through the active driver target.
-        perform [options] <command>   Perform a named screen-reader command.
-        commands [options]            List supported named driver commands.
+        press [options] <keys>        Send one or more key chords to the screen
+                                      reader.
+        type [options] <text>         Type text through the active driver target.
+        do [options] <command>        Run a named screen-reader command.
+        list [options]                List all named commands available for the
+                                      current target.
         focus [options]               Focus a window so the screen reader follows the
                                       right app.
-        interact [options]            Enter interaction mode.
-        stop-interacting [options]    Leave interaction mode.
-        click-current-item [options]  Activate the current item.
         read [options]                Read the current driver state.
         logs [options]                Read captured speech and action logs.
         clear-logs [options]          Clear captured speech and action logs.
-        checkpoint [options]          Record a named checkpoint in the current
+        checkpoint [options] <label>  Record a named checkpoint in the current
                                       session.
         help [command]                display help for command
       "
@@ -117,14 +114,13 @@ export const driveRunHelpCases: HelpCase[] = [
    },
    {
       name: 'lists supported sr key tokens',
-      args: ['sr', 'key', '--help'],
+      args: ['sr', 'press', '--help'],
       expected: `
-      "Usage: a11ied sr key [options]
+      "Usage: a11ied sr press [options] <keys>
 
-      Send one or more target-specific key chords.
+      Send one or more key chords to the screen reader.
 
       Options:
-        --keys <keys>        Send keys such as VO+ArrowRight or Tab.
         --session <id>       Reuse an existing screen-reader session. Defaults to the
                              current session or $A11IED_DRIVE_SESSION when available.
         --target <platform>  Choose one target: voiceover or virtual. Defaults to an

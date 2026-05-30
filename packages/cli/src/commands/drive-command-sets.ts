@@ -116,26 +116,27 @@ function buildCommandsExecution(args: {
    return { target: { kind: 'driver-target', value: target }, result };
 }
 
-function buildPerformExamples(): string {
+function buildDoExamples(): string {
    const examples = [
-      '  a11ied sr perform move-right --target voiceover --ephemeral',
-      '  a11ied sr perform voiceover-keycode:next --target voiceover --ephemeral',
+      '  a11ied sr do next',
+      '  a11ied sr do move-right --target voiceover --ephemeral',
+      '  a11ied sr do move-to-area-bottom --target voiceover --ephemeral',
    ];
 
    if (process.platform !== 'darwin') {
-      examples.push('  a11ied sr perform report-current-focus --target nvda --ephemeral');
+      examples.push('  a11ied sr do report-current-focus --target nvda --ephemeral');
    }
 
-   return `\nExamples:\n${examples.join('\n')}\n\nUse "a11ied sr commands" to list every supported command.\n`;
+   return `\nExamples:\n${examples.join('\n')}\n\nUse "a11ied sr list" to see every available command.\n`;
 }
 
 function registerPerformCommand(driveCommand: Command): void {
    addDrivePerformOptions(
       driveCommand
-         .command('perform <command>')
-         .description('Perform a named screen-reader command.')
+         .command('do <command>')
+         .description('Run a named screen-reader command.')
          .option('--command-set <set>', DRIVE_COMMAND_SET_HELP, 'auto')
-         .addHelpText('after', buildPerformExamples()),
+         .addHelpText('after', buildDoExamples()),
    ).action(
       async (command: string, options: DriveActionOptions & { commandSet: string }) => {
          const [{ executeDriveActionCommand }, renderers] = await Promise.all([
@@ -144,7 +145,7 @@ function registerPerformCommand(driveCommand: Command): void {
          ]);
 
          await executeDriveActionCommand({
-            subcommand: 'perform',
+            subcommand: 'do',
             action: 'perform',
             options,
             payload: { command, commandSet: options.commandSet },
@@ -158,11 +159,11 @@ function registerCommandsCommand(driveCommand: Command): void {
    addVerboseOption(
       addJsonOption(
          driveCommand
-            .command('commands')
-            .description('List supported named driver commands.')
+            .command('list')
+            .description('List all named commands available for the current target.')
             .option('--target <target>', `Filter by target: ${getPlatformTargets()}.`)
             .option('--command-set <set>', DRIVE_COMMAND_SET_HELP)
-            .option('--query <query>', 'Filter command aliases and upstream keys.'),
+            .option('--query <query>', 'Filter by command name or key sequence.'),
       ),
    ).action(async (options: DriveCommandsOptions) => {
       const [{ executeCommand, parsePlatform }, core, renderers] = await Promise.all([
@@ -174,7 +175,7 @@ function registerCommandsCommand(driveCommand: Command): void {
       await executeCommand(
          {
             family: 'sr',
-            subcommand: 'commands',
+            subcommand: 'list',
             wcagVersion: undefined,
             json: options.json,
             verbose: options.verbose,

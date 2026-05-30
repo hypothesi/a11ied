@@ -65,7 +65,7 @@ describe('cli sr command listing', () => {
    it('lists supported driver commands without requiring a session', async () => {
       const result = await runCli([
          'sr',
-         'commands',
+         'list',
          '--target',
          'voiceover',
          '--command-set',

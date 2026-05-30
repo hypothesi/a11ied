@@ -70,21 +70,20 @@ function registerSimpleAction(driveCommand: Command, config: SimpleActionConfig)
 function registerKeyCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
-         .command('key')
-         .description('Send one or more target-specific key chords.')
-         .requiredOption('--keys <keys>', 'Send keys such as VO+ArrowRight or Tab.')
+         .command('press <keys>')
+         .description('Send one or more key chords to the screen reader.')
          .addHelpText('after', () => getDriveKeyHelp()),
-   ).action(async (options: DriveActionOptions & { keys: string }) => {
+   ).action(async (keys: string, options: DriveActionOptions) => {
       const [{ executeDriveActionCommand }, renderers] = await Promise.all([
          import('../lib/execute.js'),
          import('../renderers/drive.js'),
       ]);
 
       await executeDriveActionCommand({
-         subcommand: 'key',
+         subcommand: 'press',
          action: 'key',
          options,
-         payload: { keys: options.keys },
+         payload: { keys },
          renderText: renderers.renderDriveStatusText,
       });
    });
@@ -93,10 +92,9 @@ function registerKeyCommand(driveCommand: Command): void {
 function registerTypeCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
-         .command('type')
-         .description('Type text through the active driver target.')
-         .requiredOption('--text <text>', 'Text to type into the target.'),
-   ).action(async (options: DriveActionOptions & { text: string }) => {
+         .command('type <text>')
+         .description('Type text through the active driver target.'),
+   ).action(async (text: string, options: DriveActionOptions) => {
       const [{ executeDriveActionCommand }, renderers] = await Promise.all([
          import('../lib/execute.js'),
          import('../renderers/drive.js'),
@@ -106,7 +104,7 @@ function registerTypeCommand(driveCommand: Command): void {
          subcommand: 'type',
          action: 'type',
          options,
-         payload: { text: options.text },
+         payload: { text },
          renderText: renderers.renderDriveStatusText,
       });
    });
@@ -202,10 +200,9 @@ function registerClearLogsCommand(driveCommand: Command): void {
 function registerCheckpointCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
-         .command('checkpoint')
-         .description('Record a named checkpoint in the current session.')
-         .requiredOption('--label <label>', 'Attach a label to this checkpoint.'),
-   ).action(async (options: DriveActionOptions & { label: string }) => {
+         .command('checkpoint <label>')
+         .description('Record a named checkpoint in the current session.'),
+   ).action(async (label: string, options: DriveActionOptions) => {
       const [{ executeDriveActionCommand }, renderers] = await Promise.all([
          import('../lib/execute.js'),
          import('../renderers/drive.js'),
@@ -215,23 +212,14 @@ function registerCheckpointCommand(driveCommand: Command): void {
          subcommand: 'checkpoint',
          action: 'checkpoint',
          options,
-         payload: { label: options.label },
+         payload: { label },
          renderText: renderers.renderDriveStatusText,
       });
    });
 }
 
-export function registerSimpleActions(driveCommand: Command): void {
-   registerSimpleAction(driveCommand, {
-      name: 'next',
-      description: 'Move to the next item.',
-      renderer: 'status',
-   });
-   registerSimpleAction(driveCommand, {
-      name: 'previous',
-      description: 'Move to the previous item.',
-      renderer: 'status',
-   });
+export function registerSimpleActions(_driveCommand: Command): void {
+   // Portable commands (next, previous, interact, etc.) are accessible via `sr do <command>`.
 }
 
 export function registerMiddleActions(driveCommand: Command): void {
@@ -239,21 +227,6 @@ export function registerMiddleActions(driveCommand: Command): void {
    registerTypeCommand(driveCommand);
    registerCommandSetActions(driveCommand);
    registerFocusCommand(driveCommand);
-   registerSimpleAction(driveCommand, {
-      name: 'interact',
-      description: 'Enter interaction mode.',
-      renderer: 'status',
-   });
-   registerSimpleAction(driveCommand, {
-      name: 'stop-interacting',
-      description: 'Leave interaction mode.',
-      renderer: 'status',
-   });
-   registerSimpleAction(driveCommand, {
-      name: 'click-current-item',
-      description: 'Activate the current item.',
-      renderer: 'status',
-   });
    registerSimpleAction(driveCommand, {
       name: 'read',
       description: 'Read the current driver state.',
