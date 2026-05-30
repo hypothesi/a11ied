@@ -18,13 +18,13 @@ export const topLevelHelpCases: HelpCase[] = [
         -h, --help        display help for command
 
       Commands:
-        wcag              Look up pinned WCAG requirements and coverage data.
-        inspect           Explain criterion applicability for a target.
         sr                Control a target screen reader through stable sessions.
+        wcag              Look up pinned WCAG requirements and coverage data.
+        axe [options]     Run axe-core against a target.
+        inspect           Explain criterion applicability for a target.
+        mcp               Start the MCP stdio server.
         doctor [options]  Report runtime details, browser policy, and supported
                           automation targets.
-        axe [options]     Run axe-core against a target.
-        mcp               Start the MCP stdio server.
         help-all          Print help for the full command tree in one shot.
         help [command]    display help for command
       "

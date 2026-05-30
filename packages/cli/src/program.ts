@@ -55,12 +55,12 @@ function registerHelpAllCommand(program: Command): void {
 }
 
 function registerAllCommands(program: Command): void {
-   registerWcagCommands(program);
-   registerInspectCommands(program);
    registerSessionCommands(program);
-   registerDoctorCommand(program);
+   registerWcagCommands(program);
    registerAxeCommand(program);
+   registerInspectCommands(program);
    registerMcpCommand(program);
+   registerDoctorCommand(program);
    registerHelpAllCommand(program);
 }
 
