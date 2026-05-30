@@ -9,6 +9,19 @@ const COMMAND_SET_LABELS: Readonly<Record<string, string>> = {
    'nvda-keycode': 'NVDA — Key Codes',
 } as const;
 
+const VOICEOVER_COMMAND_SETS = new Set(['voiceover-commander', 'voiceover-keycode']);
+const NVDA_COMMAND_SETS = new Set(['nvda-keycode']);
+
+function isPlatformRelevantCommandSet(commandSet: string): boolean {
+   if (process.platform === 'darwin' && NVDA_COMMAND_SETS.has(commandSet)) {
+      return false;
+   }
+   if (process.platform === 'win32' && VOICEOVER_COMMAND_SETS.has(commandSet)) {
+      return false;
+   }
+   return true;
+}
+
 interface DriveRecording {
    path: string;
    status: string;
@@ -149,12 +162,16 @@ function formatCommandLine(
 
 // Fallow-ignore-next-line unused-export
 export function formatDriveCommands(result: DriverCommandList): string {
-   if (result.commandSets.length === 0) {
+   const relevantSets = result.commandSets.filter((group) =>
+      isPlatformRelevantCommandSet(group.commandSet),
+   );
+
+   if (relevantSets.length === 0) {
       return 'No driver commands matched.';
    }
 
    const lines = ['Driver commands:'];
-   for (const group of result.commandSets) {
+   for (const group of relevantSets) {
       const label =
          COMMAND_SET_LABELS[group.commandSet] ?? `${group.target} / ${group.commandSet}`;
       const aliasWidth = Math.max(...group.commands.map((cmd) => cmd.alias.length));
