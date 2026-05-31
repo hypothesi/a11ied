@@ -1,5 +1,6 @@
 {
    "$schema": "./node_modules/oxlint/configuration_schema.json",
+   "ignorePatterns": [".aix/**", ".claude/**"],
    "plugins": ["typescript", "unicorn", "oxc", "node"],
    "jsPlugins": ["oxlint-plugin-complexity"],
    "categories": {

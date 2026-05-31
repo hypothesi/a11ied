@@ -1,6 +1,12 @@
 {
    "$schema": "./node_modules/oxfmt/configuration_schema.json",
-   "ignorePatterns": ["**/dist/**", "**/coverage/**", "apps/docs/.astro/**"],
+   "ignorePatterns": [
+      "**/dist/**",
+      "**/coverage/**",
+      "apps/docs/.astro/**",
+      ".aix/**",
+      ".claude/**"
+   ],
    "printWidth": 90,
    "tabWidth": 3,
    "singleQuote": true,
