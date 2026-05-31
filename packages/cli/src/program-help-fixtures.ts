@@ -103,6 +103,8 @@ export const driveRunHelpCases: HelpCase[] = [
                                       metadata.
         focus [options]               Focus a window so the screen reader follows the
                                       right app.
+        next [options]                Move to the next screen reader element. Requires
+                                      an active session.
         read [options]                Read the current driver state.
         logs [options]                Read captured speech and action logs.
         clear-logs [options]          Clear captured speech and action logs.

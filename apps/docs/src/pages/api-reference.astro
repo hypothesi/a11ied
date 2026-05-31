@@ -31,18 +31,16 @@ a1 help-all</code></pre>
 
    <section>
       <h2>Programmatic usage</h2>
-      <pre><code>import {'{'} listWcagCriteria, runAxe, verifyCriterion {'}'} from 'a11ied';</code></pre>
+      <pre><code>import {'{'} listWcagCriteria, runAxe, verifyCriterion, verifyLevel, runInteractionPattern {'}'} from 'a11ied';</code></pre>
       <p>
          Import the runtime helpers you need from <code>a11ied</code>.
-         CLI plumbing (like the command builder) stays internal.
-         The runtime modules (<code>@a11ied/core</code>, <code>@a11ied/contracts</code>, etc.)
-         are internal workspace packages — import from the top-level <code>a11ied</code> entrypoint.
+         CLI plumbing (like the command builder) is not exported.
       </p>
    </section>
 
    <section>
       <h2>Packages</h2>
-      <p>The monorepo is organized into focused internal packages:</p>
+      <p>The monorepo is organized into focused packages, all published to npm:</p>
       <ul>
          <li><code>@a11ied/contracts</code>: shared runtime schemas and result shapes</li>
          <li><code>@a11ied/core</code>: WCAG lookup, target resolution, driver orchestration, pattern execution, and verification</li>
@@ -51,7 +49,7 @@ a1 help-all</code></pre>
          <li><code>@a11ied/wcag-engine</code>: lookup, search, coverage, and applicability over generated artifacts</li>
          <li><code>@a11ied/mcp-server</code>: MCP server entrypoint</li>
       </ul>
-      <p>These are bundled into the published <code>a11ied</code> package — you don't install them separately.</p>
+      <p>All packages are bundled into the top-level <code>a11ied</code> package. Import from the <code>a11ied</code> entrypoint for the stable public API.</p>
    </section>
 
    <section class="field-note">

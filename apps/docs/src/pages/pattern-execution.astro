@@ -20,9 +20,17 @@ import { docsLinks } from '../lib/nav';
 
    <section>
       <h2>Examples</h2>
-      <pre><code>a1 run pattern landmark_sequence --target virtual --allow-virtual --url http://127.0.0.1:6173/landmarks.html --json
-a1 run pattern status_message_probe --target virtual --allow-virtual --url http://127.0.0.1:6173/status-message.html --json
-a1 run pattern focus_obscured_probe --target virtual --allow-virtual --url http://127.0.0.1:6173/focus-obscured.html --json</code></pre>
+      <pre><code>import {'{'} runInteractionPattern, listInteractionPatterns {'}'} from 'a11ied';
+
+// List all available patterns
+const patterns = listInteractionPatterns();
+
+// Run one pattern
+const result = await runInteractionPattern({'{'}
+  url: 'http://127.0.0.1:6173/landmarks.html',
+  patternId: 'landmark_sequence',
+  target: 'virtual',
+{'}'});</code></pre>
    </section>
 
    <section>

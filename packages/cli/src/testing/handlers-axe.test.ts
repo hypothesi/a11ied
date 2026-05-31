@@ -20,13 +20,7 @@ afterAll(async () => {
 });
 
 async function assertAxeFullScan(baseUrl: string): Promise<void> {
-   const result = await runCli([
-      'run',
-      'axe',
-      '--url',
-      `${baseUrl}/basic-page.html`,
-      '--json',
-   ]);
+   const result = await runCli(['axe', '--url', `${baseUrl}/basic-page.html`, '--json']);
    const json = parseJsonOutput(result.stdout);
    expect(result.status).toBe(EXIT_SUCCESS);
    const axeResult = json.result as {
@@ -43,7 +37,6 @@ async function assertAxeFullScan(baseUrl: string): Promise<void> {
 
 async function assertAxeCriterionScan(baseUrl: string): Promise<void> {
    const result = await runCli([
-      'run',
       'axe',
       '--url',
       `${baseUrl}/button-name-failure.html`,
@@ -72,7 +65,6 @@ async function assertAxeCriterionScan(baseUrl: string): Promise<void> {
 
 async function assertAxeLevelScan(baseUrl: string): Promise<void> {
    const result = await runCli([
-      'run',
       'axe',
       '--url',
       `${baseUrl}/contrast-failure.html`,
@@ -95,7 +87,6 @@ async function assertAxeLevelScan(baseUrl: string): Promise<void> {
 
 async function assertAxeRuleFilter(baseUrl: string): Promise<void> {
    const result = await runCli([
-      'run',
       'axe',
       '--url',
       `${baseUrl}/basic-page.html`,
@@ -122,7 +113,6 @@ async function assertAxeRuleFilter(baseUrl: string): Promise<void> {
 
 async function assertAxeIncomplete(baseUrl: string): Promise<void> {
    const result = await runCli([
-      'run',
       'axe',
       '--url',
       `${baseUrl}/basic-page.html`,
@@ -140,7 +130,6 @@ async function assertAxeIncomplete(baseUrl: string): Promise<void> {
 
 async function assertAxeTextOutput(baseUrl: string): Promise<void> {
    const output = await runCli([
-      'run',
       'axe',
       '--url',
       `${baseUrl}/button-name-failure.html`,
@@ -158,7 +147,6 @@ async function assertAxeTextOutput(baseUrl: string): Promise<void> {
 
 async function assertAxeVerboseOutput(baseUrl: string): Promise<void> {
    const verbose = await runCli([
-      'run',
       'axe',
       '--url',
       `${baseUrl}/button-name-failure.html`,

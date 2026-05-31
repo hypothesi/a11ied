@@ -58,11 +58,11 @@ import { docsLinks } from '../lib/nav';
          </div>
          <div class="stack">
             <div class="tag">3. Gather evidence</div>
-            <p>Use <code>drive</code> for manual control, <code>run axe</code> for static analysis, or <code>run pattern</code> for reusable interaction probes.</p>
+            <p>Use <code>sr</code> for manual control or <code>axe</code> for static analysis. Use the <code>runInteractionPattern</code> API for reusable interaction probes.</p>
          </div>
          <div class="stack">
             <div class="tag">4. Verify</div>
-            <p>Use <code>verify</code> to produce a criterion or level verdict based on the evidence collected.</p>
+            <p>Use the <code>verifyCriterion</code> or <code>verifyLevel</code> API to produce a criterion or level verdict from the evidence collected.</p>
          </div>
       </div>
    </section>
@@ -90,11 +90,10 @@ import { docsLinks } from '../lib/nav';
          <pre><code>a1 doctor
 a1 wcag show 4.1.3 --json
 a1 inspect criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json
-a1 run pattern status_message_probe --target virtual --allow-virtual --url http://127.0.0.1:6173/status-message.html --json
-a1 verify criterion 4.1.3 --target virtual --allow-virtual --url http://127.0.0.1:6173/status-message.html --json</code></pre>
+a1 axe --criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json</code></pre>
          <p class="command-note">
-         Each step builds on the previous one: look up the rule, check if it applies, run the test,
-         then verify.
+         Each step builds on the previous one: look up the rule, check if it applies, then run an axe scan.
+         For pattern execution and verification, use the programmatic API.
          </p>
       </div>
    </section>

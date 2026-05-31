@@ -219,6 +219,14 @@ export function registerCheckpointCommand(driveCommand: Command): void {
    });
 }
 
+export function registerNextCommand(driveCommand: Command): void {
+   registerSimpleAction(driveCommand, {
+      name: 'next',
+      description: 'Move to the next screen reader element. Requires an active session.',
+      renderer: 'status',
+   });
+}
+
 export function registerReadCommand(driveCommand: Command): void {
    registerSimpleAction(driveCommand, {
       name: 'read',

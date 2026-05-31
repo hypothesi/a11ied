@@ -17,7 +17,7 @@ Use this skill when the task is specifically about the `a11ied` toolchain.
    - automated when the runtime can make the verdict directly
    - hybrid when the runtime can gather evidence but a human still has to judge part of it
    - manual when the runtime can explain the criterion but not finish the call alone
-6. Use low-level `drive` primitives when the task requires manually operating the UI or screen reader and no reusable pattern fits yet.
+6. Use low-level `sr` commands when the task requires manually operating the UI or screen reader and no reusable pattern fits yet.
 7. Use axe where there is rule coverage, and use Guidepup-backed patterns where interaction or announcement behavior matters and a named procedure already exists.
 8. Prefer the virtual screen reader for quick feedback and deterministic local tests.
 9. Escalate to VoiceOver or NVDA when the task depends on real assistive technology behavior.

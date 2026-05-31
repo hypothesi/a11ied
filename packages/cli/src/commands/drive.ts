@@ -25,6 +25,7 @@ import {
    registerClearLogsCommand,
    registerFocusCommand,
    registerLogsCommand,
+   registerNextCommand,
    registerPressCommand,
    registerReadCommand,
    registerTypeCommand,
@@ -311,6 +312,7 @@ function registerDriverCommands(
    registerStopCommand(driveCommand);
    registerStatusCommand(driveCommand);
    registerFocusCommand(driveCommand);
+   registerNextCommand(driveCommand);
    registerReadCommand(driveCommand);
    registerLogsCommand(driveCommand);
    registerClearLogsCommand(driveCommand);

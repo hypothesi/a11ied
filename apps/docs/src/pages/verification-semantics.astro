@@ -31,10 +31,17 @@ import { docsLinks } from '../lib/nav';
    <section>
       <h2>Level verification</h2>
       <p>
-         <code>verify level</code> outputs the full criterion matrix for the requested conformance
+         <code>verifyLevel</code> returns the full criterion matrix for the requested conformance
          level. Some rows may be manual-only or not-covered even when automated checks pass,
          so the matrix gives a complete picture of conformance status.
       </p>
+      <pre><code>import {'{'} verifyLevel {'}'} from 'a11ied';
+
+const report = await verifyLevel({'{'}
+  url: 'http://127.0.0.1:6173/basic-page.html',
+  level: 'AA',
+  wcagVersion: '2.2',
+{'}'});</code></pre>
       <p>
          See the <a href="/workflows#verify-a-level">level verification workflow</a> for step-by-step usage.
       </p>

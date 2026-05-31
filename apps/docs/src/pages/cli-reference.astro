@@ -16,10 +16,9 @@ import { docsLinks } from '../lib/nav';
       <div class="route-list">
          <div class="route-row"><code>wcag</code><span>Look up criteria, levels, search results, and coverage strategy.</span></div>
          <div class="route-row"><code>inspect</code><span>Check which criteria apply to a page.</span></div>
-         <div class="route-row"><code>drive</code><span>Control a screen reader session with low-level actions.</span></div>
+         <div class="route-row"><code>sr</code><span>Control a screen reader session with low-level actions.</span></div>
+         <div class="route-row"><code>axe</code><span>Run axe-core scans against a URL.</span></div>
          <div class="route-row"><code>doctor</code><span>Report runtime details, browser policy, target availability, and recording diagnostics.</span></div>
-         <div class="route-row"><code>run</code><span>Execute <code>axe-core</code> scans or named interaction patterns.</span></div>
-         <div class="route-row"><code>verify</code><span>Produce criterion or level verdicts from collected evidence.</span></div>
          <div class="route-row"><code>mcp</code><span>Start the stdio MCP server.</span></div>
          <div class="route-row"><code>help-all</code><span>Print the entire command tree in one shot — useful for agents discovering the CLI.</span></div>
       </div>
@@ -40,16 +39,12 @@ import { docsLinks } from '../lib/nav';
             <p><code>applicable</code>, <code>criterion</code></p>
          </div>
          <div class="stack">
-            <h3>drive</h3>
-            <p><code>start</code>, <code>status</code>, <code>stop</code>, plus <code>focus</code>, <code>next</code>, <code>key</code>, <code>read</code>, <code>logs</code></p>
+            <h3>sr</h3>
+            <p><code>start</code>, <code>status</code>, <code>stop</code>, plus <code>focus</code>, <code>next</code>, <code>read</code>, <code>logs</code>, <code>press</code>, <code>type</code>, <code>do</code></p>
          </div>
          <div class="stack">
-            <h3>run</h3>
-            <p><code>axe</code> and <code>pattern</code></p>
-         </div>
-         <div class="stack">
-            <h3>verify</h3>
-            <p><code>criterion</code> and <code>level</code></p>
+            <h3>axe</h3>
+            <p>Top-level command. Options: <code>--url</code>, <code>--criterion</code>, <code>--level</code>, <code>--rule</code></p>
          </div>
       </div>
    </section>
@@ -62,11 +57,11 @@ import { docsLinks } from '../lib/nav';
          </div>
       <pre><code>a1 wcag show 4.1.3 --json
 a1 inspect criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json
-a1 run pattern status_message_probe --target virtual --allow-virtual --url http://127.0.0.1:6173/status-message.html --json
-a1 verify criterion 4.1.3 --target virtual --allow-virtual --url http://127.0.0.1:6173/status-message.html --json</code></pre>
+a1 axe --criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json</code></pre>
       <p>
-         This sequence runs through all four steps: lookup, applicability check, evidence gathering,
-         and verification.
+         This sequence runs through three steps: lookup, applicability check, and evidence gathering.
+         Pattern execution and verification are available through the programmatic API —
+         see <a href="/api-reference">API reference</a>.
       </p>
       <p>
          Most commands accept <code>--target</code>. If you omit it, a11ied chooses VoiceOver on
@@ -89,7 +84,7 @@ a1 verify criterion 4.1.3 --target virtual --allow-virtual --url http://127.0.0.
          <h2>How browser-backed commands pick Chromium</h2>
       </div>
       <p>
-         Browser-backed commands such as <code>run axe</code> and the focus or dialog probes look
+         Browser-backed commands such as <code>axe</code> and the focus or dialog probes look
          for an existing local Chromium-family browser first.
          a11ied prefers Chrome, Edge, Brave, or Chromium if one is already on the machine.
       </p>

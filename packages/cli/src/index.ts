@@ -8,6 +8,7 @@ export {
    inspectApplicableUrl,
    inspectCriterionTarget,
    inspectCriterionUrl,
+   listInteractionPatterns,
    listSupportedTargets,
    listWcagCriteria,
    listWcagLevels,
@@ -17,17 +18,21 @@ export {
    runAxe,
    runDriverSessionAction,
    runEphemeralDriverAction,
+   runInteractionPattern,
    searchWcagCriteria,
    showWcagCoverage,
    showWcagCriterion,
    startDriverSession,
    stopDriverSession,
+   verifyCriterion,
+   verifyLevel,
    CliEnvironmentError,
    CliUsageError,
 } from '@a11ied/core';
 
 export type {
    ResolveDocumentTargetInput,
+   RunPatternOptions,
    SessionActionOptions,
    TargetType,
 } from '@a11ied/core';

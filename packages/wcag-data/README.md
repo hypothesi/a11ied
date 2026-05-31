@@ -49,7 +49,7 @@ What to review after a sync:
 
 ## notes
 
-- Raw synced inputs are ignored by git through `packages/wcag-data/.gitignore`.
+- Raw synced inputs are committed under `packages/wcag-data/data/raw/` and should only change when re-running the data sync scripts.
 - Generated artifacts are intentionally not ignored, because later normalization output and provenance manifests are meant to be committed.
 - The generated layer currently emits:
    - `criteria.<version>.json`

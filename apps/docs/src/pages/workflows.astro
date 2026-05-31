@@ -20,8 +20,7 @@ import { docsLinks } from '../lib/nav';
          </p>
          <pre><code>a1 wcag show 4.1.3 --json
 a1 inspect criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json
-a1 run pattern status_message_probe --target virtual --allow-virtual --url http://127.0.0.1:6173/status-message.html --json
-a1 verify criterion 4.1.3 --target virtual --allow-virtual --url http://127.0.0.1:6173/status-message.html --json</code></pre>
+a1 axe --criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json</code></pre>
       </div>
       <div class="split-aside">
          <div class="tag">see also</div>
@@ -43,7 +42,13 @@ a1 verify criterion 4.1.3 --target virtual --allow-virtual --url http://127.0.0.
             The <code>verify level</code> command expands the full criterion matrix and runs each
             applicable check.
          </p>
-         <pre><code>a1 verify level AA --target virtual --allow-virtual --url http://127.0.0.1:6173/basic-page.html --json</code></pre>
+         <pre><code>import {'{'} verifyLevel {'}'} from 'a11ied';
+
+const report = await verifyLevel({'{'}
+  url: 'http://127.0.0.1:6173/basic-page.html',
+  level: 'AA',
+  wcagVersion: '2.2',
+{'}'});</code></pre>
       </div>
       <div class="split-aside">
          <div class="tag">important</div>
@@ -64,11 +69,11 @@ a1 verify criterion 4.1.3 --target virtual --allow-virtual --url http://127.0.0.
             Use the driver when you need direct control over the screen reader — navigating elements,
             sending keystrokes, and reading spoken output.
          </p>
-         <pre><code>a1 drive start --json
-a1 drive focus --session &lt;sessionId&gt; --app "Google Chrome" --json
-a1 drive next --session &lt;sessionId&gt; --json
-a1 drive read --session &lt;sessionId&gt; --json
-a1 drive stop --session &lt;sessionId&gt; --json</code></pre>
+         <pre><code>a1 sr start --json
+a1 sr focus --session &lt;sessionId&gt; --app "Google Chrome" --json
+a1 sr next --session &lt;sessionId&gt; --json
+a1 sr read --session &lt;sessionId&gt; --json
+a1 sr stop --session &lt;sessionId&gt; --json</code></pre>
       </div>
       <div class="split-aside">
          <div class="tag">note</div>
