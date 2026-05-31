@@ -144,7 +144,7 @@ describe('driver session tools', () => {
 
             expect(invalid.isError).toBe(true);
             expect(getInvalidContentText(invalid.content)).toContain(
-               'Input validation error',
+               'sessionId is required',
             );
 
             const stop = await harness.client.callTool({

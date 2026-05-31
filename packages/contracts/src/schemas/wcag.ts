@@ -66,6 +66,7 @@ export const axeRunResultSchema = z.object({
    passes: z.array(axeRuleResultSchema),
    incomplete: z.array(axeRuleResultSchema),
    inapplicable: z.array(axeRuleResultSchema),
+   warnings: z.array(z.string()).optional(),
 });
 export type AxeRunResult = z.infer<typeof axeRunResultSchema>;
 

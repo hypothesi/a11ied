@@ -101,27 +101,19 @@ function resolveMacMatchMode(target: DriverFocusTarget): 'contains' | 'exact' {
    return 'contains';
 }
 
-function resolveMacProcessName(appName: string, target: DriverFocusTarget): string {
-   if (appName) {
-      return appName;
-   }
-   if (target.processName) {
-      return escapeAppleScriptString(target.processName);
-   }
-   return '';
-}
-
 function resolveMacFocusParams(target: DriverFocusTarget): {
    appName: string;
    bundleId: string;
    windowTitle: string;
    matchMode: 'contains' | 'exact';
+   pid: number | undefined;
 } {
    return {
       appName: resolveMacAppName(target),
       bundleId: resolveMacBundleId(target),
       windowTitle: resolveMacWindowTitle(target),
       matchMode: resolveMacMatchMode(target),
+      pid: target.pid,
    };
 }
 
@@ -145,17 +137,44 @@ function resolveMacFocusOverride(args: {
    return undefined;
 }
 
+function buildMacPidFocusScript(pid: number): string[] {
+   return [
+      'try',
+      `tell application "System Events" to set frontmost of (first process whose unix id is ${pid}) to true`,
+      'return "focused"',
+      'on error',
+      'return "not-found"',
+      'end try',
+   ];
+}
+
+function buildMacProcessNameFocusScript(processName: string): string[] {
+   return [
+      'try',
+      `tell application "System Events" to set frontmost of (first process whose name is "${processName}") to true`,
+      'return "focused"',
+      'on error',
+      'return "not-found"',
+      'end try',
+   ];
+}
+
 function buildMacFocusScriptFromParams(
    params: ReturnType<typeof resolveMacFocusParams>,
    target: DriverFocusTarget,
 ): string[] {
+   if (params.pid !== undefined) {
+      return buildMacPidFocusScript(params.pid);
+   }
    const override = resolveMacFocusOverride(params);
    if (override) {
       return override;
    }
-   const app = resolveMacProcessName(params.appName, target);
-   if (app) {
-      return [`tell application "${app}" to activate`, 'return "focused"'];
+   if (params.appName) {
+      return [`tell application "${params.appName}" to activate`, 'return "focused"'];
+   }
+   if (target.processName) {
+      return buildMacProcessNameFocusScript(escapeAppleScriptString(target.processName));
    }
    return ['return "not-found"'];
 }
@@ -166,7 +185,7 @@ function buildMacFocusScript(target: DriverFocusTarget): string[] {
 
 function buildMacFocusArgs(target: DriverFocusTarget): string[] {
    const script = buildMacFocusScript(target);
-   return script.flatMap((line) => ['-e', line]);
+   return ['-e', script.join('\n')];
 }
 
 export async function focusMacTarget(

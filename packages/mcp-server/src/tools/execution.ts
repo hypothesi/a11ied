@@ -16,12 +16,15 @@ import {
    targetInputSchema,
 } from '../lib/shared.js';
 
+const axeCategorySchema = z.enum(['violations', 'passes', 'incomplete', 'inapplicable']);
+
 const axeSelectionInputSchema = targetInputSchema
    .extend({
       version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
       criterion: criterionLookupKeySchema.optional(),
       level: wcagLevelSchema.optional(),
       ruleIds: z.array(z.string()).min(1).optional(),
+      include: z.array(axeCategorySchema).optional(),
    })
    .superRefine((value, ctx) => {
       const selections = [
@@ -39,39 +42,83 @@ const axeSelectionInputSchema = targetInputSchema
       }
    });
 
+type AxeCategory = z.infer<typeof axeCategorySchema>;
+
+interface AxeResolveArgs {
+   resolvedUrl: string;
+   version: z.infer<typeof axeSelectionInputSchema>['version'];
+   criterion: z.infer<typeof axeSelectionInputSchema>['criterion'];
+   level: z.infer<typeof axeSelectionInputSchema>['level'];
+   ruleIds: z.infer<typeof axeSelectionInputSchema>['ruleIds'];
+}
+
+async function resolveAxeResult(
+   args: AxeResolveArgs,
+): Promise<z.infer<typeof axeRunResultSchema>> {
+   if (args.criterion) {
+      return axeRunResultSchema.parse(
+         await runAxe(args.resolvedUrl, {
+            url: args.resolvedUrl,
+            wcagVersion: args.version,
+            criterion: args.criterion,
+         }),
+      );
+   }
+   if (args.level) {
+      return axeRunResultSchema.parse(
+         await runAxe(args.resolvedUrl, {
+            url: args.resolvedUrl,
+            wcagVersion: args.version,
+            level: args.level,
+         }),
+      );
+   }
+   return axeRunResultSchema.parse(
+      await runAxe(args.resolvedUrl, {
+         url: args.resolvedUrl,
+         wcagVersion: args.version,
+         ruleIds: args.ruleIds ?? [],
+      }),
+   );
+}
+
+function applyIncludeFilter(
+   result: z.infer<typeof axeRunResultSchema>,
+   include: AxeCategory[],
+): z.infer<typeof axeRunResultSchema> {
+   const allCategories: AxeCategory[] = [
+      'violations',
+      'passes',
+      'incomplete',
+      'inapplicable',
+   ];
+   const filtered: Record<string, unknown> = { ...result };
+   for (const category of allCategories) {
+      if (!include.includes(category)) {
+         filtered[category] = [];
+      }
+   }
+   return filtered as z.infer<typeof axeRunResultSchema>;
+}
+
 async function runAxeForInput(
    input: z.infer<typeof axeSelectionInputSchema>,
 ): Promise<z.infer<typeof axeRunResultSchema>> {
-   const { version, criterion, level, ruleIds, ...targetInput } = input;
+   const { version, criterion, level, ruleIds, include, ...targetInput } = input;
    const resolved = await resolveExecutionTarget(targetInput);
+   const result = await resolveAxeResult({
+      resolvedUrl: resolved.resolvedUrl,
+      version,
+      criterion,
+      level,
+      ruleIds,
+   });
 
-   if (criterion) {
-      return axeRunResultSchema.parse(
-         await runAxe(resolved.resolvedUrl, {
-            url: resolved.resolvedUrl,
-            wcagVersion: version,
-            criterion,
-         }),
-      );
+   if (include && include.length > 0) {
+      return applyIncludeFilter(result, include);
    }
 
-   if (level) {
-      return axeRunResultSchema.parse(
-         await runAxe(resolved.resolvedUrl, {
-            url: resolved.resolvedUrl,
-            wcagVersion: version,
-            level,
-         }),
-      );
-   }
-
-   return axeRunResultSchema.parse(
-      await runAxe(resolved.resolvedUrl, {
-         url: resolved.resolvedUrl,
-         wcagVersion: version,
-         ruleIds: ruleIds ?? [],
-      }),
-   );
+   return result;
 }
 
 function registerRunAxeTool(server: McpServer): void {
@@ -79,7 +126,11 @@ function registerRunAxeTool(server: McpServer): void {
       'run_axe',
       {
          title: 'Run axe',
-         description: 'Run axe-core against a URL target.',
+         description:
+            'Run axe-core against a URL target. ' +
+            'Use include to limit which result categories are returned (violations, passes, incomplete, inapplicable). ' +
+            'Omitting include returns all categories. ' +
+            'A warnings field in the response surfaces issues like low page content that may indicate an unmounted SPA shell.',
          inputSchema: axeSelectionInputSchema,
          outputSchema: axeRunResultSchema,
          annotations: { ...readOnlyAnnotations, openWorldHint: true },

@@ -15,6 +15,9 @@ import {
    resolveRuleSelection,
 } from './selection.js';
 
+const LOW_CONTENT_NODE_THRESHOLD = 10;
+const LOW_CONTENT_TEXT_THRESHOLD = 50;
+
 type AxeRunOptions =
    | {
         url: string;
@@ -66,6 +69,11 @@ interface RawAxeResults {
    passes?: RawAxeRule[];
    incomplete?: RawAxeRule[];
    inapplicable?: RawAxeRule[];
+}
+
+interface AxeScanResult {
+   raw: RawAxeResults;
+   warnings: string[];
 }
 
 const axeScriptSource = axe.source;
@@ -143,6 +151,7 @@ function buildParsedAxeResult(args: {
    selection: AxeRunResult['selection'];
    ruleIds: string[];
    raw: RawAxeResults;
+   warnings?: string[];
 }): AxeRunResult {
    return axeRunResultSchema.parse({
       url: args.url,
@@ -153,6 +162,7 @@ function buildParsedAxeResult(args: {
       passes: (args.raw.passes ?? []).map((rule) => normalizeRule(rule)),
       incomplete: (args.raw.incomplete ?? []).map((rule) => normalizeRule(rule)),
       inapplicable: (args.raw.inapplicable ?? []).map((rule) => normalizeRule(rule)),
+      warnings: args.warnings && args.warnings.length > 0 ? args.warnings : undefined,
    });
 }
 
@@ -210,12 +220,12 @@ function resolveAxeSelection(
    return resolveAllSelection(wcagVersion);
 }
 
-async function executeAxeScan(parsedUrl: URL, ruleIds: string[]): Promise<RawAxeResults> {
+async function executeAxeScan(parsedUrl: URL, ruleIds: string[]): Promise<AxeScanResult> {
    return withLoadedPage(parsedUrl.toString(), async (page) => {
       await page.addScriptTag({ content: axeScriptSource });
 
       return await page.evaluate(
-         async ({ values }) => {
+         async ({ values, nodeThreshold, textThreshold }) => {
             const axeRef = (
                globalThis as typeof globalThis & {
                   axe: {
@@ -223,11 +233,29 @@ async function executeAxeScan(parsedUrl: URL, ruleIds: string[]): Promise<RawAxe
                   };
                }
             ).axe;
-            return await axeRef.run(document, {
+
+            const warnings: string[] = [];
+            const visibleNodes = document.body.querySelectorAll(
+               ':not(script):not(style):not(link):not(meta)',
+            ).length;
+            const textLength = (document.body.textContent ?? '').trim().length;
+            if (visibleNodes < nodeThreshold && textLength < textThreshold) {
+               warnings.push(
+                  `Low content detected (${visibleNodes} visible elements, ${textLength} characters). ` +
+                     'This page may be an unmounted SPA shell. axe-core results may be incomplete or misleading.',
+               );
+            }
+
+            const raw = await axeRef.run(document, {
                runOnly: { type: 'rule', values },
             });
+            return { raw, warnings };
          },
-         { values: ruleIds },
+         {
+            values: ruleIds,
+            nodeThreshold: LOW_CONTENT_NODE_THRESHOLD,
+            textThreshold: LOW_CONTENT_TEXT_THRESHOLD,
+         },
       );
    });
 }
@@ -265,13 +293,14 @@ export async function runAxe(url: string, options: AxeRunOptions): Promise<AxeRu
    if (cached) {
       return cached;
    }
-   const raw = await executeAxeScan(resolved.parsedUrl, resolved.ruleIds);
+   const { raw, warnings } = await executeAxeScan(resolved.parsedUrl, resolved.ruleIds);
    const parsed = buildParsedAxeResult({
       url: resolved.parsedUrl.toString(),
       wcagVersion: resolved.wcagVersion,
       selection: resolved.selection,
       ruleIds: resolved.ruleIds,
       raw,
+      warnings,
    });
    updateAxeCache({
       cacheKey: resolved.cacheKey,
