@@ -1,5 +1,6 @@
 export { createDriverAdapter } from './adapters.js';
 export { driverCapabilities, type DriverAdapter } from './adapter-shared.js';
+export { queryFocusedAxProperties } from './ax-properties-mac.js';
 export {
    DriverCommandError,
    driverCommandSets,

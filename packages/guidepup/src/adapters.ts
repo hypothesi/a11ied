@@ -1,14 +1,16 @@
 import { nvda, voiceOver } from '@guidepup/guidepup';
-import type {
-   DriverCheckpoint,
-   DriverActionName,
-   DriverFocusResult,
-   DriverFocusTarget,
-   DriverReadiness,
-   DriverStateSnapshot,
-   Platform,
+import {
+   driverStateSnapshotSchema,
+   type DriverCheckpoint,
+   type DriverActionName,
+   type DriverFocusResult,
+   type DriverFocusTarget,
+   type DriverReadiness,
+   type DriverStateSnapshot,
+   type Platform,
 } from '@a11ied/contracts';
 
+import { queryFocusedAxProperties } from './ax-properties-mac.js';
 import { focusMacTarget, focusWindowsTarget } from './focus.js';
 import {
    checkDetectedReadiness,
@@ -236,6 +238,13 @@ class RealScreenReaderAdapter implements DriverAdapter {
    }
 
    async readState(checkpoints: DriverCheckpoint[]): Promise<DriverStateSnapshot> {
+      if (this.target === 'voiceover') {
+         const [snapshot, axFocusedElement] = await Promise.all([
+            buildStateSnapshot(this.reader, checkpoints),
+            queryFocusedAxProperties().catch(() => undefined as undefined),
+         ]);
+         return driverStateSnapshotSchema.parse({ ...snapshot, axFocusedElement });
+      }
       return buildStateSnapshot(this.reader, checkpoints);
    }
 
@@ -244,7 +253,7 @@ class RealScreenReaderAdapter implements DriverAdapter {
          this.reader.clearSpokenPhraseLog(),
          this.reader.clearItemTextLog(),
       ]);
-      return buildStateSnapshot(this.reader, checkpoints);
+      return this.readState(checkpoints);
    }
 
    async waitForSpeechStabilization(): Promise<void> {

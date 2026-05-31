@@ -46,55 +46,61 @@ const driverSessionInputSchema = z.object({
 
 const driverActionInputSchema = z.discriminatedUnion('action', [
    z.object({
-      sessionId: z.string().min(1),
+      sessionId: z.string().min(1).optional(),
       action: z.literal('next'),
    }),
    z.object({
-      sessionId: z.string().min(1),
+      sessionId: z.string().min(1).optional(),
       action: z.literal('previous'),
    }),
    z.object({
-      sessionId: z.string().min(1),
+      sessionId: z.string().min(1).optional(),
       action: z.literal('interact'),
    }),
    z.object({
-      sessionId: z.string().min(1),
+      sessionId: z.string().min(1).optional(),
       action: z.literal('stop-interacting'),
    }),
    z.object({
-      sessionId: z.string().min(1),
+      sessionId: z.string().min(1).optional(),
       action: z.literal('click-current-item'),
    }),
    z.object({
-      sessionId: z.string().min(1),
+      sessionId: z.string().min(1).optional(),
       action: z.literal('read'),
    }),
    z.object({
-      sessionId: z.string().min(1),
+      sessionId: z.string().min(1).optional(),
       action: z.literal('logs'),
    }),
    z.object({
-      sessionId: z.string().min(1),
+      sessionId: z.string().min(1).optional(),
       action: z.literal('clear-logs'),
    }),
    z.object({
-      sessionId: z.string().min(1),
+      sessionId: z.string().min(1).optional(),
       action: z.literal('key'),
       key: z.string().min(1),
    }),
    z.object({
-      sessionId: z.string().min(1),
+      sessionId: z.string().min(1).optional(),
       action: z.literal('type'),
       text: z.string(),
    }),
    z.object({
-      sessionId: z.string().min(1),
+      sessionId: z.string().min(1).optional(),
       action: z.literal('checkpoint'),
       label: z.string().min(1),
    }),
+   z.object({
+      sessionId: z.string().min(1).optional(),
+      action: z.literal('perform'),
+      command: z.string().min(1),
+      commandSet: z.string().optional(),
+   }),
    driverFocusTargetFieldsSchema
       .extend({
-         sessionId: z.string().min(1),
+         sessionId: z.string().min(1).optional(),
          action: z.literal('focus'),
       })
       .superRefine(driverFocusTargetRefinement),
@@ -190,32 +196,45 @@ const driverSessionHandlers: Record<
 };
 
 async function runDriverAction(input: DriverActionInput): Promise<unknown> {
+   if (!input.sessionId) {
+      throw new Error(
+         'sessionId is required. Copy it from the driver_session start response.',
+      );
+   }
+   const sessionId = input.sessionId;
+
    if (input.action === 'key') {
-      return runDriverSessionAction(input.sessionId, 'key', {
+      return runDriverSessionAction(sessionId, 'key', {
          payload: { key: input.key },
       });
    }
 
    if (input.action === 'type') {
-      return runDriverSessionAction(input.sessionId, 'type', {
+      return runDriverSessionAction(sessionId, 'type', {
          payload: { text: input.text },
       });
    }
 
    if (input.action === 'checkpoint') {
-      return runDriverSessionAction(input.sessionId, 'checkpoint', {
+      return runDriverSessionAction(sessionId, 'checkpoint', {
          payload: { label: input.label },
       });
    }
 
+   if (input.action === 'perform') {
+      return runDriverSessionAction(sessionId, 'perform', {
+         payload: { command: input.command, commandSet: input.commandSet },
+      });
+   }
+
    if (input.action === 'focus') {
-      const { sessionId, action: _action, ...focusTarget } = input;
+      const { sessionId: _sid, action: _action, ...focusTarget } = input;
       return runDriverSessionAction(sessionId, 'focus', {
          payload: focusTarget,
       });
    }
 
-   return runDriverSessionAction(input.sessionId, input.action);
+   return runDriverSessionAction(sessionId, input.action);
 }
 
 /* ------------------------------------------------------------------ */
@@ -250,11 +269,20 @@ export function registerDriverTools(server: McpServer): void {
          title: 'Driver action',
          description:
             'Run one action against an accessibility-driver session. ' +
+            'sessionId is required — copy it from the driver_session start response. ' +
             'For real screen reader sessions (VoiceOver/NVDA), actions drive the actual assistive technology and return real speech output. ' +
             'For virtual sessions, actions are simulated in memory. ' +
             'Check the session targetType to know which mode is active. ' +
             'Use action "focus" with appName, bundleId, processName, pid, or windowTitle to bring the target window to the front. ' +
-            'The response includes actionDurationMs showing how long the operation took.',
+            'Use action "perform" with a command name (and optional commandSet) to run a named screen-reader command. ' +
+            'VoiceOver rotor and structural navigation commands: ' +
+            '"find next heading" | "find previous heading" | ' +
+            '"find next landmark" | "find previous landmark" | ' +
+            '"find next field" (form controls) | "find next button" | "find next link" | ' +
+            '"rotor" (open rotor) | "rotate left" | "rotate right" | ' +
+            '"next rotor item" | "previous rotor item". ' +
+            'For VoiceOver sessions the response state includes axFocusedElement with the ' +
+            'AX role, subrole, title, description, value, and enabled state of the system-focused element.',
          inputSchema: driverActionInputSchema,
          outputSchema: driverActionResultSchema,
          annotations: activeAnnotations,

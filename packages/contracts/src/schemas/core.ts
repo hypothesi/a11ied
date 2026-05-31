@@ -172,6 +172,22 @@ export const driverCheckpointSchema = z.object({
 });
 export type DriverCheckpoint = z.infer<typeof driverCheckpointSchema>;
 
+/**
+ * AX properties of the element that held system keyboard focus at the time of a driver
+ * action. Populated for VoiceOver (macOS) sessions only. Note that the VoiceOver cursor
+ * and system keyboard focus can diverge during virtual-cursor navigation; treat this as a
+ * best-effort supplement to lastSpokenPhrase.
+ */
+export const axFocusedElementSchema = z.object({
+   role: z.string().optional(),
+   subrole: z.string().optional(),
+   title: z.string().optional(),
+   description: z.string().optional(),
+   value: z.string().optional(),
+   enabled: z.boolean().optional(),
+});
+export type AxFocusedElement = z.infer<typeof axFocusedElementSchema>;
+
 export const driverStateSnapshotSchema = z.object({
    lastSpokenPhrase: z.string().nullish(),
    currentItemText: z.string().nullish(),
@@ -179,6 +195,7 @@ export const driverStateSnapshotSchema = z.object({
    itemTextLog: z.array(z.string()),
    logCursor: z.number().int().nonnegative(),
    checkpoints: z.array(driverCheckpointSchema),
+   axFocusedElement: axFocusedElementSchema.optional(),
 });
 export type DriverStateSnapshot = z.infer<typeof driverStateSnapshotSchema>;
 
