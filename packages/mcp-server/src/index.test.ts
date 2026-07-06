@@ -168,7 +168,6 @@ describe('resource exposure', () => {
          expect(uris).toContain('a11ied://wcag/criteria/2.2');
          expect(uris).toContain('a11ied://wcag/levels/2.2');
          expect(uris).toContain('a11ied://wcag/coverage/2.2');
-         expect(uris).toContain('a11ied://wcag/verification-strategies/2.2');
 
          const readCoverage = await harness.client.readResource({
             uri: 'a11ied://wcag/coverage/2.2',
@@ -186,8 +185,6 @@ describe('tool metadata', () => {
 
          expect(driverTool?.description).toContain('real');
          expect(driverTool?.description).toContain('targetType');
-         expect(result.tools.some((entry) => entry.name === 'verify')).toBe(false);
-         expect(result.tools.some((entry) => entry.name === 'run_pattern')).toBe(false);
       });
    });
 });

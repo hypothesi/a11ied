@@ -13,21 +13,21 @@ Feature: Docs, skill guidance, CI, and release checks
       | criterion lookup |
       | applicability |
       | driver usage |
-      | pattern execution |
-      | verification semantics |
+      | MCP usage |
+      | API reference |
 
   Scenario: The a11ied skill includes the required guardrails
     When I read "skills/a11ied/SKILL.md"
     Then it tells the agent to resolve WCAG criteria before testing
     And it distinguishes automated, hybrid, and manual evidence
-    And it warns that raw driver transcripts are not the same as compliance verdicts
+    And it warns that raw driver transcripts are not the same as WCAG claims
 
   Scenario: Pull-request CI includes virtual-target smoke coverage
     When I inspect the CI workflow configuration
     Then the workflow includes data validation
     And the workflow includes contract tests
     And the workflow includes CLI smoke tests
-    And the workflow includes virtual-target verification smoke tests
+    And the workflow includes package checks
     And the workflow includes a docs build
 
   @manual-release

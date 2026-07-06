@@ -17,8 +17,6 @@ const requiredRuntimePages = [
    'criterion-lookup.astro',
    'applicability.astro',
    'driver-usage.astro',
-   'pattern-execution.astro',
-   'verification-semantics.astro',
    'cli-reference.astro',
    'mcp-usage.astro',
    'workflows.astro',
@@ -31,8 +29,6 @@ const requiredHomeRoutes = [
    '/criterion-lookup',
    '/applicability',
    '/driver-usage',
-   '/pattern-execution',
-   '/verification-semantics',
    '/cli-reference',
    '/mcp-usage',
    '/api-reference',
@@ -71,9 +67,7 @@ function expectSkillGuardrails(): void {
    expect(skill).toContain('automated');
    expect(skill).toContain('hybrid');
    expect(skill).toContain('manual');
-   expect(skill).toContain(
-      'Do not confuse raw driver transcripts with criterion verdicts',
-   );
+   expect(skill).toContain('Do not confuse raw driver transcripts with WCAG claims');
 }
 
 function expectWorkflowSteps(): void {

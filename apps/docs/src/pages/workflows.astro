@@ -31,30 +31,27 @@ a1 axe --criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json<
       </div>
    </section>
 
-   <section class="split panel" id="verify-a-level">
+   <section class="split panel" id="gather-evidence">
       <div class="stack">
          <div class="panel-head">
             <p class="panel-kicker">Workflow 2</p>
-            <h2>Verify a target level</h2>
+            <h2>Gather evidence for a page</h2>
          </div>
          <p>
-            Use this when you need to verify A, AA, or AAA conformance for a target.
-            The <code>verify level</code> command expands the full criterion matrix and runs each
-            applicable check.
+            Use this when you need repeatable evidence for a page before a human review.
+            Start with axe for static failures, then use <code>sr</code> when the question depends
+            on what VoiceOver, NVDA, or the virtual reader says.
          </p>
-         <pre><code>import {'{'} verifyLevel {'}'} from 'a11ied';
-
-const report = await verifyLevel({'{'}
-  url: 'http://127.0.0.1:6173/basic-page.html',
-  level: 'AA',
-  wcagVersion: '2.2',
-{'}'});</code></pre>
+         <pre><code>a1 axe --url http://127.0.0.1:6173/basic-page.html --level AA --json
+a1 sr start --target virtual --allow-virtual --url http://127.0.0.1:6173/basic-page.html --json
+a1 sr do next --session &lt;sessionId&gt; --json
+a1 sr read --session &lt;sessionId&gt; --json
+a1 sr stop --session &lt;sessionId&gt; --json</code></pre>
       </div>
       <div class="split-aside">
          <div class="tag">important</div>
          <p class="aside-note">
-            Read <a href="/verification-semantics">verification semantics</a> to understand how
-            mixed results, manual-only rows, and uncovered criteria appear in the output.
+            The output is evidence for review. It is not a complete WCAG conformance verdict.
          </p>
       </div>
    </section>
@@ -78,8 +75,8 @@ a1 sr stop --session &lt;sessionId&gt; --json</code></pre>
       <div class="split-aside">
          <div class="tag">note</div>
          <p class="aside-note">
-            Driver transcripts capture what the screen reader said. To make a conformance claim,
-            follow up with the <a href="/verification-semantics">verification</a> layer.
+            Driver transcripts capture what the screen reader said. Keep the transcript with your
+            test notes so the human review has something concrete to inspect.
          </p>
          <p class="aside-note">
             If you want a simulated run, add <code>--target virtual</code>,

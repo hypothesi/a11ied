@@ -39,7 +39,7 @@ Feature: CLI WCAG lookup commands
     And the result includes "coverageState"
     And the result includes "axeRuleIds"
     And the result includes "actRuleIds"
-    And the result includes the preferred verification strategy
+    And the result includes evidence metadata
 
   Scenario: Unsupported version returns a validation failure
     When I run `a11ied wcag criteria --level AA --version 2.0 --json`

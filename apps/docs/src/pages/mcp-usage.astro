@@ -5,7 +5,7 @@ import { docsLinks } from '../lib/nav';
 
 <DocShell
    title="MCP usage"
-   summary="The MCP server exposes a11ied's full runtime to AI agents and editors through tool calls and read-only resources over stdio."
+   summary="The MCP server exposes a11ied's WCAG lookup, inspection, driver, and axe scan tools to AI agents and editors over stdio."
    links={docsLinks}
 >
    <section class="split panel">
@@ -16,8 +16,7 @@ import { docsLinks } from '../lib/nav';
          </div>
       <p>
          The server provides read-only standards resources plus tool calls for criterion lookup,
-         applicability inspection, driver actions, pattern execution, and verification.
-         It uses the same runtime as the CLI.
+         applicability inspection, driver actions, and axe scans. It uses the same runtime as the CLI.
       </p>
       </div>
       <div class="split-aside">
@@ -35,10 +34,10 @@ import { docsLinks } from '../lib/nav';
          <h2>Available tools</h2>
       </div>
       <div class="route-list">
-         <div class="route-row"><strong>Knowledge</strong><span><code>doctor</code>, <code>criterion_lookup</code>, <code>level_lookup</code>, <code>search</code>, <code>coverage_lookup</code></span></div>
-         <div class="route-row"><strong>Inspect</strong><span><code>inspect_applicable</code>, <code>inspect_criterion</code></span></div>
-         <div class="route-row"><strong>Driver</strong><span><code>driver_start_session</code>, <code>driver_get_session</code>, <code>driver_stop_session</code>, <code>driver_action</code></span></div>
-         <div class="route-row"><strong>Execution and verification</strong><span><code>run_axe</code>, <code>run_pattern</code>, <code>verify_criterion</code>, <code>verify_level</code></span></div>
+         <div class="route-row"><strong>Knowledge</strong><span><code>doctor</code>, <code>wcag_lookup</code>, <code>wcag_levels</code>, <code>wcag_search</code></span></div>
+         <div class="route-row"><strong>Inspect</strong><span><code>inspect</code></span></div>
+         <div class="route-row"><strong>Driver</strong><span><code>driver_session</code>, <code>driver_action</code></span></div>
+         <div class="route-row"><strong>Execution</strong><span><code>run_axe</code></span></div>
       </div>
       <p>
          Driver actions are bundled into <code>driver_action</code>. Provide <code>action</code> and
@@ -58,7 +57,6 @@ import { docsLinks } from '../lib/nav';
          <li><code>a11ied://wcag/criteria/&lt;version&gt;</code></li>
          <li><code>a11ied://wcag/levels/&lt;version&gt;</code></li>
          <li><code>a11ied://wcag/coverage/&lt;version&gt;</code></li>
-         <li><code>a11ied://wcag/verification-strategies/&lt;version&gt;</code></li>
       </ul>
    </section>
 
@@ -69,7 +67,7 @@ import { docsLinks } from '../lib/nav';
       </div>
       <p>
          Knowledge and inspect tools are read-only — they query local data without side effects.
-         Driver, execution, and verification tools are active — they can launch browsers and
+         Driver and execution tools are active — they can launch browsers and
          drive assistive technology. The server separates these so agents can choose lightweight
          queries before committing to heavier operations.
       </p>
@@ -85,8 +83,8 @@ import { docsLinks } from '../lib/nav';
          NVDA. Treat these as execution operations, not data retrieval.
       </p>
       <p>
-         If you omit <code>target</code> on a driver or verification tool, a11ied chooses VoiceOver
-         on macOS, NVDA on Windows, or the virtual driver elsewhere. Only pick the virtual target
+         If you omit <code>target</code> on a driver tool, a11ied chooses VoiceOver on macOS,
+         NVDA on Windows, or the virtual driver elsewhere. Only pick the virtual target
          when you explicitly want a simulated run, and set <code>allowVirtual=true</code>.
       </p>
    </section>

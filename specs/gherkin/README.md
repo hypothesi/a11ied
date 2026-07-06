@@ -9,10 +9,8 @@ The feature files are grouped by product layer:
 - `03-wcag-applicability.feature`
 - `04-cli-wcag.feature`
 - `05-cli-inspect.feature`
-- `06-cli-drive.feature`
-- `07-cli-run-axe.feature`
-- `08-cli-run-patterns.feature`
-- `09-cli-verify.feature`
+- `06-cli-sr.feature`
+- `07-cli-axe.feature`
 - `11-mcp.feature`
 - `12-docs-and-release.feature`
 
@@ -52,7 +50,7 @@ CLI exit codes:
 - `0`: success
 - `2`: usage or validation error
 - `3`: environment or dependency error
-- `4`: assertion or verification failure
+- `4`: assertion failure
 - `5`: internal runtime error
 
 ## Suggested tags
@@ -60,10 +58,8 @@ CLI exit codes:
 - `@foundation`
 - `@engine`
 - `@cli`
-- `@drive`
+- `@sr`
 - `@axe`
-- `@pattern`
-- `@verify`
 - `@mcp`
 - `@docs`
 - `@release`

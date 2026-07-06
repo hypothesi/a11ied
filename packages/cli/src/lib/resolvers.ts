@@ -1,4 +1,4 @@
-import { platformSchema, type Platform, type VerificationReport } from '#contracts';
+import { platformSchema, type Platform } from '#contracts';
 import { CliUsageError, resolveDefaultTarget, resolveDocumentTarget } from '#core';
 import { resolveImplicitDriveSession, type DriveSessionSource } from './drive-session.js';
 import { getPlatformScreenReaders } from '../commands/drive-key-help.js';
@@ -168,12 +168,16 @@ export interface ResolvedCliTarget {
    html: string;
    metadata: Record<string, string>;
    userHints: string[];
-   reportTarget: VerificationReport['target'];
+   reportTarget: {
+      kind: 'url';
+      value: string;
+      resolvedUrl: string;
+   };
 }
 
 function buildReportTarget(
    resolved: Awaited<ReturnType<typeof resolveDocumentTarget>>,
-): VerificationReport['target'] {
+): ResolvedCliTarget['reportTarget'] {
    return {
       kind: 'url',
       value: resolved.target.value,

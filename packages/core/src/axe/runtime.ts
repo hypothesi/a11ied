@@ -18,7 +18,7 @@ import {
 const LOW_CONTENT_NODE_THRESHOLD = 10;
 const LOW_CONTENT_TEXT_THRESHOLD = 50;
 
-type AxeRunOptions =
+export type AxeRunOptions =
    | {
         url: string;
         wcagVersion: string;

@@ -7,7 +7,6 @@ import {
    normalizedCriteriaArtifactSchema,
    quickrefTagLookupResultSchema,
    strategyArtifactSchema,
-   verificationStrategyLookupResultSchema,
    wcagLevelSchema,
    wcagVersionSchema,
    type CoverageLookupResult,
@@ -17,7 +16,6 @@ import {
    type NormalizedCriteriaArtifact,
    type NormalizedCriterion,
    type QuickrefTagLookupResult,
-   type VerificationStrategyLookupResult,
    type WcagLevel,
    type WcagVersion,
 } from '@a11ied/contracts';
@@ -252,26 +250,6 @@ export function getQuickrefTags(
       lookupKey,
       criterionId: criterion.id,
       tags: criterion.tags,
-   });
-}
-
-/** Returns the generated verification strategy for one criterion. */
-export function getVerificationStrategy(
-   lookupKey: CriterionLookupKey,
-   options?: { version?: string },
-): VerificationStrategyLookupResult {
-   const version = parseVersion(options?.version);
-   const criterion = resolveCriterion(version, lookupKey);
-   const strategy = getArtifacts(version).strategies[criterion.id];
-
-   if (!strategy) {
-      throw new WcagEngineNotFoundError(lookupKey);
-   }
-
-   return verificationStrategyLookupResultSchema.parse({
-      lookupKey,
-      criterionId: criterion.id,
-      strategy,
    });
 }
 

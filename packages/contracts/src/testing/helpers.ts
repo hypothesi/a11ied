@@ -13,7 +13,6 @@ import {
    normalizedCriteriaArtifactSchema,
    quickrefTagLookupResultSchema,
    strategyArtifactSchema,
-   verificationStrategyLookupResultSchema,
 } from '../index.js';
 
 const generatedRoot = resolve(import.meta.dirname, '../../../wcag-data/data/generated');
@@ -177,13 +176,8 @@ function assertCoverageLookups(artifacts: EngineTestArtifacts): void {
       coverage,
       strategy,
    });
-   const strategyLookup = verificationStrategyLookupResultSchema.parse({
-      lookupKey: 'status-messages',
-      criterionId: '4.1.3',
-      strategy,
-   });
    expect(coverageLookup.coverage.coverageState).toBe('hybrid');
-   expect(strategyLookup.strategy.procedureIds).toContain('status_message_probe');
+   expect(coverageLookup.strategy.procedureIds).toContain('status_message_probe');
 }
 
 export function assertLookupPayloads(artifacts: EngineTestArtifacts): void {

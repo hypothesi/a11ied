@@ -1,6 +1,6 @@
 @foundation @engine
 Feature: Applicability heuristics for criteria
-  As the verification planner
+  As the standards planner
   I want applicability to be derived from explicit signals
   So that the tool does not dump the full standard on every target
 

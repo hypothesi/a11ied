@@ -1,6 +1,6 @@
 # @a11ied/core
 
-`@a11ied/core` is the orchestration layer for the a11ied toolkit. It provides WCAG lookup, browser target resolution, screen reader session management, axe-core scanning, interaction pattern execution, and criterion and level verification.
+`@a11ied/core` is the orchestration layer for the a11ied toolkit. It provides WCAG lookup, browser target resolution, screen reader session management, axe-core scanning, and doctor reports.
 
 ## install
 
@@ -22,10 +22,8 @@ import {
    startDriverSession,
    runDriverSessionAction,
    stopDriverSession,
-   runInteractionPattern,
-   listInteractionPatterns,
-   verifyCriterion,
-   verifyLevel,
+   createDoctorReport,
+   renderDoctorText,
 } from '@a11ied/core';
 ```
 

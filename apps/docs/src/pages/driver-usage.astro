@@ -11,9 +11,8 @@ import { docsLinks } from '../lib/nav';
    <section>
       <h2>When to use the driver</h2>
       <p>
-         Use <code>drive</code> when you need low-level control: navigating items, sending keyboard
-         chords, entering interaction mode, reading spoken output, and capturing logs. For repeatable
-         checks, consider using a <a href="/pattern-execution">named pattern</a> instead.
+         Use <code>sr</code> when you need low-level control: navigating items, sending keyboard
+         chords, entering interaction mode, reading spoken output, and capturing logs.
       </p>
       <p>
          See the <a href="/workflows#drive-a-session">driver workflow</a> for a guided walkthrough.
@@ -22,11 +21,11 @@ import { docsLinks } from '../lib/nav';
 
    <section>
       <h2>Basic session</h2>
-      <pre><code>a1 drive start --json
-a1 drive focus --session drv_example --app "Google Chrome" --json
-a1 drive next --session drv_example --json
-a1 drive read --session drv_example --json
-a1 drive stop --session drv_example --json</code></pre>
+      <pre><code>a1 sr start --json
+a1 sr focus --session drv_example --app "Google Chrome" --json
+a1 sr do next --session drv_example --json
+a1 sr read --session drv_example --json
+a1 sr stop --session drv_example --json</code></pre>
       <p>
          If you leave off <code>--target</code>, a11ied chooses VoiceOver on macOS, NVDA on Windows,
          or the virtual driver elsewhere. Use <code>--target virtual</code> with
@@ -61,8 +60,8 @@ a1 drive stop --session drv_example --json</code></pre>
    <section class="field-note">
       <h2>Transcripts and verdicts</h2>
       <p>
-         A driver transcript records what the screen reader said during a session. To produce a
-         conformance verdict from that evidence, use the <a href="/verification-semantics">verification</a> layer.
+         A driver transcript records what the screen reader said during a session. Treat that transcript
+         as evidence for review, not as a conformance verdict by itself.
       </p>
    </section>
 </DocShell>

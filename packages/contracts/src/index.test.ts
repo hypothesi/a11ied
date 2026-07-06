@@ -12,7 +12,6 @@ import {
    driverReadinessSchema,
    driverStateSnapshotSchema,
    engineQueryErrorSchema,
-   interactionPatternResultSchema,
    normalizedCriteriaArtifactSchema,
    applicabilityInputSchema,
    applicabilityMatrixSchema,
@@ -151,45 +150,6 @@ describe('contracts axe payloads', () => {
 
       expect(result.selection.kind).toBe('criterion');
       expect(result.violations[0]?.id).toBe('button-name');
-      expect(structuredClone(result)).toEqual(result);
-   });
-});
-
-describe('contracts interaction pattern payloads', () => {
-   it('parses normalized interaction pattern output', () => {
-      const result = interactionPatternResultSchema.parse({
-         patternId: 'heading_sequence',
-         url: 'http://127.0.0.1:4173/basic-page.html',
-         target: 'virtual',
-         sessionId: 'drv_123',
-         managedSession: true,
-         stepLog: [
-            {
-               id: 'attach-target',
-               label: 'Attach target HTML to the session',
-               status: 'completed',
-            },
-         ],
-         spokenPhraseLog: ['document', 'heading, Basic content page, level 1'],
-         itemTextLog: ['Basic content page'],
-         assertions: [
-            {
-               id: 'heading-order',
-               status: 'passed',
-               message: 'Headings stayed in document order.',
-            },
-         ],
-         targetMetadata: { headings: ['Basic content page'] },
-         browserEvidence: [
-            {
-               kind: 'structure',
-               summary: 'Collected heading order from the rendered DOM.',
-            },
-         ],
-      });
-
-      expect(result.patternId).toBe('heading_sequence');
-      expect(result.assertions[0]?.status).toBe('passed');
       expect(structuredClone(result)).toEqual(result);
    });
 });

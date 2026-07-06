@@ -129,7 +129,7 @@ export function searchWcagCriteria(
    }
 }
 
-/** Returns coverage and verification-strategy metadata for one criterion. */
+/** Returns coverage and testing-strategy metadata for one criterion. */
 export function showWcagCoverage(
    lookupKey: CriterionLookupKey,
    version: string,

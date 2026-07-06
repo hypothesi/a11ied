@@ -13,7 +13,6 @@ import {
    getCriterion,
    getCriterionApplicability,
    getQuickrefTags,
-   getVerificationStrategy,
    listApplicableCriteria,
    listCriteriaByLevel,
    resetWcagEngineCache,
@@ -93,15 +92,6 @@ describe('wcag-engine coverage and strategy', () => {
       expect(result.coverage.axeRuleIds.length).toBeGreaterThan(0);
       expect(result.coverage.actRuleIds.length).toBeGreaterThan(0);
       expect(result.strategy.procedureIds).toContain('axe_scan');
-   });
-
-   it('returns the preferred verification strategy without inference', () => {
-      const result = getVerificationStrategy('4.1.3');
-
-      expect(result.criterionId).toBe('4.1.3');
-      expect(result.strategy.preferredEvidenceMode).toBe('hybrid');
-      expect(result.strategy.procedureIds).toContain('status_message_probe');
-      expect(result.strategy.requiresRealTarget).toBe(true);
    });
 
    it('exposes quickref tags by id or slug', () => {

@@ -19,7 +19,7 @@ a1 help-all
 Use the runtime API:
 
 ```js
-import { runAxe, verifyCriterion } from 'a11ied';
+import { listWcagCriteria, runAxe, startDriverSession } from 'a11ied';
 ```
 
 ## workspaces

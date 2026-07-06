@@ -132,7 +132,6 @@ const publicApiExpectations: PublicApiExpectation[] = [
          'listCriteriaByLevel',
          'getCoverage',
          'getQuickrefTags',
-         'getVerificationStrategy',
          'resetWcagEngineCache',
       ],
    },

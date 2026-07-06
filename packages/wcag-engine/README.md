@@ -16,7 +16,6 @@ import {
    listCriteriaByLevel,
    searchCriteria,
    getCoverage,
-   getVerificationStrategy,
    getCriterionApplicability,
 } from '@a11ied/wcag-engine';
 ```

@@ -5,7 +5,7 @@ import { docsLinks } from '../lib/nav';
 
 <DocShell
    title="Recording sessions"
-   summary="a11ied can record video of real VoiceOver and NVDA sessions, creating a visual evidence trail alongside the transcript and verification data."
+   summary="a11ied can record video of real VoiceOver and NVDA sessions, creating a visual evidence trail alongside the transcript."
    links={docsLinks}
 >
    <section>
@@ -23,9 +23,9 @@ import { docsLinks } from '../lib/nav';
 
    <section>
       <h2>Examples</h2>
-      <pre><code>a1 drive start --target voiceover --recording ./recordings/voiceover-home.mov
-a1 run pattern dialog_probe --target voiceover --url http://127.0.0.1:6173/dialog.html --recording ./recordings/dialog-probe.mov --json
-a1 verify criterion 4.1.3 --target voiceover --url http://127.0.0.1:6173/status-message.html --recording ./recordings/status-message.mov --json</code></pre>
+      <pre><code>a1 sr start --target voiceover --recording ./recordings/voiceover-home.mov --json
+a1 sr read --session &lt;sessionId&gt; --json
+a1 sr stop --session &lt;sessionId&gt; --json</code></pre>
    </section>
 
    <section>
@@ -62,9 +62,8 @@ npx playwright install chromium</code></pre>
    <section class="field-note">
       <h2>Recordings as evidence</h2>
       <p>
-         Video recordings supplement the transcript and verification data. They are useful for
-         reviewing what the screen reader actually did, but the verification verdict comes from the
-         <a href="/verification-semantics">verification</a> layer.
+         Video recordings supplement the transcript. They are useful when you need to review
+         exactly what the screen reader did during a real assistive technology session.
       </p>
    </section>
 </DocShell>

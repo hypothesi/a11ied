@@ -5,7 +5,7 @@ import { docsLinks } from '../lib/nav';
 
 <DocShell
    title="Automate real screen reader testing"
-   summary="a11ied is a CLI-first toolkit that lets you test with VoiceOver, NVDA, and a fast virtual screen reader — from the terminal or an AI agent. Look up WCAG criteria, check applicability, run interaction patterns, and verify conformance in one workflow."
+   summary="a11ied is a CLI-first toolkit for testing with VoiceOver, NVDA, and a fast virtual screen reader from the terminal or an AI agent. Look up WCAG criteria, check applicability, gather screen reader evidence, and run axe scans without pretending the tool can replace human judgment."
    links={docsLinks}
 >
    <section class="split panel">
@@ -17,11 +17,11 @@ import { docsLinks } from '../lib/nav';
          <div class="workflow-list">
             <div class="workflow-row">
                <strong><a href="/workflows#check-one-criterion">Check one criterion</a></strong>
-               <span>Look up a WCAG rule, check if it applies, gather evidence, and verify the result.</span>
+               <span>Look up a WCAG rule, check if it applies, then gather axe or screen reader evidence.</span>
             </div>
             <div class="workflow-row">
-               <strong><a href="/workflows#verify-a-level">Verify a target level</a></strong>
-               <span>Run the full A, AA, or AAA criterion matrix against a page or component.</span>
+               <strong><a href="/workflows#gather-evidence">Gather evidence</a></strong>
+               <span>Run axe and capture screen reader output before a human review.</span>
             </div>
             <div class="workflow-row">
                <strong><a href="/workflows#drive-a-session">Drive a reader session</a></strong>
@@ -45,12 +45,12 @@ import { docsLinks } from '../lib/nav';
    <section class="ledger">
       <div class="panel-head">
          <p class="panel-kicker">How it works</p>
-         <h2>Four steps to a verified result</h2>
+         <h2>Three steps to useful evidence</h2>
       </div>
       <div class="mini-grid">
          <div class="stack">
             <div class="tag">1. Look up the rule</div>
-            <p>Use <code>wcag show</code> to pull criterion details, coverage status, and verification strategy.</p>
+            <p>Use <code>wcag show</code> to pull criterion details, coverage status, and testing strategy.</p>
          </div>
          <div class="stack">
             <div class="tag">2. Check applicability</div>
@@ -58,11 +58,7 @@ import { docsLinks } from '../lib/nav';
          </div>
          <div class="stack">
             <div class="tag">3. Gather evidence</div>
-            <p>Use <code>sr</code> for manual control or <code>axe</code> for static analysis. Use the <code>runInteractionPattern</code> API for reusable interaction probes.</p>
-         </div>
-         <div class="stack">
-            <div class="tag">4. Verify</div>
-            <p>Use the <code>verifyCriterion</code> or <code>verifyLevel</code> API to produce a criterion or level verdict from the evidence collected.</p>
+            <p>Use <code>sr</code> for screen reader sessions or <code>axe</code> for static analysis. The output is evidence, not a blanket compliance verdict.</p>
          </div>
       </div>
    </section>
@@ -77,7 +73,7 @@ import { docsLinks } from '../lib/nav';
          <p class="command-note">
          This installs the <code>a1</code> CLI command (also available as <code>a11ied</code>). Use the runtime API too:
          </p>
-         <pre><code>import {'{'} runAxe, verifyCriterion {'}'} from 'a11ied';</code></pre>
+         <pre><code>import {'{'} listWcagCriteria, runAxe, startDriverSession {'}'} from 'a11ied';</code></pre>
       </div>
    </section>
 
@@ -93,7 +89,6 @@ a1 inspect criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --jso
 a1 axe --criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json</code></pre>
          <p class="command-note">
          Each step builds on the previous one: look up the rule, check if it applies, then run an axe scan.
-         For pattern execution and verification, use the programmatic API.
          </p>
       </div>
    </section>
@@ -121,12 +116,8 @@ a1 axe --criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json<
             <span>Find the right criterion and check whether it applies to your target.</span>
          </div>
          <div class="route-row">
-            <strong><a href="/driver-usage">Driver usage</a> and <a href="/pattern-execution">Pattern execution</a></strong>
-            <span>Low-level screen reader control and reusable interaction probes.</span>
-         </div>
-         <div class="route-row">
-            <strong><a href="/verification-semantics">Verification semantics</a></strong>
-            <span>How verdicts work: pass, fail, mixed, manual-only, and not-covered.</span>
+            <strong><a href="/driver-usage">Driver usage</a></strong>
+            <span>Low-level screen reader control for real and virtual targets.</span>
          </div>
             <div class="route-row">
             <strong><a href="/mcp-usage">MCP usage</a></strong>
@@ -142,12 +133,11 @@ a1 axe --criterion 4.1.3 --url http://127.0.0.1:6173/status-message.html --json<
    <section class="field-note">
       <div class="panel-head">
          <p class="panel-kicker">Transparency</p>
-         <h2>Transparent verification results</h2>
+         <h2>Evidence without overclaiming</h2>
       </div>
       <p>
-         Every verification result reports exactly which checks were automated, which need human review,
-         and which criteria aren't covered yet. Each result shows what was proved and what still
-         requires manual inspection.
+         a11ied is deliberately conservative. It can collect useful automated and screen reader
+         evidence, but it does not turn that into a broad conformance claim for you.
       </p>
    </section>
 </DocShell>

@@ -6,13 +6,12 @@ import {
    buildCoverageResource,
    buildCriteriaResource,
    buildLevelsResource,
-   buildStrategyResource,
    createJsonResource,
    type SupportedWcagVersion,
 } from '../lib/shared.js';
 
 interface VersionedResourceDefinition {
-   key: 'criteria' | 'levels' | 'coverage' | 'verification-strategies';
+   key: 'criteria' | 'levels' | 'coverage';
    title: (version: SupportedWcagVersion) => string;
    description: string;
    buildPayload: (version: SupportedWcagVersion) => unknown;
@@ -37,13 +36,6 @@ const versionedResourceDefinitions: VersionedResourceDefinition[] = [
       description:
          'Read-only coverage lookup data for every criterion in a WCAG version.',
       buildPayload: buildCoverageResource,
-   },
-   {
-      key: 'verification-strategies',
-      title: (version) => `WCAG ${version} verification strategies`,
-      description:
-         'Read-only verification strategy summaries for every criterion in a WCAG version.',
-      buildPayload: buildStrategyResource,
    },
 ];
 

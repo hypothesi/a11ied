@@ -192,18 +192,18 @@ export const coverageArtifactSchema = z.object({
 });
 export type CoverageArtifact = z.infer<typeof coverageArtifactSchema>;
 
-export const verificationStrategySchema = z.object({
+export const evidenceStrategySchema = z.object({
    criterionId: z.string(),
    preferredEvidenceMode: preferredEvidenceModeSchema,
    procedureIds: z.array(z.string()),
    requiresRealTarget: z.boolean(),
    notes: z.array(z.string()),
 });
-export type VerificationStrategy = z.infer<typeof verificationStrategySchema>;
+export type EvidenceStrategy = z.infer<typeof evidenceStrategySchema>;
 
 export const strategyArtifactSchema = z.object({
    version: wcagVersionSchema,
-   strategies: z.record(z.string(), verificationStrategySchema),
+   strategies: z.record(z.string(), evidenceStrategySchema),
 });
 export type StrategyArtifact = z.infer<typeof strategyArtifactSchema>;
 

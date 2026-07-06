@@ -5,7 +5,7 @@ import { docsLinks } from '../lib/nav';
 
 <DocShell
    title="Criterion lookup"
-   summary="Use the wcag command family to find criteria by ID, level, or keyword. Lookup gives you the criterion details, coverage status, and verification strategy before you start testing."
+   summary="Use the wcag command family to find criteria by ID, level, or keyword. Lookup gives you criterion details, coverage status, and testing strategy before you start testing."
    links={docsLinks}
 >
    <section>
@@ -22,7 +22,7 @@ a1 wcag coverage 4.1.3 --json</code></pre>
       <ul>
          <li>Criterion ID, title, and conformance level</li>
          <li>Coverage status with linked ACT and axe rule mappings where available</li>
-         <li>The verification strategy the runtime will use (automated, hybrid, or manual)</li>
+         <li>The testing strategy the runtime can support (automated, hybrid, or manual)</li>
          <li>Structured criterion text so you don't need to look up the W3C spec separately</li>
       </ul>
    </section>

@@ -1,6 +1,6 @@
 # a11ied
 
-`a11ied` is a CLI-first accessibility automation toolkit. It ships the `a1` (also `a11ied`) command and a programmatic API for WCAG lookup, axe-core scanning, screen reader control, interaction patterns, and criterion verification.
+`a11ied` is a CLI-first accessibility automation toolkit. It ships the `a1` (also `a11ied`) command and a programmatic API for WCAG lookup, axe-core scanning, screen reader control, and runtime diagnostics.
 
 ## install
 
@@ -30,13 +30,7 @@ See `a1 --help` or `a1 help-all` for the full command reference.
 ## programmatic API
 
 ```ts
-import {
-   listWcagCriteria,
-   runAxe,
-   runInteractionPattern,
-   verifyCriterion,
-   verifyLevel,
-} from 'a11ied';
+import { listWcagCriteria, runAxe, startDriverSession, createDoctorReport } from 'a11ied';
 ```
 
 ## targets

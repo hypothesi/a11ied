@@ -26,23 +26,12 @@ Feature: MCP tools and resources
     When I call the MCP tool "driver_action" with action "next" without a session id
     Then the tool fails with a validation error
 
-  Scenario: Verification tool returns the same top-level report fields as the CLI
-    When I call the MCP tool "verify" for criterion "4.1.2" on the button-name fixture
-    Then the tool call succeeds at the transport level
-    And the top-level payload includes "target"
-    And the top-level payload includes "wcagVersion"
-    And the top-level payload includes "requestedScope"
-    And the top-level payload includes "summary"
-    And the top-level payload includes "criteria"
-    And the criterion row for "4.1.2" has verdict "fail"
-
   Scenario: Read-only resources are exposed for standards material
     When I list MCP resources
     Then the resource set includes criteria resources
     And the resource set includes level-list resources
     And the resource set includes coverage resources
-    And the resource set includes verification-strategy resources
 
   Scenario: Tool side effects are documented for active tools
-    When I inspect the MCP tool metadata for a driver or verification tool
+    When I inspect the MCP tool metadata for a driver or execution tool
     Then the metadata explains that the tool may launch or drive assistive technology

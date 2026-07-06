@@ -31,7 +31,7 @@ a1 help-all</code></pre>
 
    <section>
       <h2>Programmatic usage</h2>
-      <pre><code>import {'{'} listWcagCriteria, runAxe, verifyCriterion, verifyLevel, runInteractionPattern {'}'} from 'a11ied';</code></pre>
+      <pre><code>import {'{'} listWcagCriteria, runAxe, startDriverSession, createDoctorReport {'}'} from 'a11ied';</code></pre>
       <p>
          Import the runtime helpers you need from <code>a11ied</code>.
          CLI plumbing (like the command builder) is not exported.
@@ -43,13 +43,13 @@ a1 help-all</code></pre>
       <p>The monorepo is organized into focused packages, all published to npm:</p>
       <ul>
          <li><code>@a11ied/contracts</code>: shared runtime schemas and result shapes</li>
-         <li><code>@a11ied/core</code>: WCAG lookup, target resolution, driver orchestration, pattern execution, and verification</li>
+         <li><code>@a11ied/core</code>: WCAG lookup, target resolution, driver orchestration, axe scans, and doctor reports</li>
          <li><code>@a11ied/guidepup</code>: platform adapters for VoiceOver, NVDA, and the virtual reader</li>
          <li><code>@a11ied/wcag-data</code>: standards-data sync and normalization</li>
          <li><code>@a11ied/wcag-engine</code>: lookup, search, coverage, and applicability over generated artifacts</li>
          <li><code>@a11ied/mcp-server</code>: MCP server entrypoint</li>
       </ul>
-      <p>All packages are bundled into the top-level <code>a11ied</code> package. Import from the <code>a11ied</code> entrypoint for the stable public API.</p>
+      <p>The top-level <code>a11ied</code> package re-exports the stable core helpers. Use scoped packages only when you deliberately need their lower-level surfaces.</p>
    </section>
 
    <section class="field-note">

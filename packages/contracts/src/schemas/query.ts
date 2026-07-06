@@ -6,8 +6,8 @@ import {
    criterionIdSchema,
    criterionLookupKeySchema,
    criterionSlugSchema,
+   evidenceStrategySchema,
    normalizedCriterionSchema,
-   verificationStrategySchema,
    applicabilityStateSchema,
 } from './wcag.js';
 
@@ -151,7 +151,7 @@ export const coverageLookupResultSchema = z.object({
    lookupKey: criterionLookupKeySchema,
    criterion: normalizedCriterionSchema,
    coverage: criterionCoverageSchema,
-   strategy: verificationStrategySchema,
+   strategy: evidenceStrategySchema,
 });
 export type CoverageLookupResult = z.infer<typeof coverageLookupResultSchema>;
 
@@ -159,18 +159,9 @@ export const wcagLookupResultSchema = z.object({
    lookupKey: criterionLookupKeySchema,
    criterion: normalizedCriterionSchema,
    coverage: criterionCoverageSchema.optional(),
-   strategy: verificationStrategySchema.optional(),
+   strategy: evidenceStrategySchema.optional(),
 });
 export type WcagLookupResult = z.infer<typeof wcagLookupResultSchema>;
-
-export const verificationStrategyLookupResultSchema = z.object({
-   lookupKey: criterionLookupKeySchema,
-   criterionId: criterionIdSchema,
-   strategy: verificationStrategySchema,
-});
-export type VerificationStrategyLookupResult = z.infer<
-   typeof verificationStrategyLookupResultSchema
->;
 
 export const notFoundErrorSchema = z.object({
    type: z.literal('not-found'),

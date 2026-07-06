@@ -1,6 +1,6 @@
 # @a11ied/mcp-server
 
-`@a11ied/mcp-server` is the [Model Context Protocol](https://modelcontextprotocol.io) server for the a11ied toolkit. It exposes a11ied's WCAG lookup, axe scanning, screen reader control, and verification tools to AI agents and editors over stdio.
+`@a11ied/mcp-server` is the [Model Context Protocol](https://modelcontextprotocol.io) server for the a11ied toolkit. It exposes a11ied's WCAG lookup, axe scanning, and screen reader control tools to AI agents and editors over stdio.
 
 ## install
 

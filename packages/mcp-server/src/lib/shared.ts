@@ -92,21 +92,6 @@ interface CoverageResource {
    coverage: Array<ReturnType<typeof showWcagCoverage>>;
 }
 
-interface StrategySummary {
-   criterionId: string;
-   title: string;
-   level: string;
-   preferredEvidenceMode: string;
-   procedureIds: string[];
-   requiresRealTarget: boolean;
-   notes: string[];
-}
-
-interface StrategyResource {
-   version: SupportedWcagVersion;
-   strategies: StrategySummary[];
-}
-
 function toJsonText(value: unknown): string {
    return JSON.stringify(value, undefined, JSON_INDENT);
 }
@@ -220,23 +205,5 @@ export function buildCoverageResource(version: SupportedWcagVersion): CoverageRe
       coverage: listAllCriteria(version).map((criterion: NormalizedCriterion) =>
          showWcagCoverage(criterion.id, version),
       ),
-   };
-}
-
-export function buildStrategyResource(version: SupportedWcagVersion): StrategyResource {
-   return {
-      version,
-      strategies: listAllCriteria(version).map((criterion: NormalizedCriterion) => {
-         const lookup = showWcagCoverage(criterion.id, version);
-         return {
-            criterionId: criterion.id,
-            title: criterion.title,
-            level: criterion.level,
-            preferredEvidenceMode: lookup.strategy.preferredEvidenceMode,
-            procedureIds: lookup.strategy.procedureIds,
-            requiresRealTarget: lookup.strategy.requiresRealTarget,
-            notes: lookup.strategy.notes,
-         };
-      }),
    };
 }

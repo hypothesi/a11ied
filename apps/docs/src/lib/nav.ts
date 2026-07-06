@@ -24,14 +24,12 @@ export const docsLinks: DocSection[] = [
          { href: '/wcag-data-sources', label: 'WCAG data sources' },
          { href: '/criterion-lookup', label: 'Criterion lookup' },
          { href: '/applicability', label: 'Applicability' },
-         { href: '/verification-semantics', label: 'Verification semantics' },
       ],
    },
    {
       title: 'Execution',
       links: [
          { href: '/driver-usage', label: 'Driver usage' },
-         { href: '/pattern-execution', label: 'Pattern execution' },
          { href: '/recording-sessions', label: 'Recording sessions' },
       ],
    },

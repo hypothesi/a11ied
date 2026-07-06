@@ -50,15 +50,12 @@ export {
    type ListDriverCommandsOptions,
    type SerializableDriverCommand,
 } from '@a11ied/guidepup';
-export { runAxe } from './axe/runtime.js';
+export { runAxe, type AxeRunOptions } from './axe/runtime.js';
 export { openUrlInSystemAutomationBrowser } from './browser/helper.js';
 export {
    resolveDocumentTarget,
    type ResolveDocumentTargetInput,
 } from './targets/runtime.js';
-export { verifyCriterion, verifyLevel } from './verification/runtime.js';
-export { listInteractionPatterns, runInteractionPattern } from './patterns/runtime.js';
-export type { RunPatternOptions } from './patterns/helpers.js';
 
 const DOCTOR_RECORDING_PROBE_SECONDS = 1;
 const DOCTOR_RECORDING_TIMEOUT_MS = 4000;

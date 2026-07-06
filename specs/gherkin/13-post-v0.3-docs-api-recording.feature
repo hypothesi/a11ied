@@ -21,12 +21,6 @@ Feature: Post-v0.3 docs, API docs, and recording support
     Then the command should report active recording metadata
     And stopping the session should finish the recording cleanly
 
-  Scenario: Managed runs can request recording
-    Given a command creates and manages its own real target driver session
-    When I run a pattern or verification command with a recording output path
-    Then the command should pass recording configuration through to the managed session
-    And the structured result should include the recording artifact path
-
   Scenario: Unsupported recording requests fail explicitly
     Given recording support is limited to real targets on supported host operating systems
     When I request recording for a virtual target

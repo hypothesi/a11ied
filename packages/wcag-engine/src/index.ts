@@ -10,7 +10,6 @@ export {
    listCriteriaByLevel,
    getCoverage,
    getQuickrefTags,
-   getVerificationStrategy,
    resetWcagEngineCache,
 } from './artifacts/runtime.js';
 

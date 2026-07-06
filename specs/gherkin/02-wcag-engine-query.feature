@@ -1,8 +1,8 @@
 @foundation @engine
 Feature: WCAG engine lookup, search, and coverage queries
   As a consumer of the normalized standards layer
-  I want stable engine APIs for lookup, listing, search, and strategy resolution
-  So that CLI, MCP, and verification code can share one source of truth
+  I want stable engine APIs for lookup, listing, search, and coverage
+  So that CLI and MCP can share one source of truth
 
   Background:
     Given generated WCAG artifacts exist for versions "2.2" and "2.1"
@@ -42,12 +42,6 @@ Feature: WCAG engine lookup, search, and coverage queries
     And the result includes an explicit coverage state
     And the result includes the mapped axe rule ids
     And the result includes the mapped ACT rule ids
-
-  Scenario: Verification strategy lookup returns the preferred evidence path
-    When I call getVerificationStrategy with "4.1.3"
-    Then the result includes a preferred evidence mode
-    And the result includes one or more procedure ids
-    And the result does not require the verification layer to infer its own procedure mapping
 
   Scenario: Unsupported criterion ids are rejected deterministically
     When I call getCriterion with "9.9.9"

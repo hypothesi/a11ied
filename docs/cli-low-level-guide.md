@@ -9,7 +9,6 @@ Top-level commands:
 - `sr`: low-level screen reader control through a stable session
 - `doctor`: show runtime support, browser policy, and recording diagnostics
 - `axe`: run `axe-core`
-- `verify`: turn collected evidence into explicit WCAG criterion or level verdicts
 - `mcp`: expose the same core capabilities over MCP stdio
 
 Start here:
@@ -97,21 +96,13 @@ node packages/cli/dist/cli.js axe --url http://127.0.0.1:6173/button-name-failur
 node packages/cli/dist/cli.js axe --url http://127.0.0.1:6173/basic-page.html --rule button-name color-contrast --json
 ```
 
-## verify
-
-```sh
-node packages/cli/dist/cli.js verify criterion 4.1.3 --target virtual --allow-virtual --url http://127.0.0.1:6173/status-message.html --json
-node packages/cli/dist/cli.js verify criterion 3.3.8 --target virtual --allow-virtual --url http://127.0.0.1:6173/auth-login.html --json
-node packages/cli/dist/cli.js verify level AA --target virtual --allow-virtual --url http://127.0.0.1:6173/basic-page.html --json
-```
-
 ## MCP
 
 ```sh
 node packages/cli/dist/cli.js mcp
 ```
 
-The MCP server exposes 9 tools:
+The MCP server exposes 8 tools:
 
 | Tool             | Purpose                                                                        |
 | ---------------- | ------------------------------------------------------------------------------ |
@@ -123,7 +114,6 @@ The MCP server exposes 9 tools:
 | `driver_session` | Start, query status, or stop an accessibility-driver session                   |
 | `driver_action`  | Run a single action (next, previous, read, key, etc.) against a driver session |
 | `run_axe`        | Run axe-core against a target                                                  |
-| `verify`         | Verify a single criterion or full conformance level                            |
 
 ### Real vs simulated screen readers
 

@@ -16,7 +16,6 @@ Feature: CLI ergonomics for help-heavy agent workflows
     Then the output includes the top-level help block
     And the output includes the "wcag" command family
     And the output includes the "inspect applicable" command
-    And the output includes the "drive start" command
-    And the output includes the "run axe" command
-    And the output includes the "verify criterion" command
+    And the output includes the "sr start" command
+    And the output includes the "axe" command
     And the output includes representative nested flags

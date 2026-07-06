@@ -48,7 +48,7 @@ function registerWcagLookupTool(server: McpServer): void {
          title: 'WCAG lookup',
          description:
             'Look up one WCAG criterion by id or slug. ' +
-            'Set include_coverage to true to also return coverage and verification-strategy data.',
+            'Set include_coverage to true to also return coverage and testing-strategy data.',
          inputSchema: z.object({
             criterion: criterionLookupKeySchema,
             version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
