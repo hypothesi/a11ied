@@ -25,6 +25,9 @@ jobs:
          - name: Install dependencies
            run: npm ci
 
+         - name: Data sync
+           run: npm run wcag:sync
+
          - name: Data validation
            run: npm run wcag:validate
 

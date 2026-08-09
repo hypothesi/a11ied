@@ -1,23 +1,23 @@
 {
-   "generatedAt": "2026-04-08T17:09:51.251Z",
+   "generatedAt": "2026-08-09T16:04:25.193Z",
    "rawSources": [
       {
          "fileName": "act-mapping.json",
          "sourceId": "act-mapping",
          "sourceUrl": "https://raw.githubusercontent.com/w3c/wcag/main/guidelines/act-mapping.json",
          "resolvedUrl": "https://raw.githubusercontent.com/w3c/wcag/main/guidelines/act-mapping.json",
-         "syncedAt": "2026-04-08T17:09:51.251Z",
-         "sha256": "e9dea0ab498f652248606cb928897a1d141fa5e325c38aa7d1c1ad2a707a0ada",
+         "syncedAt": "2026-08-09T16:04:25.193Z",
+         "sha256": "5d111710f92de504b978bf77fc5ac488e9230dca36a619c7ad9ef058ff07c4f5",
          "contentType": "json",
          "fallbackUsed": false,
-         "etag": "W/\"104f498227bac8d5303d6e13a9a529377a7dcad00f0fffec50ad66f0af4c54b2\""
+         "etag": "W/\"42643a05d95adfd63d52a77121d463f1dc181b384758087bc78b87bcfb88fe28\""
       },
       {
          "fileName": "axe-rules.json",
          "sourceId": "axe-rules",
          "sourceUrl": "npm:axe-core",
          "resolvedUrl": "npm:axe-core",
-         "syncedAt": "2026-04-08T17:09:51.251Z",
+         "syncedAt": "2026-08-09T16:04:25.193Z",
          "sha256": "2a37161b8ca5122205a37633c2f04e04ba43c2cf3b7a546743ddac676fa9508d",
          "contentType": "derived-json",
          "fallbackUsed": false,
@@ -28,7 +28,7 @@
          "sourceId": "quickref-tags",
          "sourceUrl": "https://raw.githubusercontent.com/w3c/wai-wcag-quickref/main/_data/tags-sc.yml",
          "resolvedUrl": "https://raw.githubusercontent.com/w3c/wai-wcag-quickref/gh-pages/_data/tags-sc.yml",
-         "syncedAt": "2026-04-08T17:09:51.251Z",
+         "syncedAt": "2026-08-09T16:04:25.193Z",
          "sha256": "87b97fdbcf32ae7355f60cf3cd42e9c13ee99f4d81bf9d677e0a07bf131a6a25",
          "contentType": "yaml",
          "fallbackUsed": true,
@@ -39,32 +39,32 @@
          "sourceId": "wcag21",
          "sourceUrl": "https://www.w3.org/WAI/WCAG21/wcag.json",
          "resolvedUrl": "https://www.w3.org/WAI/WCAG21/wcag.json",
-         "syncedAt": "2026-04-08T17:09:51.251Z",
-         "sha256": "214e40825bf0d826b8fc92d5801345c73269915cd2f946f924be4c3d37cbafca",
+         "syncedAt": "2026-08-09T16:04:25.193Z",
+         "sha256": "b7abb1c05c24589952238d95f4b1d553e9e3445921fcff3a99870b9eddd2a646",
          "contentType": "json",
          "fallbackUsed": false,
          "upstreamVersion": "2.1",
-         "etag": "W/\"73297-64e784a308600\"",
-         "lastModified": "Thu, 02 Apr 2026 11:13:28 GMT"
+         "etag": "W/\"73a41-6585ae9ad17c0\"",
+         "lastModified": "Thu, 06 Aug 2026 06:22:31 GMT"
       },
       {
          "fileName": "wcag.2.2.json",
          "sourceId": "wcag22",
          "sourceUrl": "https://www.w3.org/WAI/WCAG22/wcag.json",
          "resolvedUrl": "https://www.w3.org/WAI/WCAG22/wcag.json",
-         "syncedAt": "2026-04-08T17:09:51.251Z",
-         "sha256": "ce6a33cd1ad95f5c5c7dad9cccda8c420f8b57c7e1e61aa43d17217ad980191b",
+         "syncedAt": "2026-08-09T16:04:25.193Z",
+         "sha256": "b0e80091919936ec8e71f8cd7bdb25775062eb1efbfbb67231cbbe5e5eb46fc7",
          "contentType": "json",
          "fallbackUsed": false,
          "upstreamVersion": "2.2",
-         "etag": "W/\"7dbdc-64e77de6ca200\"",
-         "lastModified": "Thu, 02 Apr 2026 10:43:20 GMT"
+         "etag": "W/\"7e386-6585adb12b080\"",
+         "lastModified": "Thu, 06 Aug 2026 06:18:26 GMT"
       }
    ],
    "artifacts": [
       {
          "fileName": "coverage-summary.2.1.json",
-         "sha256": "28727a1c6a206f44d774f6c4f37619a2df3cddcc6115c3b25db5e4f34635f8a3",
+         "sha256": "4035b35ef3ae1b6c67d3f74c43f9f49afec98baa6b073871069a0dab46994614",
          "wcagVersion": "2.1",
          "sourceFileNames": [
             "wcag.2.1.json",
@@ -81,7 +81,7 @@
       },
       {
          "fileName": "coverage-summary.2.2.json",
-         "sha256": "7f0ea3b15e2efba25c10368fe83c39017ab2d6f55af05c83b658d6e5309796bf",
+         "sha256": "f38e2e84e9ca43879f2464f782f9dc96ac5ae28b9495cb150a0057b09a3e625d",
          "wcagVersion": "2.2",
          "sourceFileNames": [
             "wcag.2.2.json",
@@ -98,7 +98,7 @@
       },
       {
          "fileName": "coverage.2.1.json",
-         "sha256": "b9e33ac6c3fd55ffa7d6889e27be4b80ef3338f7aa2314d43ec3833ed8d63273",
+         "sha256": "516a363d9872f97042921860d54f313e7a3bee698734a03273318b0f1a245e78",
          "wcagVersion": "2.1",
          "sourceFileNames": [
             "wcag.2.1.json",
@@ -115,7 +115,7 @@
       },
       {
          "fileName": "coverage.2.2.json",
-         "sha256": "c503d374dbe43242b15d14c3de8e66d7ae75a306ed37036822736a44d3977193",
+         "sha256": "0650dc985518b3d0f118b39a9d4e67526489dee96101e12299ae86c8bfbe46dc",
          "wcagVersion": "2.2",
          "sourceFileNames": [
             "wcag.2.2.json",
@@ -152,7 +152,7 @@
       },
       {
          "fileName": "criteria.2.1.json",
-         "sha256": "c50e5f0dcfdfae69742a1d63949bb0d31e8fb86bab761c91b35ae6e39913eedb",
+         "sha256": "8d5e35ddece846794a70d3050222b523ca8cdc7711a9cc5143b193b85f053559",
          "wcagVersion": "2.1",
          "sourceFileNames": ["wcag.2.1.json", "quickref-tags.yml"],
          "sourceUrls": [
@@ -162,7 +162,7 @@
       },
       {
          "fileName": "criteria.2.2.json",
-         "sha256": "eef331dfdd3523a9391e026db47762c4f842263fdaaf7404e2da662f0aae9aa5",
+         "sha256": "622c2dcdcc4471075a8ae571d3093b2606ffbae4ed2c3e7fe4a071bff209de30",
          "wcagVersion": "2.2",
          "sourceFileNames": ["wcag.2.2.json", "quickref-tags.yml"],
          "sourceUrls": [
@@ -172,7 +172,7 @@
       },
       {
          "fileName": "failure-index.2.1.json",
-         "sha256": "f674e2c03a4ba1c484965ad8132d907bb6ec94895cfce64b9d0f69eebe55ba83",
+         "sha256": "a6347d8d8e3b07f807922797efc1290080dad3980b925771d10dcfa92ca7bbe7",
          "wcagVersion": "2.1",
          "sourceFileNames": ["wcag.2.1.json", "quickref-tags.yml"],
          "sourceUrls": [
@@ -182,7 +182,7 @@
       },
       {
          "fileName": "failure-index.2.2.json",
-         "sha256": "1ff15030ad55e06da16e71e2c83a14a021d6f97c21a7091241cbc65a59ea6467",
+         "sha256": "15bfc40a2df5133f83cdc7dabb956bc1c6726d761f4b8ec42fd4e0cd359d1c98",
          "wcagVersion": "2.2",
          "sourceFileNames": ["wcag.2.2.json", "quickref-tags.yml"],
          "sourceUrls": [
@@ -266,7 +266,7 @@
       },
       {
          "fileName": "technique-index.2.1.json",
-         "sha256": "9ed9238b2c60764eff089da3b90765c1f151db5cf874ad2680c4fe3d67154a71",
+         "sha256": "65d711af368d3219858bd4aa1c00865234488655fc147c995c678614e34b028d",
          "wcagVersion": "2.1",
          "sourceFileNames": ["wcag.2.1.json", "quickref-tags.yml"],
          "sourceUrls": [
@@ -276,7 +276,7 @@
       },
       {
          "fileName": "technique-index.2.2.json",
-         "sha256": "6522ca2a08978014400b8e7a1c53e0c5e88d167672991869b4bd98fcc96a9543",
+         "sha256": "163bd280f8fb4eca2baee05b7c97931a0dee49448a5f1c69c7247bc986d7f445",
          "wcagVersion": "2.2",
          "sourceFileNames": ["wcag.2.2.json", "quickref-tags.yml"],
          "sourceUrls": [

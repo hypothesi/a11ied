@@ -22,6 +22,8 @@ export const topLevelHelpCases: HelpCase[] = [
         wcag              Look up pinned WCAG requirements and coverage data.
         axe [options]     Run axe-core against a target.
         inspect           Explain criterion applicability for a target.
+        verify            Turn collected evidence into explicit WCAG criterion or
+                          level verdicts.
         mcp               Start the MCP stdio server.
         doctor [options]  Report runtime details, browser policy, and supported
                           automation targets.

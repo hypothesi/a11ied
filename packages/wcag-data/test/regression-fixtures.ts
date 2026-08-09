@@ -70,7 +70,7 @@ export const committedArtifactRegressionFixture = {
          title: 'Status Messages',
          level: 'AA',
          requiredTags: ['forms', 'messaging', 'progress-steps'],
-         techniqueCount: 12,
+         techniqueCount: 13,
          failureCount: 2,
       },
    },

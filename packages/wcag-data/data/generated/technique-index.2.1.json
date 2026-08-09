@@ -31,6 +31,24 @@
          "kind": "sufficient",
          "criterionIds": ["1.3.1"]
       },
+      "1.4.11:sufficient:identifying-a-user-interface-component-s-focus-state:1.0": {
+         "key": "1.4.11:sufficient:identifying-a-user-interface-component-s-focus-state:1.0",
+         "title": "Identifying a user interface component's focus state",
+         "kind": "sufficient",
+         "criterionIds": ["1.4.11"]
+      },
+      "1.4.11:sufficient:identifying-user-interface-components:0.0": {
+         "key": "1.4.11:sufficient:identifying-user-interface-components:0.0",
+         "title": "Identifying user interface components",
+         "kind": "sufficient",
+         "criterionIds": ["1.4.11"]
+      },
+      "1.4.11:sufficient:making-graphical-content-understandable:2.0": {
+         "key": "1.4.11:sufficient:making-graphical-content-understandable:2.0",
+         "title": "Making graphical content understandable",
+         "kind": "sufficient",
+         "criterionIds": ["1.4.11"]
+      },
       "1.4.8:sufficient:using-measurements-that-are-relative-to-other-measurements-in-the-content:4.1.1": {
          "key": "1.4.8:sufficient:using-measurements-that-are-relative-to-other-measurements-in-the-content:4.1.1",
          "title": "using measurements that are relative to other measurements in the content",
@@ -169,6 +187,14 @@
          "kind": "sufficient",
          "criterionIds": ["1.3.1"]
       },
+      "ARIA27": {
+         "key": "ARIA27",
+         "id": "ARIA27",
+         "title": "Using ariaNotify to convey the status of a progress bar",
+         "technology": "aria",
+         "kind": "sufficient",
+         "criterionIds": ["4.1.3"]
+      },
       "ARIA4": {
          "key": "ARIA4",
          "id": "ARIA4",
@@ -256,6 +282,14 @@
          "technology": "css",
          "kind": "sufficient",
          "criterionIds": ["1.4.8"]
+      },
+      "C40": {
+         "key": "C40",
+         "id": "C40",
+         "title": "Creating a two-color focus indicator to ensure sufficient contrast with all components",
+         "technology": "css",
+         "kind": "sufficient",
+         "criterionIds": ["1.4.11"]
       },
       "G10": {
          "key": "G10",
@@ -548,7 +582,7 @@
       "G183": {
          "key": "G183",
          "id": "G183",
-         "title": "Using a contrast ratio of 3:1 with surrounding text and providing additional visual cues on hover for links or controls where color alone is used to identify them",
+         "title": "Using a contrast ratio of at least 3:1 to distinguish inline text links from surrounding text",
          "technology": "general",
          "kind": "sufficient",
          "criterionIds": ["1.4.1"]

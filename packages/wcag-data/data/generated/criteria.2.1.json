@@ -166,7 +166,7 @@
             {
                "key": "F3",
                "id": "F3",
-               "title": "Failure of Success Criterion 1.1.1 due to using CSS to include images that convey important information",
+               "title": "Failure of Success Criterion 1.1.1 due to conveying information exclusively using CSS background images",
                "technology": "failures",
                "kind": "failure",
                "relatedKeys": [],
@@ -1592,7 +1592,7 @@
             {
                "key": "G183",
                "id": "G183",
-               "title": "Using a contrast ratio of 3:1 with surrounding text and providing additional visual cues on hover for links or controls where color alone is used to identify them",
+               "title": "Using a contrast ratio of at least 3:1 to distinguish inline text links from surrounding text",
                "technology": "general",
                "kind": "sufficient",
                "groupTitle": "Situation A: If the color of particular words, backgrounds, or other content is used to indicate information:",
@@ -2456,12 +2456,49 @@
          },
          "techniques": [
             {
+               "key": "1.4.11:sufficient:identifying-a-user-interface-component-s-focus-state:1.0",
+               "title": "Identifying a user interface component's focus state",
+               "kind": "sufficient",
+               "groupTitle": "Situation B: Color is used to identify a user interface component's focus state",
+               "suffix": "using the following techniques:",
+               "relatedKeys": ["C40", "G195"],
+               "isSynthetic": true
+            },
+            {
+               "key": "1.4.11:sufficient:identifying-user-interface-components:0.0",
+               "title": "Identifying user interface components",
+               "kind": "sufficient",
+               "groupTitle": "Situation A: Color is used to identify user interface components",
+               "suffix": "using the following techniques:",
+               "relatedKeys": ["G174"],
+               "isSynthetic": true
+            },
+            {
+               "key": "1.4.11:sufficient:making-graphical-content-understandable:2.0",
+               "title": "Making graphical content understandable",
+               "kind": "sufficient",
+               "groupTitle": "Situation C: Color is required to understand graphical content",
+               "suffix": "using the following techniques:",
+               "relatedKeys": ["G207", "G209"],
+               "isSynthetic": true
+            },
+            {
+               "key": "C40",
+               "id": "C40",
+               "title": "Creating a two-color focus indicator to ensure sufficient contrast with all components",
+               "technology": "css",
+               "kind": "sufficient",
+               "groupTitle": "Situation B: Color is used to identify a user interface component's focus state",
+               "relatedKeys": [],
+               "isSynthetic": false
+            },
+            {
                "key": "G174",
                "id": "G174",
                "title": "Providing a control with a sufficient contrast ratio that allows users to switch to a presentation that uses sufficient contrast",
                "technology": "general",
                "kind": "sufficient",
-               "groupTitle": "Situation A: Color is used to identify user interface components or used to identify user interface component states",
+               "groupTitle": "Situation A: Color is used to identify user interface components",
                "relatedKeys": [],
                "isSynthetic": false
             },
@@ -2471,7 +2508,7 @@
                "title": "Using an author-supplied, visible focus indicator",
                "technology": "general",
                "kind": "sufficient",
-               "groupTitle": "Situation A: Color is used to identify user interface components or used to identify user interface component states",
+               "groupTitle": "Situation B: Color is used to identify a user interface component's focus state",
                "relatedKeys": [],
                "isSynthetic": false
             },
@@ -2481,7 +2518,7 @@
                "title": "Ensuring that a contrast ratio of 3:1 is provided for icons",
                "technology": "general",
                "kind": "sufficient",
-               "groupTitle": "Situation B: Color is required to understand graphical content",
+               "groupTitle": "Situation C: Color is required to understand graphical content",
                "relatedKeys": [],
                "isSynthetic": false
             },
@@ -2491,7 +2528,7 @@
                "title": "Provide sufficient contrast at the boundaries between adjoining colors",
                "technology": "general",
                "kind": "sufficient",
-               "groupTitle": "Situation B: Color is required to understand graphical content",
+               "groupTitle": "Situation C: Color is required to understand graphical content",
                "relatedKeys": [],
                "isSynthetic": false
             }
@@ -5745,6 +5782,16 @@
                "key": "ARIA25",
                "id": "ARIA25",
                "title": "Using an ARIA live region to convey the status of a progress bar",
+               "technology": "aria",
+               "kind": "sufficient",
+               "groupTitle": "Situation C: If a status message conveys information on the progress of a process:",
+               "relatedKeys": [],
+               "isSynthetic": false
+            },
+            {
+               "key": "ARIA27",
+               "id": "ARIA27",
+               "title": "Using ariaNotify to convey the status of a progress bar",
                "technology": "aria",
                "kind": "sufficient",
                "groupTitle": "Situation C: If a status message conveys information on the progress of a process:",

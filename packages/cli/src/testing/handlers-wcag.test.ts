@@ -205,7 +205,7 @@ async function assertTextSearchSnapshot(): Promise<void> {
    expect(excerpt).toMatchInlineSnapshot(`
       "Search: status message
       
-      4.1.3  Status Messages [AA] score=35.5"
+      4.1.3  Status Messages [AA] score=38"
     `);
 }
 
