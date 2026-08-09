@@ -25,7 +25,7 @@ import {
 } from './runtime-helpers.js';
 import { runAxe } from '../axe/runtime.js';
 
-interface VerifyCriterionOptions {
+export interface VerifyCriterionOptions {
    criterion: CriterionLookupKey;
    url: string;
    target?: string;
@@ -33,7 +33,7 @@ interface VerifyCriterionOptions {
    reportTarget?: VerificationReport['target'];
    recordingPath?: string;
 }
-interface VerifyLevelOptions {
+export interface VerifyLevelOptions {
    level: string;
    url: string;
    target?: string;

@@ -241,36 +241,72 @@ async function assertTextVerboseSnapshots(baseUrl: string): Promise<void> {
 }
 
 describe('cli wcag commands', () => {
-   it('checks wcag levels', async () => {
-      await assertWcagLevels();
-   });
-   it('checks wcag criteria', async () => {
-      await assertWcagCriteria();
-   });
-   it('checks wcag show', async () => {
-      await assertWcagShow();
-   });
-   it('checks wcag search', async () => {
-      await assertWcagSearch();
-   });
-   it('checks wcag coverage', async () => {
-      await assertWcagCoverage();
-   });
-   it('rejects unsupported version', async () => {
-      await assertWcagInvalidVersion();
-   });
+   it(
+      'checks wcag levels',
+      async () => {
+         await assertWcagLevels();
+      },
+      TEST_TIMEOUT_SHORT,
+   );
+   it(
+      'checks wcag criteria',
+      async () => {
+         await assertWcagCriteria();
+      },
+      TEST_TIMEOUT_SHORT,
+   );
+   it(
+      'checks wcag show',
+      async () => {
+         await assertWcagShow();
+      },
+      TEST_TIMEOUT_SHORT,
+   );
+   it(
+      'checks wcag search',
+      async () => {
+         await assertWcagSearch();
+      },
+      TEST_TIMEOUT_SHORT,
+   );
+   it(
+      'checks wcag coverage',
+      async () => {
+         await assertWcagCoverage();
+      },
+      TEST_TIMEOUT_SHORT,
+   );
+   it(
+      'rejects unsupported version',
+      async () => {
+         await assertWcagInvalidVersion();
+      },
+      TEST_TIMEOUT_SHORT,
+   );
 });
 
 describe('cli inspect commands', () => {
-   it('inspects applicable', async () => {
-      await assertInspectApplicable(testServer.getBaseUrl());
-   });
-   it('inspects criterion', async () => {
-      await assertInspectCriterion(testServer.getBaseUrl());
-   });
-   it('rejects invalid criterion', async () => {
-      await assertInspectInvalidCriterion(testServer.getBaseUrl());
-   });
+   it(
+      'inspects applicable',
+      async () => {
+         await assertInspectApplicable(testServer.getBaseUrl());
+      },
+      TEST_TIMEOUT_SHORT,
+   );
+   it(
+      'inspects criterion',
+      async () => {
+         await assertInspectCriterion(testServer.getBaseUrl());
+      },
+      TEST_TIMEOUT_SHORT,
+   );
+   it(
+      'rejects invalid criterion',
+      async () => {
+         await assertInspectInvalidCriterion(testServer.getBaseUrl());
+      },
+      TEST_TIMEOUT_SHORT,
+   );
 
    it(
       'keeps representative text output readable',

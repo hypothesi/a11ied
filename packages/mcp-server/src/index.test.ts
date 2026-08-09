@@ -3,6 +3,7 @@ import {
    criterionSearchResponseSchema,
    type CriterionSearchResult,
    wcagLookupResultSchema,
+   verificationReportSchema,
 } from '@a11ied/contracts';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
@@ -186,8 +187,29 @@ describe('tool metadata', () => {
 
          expect(driverTool?.description).toContain('real');
          expect(driverTool?.description).toContain('targetType');
-         expect(result.tools.some((entry) => entry.name === 'verify')).toBe(false);
+         expect(result.tools.some((entry) => entry.name === 'verify')).toBe(true);
          expect(result.tools.some((entry) => entry.name === 'run_pattern')).toBe(false);
+      });
+   });
+});
+
+describe('mcp verify tool', () => {
+   it('verifies a single criterion via MCP', async () => {
+      await withHarness(async (harness) => {
+         const result = await harness.client.callTool({
+            name: 'verify',
+            arguments: {
+               criterion: '4.1.3',
+               url: 'https://example.com',
+               target: 'virtual',
+               allowVirtual: true,
+            },
+         });
+
+         expect(result.isError).toBeFalsy();
+         const payload = verificationReportSchema.parse(result.structuredContent);
+         expect(payload.requestedScope.kind).toBe('criterion');
+         expect(payload.criteria.length).toBe(1);
       });
    });
 });

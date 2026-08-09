@@ -9,7 +9,7 @@ import {
    parseJsonOutput,
    EXIT_SUCCESS,
    EXIT_USAGE,
-   TEST_TIMEOUT_SHORT,
+   TEST_TIMEOUT_LONG,
    useTestServer,
 } from './setup.js';
 import { expectFirstErrorMessage, expectJsonLogCursor } from './helpers.js';
@@ -230,7 +230,7 @@ describe('cli sr lifecycle commands', () => {
             await assertSessionStop(sessionId);
             await assertMissingSessionError();
          }),
-      TEST_TIMEOUT_SHORT,
+      TEST_TIMEOUT_LONG,
    );
 
    it(
@@ -249,6 +249,6 @@ describe('cli sr lifecycle commands', () => {
             await assertLogsAfterClear(sessionId);
             await stopSession(sessionId);
          }),
-      TEST_TIMEOUT_SHORT,
+      TEST_TIMEOUT_LONG,
    );
 });

@@ -36,6 +36,7 @@ export const cliCommandFamilySchema = z.enum([
    'axe',
    'doctor',
    'mcp',
+   'verify',
 ]);
 export type CliCommandFamily = z.infer<typeof cliCommandFamilySchema>;
 

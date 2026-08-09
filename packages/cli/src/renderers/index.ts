@@ -1,4 +1,10 @@
-import type { CliOutputEnvelope } from '#contracts';
+import type {
+   CliMessage,
+   CliOutputEnvelope,
+   VerificationCriterionResult,
+   VerificationReport,
+   VerificationReportSummary,
+} from '#contracts';
 import { stripHtml } from '../lib/text.js';
 
 // Fallow-ignore-next-line unused-export
@@ -27,6 +33,103 @@ export function renderCriteriaText(
    for (const criterion of result.criteria) {
       const level = listsAllLevels && criterion.level ? ` [${criterion.level}]` : '';
       lines.push(`${criterion.id}  ${criterion.title}${level}`);
+   }
+
+   return lines.join('\n');
+}
+
+function renderSummary(summary: VerificationReportSummary): string[] {
+   const lines: string[] = [
+      'Summary:',
+      `  Total Criteria: ${summary.totalCriteria}`,
+      `  Failed: ${summary.failedCount}`,
+      `  Pass: ${summary.verdicts.pass}`,
+      `  Needs Manual Review: ${summary.verdicts['needs-manual-review']}`,
+      `  Not Applicable: ${summary.verdicts['not-applicable']}`,
+      `  Not Covered: ${summary.verdicts['not-covered']}`,
+   ];
+   if (summary.verdicts.error > 0) {
+      lines.push(`  Errors: ${summary.verdicts.error}`);
+   }
+   return lines;
+}
+
+function renderEvidence(
+   criterion: VerificationCriterionResult,
+   verbose: boolean,
+): string[] {
+   const lines: string[] = [];
+   if (verbose) {
+      lines.push(`  Evidence Mode: ${criterion.evidenceMode}`);
+      if (criterion.evidence.length > 0) {
+         lines.push(`  Evidence (${criterion.evidence.length} records):`);
+         for (const ev of criterion.evidence) {
+            lines.push(`    - [${ev.kind}] ${ev.summary}`);
+            if (ev.notes.length > 0) {
+               lines.push(`      Notes: ${ev.notes.join(' | ')}`);
+            }
+         }
+      }
+   }
+   return lines;
+}
+
+function renderCriterionResult(
+   criterion: VerificationCriterionResult,
+   verbose: boolean,
+): string[] {
+   const lines: string[] = [
+      `- ${criterion.criterionId}  ${criterion.criterion.title} [${criterion.criterion.level}] — Verdict: ${criterion.verdict.toUpperCase()}`,
+   ];
+   if (criterion.notes.length > 0) {
+      lines.push(`  Notes: ${criterion.notes.join(' | ')}`);
+   }
+   if (criterion.uncoveredWork.length > 0) {
+      lines.push('  Uncovered Work:');
+      for (const work of criterion.uncoveredWork) {
+         lines.push(`    - [${work.kind}] ${work.message}`);
+      }
+   }
+   lines.push(...renderEvidence(criterion, verbose));
+   return lines;
+}
+
+function renderWarnings(warnings: CliMessage[]): string[] {
+   const lines: string[] = ['Warnings:'];
+   for (const warning of warnings) {
+      lines.push(`  - [${warning.code}] ${warning.message}`);
+   }
+   return lines;
+}
+
+// Fallow-ignore-next-line unused-export
+export function renderVerificationReportText(
+   envelope: CliOutputEnvelope,
+   options: { verbose: boolean },
+): string {
+   const report = envelope.result as unknown as VerificationReport;
+   const scope = report.requestedScope;
+   const scopeStr =
+      scope.kind === 'criterion'
+         ? `criterion ${scope.criterion}`
+         : `level ${scope.level}`;
+
+   const lines: string[] = [
+      `Verification Report — ${scopeStr}`,
+      `Target: ${report.target.value}`,
+      `WCAG Version: ${report.wcagVersion}`,
+      '',
+      ...renderSummary(report.summary),
+      '',
+      'Criteria results:',
+   ];
+
+   for (const criterion of report.criteria) {
+      lines.push(...renderCriterionResult(criterion, options.verbose));
+   }
+
+   if (report.warnings.length > 0) {
+      lines.push('', ...renderWarnings(report.warnings));
    }
 
    return lines.join('\n');

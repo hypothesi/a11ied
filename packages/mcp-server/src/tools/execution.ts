@@ -3,8 +3,17 @@ import {
    criterionLookupKeySchema,
    wcagLevelSchema,
    wcagVersionSchema,
+   verificationReportSchema,
+   type Platform,
 } from '@a11ied/contracts';
-import { runAxe } from '@a11ied/core';
+import {
+   runAxe,
+   verifyCriterion,
+   verifyLevel,
+   resolveDefaultTarget,
+   type VerifyCriterionOptions,
+   type VerifyLevelOptions,
+} from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
@@ -12,8 +21,10 @@ import {
    DEFAULT_WCAG_VERSION,
    createToolResponse,
    readOnlyAnnotations,
+   activeAnnotations,
    resolveExecutionTarget,
    targetInputSchema,
+   ensureVirtualTargetAllowed,
 } from '../lib/shared.js';
 
 const axeCategorySchema = z.enum(['violations', 'passes', 'incomplete', 'inapplicable']);
@@ -121,6 +132,128 @@ async function runAxeForInput(
    return result;
 }
 
+const verifyInputSchema = targetInputSchema
+   .extend({
+      version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
+      criterion: criterionLookupKeySchema.optional(),
+      level: wcagLevelSchema.optional(),
+      target: z.string().optional(),
+      allowVirtual: z.boolean().optional(),
+      recording: z.string().optional(),
+   })
+   .superRefine((value, ctx) => {
+      const selections = [
+         value.criterion !== undefined,
+         value.level !== undefined,
+      ].filter(Boolean).length;
+
+      if (selections !== 1) {
+         ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Choose exactly one of criterion or level.',
+            path: ['criterion'],
+         });
+      }
+   });
+
+async function executeMcpVerifyCriterion(args: {
+   criterion: string;
+   resolvedUrl: string;
+   target: string | undefined;
+   version: string;
+   reportTarget: z.infer<typeof verificationReportSchema>['target'];
+   recording: string | undefined;
+}): Promise<z.infer<typeof verificationReportSchema>> {
+   const verifyOpts: VerifyCriterionOptions = {
+      criterion: args.criterion,
+      url: args.resolvedUrl,
+      wcagVersion: args.version,
+      reportTarget: args.reportTarget,
+   };
+   if (args.target !== undefined) {
+      verifyOpts.target = args.target;
+   }
+   if (args.recording !== undefined) {
+      verifyOpts.recordingPath = args.recording;
+   }
+   return verificationReportSchema.parse(await verifyCriterion(verifyOpts));
+}
+
+async function executeMcpVerifyLevel(args: {
+   level: string;
+   resolvedUrl: string;
+   target: string | undefined;
+   version: string;
+   reportTarget: z.infer<typeof verificationReportSchema>['target'];
+   recording: string | undefined;
+}): Promise<z.infer<typeof verificationReportSchema>> {
+   const verifyOpts: VerifyLevelOptions = {
+      level: args.level,
+      url: args.resolvedUrl,
+      wcagVersion: args.version,
+      reportTarget: args.reportTarget,
+   };
+   if (args.target !== undefined) {
+      verifyOpts.target = args.target;
+   }
+   if (args.recording !== undefined) {
+      verifyOpts.recordingPath = args.recording;
+   }
+   return verificationReportSchema.parse(await verifyLevel(verifyOpts));
+}
+
+async function verifyForInput(
+   input: z.infer<typeof verifyInputSchema>,
+): Promise<z.infer<typeof verificationReportSchema>> {
+   const { version, criterion, level, target, allowVirtual, recording, ...targetInput } =
+      input;
+   const resolved = await resolveExecutionTarget(targetInput);
+
+   if (target) {
+      ensureVirtualTargetAllowed(target as Platform, allowVirtual);
+   } else {
+      const fallback = resolveDefaultTarget();
+      ensureVirtualTargetAllowed(fallback.target, allowVirtual);
+   }
+
+   if (criterion) {
+      return executeMcpVerifyCriterion({
+         criterion,
+         resolvedUrl: resolved.resolvedUrl,
+         target,
+         version,
+         reportTarget: resolved.reportTarget,
+         recording,
+      });
+   }
+
+   const resolvedLevel = level ?? '';
+   return executeMcpVerifyLevel({
+      level: resolvedLevel,
+      resolvedUrl: resolved.resolvedUrl,
+      target,
+      version,
+      reportTarget: resolved.reportTarget,
+      recording,
+   });
+}
+
+function registerVerifyTool(server: McpServer): void {
+   server.registerTool(
+      'verify',
+      {
+         title: 'Verify WCAG conformance',
+         description:
+            'Turn collected evidence into explicit WCAG criterion or level verdicts. ' +
+            'Choose exactly one of criterion or level to verify against the target.',
+         inputSchema: verifyInputSchema,
+         outputSchema: verificationReportSchema,
+         annotations: { ...activeAnnotations, openWorldHint: true },
+      },
+      async (input) => createToolResponse(await verifyForInput(input)),
+   );
+}
+
 function registerRunAxeTool(server: McpServer): void {
    server.registerTool(
       'run_axe',
@@ -141,4 +274,5 @@ function registerRunAxeTool(server: McpServer): void {
 
 export function registerExecutionTools(server: McpServer): void {
    registerRunAxeTool(server);
+   registerVerifyTool(server);
 }

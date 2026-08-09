@@ -56,7 +56,12 @@ export {
    resolveDocumentTarget,
    type ResolveDocumentTargetInput,
 } from './targets/runtime.js';
-export { verifyCriterion, verifyLevel } from './verification/runtime.js';
+export {
+   verifyCriterion,
+   verifyLevel,
+   type VerifyCriterionOptions,
+   type VerifyLevelOptions,
+} from './verification/runtime.js';
 export { listInteractionPatterns, runInteractionPattern } from './patterns/runtime.js';
 export type { RunPatternOptions } from './patterns/helpers.js';
 
@@ -119,6 +124,11 @@ const cliCommands: CliCommand[] = [
    {
       name: 'mcp',
       summary: 'Expose the runtime over an MCP stdio server.',
+      maturity: 'ready',
+   },
+   {
+      name: 'verify',
+      summary: 'Turn collected evidence into explicit WCAG criterion or level verdicts.',
       maturity: 'ready',
    },
 ];

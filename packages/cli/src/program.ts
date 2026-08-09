@@ -4,6 +4,7 @@ import { registerSessionCommands } from './commands/drive.js';
 import { registerInspectCommands } from './commands/inspect.js';
 import { registerAxeCommand } from './commands/axe.js';
 import { registerWcagCommands } from './commands/wcag.js';
+import { registerVerifyCommands } from './commands/verify.js';
 import { CLI_VERSION, JSON_INDENT } from './lib/constants.js';
 import { renderFullHelp } from './lib/help.js';
 import { styleCommandText } from './lib/text.js';
@@ -59,6 +60,7 @@ function registerAllCommands(program: Command): void {
    registerWcagCommands(program);
    registerAxeCommand(program);
    registerInspectCommands(program);
+   registerVerifyCommands(program);
    registerMcpCommand(program);
    registerDoctorCommand(program);
    registerHelpAllCommand(program);

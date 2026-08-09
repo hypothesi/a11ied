@@ -14,8 +14,18 @@ vi.mock('node:child_process', () => ({
 const EXPECTED_TARGET_COUNT = 3;
 const VIRTUAL_TARGET_INDEX = 2;
 
+const originalPlatform = process.platform;
+
+function setPlatform(platform: NodeJS.Platform): void {
+   Object.defineProperty(process, 'platform', {
+      configurable: true,
+      value: platform,
+   });
+}
+
 afterEach(() => {
    childProcessMocks.spawnSync.mockReset();
+   setPlatform(originalPlatform);
 });
 
 function createSpawnResult(
@@ -58,6 +68,7 @@ function mockSpawnForFailingRecordingProbe(): void {
 
 describe('core scaffolding', () => {
    it('returns the supported target matrix', async () => {
+      setPlatform('darwin');
       mockSpawnForReadyDoctor();
       const { listSupportedTargets } = await import('./index.js');
       const targets = listSupportedTargets();
@@ -76,6 +87,7 @@ describe('core scaffolding', () => {
    });
 
    it('returns only shipped ready command families in the CLI catalog data', async () => {
+      setPlatform('darwin');
       mockSpawnForFailingRecordingProbe();
       const { createDoctorReport, listCliCommands } = await import('./index.js');
       const commands = listCliCommands();
