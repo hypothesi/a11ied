@@ -121,6 +121,11 @@ export async function runCli(args: string[]): Promise<CliResult> {
 
       child.on('error', reject);
       child.on('close', (code) => {
+         if (code !== 0 && code !== 2) {
+            console.error(
+               `CLI execution failed with code ${code}.\nArgs: ${args.join(' ')}\nStdout: ${stdout}\nStderr: ${stderr}`,
+            );
+         }
          resolveResult({
             status: code ?? 1,
             stderr,
