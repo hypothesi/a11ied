@@ -23,8 +23,8 @@
    },
    "dependencies": {
       "@a11ied/contracts": "0.1.0",
-      "@guidepup/guidepup": "^0.24.1",
+      "@guidepup/guidepup": "^0.33.2",
       "@guidepup/virtual-screen-reader": "^0.32.1",
-      "jsdom": "^27.0.1"
+      "jsdom": "^30.0.1"
    }
 }
