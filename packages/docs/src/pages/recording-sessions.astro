@@ -1,0 +1,69 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+---
+
+<DocShell
+   title="Recording sessions"
+   summary="Record a real VoiceOver session to MOV or an NVDA session to MP4. Pair the video with the session transcript in a bug or test report."
+   links={docsLinks}
+>
+   <section>
+      <h2>Supported targets</h2>
+      <ul>
+         <li>VoiceOver on macOS with a <code>.mov</code> output path</li>
+         <li>NVDA on Windows with an <code>.mp4</code> output path</li>
+         <li>The <code>sr start --recording</code> command</li>
+      </ul>
+      <p>
+         The virtual screen reader target does not support recording. It runs headlessly and
+         produces transcript data instead.
+      </p>
+   </section>
+
+   <section>
+      <h2>Examples</h2>
+      <pre><code>a1 sr start --target voiceover --recording ./recordings/voiceover-home.mov --json
+a1 sr read --session &lt;sessionId&gt; --json
+a1 sr stop --session &lt;sessionId&gt; --json</code></pre>
+   </section>
+
+   <section>
+      <h2>Setup with doctor</h2>
+      <p>
+         On macOS, <code>doctor</code> runs a short native recording probe for the current host app.
+         It also reports how a11ied will handle browser-backed automation. The browser policy checks
+         for an existing local Chromium-family browser before Playwright Chromium.
+      </p>
+      <pre><code>a1 doctor
+a1 doctor --json
+npx playwright install chromium</code></pre>
+   </section>
+
+   <section>
+      <h2>Troubleshooting</h2>
+      <p>
+         If recording fails, run <code>doctor</code> first. On macOS, a11ied records video without
+         microphone input. If recording works from Terminal but fails from your editor or agent,
+         check that the host app has Screen Recording permission in System Settings. If a browser-backed
+         command fails before it gets to recording, install Chromium with
+         <code>npx playwright install chromium</code>.
+      </p>
+   </section>
+
+   <section>
+      <h2>Privacy notes</h2>
+      <ul>
+         <li>Recordings may capture page content, system chrome, and assistive technology output.</li>
+         <li>A recording documents one specific test run. Include the artifact path in the test report.</li>
+      </ul>
+   </section>
+
+   <section class="field-note">
+      <h2>What a recording captures</h2>
+      <p>
+         A recording shows the page, browser, and screen reader activity from one test run. Use the
+         transcript to review the spoken output.
+      </p>
+   </section>
+</DocShell>

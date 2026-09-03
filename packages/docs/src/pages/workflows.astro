@@ -1,0 +1,104 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+---
+
+<DocShell
+   title="Workflows"
+   summary="Copy the commands for a criterion check, page scan, screen reader session, or MCP integration. Each workflow states what its result can prove."
+   links={docsLinks}
+>
+   <section class="split panel" id="drive-a-session">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Workflow 1</p>
+            <h2>Drive a screen reader</h2>
+         </div>
+         <p>
+            Use the driver when you need to navigate elements, send keystrokes, or read spoken
+            output directly.
+         </p>
+         <pre><code>a1 sr start --json
+a1 sr focus --session &lt;sessionId&gt; --app "Google Chrome" --json
+a1 sr next --session &lt;sessionId&gt; --json
+a1 sr read --session &lt;sessionId&gt; --json
+a1 sr stop --session &lt;sessionId&gt; --json</code></pre>
+         <p>
+            Open the page before starting a real VoiceOver or NVDA session. For a simulated run,
+            start the virtual target with <code>--allow-virtual</code> and <code>--url</code>.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Keep the output</div>
+         <p class="aside-note">Save the spoken phrase log with the route, actions, browser, and screen reader used in the test.</p>
+      </div>
+   </section>
+
+   <section class="split panel" id="agent-and-mcp">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Workflow 2</p>
+            <h2>Run the tools from an agent</h2>
+         </div>
+         <p>
+            Connect the MCP server when an AI agent or editor should call the screen reader, axe,
+            WCAG, and inspect tools directly.
+         </p>
+         <pre><code>npx -y a11ied mcp</code></pre>
+         <p>Follow the <a href="/agent-workflows">AI agent guide</a> for client configuration and practical prompts.</p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Local process</div>
+         <p class="aside-note">The server communicates over stdio. It does not listen on a network port.</p>
+      </div>
+   </section>
+
+   <section class="split panel" id="gather-evidence">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Workflow 3</p>
+            <h2>Scan a page with axe</h2>
+         </div>
+         <p>
+            Run axe against a development URL for fast, repeatable checks. Keep the JSON output with
+            the pull request or test report.
+         </p>
+         <pre><code>a1 axe --url http://localhost:3000 --level AA --json</code></pre>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Choose a scope</div>
+         <p class="aside-note">Use exactly one of <code>--level</code>, <code>--criterion</code>, or one or more <code>--rule</code> flags.</p>
+      </div>
+   </section>
+
+   <section class="split panel" id="check-one-criterion">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Workflow 4</p>
+            <h2>Check one WCAG criterion</h2>
+         </div>
+         <p>
+            Look up the criterion, check its coverage, inspect the page, then run any mapped axe rules.
+         </p>
+         <pre><code>a1 wcag show 1.1.1 --json
+a1 wcag coverage 1.1.1 --json
+a1 inspect criterion 1.1.1 --url http://localhost:3000 --json
+a1 axe --criterion 1.1.1 --url http://localhost:3000 --json</code></pre>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Read coverage first</div>
+         <p class="aside-note">If coverage is <code>hybrid</code> or <code>manual</code>, follow the returned strategy instead of treating axe as the whole test.</p>
+      </div>
+   </section>
+
+   <section class="field-note">
+      <div class="panel-head">
+         <p class="panel-kicker">Before a real driver session</p>
+         <h2>Open the page in the target browser</h2>
+      </div>
+      <p>
+         VoiceOver and NVDA operate the browser window already on screen. Navigate to the route,
+         wait for the interface to finish loading, then start the session and focus that browser.
+      </p>
+   </section>
+</DocShell>

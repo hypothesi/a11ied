@@ -1,0 +1,59 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+---
+
+<DocShell
+   title="Applicability"
+   summary="Inspect a page for forms, dialogs, live regions, media, and other signals tied to a WCAG criterion. Use the result to choose what to test next."
+   links={docsLinks}
+>
+   <section>
+      <h2>What determines applicability</h2>
+      <ul>
+         <li>Document structure and semantics from the loaded target</li>
+         <li>Signals such as forms, live regions, dialogs, media, and interactive widgets</li>
+         <li>Criterion tags and criterion-specific rules in the WCAG engine</li>
+      </ul>
+   </section>
+
+   <section>
+      <h2>Commands</h2>
+      <pre><code>a1 inspect applicable --url http://localhost:3000 --json
+a1 inspect criterion 3.3.8 --url http://localhost:3000 --json</code></pre>
+      <p>
+         The first command lists criteria with detected relevance. The second returns one
+         criterion's state, matching signals, and reasons.
+      </p>
+   </section>
+
+   <section>
+      <h2>Result categories</h2>
+      <div class="mini-grid">
+         <div class="stack">
+            <div class="tag">applicable</div>
+            <p>The target has a strong signal that matches the criterion.</p>
+         </div>
+         <div class="stack">
+            <div class="tag">likely-applicable</div>
+            <p>The target has a relevant signal, but the evidence is not strong enough for <code>applicable</code>.</p>
+         </div>
+         <div class="stack">
+            <div class="tag">not-detected</div>
+            <p>The analyzer found no matching signal. This does not prove that the criterion is out of scope.</p>
+         </div>
+         <div class="stack">
+            <div class="tag">unknown</div>
+            <p>The available signals do not support a reliable applicability decision.</p>
+         </div>
+      </div>
+   </section>
+
+   <section class="field-note">
+      <h2>Applicability is not a pass or fail result</h2>
+      <p>
+         Applicability is a triage step. It does not produce a pass or fail result. A criterion with
+         manual or hybrid coverage still needs the evidence named by its testing strategy.
+      </p>
+   </section>
+</DocShell>

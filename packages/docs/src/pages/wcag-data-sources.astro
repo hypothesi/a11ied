@@ -1,0 +1,47 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+---
+
+<DocShell
+   title="WCAG data sources"
+   summary="Query bundled WCAG 2.1 and 2.2 criteria, W3C ACT mappings, Quickref tags, and axe-core rule metadata without a network request."
+   links={docsLinks}
+>
+   <section>
+      <h2>What ships in the repo</h2>
+      <p>
+         The <code>packages/wcag-data</code> package syncs structured data from upstream W3C and
+         axe-core sources, then generates normalized artifacts that the rest of the toolkit reads
+         at runtime.
+      </p>
+   </section>
+
+   <section>
+      <h2>Upstream sources</h2>
+      <ul>
+         <li>W3C WCAG 2.1 and 2.2 JSON: criteria, levels, normative text, techniques, and failures</li>
+         <li>W3C ACT mapping: machine-readable rule-to-criterion coverage</li>
+         <li>W3C Quickref tags: topic tags keyed by success criterion</li>
+         <li>The installed axe-core package: rule IDs, tags, and ACT rule IDs</li>
+      </ul>
+   </section>
+
+   <section>
+      <h2>Choose a test from the coverage result</h2>
+      <ol>
+         <li>Resolve the WCAG version (default: 2.2) before running any checks.</li>
+         <li>Look up the criterion or target level before opening a browser.</li>
+         <li>Check coverage and testing strategy to know what can be automated.</li>
+      </ol>
+   </section>
+
+   <section class="field-note">
+      <h2>Coverage limits</h2>
+      <p>
+         Bundled WCAG data makes criterion lookup local. Some criteria map to axe rules, some need
+         screen reader output, and some require human review. The
+         <code>wcag coverage</code> command shows which category each criterion falls into.
+      </p>
+   </section>
+</DocShell>

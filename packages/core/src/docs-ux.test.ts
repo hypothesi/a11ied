@@ -4,9 +4,9 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const repoRoot = resolve(import.meta.dirname, '../../..');
-const docsPagesDir = resolve(repoRoot, 'apps/docs/src/pages');
-const docShellPath = resolve(repoRoot, 'apps/docs/src/layouts/doc-shell.astro');
-const navPath = resolve(repoRoot, 'apps/docs/src/lib/nav.ts');
+const docsPagesDir = resolve(repoRoot, 'packages/docs/src/pages');
+const docShellPath = resolve(repoRoot, 'packages/docs/src/layouts/doc-shell.astro');
+const navPath = resolve(repoRoot, 'packages/docs/src/lib/nav.ts');
 
 function readDocsFile(relativePath: string): string {
    return readFileSync(resolve(repoRoot, relativePath), 'utf8');
@@ -29,11 +29,11 @@ function expectTaskFirstEntryPoints(homePage: string, workflowsPage: string): vo
    expect(homePage).toContain('/workflows#check-one-criterion');
    expect(homePage).toContain('/workflows#gather-evidence');
    expect(homePage).toContain('/workflows#drive-a-session');
-   expect(homePage).toContain('/workflows#agent-and-mcp');
-   expect(workflowsPage).toContain('Check one criterion');
-   expect(workflowsPage).toContain('Gather evidence for a page');
-   expect(workflowsPage).toContain('Drive a session manually');
-   expect(workflowsPage).toContain('Use it from an agent');
+   expect(homePage).toContain('/agent-workflows');
+   expect(workflowsPage).toContain('Check one WCAG criterion');
+   expect(workflowsPage).toContain('Scan a page with axe');
+   expect(workflowsPage).toContain('Drive a screen reader');
+   expect(workflowsPage).toContain('Run the tools from an agent');
 }
 
 function expectDocsFilesFreeOfLegacyCallouts(files: readonly string[]): void {
@@ -55,7 +55,9 @@ describe('docs UX remediation guardrails', () => {
       const homePage = readDocsPage('index.astro');
       const workflowsPage = readDocsPage('workflows.astro');
 
-      expect(nav).toContain("{ href: '/workflows', label: 'Workflows' }");
+      expect(nav).toContain("{ href: '/workflows', label: 'Test a web page' }");
+      expect(nav).toContain("{ href: '/agent-workflows', label: 'Automate with an AI agent' }");
+      expect(nav).toContain("{ href: '/agent-skill', label: 'Install the agent skill' }");
       expectTaskFirstEntryPoints(homePage, workflowsPage);
    });
 
@@ -67,11 +69,11 @@ describe('docs UX remediation guardrails', () => {
 
    it('keeps the docs surfaces free of stale callout styling and placeholder routes', () => {
       const docsFiles = [
-         'apps/docs/src/layouts/doc-shell.astro',
-         'apps/docs/src/pages/index.astro',
-         'apps/docs/src/pages/workflows.astro',
-         'apps/docs/src/pages/cli-reference.astro',
-         'apps/docs/src/pages/mcp-usage.astro',
+         'packages/docs/src/layouts/doc-shell.astro',
+         'packages/docs/src/pages/index.astro',
+         'packages/docs/src/pages/workflows.astro',
+         'packages/docs/src/pages/cli-reference.astro',
+         'packages/docs/src/pages/mcp-usage.astro',
       ] as const;
 
       expectDocsFilesFreeOfLegacyCallouts(docsFiles);

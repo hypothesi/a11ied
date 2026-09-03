@@ -3,15 +3,19 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const rootDir = resolve(import.meta.dirname, '../../..');
-const docsPagesDir = resolve(rootDir, 'apps/docs/src/pages');
+const docsPagesDir = resolve(rootDir, 'packages/docs/src/pages');
 const maintainerReleaseChecklistPath = resolve(
    rootDir,
-   'docs/maintainer-release-checklist.md',
+   'internal-docs/maintainer-release-checklist.md',
 );
-const skillPath = resolve(rootDir, 'skills/a11ied/SKILL.md');
+const skillPath = resolve(rootDir, 'packages/skills/a11ied/SKILL.md');
+const skillInstallConfigPath = resolve(rootDir, 'packages/skills/ai.json');
 const ciWorkflowPath = resolve(rootDir, '.github/workflows/ci.yml');
 const publishWorkflowPath = resolve(rootDir, '.github/workflows/publish.yml');
-const releaseReadinessPath = resolve(rootDir, 'releases/v0.3.0-readiness.md');
+const releaseReadinessPath = resolve(
+   rootDir,
+   'internal-docs/releases/v0.3.0-readiness.md',
+);
 const requiredRuntimePages = [
    'wcag-data-sources.astro',
    'criterion-lookup.astro',
@@ -19,6 +23,8 @@ const requiredRuntimePages = [
    'driver-usage.astro',
    'cli-reference.astro',
    'mcp-usage.astro',
+   'agent-workflows.astro',
+   'agent-skill.astro',
    'workflows.astro',
    'api-reference.astro',
    'recording-sessions.astro',
@@ -31,6 +37,8 @@ const requiredHomeRoutes = [
    '/driver-usage',
    '/cli-reference',
    '/mcp-usage',
+   '/agent-workflows',
+   '/agent-skill',
    '/api-reference',
    '/recording-sessions',
 ] as const;
@@ -63,11 +71,15 @@ function expectHomeRoutes(): void {
 
 function expectSkillGuardrails(): void {
    const skill = readFileSync(skillPath, 'utf8');
+   const installConfig = readFileSync(skillInstallConfigPath, 'utf8');
    expect(skill).toContain('resolve the criterion or target level before testing');
    expect(skill).toContain('automated');
    expect(skill).toContain('hybrid');
    expect(skill).toContain('manual');
    expect(skill).toContain('Do not confuse raw driver transcripts with WCAG claims');
+   expect(installConfig).toContain('"a11ied"');
+   expect(installConfig).toContain('"./a11ied/"');
+   expect(readDocsPage('agent-skill.astro')).toContain('--only skills --user');
 }
 
 function expectWorkflowSteps(): void {
@@ -100,16 +112,43 @@ function expectSurfaceDoc(page: string, requiredText: string): void {
    expect(readDocsPage(page)).toContain(requiredText);
 }
 
-function expectPublicSurfaceDocs(): void {
+function expectCliSurfaceDocs(): void {
    expectSurfaceDoc('cli-reference.astro', 'Command families');
+   expectSurfaceDoc('cli-reference.astro', 'a1 wcag coverage 1.1.1');
    expectSurfaceDoc('cli-reference.astro', 'npx playwright install chromium');
    expectSurfaceDoc('cli-reference.astro', 'Chrome, Edge, Brave, or Chromium');
+   expect(readDocsPage('cli-reference.astro')).not.toContain('a1 axe --criterion 4.1.3');
+}
+
+function expectApplicabilitySurfaceDocs(): void {
+   expectSurfaceDoc('applicability.astro', 'likely-applicable');
+   expectSurfaceDoc('applicability.astro', 'not-detected');
+   expect(readDocsPage('applicability.astro')).not.toContain('Needs review');
+}
+
+function expectMcpAndApiSurfaceDocs(): void {
    expectSurfaceDoc('mcp-usage.astro', 'What MCP exposes');
+   expectSurfaceDoc('mcp-usage.astro', 'requires exactly one selector');
+   expectSurfaceDoc('mcp-usage.astro', 'npx -y a11ied mcp');
    expectSurfaceDoc('api-reference.astro', 'Packages');
+   expectSurfaceDoc('api-reference.astro', 'Exported helper groups');
+}
+
+function expectRecordingSurfaceDocs(): void {
    expectSurfaceDoc('recording-sessions.astro', 'Supported targets');
-   expectSurfaceDoc('recording-sessions.astro', 'voiceover');
+   expectSurfaceDoc('recording-sessions.astro', '.mov');
+   expectSurfaceDoc('recording-sessions.astro', '.mp4');
+   expectSurfaceDoc('recording-sessions.astro', 'sr start --recording');
    expectSurfaceDoc('recording-sessions.astro', 'doctor');
    expectSurfaceDoc('recording-sessions.astro', 'npx playwright install chromium');
+}
+
+function expectPublicSurfaceDocs(): void {
+   expectCliSurfaceDocs();
+   expectApplicabilitySurfaceDocs();
+   expectMcpAndApiSurfaceDocs();
+   expectRecordingSurfaceDocs();
+   expect(readDocsPage('workflows.astro')).not.toContain('a1 axe --criterion 4.1.3');
    expect(existsSync(resolve(docsPagesDir, 'release-checklist.astro'))).toBe(false);
 }
 

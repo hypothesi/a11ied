@@ -1,0 +1,71 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+---
+
+<DocShell
+   title="Driver usage"
+   summary="Start VoiceOver, NVDA, or a virtual screen reader session. Navigate the page, send keystrokes, and capture what the reader announces."
+   links={docsLinks}
+>
+   <section>
+      <h2>When to use the driver</h2>
+      <p>
+         Use <code>sr</code> when you need low-level control: navigating items, sending keyboard
+         chords, entering interaction mode, reading spoken output, and capturing logs.
+      </p>
+      <p>
+         See the <a href="/workflows#drive-a-session">driver workflow</a> for a guided walkthrough.
+      </p>
+   </section>
+
+   <section>
+      <h2>Basic session</h2>
+      <pre><code>a1 sr start --json
+a1 sr focus --session &lt;sessionId&gt; --app "Google Chrome" --json
+a1 sr do next --session &lt;sessionId&gt; --json
+a1 sr read --session &lt;sessionId&gt; --json
+a1 sr stop --session &lt;sessionId&gt; --json</code></pre>
+      <p>
+         If you leave off <code>--target</code>, a11ied chooses VoiceOver on macOS, NVDA on Windows,
+         or the virtual driver elsewhere. Use <code>--target virtual</code> with
+         <code>--allow-virtual</code> when you want a simulated run. For real sessions, open the
+         browser and navigate to the page before starting the driver.
+      </p>
+      <p>
+         When you want the virtual target, pass <code>--target virtual</code>,
+         <code>--allow-virtual</code>, plus <code>--url</code> so a11ied can load the HTML.
+      </p>
+   </section>
+
+   <section>
+      <h2>Available actions</h2>
+      <div class="route-list">
+         <div class="route-row"><code>start</code>, <code>status</code>, <code>stop</code><span>Create, inspect, and tear down a session.</span></div>
+         <div class="route-row"><code>focus</code><span>Bring a target window to the front so the screen reader reads the right app.</span></div>
+         <div class="route-row"><code>next</code><span>Move to the next item with a dedicated subcommand.</span></div>
+         <div class="route-row"><code>do previous</code>, <code>do interact</code>, <code>do stop-interacting</code>, <code>do click-current-item</code><span>Run portable named screen-reader commands. Use <code>sr list</code> for the complete target-specific list.</span></div>
+         <div class="route-row"><code>press</code>, <code>type</code><span>Send key chords or type text.</span></div>
+         <div class="route-row"><code>read</code>, <code>logs</code>, <code>clear-logs</code>, <code>checkpoint</code><span>Read spoken output, view session logs, and create checkpoints.</span></div>
+      </div>
+   </section>
+
+   <section>
+      <h2>Persistent vs. ephemeral sessions</h2>
+      <p>
+         Persistent sessions keep the full transcript, checkpoints, and state together across multiple
+         commands. Use the <code>--ephemeral</code> flag for quick one-off actions.
+      </p>
+   </section>
+
+   <section class="field-note">
+      <div class="panel-head">
+         <p class="panel-kicker">Session cleanup</p>
+         <h2>Stop every session you start</h2>
+      </div>
+      <p>
+         Run <code>a1 sr stop --session &lt;sessionId&gt; --json</code> when the test ends. This stops the
+         screen reader driver, finishes an active recording, and removes the persisted session state.
+      </p>
+   </section>
+</DocShell>

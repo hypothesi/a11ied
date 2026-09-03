@@ -20,7 +20,7 @@ describe('release consistency guardrails', () => {
    });
 
    it('keeps the shipped skill package map free of stale planned markers', () => {
-      const skill = readRepoFile('skills/a11ied/SKILL.md');
+      const skill = readRepoFile('packages/skills/a11ied/SKILL.md');
 
       expect(skill).not.toMatch(/^- planned:/m);
    });

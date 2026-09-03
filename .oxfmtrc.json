@@ -3,7 +3,7 @@
    "ignorePatterns": [
       "**/dist/**",
       "**/coverage/**",
-      "apps/docs/.astro/**",
+      "packages/docs/.astro/**",
       ".aix/**",
       ".claude/**"
    ],

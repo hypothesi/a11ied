@@ -1,0 +1,108 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+---
+
+<DocShell
+   title="MCP tool reference"
+   summary="Tool names, inputs, browser behavior, and resource URIs for clients connected to a11ied's local MCP server."
+   links={docsLinks}
+>
+   <section class="split panel">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Runtime</p>
+            <h2>What MCP exposes</h2>
+         </div>
+      <p>
+         The server provides read-only standards resources plus tool calls for criterion lookup,
+         applicability inspection, driver actions, and axe scans. It uses the same runtime as the CLI.
+      </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">No second implementation</div>
+         <p class="aside-note">
+            MCP tools wrap the same runtime functions as the CLI commands.
+         </p>
+      </div>
+   </section>
+
+   <section class="ledger">
+      <div class="panel-head">
+         <p class="panel-kicker">Tool families</p>
+         <h2>Available tools</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row"><strong>Driver</strong><span><code>driver_session</code>, <code>driver_action</code></span></div>
+         <div class="route-row"><strong>Axe</strong><span><code>run_axe</code></span></div>
+         <div class="route-row"><strong>WCAG</strong><span><code>wcag_lookup</code>, <code>wcag_levels</code>, <code>wcag_search</code></span></div>
+         <div class="route-row"><strong>Inspect</strong><span><code>inspect</code></span></div>
+         <div class="route-row"><strong>Diagnostics</strong><span><code>doctor</code></span></div>
+      </div>
+      <p>
+         Driver actions are bundled into <code>driver_action</code>. Provide <code>action</code> and
+         any required fields such as <code>key</code>, <code>text</code>, or <code>label</code>.
+         Use <code>focus</code> with <code>appName</code>, <code>bundleId</code>, <code>processName</code>,
+         <code>pid</code>, or <code>windowTitle</code> to bring the right window to the front.
+      </p>
+      <p>
+         <code>run_axe</code> requires exactly one selector: <code>criterion</code>,
+         <code>level</code>, or <code>ruleIds</code>. Use <code>include</code> to return only selected
+         axe result categories.
+      </p>
+   </section>
+
+   <section class="panel">
+      <div class="panel-head">
+         <p class="panel-kicker">Startup</p>
+         <h2>Start the stdio server</h2>
+      </div>
+      <pre><code>npx -y a11ied mcp</code></pre>
+      <p>
+         Configure your MCP client to run that command over stdio. The server does not open a
+         network port.
+      </p>
+   </section>
+
+   <section class="panel">
+      <div class="panel-head">
+         <p class="panel-kicker">Resources</p>
+         <h2>Read-only resource URIs</h2>
+      </div>
+      <ul>
+         <li><code>a11ied://targets</code></li>
+         <li><code>a11ied://wcag/criteria/&lt;version&gt;</code></li>
+         <li><code>a11ied://wcag/levels/&lt;version&gt;</code></li>
+         <li><code>a11ied://wcag/coverage/&lt;version&gt;</code></li>
+      </ul>
+   </section>
+
+   <section>
+      <div class="panel-head">
+         <p class="panel-kicker">Behavior</p>
+         <h2>Which tools open a browser or control a screen reader</h2>
+      </div>
+      <p>
+         WCAG knowledge tools read local data. <code>doctor</code> probes the host environment and can
+         run a short recording check on macOS. <code>inspect</code> fetches the requested URL, while
+         <code>run_axe</code> opens it in browser automation. Driver tools create sessions and can
+         control real assistive technology or a simulated virtual target.
+      </p>
+   </section>
+
+   <section class="field-note">
+      <div class="panel-head">
+         <p class="panel-kicker">Before a driver call</p>
+         <h2>Open the page for real sessions</h2>
+      </div>
+      <p>
+         For a real driver session, open the page before calling <code>driver_session</code>.
+         For a virtual session, pass <code>url</code> to load the document into the simulator.
+      </p>
+      <p>
+         If you omit <code>target</code> on a driver tool, a11ied chooses VoiceOver on macOS,
+         NVDA on Windows, or the virtual driver elsewhere. Only pick the virtual target
+         when you explicitly want a simulated run, and set <code>allowVirtual=true</code>.
+      </p>
+   </section>
+</DocShell>

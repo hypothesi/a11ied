@@ -33,8 +33,8 @@ The repo is split into npm workspaces. `packages/cli` publishes the end-user `a1
 - `packages/wcag-data`: normalized WCAG data artifacts (`@a11ied/wcag-data`)
 - `packages/wcag-engine`: lookup and search APIs over the WCAG data package (`@a11ied/wcag-engine`)
 - `packages/cli`: end-user command line entrypoint (published as `a11ied`)
-- `apps/docs`: Astro docs site
-- `skills/a11ied`: Agent Skill scaffold
+- `packages/docs`: Astro docs site
+- `packages/skills/a11ied`: Agent Skill scaffold
 
 ## quick start
 
@@ -68,7 +68,7 @@ For the package-level details, see [packages/wcag-data/README.md](packages/wcag-
 
 ## release readiness
 
-The current public release record is [releases/v0.3.0-readiness.md](releases/v0.3.0-readiness.md).
+The current release record is [internal-docs/releases/v0.3.0-readiness.md](internal-docs/releases/v0.3.0-readiness.md).
 
 That file is the one to read before a public minor or major cut. It includes:
 

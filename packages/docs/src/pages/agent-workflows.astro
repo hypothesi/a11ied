@@ -1,0 +1,77 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+---
+
+<DocShell
+   title="Automate tests with an AI agent"
+   summary="Connect a11ied's local MCP server so an agent can look up WCAG criteria, scan a development URL with axe, and control VoiceOver, NVDA, or a virtual screen reader."
+   links={docsLinks}
+>
+   <section class="split panel">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Step 1</p>
+            <h2>Connect the MCP server</h2>
+         </div>
+         <p>Add a11ied to your editor or agent's MCP configuration. It runs locally over stdio and does not open a network port.</p>
+         <pre><code>{`{
+  "mcpServers": {
+    "a11ied": {
+      "command": "npx",
+      "args": ["-y", "a11ied", "mcp"]
+    }
+  }
+}`}</code></pre>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Check the host</div>
+         <p class="aside-note">Ask the agent to call <code>doctor</code> first. Its result lists the browser, screen reader, and recording support available on this machine.</p>
+      </div>
+   </section>
+
+   <section class="panel">
+      <div class="panel-head">
+         <p class="panel-kicker">Step 2</p>
+         <h2>Scan the page you are building</h2>
+      </div>
+      <p>Start your development server, then give the agent the exact local URL and the WCAG level you want to test.</p>
+      <pre data-label="AI AGENT PROMPT"><code>Open http://localhost:3000/account/settings.
+Use a11ied to run axe for WCAG level AA.
+Return each violation with its selector, impact, and suggested fix.</code></pre>
+      <p>The agent should call <code>run_axe</code> with the URL and <code>level: "AA"</code>. That tool requires one selector: a criterion, a level, or a list of axe rule IDs.</p>
+   </section>
+
+   <section class="panel">
+      <div class="panel-head">
+         <p class="panel-kicker">Step 3</p>
+         <h2>Test what the screen reader says</h2>
+      </div>
+      <p>Use a driver session for labels, focus order, menus, dialogs, validation messages, and other behavior that a static scan cannot hear.</p>
+      <pre data-label="AI AGENT PROMPT"><code>Use a11ied to test the checkout form with the available screen reader.
+Move through every field in keyboard order.
+Report the spoken label, role, state, and any confusing announcement.</code></pre>
+      <p>For VoiceOver or NVDA, open the page before the agent starts <code>driver_session</code>. For the virtual reader, provide the URL and set <code>allowVirtual</code> to <code>true</code>.</p>
+   </section>
+
+   <section class="ledger">
+      <div class="panel-head">
+         <p class="panel-kicker">Useful jobs</p>
+         <h2>Give the agent a concrete test</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row"><strong>Review a pull request</strong><span>Run axe on the changed route and compare violations with the expected behavior.</span></div>
+         <div class="route-row"><strong>Check a modal or menu</strong><span>Open it, move focus through it, close it, and report the screen reader transcript.</span></div>
+         <div class="route-row"><strong>Investigate one WCAG issue</strong><span>Look up the criterion, check its automation coverage, then run the supported test.</span></div>
+         <div class="route-row"><strong>Save repeatable evidence</strong><span>Return structured axe results and the driver transcript with the route and test steps.</span></div>
+      </div>
+   </section>
+
+   <section class="field-note">
+      <div class="panel-head">
+         <p class="panel-kicker">Need exact inputs?</p>
+         <h2>Use the MCP tool reference</h2>
+      </div>
+      <p>The <a href="/mcp-usage">MCP tool reference</a> lists every tool family, selector rule, resource URI, and browser side effect.</p>
+   </section>
+</DocShell>
