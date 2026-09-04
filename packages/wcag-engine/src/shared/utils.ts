@@ -1,4 +1,5 @@
 import type {
+   ApplicabilityElement,
    ApplicabilitySignal,
    ApplicabilitySignalCategory,
    CriterionApplicability,
@@ -12,9 +13,31 @@ import {
 } from './data.js';
 
 const FORMAT_LIST_PAIR_LENGTH = 2;
+const MAX_ASSESSMENT_ELEMENTS = 20;
 
 export function dedupe<TValue>(values: TValue[]): TValue[] {
    return [...new Set(values)];
+}
+
+/**
+ * Merges the elements behind a set of signals, keeping document order and dropping
+ * repeats.
+ */
+export function collectSignalElements(
+   signals: ApplicabilitySignal[],
+): ApplicabilityElement[] {
+   const seen = new Set<string>();
+   const elements: ApplicabilityElement[] = [];
+
+   for (const element of signals.flatMap((signal) => signal.elements ?? [])) {
+      if (seen.has(element.xpath)) {
+         continue;
+      }
+      seen.add(element.xpath);
+      elements.push(element);
+   }
+
+   return elements.slice(0, MAX_ASSESSMENT_ELEMENTS);
 }
 
 export function formatList(values: string[]): string {
@@ -35,15 +58,17 @@ export function formatList(values: string[]): string {
 }
 
 export function buildNotDetected(
-   criterionId: string,
+   criterion: NormalizedCriterion,
    reason: string,
 ): CriterionApplicability {
    return {
-      criterionId,
+      criterionId: criterion.id,
+      title: criterion.title,
       state: 'not-detected',
       reasons: [reason],
       matchedSignalCategories: [],
       matchedTags: [],
+      elements: [],
    };
 }
 
@@ -78,6 +103,7 @@ export function getMatchedTags(
 export function getInteractiveUnknownAssessment(
    criterion: NormalizedCriterion,
    matchedTags: string[],
+   elements: ApplicabilityElement[],
 ): CriterionApplicability | undefined {
    const criterionLooksInteractive = criterion.tags.some((tag) =>
       interactiveFallbackTags.has(tag),
@@ -89,11 +115,13 @@ export function getInteractiveUnknownAssessment(
 
    return {
       criterionId: criterion.id,
+      title: criterion.title,
       state: 'unknown',
       reasons: [
          `Detected a custom widget signal, but no recognized form, dialog, media, menu, or authentication-flow signals. Applicability for this interactive criterion stays unresolved.`,
       ],
       matchedSignalCategories: ['widget'],
       matchedTags,
+      elements,
    };
 }

@@ -1,200 +1,251 @@
+import { JSDOM, VirtualConsole } from 'jsdom';
 import {
    applicabilityInputSchema,
+   type ApplicabilityElement,
    type ApplicabilityInput,
    type ApplicabilitySignal,
 } from '@a11ied/contracts';
 
-interface AddSignalParams {
+const MAX_ELEMENTS_PER_SIGNAL = 10;
+const MAX_SNIPPET_LENGTH = 120;
+
+interface SignalDetector {
    category: ApplicabilitySignal['category'];
    source: ApplicabilitySignal['source'];
    value: string;
    confidence: ApplicabilitySignal['confidence'];
+   selector?: string;
+   /** Tested against an element's opening tag plus the text it holds directly. */
+   pattern?: RegExp;
 }
 
-function hasMatch(value: string, pattern: RegExp): boolean {
-   return pattern.test(value);
+const LANDMARK_ROLES = ['main', 'navigation', 'banner', 'contentinfo', 'complementary'];
+const WIDGET_ROLES = [
+   'button',
+   'link',
+   'switch',
+   'slider',
+   'combobox',
+   'listbox',
+   'tree',
+];
+
+function roleSelector(roles: string[]): string {
+   return roles.map((role) => `[role="${role}"]`).join(', ');
 }
 
-function addSignal(signals: ApplicabilitySignal[], params: AddSignalParams): void {
-   signals.push({
-      category: params.category,
-      source: params.source,
-      value: params.value,
-      confidence: params.confidence,
-   });
+const domDetectors: readonly SignalDetector[] = [
+   {
+      category: 'landmark',
+      source: 'dom',
+      value: 'landmark structure',
+      confidence: 'high',
+      selector: `main, nav, header, footer, aside, ${roleSelector(LANDMARK_ROLES)}`,
+   },
+   {
+      category: 'heading',
+      source: 'dom',
+      value: 'heading structure',
+      confidence: 'high',
+      selector: 'h1, h2, h3, h4, h5, h6, [role="heading"]',
+   },
+   {
+      category: 'form',
+      source: 'dom',
+      value: 'form controls',
+      confidence: 'high',
+      selector: 'form, input, select, textarea',
+   },
+   {
+      category: 'auth',
+      source: 'dom',
+      value: 'authentication flow',
+      confidence: 'high',
+      selector:
+         'input[type="password"], [autocomplete="current-password"], [autocomplete="new-password"], [autocomplete="username"]',
+      pattern: /\b(log in|login|sign in|password recovery|two-factor|otp)\b/i,
+   },
+   {
+      category: 'live-region',
+      source: 'dom',
+      value: 'aria-live region',
+      confidence: 'high',
+      selector: '[aria-live]:not([aria-live=""])',
+   },
+   {
+      category: 'live-region',
+      source: 'a11y-tree',
+      value: 'role=status',
+      confidence: 'high',
+      selector: '[role="status"]',
+   },
+   {
+      category: 'live-region',
+      source: 'a11y-tree',
+      value: 'alert or log role',
+      confidence: 'medium',
+      selector: roleSelector(['alert', 'log']),
+   },
+   {
+      category: 'dialog',
+      source: 'dom',
+      value: 'dialog structure',
+      confidence: 'high',
+      selector: `${roleSelector(['dialog', 'alertdialog'])}, [aria-modal="true"]`,
+   },
+   {
+      category: 'overlay',
+      source: 'dom',
+      value: 'fixed or modal overlay',
+      confidence: 'medium',
+      pattern: /\b(modal|overlay)\b|position\s*:\s*(fixed|sticky)/i,
+   },
+   {
+      category: 'media',
+      source: 'dom',
+      value: 'audio or video media',
+      confidence: 'high',
+      selector: 'video, audio',
+   },
+   {
+      category: 'drag-and-drop',
+      source: 'dom',
+      value: 'drag-and-drop interaction',
+      confidence: 'medium',
+      pattern: /\b(draggable|drag|drop)\b/i,
+   },
+   {
+      category: 'menu',
+      source: 'dom',
+      value: 'menu structure',
+      confidence: 'medium',
+      selector: roleSelector(['menu', 'menubar', 'menuitem']),
+      pattern: /\b(menu|menubar)\b/i,
+   },
+   {
+      category: 'tablist',
+      source: 'dom',
+      value: 'tablist structure',
+      confidence: 'medium',
+      selector: '[role="tablist"]',
+   },
+   {
+      category: 'validation',
+      source: 'dom',
+      value: 'validation messaging',
+      confidence: 'medium',
+      selector: '[aria-invalid="true"]',
+      pattern: /\b(error|invalid|required field|validation)\b/i,
+   },
+   {
+      category: 'widget',
+      source: 'dom',
+      value: 'focusable widget',
+      confidence: 'medium',
+      selector: `[tabindex="0"], ${roleSelector(WIDGET_ROLES)}`,
+   },
+];
+
+function buildOpeningTag(element: Element): string {
+   const attributes = [...element.attributes]
+      .map((attribute) => ` ${attribute.name}="${attribute.value}"`)
+      .join('');
+   return `<${element.localName}${attributes}>`;
 }
 
-function detectStructuralSignals(html: string, signals: ApplicabilitySignal[]): void {
-   if (
-      hasMatch(html, /<(main|nav|header|footer|aside)\b/i) ||
-      hasMatch(html, /role=["'](?:main|navigation|banner|contentinfo|complementary)["']/i)
-   ) {
-      addSignal(signals, {
-         category: 'landmark',
-         source: 'dom',
-         value: 'landmark structure',
-         confidence: 'high',
-      });
-   }
-
-   if (hasMatch(html, /<h[1-6]\b/i) || hasMatch(html, /role=["']heading["']/i)) {
-      addSignal(signals, {
-         category: 'heading',
-         source: 'dom',
-         value: 'heading structure',
-         confidence: 'high',
-      });
-   }
-
-   if (hasMatch(html, /<form\b/i) || hasMatch(html, /<(input|select|textarea)\b/i)) {
-      addSignal(signals, {
-         category: 'form',
-         source: 'dom',
-         value: 'form controls',
-         confidence: 'high',
-      });
-   }
+function buildOwnText(element: Element): string {
+   return [...element.childNodes]
+      .filter((node) => node.nodeType === node.TEXT_NODE)
+      .map((node) => node.textContent ?? '')
+      .join(' ');
 }
 
-function detectAuthAndLiveRegionSignals(
-   html: string,
-   signals: ApplicabilitySignal[],
-): void {
-   if (
-      hasMatch(html, /type=["']password["']/i) ||
-      hasMatch(
-         html,
-         /autocomplete=["'](?:current-password|new-password|username)["']/i,
-      ) ||
-      hasMatch(html, /\b(log in|login|sign in|password recovery|two-factor|otp)\b/i)
-   ) {
-      addSignal(signals, {
-         category: 'auth',
-         source: 'dom',
-         value: 'authentication flow',
-         confidence: 'high',
-      });
+function buildXPathSegment(element: Element): string {
+   const name = element.localName;
+   const parent = element.parentElement;
+   if (!parent) {
+      return name;
    }
 
-   if (hasMatch(html, /aria-live=["'][^"']+["']/i)) {
-      addSignal(signals, {
-         category: 'live-region',
-         source: 'dom',
-         value: 'aria-live region',
-         confidence: 'high',
-      });
+   const sameTagSiblings = [...parent.children].filter(
+      (sibling) => sibling.localName === name,
+   );
+   if (sameTagSiblings.length === 1) {
+      return name;
    }
-
-   if (hasMatch(html, /role=["']status["']/i)) {
-      addSignal(signals, {
-         category: 'live-region',
-         source: 'a11y-tree',
-         value: 'role=status',
-         confidence: 'high',
-      });
-   }
-
-   if (hasMatch(html, /role=["'](?:alert|log)["']/i)) {
-      addSignal(signals, {
-         category: 'live-region',
-         source: 'a11y-tree',
-         value: 'alert or log role',
-         confidence: 'medium',
-      });
-   }
+   return `${name}[${sameTagSiblings.indexOf(element) + 1}]`;
 }
 
-function detectDialogSignals(html: string, signals: ApplicabilitySignal[]): void {
-   if (
-      hasMatch(html, /role=["'](?:dialog|alertdialog)["']/i) ||
-      hasMatch(html, /aria-modal=["']true["']/i)
-   ) {
-      addSignal(signals, {
-         category: 'dialog',
-         source: 'dom',
-         value: 'dialog structure',
-         confidence: 'high',
-      });
+function buildXPath(element: Element): string {
+   const segments: string[] = [];
+   let current: Element | null = element;
+
+   while (current) {
+      segments.unshift(buildXPathSegment(current));
+      current = current.parentElement;
    }
+
+   return `/${segments.join('/')}`;
 }
 
-function detectUiPatternSignals(html: string, signals: ApplicabilitySignal[]): void {
-   if (
-      hasMatch(html, /\b(modal|overlay)\b/i) ||
-      hasMatch(html, /position\s*:\s*(fixed|sticky)/i)
-   ) {
-      addSignal(signals, {
-         category: 'overlay',
-         source: 'dom',
-         value: 'fixed or modal overlay',
-         confidence: 'medium',
-      });
+function buildSnippet(openingTag: string): string {
+   const singleLine = openingTag.replaceAll(/\s+/g, ' ');
+   if (singleLine.length <= MAX_SNIPPET_LENGTH) {
+      return singleLine;
    }
-
-   if (hasMatch(html, /<(video|audio)\b/i)) {
-      addSignal(signals, {
-         category: 'media',
-         source: 'dom',
-         value: 'audio or video media',
-         confidence: 'high',
-      });
-   }
-
-   if (hasMatch(html, /\b(draggable|drag|drop)\b/i)) {
-      addSignal(signals, {
-         category: 'drag-and-drop',
-         source: 'dom',
-         value: 'drag-and-drop interaction',
-         confidence: 'medium',
-      });
-   }
-
-   if (
-      hasMatch(html, /\b(menu|menubar)\b/i) ||
-      hasMatch(html, /role=["'](?:menu|menubar|menuitem)["']/i)
-   ) {
-      addSignal(signals, {
-         category: 'menu',
-         source: 'dom',
-         value: 'menu structure',
-         confidence: 'medium',
-      });
-   }
+   return `${singleLine.slice(0, MAX_SNIPPET_LENGTH)}...`;
 }
 
-function detectWidgetSignals(html: string, signals: ApplicabilitySignal[]): void {
-   if (hasMatch(html, /role=["']tablist["']/i)) {
-      addSignal(signals, {
-         category: 'tablist',
-         source: 'dom',
-         value: 'tablist structure',
-         confidence: 'medium',
-      });
+function toApplicabilityElement(
+   element: Element,
+   openingTag: string,
+): ApplicabilityElement {
+   return {
+      xpath: buildXPath(element),
+      tag: element.localName,
+      snippet: buildSnippet(openingTag),
+   };
+}
+
+function matchesDetector(
+   detector: SignalDetector,
+   element: Element,
+   surface: string,
+): boolean {
+   if (detector.selector && element.matches(detector.selector)) {
+      return true;
+   }
+   return detector.pattern !== undefined && detector.pattern.test(surface);
+}
+
+function detectDomSignals(html: string): ApplicabilitySignal[] {
+   const dom = new JSDOM(html, { virtualConsole: new VirtualConsole() });
+   const matches = new Map<SignalDetector, ApplicabilityElement[]>();
+
+   for (const element of dom.window.document.querySelectorAll('*')) {
+      const openingTag = buildOpeningTag(element);
+      const surface = `${openingTag} ${buildOwnText(element)}`;
+      for (const detector of domDetectors) {
+         if (!matchesDetector(detector, element, surface)) {
+            continue;
+         }
+         const elements = matches.get(detector) ?? [];
+         if (elements.length < MAX_ELEMENTS_PER_SIGNAL) {
+            elements.push(toApplicabilityElement(element, openingTag));
+         }
+         matches.set(detector, elements);
+      }
    }
 
-   if (
-      hasMatch(html, /aria-invalid=["']true["']/i) ||
-      hasMatch(html, /\b(error|invalid|required field|validation)\b/i)
-   ) {
-      addSignal(signals, {
-         category: 'validation',
-         source: 'dom',
-         value: 'validation messaging',
-         confidence: 'medium',
-      });
-   }
-
-   if (
-      hasMatch(html, /tabindex=["']0["']/i) ||
-      hasMatch(html, /role=["'](?:button|link|switch|slider|combobox|listbox|tree)["']/i)
-   ) {
-      addSignal(signals, {
-         category: 'widget',
-         source: 'dom',
-         value: 'focusable widget',
-         confidence: 'medium',
-      });
-   }
+   return domDetectors
+      .filter((detector) => matches.has(detector))
+      .map((detector) => ({
+         category: detector.category,
+         source: detector.source,
+         value: detector.value,
+         confidence: detector.confidence,
+         elements: matches.get(detector) ?? [],
+      }));
 }
 
 function resolveHintSource(userHints: string[] | undefined): 'user-hint' | 'metadata' {
@@ -206,37 +257,39 @@ function resolveHintSource(userHints: string[] | undefined): 'user-hint' | 'meta
 
 function detectHintBasedSignals(
    hintValues: string,
-   signals: ApplicabilitySignal[],
    userHints: string[] | undefined,
-): void {
-   if (hasMatch(hintValues, /\b(auth|login|sign in|sign-in|password|credential)\b/i)) {
-      addSignal(signals, {
+): ApplicabilitySignal[] {
+   const source = resolveHintSource(userHints);
+   const signals: ApplicabilitySignal[] = [];
+
+   if (/\b(auth|login|sign in|sign-in|password|credential)\b/i.test(hintValues)) {
+      signals.push({
          category: 'auth',
-         source: resolveHintSource(userHints),
+         source,
          value: 'story metadata hints at an authentication flow',
          confidence: 'high',
       });
    }
 
-   if (
-      hasMatch(hintValues, /\b(status|toast|notification|live region|status update)\b/i)
-   ) {
-      addSignal(signals, {
+   if (/\b(status|toast|notification|live region|status update)\b/i.test(hintValues)) {
+      signals.push({
          category: 'live-region',
-         source: resolveHintSource(userHints),
+         source,
          value: 'story metadata hints at a status message',
          confidence: 'medium',
       });
    }
 
-   if (hasMatch(hintValues, /\b(dialog|modal|confirm|overlay)\b/i)) {
-      addSignal(signals, {
+   if (/\b(dialog|modal|confirm|overlay)\b/i.test(hintValues)) {
+      signals.push({
          category: 'dialog',
-         source: resolveHintSource(userHints),
+         source,
          value: 'story metadata hints at a dialog workflow',
          confidence: 'medium',
       });
    }
+
+   return signals;
 }
 
 function buildHintValues(options?: {
@@ -258,16 +311,10 @@ export function deriveApplicabilityInputFromHtml(
       userHints?: string[];
    },
 ): ApplicabilityInput {
-   const signals: ApplicabilitySignal[] = [];
-
-   detectStructuralSignals(html, signals);
-   detectAuthAndLiveRegionSignals(html, signals);
-   detectDialogSignals(html, signals);
-   detectUiPatternSignals(html, signals);
-   detectWidgetSignals(html, signals);
-
-   const hintValues = buildHintValues(options);
-   detectHintBasedSignals(hintValues, signals, options?.userHints);
+   const signals = [
+      ...detectDomSignals(html),
+      ...detectHintBasedSignals(buildHintValues(options), options?.userHints),
+   ];
 
    return applicabilityInputSchema.parse({
       target: options?.target ?? {

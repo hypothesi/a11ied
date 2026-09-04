@@ -27,6 +27,7 @@
       "@a11ied/wcag-engine": "0.1.0",
       "@guidepup/record": "^0.1.0",
       "axe-core": "^4.13.0",
+      "jsdom": "30.0.1",
       "playwright": "^1.62.1"
    }
 }

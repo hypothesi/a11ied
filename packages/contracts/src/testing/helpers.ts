@@ -269,10 +269,18 @@ export function createApplicabilityMatrixPayload(
       assessments: {
          '4.1.3': {
             criterionId: '4.1.3',
+            title: 'Status Messages',
             state: 'applicable',
             reasons: ['Detected a live region and a status-update signal.'],
             matchedSignalCategories: ['live-region', 'form'],
             matchedTags: ['forms', 'messaging'],
+            elements: [
+               {
+                  xpath: '/html/body/main/div',
+                  tag: 'div',
+                  snippet: '<div role="status" aria-live="polite">',
+               },
+            ],
          },
       },
    };

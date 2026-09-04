@@ -41,11 +41,19 @@ export const applicabilitySignalSourceSchema = z.enum([
 ]);
 export type ApplicabilitySignalSource = z.infer<typeof applicabilitySignalSourceSchema>;
 
+export const applicabilityElementSchema = z.object({
+   xpath: z.string(),
+   tag: z.string(),
+   snippet: z.string(),
+});
+export type ApplicabilityElement = z.infer<typeof applicabilityElementSchema>;
+
 export const applicabilitySignalSchema = z.object({
    category: applicabilitySignalCategorySchema,
    source: applicabilitySignalSourceSchema,
    value: z.string(),
    confidence: z.enum(['high', 'medium', 'low']),
+   elements: z.array(applicabilityElementSchema).optional(),
 });
 export type ApplicabilitySignal = z.infer<typeof applicabilitySignalSchema>;
 
@@ -65,10 +73,12 @@ export type ApplicabilityInput = z.infer<typeof applicabilityInputSchema>;
 
 export const criterionApplicabilitySchema = z.object({
    criterionId: criterionIdSchema,
+   title: z.string(),
    state: applicabilityStateSchema,
    reasons: z.array(z.string()),
    matchedSignalCategories: z.array(applicabilitySignalCategorySchema),
    matchedTags: z.array(z.string()),
+   elements: z.array(applicabilityElementSchema),
 });
 export type CriterionApplicability = z.infer<typeof criterionApplicabilitySchema>;
 

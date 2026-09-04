@@ -24,12 +24,22 @@ const toc = [
          </div>
          <p>
             <code>inspect</code> fetches the URL and parses the HTML. It does not start a browser.
-            Each signal carries a category, the source it came from, the text that matched, and a
-            confidence of high, medium, or low.
+            Each signal carries a category, the source it came from, the text that matched, a
+            confidence of high, medium, or low, and up to ten <code>elements</code>: the XPath, tag,
+            and opening tag of the nodes that produced it.
          </p>
          <pre data-label="OUTPUT"><code>"signals": [
-  &#123; "category": "heading", "source": "dom", "value": "heading structure", "confidence": "high" &#125;,
-  &#123; "category": "form", "source": "dom", "value": "form controls", "confidence": "high" &#125;
+  &#123;
+    "category": "heading", "source": "dom", "value": "heading structure", "confidence": "high",
+    "elements": [&#123; "xpath": "/html/body/main/h1", "tag": "h1", "snippet": "&lt;h1&gt;" &#125;]
+  &#125;,
+  &#123;
+    "category": "form", "source": "dom", "value": "form controls", "confidence": "high",
+    "elements": [
+      &#123; "xpath": "/html/body/main/form", "tag": "form", "snippet": "&lt;form action=\"/save\" method=\"post\"&gt;" &#125;,
+      &#123; "xpath": "/html/body/main/form/label/input", "tag": "input", "snippet": "&lt;input type=\"text\" name=\"displayName\"&gt;" &#125;
+    ]
+  &#125;
 ]</code></pre>
          <p>
             The 15 categories are <code>auth</code>, <code>dialog</code>,
@@ -90,16 +100,24 @@ const toc = [
 a1 inspect criterion 2.4.3 --url http://localhost:3000/checkout --json</code></pre>
       <pre data-label="OUTPUT"><code>"assessment": &#123;
   "criterionId": "2.4.3",
+  "title": "Focus Order",
   "state": "likely-applicable",
   "reasons": [
     "Detected heading and form signals (heading structure and form controls) and matching criterion tags (structure, forms, controls, and errors)."
   ],
   "matchedSignalCategories": ["heading", "form"],
-  "matchedTags": ["structure", "forms", "controls", "errors"]
+  "matchedTags": ["structure", "forms", "controls", "errors"],
+  "elements": [
+    &#123; "xpath": "/html/body/main/h1", "tag": "h1", "snippet": "&lt;h1&gt;" &#125;,
+    &#123; "xpath": "/html/body/main/form", "tag": "form", "snippet": "&lt;form action=\"/save\" method=\"post\"&gt;" &#125;
+  ]
 &#125;</code></pre>
       <p>
          <code>reasons</code> names the signals and the tags that produced the state. Read it before
-         acting on the state.
+         acting on the state. <code>elements</code> lists the nodes behind it, merged across the
+         matched signals and capped at 20. Paste an XPath into the browser console as
+         <code>$x('/html/body/main/form')</code> to jump to the node. The text output shows the
+         first few with <code>--verbose</code>.
       </p>
    </section>
 

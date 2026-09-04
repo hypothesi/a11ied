@@ -15,6 +15,7 @@ import {
 import { getArtifacts, parseVersion, resolveCriterion } from '../artifacts/runtime.js';
 import {
    buildNotDetected,
+   collectSignalElements,
    dedupe,
    formatList,
    getInteractiveUnknownAssessment,
@@ -28,6 +29,7 @@ const MAX_SIGNAL_VALUES = 4;
 interface ApplicabilityContext {
    criterion: NormalizedCriterion;
    signals: ApplicabilitySignal[];
+   matchedSignals: ApplicabilitySignal[];
    matchedCategories: ApplicabilitySignalCategory[];
    matchedTags: string[];
    signalValues: string[];
@@ -41,17 +43,19 @@ function evaluateAuthCriterion(ctx: ApplicabilityContext): CriterionApplicabilit
    if (authSignals.length > 0) {
       return {
          criterionId: ctx.criterion.id,
+         title: ctx.criterion.title,
          state: 'applicable',
          reasons: [
             `Detected authentication signals (${formatList(authSignals.map((signal) => signal.value))}) and matching criterion tags (${formatList(authTags)}).`,
          ],
          matchedSignalCategories: ['auth'],
          matchedTags: authTags,
+         elements: collectSignalElements(authSignals),
       };
    }
 
    return buildNotDetected(
-      ctx.criterion.id,
+      ctx.criterion,
       'No authentication-flow signals were detected for this target.',
    );
 }
@@ -71,6 +75,7 @@ function evaluateStatusWithLiveRegion(
    if (statusSignals.length > 0) {
       return {
          criterionId: ctx.criterion.id,
+         title: ctx.criterion.title,
          state: 'applicable',
          reasons: [
             `Detected live region signals (${formatList(statusSignals.map((signal) => signal.value))}) and matching criterion tags (${formatList(statusTags)}).`,
@@ -80,6 +85,7 @@ function evaluateStatusWithLiveRegion(
             ...ctx.matchedCategories,
          ]),
          matchedTags: statusTags,
+         elements: collectSignalElements(statusSignals),
       };
    }
 
@@ -89,12 +95,14 @@ function evaluateStatusWithLiveRegion(
    ) {
       return {
          criterionId: ctx.criterion.id,
+         title: ctx.criterion.title,
          state: 'likely-applicable',
          reasons: [
             `Detected form or validation signals (${formatList(ctx.signalValues)}) and matching criterion tags (${formatList(statusTags)}), but no explicit live region or status role signal yet.`,
          ],
          matchedSignalCategories: dedupe(ctx.matchedCategories),
          matchedTags: statusTags,
+         elements: collectSignalElements(ctx.matchedSignals),
       };
    }
 
@@ -108,7 +116,7 @@ function evaluateStatusCriterion(ctx: ApplicabilityContext): CriterionApplicabil
    }
 
    return buildNotDetected(
-      ctx.criterion.id,
+      ctx.criterion,
       'No live region or equivalent status signal was detected for this target.',
    );
 }
@@ -129,12 +137,14 @@ function evaluateDefaultCriterion(ctx: ApplicabilityContext): CriterionApplicabi
 
    return {
       criterionId: ctx.criterion.id,
+      title: ctx.criterion.title,
       state,
       reasons: [
          `Detected ${formatList(ctx.signalLabels)} signals (${formatList(ctx.signalValues)})${tagSuffix}`,
       ],
       matchedSignalCategories: ctx.matchedCategories,
       matchedTags: ctx.matchedTags,
+      elements: collectSignalElements(ctx.matchedSignals),
    };
 }
 
@@ -150,6 +160,7 @@ function buildContext(
    return {
       criterion,
       signals,
+      matchedSignals,
       matchedCategories,
       matchedTags: getMatchedTags(criterion, matchedCategories),
       signalValues: dedupe(matchedSignals.map((signal) => signal.value)).slice(
@@ -171,6 +182,7 @@ function evaluateWidgetOrDefault(ctx: ApplicabilityContext): CriterionApplicabil
       const unknownAssessment = getInteractiveUnknownAssessment(
          ctx.criterion,
          ctx.matchedTags,
+         collectSignalElements(ctx.signals),
       );
       if (unknownAssessment) {
          return unknownAssessment;
@@ -182,7 +194,7 @@ function evaluateWidgetOrDefault(ctx: ApplicabilityContext): CriterionApplicabil
    }
 
    return buildNotDetected(
-      ctx.criterion.id,
+      ctx.criterion,
       'No matching applicability signals were detected for this criterion.',
    );
 }
