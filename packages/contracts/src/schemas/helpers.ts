@@ -13,4 +13,5 @@ export const techniqueReferenceSchema = z.object({
    title: z.string(),
    technology: z.string().optional(),
    kind: z.enum(['sufficient', 'advisory', 'failure']),
+   url: z.string().url().optional(),
 });

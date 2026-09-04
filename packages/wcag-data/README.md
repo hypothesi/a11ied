@@ -60,5 +60,7 @@ What to review after a sync:
    - `slug-index.<version>.json`
    - `technique-index.<version>.json`
    - `failure-index.<version>.json`
-   - `tag-index.<version>.json`
+   - `axe-rules.<version>.json`
    - `generated-provenance.json`
+- `data/generated/` ships in the published package next to `dist/`; `@a11ied/wcag-engine` reads it from there.
+- Techniques carry a `url` to the W3C technique page and criteria carry `understandingUrl`. The Understanding prose and technique bodies are not copied into the data: the `w3c/wcag` repository is under the W3C Document License, which does not grant a general right to redistribute derivative text. See `NOTICE.md`.

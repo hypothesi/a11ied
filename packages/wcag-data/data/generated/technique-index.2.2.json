@@ -31,6 +31,24 @@
          "kind": "sufficient",
          "criterionIds": ["1.3.1"]
       },
+      "1.4.11:sufficient:identifying-a-user-interface-component-s-focus-state:1.0": {
+         "key": "1.4.11:sufficient:identifying-a-user-interface-component-s-focus-state:1.0",
+         "title": "Identifying a user interface component's focus state",
+         "kind": "sufficient",
+         "criterionIds": ["1.4.11"]
+      },
+      "1.4.11:sufficient:identifying-user-interface-components:0.0": {
+         "key": "1.4.11:sufficient:identifying-user-interface-components:0.0",
+         "title": "Identifying user interface components",
+         "kind": "sufficient",
+         "criterionIds": ["1.4.11"]
+      },
+      "1.4.11:sufficient:making-graphical-content-understandable:2.0": {
+         "key": "1.4.11:sufficient:making-graphical-content-understandable:2.0",
+         "title": "Making graphical content understandable",
+         "kind": "sufficient",
+         "criterionIds": ["1.4.11"]
+      },
       "1.4.8:sufficient:using-measurements-that-are-relative-to-other-measurements-in-the-content:4.1.1": {
          "key": "1.4.8:sufficient:using-measurements-that-are-relative-to-other-measurements-in-the-content:4.1.1",
          "title": "using measurements that are relative to other measurements in the content",
@@ -55,6 +73,7 @@
          "title": "Using ARIA landmarks to identify regions of a page",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA11",
          "criterionIds": ["1.3.1"]
       },
       "ARIA12": {
@@ -63,6 +82,7 @@
          "title": "Using role=heading to identify headings",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA12",
          "criterionIds": ["1.3.1"]
       },
       "ARIA13": {
@@ -71,6 +91,7 @@
          "title": "Using aria-labelledby to name regions and landmarks",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA13",
          "criterionIds": ["1.3.1"]
       },
       "ARIA14": {
@@ -79,6 +100,7 @@
          "title": "Using aria-label to provide an accessible name where a visible label cannot be used",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA14",
          "criterionIds": ["4.1.2"]
       },
       "ARIA16": {
@@ -87,6 +109,7 @@
          "title": "Using aria-labelledby to provide a name for user interface controls",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA16",
          "criterionIds": ["1.3.1", "4.1.2"]
       },
       "ARIA17": {
@@ -95,6 +118,7 @@
          "title": "Using grouping roles to identify related form controls",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA17",
          "criterionIds": ["1.3.1"]
       },
       "ARIA18": {
@@ -103,6 +127,7 @@
          "title": "Using aria-alertdialog to Identify Errors",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA18",
          "criterionIds": ["3.3.1", "3.3.3"]
       },
       "ARIA19": {
@@ -111,6 +136,7 @@
          "title": "Using ARIA role=alert or Live Regions to Identify Errors",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA19",
          "criterionIds": ["3.3.1", "4.1.3"]
       },
       "ARIA20": {
@@ -119,6 +145,7 @@
          "title": "Using the region role to identify a region of the page",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA20",
          "criterionIds": ["1.3.1"]
       },
       "ARIA21": {
@@ -127,6 +154,7 @@
          "title": "Using aria-invalid to Indicate An Error Field",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA21",
          "criterionIds": ["3.3.1"]
       },
       "ARIA22": {
@@ -135,6 +163,7 @@
          "title": "Using role=status to present status messages",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA22",
          "criterionIds": ["4.1.3"]
       },
       "ARIA23": {
@@ -143,6 +172,7 @@
          "title": "Using role=log to identify sequential information updates",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA23",
          "criterionIds": ["4.1.3"]
       },
       "ARIA24": {
@@ -151,6 +181,7 @@
          "title": "Semantically identifying a font icon with role=\"img\"",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA24",
          "criterionIds": ["1.3.1"]
       },
       "ARIA25": {
@@ -159,6 +190,7 @@
          "title": "Using an ARIA live region to convey the status of a progress bar",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA25",
          "criterionIds": ["4.1.3"]
       },
       "ARIA26": {
@@ -167,7 +199,17 @@
          "title": "Using aria-current to identify the current item in a set",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA26",
          "criterionIds": ["1.3.1"]
+      },
+      "ARIA27": {
+         "key": "ARIA27",
+         "id": "ARIA27",
+         "title": "Using ariaNotify to convey the status of a progress bar",
+         "technology": "aria",
+         "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA27",
+         "criterionIds": ["4.1.3"]
       },
       "ARIA4": {
          "key": "ARIA4",
@@ -175,6 +217,7 @@
          "title": "Using a WAI-ARIA role to expose the role of a user interface component",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA4",
          "criterionIds": ["4.1.2"]
       },
       "ARIA5": {
@@ -183,6 +226,7 @@
          "title": "Using WAI-ARIA state and property attributes to expose the state of a user interface component",
          "technology": "aria",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA5",
          "criterionIds": ["4.1.2"]
       },
       "C12": {
@@ -191,6 +235,7 @@
          "title": "Using percent for font sizes",
          "technology": "css",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/css/C12",
          "criterionIds": ["1.4.8"]
       },
       "C13": {
@@ -199,6 +244,7 @@
          "title": "Using named font sizes",
          "technology": "css",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/css/C13",
          "criterionIds": ["1.4.8"]
       },
       "C14": {
@@ -207,6 +253,7 @@
          "title": "Using em units for font sizes",
          "technology": "css",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/css/C14",
          "criterionIds": ["1.4.8"]
       },
       "C19": {
@@ -215,6 +262,7 @@
          "title": "Specifying alignment either to the left or right in CSS",
          "technology": "css",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/css/C19",
          "criterionIds": ["1.4.8"]
       },
       "C20": {
@@ -223,6 +271,7 @@
          "title": "Using relative measurements to set column widths so that lines can average 80 characters or less when the browser is resized",
          "technology": "css",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/css/C20",
          "criterionIds": ["1.4.8"]
       },
       "C21": {
@@ -231,6 +280,7 @@
          "title": "Specifying line spacing in CSS",
          "technology": "css",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/css/C21",
          "criterionIds": ["1.4.8"]
       },
       "C23": {
@@ -239,6 +289,7 @@
          "title": "Specifying text and background colors of secondary content such as banners, features and navigation in CSS while not specifying text and background colors of the main content",
          "technology": "css",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/css/C23",
          "criterionIds": ["1.4.8"]
       },
       "C24": {
@@ -247,6 +298,7 @@
          "title": "Using percentage values in CSS for container sizes",
          "technology": "css",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/css/C24",
          "criterionIds": ["1.4.8"]
       },
       "C25": {
@@ -255,7 +307,17 @@
          "title": "Specifying borders and layout in CSS to delineate areas of a web page while not specifying text and text-background colors",
          "technology": "css",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/css/C25",
          "criterionIds": ["1.4.8"]
+      },
+      "C40": {
+         "key": "C40",
+         "id": "C40",
+         "title": "Creating a two-color focus indicator to ensure sufficient contrast with all components",
+         "technology": "css",
+         "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/css/C40",
+         "criterionIds": ["1.4.11"]
       },
       "G10": {
          "key": "G10",
@@ -263,6 +325,7 @@
          "title": "Creating components using a technology that supports the accessibility API features of the platforms on which the user agents will be run to expose the names and roles, allow user-settable properties to be directly set, and provide notification of changes",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G10",
          "criterionIds": ["4.1.2"]
       },
       "G100": {
@@ -271,6 +334,7 @@
          "title": "Providing a short text alternative which is the accepted name or a descriptive name of the non-text content",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G100",
          "criterionIds": ["1.1.1"]
       },
       "G101": {
@@ -279,6 +343,7 @@
          "title": "Providing the definition of a word or phrase used in an unusual or restricted way",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G101",
          "criterionIds": ["3.1.3"]
       },
       "G102": {
@@ -287,6 +352,7 @@
          "title": "Providing the expansion or explanation of an abbreviation",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G102",
          "criterionIds": ["3.1.4"]
       },
       "G108": {
@@ -295,6 +361,7 @@
          "title": "Using markup features to expose the name and role, allow user-settable properties to be directly set, and provide notification of changes",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G108",
          "criterionIds": ["4.1.2"]
       },
       "G110": {
@@ -303,6 +370,7 @@
          "title": "Using an instant client-side redirect",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G110",
          "criterionIds": ["3.2.5"]
       },
       "G111": {
@@ -311,6 +379,7 @@
          "title": "Using color and pattern",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G111",
          "criterionIds": ["1.4.1"]
       },
       "G112": {
@@ -319,6 +388,7 @@
          "title": "Using inline definitions",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G112",
          "criterionIds": ["3.1.3"]
       },
       "G115": {
@@ -327,6 +397,7 @@
          "title": "Using semantic elements to mark up structure",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G115",
          "criterionIds": ["1.3.1"]
       },
       "G117": {
@@ -335,6 +406,7 @@
          "title": "Using text to convey information that is conveyed by variations in presentation of text",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G117",
          "criterionIds": ["1.3.1"]
       },
       "G133": {
@@ -343,6 +415,7 @@
          "title": "Providing a checkbox on the first page of a multipart form that allows users to ask for longer session time limit or no session time limit",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G133",
          "criterionIds": ["2.2.1"]
       },
       "G135": {
@@ -351,6 +424,7 @@
          "title": "Using the accessibility API features of a technology to expose names and roles, to allow user-settable properties to be directly set, and to provide notification of changes",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G135",
          "criterionIds": ["4.1.2"]
       },
       "G138": {
@@ -359,6 +433,7 @@
          "title": "Using semantic markup whenever color cues are used",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G138",
          "criterionIds": ["1.3.1"]
       },
       "G14": {
@@ -367,6 +442,7 @@
          "title": "Ensuring that information conveyed by color differences is also available in text",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G14",
          "criterionIds": ["1.4.1"]
       },
       "G140": {
@@ -375,6 +451,7 @@
          "title": "Separating information and structure from presentation to enable different presentations",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G140",
          "criterionIds": ["1.3.1"]
       },
       "G143": {
@@ -383,6 +460,7 @@
          "title": "Providing a text alternative that describes the purpose of the CAPTCHA",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G143",
          "criterionIds": ["1.1.1"]
       },
       "G144": {
@@ -391,6 +469,7 @@
          "title": "Ensuring that the web page contains another CAPTCHA serving the same purpose using a different modality",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G144",
          "criterionIds": ["1.1.1"]
       },
       "G145": {
@@ -399,6 +478,7 @@
          "title": "Ensuring that a contrast ratio of at least 3:1 exists between text (and images of text) and background behind the text",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G145",
          "criterionIds": ["1.4.3"]
       },
       "G146": {
@@ -407,6 +487,7 @@
          "title": "Using liquid layout",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G146",
          "criterionIds": ["1.4.8"]
       },
       "G148": {
@@ -415,6 +496,7 @@
          "title": "Not specifying background color, not specifying text color, and not using technology features that change those defaults",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G148",
          "criterionIds": ["1.4.3", "1.4.6", "1.4.8"]
       },
       "G155": {
@@ -423,6 +505,7 @@
          "title": "Providing a checkbox in addition to a submit button",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G155",
          "criterionIds": ["3.3.4"]
       },
       "G156": {
@@ -431,6 +514,7 @@
          "title": "Using a technology that has commonly-available user agents that can change the foreground and background of blocks of text",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G156",
          "criterionIds": ["1.4.8"]
       },
       "G158": {
@@ -439,6 +523,7 @@
          "title": "Providing an alternative for time-based media for audio-only content",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G158",
          "criterionIds": ["1.2.1"]
       },
       "G159": {
@@ -447,6 +532,7 @@
          "title": "Providing an alternative for time-based media for video-only content",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G159",
          "criterionIds": ["1.2.1", "1.2.8"]
       },
       "G164": {
@@ -455,6 +541,7 @@
          "title": "Providing a stated time within which an online request (or transaction) may be amended or canceled by the user after making the request",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G164",
          "criterionIds": ["3.3.4"]
       },
       "G166": {
@@ -463,6 +550,7 @@
          "title": "Providing audio that describes the important video content and describing it as such",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G166",
          "criterionIds": ["1.2.1"]
       },
       "G168": {
@@ -471,6 +559,7 @@
          "title": "Requesting confirmation to continue with selected action",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G168",
          "criterionIds": ["3.3.4"]
       },
       "G169": {
@@ -479,6 +568,7 @@
          "title": "Aligning text on only one side",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G169",
          "criterionIds": ["1.4.8"]
       },
       "G17": {
@@ -487,6 +577,7 @@
          "title": "Ensuring that a contrast ratio of at least 7:1 exists between text (and images of text) and background behind the text",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G17",
          "criterionIds": ["1.4.6"]
       },
       "G172": {
@@ -495,6 +586,7 @@
          "title": "Providing a mechanism to remove full justification of text",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G172",
          "criterionIds": ["1.4.8"]
       },
       "G174": {
@@ -503,6 +595,7 @@
          "title": "Providing a control with a sufficient contrast ratio that allows users to switch to a presentation that uses sufficient contrast",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G174",
          "criterionIds": ["1.4.3", "1.4.6", "1.4.11"]
       },
       "G175": {
@@ -511,6 +604,7 @@
          "title": "Providing a multi color selection tool on the page for foreground and background colors",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G175",
          "criterionIds": ["1.4.8"]
       },
       "G177": {
@@ -519,6 +613,7 @@
          "title": "Providing suggested correction text",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G177",
          "criterionIds": ["3.3.3", "4.1.3"]
       },
       "G18": {
@@ -527,6 +622,7 @@
          "title": "Ensuring that a contrast ratio of at least 4.5:1 exists between text (and images of text) and background behind the text",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G18",
          "criterionIds": ["1.4.3", "1.4.6"]
       },
       "G180": {
@@ -535,6 +631,7 @@
          "title": "Providing the user with a means to set the time limit to 10 times the default time limit",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G180",
          "criterionIds": ["2.2.1"]
       },
       "G182": {
@@ -543,14 +640,16 @@
          "title": "Ensuring that additional visual cues are available when text color differences are used to convey information",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G182",
          "criterionIds": ["1.4.1"]
       },
       "G183": {
          "key": "G183",
          "id": "G183",
-         "title": "Using a contrast ratio of 3:1 with surrounding text and providing additional visual cues on hover for links or controls where color alone is used to identify them",
+         "title": "Using a contrast ratio of at least 3:1 to distinguish inline text links from surrounding text",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G183",
          "criterionIds": ["1.4.1"]
       },
       "G184": {
@@ -559,6 +658,7 @@
          "title": "Providing text instructions at the beginning of a form or set of fields that describes the necessary input",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G184",
          "criterionIds": ["3.3.5"]
       },
       "G188": {
@@ -567,6 +667,7 @@
          "title": "Providing a button on the page to increase line spaces and paragraph spaces",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G188",
          "criterionIds": ["1.4.8"]
       },
       "G193": {
@@ -575,6 +676,7 @@
          "title": "Providing help by an assistant in the web page",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G193",
          "criterionIds": ["3.3.5", "4.1.3"]
       },
       "G194": {
@@ -583,6 +685,7 @@
          "title": "Providing spell checking and suggestions for text input",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G194",
          "criterionIds": ["3.3.5", "4.1.3"]
       },
       "G195": {
@@ -591,6 +694,7 @@
          "title": "Using an author-supplied, visible focus indicator",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G195",
          "criterionIds": ["1.4.11"]
       },
       "G198": {
@@ -599,6 +703,7 @@
          "title": "Providing a way for the user to turn the time limit off",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G198",
          "criterionIds": ["2.2.1"]
       },
       "G199": {
@@ -607,6 +712,7 @@
          "title": "Providing success feedback when data is submitted successfully",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G199",
          "criterionIds": ["4.1.3"]
       },
       "G204": {
@@ -615,6 +721,7 @@
          "title": "Not interfering with the user agent's reflow of text as the viewing window is narrowed",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G204",
          "criterionIds": ["1.4.8"]
       },
       "G205": {
@@ -623,6 +730,7 @@
          "title": "Including a text cue for colored form control labels",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G205",
          "criterionIds": ["1.4.1"]
       },
       "G206": {
@@ -631,6 +739,7 @@
          "title": "Providing options within the content to switch to a layout that does not require the user to scroll horizontally to read a line of text",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G206",
          "criterionIds": ["1.4.8"]
       },
       "G207": {
@@ -639,6 +748,7 @@
          "title": "Ensuring that a contrast ratio of 3:1 is provided for icons",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G207",
          "criterionIds": ["1.4.11"]
       },
       "G209": {
@@ -647,6 +757,7 @@
          "title": "Provide sufficient contrast at the boundaries between adjoining colors",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G209",
          "criterionIds": ["1.4.11"]
       },
       "G4": {
@@ -655,6 +766,7 @@
          "title": "Allowing the content to be paused and restarted from where it was paused",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G4",
          "criterionIds": ["2.2.1"]
       },
       "G55": {
@@ -663,6 +775,7 @@
          "title": "Linking to definitions",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G55",
          "criterionIds": ["3.1.3", "3.1.4"]
       },
       "G58": {
@@ -671,6 +784,7 @@
          "title": "Placing a link to the alternative for time-based media immediately next to the non-text content",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G58",
          "criterionIds": ["1.2.8"]
       },
       "G62": {
@@ -679,6 +793,7 @@
          "title": "Providing a glossary",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G62",
          "criterionIds": ["3.1.3", "3.1.4"]
       },
       "G68": {
@@ -687,6 +802,7 @@
          "title": "Providing a short text alternative that describes the purpose of live audio-only and live video-only content",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G68",
          "criterionIds": ["1.1.1"]
       },
       "G69": {
@@ -695,6 +811,7 @@
          "title": "Providing an alternative for time based media",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G69",
          "criterionIds": ["1.2.8"]
       },
       "G70": {
@@ -703,6 +820,7 @@
          "title": "Providing a function to search an online dictionary",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G70",
          "criterionIds": ["3.1.3", "3.1.4"]
       },
       "G71": {
@@ -711,6 +829,7 @@
          "title": "Providing a help link on every web page",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G71",
          "criterionIds": ["3.3.5"]
       },
       "G76": {
@@ -719,6 +838,7 @@
          "title": "Providing a mechanism to request an update of the content instead of updating automatically",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G76",
          "criterionIds": ["3.2.5"]
       },
       "G82": {
@@ -727,6 +847,7 @@
          "title": "Providing a text alternative that identifies the purpose of interactive non-text content",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G82",
          "criterionIds": ["1.1.1"]
       },
       "G83": {
@@ -735,6 +856,7 @@
          "title": "Providing text descriptions to identify required fields that were not completed",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G83",
          "criterionIds": ["3.3.1", "4.1.3"]
       },
       "G84": {
@@ -743,6 +865,7 @@
          "title": "Providing a text description when the user provides information that is not in the list of allowed values",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G84",
          "criterionIds": ["3.3.1", "3.3.3", "4.1.3"]
       },
       "G85": {
@@ -751,6 +874,7 @@
          "title": "Providing a text description when user input falls outside the required format or values",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G85",
          "criterionIds": ["3.3.1", "3.3.3", "4.1.3"]
       },
       "G89": {
@@ -759,6 +883,7 @@
          "title": "Providing expected data format and example",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G89",
          "criterionIds": ["3.3.5"]
       },
       "G94": {
@@ -767,6 +892,7 @@
          "title": "Providing short text alternative for non-text content that serves the same purpose and presents the same information as the non-text content",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G94",
          "criterionIds": ["1.1.1"]
       },
       "G95": {
@@ -775,6 +901,7 @@
          "title": "Providing short text alternatives that provide a brief description of the non-text content",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G95",
          "criterionIds": ["1.1.1"]
       },
       "G97": {
@@ -783,6 +910,7 @@
          "title": "Providing the first use of an abbreviation immediately before or after the expanded form",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G97",
          "criterionIds": ["3.1.4"]
       },
       "G98": {
@@ -791,6 +919,7 @@
          "title": "Providing the ability for the user to review and correct answers before submitting",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G98",
          "criterionIds": ["3.3.4"]
       },
       "G99": {
@@ -799,6 +928,7 @@
          "title": "Providing the ability to recover deleted information",
          "technology": "general",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G99",
          "criterionIds": ["3.3.4"]
       },
       "H101": {
@@ -807,6 +937,7 @@
          "title": "Using semantic HTML elements to identify regions of a page",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H101",
          "criterionIds": ["1.3.1"]
       },
       "H39": {
@@ -815,6 +946,7 @@
          "title": "Using caption elements to associate data table captions with data tables",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H39",
          "criterionIds": ["1.3.1"]
       },
       "H40": {
@@ -823,6 +955,7 @@
          "title": "Using description lists",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H40",
          "criterionIds": ["3.1.3"]
       },
       "H42": {
@@ -831,6 +964,7 @@
          "title": "Using h1-h6 to identify headings",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H42",
          "criterionIds": ["1.3.1"]
       },
       "H43": {
@@ -839,6 +973,7 @@
          "title": "Using id and headers attributes to associate data cells with header cells in data tables",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H43",
          "criterionIds": ["1.3.1"]
       },
       "H44": {
@@ -847,6 +982,7 @@
          "title": "Using label elements to associate text labels with form controls",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H44",
          "criterionIds": ["1.3.1", "4.1.2"]
       },
       "H48": {
@@ -855,6 +991,7 @@
          "title": "Using ol, ul and dl for lists or groups of links",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H48",
          "criterionIds": ["1.3.1"]
       },
       "H49": {
@@ -863,6 +1000,7 @@
          "title": "Using semantic markup to mark emphasized or special text",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H49",
          "criterionIds": ["1.3.1"]
       },
       "H51": {
@@ -871,6 +1009,7 @@
          "title": "Using table markup to present tabular information",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H51",
          "criterionIds": ["1.3.1"]
       },
       "H53": {
@@ -879,6 +1018,7 @@
          "title": "Using the body of the object element",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H53",
          "criterionIds": ["1.2.8"]
       },
       "H54": {
@@ -887,6 +1027,7 @@
          "title": "Using the dfn element to identify the defining instance of a word or phrase",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H54",
          "criterionIds": ["3.1.3"]
       },
       "H63": {
@@ -895,6 +1036,7 @@
          "title": "Using the scope attribute to associate header cells with data cells in data tables",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H63",
          "criterionIds": ["1.3.1"]
       },
       "H64": {
@@ -903,6 +1045,7 @@
          "title": "Using the title attribute of the iframe element",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H64",
          "criterionIds": ["4.1.2"]
       },
       "H65": {
@@ -911,6 +1054,7 @@
          "title": "Using the title attribute to identify form controls when the label element cannot be used",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H65",
          "criterionIds": ["1.3.1", "4.1.2"]
       },
       "H71": {
@@ -919,6 +1063,7 @@
          "title": "Providing a description for groups of form controls using fieldset and legend elements",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H71",
          "criterionIds": ["1.3.1"]
       },
       "H76": {
@@ -927,6 +1072,7 @@
          "title": "Using meta refresh to create an instant client-side redirect",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H76",
          "criterionIds": ["3.2.5"]
       },
       "H83": {
@@ -935,6 +1081,7 @@
          "title": "Using the target attribute to open a new window on user request and indicating this in link text",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H83",
          "criterionIds": ["3.2.5"]
       },
       "H85": {
@@ -943,6 +1090,7 @@
          "title": "Using optgroup to group option elements inside a select",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H85",
          "criterionIds": ["1.3.1"]
       },
       "H88": {
@@ -951,6 +1099,7 @@
          "title": "Using HTML according to spec",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H88",
          "criterionIds": ["4.1.2"]
       },
       "H91": {
@@ -959,6 +1108,7 @@
          "title": "Using HTML form controls and links",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H91",
          "criterionIds": ["4.1.2"]
       },
       "H97": {
@@ -967,6 +1117,7 @@
          "title": "Grouping related links using the nav element",
          "technology": "html",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/html/H97",
          "criterionIds": ["1.3.1"]
       },
       "PDF10": {
@@ -975,6 +1126,7 @@
          "title": "Providing labels for interactive form controls in PDF documents",
          "technology": "pdf",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF10",
          "criterionIds": ["1.3.1", "4.1.2"]
       },
       "PDF11": {
@@ -983,6 +1135,7 @@
          "title": "Providing links and link text using the Link annotation and the /Link structure element in PDF documents",
          "technology": "pdf",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF11",
          "criterionIds": ["1.3.1"]
       },
       "PDF12": {
@@ -991,6 +1144,7 @@
          "title": "Providing name, role, value information for form fields in PDF documents",
          "technology": "pdf",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF12",
          "criterionIds": ["1.3.1", "4.1.2"]
       },
       "PDF17": {
@@ -999,6 +1153,7 @@
          "title": "Specifying consistent page numbering for PDF documents",
          "technology": "pdf",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF17",
          "criterionIds": ["1.3.1"]
       },
       "PDF20": {
@@ -1007,6 +1162,7 @@
          "title": "Using Adobe Acrobat Pro's Table Editor to repair mistagged tables",
          "technology": "pdf",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF20",
          "criterionIds": ["1.3.1"]
       },
       "PDF21": {
@@ -1015,6 +1171,7 @@
          "title": "Using List tags for lists in PDF documents",
          "technology": "pdf",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF21",
          "criterionIds": ["1.3.1"]
       },
       "PDF22": {
@@ -1023,6 +1180,7 @@
          "title": "Indicating when user input falls outside the required format or values in PDF forms",
          "technology": "pdf",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF22",
          "criterionIds": ["3.3.1", "3.3.3"]
       },
       "PDF5": {
@@ -1031,6 +1189,7 @@
          "title": "Indicating required form controls in PDF forms",
          "technology": "pdf",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF5",
          "criterionIds": ["3.3.1"]
       },
       "PDF6": {
@@ -1039,6 +1198,7 @@
          "title": "Using table elements for table markup in PDF Documents",
          "technology": "pdf",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF6",
          "criterionIds": ["1.3.1"]
       },
       "PDF8": {
@@ -1047,6 +1207,7 @@
          "title": "Providing definitions for abbreviations via an E entry for a structure element",
          "technology": "pdf",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF8",
          "criterionIds": ["3.1.4"]
       },
       "PDF9": {
@@ -1055,6 +1216,7 @@
          "title": "Providing headings by marking content with heading tags in PDF documents",
          "technology": "pdf",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/pdf/PDF9",
          "criterionIds": ["1.3.1"]
       },
       "SCR1": {
@@ -1063,6 +1225,7 @@
          "title": "Allowing the user to extend the default time limit",
          "technology": "client-side-script",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/client-side-script/SCR1",
          "criterionIds": ["2.2.1"]
       },
       "SCR16": {
@@ -1071,6 +1234,7 @@
          "title": "Providing a script that warns the user a time limit is about to expire",
          "technology": "client-side-script",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/client-side-script/SCR16",
          "criterionIds": ["2.2.1"]
       },
       "SCR18": {
@@ -1079,6 +1243,7 @@
          "title": "Providing client-side validation and alert",
          "technology": "client-side-script",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/client-side-script/SCR18",
          "criterionIds": ["3.3.1"]
       },
       "SCR19": {
@@ -1087,6 +1252,7 @@
          "title": "Using an onchange event on a select element without causing a change of context",
          "technology": "client-side-script",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/client-side-script/SCR19",
          "criterionIds": ["3.2.5"]
       },
       "SCR24": {
@@ -1095,6 +1261,7 @@
          "title": "Using progressive enhancement to open new windows on user request",
          "technology": "client-side-script",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/client-side-script/SCR24",
          "criterionIds": ["3.2.5"]
       },
       "SCR32": {
@@ -1103,6 +1270,7 @@
          "title": "Providing client-side validation and adding error text via the DOM",
          "technology": "client-side-script",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/client-side-script/SCR32",
          "criterionIds": ["3.3.1"]
       },
       "SCR33": {
@@ -1111,6 +1279,7 @@
          "title": "Using script to scroll content, and providing a mechanism to pause it",
          "technology": "client-side-script",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/client-side-script/SCR33",
          "criterionIds": ["2.2.1"]
       },
       "SCR34": {
@@ -1119,6 +1288,7 @@
          "title": "Calculating size and position in a way that scales with text size",
          "technology": "client-side-script",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/client-side-script/SCR34",
          "criterionIds": ["1.4.8"]
       },
       "SCR36": {
@@ -1127,6 +1297,7 @@
          "title": "Providing a mechanism to allow users to display moving, scrolling, or auto-updating text in a static window or area",
          "technology": "client-side-script",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/client-side-script/SCR36",
          "criterionIds": ["2.2.1"]
       },
       "SVR1": {
@@ -1135,6 +1306,7 @@
          "title": "Implementing automatic redirects on the server side instead of on the client side",
          "technology": "server-side-script",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/server-side-script/SVR1",
          "criterionIds": ["3.2.5"]
       },
       "T1": {
@@ -1143,6 +1315,7 @@
          "title": "Using standard text formatting conventions for paragraphs",
          "technology": "text",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/text/T1",
          "criterionIds": ["1.3.1"]
       },
       "T2": {
@@ -1151,6 +1324,7 @@
          "title": "Using standard text formatting conventions for lists",
          "technology": "text",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/text/T2",
          "criterionIds": ["1.3.1"]
       },
       "T3": {
@@ -1159,6 +1333,7 @@
          "title": "Using standard text formatting conventions for headings",
          "technology": "text",
          "kind": "sufficient",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/text/T3",
          "criterionIds": ["1.3.1"]
       }
    }

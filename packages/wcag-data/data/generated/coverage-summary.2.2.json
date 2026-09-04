@@ -1,34 +1,34 @@
 {
    "version": "2.2",
-   "updatedAt": "2026-04-08T17:09:51.251Z",
+   "updatedAt": "2026-09-04T18:35:21.040Z",
    "totals": {
-      "criteria": 86,
       "automated": 28,
       "hybrid": 10,
       "manual": 48,
-      "unknown": 0
+      "unknown": 0,
+      "criteria": 86
    },
    "byLevel": {
       "A": {
-         "criteria": 31,
          "automated": 15,
          "hybrid": 3,
          "manual": 13,
-         "unknown": 0
+         "unknown": 0,
+         "criteria": 31
       },
       "AA": {
-         "criteria": 24,
          "automated": 8,
          "hybrid": 4,
          "manual": 12,
-         "unknown": 0
+         "unknown": 0,
+         "criteria": 24
       },
       "AAA": {
-         "criteria": 31,
          "automated": 5,
          "hybrid": 3,
          "manual": 23,
-         "unknown": 0
+         "unknown": 0,
+         "criteria": 31
       }
    },
    "coverageSources": {

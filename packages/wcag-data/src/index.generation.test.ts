@@ -43,7 +43,7 @@ function assertGeneratedEntriesAreComplete(generatedEntries: string[]): void {
          'slug-index.2.2.json',
          'technique-index.2.2.json',
          'failure-index.2.2.json',
-         'tag-index.2.2.json',
+         'axe-rules.2.2.json',
          'criteria.2.1.json',
          'criteria-by-level.2.1.json',
          'coverage.2.1.json',
@@ -52,7 +52,7 @@ function assertGeneratedEntriesAreComplete(generatedEntries: string[]): void {
          'slug-index.2.1.json',
          'technique-index.2.1.json',
          'failure-index.2.1.json',
-         'tag-index.2.1.json',
+         'axe-rules.2.1.json',
          'generated-provenance.json',
       ]),
    );
@@ -107,6 +107,17 @@ async function assertProvenanceManifestIsCorrect(
    expect(manifest.generatedAt).toBe(SYNC_TIMESTAMP);
    assertProvenanceRawSources(manifest);
    assertProvenanceSourceUrls(manifest);
+}
+
+async function assertAxeRuleIndexIsCorrect(
+   directories: WcagDataDirectories,
+): Promise<void> {
+   const axeRuleIndex = JSON.parse(
+      await readFile(join(directories.generated, 'axe-rules.2.2.json'), 'utf8'),
+   ) as { rules: Record<string, { criterionIds: string[]; tags: string[] }> };
+   expect(axeRuleIndex.rules['target-size']?.criterionIds).toEqual(['2.5.8']);
+   expect(axeRuleIndex.rules['target-size']?.tags).toContain('wcag258');
+   expect(axeRuleIndex.rules.region?.criterionIds).toEqual([]);
 }
 
 async function assertCoverageArtifactIsCorrect(
@@ -230,6 +241,7 @@ describe('wcag-data normalization / artifact generation', () => {
       assertGeneratedEntriesAreComplete(generatedEntries);
       await assertProvenanceManifestIsCorrect(directories);
       await assertCoverageArtifactIsCorrect(directories);
+      await assertAxeRuleIndexIsCorrect(directories);
       await assertStrategyAndSummaryArtifacts(directories);
       await expect(validateGeneratedArtifacts(directories)).resolves.toHaveLength(
          EXPECTED_GENERATED_ARTIFACT_COUNT,

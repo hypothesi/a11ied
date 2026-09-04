@@ -30,7 +30,6 @@ function assertLevelIndexIsCorrect(
       AAA: [],
    });
    expect(artifacts.slugIndexArtifact.slugs['status-messages']).toBe('4.1.3');
-   expect(artifacts.tagIndexArtifact.tags['aria-live']).toEqual(['4.1.3']);
 }
 
 function assertStatusMessagesCriterionShape(
@@ -66,7 +65,9 @@ function assertTechniqueAndFailureCrossRefs(
    expect(aria22).toBeDefined();
    expect(f104).toBeDefined();
    expect(aria22?.criterionIds).toEqual(['4.1.3']);
+   expect(aria22?.url).toBe('https://www.w3.org/WAI/WCAG22/Techniques/ARIA/ARIA22');
    expect(f104?.criterionIds).toEqual(['4.1.3']);
+   expect(f104?.url).toBe('https://www.w3.org/WAI/WCAG22/Techniques/ARIA/F104');
 }
 
 function createNormalizationInput(

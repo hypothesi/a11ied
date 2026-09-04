@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { wcagLevelSchema, wcagVersionSchema } from './core.js';
 import {
+   axeRuleIndexEntrySchema,
    criterionCoverageSchema,
    criterionIdSchema,
    criterionLookupKeySchema,
@@ -9,6 +10,7 @@ import {
    evidenceStrategySchema,
    normalizedCriterionSchema,
    applicabilityStateSchema,
+   techniqueIndexEntrySchema,
 } from './wcag.js';
 
 export const applicabilitySignalCategorySchema = z.enum([
@@ -173,10 +175,27 @@ export const wcagLookupResultSchema = z.object({
 });
 export type WcagLookupResult = z.infer<typeof wcagLookupResultSchema>;
 
+export const axeRuleLookupResultSchema = z.object({
+   ruleId: z.string(),
+   rule: axeRuleIndexEntrySchema,
+   description: z.string().optional(),
+   help: z.string().optional(),
+   helpUrl: z.string().url().optional(),
+   criteria: z.array(normalizedCriterionSchema),
+});
+export type AxeRuleLookupResult = z.infer<typeof axeRuleLookupResultSchema>;
+
+export const techniqueLookupResultSchema = z.object({
+   lookupKey: z.string(),
+   technique: techniqueIndexEntrySchema,
+   criteria: z.array(normalizedCriterionSchema),
+});
+export type TechniqueLookupResult = z.infer<typeof techniqueLookupResultSchema>;
+
 export const notFoundErrorSchema = z.object({
    type: z.literal('not-found'),
    message: z.string(),
-   lookupKey: criterionLookupKeySchema,
+   lookupKey: z.string(),
 });
 export type NotFoundError = z.infer<typeof notFoundErrorSchema>;
 

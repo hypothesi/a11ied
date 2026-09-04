@@ -67,6 +67,7 @@
          "title": "Failure of Success Criterion 1.3.2 due to changing the meaning of content by positioning information with CSS",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F1",
          "criterionIds": ["1.3.2"]
       },
       "F10": {
@@ -75,6 +76,7 @@
          "title": "Failure of Success Criterion 2.1.2 and Conformance Requirement 5 due to combining multiple content formats in a way that traps users inside one format type",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F10",
          "criterionIds": ["2.1.2"]
       },
       "F100": {
@@ -83,6 +85,7 @@
          "title": "Failure of Success Criterion 1.3.4 due to showing a message asking to reorient device",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F100",
          "criterionIds": ["1.3.4"]
       },
       "F101": {
@@ -91,6 +94,7 @@
          "title": "Failure of Success Criterion 2.5.2 due to activating a control on the down-event",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F101",
          "criterionIds": ["2.5.2"]
       },
       "F102": {
@@ -99,6 +103,7 @@
          "title": "Failure of Success Criterion 1.4.10 due to content disappearing and not being available when content has reflowed",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F102",
          "criterionIds": ["1.4.10"]
       },
       "F103": {
@@ -107,6 +112,7 @@
          "title": "Failure of Success Criterion 4.1.3 due to providing status messages that cannot be programmatically determined through role or properties",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F103",
          "criterionIds": ["4.1.3"]
       },
       "F104": {
@@ -115,6 +121,7 @@
          "title": "Failure of Success Criterion 1.4.12 due to clipped or overlapped content when text spacing is adjusted",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F104",
          "criterionIds": ["1.4.12"]
       },
       "F105": {
@@ -123,6 +130,7 @@
          "title": "Failure of Success Criterion 2.5.1 due to providing functionality via a path-based gesture without simple pointer alternative",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F105",
          "criterionIds": ["2.5.1"]
       },
       "F106": {
@@ -131,6 +139,7 @@
          "title": "Failure due to inability to deactivate motion actuation",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F106",
          "criterionIds": ["2.5.4"]
       },
       "F107": {
@@ -139,6 +148,7 @@
          "title": "Failure of Success Criterion 1.3.5 due to incorrect autocomplete attribute values",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F107",
          "criterionIds": ["1.3.5"]
       },
       "F108": {
@@ -147,6 +157,7 @@
          "title": "Failure of Success Criterion 2.5.7 Dragging Movements due to not providing a single pointer method that does not require a dragging movement",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F108",
          "criterionIds": ["2.5.7"]
       },
       "F109": {
@@ -155,6 +166,7 @@
          "title": "Failure of Success Criterion 3.3.8 and 3.3.9 due to preventing password or code re-entry in the same format",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F109",
          "criterionIds": ["3.3.8", "3.3.9"]
       },
       "F110": {
@@ -163,6 +175,7 @@
          "title": "Failure of Success Criterion 2.4.11 Focus Not Obscured (Minimum) due to a sticky footer or header completely hiding focused elements",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F110",
          "criterionIds": ["2.4.11"]
       },
       "F111": {
@@ -171,6 +184,7 @@
          "title": "Failure of Success Criteria 1.3.1, 2.5.3, and 4.1.2 due to a control with visible label text but no accessible name",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F111",
          "criterionIds": ["1.3.1", "2.5.3", "4.1.2"]
       },
       "F112": {
@@ -179,6 +193,7 @@
          "title": "Failure of Success Criterion 2.2.2 due to using blinking content that lasts for more than five seconds without a mechanism to stop it",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F112",
          "criterionIds": ["2.2.2"]
       },
       "F113": {
@@ -187,6 +202,7 @@
          "title": "Failure of Success Criterion 1.2.5 due to not using available pauses in dialogue to provide audio descriptions of important visual content",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F113",
          "criterionIds": ["1.2.5"]
       },
       "F12": {
@@ -195,6 +211,7 @@
          "title": "Failure of Success Criterion 2.2.5 due to having a session time limit without a mechanism for saving user's input and re-establishing that information upon re-authentication",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F12",
          "criterionIds": ["2.2.5"]
       },
       "F13": {
@@ -203,6 +220,7 @@
          "title": "Failure of Success Criterion 1.1.1 and 1.4.1 due to having a text alternative that does not include information that is conveyed by color differences in the image",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F13",
          "criterionIds": ["1.1.1", "1.4.1"]
       },
       "F14": {
@@ -211,6 +229,7 @@
          "title": "Failure of Success Criterion 1.3.3 due to identifying content only by its shape or location",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F14",
          "criterionIds": ["1.3.3"]
       },
       "F15": {
@@ -219,6 +238,7 @@
          "title": "Failure of Success Criterion 4.1.2 due to implementing custom controls that do not use an accessibility API for the technology, or do so incompletely",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F15",
          "criterionIds": ["4.1.2"]
       },
       "F16": {
@@ -227,6 +247,7 @@
          "title": "Failure of Success Criterion 2.2.2 due to including scrolling content where movement is not essential to the activity without also including a mechanism to pause and restart the content",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F16",
          "criterionIds": ["2.2.2"]
       },
       "F2": {
@@ -235,6 +256,7 @@
          "title": "Failure of Success Criterion 1.3.1 due to using changes in text presentation to convey information without using the appropriate markup or text",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F2",
          "criterionIds": ["1.3.1"]
       },
       "F20": {
@@ -243,6 +265,7 @@
          "title": "Failure of Success Criterion 1.1.1 and 4.1.2 due to not updating text alternatives when changes to non-text content occur",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F20",
          "criterionIds": ["1.1.1", "4.1.2"]
       },
       "F22": {
@@ -251,6 +274,7 @@
          "title": "Failure of Success Criterion 3.2.5 due to opening windows that are not requested by the user",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F22",
          "criterionIds": ["3.2.5"]
       },
       "F23": {
@@ -259,6 +283,7 @@
          "title": "Failure of 1.4.2 due to playing a sound longer than 3 seconds where there is no mechanism to turn it off",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F23",
          "criterionIds": ["1.4.2"]
       },
       "F24": {
@@ -267,6 +292,7 @@
          "title": "Failure of Success Criterion 1.4.3, 1.4.6 and 1.4.8 due to specifying foreground colors without specifying background colors or vice versa",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F24",
          "criterionIds": ["1.4.3", "1.4.6", "1.4.8"]
       },
       "F25": {
@@ -275,6 +301,7 @@
          "title": "Failure of Success Criterion 2.4.2 due to the title of a web page not identifying the contents",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F25",
          "criterionIds": ["2.4.2"]
       },
       "F26": {
@@ -283,14 +310,16 @@
          "title": "Failure of Success Criterion 1.3.3 due to using a graphical symbol alone to convey information",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F26",
          "criterionIds": ["1.3.3"]
       },
       "F3": {
          "key": "F3",
          "id": "F3",
-         "title": "Failure of Success Criterion 1.1.1 due to using CSS to include images that convey important information",
+         "title": "Failure of Success Criterion 1.1.1 due to conveying information exclusively using CSS background images",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F3",
          "criterionIds": ["1.1.1"]
       },
       "F30": {
@@ -299,6 +328,7 @@
          "title": "Failure of Success Criterion 1.1.1 and 1.2.1 due to using text alternatives that are not alternatives (e.g., filenames or placeholder text)",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F30",
          "criterionIds": ["1.1.1", "1.2.1"]
       },
       "F31": {
@@ -307,6 +337,7 @@
          "title": "Failure of Success Criterion 3.2.4 due to using two different labels for the same function on different web pages within a set of web pages",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F31",
          "criterionIds": ["3.2.4"]
       },
       "F32": {
@@ -315,6 +346,7 @@
          "title": "Failure of Success Criterion 1.3.2 due to using white space characters to control spacing within a word",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F32",
          "criterionIds": ["1.3.2"]
       },
       "F33": {
@@ -323,6 +355,7 @@
          "title": "Failure of Success Criterion 1.3.1 and 1.3.2 due to using white space characters to create multiple columns in plain text content",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F33",
          "criterionIds": ["1.3.1", "1.3.2"]
       },
       "F34": {
@@ -331,6 +364,7 @@
          "title": "Failure of Success Criterion 1.3.1 and 1.3.2 due to using white space characters to format tables in plain text content",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F34",
          "criterionIds": ["1.3.1", "1.3.2"]
       },
       "F36": {
@@ -339,6 +373,7 @@
          "title": "Failure of Success Criterion 3.2.2 due to automatically submitting a form and presenting new content without prior warning when the last field in the form is given a value",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F36",
          "criterionIds": ["3.2.2"]
       },
       "F37": {
@@ -347,6 +382,7 @@
          "title": "Failure of Success Criterion 3.2.2 due to launching a new window without prior warning when the selection of a radio button, check box or select list is changed",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F37",
          "criterionIds": ["3.2.2"]
       },
       "F38": {
@@ -355,6 +391,7 @@
          "title": "Failure of Success Criterion 1.1.1 due to not marking up decorative images in HTML in a way that allows assistive technology to ignore them",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F38",
          "criterionIds": ["1.1.1"]
       },
       "F39": {
@@ -363,6 +400,7 @@
          "title": "Failure of Success Criterion 1.1.1 due to providing a text alternative that is not null (e.g., alt=\"spacer\" or alt=\"image\") for images that should be ignored by assistive technology",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F39",
          "criterionIds": ["1.1.1"]
       },
       "F40": {
@@ -371,6 +409,7 @@
          "title": "Failure due to using meta redirect with a time limit",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F40",
          "criterionIds": ["2.2.1", "2.2.4", "3.2.5"]
       },
       "F41": {
@@ -379,6 +418,7 @@
          "title": "Failure of Success Criterion 2.2.1, 2.2.4, and 3.2.5 due to using meta refresh to reload the page",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F41",
          "criterionIds": ["2.2.1", "2.2.4", "3.2.5"]
       },
       "F42": {
@@ -387,6 +427,7 @@
          "title": "Failure of Success Criteria 1.3.1, 2.1.1, 2.1.3, or 4.1.2 when emulating links",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F42",
          "criterionIds": ["1.3.1", "2.1.1", "4.1.2"]
       },
       "F43": {
@@ -395,6 +436,7 @@
          "title": "Failure of Success Criterion 1.3.1 due to using structural markup in a way that does not represent relationships in the content",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F43",
          "criterionIds": ["1.3.1"]
       },
       "F44": {
@@ -403,6 +445,7 @@
          "title": "Failure of Success Criterion 2.4.3 due to using tabindex to create a tab order that does not preserve meaning and operability",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F44",
          "criterionIds": ["2.4.3"]
       },
       "F46": {
@@ -411,6 +454,7 @@
          "title": "Failure of Success Criterion 1.3.1 due to using th elements, caption elements, or non-empty summary attributes in layout tables",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F46",
          "criterionIds": ["1.3.1"]
       },
       "F48": {
@@ -419,6 +463,7 @@
          "title": "Failure of Success Criterion 1.3.1 due to using the pre element to markup tabular information",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F48",
          "criterionIds": ["1.3.1"]
       },
       "F49": {
@@ -427,6 +472,7 @@
          "title": "Failure of Success Criterion 1.3.2 due to using an HTML layout table that does not make sense when linearized",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F49",
          "criterionIds": ["1.3.2"]
       },
       "F50": {
@@ -435,6 +481,7 @@
          "title": "Failure of Success Criterion 2.2.2 due to a script that causes a blink effect without a mechanism to stop the blinking at 5 seconds or less",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F50",
          "criterionIds": ["2.2.2"]
       },
       "F52": {
@@ -443,6 +490,7 @@
          "title": "Failure of Success Criterion 3.2.5 due to opening a new window as soon as a new page is loaded",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F52",
          "criterionIds": ["3.2.5"]
       },
       "F54": {
@@ -451,6 +499,7 @@
          "title": "Failure of Success Criterion 2.1.1 due to using only pointing-device-specific event handlers (including gesture) for a function",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F54",
          "criterionIds": ["2.1.1"]
       },
       "F55": {
@@ -459,6 +508,7 @@
          "title": "Failure of Success Criteria 2.1.1, 2.4.7, 2.4.13, and 3.2.1 due to using script to remove focus when focus is received",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F55",
          "criterionIds": ["2.1.1", "2.4.7", "2.4.13", "3.2.1"]
       },
       "F58": {
@@ -467,6 +517,7 @@
          "title": "Failure of Success Criterion 2.2.1 due to using server-side techniques to automatically redirect pages after a time-out",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F58",
          "criterionIds": ["2.2.1"]
       },
       "F59": {
@@ -475,6 +526,7 @@
          "title": "Failure of Success Criterion 4.1.2 due to using script to make div or span a user interface control in HTML without providing a role for the control",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F59",
          "criterionIds": ["4.1.2"]
       },
       "F60": {
@@ -483,6 +535,7 @@
          "title": "Failure of Success Criterion 3.2.5 due to launching a new window when a user enters text into an input field",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F60",
          "criterionIds": ["3.2.5"]
       },
       "F61": {
@@ -491,6 +544,7 @@
          "title": "Failure of Success Criterion 3.2.5 due to complete change of main content through an automatic update that the user cannot disable from within the content",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F61",
          "criterionIds": ["3.2.5"]
       },
       "F63": {
@@ -499,6 +553,7 @@
          "title": "Failure of Success Criterion 2.4.4 due to providing link context only in content that is not related to the link",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F63",
          "criterionIds": ["2.4.4"]
       },
       "F65": {
@@ -507,6 +562,7 @@
          "title": "Failure of Success Criterion 1.1.1 due to omitting the alt attribute or text alternative on img elements, area elements, and input elements of type \"image\"",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F65",
          "criterionIds": ["1.1.1"]
       },
       "F66": {
@@ -515,6 +571,7 @@
          "title": "Failure of Success Criterion 3.2.3 due to presenting navigation links in a different relative order on different pages",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F66",
          "criterionIds": ["3.2.3"]
       },
       "F67": {
@@ -523,6 +580,7 @@
          "title": "Failure of Success Criterion 1.1.1 and 1.2.1 due to providing long descriptions for non-text content that does not serve the same purpose or does not present the same information",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F67",
          "criterionIds": ["1.1.1", "1.2.1"]
       },
       "F68": {
@@ -531,6 +589,7 @@
          "title": "Failure of Success Criterion 4.1.2 due to a user interface control not having a programmatically determined name",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F68",
          "criterionIds": ["4.1.2"]
       },
       "F69": {
@@ -539,6 +598,7 @@
          "title": "Failure of Success Criterion 1.4.4 when resizing visually rendered text up to 200 percent causes the text, image or controls to be clipped, truncated or obscured",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F69",
          "criterionIds": ["1.4.4"]
       },
       "F7": {
@@ -547,6 +607,7 @@
          "title": "Failure of Success Criterion 2.2.2 due to an object or applet that has blinking content without a mechanism to pause the content that blinks for more than five seconds",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F7",
          "criterionIds": ["2.2.2"]
       },
       "F71": {
@@ -555,6 +616,7 @@
          "title": "Failure of Success Criterion 1.1.1 due to using text look-alikes to represent text without providing a text alternative",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F71",
          "criterionIds": ["1.1.1"]
       },
       "F72": {
@@ -563,6 +625,7 @@
          "title": "Failure of Success Criterion 1.1.1 due to using ASCII art without providing a text alternative",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F72",
          "criterionIds": ["1.1.1"]
       },
       "F73": {
@@ -571,6 +634,7 @@
          "title": "Failure of Success Criterion 1.4.1 due to creating links that are not visually evident without color vision",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F73",
          "criterionIds": ["1.4.1"]
       },
       "F74": {
@@ -579,6 +643,7 @@
          "title": "Failure of Success Criterion 1.2.2 and 1.2.8 due to not labeling a synchronized media alternative to text as an alternative",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F74",
          "criterionIds": ["1.2.2", "1.2.8"]
       },
       "F75": {
@@ -587,6 +652,7 @@
          "title": "Failure of Success Criterion 1.2.2 by providing synchronized media without captions when the synchronized media presents more information than is presented on the page",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F75",
          "criterionIds": ["1.2.2"]
       },
       "F78": {
@@ -595,6 +661,7 @@
          "title": "Failure of Success Criterion 1.4.11, 2.4.7 and 2.4.13 due to styling element outlines and borders in a way that removes or renders non-visible the visual focus indicator",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F78",
          "criterionIds": ["1.4.11", "2.4.7", "2.4.13"]
       },
       "F79": {
@@ -603,6 +670,7 @@
          "title": "Failure of Success Criterion 4.1.2 due to the focus state of a user interface component not being programmatically determinable or no notification of change of focus state available",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F79",
          "criterionIds": ["4.1.2"]
       },
       "F8": {
@@ -611,6 +679,7 @@
          "title": "Failure of Success Criterion 1.2.2 due to captions omitting some dialogue or important sound effects",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F8",
          "criterionIds": ["1.2.2"]
       },
       "F80": {
@@ -619,6 +688,7 @@
          "title": "Failure of Success Criterion 1.4.4 when text-based form controls do not resize when visually rendered text is resized up to 200%",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F80",
          "criterionIds": ["1.4.4"]
       },
       "F81": {
@@ -627,6 +697,7 @@
          "title": "Failure of Success Criterion 1.4.1 due to identifying required or error fields using color differences only",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F81",
          "criterionIds": ["1.4.1"]
       },
       "F82": {
@@ -635,6 +706,7 @@
          "title": "Failure of Success Criterion 3.3.2 by visually formatting a set of phone number fields but not including a text label",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F82",
          "criterionIds": ["3.3.2"]
       },
       "F83": {
@@ -643,6 +715,7 @@
          "title": "Failure of Success Criterion 1.4.3 and 1.4.6 due to using background images that do not provide sufficient contrast with foreground text (or images of text)",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F83",
          "criterionIds": ["1.4.3", "1.4.6"]
       },
       "F84": {
@@ -651,6 +724,7 @@
          "title": "Failure of Success Criterion 2.4.9 due to using a non-specific link such as \"click here\" or \"more\" without a mechanism to change the link text to specific text.",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F84",
          "criterionIds": ["2.4.9"]
       },
       "F85": {
@@ -659,6 +733,7 @@
          "title": "Failure of Success Criterion 2.4.3 due to using dialogs or menus that are not adjacent to their trigger control in the sequential navigation order",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F85",
          "criterionIds": ["2.4.3"]
       },
       "F86": {
@@ -667,6 +742,7 @@
          "title": "Failure of Success Criterion 4.1.2 due to not providing names for each part of a multi-part form field, such as a US telephone number",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F86",
          "criterionIds": ["4.1.2"]
       },
       "F88": {
@@ -675,6 +751,7 @@
          "title": "Failure of Success Criterion 1.4.8 due to using text that is justified (aligned to both the left and the right margins)",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F88",
          "criterionIds": ["1.4.8"]
       },
       "F89": {
@@ -683,6 +760,7 @@
          "title": "Failure of Success Criteria 2.4.4, 2.4.9 and 4.1.2 due to not providing an accessible name for an image which is the only content in a link",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F89",
          "criterionIds": ["2.4.4", "2.4.9", "4.1.2"]
       },
       "F9": {
@@ -691,6 +769,7 @@
          "title": "Failure of Success Criterion 3.2.5 due to changing the context when the user removes focus from a form element",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F9",
          "criterionIds": ["3.2.5"]
       },
       "F90": {
@@ -699,6 +778,7 @@
          "title": "Failure of Success Criterion 1.3.1 for incorrectly associating table headers and content via the headers and id attributes",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F90",
          "criterionIds": ["1.3.1"]
       },
       "F91": {
@@ -707,6 +787,7 @@
          "title": "Failure of Success Criterion 1.3.1 for not correctly marking up table headers",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F91",
          "criterionIds": ["1.3.1"]
       },
       "F92": {
@@ -715,6 +796,7 @@
          "title": "Failure of Success Criterion 1.3.1 due to the use of role presentation on content which conveys semantic information",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F92",
          "criterionIds": ["1.3.1"]
       },
       "F93": {
@@ -723,6 +805,7 @@
          "title": "Failure of Success Criterion 1.4.2 for absence of a way to pause or stop an HTML5 media element that autoplays",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F93",
          "criterionIds": ["1.4.2"]
       },
       "F94": {
@@ -731,6 +814,7 @@
          "title": "Failure of Success Criterion 1.4.4 due to incorrect use of viewport units to resize text",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F94",
          "criterionIds": ["1.4.4"]
       },
       "F95": {
@@ -739,6 +823,7 @@
          "title": "Failure of Success Criterion 1.4.13 due to content shown on hover not being hoverable",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F95",
          "criterionIds": ["1.4.13"]
       },
       "F96": {
@@ -747,6 +832,7 @@
          "title": "Failure due to the accessible name not containing the visible label text",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F96",
          "criterionIds": ["2.5.3"]
       },
       "F97": {
@@ -755,6 +841,7 @@
          "title": "Failure due to locking the orientation to landscape or portrait view",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F97",
          "criterionIds": ["1.3.4"]
       },
       "F98": {
@@ -763,6 +850,7 @@
          "title": "Failure due to interactions being limited to touch-only on touchscreen devices",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F98",
          "criterionIds": ["2.5.6"]
       },
       "F99": {
@@ -771,6 +859,7 @@
          "title": "Failure of Success Criterion 2.1.4 due to implementing character key shortcuts that cannot be turned off or remapped",
          "technology": "failures",
          "kind": "failure",
+         "url": "https://www.w3.org/WAI/WCAG22/Techniques/failures/F99",
          "criterionIds": ["2.1.4"]
       }
    }

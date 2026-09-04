@@ -1,4 +1,5 @@
 import {
+   axeRuleIndexArtifactSchema,
    coverageArtifactSchema,
    coverageSummaryArtifactSchema,
    criteriaByLevelArtifactSchema,
@@ -6,7 +7,6 @@ import {
    normalizedCriteriaArtifactSchema,
    slugIndexArtifactSchema,
    strategyArtifactSchema,
-   tagIndexArtifactSchema,
    techniqueIndexArtifactSchema,
 } from '@a11ied/contracts';
 import { readdir, readFile } from 'node:fs/promises';
@@ -46,7 +46,7 @@ const versionSchemas: SchemaEntry[] = [
       fileName: (ver) => `technique-index.${ver}.json`,
    },
    { schema: failureIndexArtifactSchema, fileName: (ver) => `failure-index.${ver}.json` },
-   { schema: tagIndexArtifactSchema, fileName: (ver) => `tag-index.${ver}.json` },
+   { schema: axeRuleIndexArtifactSchema, fileName: (ver) => `axe-rules.${ver}.json` },
 ];
 
 function requiredFilesForVersion(version: string): string[] {

@@ -3,13 +3,11 @@ import {
    failureIndexArtifactSchema,
    normalizedCriteriaArtifactSchema,
    slugIndexArtifactSchema,
-   tagIndexArtifactSchema,
    techniqueIndexArtifactSchema,
    type CriteriaByLevelArtifact,
    type FailureIndexArtifact,
    type NormalizedCriteriaArtifact,
    type SlugIndexArtifact,
-   type TagIndexArtifact,
    type TechniqueIndexArtifact,
    type WcagVersion,
 } from '@a11ied/contracts';
@@ -60,6 +58,7 @@ function buildTechniqueIndex(
             title: technique.title,
             technology: technique.technology,
             kind: technique.kind,
+            url: technique.url,
             criterionIds: [
                ...new Set([...(current?.criterionIds ?? []), criterion.id]),
             ].toSorted((left, right) =>
@@ -84,27 +83,13 @@ function buildFailureIndex(
             title: failure.title,
             technology: failure.technology,
             kind: failure.kind,
+            url: failure.url,
             criterionIds: [
                ...new Set([...(current?.criterionIds ?? []), criterion.id]),
             ].toSorted((left, right) =>
                left.localeCompare(right, undefined, { numeric: true }),
             ),
          });
-      }
-   }
-   return index;
-}
-
-function buildTagIndex(criteria: CriteriaMap): Map<string, string[]> {
-   const index = new Map<string, string[]>();
-   for (const criterion of Object.values(criteria)) {
-      for (const tag of criterion.tags) {
-         index.set(
-            tag,
-            [...new Set([...(index.get(tag) ?? []), criterion.id])].toSorted(
-               (left, right) => left.localeCompare(right, undefined, { numeric: true }),
-            ),
-         );
       }
    }
    return index;
@@ -125,7 +110,6 @@ function assembleCriteriaArtifacts(input: {
    slugIndexArtifact: SlugIndexArtifact;
    techniqueIndexArtifact: TechniqueIndexArtifact;
    failureIndexArtifact: FailureIndexArtifact;
-   tagIndexArtifact: TagIndexArtifact;
 } {
    return {
       criteriaArtifact: normalizedCriteriaArtifactSchema.parse({
@@ -148,10 +132,6 @@ function assembleCriteriaArtifacts(input: {
          version: input.version,
          failures: mapToSortedObject(buildFailureIndex(input.criteria)),
       }),
-      tagIndexArtifact: tagIndexArtifactSchema.parse({
-         version: input.version,
-         tags: mapToSortedObject(buildTagIndex(input.criteria)),
-      }),
    };
 }
 
@@ -166,7 +146,6 @@ export function normalizeCriteriaArtifacts(input: {
    slugIndexArtifact: SlugIndexArtifact;
    techniqueIndexArtifact: TechniqueIndexArtifact;
    failureIndexArtifact: FailureIndexArtifact;
-   tagIndexArtifact: TagIndexArtifact;
 } {
    const criteriaEntries = input.wcag.principles.flatMap((principle) =>
       principle.guidelines.flatMap((guideline) =>

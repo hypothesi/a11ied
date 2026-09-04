@@ -25,6 +25,7 @@ interface NormalizeTechniqueInput {
    technique: TechniquePayload;
    kind: TechniqueKind;
    criterionId: string;
+   version: WcagVersion;
    groupTitle: string | undefined;
    groupNote: string | undefined;
    lineage: number[];
@@ -35,9 +36,27 @@ const WCAG_VERSION_TOKENS: Record<string, string> = {
    '2.1': 'WCAG21',
 };
 
+function versionToken(version: WcagVersion): string {
+   return WCAG_VERSION_TOKENS[version] ?? 'WCAG21';
+}
+
 function understandingUrl(version: WcagVersion, slug: string): string {
-   const versionToken = WCAG_VERSION_TOKENS[version] ?? 'WCAG21';
-   return `https://www.w3.org/WAI/${versionToken}/Understanding/${slug}`;
+   return `https://www.w3.org/WAI/${versionToken(version)}/Understanding/${slug}`;
+}
+
+/**
+ * Builds the W3C technique page URL. The wcag.json `technology` value is the directory
+ * name W3C publishes techniques under (general, html, aria, css, failures, ...), so no
+ * extra mapping table is needed.
+ */
+function techniqueUrl(
+   version: WcagVersion,
+   technique: TechniquePayload,
+): string | undefined {
+   if (!technique.id || !technique.technology) {
+      return undefined;
+   }
+   return `https://www.w3.org/WAI/${versionToken(version)}/Techniques/${technique.technology}/${technique.id}`;
 }
 
 function normalizeTags(tagPayload: Record<string, string> | undefined): string[] {
@@ -136,11 +155,8 @@ function normalizeTechniqueTree(input: NormalizeTechniqueInput): NormalizedTechn
    const mapChild = (children: TechniquePayload[]): NormalizedTechnique[] =>
       children.flatMap((child, index) =>
          normalizeTechniqueTree({
+            ...input,
             technique: child,
-            kind: input.kind,
-            criterionId: input.criterionId,
-            groupTitle: input.groupTitle,
-            groupNote: input.groupNote,
             lineage: [...input.lineage, index],
          }),
       );
@@ -162,6 +178,7 @@ function normalizeTechniqueTree(input: NormalizeTechniqueInput): NormalizedTechn
       title: input.technique.title,
       technology: input.technique.technology,
       kind: input.kind,
+      url: techniqueUrl(input.version, input.technique),
       groupTitle: input.groupTitle,
       groupNote: input.groupNote,
       suffix: input.technique.suffix,
@@ -173,8 +190,13 @@ function normalizeTechniqueTree(input: NormalizeTechniqueInput): NormalizedTechn
    return [normalized, ...children];
 }
 
+interface CriterionScope {
+   criterionId: string;
+   version: WcagVersion;
+}
+
 function normalizeTechniqueGroups(
-   criterionId: string,
+   scope: CriterionScope,
    kind: Extract<TechniqueKind, 'sufficient' | 'advisory'>,
    groups: TechniqueGroupPayload[] | undefined,
 ): NormalizedTechnique[] {
@@ -184,9 +206,9 @@ function normalizeTechniqueGroups(
    return groups.flatMap((group, gi) =>
       (group.techniques ?? []).flatMap((tech, ti) =>
          normalizeTechniqueTree({
+            ...scope,
             technique: tech,
             kind,
-            criterionId,
             groupTitle: group.title,
             groupNote: group.note,
             lineage: [gi, ti],
@@ -196,7 +218,7 @@ function normalizeTechniqueGroups(
 }
 
 function normalizeFailureTechniques(
-   criterionId: string,
+   scope: CriterionScope,
    techniques: TechniquePayload[] | undefined,
 ): NormalizedTechnique[] {
    if (!techniques) {
@@ -204,9 +226,9 @@ function normalizeFailureTechniques(
    }
    return techniques.flatMap((tech, index) =>
       normalizeTechniqueTree({
+         ...scope,
          technique: tech,
          kind: 'failure',
-         criterionId,
          groupTitle: undefined,
          groupNote: undefined,
          lineage: [index],
@@ -226,18 +248,15 @@ export function normalizeSingleCriterion(input: {
    guideline: { id: string; num: string; handle: string };
 }): readonly [string, ReturnType<typeof normalizedCriterionSchema.parse>] {
    const { criterion, version, quickrefTags, principle, guideline } = input;
+   const scope: CriterionScope = { criterionId: criterion.num, version };
    const techniques = sortTechniques(
-      normalizeTechniqueGroups(
-         criterion.num,
-         'sufficient',
-         criterion.techniques?.sufficient,
-      ),
+      normalizeTechniqueGroups(scope, 'sufficient', criterion.techniques?.sufficient),
    );
    const advisoryTechniques = sortTechniques(
-      normalizeTechniqueGroups(criterion.num, 'advisory', criterion.techniques?.advisory),
+      normalizeTechniqueGroups(scope, 'advisory', criterion.techniques?.advisory),
    );
    const failures = sortTechniques(
-      normalizeFailureTechniques(criterion.num, criterion.techniques?.failure),
+      normalizeFailureTechniques(scope, criterion.techniques?.failure),
    );
    const normalizedCriterion = normalizedCriterionSchema.parse({
       id: criterion.num,

@@ -24,7 +24,6 @@ const CRITERIA_PREFIXES = [
    'slug-index.',
    'technique-index.',
    'failure-index.',
-   'tag-index.',
 ];
 
 function isCriteriaArtifact(fileName: string): boolean {
@@ -75,10 +74,6 @@ function buildCriteriaArtifactBodies(input: {
          fileName: `failure-index.${input.version}.json`,
          body: toJsonString(input.artifacts.failureIndexArtifact),
       },
-      {
-         fileName: `tag-index.${input.version}.json`,
-         body: toJsonString(input.artifacts.tagIndexArtifact),
-      },
    ];
 }
 
@@ -98,6 +93,10 @@ function buildCoverageArtifactBodies(input: {
       {
          fileName: `coverage-summary.${input.version}.json`,
          body: toJsonString(input.coverageArtifacts.coverageSummaryArtifact),
+      },
+      {
+         fileName: `axe-rules.${input.version}.json`,
+         body: toJsonString(input.coverageArtifacts.axeRuleIndexArtifact),
       },
    ];
 }

@@ -169,11 +169,19 @@ export const failureIndexArtifactSchema = z.object({
 });
 export type FailureIndexArtifact = z.infer<typeof failureIndexArtifactSchema>;
 
-export const tagIndexArtifactSchema = z.object({
-   version: wcagVersionSchema,
-   tags: z.record(z.string(), z.array(z.string())),
+export const axeRuleIndexEntrySchema = z.object({
+   ruleId: z.string(),
+   tags: z.array(z.string()),
+   actIds: z.array(z.string()),
+   criterionIds: z.array(z.string()),
 });
-export type TagIndexArtifact = z.infer<typeof tagIndexArtifactSchema>;
+export type AxeRuleIndexEntry = z.infer<typeof axeRuleIndexEntrySchema>;
+
+export const axeRuleIndexArtifactSchema = z.object({
+   version: wcagVersionSchema,
+   rules: z.record(z.string(), axeRuleIndexEntrySchema),
+});
+export type AxeRuleIndexArtifact = z.infer<typeof axeRuleIndexArtifactSchema>;
 
 export const criterionCoverageSchema = z.object({
    criterionId: z.string(),
