@@ -11,10 +11,14 @@ import {
    wrap,
 } from '../lib/format.js';
 import {
+   applicabilityDefinitionLines,
+   applicabilityStateDefinitions,
    criterionLine,
+   nextCommandLine,
    renderElementLines,
    type RenderedElement,
    type RenderOptions,
+   type StrategySummary,
 } from './shared.js';
 
 interface Assessment {
@@ -36,12 +40,23 @@ const APPLICABILITY_STATE_LABELS: Readonly<Record<string, string>> = {
    unknown: 'unknown',
 };
 
-function renderAssessmentLines(assessment: Assessment, options: RenderOptions): string[] {
+function renderAssessmentLines(
+   assessment: Assessment,
+   options: RenderOptions & { strategy: StrategySummary | undefined; url: string },
+): string[] {
    const reasons = options.verbose ? assessment.reasons : assessment.reasons.slice(0, 1);
+   const next = nextCommandLine({
+      criterionId: assessment.criterionId,
+      strategy: options.strategy,
+      url: options.url,
+   });
    const lines = [
       criterionLine({ id: assessment.criterionId, title: assessment.title }),
       ...indent(
-         reasons.flatMap((reason) => wrap(dim(reason), 1)),
+         [
+            ...reasons.flatMap((reason) => wrap(dim(reason), 1)),
+            `${dim('Next:')} ${next}`,
+         ],
          REASON_DEPTH,
       ),
    ];
@@ -73,11 +88,12 @@ export function renderApplicableText(
    const result = envelope.result as {
       target: { value: string };
       matrix: { assessments: Record<string, Assessment> };
+      strategies?: Record<string, StrategySummary>;
    };
    const assessments = Object.values(result.matrix.assessments);
    const lines = [
       title(`Applicable criteria for ${result.target.value}`),
-      ...indent([dim(summarizeStates(assessments))]),
+      ...indent([dim(summarizeStates(assessments)), ...applicabilityDefinitionLines()]),
    ];
 
    for (const state of APPLICABILITY_STATE_ORDER) {
@@ -87,7 +103,11 @@ export function renderApplicableText(
       }
       const name = `${badge(state)} ${dim(`(${matching.length})`)}`;
       const body = matching.flatMap((assessment) =>
-         renderAssessmentLines(assessment, options),
+         renderAssessmentLines(assessment, {
+            ...options,
+            strategy: result.strategies?.[assessment.criterionId],
+            url: result.target.value,
+         }),
       );
       lines.push(...section(name, body));
    }
@@ -120,6 +140,8 @@ export function renderCriterionApplicabilityText(
          source: string;
          confidence: string;
       }>;
+      strategy?: StrategySummary;
+      target?: { value: string };
    };
    const reasons = options.verbose
       ? result.assessment.reasons
@@ -132,9 +154,24 @@ export function renderCriterionApplicabilityText(
       ? Number.POSITIVE_INFINITY
       : MAX_CRITERION_ELEMENTS;
 
+   const definition = applicabilityStateDefinitions.find(
+      (entry) => entry.state === result.assessment.state,
+   )?.definition;
+   const next = nextCommandLine({
+      criterionId: result.criterion.id,
+      strategy: result.strategy,
+      url: result.target?.value,
+   });
+
    return [
       criterionLine(result.criterion),
-      ...indent(fields([['State', badge(result.assessment.state)]])),
+      ...indent(
+         fields([
+            ['State', badge(result.assessment.state)],
+            ['Meaning', definition ?? dim('no page signal matched this criterion')],
+            ['Next', next],
+         ]),
+      ),
       ...section(
          reasons.length === 1 ? 'Reason' : 'Reasons',
          reasons.flatMap((reason) => wrap(reason)),

@@ -14,21 +14,24 @@ export const topLevelHelpCases: HelpCase[] = [
       CLI-first accessibility automation for VoiceOver, NVDA, and MCP.
 
       Options:
-        -V, --version     output the version number
-        -h, --help        display help for command
+        -V, --version               output the version number
+        -h, --help                  display help for command
 
       Commands:
-        sr                Control a target screen reader through stable sessions.
-        wcag              Look up pinned WCAG requirements and coverage data.
-        axe [options]     Run axe-core against a target.
-        inspect           Explain criterion applicability for a target.
-        mcp               Start the MCP stdio server.
-        doctor [options]  Check this machine for browser and screen reader readiness,
-                          and list the setup steps still needed.
-        setup [options]   Run the Guidepup setup and install commands this host needs
-                          for real screen reader sessions, then re-check with doctor.
-        help-all          Print help for the full command tree in one shot.
-        help [command]    display help for command
+        sr                          Control a target screen reader through stable
+                                    sessions.
+        wcag [options] [criterion]  Look up pinned WCAG requirements and coverage
+                                    data.
+        axe [options]               Run axe-core against a target.
+        inspect                     Explain criterion applicability for a target.
+        mcp                         Start the MCP stdio server.
+        doctor [options]            Check this machine for browser and screen reader
+                                    readiness, and list the setup steps still needed.
+        setup [options]             Run the Guidepup setup and install commands this
+                                    host needs for real screen reader sessions, then
+                                    re-check with doctor.
+        help-all                    Print help for the full command tree in one shot.
+        help [command]              display help for command
       "
     `,
    },
@@ -36,23 +39,30 @@ export const topLevelHelpCases: HelpCase[] = [
       name: 'keeps the wcag subcommand grammar stable',
       args: ['wcag', '--help'],
       expected: `
-      "Usage: a11ied wcag [options] [command]
+      "Usage: a11ied wcag [options] [command] [criterion]
 
       Look up pinned WCAG requirements and coverage data.
 
+      Arguments:
+        criterion                   Show one criterion by id or slug, or one technique
+                                    by id such as G18.
+
       Options:
-        -h, --help                      display help for command
+        --version <version>         Use a specific WCAG version. Defaults to 2.2.
+                                    (default: "2.2")
+        --json                      Print JSON instead of human-readable text.
+        --verbose                   Print more detail in text output.
+        -h, --help                  display help for command
 
       Commands:
-        levels [options]                List the available conformance levels.
-        criteria [options]              List criteria, optionally filtered to one
-                                        conformance level.
-        show [options] <criterion>      Show one criterion by id or slug.
-        search [options] <query>        Search criterion titles, summaries,
-                                        techniques, failures, and tags.
-        coverage [options] <criterion>  Show automation coverage and preferred
-                                        strategy for one criterion.
-        help [command]                  display help for command
+        criteria [options]          List criteria, optionally filtered to one
+                                    conformance level.
+        show [options] <criterion>  Show one criterion by id or slug with its
+                                    techniques, failures, and coverage.
+        search [options] <query>    Search criterion titles, summaries, techniques,
+                                    failures, and tags.
+        rule [options] <ruleId>     Map one axe-core rule id to its criteria,
+                                    techniques, failures, and fix guidance.
       "
     `,
    },

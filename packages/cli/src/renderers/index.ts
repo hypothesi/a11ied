@@ -1,9 +1,12 @@
 export { renderRunAxeText } from './axe.js';
 export { renderApplicableText, renderCriterionApplicabilityText } from './inspect.js';
 export {
-   renderCoverageText,
+   renderCoverageSummaryText,
    renderCriteriaText,
    renderSearchText,
-   renderShowCriterionText,
-   renderWcagLevelsText,
 } from './wcag.js';
+export {
+   renderAxeRuleText,
+   renderShowCriterionText,
+   renderTechniqueText,
+} from './wcag-show.js';

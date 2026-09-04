@@ -1,46 +1,36 @@
 import type { Command } from 'commander';
 import type { CliOutputEnvelope } from '#contracts';
+import type * as CoreModuleNamespace from '#core';
+import type * as RenderersNamespace from '../renderers/index.js';
 import { addJsonOption, addVerboseOption, addWcagVersionOption } from '../lib/options.js';
 
-interface CriterionCommandOptions {
+interface WcagCommandOptions {
    json?: boolean;
    verbose?: boolean;
    version: string;
 }
 
+type CoreModule = typeof CoreModuleNamespace;
+type Renderers = typeof RenderersNamespace;
 type RenderText = (envelope: CliOutputEnvelope, options: { verbose: boolean }) => string;
+type CommandResult = Record<string, unknown> | Promise<Record<string, unknown>>;
 
-interface Renderers {
-   renderShowCriterionText: RenderText;
-   renderCoverageText: RenderText;
-   renderWcagLevelsText: RenderText;
-   renderCriteriaText: RenderText;
-   renderSearchText: RenderText;
+const TECHNIQUE_ID_PATTERN = /^[A-Z]+\d+$/;
+
+function isTechniqueId(lookupKey: string): boolean {
+   return TECHNIQUE_ID_PATTERN.test(lookupKey);
 }
 
-interface CoreModule {
-   listWcagLevels: (version: string) => Record<string, unknown>;
-   listWcagCriteria: (
-      level: string | undefined,
-      version: string,
-   ) => Record<string, unknown>;
-   showWcagCriterion: (criterion: string, version: string) => Record<string, unknown>;
-   searchWcagCriteria: (
-      query: string,
-      options: { version: string; limit: number },
-   ) => Record<string, unknown>;
-   showWcagCoverage: (criterion: string, version: string) => Record<string, unknown>;
+function withWcagOptions(command: Command): Command {
+   return addVerboseOption(addJsonOption(addWcagVersionOption(command)));
 }
 
-async function runCriterionCommand(
-   criterion: string,
-   options: CriterionCommandOptions,
-   args: {
-      subcommand: 'show' | 'coverage';
-      buildResult: (core: CoreModule) => Record<string, unknown>;
-      renderText: (renderers: Renderers) => RenderText;
-   },
-): Promise<void> {
+async function runWcagCommand(input: {
+   subcommand: string;
+   options: WcagCommandOptions;
+   buildResult: (core: CoreModule) => CommandResult;
+   renderText: (renderers: Renderers) => RenderText;
+}): Promise<void> {
    const [{ executeCommand }, renderers, core] = await Promise.all([
       import('../lib/execute.js'),
       import('../renderers/index.js'),
@@ -50,172 +40,128 @@ async function runCriterionCommand(
    await executeCommand(
       {
          family: 'wcag',
-         subcommand: args.subcommand,
-         wcagVersion: options.version,
-         json: options.json,
-         verbose: options.verbose,
+         subcommand: input.subcommand,
+         wcagVersion: input.options.version,
+         json: input.options.json,
+         verbose: input.options.verbose,
       },
-      () => ({
-         result: args.buildResult(core),
-      }),
-      args.renderText(renderers),
+      async () => ({ result: await input.buildResult(core) }),
+      input.renderText(renderers),
    );
 }
 
-function registerLevelsCommand(wcagCommand: Command): void {
-   addVerboseOption(
-      addJsonOption(
-         addWcagVersionOption(
-            wcagCommand
-               .command('levels')
-               .description('List the available conformance levels.'),
-         ),
-      ),
-   ).action(async (options: { json?: boolean; verbose?: boolean; version: string }) => {
-      const [{ executeCommand }, renderers, core] = await Promise.all([
-         import('../lib/execute.js'),
-         import('../renderers/index.js'),
-         import('#core'),
-      ]);
-
-      await executeCommand(
-         {
-            family: 'wcag',
-            subcommand: 'levels',
-            wcagVersion: options.version,
-            json: options.json,
-            verbose: options.verbose,
-         },
-         () => ({
-            result: core.listWcagLevels(options.version),
-         }),
-         renderers.renderWcagLevelsText,
-      );
+async function showCriterionOrTechnique(
+   lookupKey: string,
+   options: WcagCommandOptions,
+): Promise<void> {
+   if (isTechniqueId(lookupKey)) {
+      await runWcagCommand({
+         subcommand: 'technique',
+         options,
+         buildResult: (core) => core.showWcagTechnique(lookupKey, options.version),
+         renderText: (renderers) => renderers.renderTechniqueText,
+      });
+      return;
+   }
+   await runWcagCommand({
+      subcommand: 'show',
+      options,
+      buildResult: (core) => core.showWcagCriterion(lookupKey, options.version),
+      renderText: (renderers) => renderers.renderShowCriterionText,
    });
 }
 
-function registerCriteriaCommand(wcagCommand: Command): void {
-   addVerboseOption(
-      addJsonOption(
-         addWcagVersionOption(
-            wcagCommand
-               .command('criteria')
-               .description(
-                  'List criteria, optionally filtered to one conformance level.',
-               )
-               .option(
-                  '--level <level>',
-                  'Filter criteria to one WCAG level: A, AA, or AAA.',
-               ),
-         ),
-      ),
-   ).action(
-      async (options: {
-         json?: boolean;
-         verbose?: boolean;
-         version: string;
-         level?: string;
-      }) => {
-         const [{ executeCommand }, renderers, core] = await Promise.all([
-            import('../lib/execute.js'),
-            import('../renderers/index.js'),
-            import('#core'),
-         ]);
+/**
+ * Bare `a1 wcag` opens the interactive finder on a terminal. Piped output and --json get
+ * the help text instead, so scripts never block on a TUI.
+ */
+async function runWcagEntry(
+   wcagCommand: Command,
+   options: WcagCommandOptions,
+): Promise<void> {
+   if (!process.stdout.isTTY || !process.stdin.isTTY || options.json) {
+      wcagCommand.outputHelp();
+      return;
+   }
+   const { runWcagFinder } = await import('../tui/finder.js');
+   await runWcagFinder({ version: options.version });
+}
 
-         await executeCommand(
-            {
-               family: 'wcag',
+function registerCriteriaCommand(wcagCommand: Command): void {
+   withWcagOptions(
+      wcagCommand
+         .command('criteria')
+         .description('List criteria, optionally filtered to one conformance level.')
+         .option('--level <level>', 'Filter criteria to one WCAG level: A, AA, or AAA.')
+         .option('--summary', 'Print coverage totals per level instead of the list.'),
+   ).action(
+      async (options: WcagCommandOptions & { level?: string; summary?: boolean }) => {
+         if (options.summary) {
+            await runWcagCommand({
                subcommand: 'criteria',
-               wcagVersion: options.version,
-               json: options.json,
-               verbose: options.verbose,
-            },
-            () => ({
-               result: core.listWcagCriteria(options.level, options.version),
-            }),
-            renderers.renderCriteriaText,
-         );
+               options,
+               buildResult: (core) => core.showWcagCoverageSummary(options.version),
+               renderText: (renderers) => renderers.renderCoverageSummaryText,
+            });
+            return;
+         }
+         await runWcagCommand({
+            subcommand: 'criteria',
+            options,
+            buildResult: (core) => core.listWcagCriteria(options.level, options.version),
+            renderText: (renderers) => renderers.renderCriteriaText,
+         });
       },
    );
 }
 
 function registerShowCommand(wcagCommand: Command): void {
-   addVerboseOption(
-      addJsonOption(
-         addWcagVersionOption(
-            wcagCommand
-               .command('show <criterion>')
-               .description('Show one criterion by id or slug.'),
+   withWcagOptions(
+      wcagCommand
+         .command('show <criterion>')
+         .description(
+            'Show one criterion by id or slug with its techniques, failures, and coverage.',
          ),
-      ),
-   ).action(async (criterion: string, options: CriterionCommandOptions) => {
-      await runCriterionCommand(criterion, options, {
-         subcommand: 'show',
-         buildResult: (core) => core.showWcagCriterion(criterion, options.version),
-         renderText: (renderers) => renderers.renderShowCriterionText,
-      });
+   ).action(async (criterion: string, options: WcagCommandOptions) => {
+      await showCriterionOrTechnique(criterion, options);
    });
 }
 
 function registerSearchCommand(wcagCommand: Command): void {
-   addVerboseOption(
-      addJsonOption(
-         addWcagVersionOption(
-            wcagCommand
-               .command('search <query>')
-               .description(
-                  'Search criterion titles, summaries, techniques, failures, and tags.',
-               )
-               .option('--limit <count>', 'Limit the number of returned rows.', '10'),
-         ),
-      ),
-   ).action(
-      async (
-         query: string,
-         options: { json?: boolean; verbose?: boolean; version: string; limit: string },
-      ) => {
-         const [{ executeCommand }, renderers, core] = await Promise.all([
-            import('../lib/execute.js'),
-            import('../renderers/index.js'),
-            import('#core'),
-         ]);
-
-         await executeCommand(
-            {
-               family: 'wcag',
-               subcommand: 'search',
-               wcagVersion: options.version,
-               json: options.json,
-               verbose: options.verbose,
-            },
-            () => ({
-               result: core.searchWcagCriteria(query, {
-                  version: options.version,
-                  limit: Number.parseInt(options.limit, 10),
-               }),
+   withWcagOptions(
+      wcagCommand
+         .command('search <query>')
+         .description(
+            'Search criterion titles, summaries, techniques, failures, and tags.',
+         )
+         .option('--limit <count>', 'Limit the number of returned rows.', '10'),
+   ).action(async (query: string, options: WcagCommandOptions & { limit: string }) => {
+      await runWcagCommand({
+         subcommand: 'search',
+         options,
+         buildResult: (core) =>
+            core.searchWcagCriteria(query, {
+               version: options.version,
+               limit: Number.parseInt(options.limit, 10),
             }),
-            renderers.renderSearchText,
-         );
-      },
-   );
+         renderText: (renderers) => renderers.renderSearchText,
+      });
+   });
 }
 
-function registerCoverageCommand(wcagCommand: Command): void {
-   addVerboseOption(
-      addJsonOption(
-         addWcagVersionOption(
-            wcagCommand
-               .command('coverage <criterion>')
-               .description(
-                  'Show automation coverage and preferred strategy for one criterion.',
-               ),
+function registerRuleCommand(wcagCommand: Command): void {
+   withWcagOptions(
+      wcagCommand
+         .command('rule <ruleId>')
+         .description(
+            'Map one axe-core rule id to its criteria, techniques, failures, and fix guidance.',
          ),
-      ),
-   ).action(async (criterion: string, options: CriterionCommandOptions) => {
-      await runCriterionCommand(criterion, options, {
-         subcommand: 'coverage',
-         buildResult: (core) => core.showWcagCoverage(criterion, options.version),
-         renderText: (renderers) => renderers.renderCoverageText,
+   ).action(async (ruleId: string, options: WcagCommandOptions) => {
+      await runWcagCommand({
+         subcommand: 'rule',
+         options,
+         buildResult: (core) => core.showWcagAxeRule(ruleId, options.version),
+         renderText: (renderers) => renderers.renderAxeRuleText,
       });
    });
 }
@@ -223,11 +169,24 @@ function registerCoverageCommand(wcagCommand: Command): void {
 export function registerWcagCommands(program: Command): void {
    const wcagCommand = program
       .command('wcag')
-      .description('Look up pinned WCAG requirements and coverage data.');
+      .description('Look up pinned WCAG requirements and coverage data.')
+      .argument(
+         '[criterion]',
+         'Show one criterion by id or slug, or one technique by id such as G18.',
+      );
 
-   registerLevelsCommand(wcagCommand);
+   withWcagOptions(wcagCommand).action(
+      async (criterion: string | undefined, options: WcagCommandOptions) => {
+         if (criterion === undefined) {
+            await runWcagEntry(wcagCommand, options);
+            return;
+         }
+         await showCriterionOrTechnique(criterion, options);
+      },
+   );
+
    registerCriteriaCommand(wcagCommand);
    registerShowCommand(wcagCommand);
    registerSearchCommand(wcagCommand);
-   registerCoverageCommand(wcagCommand);
+   registerRuleCommand(wcagCommand);
 }

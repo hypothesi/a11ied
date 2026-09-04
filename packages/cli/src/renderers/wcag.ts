@@ -1,31 +1,14 @@
-import type { CliOutputEnvelope } from '#contracts';
 import {
-   badge,
-   count,
-   dim,
-   fields,
-   indent,
-   listItems,
-   section,
-   title,
-   wrap,
-} from '../lib/format.js';
-import { stripHtml } from '../lib/text.js';
+   coverageSummaryArtifactSchema,
+   criterionSearchResponseSchema,
+   type CliOutputEnvelope,
+} from '#contracts';
+import { count, dim, indent, section, title } from '../lib/format.js';
 import { criterionLine, type CriterionSummary, type RenderOptions } from './shared.js';
 
 const MATCH_DEPTH = 2;
-
-// Fallow-ignore-next-line unused-export
-export function renderWcagLevelsText(
-   envelope: CliOutputEnvelope,
-   _options: RenderOptions,
-): string {
-   const result = envelope.result as { version: string; levels: string[] };
-   return [
-      title(`WCAG ${result.version}`),
-      ...indent(fields([['Levels', result.levels.join(', ')]])),
-   ].join('\n');
-}
+const SUMMARY_COLUMN_WIDTH = 11;
+const SUMMARY_LEVELS = ['A', 'AA', 'AAA'] as const;
 
 function groupByGuideline(
    criteria: CriterionSummary[],
@@ -67,46 +50,46 @@ export function renderCriteriaText(
    return lines.join('\n');
 }
 
+function summaryRow(cells: Array<string | number>): string {
+   return cells
+      .map((cell) => String(cell).padEnd(SUMMARY_COLUMN_WIDTH))
+      .join('')
+      .trimEnd();
+}
+
 // Fallow-ignore-next-line unused-export
-export function renderShowCriterionText(
+export function renderCoverageSummaryText(
    envelope: CliOutputEnvelope,
-   options: RenderOptions,
+   _options: RenderOptions,
 ): string {
-   const { criterion } = envelope.result as {
-      criterion: CriterionSummary & {
-         slug?: string;
-         wcagVersion?: string;
-         summary: string;
-         normativeText: string;
-         understandingUrl: string;
-         tags?: string[];
-      };
-   };
-   const lines = [criterionLine(criterion)];
+   const summary = coverageSummaryArtifactSchema.parse(envelope.result);
+   const buckets = [
+      ...SUMMARY_LEVELS.map((level) => [level, summary.byLevel[level]] as const),
+      ['All', summary.totals] as const,
+   ];
+   const table = [
+      dim(summaryRow(['Level', 'Criteria', 'Automated', 'Hybrid', 'Manual', 'Unknown'])),
+      ...buckets.map(([label, bucket]) =>
+         summaryRow([
+            label,
+            bucket.criteria,
+            bucket.automated,
+            bucket.hybrid,
+            bucket.manual,
+            bucket.unknown,
+         ]),
+      ),
+   ];
+   const sources = summary.coverageSources;
 
-   if (criterion.guideline) {
-      lines.push(
-         dim(`Guideline ${criterion.guideline.number} ${criterion.guideline.title}`),
-      );
-   }
-   lines.push('', ...wrap(criterion.summary, 1));
-   lines.push(...section('Normative text', wrap(stripHtml(criterion.normativeText))));
-   lines.push(...section('Understanding', [criterion.understandingUrl]));
-
-   if (options.verbose) {
-      lines.push(
-         ...section(
-            'Details',
-            fields([
-               ['Slug', criterion.slug ?? 'none'],
-               ['WCAG version', criterion.wcagVersion ?? 'unknown'],
-               ['Tags', criterion.tags?.join(', ') || 'none'],
-            ]),
-         ),
-      );
-   }
-
-   return lines.join('\n');
+   return [
+      `${title(`WCAG ${summary.version} coverage`)}  ${dim(`updated ${summary.updatedAt.slice(0, 'YYYY-MM-DD'.length)}`)}`,
+      ...indent(table),
+      '',
+      ...indent([
+         `${sources.criteriaWithAxe} criteria have an axe rule, ${sources.criteriaWithAct} have an ACT rule, ${sources.criteriaWithBoth} have both.`,
+      ]),
+   ].join('\n');
 }
 
 // Fallow-ignore-next-line unused-export
@@ -114,16 +97,7 @@ export function renderSearchText(
    envelope: CliOutputEnvelope,
    options: RenderOptions,
 ): string {
-   const result = envelope.result as {
-      query: string;
-      results: Array<{
-         criterionId: string;
-         title: string;
-         level: string;
-         score: number;
-         matches?: Array<{ field: string; snippet: string }>;
-      }>;
-   };
+   const result = criterionSearchResponseSchema.parse(envelope.result);
    const lines = [
       `${title(`Search results for "${result.query}"`)}  ${dim(count(result.results.length, 'match', 'matches'))}`,
       '',
@@ -134,9 +108,9 @@ export function renderSearchText(
       lines.push(
          ...indent([`${criterionLine(summary)}  ${dim(`score ${entry.score}`)}`]),
       );
-      if (options.verbose && entry.matches?.length) {
+      if (options.verbose && entry.matches.length > 0) {
          const matchLines = entry.matches.map(
-            (match) => `${dim(`${match.field}:`)} ${match.snippet}`,
+            (match) => `${dim(`${match.field}:`)} ${match.text}`,
          );
          lines.push(...indent(matchLines, MATCH_DEPTH));
       }
@@ -144,46 +118,6 @@ export function renderSearchText(
 
    if (result.results.length === 0) {
       lines.push(...indent([dim('No criteria matched.')]));
-   }
-
-   return lines.join('\n');
-}
-
-// Fallow-ignore-next-line unused-export
-export function renderCoverageText(
-   envelope: CliOutputEnvelope,
-   options: RenderOptions,
-): string {
-   const result = envelope.result as {
-      criterion: { id: string; title: string };
-      coverage: { coverageState: string; axeRuleIds: string[]; actRuleIds: string[] };
-      strategy: {
-         preferredEvidenceMode: string;
-         procedureIds: string[];
-         notes?: string[];
-      };
-   };
-   const lines = [
-      criterionLine(result.criterion),
-      ...section(
-         'Coverage',
-         fields([
-            ['State', badge(result.coverage.coverageState)],
-            ['axe rules', result.coverage.axeRuleIds.join(', ') || dim('none')],
-            ['ACT rules', result.coverage.actRuleIds.join(', ') || dim('none')],
-         ]),
-      ),
-      ...section(
-         'Strategy',
-         fields([
-            ['Evidence', badge(result.strategy.preferredEvidenceMode)],
-            ['Procedures', result.strategy.procedureIds.join(', ') || dim('none')],
-         ]),
-      ),
-   ];
-
-   if (options.verbose) {
-      lines.push(...section('Strategy notes', listItems(result.strategy.notes ?? [])));
    }
 
    return lines.join('\n');

@@ -67,9 +67,9 @@ export function indent(lines: string[], depth = 1): string[] {
 }
 
 /** Wraps text to the terminal width, indenting every continuation line by the same amount. */
-export function wrap(text: string, depth = 0): string[] {
-   const width = getTerminalWidth() - INDENT.length * depth;
-   return indent(wrapAnsi(text, width, { hard: false, trim: true }).split('\n'), depth);
+export function wrap(text: string, depth = 0, width = getTerminalWidth()): string[] {
+   const usable = width - INDENT.length * depth;
+   return indent(wrapAnsi(text, usable, { hard: false, trim: true }).split('\n'), depth);
 }
 
 export function badge(state: string): string {
