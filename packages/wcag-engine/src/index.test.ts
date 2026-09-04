@@ -9,10 +9,13 @@ import { describe, expect, it } from 'vitest';
 import {
    WcagEngineNotFoundError,
    WcagEngineValidationError,
+   getAxeRule,
    getCoverage,
+   getCoverageSummary,
    getCriterion,
    getCriterionApplicability,
    getQuickrefTags,
+   getTechnique,
    listApplicableCriteria,
    listCriteriaByLevel,
    resetWcagEngineCache,
@@ -100,6 +103,48 @@ describe('wcag-engine coverage and strategy', () => {
       expect(result.criterionId).toBe('4.1.3');
       expect(result.tags.length).toBeGreaterThan(0);
       expect(result.tags).toContain('forms');
+   });
+
+   it('returns the pinned coverage totals per level', () => {
+      const summary = getCoverageSummary({ version: '2.2' });
+
+      expect(summary.version).toBe('2.2');
+      expect(summary.totals.criteria).toBe(
+         summary.byLevel.A.criteria +
+            summary.byLevel.AA.criteria +
+            summary.byLevel.AAA.criteria,
+      );
+   });
+});
+
+describe('wcag-engine technique and axe rule lookup', () => {
+   it('resolves a technique and a failure to the criteria that list them', () => {
+      const technique = getTechnique('G18');
+      const failure = getTechnique('F65');
+
+      expect(technique.technique.kind).toBe('sufficient');
+      expect(technique.technique.url).toBe(
+         'https://www.w3.org/WAI/WCAG22/Techniques/general/G18',
+      );
+      expect(technique.criteria.map((criterion) => criterion.id)).toContain('1.4.3');
+      expect(failure.technique.kind).toBe('failure');
+      expect(failure.criteria.map((criterion) => criterion.id)).toEqual(['1.1.1']);
+   });
+
+   it('maps an axe rule id back to its criteria', () => {
+      const result = getAxeRule('color-contrast');
+
+      expect(result.rule.criterionIds).toContain('1.4.3');
+      expect(result.criteria.map((criterion) => criterion.id)).toEqual(
+         result.rule.criterionIds,
+      );
+      expect(result.criteria[0]?.level).toBe('AA');
+      expect(result.rule.tags).toContain('wcag143');
+   });
+
+   it('throws typed not-found errors for unknown techniques and rules', () => {
+      expect(() => getTechnique('G9999')).toThrowError(/technique lookup failed/i);
+      expect(() => getAxeRule('not-a-rule')).toThrowError(WcagEngineNotFoundError);
    });
 });
 

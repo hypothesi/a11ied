@@ -4,7 +4,10 @@ import {
    wcagVersionSchema,
    type ApplicabilitySignalCategory,
    type ApplicabilityState,
+   type AxeRuleIndexArtifact,
+   type CoverageSummaryArtifact,
    type NormalizedCriterion,
+   type TechniqueIndexArtifact,
    type WcagLevel,
    type WcagVersion,
    type coverageArtifactSchema,
@@ -41,6 +44,10 @@ export interface EngineArtifacts {
    coverage: ReturnType<typeof coverageArtifactSchema.parse>['coverage'];
    strategies: ReturnType<typeof strategyArtifactSchema.parse>['strategies'];
    slugToId: Record<string, string>;
+   techniques: TechniqueIndexArtifact['techniques'];
+   failures: TechniqueIndexArtifact['techniques'];
+   axeRules: AxeRuleIndexArtifact['rules'];
+   coverageSummary: CoverageSummaryArtifact;
 }
 
 export const artifactsCache = new Map<WcagVersion, EngineArtifacts>();

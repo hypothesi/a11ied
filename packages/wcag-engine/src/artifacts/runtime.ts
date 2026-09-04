@@ -1,28 +1,24 @@
 import {
-   coverageArtifactSchema,
+   axeRuleLookupResultSchema,
    coverageLookupResultSchema,
-   criteriaByLevelArtifactSchema,
    criteriaByLevelResultSchema,
    criterionLookupResultSchema,
-   normalizedCriteriaArtifactSchema,
    quickrefTagLookupResultSchema,
-   strategyArtifactSchema,
+   techniqueLookupResultSchema,
    wcagLevelSchema,
    wcagVersionSchema,
+   type AxeRuleLookupResult,
    type CoverageLookupResult,
+   type CoverageSummaryArtifact,
    type CriteriaByLevelResult,
    type CriterionLookupKey,
    type CriterionLookupResult,
-   type NormalizedCriteriaArtifact,
    type NormalizedCriterion,
    type QuickrefTagLookupResult,
+   type TechniqueLookupResult,
    type WcagLevel,
    type WcagVersion,
 } from '@a11ied/contracts';
-
-import { existsSync, readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import {
    artifactsCache,
@@ -30,105 +26,7 @@ import {
    type EngineArtifacts,
 } from '../shared/data.js';
 import { WcagEngineNotFoundError, WcagEngineValidationError } from '../errors/index.js';
-
-function resolveInstalledPath(specifier: string): string | undefined {
-   try {
-      return fileURLToPath(import.meta.resolve(specifier));
-   } catch {
-      return undefined;
-   }
-}
-
-function resolveGeneratedRootFromPackage(): string | undefined {
-   const packageJsonPath = resolveInstalledPath('@a11ied/wcag-data/package.json');
-   if (packageJsonPath) {
-      return resolve(dirname(packageJsonPath), 'data/generated');
-   }
-
-   const packageEntryPath = resolveInstalledPath('@a11ied/wcag-data');
-   if (!packageEntryPath) {
-      return undefined;
-   }
-   const packageDir = dirname(packageEntryPath);
-   if (packageDir.endsWith('/dist')) {
-      return resolve(packageDir, '../data/generated');
-   }
-   return resolve(packageDir, 'data/generated');
-}
-
-function getGeneratedRootCandidates(): string[] {
-   return [
-      resolve(import.meta.dirname, '../../wcag-data/data/generated'),
-      resolve(import.meta.dirname, '../../../wcag-data/data/generated'),
-      resolve(import.meta.dirname, '../../../packages/wcag-data/data/generated'),
-      resolve(process.cwd(), 'packages/wcag-data/data/generated'),
-   ];
-}
-
-function findExistingGeneratedRoot(candidates: string[]): string | undefined {
-   for (const candidate of candidates) {
-      if (existsSync(candidate)) {
-         return candidate;
-      }
-   }
-   return undefined;
-}
-
-function resolveGeneratedRoot(): string {
-   const packageRoot = resolveGeneratedRootFromPackage();
-   if (packageRoot) {
-      return packageRoot;
-   }
-
-   const candidates = getGeneratedRootCandidates();
-   const existingRoot = findExistingGeneratedRoot(candidates);
-   if (existingRoot) {
-      return existingRoot;
-   }
-
-   return resolve(process.cwd(), 'packages/wcag-data/data/generated');
-}
-
-const generatedRoot = resolveGeneratedRoot();
-
-function loadArtifact<TResult>(
-   schema: { parse: (data: unknown) => TResult },
-   filePath: string,
-): TResult {
-   return schema.parse(JSON.parse(readFileSync(filePath, 'utf8')) as unknown);
-}
-
-function buildArtifacts(version: WcagVersion): EngineArtifacts {
-   const criteriaArtifact = loadArtifact(
-      normalizedCriteriaArtifactSchema,
-      resolve(generatedRoot, `criteria.${version}.json`),
-   );
-   const criteriaByLevelArtifact = loadArtifact(
-      criteriaByLevelArtifactSchema,
-      resolve(generatedRoot, `criteria-by-level.${version}.json`),
-   );
-   const coverageArtifact = loadArtifact(
-      coverageArtifactSchema,
-      resolve(generatedRoot, `coverage.${version}.json`),
-   );
-   const strategyArtifact = loadArtifact(
-      strategyArtifactSchema,
-      resolve(generatedRoot, `strategy.${version}.json`),
-   );
-   const criteriaEntries = Object.values(
-      criteriaArtifact.criteria,
-   ) as NormalizedCriteriaArtifact['criteria'][string][];
-
-   return {
-      criteria: criteriaArtifact.criteria,
-      criteriaByLevel: criteriaByLevelArtifact.levels,
-      coverage: coverageArtifact.coverage,
-      strategies: strategyArtifact.strategies,
-      slugToId: Object.fromEntries(
-         criteriaEntries.map((criterion) => [criterion.slug, criterion.id] as const),
-      ),
-   };
-}
+import { loadEngineArtifacts } from './load.js';
 
 /** Loads the generated artifact bundle for one supported WCAG version. */
 export function getArtifacts(version: WcagVersion): EngineArtifacts {
@@ -137,7 +35,7 @@ export function getArtifacts(version: WcagVersion): EngineArtifacts {
       return cached;
    }
 
-   const nextArtifacts = buildArtifacts(version);
+   const nextArtifacts = loadEngineArtifacts(version);
    artifactsCache.set(version, nextArtifacts);
    return nextArtifacts;
 }
@@ -182,6 +80,19 @@ export function resolveCriterion(
    }
 
    throw new WcagEngineNotFoundError(lookupKey);
+}
+
+function listCriteriaByIds(
+   artifacts: EngineArtifacts,
+   criterionIds: string[],
+): NormalizedCriterion[] {
+   return criterionIds.flatMap((criterionId) => {
+      const criterion = artifacts.criteria[criterionId];
+      if (!criterion) {
+         return [];
+      }
+      return [criterion];
+   });
 }
 
 /** Resolves one criterion by id or slug from the generated artifacts. */
@@ -238,6 +149,13 @@ export function getCoverage(
    });
 }
 
+/** Returns the pinned coverage totals per level for one WCAG version. */
+export function getCoverageSummary(options?: {
+   version?: string;
+}): CoverageSummaryArtifact {
+   return getArtifacts(parseVersion(options?.version)).coverageSummary;
+}
+
 /** Returns the indexed Quickref tags for one criterion. */
 export function getQuickrefTags(
    lookupKey: CriterionLookupKey,
@@ -250,6 +168,47 @@ export function getQuickrefTags(
       lookupKey,
       criterionId: criterion.id,
       tags: criterion.tags,
+   });
+}
+
+/**
+ * Resolves one technique or failure by its W3C id (G18, F65, ARIA22) from the generated
+ * technique and failure indexes, with every criterion it is listed under.
+ */
+export function getTechnique(
+   lookupKey: string,
+   options?: { version?: string },
+): TechniqueLookupResult {
+   const artifacts = getArtifacts(parseVersion(options?.version));
+   const technique = artifacts.techniques[lookupKey] ?? artifacts.failures[lookupKey];
+
+   if (!technique) {
+      throw new WcagEngineNotFoundError(lookupKey, 'technique');
+   }
+
+   return techniqueLookupResultSchema.parse({
+      lookupKey,
+      technique,
+      criteria: listCriteriaByIds(artifacts, technique.criterionIds),
+   });
+}
+
+/** Resolves one axe-core rule id to the criteria it maps to in the pinned data. */
+export function getAxeRule(
+   ruleId: string,
+   options?: { version?: string },
+): AxeRuleLookupResult {
+   const artifacts = getArtifacts(parseVersion(options?.version));
+   const rule = artifacts.axeRules[ruleId];
+
+   if (!rule) {
+      throw new WcagEngineNotFoundError(ruleId, 'axe rule');
+   }
+
+   return axeRuleLookupResultSchema.parse({
+      ruleId,
+      rule,
+      criteria: listCriteriaByIds(artifacts, rule.criterionIds),
    });
 }
 

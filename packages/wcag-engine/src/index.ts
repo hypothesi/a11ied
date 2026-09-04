@@ -6,10 +6,13 @@ export {
 } from './shared/data.js';
 
 export {
-   getCriterion,
-   listCriteriaByLevel,
+   getAxeRule,
    getCoverage,
+   getCoverageSummary,
+   getCriterion,
    getQuickrefTags,
+   getTechnique,
+   listCriteriaByLevel,
    resetWcagEngineCache,
 } from './artifacts/runtime.js';
 
