@@ -1,0 +1,119 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'sources', label: 'Upstream sources' },
+   { id: 'artifacts', label: 'Generated artifacts' },
+   { id: 'criterion', label: 'A criterion record' },
+   { id: 'refresh', label: 'Refreshing the data' },
+];
+---
+
+<DocShell
+   title="WCAG data"
+   summary="a11ied ships WCAG 2.1 and 2.2 as generated artifacts inside the package. Criterion lookup, search, coverage, and applicability all read those files, so none of them makes a network request at runtime."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="ledger" id="sources">
+      <div class="panel-head">
+         <p class="panel-kicker">Upstream</p>
+         <h2>Where the data comes from</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row">
+            <strong>W3C WCAG 2.1 and 2.2</strong>
+            <span>Criterion IDs, titles, levels, normative text, techniques, and failures.</span>
+         </div>
+         <div class="route-row">
+            <strong>W3C ACT rule mapping</strong>
+            <span>Machine-readable rule to criterion coverage. 24 criteria in WCAG 2.2 have at least one ACT rule.</span>
+         </div>
+         <div class="route-row">
+            <strong>W3C Quickref tags</strong>
+            <span>Topic tags per criterion. Applicability matches page signals against these.</span>
+         </div>
+         <div class="route-row">
+            <strong>axe-core</strong>
+            <span>Rule IDs, WCAG tags, and ACT rule IDs read from the installed package. 29 criteria in WCAG 2.2 have at least one axe rule.</span>
+         </div>
+      </div>
+      <p>
+         Coverage joins these four. Each record lists the sources that produced it under
+         <code>sourceAttribution</code>, so you can tell an ACT mapping from a heuristic.
+      </p>
+   </section>
+
+   <section class="split panel" id="artifacts">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Artifacts</p>
+            <h2>What ships in the package</h2>
+         </div>
+         <p>
+            The sync step writes raw upstream payloads, then generates normalized artifacts per
+            version. Both sets are committed, so a build never reaches the network.
+         </p>
+         <div class="route-list">
+            <div class="route-row"><code>criteria</code><span>Full criterion records with techniques and failures.</span></div>
+            <div class="route-row"><code>criteria-by-level</code><span>Criterion IDs grouped by A, AA, and AAA.</span></div>
+            <div class="route-row"><code>coverage</code><span>Coverage state and mapped rule IDs per criterion.</span></div>
+            <div class="route-row"><code>coverage-summary</code><span>Totals per level, source counts, and representative IDs.</span></div>
+            <div class="route-row"><code>strategy</code><span>Evidence mode, procedure IDs, and whether a real target is needed.</span></div>
+            <div class="route-row"><code>slug-index</code>, <code>tag-index</code><span>Lookup by slug and by Quickref tag.</span></div>
+            <div class="route-row"><code>technique-index</code>, <code>failure-index</code><span>Lookup by technique and failure key.</span></div>
+         </div>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Provenance</div>
+         <p class="aside-note">
+            <code>generated-provenance.json</code> records which upstream payload produced each
+            artifact and when.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="criterion">
+      <div class="panel-head">
+         <p class="panel-kicker">Shape</p>
+         <h2>What a criterion record holds</h2>
+      </div>
+      <pre><code>a1 wcag show 1.4.3 --json</code></pre>
+      <pre data-label="OUTPUT"><code>&#123;
+  "id": "1.4.3",
+  "slug": "contrast-minimum",
+  "title": "Contrast (Minimum)",
+  "level": "AA",
+  "wcagVersion": "2.2",
+  "summary": "The visual presentation of text and images of text has a contrast ratio of at least 4.5:1, except for the following:",
+  "understandingUrl": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum",
+  "versions": ["2.0", "2.1", "2.2"],
+  "tags": ["buttons", "color", "content", "contrast", "errors", "focus", "forms", "images-of-text", "messaging", "navigation", "text"],
+  "principle": &#123; "id": "perceivable", "number": "1", "title": "Perceivable" &#125;,
+  "guideline": &#123; "id": "distinguishable", "number": "1.4", "title": "Distinguishable" &#125;
+&#125;</code></pre>
+      <p>
+         The record also carries <code>normativeText</code> as HTML, a parsed
+         <code>details</code> list for the exceptions, <code>altIds</code> for older slugs, and the
+         resolved <code>techniques</code> and <code>failures</code>. <code>versions</code> says which
+         WCAG releases contain the criterion.
+      </p>
+   </section>
+
+   <section class="field-note" id="refresh">
+      <div class="panel-head">
+         <p class="panel-kicker">Maintenance</p>
+         <h2>Refreshing the artifacts</h2>
+      </div>
+      <p>
+         From the repository root, <code>npm run wcag:sync</code> pulls the upstream payloads and
+         regenerates the artifacts. <code>npm run wcag:validate</code> checks them against the
+         provenance manifests and the regression fixtures.
+      </p>
+      <p>
+         Review the generated diff before committing. Both commands are for maintainers. Nothing in
+         normal use of the CLI, MCP server, or API triggers a sync.
+      </p>
+   </section>
+</DocShell>

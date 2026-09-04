@@ -1,0 +1,138 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'connect', label: 'Connect the server' },
+   { id: 'run', label: 'Ask for an axe run' },
+   { id: 'driver', label: 'Ask for a session' },
+   { id: 'prompts', label: 'Prompts that work' },
+   { id: 'pitfalls', label: 'Two failure modes' },
+];
+---
+
+<DocShell
+   title="Test from an AI agent"
+   summary="The MCP server gives a coding agent eight tools: criterion lookup, level listing, keyword search, applicability inspection, axe runs, session control, driver actions, and host diagnostics. It runs locally over stdio and opens no network port."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="split panel" id="connect">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Step 1</p>
+            <h2>Connect the server</h2>
+         </div>
+         <p>Add a11ied to the MCP configuration your editor or agent reads, then restart it.</p>
+         <pre data-label="CONFIG"><code>{`{
+  "mcpServers": {
+    "a11ied": {
+      "command": "npx",
+      "args": ["-y", "a11ied", "mcp"]
+    }
+  }
+}`}</code></pre>
+         <p>
+            Ask the agent to call <code>doctor</code> as its first action. The result lists the
+            browser a11ied will use and the status of each screen reader target, which tells the
+            agent what it can actually run.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Resources too</div>
+         <p class="aside-note">
+            The server also exposes seven read-only resources, including the criteria index and the
+            coverage table for WCAG 2.1 and 2.2. See the
+            <a href="/reference/mcp">MCP reference</a>.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="run">
+      <div class="panel-head">
+         <p class="panel-kicker">Step 2</p>
+         <h2>Ask for an axe run</h2>
+      </div>
+      <p>
+         Start your development server, then give the agent the exact route and the level you want
+         tested.
+      </p>
+      <pre data-label="AI AGENT PROMPT"><code>Open http://localhost:3000/account/settings.
+Use a11ied to run axe at WCAG level AA.
+For each violation, give me the selector, the impact, and the failing HTML.</code></pre>
+      <p>
+         The agent calls <code>run_axe</code> with <code>url</code> and
+         <code>level: "AA"</code>. That tool needs exactly one of <code>criterion</code>,
+         <code>level</code>, or <code>ruleIds</code>. Add <code>include</code> to limit the response
+         to the categories you asked about, which keeps a full-page result from filling the agent's
+         context.
+      </p>
+   </section>
+
+   <section class="panel" id="driver">
+      <div class="panel-head">
+         <p class="panel-kicker">Step 3</p>
+         <h2>Ask for a screen reader session</h2>
+      </div>
+      <p>
+         Use a session for labels, focus order, dialogs, menus, and validation messages. An axe run
+         reports none of those in sequence.
+      </p>
+      <pre data-label="AI AGENT PROMPT"><code>Use a11ied to walk the checkout form with the screen reader.
+Move through every field in order and collect the spoken phrase log.
+Tell me which controls announce without a name and where the order
+does not match the visual order.</code></pre>
+      <p>
+         The agent calls <code>driver_session</code> with <code>action: "start"</code>, then
+         <code>driver_action</code> for each step. For VoiceOver or NVDA, open the page in a browser
+         before the agent starts. For the virtual reader, the agent passes <code>url</code> and
+         <code>allowVirtual: true</code>.
+      </p>
+      <p>
+         Remind the agent to call <code>driver_session</code> with <code>action: "stop"</code> when
+         it finishes. A session left open holds the screen reader under automation.
+      </p>
+   </section>
+
+   <section class="ledger" id="prompts">
+      <div class="panel-head">
+         <p class="panel-kicker">Prompts</p>
+         <h2>Jobs worth handing over</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row">
+            <strong>Review a branch</strong>
+            <span>Run axe on the routes the diff touches and compare each violation against the intended behavior.</span>
+         </div>
+         <div class="route-row">
+            <strong>Test a dialog</strong>
+            <span>Open it, move focus through it, close it, and report where focus landed at each step.</span>
+         </div>
+         <div class="route-row">
+            <strong>Work one criterion</strong>
+            <span>Look up the criterion, read its coverage, inspect the page, then run the test the strategy names.</span>
+         </div>
+         <div class="route-row">
+            <strong>Narrow a bug report</strong>
+            <span>Reproduce the reported step, capture the phrase log around it, and quote the exact announcement.</span>
+         </div>
+      </div>
+   </section>
+
+   <section class="field-note" id="pitfalls">
+      <div class="panel-head">
+         <p class="panel-kicker">Watch for</p>
+         <h2>Two ways an agent gets this wrong</h2>
+      </div>
+      <p>
+         The first is reporting a clean axe run as conformance. axe rules decide 8 of the 24 level AA
+         criteria. Ask the agent for the coverage state next to every result.
+      </p>
+      <p>
+         The second is quoting virtual reader output as VoiceOver behavior. The session response
+         carries <code>targetType</code>, either <code>real</code> or <code>simulated</code>. Ask the
+         agent to include it. The <a href="/guides/agent-skill">agent skill</a> builds both rules
+         into the model's instructions.
+      </p>
+   </section>
+</DocShell>

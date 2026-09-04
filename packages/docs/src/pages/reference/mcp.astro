@@ -1,0 +1,209 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'start', label: 'Starting the server' },
+   { id: 'tools', label: 'Tools' },
+   { id: 'driver', label: 'driver_session and driver_action' },
+   { id: 'axe', label: 'run_axe' },
+   { id: 'knowledge', label: 'WCAG tools' },
+   { id: 'inspect', label: 'inspect and doctor' },
+   { id: 'resources', label: 'Resources' },
+   { id: 'effects', label: 'Side effects' },
+];
+---
+
+<DocShell
+   title="MCP reference"
+   summary="Tool names, inputs, resource URIs, and side effects for the a11ied MCP server. Every tool calls the same runtime function as the matching CLI command, so results match across the two."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="split panel" id="start">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Startup</p>
+            <h2>Starting the server</h2>
+         </div>
+         <pre><code>npx -y a11ied mcp</code></pre>
+         <p>
+            Configure your client to run that command over stdio. The server opens no network port
+            and takes no options.
+         </p>
+         <pre data-label="CONFIG"><code>{`{
+  "mcpServers": {
+    "a11ied": {
+      "command": "npx",
+      "args": ["-y", "a11ied", "mcp"]
+    }
+  }
+}`}</code></pre>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Defaults</div>
+         <p class="aside-note">
+            Every tool that takes <code>version</code> defaults to <code>2.2</code>. The other
+            supported value is <code>2.1</code>.
+         </p>
+      </div>
+   </section>
+
+   <section class="ledger" id="tools">
+      <div class="panel-head">
+         <p class="panel-kicker">Tools</p>
+         <h2>The eight tools</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row"><code>driver_session</code><span>Start, inspect, or stop a screen reader session.</span></div>
+         <div class="route-row"><code>driver_action</code><span>Run one action against an open session.</span></div>
+         <div class="route-row"><code>run_axe</code><span>Run axe-core against a URL.</span></div>
+         <div class="route-row"><code>inspect</code><span>Return applicability for a URL, for all criteria or one.</span></div>
+         <div class="route-row"><code>wcag_lookup</code><span>Return one criterion, optionally with coverage.</span></div>
+         <div class="route-row"><code>wcag_levels</code><span>Return every criterion at one level.</span></div>
+         <div class="route-row"><code>wcag_search</code><span>Return ranked criterion matches for a query.</span></div>
+         <div class="route-row"><code>doctor</code><span>Return runtime details and the target support matrix.</span></div>
+      </div>
+   </section>
+
+   <section class="panel" id="driver">
+      <div class="panel-head">
+         <p class="panel-kicker">Driver</p>
+         <h2>driver_session and driver_action</h2>
+      </div>
+      <h3>driver_session</h3>
+      <div class="route-list">
+         <div class="route-row"><code>action</code><span><code>start</code>, <code>status</code>, or <code>stop</code>. Required.</span></div>
+         <div class="route-row"><code>sessionId</code><span>Required for <code>status</code> and <code>stop</code>.</span></div>
+         <div class="route-row"><code>target</code><span><code>voiceover</code>, <code>nvda</code>, or <code>virtual</code>.</span></div>
+         <div class="route-row"><code>allowVirtual</code><span>Set to <code>true</code> to accept the simulated reader.</span></div>
+         <div class="route-row"><code>url</code><span>Document to load into a virtual session. Without it the session starts against an empty document.</span></div>
+      </div>
+      <p>
+         The start response carries <code>sessionId</code>, <code>target</code>, and
+         <code>targetType</code>. <code>targetType</code> is <code>real</code> for VoiceOver and
+         NVDA, and <code>simulated</code> for virtual.
+      </p>
+      <h3>driver_action</h3>
+      <p>
+         Takes <code>sessionId</code> and an <code>action</code>. Most actions need nothing else:
+         <code>next</code>, <code>previous</code>, <code>interact</code>,
+         <code>stop-interacting</code>, <code>click-current-item</code>, <code>read</code>,
+         <code>logs</code>, and <code>clear-logs</code>.
+      </p>
+      <div class="route-list">
+         <div class="route-row"><code>key</code><span>Add <code>key</code> with the chord to send.</span></div>
+         <div class="route-row"><code>type</code><span>Add <code>text</code> with the string to type.</span></div>
+         <div class="route-row"><code>checkpoint</code><span>Add <code>label</code> to mark the log.</span></div>
+         <div class="route-row"><code>perform</code><span>Add <code>command</code>, and <code>commandSet</code> when the name is ambiguous.</span></div>
+         <div class="route-row"><code>focus</code><span>Add one of <code>appName</code>, <code>bundleId</code>, <code>processName</code>, <code>pid</code>, or <code>windowTitle</code>.</span></div>
+      </div>
+      <p>
+         For a VoiceOver session, the response state includes <code>axFocusedElement</code> with the
+         accessibility role, subrole, title, description, value, and enabled state of the element the
+         system has focused.
+      </p>
+      <p>
+         <code>perform</code> accepts VoiceOver rotor and structural commands such as
+         <code>find next heading</code>, <code>find next landmark</code>,
+         <code>find next field</code>, <code>rotor</code>, and <code>next rotor item</code>.
+      </p>
+   </section>
+
+   <section class="split panel" id="axe">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">axe</p>
+            <h2>run_axe</h2>
+         </div>
+         <div class="route-list">
+            <div class="route-row"><code>url</code><span>The page to run against. Required.</span></div>
+            <div class="route-row"><code>criterion</code><span>Scope to one criterion, by ID or slug.</span></div>
+            <div class="route-row"><code>level</code><span>Scope to <code>A</code>, <code>AA</code>, or <code>AAA</code>.</span></div>
+            <div class="route-row"><code>ruleIds</code><span>Scope to named axe rules.</span></div>
+            <div class="route-row"><code>include</code><span>Which categories to return: <code>violations</code>, <code>passes</code>, <code>incomplete</code>, <code>inapplicable</code>.</span></div>
+            <div class="route-row"><code>version</code><span>WCAG version. Defaults to <code>2.2</code>.</span></div>
+         </div>
+         <p>
+            Provide exactly one of <code>criterion</code>, <code>level</code>, or
+            <code>ruleIds</code>. Passing none or more than one is a validation error. This differs
+            from <code>a1 axe</code>, which runs every mapped rule when no selector is given.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Use include</div>
+         <p class="aside-note">
+            A level AA run returns results for 72 rules across four categories. Pass
+            <code>include: ["violations"]</code> to keep the response small enough to reason about.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="knowledge">
+      <div class="panel-head">
+         <p class="panel-kicker">Standards</p>
+         <h2>wcag_lookup, wcag_levels, and wcag_search</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row"><code>wcag_lookup</code><span><code>criterion</code> required. <code>include_coverage: true</code> adds the coverage and strategy objects. Defaults to <code>false</code>.</span></div>
+         <div class="route-row"><code>wcag_levels</code><span><code>level</code> required: <code>A</code>, <code>AA</code>, or <code>AAA</code>.</span></div>
+         <div class="route-row"><code>wcag_search</code><span><code>query</code> required. <code>limit</code> defaults to 10 and caps at 50.</span></div>
+      </div>
+      <p>
+         All three read bundled data. They make no network request and start no browser, so they are
+         safe for an agent to call freely.
+      </p>
+   </section>
+
+   <section class="panel" id="inspect">
+      <div class="panel-head">
+         <p class="panel-kicker">Applicability</p>
+         <h2>inspect and doctor</h2>
+      </div>
+      <p>
+         <code>inspect</code> takes <code>url</code> and an optional <code>criterion</code>. Without
+         a criterion it returns the full applicability matrix. With one it returns that criterion's
+         assessment, matched signals, and reasons.
+      </p>
+      <p>
+         <code>doctor</code> takes no input. It returns the package, Node, and npm versions, the
+         browser policy with every detected candidate, and each target's status.
+      </p>
+   </section>
+
+   <section class="ledger" id="resources">
+      <div class="panel-head">
+         <p class="panel-kicker">Resources</p>
+         <h2>Read-only resource URIs</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row"><code>a11ied://targets</code><span>The supported target list.</span></div>
+         <div class="route-row"><code>a11ied://wcag/criteria/2.2</code><span>The criteria index for a version.</span></div>
+         <div class="route-row"><code>a11ied://wcag/levels/2.2</code><span>Level to criteria lists for a version.</span></div>
+         <div class="route-row"><code>a11ied://wcag/coverage/2.2</code><span>Coverage data for every criterion in a version.</span></div>
+      </div>
+      <p>
+         The three versioned resources are registered for both <code>2.1</code> and
+         <code>2.2</code>, which makes seven resources in total. All return
+         <code>application/json</code>.
+      </p>
+   </section>
+
+   <section class="field-note" id="effects">
+      <div class="panel-head">
+         <p class="panel-kicker">Side effects</p>
+         <h2>What each tool touches</h2>
+      </div>
+      <p>
+         <code>wcag_lookup</code>, <code>wcag_levels</code>, and <code>wcag_search</code> read local
+         files. <code>inspect</code> fetches the URL over HTTP and parses the HTML.
+         <code>run_axe</code> opens the URL in browser automation. <code>doctor</code> probes the
+         host and runs a short recording check on macOS.
+      </p>
+      <p>
+         The driver tools change the state of the machine. A real session puts VoiceOver or NVDA
+         under automation control until the client calls <code>driver_session</code> with
+         <code>action: "stop"</code>.
+      </p>
+   </section>
+</DocShell>

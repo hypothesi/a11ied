@@ -1,59 +1,123 @@
 ---
 import DocShell from '../layouts/doc-shell.astro';
 import { docsLinks } from '../lib/nav';
+
+const toc = [
+   { id: 'signals', label: 'Signals' },
+   { id: 'states', label: 'The five states' },
+   { id: 'commands', label: 'Running inspect' },
+   { id: 'limits', label: 'What it does not do' },
+];
 ---
 
 <DocShell
    title="Applicability"
-   summary="Inspect a page for forms, dialogs, live regions, media, and other signals tied to a WCAG criterion. Use the result to choose what to test next."
+   summary="Applicability answers one question: does this page contain anything a given success criterion is about? a11ied reads the HTML for 15 kinds of signal, matches them against criterion tags, and returns a state for every criterion in the version."
    links={docsLinks}
+   toc={toc}
 >
-   <section>
-      <h2>What determines applicability</h2>
-      <ul>
-         <li>Document structure and semantics from the loaded target</li>
-         <li>Signals such as forms, live regions, dialogs, media, and interactive widgets</li>
-         <li>Criterion tags and criterion-specific rules in the WCAG engine</li>
-      </ul>
+   <section class="split panel" id="signals">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Signals</p>
+            <h2>What the analyzer looks for</h2>
+         </div>
+         <p>
+            <code>inspect</code> fetches the URL and parses the HTML. It does not start a browser.
+            Each signal carries a category, the source it came from, the text that matched, and a
+            confidence of high, medium, or low.
+         </p>
+         <pre data-label="OUTPUT"><code>"signals": [
+  &#123; "category": "heading", "source": "dom", "value": "heading structure", "confidence": "high" &#125;,
+  &#123; "category": "form", "source": "dom", "value": "form controls", "confidence": "high" &#125;
+]</code></pre>
+         <p>
+            The 15 categories are <code>auth</code>, <code>dialog</code>,
+            <code>drag-and-drop</code>, <code>form</code>, <code>heading</code>, <code>help</code>,
+            <code>landmark</code>, <code>live-region</code>, <code>media</code>, <code>menu</code>,
+            <code>overlay</code>, <code>repeated-form</code>, <code>tablist</code>,
+            <code>validation</code>, and <code>widget</code>.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Sources</div>
+         <p class="aside-note">
+            A signal comes from the DOM, the accessibility tree, document metadata, a W3C Quickref
+            tag, or a hint you supplied.
+         </p>
+      </div>
    </section>
 
-   <section>
-      <h2>Commands</h2>
-      <pre><code>a1 inspect applicable --url http://localhost:3000 --json
-a1 inspect criterion 3.3.8 --url http://localhost:3000 --json</code></pre>
-      <p>
-         The first command lists criteria with detected relevance. The second returns one
-         criterion's state, matching signals, and reasons.
-      </p>
-   </section>
-
-   <section>
-      <h2>Result categories</h2>
-      <div class="mini-grid">
-         <div class="stack">
-            <div class="tag">applicable</div>
-            <p>The target has a strong signal that matches the criterion.</p>
+   <section class="ledger" id="states">
+      <div class="panel-head">
+         <p class="panel-kicker">States</p>
+         <h2>The five applicability states</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row">
+            <code>applicable</code>
+            <span>A high-confidence signal matches the criterion's tags.</span>
          </div>
-         <div class="stack">
-            <div class="tag">likely-applicable</div>
-            <p>The target has a relevant signal, but the evidence is not strong enough for <code>applicable</code>.</p>
+         <div class="route-row">
+            <code>likely-applicable</code>
+            <span>A signal matches, but not strongly enough to call it applicable.</span>
          </div>
-         <div class="stack">
-            <div class="tag">not-detected</div>
-            <p>The analyzer found no matching signal. This does not prove that the criterion is out of scope.</p>
+         <div class="route-row">
+            <code>not-detected</code>
+            <span>Nothing on the page matched. The criterion may still apply.</span>
          </div>
-         <div class="stack">
-            <div class="tag">unknown</div>
-            <p>The available signals do not support a reliable applicability decision.</p>
+         <div class="route-row">
+            <code>out-of-scope</code>
+            <span>The criterion does not apply to this kind of target.</span>
+         </div>
+         <div class="route-row">
+            <code>unknown</code>
+            <span>The signals do not support a decision either way.</span>
          </div>
       </div>
    </section>
 
-   <section class="field-note">
-      <h2>Applicability is not a pass or fail result</h2>
+   <section class="panel" id="commands">
+      <div class="panel-head">
+         <p class="panel-kicker">Commands</p>
+         <h2>Running inspect</h2>
+      </div>
       <p>
-         Applicability is a triage step. It does not produce a pass or fail result. A criterion with
-         manual or hybrid coverage still needs the evidence named by its testing strategy.
+         <code>inspect applicable</code> returns a matrix with one assessment per criterion.
+         <code>inspect criterion</code> narrows it to one.
+      </p>
+      <pre><code>a1 inspect applicable --url http://localhost:3000/checkout --json
+a1 inspect criterion 2.4.3 --url http://localhost:3000/checkout --json</code></pre>
+      <pre data-label="OUTPUT"><code>"assessment": &#123;
+  "criterionId": "2.4.3",
+  "state": "likely-applicable",
+  "reasons": [
+    "Detected heading and form signals (heading structure and form controls) and matching criterion tags (structure, forms, controls, and errors)."
+  ],
+  "matchedSignalCategories": ["heading", "form"],
+  "matchedTags": ["structure", "forms", "controls", "errors"]
+&#125;</code></pre>
+      <p>
+         <code>reasons</code> names the signals and the tags that produced the state. Read it before
+         acting on the state.
+      </p>
+   </section>
+
+   <section class="field-note" id="limits">
+      <div class="panel-head">
+         <p class="panel-kicker">Limits</p>
+         <h2>What applicability does not tell you</h2>
+      </div>
+      <p>
+         An assessment never says pass or fail. It says which criteria are worth testing on this
+         page, so a sweep of 86 criteria becomes a short list.
+      </p>
+      <p>
+         <code>not-detected</code> is the state to be careful with. The analyzer reads the HTML the
+         server returned. Content a client framework renders later, or a dialog that only exists
+         after a click, produces no signal. Use <a href="/coverage">coverage</a> to decide what
+         evidence a criterion needs, and a driver session to reach states the initial HTML does not
+         contain.
       </p>
    </section>
 </DocShell>

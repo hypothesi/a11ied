@@ -1,0 +1,232 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'families', label: 'Command families' },
+   { id: 'shared', label: 'Shared options' },
+   { id: 'sr', label: 'a1 sr' },
+   { id: 'keys', label: 'Key chords' },
+   { id: 'wcag', label: 'a1 wcag' },
+   { id: 'axe', label: 'a1 axe' },
+   { id: 'inspect', label: 'a1 inspect' },
+   { id: 'doctor', label: 'a1 doctor and mcp' },
+   { id: 'browser', label: 'Browser selection' },
+];
+---
+
+<DocShell
+   title="CLI reference"
+   summary="Every command, subcommand, and option in the a1 binary. Run a1 help-all to print the whole tree in one response, which is the fastest way to give an agent the full command set."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="ledger" id="families">
+      <div class="panel-head">
+         <p class="panel-kicker">Map</p>
+         <h2>Command families</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row"><code>a1 sr</code><span>Control a screen reader through a session.</span></div>
+         <div class="route-row"><code>a1 wcag</code><span>Look up criteria, levels, search results, and coverage.</span></div>
+         <div class="route-row"><code>a1 axe</code><span>Run axe-core against a URL.</span></div>
+         <div class="route-row"><code>a1 inspect</code><span>Explain which criteria apply to a page.</span></div>
+         <div class="route-row"><code>a1 mcp</code><span>Start the stdio MCP server.</span></div>
+         <div class="route-row"><code>a1 doctor</code><span>Report runtime details, browser policy, and target status.</span></div>
+         <div class="route-row"><code>a1 help-all</code><span>Print help for every command and option at once.</span></div>
+      </div>
+   </section>
+
+   <section class="split panel" id="shared">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Options</p>
+            <h2>Options most commands take</h2>
+         </div>
+         <div class="route-list">
+            <div class="route-row"><code>--json</code><span>Print one structured object instead of formatted text.</span></div>
+            <div class="route-row"><code>--verbose</code><span>Add detail to the text output. No effect with <code>--json</code>.</span></div>
+            <div class="route-row"><code>--version &lt;version&gt;</code><span>WCAG version for <code>wcag</code>, <code>axe</code>, and <code>inspect</code>. Accepts <code>2.1</code> or <code>2.2</code>. Defaults to <code>2.2</code>.</span></div>
+         </div>
+         <p>
+            <code>-V</code> at the top level prints the package version. Inside a subcommand,
+            <code>--version</code> means the WCAG version.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Environment</div>
+         <p class="aside-note">
+            <code>A11IED_DRIVE_SESSION</code> supplies the session id when a driver command has no
+            <code>--session</code> flag.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="sr">
+      <div class="panel-head">
+         <p class="panel-kicker">Screen reader</p>
+         <h2>a1 sr</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row"><code>sr start</code><span>Start a persistent session. Takes <code>--target</code>, <code>--url</code>, <code>--allow-virtual</code>, <code>--recording &lt;path&gt;</code>.</span></div>
+         <div class="route-row"><code>sr status</code><span>Print the persisted session state and its capability list.</span></div>
+         <div class="route-row"><code>sr stop</code><span>Stop the session and delete its state file.</span></div>
+         <div class="route-row"><code>sr focus</code><span>Bring a window to the front. Takes <code>--app</code>, <code>--bundle-id</code>, <code>--process</code>, <code>--pid</code>, <code>--window-title</code>, <code>--match</code>.</span></div>
+         <div class="route-row"><code>sr next</code><span>Move to the next element.</span></div>
+         <div class="route-row"><code>sr read</code><span>Read the current state without moving.</span></div>
+         <div class="route-row"><code>sr press &lt;keys&gt;</code><span>Send one or more key chords.</span></div>
+         <div class="route-row"><code>sr type &lt;text&gt;</code><span>Type text through the active target.</span></div>
+         <div class="route-row"><code>sr do &lt;command&gt;</code><span>Run a named command. Takes <code>--command-set</code>.</span></div>
+         <div class="route-row"><code>sr list</code><span>List the commands the target accepts. Takes <code>--target</code>, <code>--command-set</code>, <code>--query</code>.</span></div>
+         <div class="route-row"><code>sr logs</code><span>Return the speech and action log.</span></div>
+         <div class="route-row"><code>sr clear-logs</code><span>Empty the log for the session.</span></div>
+         <div class="route-row"><code>sr checkpoint &lt;label&gt;</code><span>Write a named marker into the log.</span></div>
+      </div>
+      <h3>Session options</h3>
+      <div class="route-list">
+         <div class="route-row"><code>--session &lt;id&gt;</code><span>Which session to act on. Falls back to the current session, then to <code>A11IED_DRIVE_SESSION</code>.</span></div>
+         <div class="route-row"><code>--target &lt;platform&gt;</code><span><code>voiceover</code>, <code>nvda</code>, or <code>virtual</code>. Without it, a11ied picks the platform reader and falls back to virtual.</span></div>
+         <div class="route-row"><code>--allow-virtual</code><span>Confirm you want the simulated reader when a real one is available.</span></div>
+         <div class="route-row"><code>--ephemeral</code><span>Run one action in a temporary session and tear it down.</span></div>
+         <div class="route-row"><code>--command-set &lt;set&gt;</code><span><code>auto</code>, <code>portable</code>, <code>voiceover-commander</code>, or <code>voiceover-keycode</code>. Defaults to <code>auto</code>.</span></div>
+      </div>
+      <p>
+         <code>press</code>, <code>type</code>, and <code>do</code> start a session automatically when
+         none is active. <code>next</code> requires one.
+      </p>
+   </section>
+
+   <section class="split panel" id="keys">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Keys</p>
+            <h2>Key chord syntax</h2>
+         </div>
+         <p>
+            <code>sr press</code> takes tokens joined with <code>+</code>, such as
+            <code>Tab</code>, <code>Shift+Tab</code>, <code>VO+ArrowRight</code>, or
+            <code>NVDA+N</code>.
+         </p>
+         <div class="route-list">
+            <div class="route-row"><strong>Modifiers</strong><span><code>Shift</code>, <code>Control</code>, <code>Alt</code></span></div>
+            <div class="route-row"><strong>Letters and digits</strong><span><code>a</code> to <code>z</code>, <code>KeyA</code> to <code>KeyZ</code>, <code>0</code> to <code>9</code>, <code>Digit0</code> to <code>Digit9</code></span></div>
+            <div class="route-row"><strong>Arrows</strong><span><code>ArrowUp</code>, <code>ArrowDown</code>, <code>ArrowLeft</code>, <code>ArrowRight</code>, and the <code>Up</code> and <code>UpArrow</code> aliases</span></div>
+            <div class="route-row"><strong>Navigation</strong><span><code>Tab</code>, <code>Enter</code>, <code>Escape</code>, <code>Space</code>, <code>Backspace</code>, <code>Delete</code>, <code>Home</code>, <code>End</code>, <code>PageUp</code>, <code>PageDown</code></span></div>
+            <div class="route-row"><strong>VoiceOver</strong><span><code>VO</code> for Control and Option, plus <code>Command</code>, <code>Option</code>, <code>Meta</code>, and <code>Fn</code></span></div>
+            <div class="route-row"><strong>NVDA</strong><span><code>NVDA</code> for Insert, plus <code>Windows</code>, <code>Application</code>, and the <code>NumPad0</code> to <code>NumPad9</code> keys</span></div>
+         </div>
+         <pre><code>a1 sr press "Tab" --session drv_c33f1d8f --json
+a1 sr press "VO+ArrowRight" --session drv_c33f1d8f --json</code></pre>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Full list</div>
+         <p class="aside-note">
+            <code>a1 sr press --help</code> prints every token the current platform accepts,
+            including function keys and punctuation names.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="wcag">
+      <div class="panel-head">
+         <p class="panel-kicker">Standards</p>
+         <h2>a1 wcag</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row"><code>wcag levels</code><span>List the conformance levels in the version.</span></div>
+         <div class="route-row"><code>wcag criteria</code><span>List criteria. <code>--level A</code>, <code>AA</code>, or <code>AAA</code> narrows it.</span></div>
+         <div class="route-row"><code>wcag show &lt;criterion&gt;</code><span>Full record for one criterion, by ID or slug.</span></div>
+         <div class="route-row"><code>wcag search &lt;query&gt;</code><span>Ranked matches across titles, summaries, normative text, techniques, failures, and tags. <code>--limit</code> defaults to 10.</span></div>
+         <div class="route-row"><code>wcag coverage &lt;criterion&gt;</code><span>Coverage state, mapped rule IDs, and the testing strategy.</span></div>
+      </div>
+      <pre><code>a1 wcag show status-messages --json
+a1 wcag criteria --level AA --version 2.1 --json
+a1 wcag search "focus order" --limit 3 --json</code></pre>
+      <p>These read bundled data. No command in this family opens a browser or makes a request.</p>
+   </section>
+
+   <section class="split panel" id="axe">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">axe</p>
+            <h2>a1 axe</h2>
+         </div>
+         <div class="route-list">
+            <div class="route-row"><code>--url &lt;url&gt;</code><span>The page to run against. Required.</span></div>
+            <div class="route-row"><code>--level &lt;level&gt;</code><span>Run the rules mapped to one WCAG level. <code>--level AA</code> resolves 72 rules for WCAG 2.2.</span></div>
+            <div class="route-row"><code>--criterion &lt;criterion&gt;</code><span>Run the rules mapped to one criterion, by ID or slug.</span></div>
+            <div class="route-row"><code>--rule &lt;ruleId...&gt;</code><span>Run named axe rules. Repeat the flag for more than one.</span></div>
+         </div>
+         <pre><code>a1 axe --url http://localhost:3000 --level AA --json
+a1 axe --url http://localhost:3000 --criterion 1.4.3 --json
+a1 axe --url http://localhost:3000 --rule color-contrast --rule link-name --json</code></pre>
+         <p>
+            With no selector, the run covers every rule mapped in the WCAG version. The result has
+            <code>violations</code>, <code>passes</code>, <code>incomplete</code>, and
+            <code>inapplicable</code>, plus the resolved rule list under <code>selection</code>.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Thin pages</div>
+         <p class="aside-note">
+            If the page has fewer than 10 elements and under 50 characters of text, the result adds a
+            warning that a single-page app may not have mounted.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="inspect">
+      <div class="panel-head">
+         <p class="panel-kicker">Applicability</p>
+         <h2>a1 inspect</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row"><code>inspect applicable</code><span>Return an assessment for every criterion in the version.</span></div>
+         <div class="route-row"><code>inspect criterion &lt;criterion&gt;</code><span>Return one criterion's state, matched signals, and reasons.</span></div>
+      </div>
+      <pre><code>a1 inspect applicable --url http://localhost:3000 --json
+a1 inspect criterion 3.3.8 --url http://localhost:3000 --json</code></pre>
+      <p>
+         Both take <code>--url</code>. <code>inspect</code> fetches the HTML and parses it directly,
+         so it starts no browser. See <a href="/applicability">applicability</a> for how the states
+         are decided.
+      </p>
+   </section>
+
+   <section class="panel" id="doctor">
+      <div class="panel-head">
+         <p class="panel-kicker">Runtime</p>
+         <h2>a1 doctor, a1 mcp, and a1 help-all</h2>
+      </div>
+      <pre><code>a1 doctor
+a1 doctor --json
+a1 mcp
+a1 help-all</code></pre>
+      <p>
+         <code>doctor</code> reports the package, Node, and npm versions, the browser policy with
+         every detected candidate, and each target's status with the setup command it needs. On macOS
+         it also runs a short screen recording probe for the current host app.
+      </p>
+      <p>
+         <code>mcp</code> takes no options and speaks stdio. <code>help-all</code> prints every
+         command, option, and the full named-command list in one response, which is what to give an
+         agent instead of a sequence of help calls.
+      </p>
+   </section>
+
+   <section class="field-note" id="browser">
+      <div class="panel-head">
+         <p class="panel-kicker">Browsers</p>
+         <h2>How a11ied picks a browser</h2>
+      </div>
+      <p>
+         The policy is system browser first. <code>a1 axe</code> prefers an installed
+         Chrome, Edge, Brave, or Chromium over Playwright's managed Chromium. If neither is
+         present, the command tells you to run <code>npx playwright install chromium</code>.
+      </p>
+      <p>
+         <code>a1 doctor --json</code> lists every candidate it found under
+         <code>browserAutomation.candidates</code>, with the executable path for each.
+      </p>
+   </section>
+</DocShell>

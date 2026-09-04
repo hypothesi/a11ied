@@ -1,12 +1,23 @@
 ---
 interface LinkItem { href: string; label: string; }
 interface LinkSection { title: string; links: LinkItem[]; }
-interface Props { title: string; summary: string; links: LinkSection[]; }
+interface TocItem { id: string; label: string; }
+interface Props { title: string; summary: string; links: LinkSection[]; toc?: TocItem[]; }
 
-const { title, summary, links } = Astro.props;
-const pathname = Astro.url.pathname;
-const activeSection = links.find((section) => section.links.some((link) => link.href === pathname));
-const pageNumber = links.flatMap((section) => section.links).findIndex((link) => link.href === pathname) + 1;
+const { title, summary, links, toc = [] } = Astro.props;
+
+function normalizePath(value: string): string {
+   const trimmed = value.replace(/\/+$/, '');
+   return trimmed === '' ? '/' : trimmed;
+}
+
+const pathname = normalizePath(Astro.url.pathname);
+const flatLinks = links.flatMap((section) => section.links);
+const activeIndex = flatLinks.findIndex((link) => normalizePath(link.href) === pathname);
+const activeSection = links.find((section) => section.links.some((link) => normalizePath(link.href) === pathname));
+const previousLink = activeIndex > 0 ? flatLinks[activeIndex - 1] : undefined;
+const nextLink = activeIndex === -1 ? undefined : flatLinks[activeIndex + 1];
+const pageNumber = Math.max(1, activeIndex + 1);
 ---
 
 <html lang="en">
@@ -107,7 +118,7 @@ const pageNumber = links.flatMap((section) => section.links).findIndex((link) =>
          .eyebrow, .context-chip, .tag { display: inline-flex; align-items: center; width: fit-content; padding: 0.35rem 0.55rem; border: 2px solid var(--ink); font: 700 0.76rem/1 var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
          .eyebrow { background: var(--red); color: var(--paper-light); }
          .context-chip { background: var(--paper-light); color: var(--ink); }
-         h1 { margin: 0; max-width: 11ch; font: 700 clamp(4.3rem, 10vw, 9.5rem)/0.88 var(--display); letter-spacing: -0.065em; text-transform: uppercase; text-wrap: balance; text-shadow: 4px 4px 0 var(--yellow), 7px 7px 0 color-mix(in oklch, var(--red) 62%, transparent); }
+         h1 { margin: 0; max-width: 13ch; font: 700 clamp(4.3rem, 10vw, 9.5rem)/0.88 var(--display); letter-spacing: -0.065em; text-transform: uppercase; text-wrap: balance; text-shadow: 4px 4px 0 var(--yellow), 7px 7px 0 color-mix(in oklch, var(--red) 62%, transparent); }
          .summary { max-width: 60ch; margin: var(--xl) 0 0; padding-top: var(--lg); border-top: 3px solid var(--ink); font-size: clamp(1.12rem, 1.6vw, 1.35rem); font-weight: 500; line-height: 1.58; color: var(--ink-soft); }
 
          article { display: grid; gap: var(--3xl); }
@@ -139,6 +150,8 @@ const pageNumber = links.flatMap((section) => section.links).findIndex((link) =>
          .code-block-tools { position: absolute; inset: 0 0 auto; min-height: 2.5rem; display: flex; align-items: center; justify-content: space-between; gap: var(--md); padding: 0.35rem 0.45rem 0.35rem 0.75rem; background: var(--yellow); color: var(--ink); font: 700 0.68rem/1 var(--display); letter-spacing: 0.14em; }
          pre[data-label="AI AGENT PROMPT"] .code-block-tools { background: oklch(43% 0.16 250); color: var(--paper-light); }
          pre[data-label="AI AGENT PROMPT"] .copy-button { background: var(--yellow); color: var(--ink); }
+         pre[data-label="OUTPUT"] .code-block-tools { background: var(--paper-light); }
+         pre[data-label="CONFIG"] .code-block-tools { background: var(--paper-light); }
          .copy-button { display: inline-flex; align-items: center; gap: 0.38rem; min-height: 1.8rem; margin: 0; padding: 0.28rem 0.48rem; border: 2px solid var(--ink); border-radius: 0; background: var(--paper-light); color: var(--ink); box-shadow: 2px 2px 0 var(--red); font: 700 0.68rem/1 var(--display); letter-spacing: 0.1em; cursor: pointer; }
          .copy-button:hover { background: var(--red); color: var(--paper-light); }
          .copy-button svg { width: 0.95rem; height: 0.95rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
@@ -163,7 +176,26 @@ const pageNumber = links.flatMap((section) => section.links).findIndex((link) =>
          .split-aside { display: grid; gap: var(--md); padding: var(--lg); background: var(--yellow); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--red); transform: rotate(1deg); }
          .split-aside .tag { background: var(--red-dark); color: var(--paper-light); }
          .split-aside .aside-note { color: var(--ink); }
+         .split-aside :not(pre) > code { background: var(--paper-light); border: 1px solid var(--ink); }
+         .toc-rail { display: none; }
+         .toc-nav { display: grid; }
+         .toc-title { margin-bottom: var(--xs); padding-bottom: var(--xs); border-bottom: 2px solid var(--ink); font: 700 0.72rem/1 var(--display); letter-spacing: 0.16em; text-transform: uppercase; }
+         .toc-link { padding: 0.42rem 0; color: var(--ink-soft); border-bottom: 1px solid color-mix(in oklch, var(--ink) 22%, transparent); font-size: 0.86rem; font-weight: 600; line-height: 1.25; text-decoration: none; }
+         .toc-link:hover { color: var(--red); }
+
+         .page-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--lg); }
+         .page-nav-link { display: grid; align-content: start; gap: 0.3rem; padding: var(--md); background: var(--paper-light); color: var(--ink); border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); text-decoration: none; }
+         .page-nav-link:hover { background: var(--yellow); color: var(--ink); }
+         .page-nav-link--next { text-align: end; }
+         .page-nav-kicker { color: var(--red-dark); font: 700 0.7rem/1 var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
+         .page-nav-label { font: 700 1.05rem/1.2 var(--display); letter-spacing: -0.015em; text-transform: uppercase; }
+
          .main-footer { display: flex; justify-content: space-between; gap: var(--lg); padding-top: var(--md); border-top: 3px solid var(--ink); color: var(--ink-soft); font: 700 0.78rem/1.4 var(--display); letter-spacing: 0.1em; text-transform: uppercase; }
+
+         @media (min-width: 1500px) {
+            .shell--with-toc { grid-template-columns: 18.5rem minmax(0, 1fr) 16rem; }
+            .shell--with-toc .toc-rail { position: sticky; top: 0; display: block; max-height: 100vh; overflow-y: auto; padding: clamp(1.25rem, 3vw, 3rem) var(--lg) var(--3xl) 0; }
+         }
 
          @media (prefers-reduced-motion: no-preference) {
             header > *, article > * { animation: print-in 520ms both cubic-bezier(0.22, 1, 0.36, 1); }
@@ -201,7 +233,7 @@ const pageNumber = links.flatMap((section) => section.links).findIndex((link) =>
             header { padding-top: var(--md); }
             header::before { opacity: 0.65; }
             header::after { bottom: -1.5rem; }
-            h1 { max-width: 9ch; font-size: clamp(3.8rem, 20vw, 6.4rem); }
+            h1 { max-width: 11ch; font-size: clamp(3.4rem, 17vw, 6rem); }
             .summary { font-size: 1.06rem; }
             section.panel, section.ledger, section.field-note, section.split { padding: var(--lg) var(--md); box-shadow: 6px 6px 0 var(--ink); }
             section.split { grid-template-columns: 1fr; }
@@ -210,13 +242,15 @@ const pageNumber = links.flatMap((section) => section.links).findIndex((link) =>
             .feature-command-grid { grid-template-columns: 1fr; }
             .split-aside { transform: none; }
             .route-drawer-nav { grid-template-columns: 1fr; }
+            .page-nav { grid-template-columns: 1fr; }
+            .page-nav-link--next { text-align: start; }
             .main-footer { flex-direction: column; }
             pre { overflow-x: visible; white-space: pre-wrap; overflow-wrap: anywhere; }
          }
       </style>
    </head>
    <body>
-      <div class="shell">
+      <div class:list={['shell', { 'shell--with-toc': toc.length > 0 }]}>
          <aside class="desktop-rail">
             <div class="brand">
                <a href="/" aria-label="a11ied home"><div class="mark" aria-hidden="true">a!</div></a>
@@ -229,7 +263,7 @@ const pageNumber = links.flatMap((section) => section.links).findIndex((link) =>
                   <div class="nav-section">
                      <div class="nav-title">{section.title}</div>
                      <div class="nav-links">
-                        {section.links.map((link) => <a class:list={['nav-link', { active: pathname === link.href }]} href={link.href} aria-current={pathname === link.href ? 'page' : undefined}>{link.label}</a>)}
+                        {section.links.map((link) => <a class:list={['nav-link', { active: normalizePath(link.href) === pathname }]} href={link.href} aria-current={normalizePath(link.href) === pathname ? 'page' : undefined}>{link.label}</a>)}
                      </div>
                   </div>
                ))}
@@ -249,7 +283,7 @@ const pageNumber = links.flatMap((section) => section.links).findIndex((link) =>
                      <div class="route-drawer-panel">
                         <nav class="route-drawer-nav" aria-label="Documentation">
                            {links.map((section) => (
-                              <div class="nav-section"><div class="nav-title">{section.title}</div><div class="nav-links">{section.links.map((link) => <a class:list={['nav-link', { active: pathname === link.href }]} href={link.href} aria-current={pathname === link.href ? 'page' : undefined}>{link.label}</a>)}</div></div>
+                              <div class="nav-section"><div class="nav-title">{section.title}</div><div class="nav-links">{section.links.map((link) => <a class:list={['nav-link', { active: normalizePath(link.href) === pathname }]} href={link.href} aria-current={normalizePath(link.href) === pathname ? 'page' : undefined}>{link.label}</a>)}</div></div>
                            ))}
                         </nav>
                      </div>
@@ -260,86 +294,26 @@ const pageNumber = links.flatMap((section) => section.links).findIndex((link) =>
                   <div><h1>{title}</h1><p class="summary">{summary}</p></div>
                </header>
                <article><slot /></article>
+               {(previousLink || nextLink) ? (
+                  <nav class="page-nav" aria-label="Page">
+                     {previousLink ? <a class="page-nav-link" href={previousLink.href}><span class="page-nav-kicker">Previous</span><span class="page-nav-label">{previousLink.label}</span></a> : <span />}
+                     {nextLink ? <a class="page-nav-link page-nav-link--next" href={nextLink.href}><span class="page-nav-kicker">Next</span><span class="page-nav-label">{nextLink.label}</span></a> : <span />}
+                  </nav>
+               ) : null}
                <div class="main-footer"><span>a11ied / open source accessibility testing</span><span>axe + VoiceOver + NVDA / CLI + TypeScript + MCP</span></div>
             </div>
          </main>
+         {toc.length > 0 ? (
+            <aside class="toc-rail">
+               <nav class="toc-nav" aria-label="On this page">
+                  <div class="toc-title">On this page</div>
+                  {toc.map((item) => <a class="toc-link" href={`#${item.id}`}>{item.label}</a>)}
+               </nav>
+            </aside>
+         ) : null}
       </div>
-      <script is:inline>
-         const tokenPattern = /(https?:\/\/[^\s]+|--?[a-z][\w-]*|<[^>\n]+>|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\b(?:a1|a11ied|npm|npx|import|from|const|await)\b)/g;
-
-         function tokenClass(value) {
-            if (value.startsWith('http')) return 'token-url';
-            if (value.startsWith('-')) return 'token-option';
-            if (value.startsWith('<')) return 'token-variable';
-            if (value.startsWith('"') || value.startsWith("'")) return 'token-string';
-            if (/^(import|from|const|await)$/.test(value)) return 'token-keyword';
-            return 'token-command';
-         }
-
-         function highlight(code, source) {
-            const fragment = document.createDocumentFragment();
-            let cursor = 0;
-
-            for (const match of source.matchAll(tokenPattern)) {
-               const index = match.index ?? 0;
-               fragment.append(document.createTextNode(source.slice(cursor, index)));
-               const token = document.createElement('span');
-               token.className = tokenClass(match[0]);
-               token.textContent = match[0];
-               fragment.append(token);
-               cursor = index + match[0].length;
-            }
-
-            fragment.append(document.createTextNode(source.slice(cursor)));
-            code.replaceChildren(fragment);
-         }
-
-         function clipboardIcon() {
-            const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            icon.setAttribute('viewBox', '0 0 24 24');
-            icon.setAttribute('aria-hidden', 'true');
-            icon.innerHTML = '<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><path d="M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2 2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2Z"/>';
-            return icon;
-         }
-
-         for (const pre of document.querySelectorAll('pre')) {
-            const code = pre.querySelector(':scope > code');
-            if (!code) continue;
-
-            const source = code.textContent ?? '';
-            highlight(code, source);
-
-            const tools = document.createElement('div');
-            tools.className = 'code-block-tools';
-
-            const label = document.createElement('span');
-            const blockLabel = pre.dataset.label ?? 'TERMINAL';
-            label.textContent = blockLabel;
-
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'copy-button';
-            const copyKind = blockLabel === 'AI AGENT PROMPT' ? 'prompt' : 'command';
-            button.setAttribute('aria-label', `Copy ${copyKind}`);
-            button.append(clipboardIcon(), document.createTextNode('COPY'));
-            tools.append(label, button);
-            pre.prepend(tools);
-
-            button.addEventListener('click', async () => {
-               try {
-                  await navigator.clipboard.writeText(source);
-                  button.lastChild.textContent = 'COPIED';
-                  button.setAttribute('aria-label', `${copyKind === 'prompt' ? 'Prompt' : 'Command'} copied`);
-                  window.setTimeout(() => {
-                     button.lastChild.textContent = 'COPY';
-                     button.setAttribute('aria-label', `Copy ${copyKind}`);
-                  }, 1600);
-               } catch {
-                  button.lastChild.textContent = 'RETRY';
-                  button.setAttribute('aria-label', 'Copy failed. Try again');
-               }
-            });
-         }
+      <script>
+         import '../scripts/code-blocks';
       </script>
    </body>
 </html>

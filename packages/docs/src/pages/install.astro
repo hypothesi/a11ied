@@ -1,0 +1,150 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+
+const toc = [
+   { id: 'package', label: 'Install the package' },
+   { id: 'verify', label: 'Verify with doctor' },
+   { id: 'browser', label: 'Browser' },
+   { id: 'screen-readers', label: 'VoiceOver and NVDA' },
+   { id: 'mcp', label: 'MCP client' },
+];
+---
+
+<DocShell
+   title="Install"
+   summary="Install the a11ied package, check the host with doctor, and add the setup each target needs. The virtual screen reader works right after install. VoiceOver and NVDA need one setup command per machine."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="split panel" id="package">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Package</p>
+            <h2>Install the package</h2>
+         </div>
+         <p>Install globally when you want the <code>a1</code> command in your shell.</p>
+         <pre><code>npm install --global a11ied</code></pre>
+         <p>Install into a project when you want the TypeScript API or a repository-local CLI.</p>
+         <pre><code>npm install a11ied</code></pre>
+         <p>
+            The package installs two identical binaries, <code>a1</code> and <code>a11ied</code>.
+            Every example in these docs uses <code>a1</code>.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">No install</div>
+         <p class="aside-note">
+            <code>npx -y a11ied mcp</code> starts the MCP server without installing anything. Use
+            it in an MCP client config so the client always runs the published version.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="verify">
+      <div class="panel-head">
+         <p class="panel-kicker">Verify</p>
+         <h2>Check the host with doctor</h2>
+      </div>
+      <pre><code>a1 doctor</code></pre>
+      <pre data-label="OUTPUT"><code>a11ied 0.1.0
+Node v24.19.0
+npm 11.17.0
+
+Browser automation:
+- Policy: system-browser-first
+- Preferred: Google Chrome
+- Fallback install: npx playwright install chromium
+- Detected browsers:
+  - Google Chrome [channel, system] (/Applications/Google Chrome.app/...)
+
+Targets:
+- macos-voiceover [requires-setup]
+- windows-nvda [requires-setup]
+- virtual-dom [ready]</code></pre>
+      <p>
+         Run <code>a1 doctor --json</code> for the same report as a structured object. A target with
+         status <code>ready</code> needs nothing further. A target with status
+         <code>requires-setup</code> lists the command to run in its notes.
+      </p>
+   </section>
+
+   <section class="split panel" id="browser">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Browser</p>
+            <h2>Give a11ied a Chromium browser</h2>
+         </div>
+         <p>
+            <code>a1 axe</code> loads the page in browser automation. It looks for an installed
+            Chrome, Edge, Brave, or Chromium first, then falls back to Playwright's managed
+            Chromium.
+         </p>
+         <p>If <code>doctor</code> detects no browser, install one:</p>
+         <pre><code>npx playwright install chromium</code></pre>
+      </div>
+      <div class="split-aside">
+         <div class="tag">No browser needed</div>
+         <p class="aside-note">
+            <code>a1 wcag</code> reads local data. <code>a1 inspect</code> fetches the URL and parses
+            the HTML. Neither one starts a browser.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="screen-readers">
+      <div class="panel-head">
+         <p class="panel-kicker">Real targets</p>
+         <h2>Set up VoiceOver or NVDA</h2>
+      </div>
+      <p>
+         Guidepup provisions the automation permissions each screen reader needs. Run its setup once
+         per machine, before the first real session.
+      </p>
+      <pre><code>npx @guidepup/setup</code></pre>
+      <p>
+         On macOS the setup enables VoiceOver's AppleScript control. On Windows it installs the NVDA
+         automation add-on. Run <code>a1 doctor</code> again afterward to confirm the target status
+         changed.
+      </p>
+      <p>
+         Screen recording on macOS needs one more permission. The app that runs <code>a1</code>,
+         whether that is Terminal, iTerm, or your editor, needs Screen Recording access in System
+         Settings. See <a href="/guides/recording">record a session</a>.
+      </p>
+   </section>
+
+   <section class="panel" id="mcp">
+      <div class="panel-head">
+         <p class="panel-kicker">MCP</p>
+         <h2>Add the server to an MCP client</h2>
+      </div>
+      <pre data-label="CONFIG"><code>{`{
+  "mcpServers": {
+    "a11ied": {
+      "command": "npx",
+      "args": ["-y", "a11ied", "mcp"]
+    }
+  }
+}`}</code></pre>
+      <p>
+         The server speaks stdio and opens no network port. Restart the client after editing the
+         config, then ask the agent to call <code>doctor</code> to confirm the connection.
+      </p>
+      <p>
+         Point <code>command</code> at <code>a1</code> with <code>args: ["mcp"]</code> instead if you
+         installed globally and want the client to use that copy.
+      </p>
+   </section>
+
+   <section class="field-note">
+      <div class="panel-head">
+         <p class="panel-kicker">Next</p>
+         <h2>Run a test</h2>
+      </div>
+      <p>
+         The <a href="/quickstart">quickstart</a> uses the virtual target, so it works as soon as the
+         package installs.
+      </p>
+   </section>
+</DocShell>

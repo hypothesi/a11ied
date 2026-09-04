@@ -183,11 +183,7 @@ Command-set model:
 
 ```ts
 type DriverCommandSet =
-   | 'auto'
-   | 'portable'
-   | 'voiceover-commander'
-   | 'voiceover-keycode'
-   | 'nvda-keycode';
+   'auto' | 'portable' | 'voiceover-commander' | 'voiceover-keycode' | 'nvda-keycode';
 ```
 
 Resolved command model:

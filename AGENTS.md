@@ -73,4 +73,5 @@ bd close <id>         # Complete work
 
 - Do **not** run `bd dolt push`, `git push`, or other remote sync commands unless the user explicitly asks for that in the current task.
 - Local commits are allowed when requested, but remote pushes are opt-in.
+
  <!-- END BEADS INTEGRATION -->

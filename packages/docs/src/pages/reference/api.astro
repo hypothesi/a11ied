@@ -1,0 +1,215 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'install', label: 'Install' },
+   { id: 'driver', label: 'Driver sessions' },
+   { id: 'axe', label: 'axe' },
+   { id: 'wcag', label: 'WCAG lookup' },
+   { id: 'inspect', label: 'Applicability' },
+   { id: 'doctor', label: 'Diagnostics' },
+   { id: 'exports', label: 'Export map' },
+   { id: 'packages', label: 'Packages' },
+];
+---
+
+<DocShell
+   title="TypeScript API"
+   summary="Import driver sessions, axe runs, WCAG lookups, applicability, and host diagnostics from the a11ied package. These are the same functions the CLI commands and the MCP tools call."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="split panel" id="install">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Install</p>
+            <h2>Install into a project</h2>
+         </div>
+         <pre><code>npm install a11ied</code></pre>
+         <p>
+            The package ships ESM with type declarations. Import from the package entrypoint.
+            Internal file paths are not part of the public API and change between releases.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Errors</div>
+         <p class="aside-note">
+            Failures throw <code>CliUsageError</code> for bad input,
+            <code>CliEnvironmentError</code> for a missing browser or target, and
+            <code>DriverCommandError</code> for an unresolvable command name. All three are
+            exported, so <code>instanceof</code> works.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="driver">
+      <div class="panel-head">
+         <p class="panel-kicker">Driver</p>
+         <h2>Start and drive a session</h2>
+      </div>
+      <pre><code>import {'{'}
+  runDriverSessionAction,
+  startDriverSession,
+  stopDriverSession,
+{'}'} from 'a11ied';
+
+const session = await startDriverSession('virtual');
+
+try {'{'}
+  const result = await runDriverSessionAction(session.sessionId, 'next');
+
+  console.log(result.state.lastSpokenPhrase);
+  console.log(result.state.spokenPhraseLog);
+{'}'} finally {'{'}
+  await stopDriverSession(session.sessionId);
+{'}'}</code></pre>
+      <div class="route-list">
+         <div class="route-row"><code>startDriverSession(target, cwd?, recordingPath?)</code><span>Pass <code>'voiceover'</code>, <code>'nvda'</code>, <code>'virtual'</code>, or <code>undefined</code> to take the platform default. <code>recordingPath</code> starts a recording on targets that support one.</span></div>
+         <div class="route-row"><code>runDriverSessionAction(sessionId, action, options?)</code><span>Actions needing input take it under <code>options.payload</code>, such as <code>{'{'} payload: {'{'} key: 'Tab' {'}'} {'}'}</code>.</span></div>
+         <div class="route-row"><code>getDriverSessionStatus(sessionId)</code><span>Read state without moving the cursor.</span></div>
+         <div class="route-row"><code>runEphemeralDriverAction(target, action, options?)</code><span>One action in a session that is torn down immediately. No transcript.</span></div>
+         <div class="route-row"><code>stopDriverSession(sessionId)</code><span>Stop the driver, finish any recording, and delete the state file.</span></div>
+      </div>
+      <p>
+         Wrap every session in <code>try</code> and <code>finally</code>. A session runs in its own
+         process and outlives the code that started it.
+      </p>
+   </section>
+
+   <section class="panel" id="axe">
+      <div class="panel-head">
+         <p class="panel-kicker">axe</p>
+         <h2>Run axe against a URL</h2>
+      </div>
+      <pre><code>import {'{'} runAxe {'}'} from 'a11ied';
+
+const result = await runAxe('http://localhost:3000/checkout', {'{'}
+  url: 'http://localhost:3000/checkout',
+  wcagVersion: '2.2',
+  level: 'AA',
+{'}'});
+
+for (const violation of result.violations) {'{'}
+  console.log(violation.id, violation.impact, violation.nodes[0]?.target);
+{'}'}</code></pre>
+      <p>
+         Scope the run with <code>level</code>, <code>criterion</code>, or <code>ruleIds</code>. The
+         options type allows one of the three. Omit all three to run every rule mapped in the WCAG
+         version.
+      </p>
+      <p>
+         The result carries <code>violations</code>, <code>passes</code>, <code>incomplete</code>,
+         <code>inapplicable</code>, the resolved <code>ruleIds</code>, and a
+         <code>selection</code> object describing how the rule list was chosen.
+      </p>
+   </section>
+
+   <section class="panel" id="wcag">
+      <div class="panel-head">
+         <p class="panel-kicker">Standards</p>
+         <h2>Look up criteria and coverage</h2>
+      </div>
+      <pre><code>import {'{'}
+  listWcagCriteria,
+  searchWcagCriteria,
+  showWcagCoverage,
+  showWcagCriterion,
+{'}'} from 'a11ied';
+
+const criterion = showWcagCriterion('4.1.3', '2.2');
+const {'{'} coverage, strategy {'}'} = showWcagCoverage('4.1.3', '2.2');
+
+if (strategy.requiresRealTarget) {'{'}
+  console.log('Needs a driver session:', strategy.procedureIds);
+{'}'}
+
+const levelAA = listWcagCriteria('AA', '2.2');
+const matches = searchWcagCriteria('focus order', {'{'} version: '2.2', limit: 3 {'}'});</code></pre>
+      <p>
+         These functions are synchronous. They read data bundled with the package, so they make no
+         network request. <code>listWcagCriteria</code> takes <code>undefined</code> as the level to
+         return every criterion. <code>listWcagLevels</code> returns the levels in a version.
+      </p>
+   </section>
+
+   <section class="panel" id="inspect">
+      <div class="panel-head">
+         <p class="panel-kicker">Applicability</p>
+         <h2>Check what applies to a page</h2>
+      </div>
+      <pre><code>import {'{'} inspectApplicableUrl, inspectCriterionUrl {'}'} from 'a11ied';
+
+const matrix = await inspectApplicableUrl('http://localhost:3000', '2.2');
+const focusOrder = await inspectCriterionUrl('2.4.3', 'http://localhost:3000', '2.2');
+
+console.log(focusOrder.assessment.state);
+console.log(focusOrder.assessment.reasons);</code></pre>
+      <p>
+         Both fetch the URL and parse the returned HTML. Use
+         <code>inspectApplicableTarget</code> and <code>inspectCriterionTarget</code> when you
+         already hold a resolved document target rather than a URL.
+      </p>
+   </section>
+
+   <section class="panel" id="doctor">
+      <div class="panel-head">
+         <p class="panel-kicker">Runtime</p>
+         <h2>Check the host</h2>
+      </div>
+      <pre><code>import {'{'} createDoctorReport, renderDoctorText, resolveAvailableDefaultTarget {'}'} from 'a11ied';
+
+const report = createDoctorReport();
+const ready = report.targets.filter((target) => {'{'} return target.status === 'ready'; {'}'});
+
+console.log(renderDoctorText(report));
+
+const {'{'} target, targetType, warning {'}'} = await resolveAvailableDefaultTarget();</code></pre>
+      <p>
+         <code>resolveAvailableDefaultTarget</code> checks whether the platform screen reader is
+         ready for automation and falls back to <code>virtual</code> when it is not. The returned
+         <code>warning</code> is set on every fallback.
+      </p>
+   </section>
+
+   <section class="ledger" id="exports">
+      <div class="panel-head">
+         <p class="panel-kicker">Exports</p>
+         <h2>Export map</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row"><strong>Sessions</strong><span><code>startDriverSession</code>, <code>getDriverSessionStatus</code>, <code>runDriverSessionAction</code>, <code>runEphemeralDriverAction</code>, <code>stopDriverSession</code>, <code>attachDocumentToDriverSession</code>, <code>cleanupStaleDriverSessions</code></span></div>
+         <div class="route-row"><strong>Commands</strong><span><code>listDriverCommands</code>, <code>resolveDriverCommand</code>, <code>driverCommandSets</code>, <code>isDriverCommandSet</code>, <code>parseDriverCommandSet</code></span></div>
+         <div class="route-row"><strong>axe</strong><span><code>runAxe</code></span></div>
+         <div class="route-row"><strong>WCAG</strong><span><code>listWcagLevels</code>, <code>listWcagCriteria</code>, <code>showWcagCriterion</code>, <code>searchWcagCriteria</code>, <code>showWcagCoverage</code></span></div>
+         <div class="route-row"><strong>Applicability</strong><span><code>inspectApplicableTarget</code>, <code>inspectApplicableUrl</code>, <code>inspectCriterionTarget</code>, <code>inspectCriterionUrl</code></span></div>
+         <div class="route-row"><strong>Targets</strong><span><code>resolveDocumentTarget</code>, <code>openUrlInSystemAutomationBrowser</code>, <code>resolveDefaultTarget</code>, <code>resolveAvailableDefaultTarget</code>, <code>resolveTargetType</code>, <code>listSupportedTargets</code></span></div>
+         <div class="route-row"><strong>Diagnostics</strong><span><code>createDoctorReport</code>, <code>renderDoctorText</code>, <code>listCliCommands</code></span></div>
+         <div class="route-row"><strong>Errors</strong><span><code>CliUsageError</code>, <code>CliEnvironmentError</code>, <code>DriverCommandError</code></span></div>
+      </div>
+      <p>
+         The package also exports the option and result types, including
+         <code>AxeRunOptions</code>, <code>SessionActionOptions</code>,
+         <code>DriverCommandList</code>, and <code>TargetType</code>.
+      </p>
+   </section>
+
+   <section class="panel" id="packages">
+      <div class="panel-head">
+         <p class="panel-kicker">Packages</p>
+         <h2>The scoped packages</h2>
+      </div>
+      <p>
+         <code>a11ied</code> re-exports the public core helpers and is the package to depend on.
+         Install a scoped package only when you need a lower-level API it does not re-export.
+      </p>
+      <div class="route-list">
+         <div class="route-row"><code>@a11ied/contracts</code><span>Zod schemas and result types shared across the runtime.</span></div>
+         <div class="route-row"><code>@a11ied/core</code><span>WCAG lookup, target resolution, driver orchestration, axe runs, doctor reports.</span></div>
+         <div class="route-row"><code>@a11ied/guidepup</code><span>Platform adapters for VoiceOver, NVDA, and the virtual reader.</span></div>
+         <div class="route-row"><code>@a11ied/wcag-data</code><span>Upstream data sync and the generated artifacts.</span></div>
+         <div class="route-row"><code>@a11ied/wcag-engine</code><span>Lookup, search, coverage, and applicability over those artifacts.</span></div>
+         <div class="route-row"><code>@a11ied/mcp-server</code><span>The MCP server entrypoint.</span></div>
+      </div>
+   </section>
+</DocShell>

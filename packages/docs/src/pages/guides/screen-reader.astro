@@ -1,0 +1,178 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'session', label: 'Open a session' },
+   { id: 'move', label: 'Move and read' },
+   { id: 'commands', label: 'Named commands' },
+   { id: 'checkpoints', label: 'Checkpoints' },
+   { id: 'form', label: 'Worked example' },
+   { id: 'cleanup', label: 'Cleanup' },
+];
+---
+
+<DocShell
+   title="Test with a screen reader"
+   summary="Open a driver session, move through the page, and keep what the reader announced. The same commands work against VoiceOver, NVDA, and the virtual reader. Only the target changes."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="split panel" id="session">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Step 1</p>
+            <h2>Open a session</h2>
+         </div>
+         <p>
+            For VoiceOver or NVDA, open the browser and load the route first. The reader operates
+            the window already on screen.
+         </p>
+         <pre><code>a1 sr start --target voiceover --json
+a1 sr focus --session drv_c33f1d8f --app "Google Chrome" --json</code></pre>
+         <p>For the virtual reader, pass the URL and let a11ied load the document.</p>
+         <pre><code>a1 sr start --target virtual --allow-virtual --url http://localhost:3000/checkout --json</code></pre>
+         <p>
+            The response returns a <code>sessionId</code>. Pass it to every later command as
+            <code>--session</code>, or export it as <code>A11IED_DRIVE_SESSION</code> and leave the
+            flag off.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Sessions persist</div>
+         <p class="aside-note">
+            A session runs in its own process with a state file under <code>.a11ied/state</code>. It
+            survives across shell commands until you stop it.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="move">
+      <div class="panel-head">
+         <p class="panel-kicker">Step 2</p>
+         <h2>Move through the page and read the output</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row">
+            <code>sr next</code>
+            <span>Move to the next element and return what the reader said about it.</span>
+         </div>
+         <div class="route-row">
+            <code>sr read</code>
+            <span>Return the current state without moving the cursor.</span>
+         </div>
+         <div class="route-row">
+            <code>sr press "Tab"</code>
+            <span>Send a key chord. Use it for keyboard order and for shortcuts the page defines.</span>
+         </div>
+         <div class="route-row">
+            <code>sr type "test@example.com"</code>
+            <span>Type into the focused control.</span>
+         </div>
+         <div class="route-row">
+            <code>sr logs</code>
+            <span>Return the full speech and action log for the session.</span>
+         </div>
+      </div>
+      <p>
+         Every response carries a <code>state</code> object with
+         <code>lastSpokenPhrase</code>, <code>currentItemText</code>, and the running
+         <code>spokenPhraseLog</code>. <code>sr clear-logs</code> empties the log so the next
+         sequence starts clean.
+      </p>
+   </section>
+
+   <section class="split panel" id="commands">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Step 3</p>
+            <h2>Run named screen reader commands</h2>
+         </div>
+         <p>
+            <code>sr do</code> runs a command by name. Six portable commands work on every target:
+            <code>next</code>, <code>previous</code>, <code>interact</code>,
+            <code>stop-interacting</code>, <code>activate</code>, and
+            <code>click-current-item</code>.
+         </p>
+         <pre><code>a1 sr do interact --session drv_c33f1d8f --json
+a1 sr do next --session drv_c33f1d8f --json
+a1 sr do stop-interacting --session drv_c33f1d8f --json</code></pre>
+         <p>
+            VoiceOver adds its own set, including rotor and structural navigation. List what the
+            current target accepts:
+         </p>
+         <pre><code>a1 sr list --json
+a1 sr list --query heading --json</code></pre>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Command sets</div>
+         <p class="aside-note">
+            <code>--command-set</code> picks between <code>portable</code>,
+            <code>voiceover-commander</code>, and <code>voiceover-keycode</code>. The default,
+            <code>auto</code>, resolves the name against whichever set has it.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="checkpoints">
+      <div class="panel-head">
+         <p class="panel-kicker">Step 4</p>
+         <h2>Mark the steps of a test</h2>
+      </div>
+      <p>
+         A checkpoint writes a label into the session log. It turns one long transcript into
+         readable sections when you paste it into a bug report.
+      </p>
+      <pre><code>a1 sr checkpoint "opened the dialog" --session drv_c33f1d8f --json</code></pre>
+   </section>
+
+   <section class="panel" id="form">
+      <div class="panel-head">
+         <p class="panel-kicker">Example</p>
+         <h2>Check a form's announcement order</h2>
+      </div>
+      <p>
+         Step through the form field by field and read the log as a sequence. Each entry is what the
+         reader said at that position.
+      </p>
+      <pre data-label="OUTPUT"><code>"spokenPhraseLog": [
+  "document",
+  "heading, Checkout, level 1",
+  "form",
+  "Email",
+  "textbox, Email, required",
+  "Card number",
+  "textbox, Card number",
+  "button, Pay now",
+  "button",
+  "end of form"
+]</code></pre>
+      <p>
+         Three things to check in a log like this. Every control has a name, so
+         <code>"button"</code> on its own is a defect. The order matches the visual order. States
+         that matter are announced, which is why <code>required</code> appears on the email field
+         and not on the card field.
+      </p>
+      <p>
+         For validation messages, submit the form with <code>sr press "Enter"</code>, then read the
+         log to see whether the error was announced. Status Messages is criterion 4.1.3, and
+         <a href="/coverage">its coverage state</a> is hybrid for exactly this reason.
+      </p>
+   </section>
+
+   <section class="field-note" id="cleanup">
+      <div class="panel-head">
+         <p class="panel-kicker">Cleanup</p>
+         <h2>Stop every session you start</h2>
+      </div>
+      <pre><code>a1 sr stop --session drv_c33f1d8f --json</code></pre>
+      <p>
+         Stopping shuts down the driver process, finishes any recording, and deletes the state file.
+         A session left running keeps the screen reader under automation control.
+      </p>
+      <p>
+         For a single action with no transcript, add <code>--ephemeral</code>. It starts a session,
+         runs the action, and tears it down in one command.
+      </p>
+   </section>
+</DocShell>

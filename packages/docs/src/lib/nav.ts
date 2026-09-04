@@ -10,25 +10,37 @@ interface DocSection {
 
 export const docsLinks: DocSection[] = [
    {
-      title: 'Practical guides',
+      title: 'Start',
       links: [
          { href: '/', label: 'Overview' },
-         { href: '/driver-usage', label: 'Test with a screen reader' },
-         { href: '/agent-workflows', label: 'Automate with an AI agent' },
-         { href: '/workflows', label: 'Test a web page' },
-         { href: '/agent-skill', label: 'Install the agent skill' },
-         { href: '/recording-sessions', label: 'Record a test' },
+         { href: '/install', label: 'Install' },
+         { href: '/quickstart', label: 'Quickstart' },
+      ],
+   },
+   {
+      title: 'Concepts',
+      links: [
+         { href: '/targets', label: 'Targets' },
+         { href: '/coverage', label: 'Coverage' },
+         { href: '/applicability', label: 'Applicability' },
+      ],
+   },
+   {
+      title: 'Guides',
+      links: [
+         { href: '/guides/screen-reader', label: 'Test with a screen reader' },
+         { href: '/guides/agents', label: 'Test from an AI agent' },
+         { href: '/guides/agent-skill', label: 'Install the agent skill' },
+         { href: '/guides/recording', label: 'Record a session' },
       ],
    },
    {
       title: 'Reference',
       links: [
-         { href: '/mcp-usage', label: 'MCP tools' },
-         { href: '/cli-reference', label: 'CLI commands' },
-         { href: '/api-reference', label: 'TypeScript API' },
-         { href: '/criterion-lookup', label: 'WCAG lookup' },
-         { href: '/applicability', label: 'Applicability states' },
-         { href: '/wcag-data-sources', label: 'Data sources' },
+         { href: '/reference/cli', label: 'CLI' },
+         { href: '/reference/mcp', label: 'MCP tools' },
+         { href: '/reference/api', label: 'TypeScript API' },
+         { href: '/reference/wcag-data', label: 'WCAG data' },
       ],
    },
 ];

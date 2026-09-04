@@ -1,108 +1,222 @@
 ---
 import DocShell from '../layouts/doc-shell.astro';
 import { docsLinks } from '../lib/nav';
+
+const toc = [
+   { id: 'install', label: 'Install' },
+   { id: 'screen-reader', label: 'Screen reader output' },
+   { id: 'axe', label: 'axe runs' },
+   { id: 'coverage', label: 'Coverage' },
+   { id: 'agents', label: 'Agent tools' },
+   { id: 'interfaces', label: 'Interfaces' },
+   { id: 'next', label: 'Start here' },
+];
 ---
 
 <DocShell
-   title="Run accessibility tests from your terminal or AI agent"
-   summary="Install one package for a CLI, TypeScript API, and MCP server that run axe, control VoiceOver or NVDA, and query WCAG coverage. Every interface calls the same runtime and returns structured results."
+   title="Test what the screen reader says"
+   summary="a11ied drives VoiceOver, NVDA, and a virtual screen reader from the command line, runs axe against a URL, and reports which WCAG criteria automation can decide on its own. One install gives you a CLI, an MCP server, and a TypeScript API over the same runtime."
    links={docsLinks}
+   toc={toc}
 >
-   <section class="split panel">
+   <section class="split panel" id="install">
       <div class="stack">
          <div class="panel-head">
-            <p class="panel-kicker">Try it on a local page</p>
-            <h2>Scan your first page</h2>
+            <p class="panel-kicker">Install</p>
+            <h2>Two commands to a working setup</h2>
          </div>
          <pre><code>npm install --global a11ied
 
-a1 doctor
-a1 axe --url http://localhost:3000 --level AA --json</code></pre>
-         <p>Replace the URL with any page your browser can open. The command returns each violation, its impact, the failing HTML, and the affected selector.</p>
+a1 doctor</code></pre>
+         <p>
+            <code>doctor</code> prints the browser a11ied will automate and the state of each
+            screen reader target on this machine.
+         </p>
+         <pre data-label="OUTPUT"><code>Targets:
+- macos-voiceover [requires-setup]
+  Run `npx @guidepup/setup` before the first real-device session.
+- windows-nvda [requires-setup]
+  Run `npx @guidepup/setup` on Windows to provision NVDA automation.
+- virtual-dom [ready]
+  Use the virtual screen reader for fast, local feedback loops.</code></pre>
       </div>
       <div class="split-aside">
-         <div class="tag">Why run doctor?</div>
-         <p class="aside-note"><code>a1 doctor</code> reports which browser, screen reader, and recording tools a11ied can use on this machine.</p>
-         <p class="aside-note">Use <code>npm install a11ied</code> without <code>--global</code> when you want the TypeScript API inside a project.</p>
+         <div class="tag">No setup needed</div>
+         <p class="aside-note">
+            The virtual target is ready as soon as the package installs. VoiceOver and NVDA
+            need <code>npx @guidepup/setup</code> once per machine.
+         </p>
+         <p class="aside-note">
+            Drop <code>--global</code> to install into a project and use the TypeScript API.
+         </p>
       </div>
    </section>
 
-   <section class="panel">
+   <section class="panel" id="screen-reader">
       <div class="panel-head">
-         <p class="panel-kicker">More than a page scan</p>
-         <h2>Screen readers, agents, and targeted checks</h2>
+         <p class="panel-kicker">Screen reader output</p>
+         <h2>Read the announcement order for a page</h2>
       </div>
-      <div class="workflow-grid feature-command-grid">
-         <div class="stack">
-            <h3>Hear the focus order</h3>
-            <pre><code>a1 sr start --json
-a1 sr next --session &lt;sessionId&gt; --json
-a1 sr read --session &lt;sessionId&gt; --json</code></pre>
-            <p class="support-copy">Drive VoiceOver, NVDA, or the virtual reader and keep the spoken output.</p>
+      <p>
+         Start a session, step through the page, and read the phrase log. Every step returns the
+         spoken text as JSON.
+      </p>
+      <pre><code>a1 sr start --target virtual --allow-virtual --url http://localhost:3000/checkout --json
+a1 sr next --session drv_c33f1d8f --json
+a1 sr read --session drv_c33f1d8f --json</code></pre>
+      <pre data-label="OUTPUT"><code>"spokenPhraseLog": [
+  "document",
+  "heading, Checkout, level 1",
+  "form",
+  "Email",
+  "textbox, Email, required",
+  "Card number",
+  "textbox, Card number",
+  "button, Pay now",
+  "button",
+  "end of form"
+]</code></pre>
+      <p>
+         The log is the order a screen reader user moves through. This one shows the required state
+         on the email field, and a ninth entry that announces as <code>button</code> with no name.
+      </p>
+      <p>
+         Swap <code>--target virtual --allow-virtual</code> for <code>--target voiceover</code> to
+         run the same steps against the real screen reader.
+      </p>
+   </section>
+
+   <section class="panel" id="axe">
+      <div class="panel-head">
+         <p class="panel-kicker">axe runs</p>
+         <h2>Run axe against a URL</h2>
+      </div>
+      <p>
+         <code>--level AA</code> resolves the 72 axe rules mapped to WCAG 2.2 level AA and runs
+         them against the page.
+      </p>
+      <pre><code>a1 axe --url http://localhost:3000/checkout --level AA --json</code></pre>
+      <pre data-label="OUTPUT"><code>"violations": [
+  &#123;
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name",
+    "nodes": [
+      &#123;
+        "target": ["button[type=\"button\"]"],
+        "html": "&lt;button type=\"button\"&gt;&lt;img src=\"cart.png\" alt=\"\"&gt;&lt;/button&gt;",
+        "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty"
+      &#125;
+    ]
+  &#125;
+]</code></pre>
+      <p>
+         Scope a run three other ways: <code>--criterion 1.4.3</code> for one success criterion,
+         <code>--rule color-contrast --rule link-name</code> for named rules, or no selector at all
+         for every rule mapped in the WCAG version.
+      </p>
+   </section>
+
+   <section class="split panel" id="coverage">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Coverage</p>
+            <h2>Find out what axe cannot decide</h2>
          </div>
-         <div class="stack">
-            <h3>Give the tools to an agent</h3>
-            <pre><code>npx -y a11ied mcp</code></pre>
-            <p class="support-copy">Connect the local MCP server so an agent can call WCAG, axe, and screen reader tools.</p>
-         </div>
-         <div class="stack">
-            <h3>Scan for axe violations</h3>
-            <pre><code>a1 axe --url http://localhost:3000 --level AA --json</code></pre>
-            <p class="support-copy">Return structured violations for the selected WCAG level.</p>
-         </div>
-         <div class="stack">
-            <h3>Check one WCAG criterion</h3>
-            <pre><code>a1 wcag coverage 1.1.1 --json</code></pre>
-            <p class="support-copy">See whether automation covers the criterion and read the supported testing strategy.</p>
-         </div>
-         <div class="stack">
-            <h3>Inspect what applies</h3>
-            <pre><code>a1 inspect applicable --url http://localhost:3000 --json</code></pre>
-            <p class="support-copy">Find forms, dialogs, media, and other page signals tied to WCAG criteria.</p>
-         </div>
+         <p>
+            Ask what a criterion needs before you test it. a11ied ships the W3C ACT mapping and the
+            axe rule tags as local data, so the lookup runs without a network request.
+         </p>
+         <pre><code>a1 wcag coverage 2.4.3 --json</code></pre>
+         <pre data-label="OUTPUT"><code>"coverage": &#123;
+  "coverageState": "hybrid",
+  "axeRuleIds": [],
+  "actRuleIds": [],
+  "notes": ["Focus order depends on interaction flow, not just static structure."]
+&#125;,
+"strategy": &#123;
+  "preferredEvidenceMode": "hybrid",
+  "procedureIds": ["focus_order_probe"],
+  "requiresRealTarget": true
+&#125;</code></pre>
+         <p>
+            No axe rule decides Focus Order. The strategy names the probe to run and says the test
+            needs a real target, which is what the driver session provides.
+            <a href="/coverage">Coverage</a> explains the four states and the mapping behind them.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">WCAG 2.2, level AA</div>
+         <p class="aside-note">
+            24 success criteria. axe rules decide 8. Four are hybrid. Twelve stay manual.
+         </p>
+         <p class="aside-note">
+            Across all three levels: 86 criteria, 28 automated, 10 hybrid, 48 manual.
+         </p>
       </div>
    </section>
 
-   <section class="ledger">
+   <section class="panel" id="agents">
       <div class="panel-head">
-         <p class="panel-kicker">Practical guides</p>
-         <h2>Test the parts developers ship</h2>
+         <p class="panel-kicker">Agent tools</p>
+         <h2>Give a coding agent the same commands</h2>
+      </div>
+      <p>
+         The MCP server runs over stdio and opens no network port. Add it to any MCP client and the
+         agent gets criterion lookup, applicability inspection, axe runs, and driver sessions.
+      </p>
+      <pre data-label="CONFIG"><code>{`{
+  "mcpServers": {
+    "a11ied": {
+      "command": "npx",
+      "args": ["-y", "a11ied", "mcp"]
+    }
+  }
+}`}</code></pre>
+      <pre data-label="AI AGENT PROMPT"><code>Test http://localhost:3000/checkout with a11ied.
+Run axe at level AA, then step through the form with the screen reader.
+Report the axe violations and the spoken phrase log separately.</code></pre>
+      <p>
+         The <a href="/guides/agent-skill">agent skill</a> adds the reasoning: check coverage first,
+         pick the right target, and keep automated results apart from transcripts.
+      </p>
+   </section>
+
+   <section class="ledger" id="interfaces">
+      <div class="panel-head">
+         <p class="panel-kicker">Interfaces</p>
+         <h2>One runtime, three ways in</h2>
       </div>
       <div class="route-list">
          <div class="route-row">
-            <strong><a href="/workflows#drive-a-session">Test navigation with a screen reader</a></strong>
-            <span>Move through the interface with VoiceOver, NVDA, or the virtual reader and save what it announces.</span>
+            <strong><a href="/reference/cli">CLI</a></strong>
+            <span>The <code>a1</code> command. Every subcommand takes <code>--json</code> and prints one structured object.</span>
          </div>
          <div class="route-row">
-            <strong><a href="/agent-workflows">Add accessibility tests to an AI agent</a></strong>
-            <span>Connect the MCP server, scan a page, and drive a screen reader from an agent.</span>
+            <strong><a href="/reference/mcp">MCP server</a></strong>
+            <span>Eight tools and seven read-only resources over stdio, for coding agents and editors.</span>
          </div>
          <div class="route-row">
-            <strong><a href="/workflows#gather-evidence">Scan a page during development</a></strong>
-            <span>Run axe against a local URL and save structured findings for review or CI.</span>
-         </div>
-         <div class="route-row">
-            <strong><a href="/workflows#check-one-criterion">Test a specific WCAG criterion</a></strong>
-            <span>Check the available automation before running the supported test.</span>
+            <strong><a href="/reference/api">TypeScript API</a></strong>
+            <span>Import <code>runAxe</code>, <code>startDriverSession</code>, and the WCAG lookups from <code>a11ied</code>.</span>
          </div>
       </div>
+      <p>
+         The MCP tools and the CLI commands call the same functions. A result from one matches a
+         result from any other.
+      </p>
    </section>
 
-   <section class="panel">
+   <section class="field-note" id="next">
       <div class="panel-head">
-         <p class="panel-kicker">Reference</p>
-         <h2>Command and data reference</h2>
+         <p class="panel-kicker">Start here</p>
+         <h2>Run your first test</h2>
       </div>
-      <div class="route-list">
-         <div class="route-row"><strong><a href="/driver-usage">Screen reader driver</a></strong><span>Session lifecycle, actions, focus control, and transcripts.</span></div>
-         <div class="route-row"><strong><a href="/mcp-usage">MCP tool reference</a></strong><span>Tool inputs, behavior, and read-only resources.</span></div>
-         <div class="route-row"><strong><a href="/cli-reference">CLI reference</a></strong><span>Screen reader, axe, WCAG, inspect, and diagnostic commands.</span></div>
-         <div class="route-row"><strong><a href="/agent-skill">Agent skill</a></strong><span>Installation, first use, workflow, and safety rules.</span></div>
-         <div class="route-row"><strong><a href="/criterion-lookup">Criterion lookup</a> and <a href="/applicability">applicability</a></strong><span>Find a criterion and check whether the page contains relevant signals.</span></div>
-         <div class="route-row"><strong><a href="/wcag-data-sources">WCAG data sources</a></strong><span>See which W3C and axe-core data ships with the package.</span></div>
-         <div class="route-row"><strong><a href="/recording-sessions">Recording sessions</a></strong><span>Record real VoiceOver or NVDA sessions.</span></div>
-         <div class="route-row"><strong><a href="/api-reference">API reference</a></strong><span>Import runtime helpers from TypeScript.</span></div>
-      </div>
+      <p>
+         The <a href="/quickstart">quickstart</a> takes a local URL from an axe run to a screen
+         reader transcript in about five minutes. Read <a href="/targets">targets</a> first if you
+         want to know when to use VoiceOver instead of the virtual reader.
+      </p>
    </section>
-
 </DocShell>

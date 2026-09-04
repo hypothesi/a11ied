@@ -1,0 +1,167 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+
+const toc = [
+   { id: 'run', label: '1. Run axe' },
+   { id: 'coverage', label: '2. Check coverage' },
+   { id: 'session', label: '3. Start a session' },
+   { id: 'read', label: '4. Read the transcript' },
+   { id: 'stop', label: '5. Stop the session' },
+   { id: 'report', label: 'What you can claim' },
+];
+---
+
+<DocShell
+   title="Quickstart"
+   summary="Take one local route from an axe run to a screen reader transcript. This runs on the virtual target, so it needs nothing beyond the installed package and a running development server."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="split panel" id="run">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Step 1</p>
+            <h2>Run axe on the page</h2>
+         </div>
+         <p>Start your development server, then run axe against the route you are working on.</p>
+         <pre><code>a1 axe --url http://localhost:3000/checkout --level AA --json</code></pre>
+         <p>
+            The result has four arrays: <code>violations</code>, <code>passes</code>,
+            <code>incomplete</code>, and <code>inapplicable</code>. Each violation names the axe
+            rule, its impact, the failing selector, and the failing HTML.
+         </p>
+         <pre data-label="OUTPUT"><code>"violations": [
+  &#123;
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": [
+      &#123;
+        "target": ["button[type=\"button\"]"],
+        "html": "&lt;button type=\"button\"&gt;&lt;img src=\"cart.png\" alt=\"\"&gt;&lt;/button&gt;"
+      &#125;
+    ]
+  &#125;
+]</code></pre>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Empty results</div>
+         <p class="aside-note">
+            If a single-page app has not mounted yet, the result carries a <code>warnings</code>
+            entry saying the page had too little content to test. Load the route in a browser first
+            to confirm it renders.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="coverage">
+      <div class="panel-head">
+         <p class="panel-kicker">Step 2</p>
+         <h2>Check what the run left out</h2>
+      </div>
+      <p>
+         A clean axe run covers the criteria that have axe rules. Ask which criteria those are before
+         you draw a conclusion.
+      </p>
+      <pre><code>a1 wcag coverage 2.4.3 --json
+a1 wcag coverage 1.4.3 --json</code></pre>
+      <p>
+         Focus Order returns <code>"coverageState": "hybrid"</code> with an empty
+         <code>axeRuleIds</code> list. Contrast (Minimum) returns
+         <code>"coverageState": "automated"</code> with <code>color-contrast</code>. The first needs
+         a screen reader session. The second is already covered by step 1.
+      </p>
+      <p>
+         <a href="/coverage">Coverage</a> explains the four states and where the mapping data comes
+         from.
+      </p>
+   </section>
+
+   <section class="split panel" id="session">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Step 3</p>
+            <h2>Start a screen reader session</h2>
+         </div>
+         <p>
+            The virtual target loads the URL into a simulated reader. Pass
+            <code>--allow-virtual</code> to say the simulation is what you want.
+         </p>
+         <pre><code>a1 sr start --target virtual --allow-virtual --url http://localhost:3000/checkout --json</code></pre>
+         <pre data-label="OUTPUT"><code>"session": &#123;
+  "sessionId": "drv_c33f1d8f-4f8c-4a78-afe6-f54d7f0b0b50",
+  "target": "virtual",
+  "targetType": "simulated"
+&#125;</code></pre>
+         <p>Copy the <code>sessionId</code>. Every later command takes it as <code>--session</code>.</p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Skip the flag</div>
+         <p class="aside-note">
+            Set <code>A11IED_DRIVE_SESSION</code> to the session id and the other
+            <code>sr</code> commands pick it up without <code>--session</code>.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="read">
+      <div class="panel-head">
+         <p class="panel-kicker">Step 4</p>
+         <h2>Step through the page and read the log</h2>
+      </div>
+      <p>
+         <code>sr next</code> moves to the next element and returns what the reader announced.
+         <code>sr read</code> returns the current state without moving.
+      </p>
+      <pre><code>a1 sr next --session drv_c33f1d8f --json
+a1 sr next --session drv_c33f1d8f --json
+a1 sr logs --session drv_c33f1d8f --json</code></pre>
+      <pre data-label="OUTPUT"><code>"spokenPhraseLog": [
+  "document",
+  "heading, Checkout, level 1",
+  "form",
+  "Email",
+  "textbox, Email, required",
+  "Card number",
+  "textbox, Card number",
+  "button, Pay now",
+  "button",
+  "end of form"
+]</code></pre>
+      <p>
+         Read the log as a sequence. The email field announces its required state. The last button
+         announces as <code>button</code> with nothing after it, which matches the
+         <code>button-name</code> violation from step 1.
+      </p>
+   </section>
+
+   <section class="panel" id="stop">
+      <div class="panel-head">
+         <p class="panel-kicker">Step 5</p>
+         <h2>Stop the session</h2>
+      </div>
+      <pre><code>a1 sr stop --session drv_c33f1d8f --json</code></pre>
+      <p>
+         Stopping shuts down the driver process, finishes any recording, and deletes the session
+         state file. Sessions outlive the shell that started them, so stop each one you start.
+      </p>
+   </section>
+
+   <section class="field-note" id="report">
+      <div class="panel-head">
+         <p class="panel-kicker">Result</p>
+         <h2>What this run supports</h2>
+      </div>
+      <p>
+         You have an axe result for the 72 rules mapped to level AA, and a transcript of the
+         announcement order for one route on one target.
+      </p>
+      <p>
+         It is not a conformance claim. The virtual reader is a simulation, and 12 of the 24 level
+         AA criteria have no automated coverage at all. Move to
+         <a href="/guides/screen-reader">VoiceOver or NVDA</a> when the real behavior is what you
+         need to check.
+      </p>
+   </section>
+</DocShell>
