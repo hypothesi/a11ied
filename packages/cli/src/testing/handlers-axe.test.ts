@@ -140,16 +140,30 @@ async function assertAxeTextOutput(baseUrl: string): Promise<void> {
      "axe scan
        URL:        <base>/button-name-failure.html
        Selection:  criterion=4.1.2
+       Result:     1 violation, 0 incomplete checks, 2 passes
 
      Violations (1)
-       ✗ button-name  critical
-
-     Passes (2)
-       ✓ aria-hidden-body
-       ✓ nested-interactive
+       ✗ button-name  critical  WCAG 4.1.2 (A)
+           Buttons must have discernible text
+           https://dequeuniversity.com/rules/axe/4.13/button-name?application=axeAPI
+           1 failing element
+             button
+               <button type="button"></button>
+               Fix any of the following:
+               • Element does not have inner text that is visible to screen readers
+               • aria-label attribute does not exist or is empty
+               • aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+               • Element has no title attribute
+               • Element does not have an implicit (wrapped) <label>
+               • Element does not have an explicit <label>
+               • Element's default semantics were not overridden with role="none" or role="presentation"
 
      Incomplete (0)
        none
+
+     Passes (2)
+       ✓ aria-hidden-body  aria-hidden="true" must not be present on the document body
+       ✓ nested-interactive  Interactive controls must not be nested
      "
    `);
 }
