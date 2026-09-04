@@ -2,7 +2,9 @@
    "name": "@a11ied/wcag-data",
    "version": "0.1.0",
    "files": [
-      "dist"
+      "dist",
+      "data/generated",
+      "NOTICE.md"
    ],
    "type": "module",
    "main": "./dist/index.js",
@@ -11,7 +13,8 @@
       ".": {
          "types": "./dist/index.d.ts",
          "import": "./dist/index.js"
-      }
+      },
+      "./package.json": "./package.json"
    },
    "publishConfig": {
       "access": "public"
