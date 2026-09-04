@@ -15,6 +15,7 @@ import {
    persistImplicitDriveSession,
    withImplicitDriveSessionGuard,
 } from './drive-session.js';
+import { errorLine } from './format.js';
 import {
    type CommandExecution,
    createEnvelope,
@@ -100,7 +101,7 @@ function buildErrorEnvelope(
 function renderErrorText(failedEnvelope: CliOutputEnvelope): string {
    const code = failedEnvelope.errors[0]?.code ?? 'unknown';
    const message = failedEnvelope.errors[0]?.message ?? 'Unknown error';
-   return `Error (${code}): ${message}`;
+   return errorLine(code, message);
 }
 
 // Fallow-ignore-next-line unused-export

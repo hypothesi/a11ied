@@ -32,6 +32,14 @@ const publicApiExpectations: PublicApiExpectation[] = [
       functions: ['guidepupSetupCommand', 'describePlatform'],
    },
    {
+      file: 'packages/guidepup/src/environment.ts',
+      functions: [
+         'checkNvdaEnvironment',
+         'checkVoiceOverEnvironment',
+         'resolveGuidepupCachePath',
+      ],
+   },
+   {
       file: 'packages/core/src/errors/cli-environment-error.ts',
       classes: ['CliEnvironmentError'],
    },
@@ -41,12 +49,15 @@ const publicApiExpectations: PublicApiExpectation[] = [
    },
    {
       file: 'packages/core/src/index.ts',
-      functions: [
-         'createDoctorReport',
-         'listCliCommands',
-         'listSupportedTargets',
-         'renderDoctorText',
-      ],
+      functions: ['listCliCommands'],
+   },
+   {
+      file: 'packages/core/src/doctor/runtime.ts',
+      functions: ['createDoctorReport', 'listSupportedTargets'],
+   },
+   {
+      file: 'packages/core/src/doctor/render.ts',
+      functions: ['renderDoctorText'],
    },
    {
       file: 'packages/core/src/wcag/runtime.ts',

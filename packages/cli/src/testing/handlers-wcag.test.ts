@@ -189,24 +189,32 @@ async function assertInspectInvalidCriterion(baseUrl: string): Promise<void> {
 async function assertTextShowSnapshot(): Promise<void> {
    const show = await runCli(['wcag', 'show', 'status-messages']);
    expect(show.stdout).toMatchInlineSnapshot(`
-      "4.1.3  Status Messages [AA]
-      
-      In content implemented using markup languages, status messages can be programmatically determined through role or properties such that they can be presented to the user by assistive technologies without receiving focus.
-      
-      Normative text: In content implemented using markup languages, status messages can be programmatically determined through role or properties such that they can be presented to the user by assistive technologies without receiving focus.
-      Understanding: https://www.w3.org/WAI/WCAG22/Understanding/status-messages
-      "
-    `);
+     "4.1.3  Status Messages  [AA]
+     Guideline 4.1 Compatible
+
+       In content implemented using markup languages, status messages can be
+       programmatically determined through role or properties such that they can be
+       presented to the user by assistive technologies without receiving focus.
+
+     Normative text
+       In content implemented using markup languages, status messages can be
+       programmatically determined through role or properties such that they can be
+       presented to the user by assistive technologies without receiving focus.
+
+     Understanding
+       https://www.w3.org/WAI/WCAG22/Understanding/status-messages
+     "
+   `);
 }
 
 async function assertTextSearchSnapshot(): Promise<void> {
    const search = await runCli(['wcag', 'search', 'status message']);
    const excerpt = search.stdout.split('\n').slice(0, SEARCH_EXCERPT_LINES).join('\n');
    expect(excerpt).toMatchInlineSnapshot(`
-      "Search: status message
-      
-      4.1.3  Status Messages [AA] score=35.5"
-    `);
+     "Search results for "status message"  2 matches
+
+       4.1.3  Status Messages  [AA]  score 35.5"
+   `);
 }
 
 async function assertTextCriterionSnapshot(baseUrl: string): Promise<void> {
@@ -218,17 +226,30 @@ async function assertTextCriterionSnapshot(baseUrl: string): Promise<void> {
       `${baseUrl}/status-message.html`,
    ]);
    expect(criterion.stdout).toMatchInlineSnapshot(`
-      "4.1.3  Status Messages
-      State: applicable
-      Signals: landmark=landmark structure; heading=heading structure; form=form controls; live-region=aria-live region; live-region=role=status
-      Reason: Detected live region signals (aria-live region and role=status) and matching criterion tags (messaging, errors, forms, progress-steps, visual-cues, and content).
-      "
-    `);
+     "4.1.3  Status Messages  [AA]
+       State:  applicable
+
+     Reason
+       Detected live region signals (aria-live region and role=status) and matching
+       criterion tags (messaging, errors, forms, progress-steps, visual-cues, and
+       content).
+
+     Signals (5)
+       • landmark  landmark structure  (dom, high)
+       • heading  heading structure  (dom, high)
+       • form  form controls  (dom, high)
+       • live-region  aria-live region  (dom, high)
+       • live-region  role=status  (a11y-tree, high)
+
+     Elements (1)
+       /html/body/main/div  <div role="status" aria-live="polite" id="save-status">
+     "
+   `);
 }
 
 async function assertTextVerboseSnapshots(baseUrl: string): Promise<void> {
    const verboseShow = await runCli(['wcag', 'show', 'status-messages', '--verbose']);
-   expect(verboseShow.stdout).toContain('Slug: status-messages');
+   expect(verboseShow.stdout).toMatch(/Slug:\s+status-messages/);
    const verboseCriterion = await runCli([
       'inspect',
       'criterion',
@@ -237,7 +258,8 @@ async function assertTextVerboseSnapshots(baseUrl: string): Promise<void> {
       `${baseUrl}/status-message.html`,
       '--verbose',
    ]);
-   expect(verboseCriterion.stdout).toContain('Signals:');
+   expect(verboseCriterion.stdout).toContain('Signals (');
+   expect(verboseCriterion.stdout).toContain('Elements (');
 }
 
 describe('cli wcag commands', () => {

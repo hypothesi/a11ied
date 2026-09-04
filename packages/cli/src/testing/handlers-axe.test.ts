@@ -136,13 +136,22 @@ async function assertAxeTextOutput(baseUrl: string): Promise<void> {
       '--criterion',
       '4.1.2',
    ]);
-   expect(output.stdout).toMatchInlineSnapshot(`
-      "Selection: criterion=4.1.2
-      Violations: button-name (critical)
-      Passes: aria-hidden-body, nested-interactive
-      Incomplete: none
-      "
-    `);
+   expect(output.stdout.replaceAll(baseUrl, '<base>')).toMatchInlineSnapshot(`
+     "axe scan
+       URL:        <base>/button-name-failure.html
+       Selection:  criterion=4.1.2
+
+     Violations (1)
+       ✗ button-name  critical
+
+     Passes (2)
+       ✓ aria-hidden-body
+       ✓ nested-interactive
+
+     Incomplete (0)
+       none
+     "
+   `);
 }
 
 async function assertAxeVerboseOutput(baseUrl: string): Promise<void> {
@@ -154,8 +163,9 @@ async function assertAxeVerboseOutput(baseUrl: string): Promise<void> {
       '4.1.2',
       '--verbose',
    ]);
-   expect(verbose.stdout).toContain(`URL: ${baseUrl}/button-name-failure.html`);
-   expect(verbose.stdout).toContain('Rule ids:');
+   expect(verbose.stdout).toMatch(/URL:\s+http/);
+   expect(verbose.stdout).toContain(`${baseUrl}/button-name-failure.html`);
+   expect(verbose.stdout).toContain('Rule ids');
 }
 
 describe('cli run axe / scan commands', () => {

@@ -32,7 +32,8 @@ const toc = [
          <div class="route-row"><code>a1 axe</code><span>Run axe-core against a URL.</span></div>
          <div class="route-row"><code>a1 inspect</code><span>Explain which criteria apply to a page.</span></div>
          <div class="route-row"><code>a1 mcp</code><span>Start the stdio MCP server.</span></div>
-         <div class="route-row"><code>a1 doctor</code><span>Report runtime details, browser policy, and target status.</span></div>
+         <div class="route-row"><code>a1 doctor</code><span>Check the host and list the setup steps still needed.</span></div>
+         <div class="route-row"><code>a1 setup</code><span>Run the Guidepup setup steps this host needs, then re-check.</span></div>
          <div class="route-row"><code>a1 help-all</code><span>Print help for every command and option at once.</span></div>
       </div>
    </section>
@@ -200,12 +201,28 @@ a1 inspect criterion 3.3.8 --url http://localhost:3000 --json</code></pre>
       </div>
       <pre><code>a1 doctor
 a1 doctor --json
+a1 doctor --strict
+a1 setup
+a1 setup --skip-setup
 a1 mcp
 a1 help-all</code></pre>
       <p>
-         <code>doctor</code> reports the package, Node, and npm versions, the browser policy with
-         every detected candidate, and each target's status with the setup command it needs. On macOS
-         it also runs a short screen recording probe for the current host app.
+         <code>doctor</code> checks this machine and leads with a verdict: <code>✓</code> ready, or
+         <code>✗</code> with the number of setup steps still needed. Action items with the exact
+         commands come first, then each target with its individual checks, the browser a11ied will
+         automate, and the a11ied, Node, npm, and host versions at the bottom. Targets that only
+         exist on another OS get one dim line instead of instructions. On macOS it also runs a short
+         screen recording probe for the current host app. The exit code is 0 unless you pass
+         <code>--strict</code>, which exits with 3 while a required step is missing.
+      </p>
+      <p>
+         <code>setup</code> runs the Guidepup commands for this host in order,
+         <code>npx -y @guidepup/setup setup</code> on macOS and then
+         <code>npx -y @guidepup/setup install</code> on macOS and Windows, from the directory
+         where <code>@guidepup/guidepup</code> resolves. Each command keeps the terminal while it
+         runs. It stops at the first failure, then prints the <code>doctor</code> report and exits
+         with 3 when a required step is still missing. <code>--skip-setup</code> and
+         <code>--skip-install</code> drop one of the two steps.
       </p>
       <p>
          <code>mcp</code> takes no options and speaks stdio. <code>help-all</code> prints every

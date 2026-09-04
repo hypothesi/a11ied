@@ -11,7 +11,8 @@ npm install a11ied
 This installs the `a1` CLI command (also available as `a11ied`):
 
 ```sh
-a1 doctor
+a1 doctor                    # check this machine and list the setup steps still needed
+a1 setup                     # run the Guidepup setup steps for VoiceOver or NVDA, then re-check
 a1 wcag show 4.1.3 --json
 a1 help-all
 ```

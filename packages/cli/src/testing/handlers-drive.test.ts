@@ -67,11 +67,11 @@ async function assertSessionStop(sessionId: string): Promise<void> {
 
 async function assertStartTextOutput(): Promise<void> {
    const result = await runCli(['sr', 'start', ...virtualTargetArgs]);
-   const sessionId = result.stdout.match(/Session ID: (drv_[a-f0-9-]+)/)?.[1];
+   const sessionId = result.stdout.match(/Session ID:\s+(drv_[a-f0-9-]+)/)?.[1];
 
    expect(result.status).toBe(EXIT_SUCCESS);
    expect(result.stdout).toContain('Drive session ready');
-   expect(result.stdout).toMatch(/Session ID: drv_[a-f0-9-]+/);
+   expect(result.stdout).toMatch(/Session ID:\s+drv_[a-f0-9-]+/);
    expect(result.stdout).toContain('Broker PID:');
    expect(sessionId).toBeTruthy();
 

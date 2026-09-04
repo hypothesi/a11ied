@@ -47,25 +47,40 @@ const toc = [
          <h2>Check the host with doctor</h2>
       </div>
       <pre><code>a1 doctor</code></pre>
-      <pre data-label="OUTPUT"><code>a11ied 0.1.0
-Node v24.19.0
-npm 11.17.0
+      <pre data-label="OUTPUT"><code>✓ Ready for a1 commands on macOS 26.0 (arm64)
 
-Browser automation:
-- Policy: system-browser-first
-- Preferred: Google Chrome
-- Fallback install: npx playwright install chromium
-- Detected browsers:
-  - Google Chrome [channel, system] (/Applications/Google Chrome.app/...)
+Targets
+  ✓ macos-voiceover  ready  Ready for real screen reader sessions.
+      ✓ AppleScript control enabled in VoiceOver settings
+      ✓ AppleScript control confirmed by macOS
+      ✓ VoiceOver local preferences exist
+      ✓ VoiceOver welcome dialog suppressed
+      ✓ Guidepup VoiceOver preferences bundle installed
+      ✓ Screen recording available to the current host app
+  - windows-nvda     Only available on Windows.
+  ✓ virtual-dom      ready  No setup needed.
 
-Targets:
-- macos-voiceover [requires-setup]
-- windows-nvda [requires-setup]
-- virtual-dom [ready]</code></pre>
+Browser automation
+  ✓ Google Chrome  ready  Used for a1 axe scans.
+      Path    /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+      Launch  system install, opened through the "chrome" browser channel
+
+  Policy    system-browser-first: an installed Chrome, Edge, Brave, or Chromium is used before Playwright's Chromium
+  Fallback  npx playwright install chromium
+
+Environment
+  a11ied  0.1.0
+  Node    v24.19.0
+  npm     11.17.0
+  Host    macOS 26.0 (arm64) [darwin]</code></pre>
       <p>
-         Run <code>a1 doctor --json</code> for the same report as a structured object. A target with
-         status <code>ready</code> needs nothing further. A target with status
-         <code>requires-setup</code> lists the command to run in its notes.
+         The first line is the verdict. When a check fails, it switches to <code>✗</code> with the
+         number of steps left, and an <strong>Action items</strong> list with the exact commands
+         appears right below it. Targets that only exist on another OS get one dim line.
+         <code>a1 doctor --json</code> returns the same report as an object with
+         <code>ready</code>, the ordered <code>actions</code>, and each target's
+         <code>checks</code>. <code>a1 doctor --strict</code> exits with code 3 while a required
+         step is missing, which makes it usable as a CI gate.
       </p>
    </section>
 
@@ -98,14 +113,32 @@ Targets:
          <h2>Set up VoiceOver or NVDA</h2>
       </div>
       <p>
-         Guidepup provisions the automation permissions each screen reader needs. Run its setup once
-         per machine, before the first real session.
+         Guidepup provisions the automation permissions and the screen reader assets each real target
+         needs. <code>a1 setup</code> runs its commands for this host, once per machine, and ends
+         with the <code>doctor</code> report so you can see every check pass.
       </p>
-      <pre><code>npx @guidepup/setup</code></pre>
+      <pre><code>a1 setup</code></pre>
       <p>
-         On macOS the setup enables VoiceOver's AppleScript control. On Windows it installs the NVDA
-         automation add-on. Run <code>a1 doctor</code> again afterward to confirm the target status
-         changed.
+         On macOS it runs <code>npx -y @guidepup/setup setup</code>, which turns on VoiceOver's
+         AppleScript control and creates the local VoiceOver preferences file, then
+         <code>npx -y @guidepup/setup install</code>, which downloads the VoiceOver preferences
+         bundle that every session mounts on start. On Windows only the install step runs and it
+         downloads the NVDA build. The assets land in Guidepup's cache
+         (<code>~/Library/Caches/guidepup</code> on macOS,
+         <code>%LOCALAPPDATA%\guidepup</code> on Windows). Each Guidepup command keeps the
+         terminal while it runs, so accept any permission prompts it shows.
+      </p>
+      <p>
+         Add <code>--skip-setup</code> or <code>--skip-install</code> to run one step only. The
+         command exits with code 3 when a step fails or <code>doctor</code> still reports a
+         required step.
+      </p>
+      <p>
+         To run Guidepup by hand instead: <code>install</code> reads the asset list from
+         <code>@guidepup/guidepup</code>, so run it from a directory where that package resolves,
+         which for a global install is <code>$(npm root -g)/a11ied</code>.
+         <code>a1 doctor</code> prints that command with the right <code>cd</code> whenever the
+         bundle is missing.
       </p>
       <p>
          Screen recording on macOS needs one more permission. The app that runs <code>a1</code>,

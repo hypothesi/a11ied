@@ -42,7 +42,7 @@ Use this skill when the task is specifically about the `a11ied` toolchain.
 - Do not confuse raw driver transcripts with WCAG claims.
 - Do not skip applicability and jump straight from a target URL to a compliance claim.
 - Do not hide uncovered work. If the runtime leaves manual review behind, say so plainly.
-- Call out setup requirements before suggesting a real-device run.
+- Call out setup requirements before suggesting a real-device run. `a1 doctor` lists them under Action items and `a1 setup` runs them.
 - Distinguish between automated, hybrid, and manual evidence.
 - Keep repeated driver procedures documented so they can be reviewed and rerun.
 - Keep command examples copy-pasteable.

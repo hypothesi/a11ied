@@ -87,7 +87,7 @@ function captureProcessOutput(): {
 }
 
 function getChildEnv(): NodeJS.ProcessEnv {
-   return Object.fromEntries(
+   const inherited = Object.fromEntries(
       Object.entries(processEnv).filter(([key]) => {
          if (key === 'NODE_OPTIONS') {
             return false;
@@ -98,6 +98,9 @@ function getChildEnv(): NodeJS.ProcessEnv {
          return !key.startsWith('__VITEST');
       }),
    );
+
+   // Snapshots compare plain text, so keep chalk from coloring the child output.
+   return { ...inherited, FORCE_COLOR: '0' };
 }
 
 export async function runCli(args: string[]): Promise<CliResult> {

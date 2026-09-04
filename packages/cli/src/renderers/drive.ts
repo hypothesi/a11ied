@@ -1,6 +1,15 @@
 import chalk from 'chalk';
 import type { CliOutputEnvelope } from '#contracts';
 import type { DriverCommandList, SerializableDriverCommand } from '#core';
+import {
+   dim,
+   fields,
+   heading,
+   indent,
+   numberedItems,
+   section,
+   title,
+} from '../lib/format.js';
 
 const COMMAND_SET_LABELS: Readonly<Record<string, string>> = {
    portable: 'Portable',
@@ -62,83 +71,72 @@ interface DriveResult<TState extends DriveStateWithCursor> {
    };
 }
 
-function formatCheckpoints(checkpoints?: Array<{ label: string }>): string {
-   return checkpoints?.map((entry) => entry.label).join(', ') || 'none';
+function sessionId(value: string): string {
+   return chalk.greenBright(value);
 }
 
-function formatRecording(recording?: {
-   path: string;
-   status: string;
-   format: string;
-}): string {
-   if (!recording) {
-      return 'none';
-   }
+function target(value: string): string {
+   return chalk.magentaBright(value);
+}
 
+function spoken(value: string | null | undefined): string {
+   if (!value) {
+      return dim('none');
+   }
+   return chalk.bold(value);
+}
+
+function formatCheckpoints(checkpoints?: Array<{ label: string }>): string {
+   return checkpoints?.map((entry) => entry.label).join(', ') || dim('none');
+}
+
+function formatRecording(recording?: DriveRecording): string {
+   if (!recording) {
+      return dim('none');
+   }
    return `${recording.status} ${recording.format} ${recording.path}`;
 }
 
-function buildDriveLines(args: {
-   action: string;
-   sessionId: string;
-   target: string;
-   detailLabel: string;
-   detailValue: string;
-   secondaryLabel: string;
-   secondaryValue: string;
-   logCursor: number;
-   checkpoints: Array<{ label: string }> | undefined;
-   verbose: boolean;
-}): string[] {
-   const lines = [
-      `Action: ${args.action}`,
-      `Session: ${args.sessionId}`,
-      `Target: ${args.target}`,
-      `${args.detailLabel}: ${args.detailValue}`,
-      `${args.secondaryLabel}: ${args.secondaryValue}`,
-      `Log cursor: ${args.logCursor}`,
-   ];
-
-   if (args.verbose) {
-      lines.push(`Checkpoints: ${formatCheckpoints(args.checkpoints)}`);
-   }
-
-   return lines;
+function sessionHeading(action: string, session: DriveSessionInfo): string {
+   return `${title(`sr ${action}`)}  ${sessionId(session.sessionId)}  ${target(session.target)}`;
 }
 
-function appendFocusDetails(
-   lines: string[],
+function focusDetailFields(
    result: DriveResult<DriveStatusState>,
    verbose: boolean,
-): void {
+): Array<[string, string]> {
    if (result.action !== 'focus' || !result.details?.focus) {
-      return;
+      return [];
    }
-   const status = result.details.focus.status ?? 'unknown';
-   lines.push(`Focus status: ${status}`);
+   const entries: Array<[string, string]> = [
+      ['Focus status', result.details.focus.status ?? 'unknown'],
+   ];
    if (verbose && result.details.focus.details?.length) {
-      lines.push(`Focus notes: ${result.details.focus.details.join(' | ')}`);
+      entries.push(['Focus notes', result.details.focus.details.join(' | ')]);
    }
+   return entries;
 }
 
-function appendPerformDetails(
-   lines: string[],
+function performDetailFields(
    result: DriveResult<DriveStatusState>,
    verbose: boolean,
-): void {
+): Array<[string, string]> {
    if (result.action !== 'perform' || !result.details?.command) {
-      return;
+      return [];
    }
    const command = result.details.command;
-   lines.push(`Command: ${command.alias} (${command.commandSet})`);
-   lines.push(`Requested command: ${command.requestedCommand}`);
-   lines.push(`Upstream key: ${command.upstreamKey}`);
+   const entries: Array<[string, string]> = [
+      ['Command', `${command.alias} ${dim(`(${command.commandSet})`)}`],
+      ['Requested command', command.requestedCommand],
+      ['Upstream key', command.upstreamKey],
+   ];
    if (verbose && command.representation) {
-      lines.push(`Key sequence: ${command.representation}`);
+      entries.push(['Key sequence', command.representation]);
    }
    if (verbose && command.upstreamValue) {
-      lines.push(`Upstream value: ${command.upstreamValue}`);
+      entries.push(['Upstream value', command.upstreamValue]);
    }
+   return entries;
 }
 
 function formatCommandLine(
@@ -170,12 +168,12 @@ export function formatDriveCommands(result: DriverCommandList): string {
       return 'No driver commands matched.';
    }
 
-   const lines = ['Driver commands:'];
+   const lines = [title('Driver commands')];
    for (const group of relevantSets) {
       const label =
          COMMAND_SET_LABELS[group.commandSet] ?? `${group.target} / ${group.commandSet}`;
       const aliasWidth = Math.max(...group.commands.map((cmd) => cmd.alias.length));
-      lines.push('', chalk.bold(label));
+      lines.push('', heading(label));
       for (const command of group.commands) {
          lines.push(formatCommandLine(command, aliasWidth));
       }
@@ -195,21 +193,25 @@ export function renderDriveSessionText(
          startedAt: string;
          brokerPid: number;
          socketPath: string;
-         recording?: { path: string; status: string; format: string };
+         recording?: DriveRecording;
       };
    };
 
    return [
-      'Drive session ready',
+      chalk.bold.green('Drive session ready'),
       '',
-      `Session ID: ${result.session.sessionId}`,
-      `Target: ${result.session.target}`,
-      `Started: ${result.session.startedAt}`,
-      `Broker PID: ${result.session.brokerPid}`,
-      `Socket: ${result.session.socketPath}`,
-      `Recording: ${formatRecording(result.session.recording)}`,
+      ...indent(
+         fields([
+            ['Session ID', sessionId(result.session.sessionId)],
+            ['Target', target(result.session.target)],
+            ['Started', result.session.startedAt],
+            ['Broker PID', String(result.session.brokerPid)],
+            ['Socket', result.session.socketPath],
+            ['Recording', formatRecording(result.session.recording)],
+         ]),
+      ),
       '',
-      chalk.dim('Session cached \u2014 run sr commands without --session'),
+      dim('Session cached — run sr commands without --session'),
    ].join('\n');
 }
 
@@ -223,27 +225,27 @@ export function renderDriveStatusText(
    };
 
    if (result.noSession) {
-      return ['No active session.', '', 'Start one with: a11ied sr start'].join('\n');
+      return ['No active session.', '', dim('Start one with: a11ied sr start')].join(
+         '\n',
+      );
    }
 
-   const lines = buildDriveLines({
-      action: result.action,
-      sessionId: result.session.sessionId,
-      target: result.session.target,
-      detailLabel: 'Last spoken phrase',
-      detailValue: result.state.lastSpokenPhrase ?? 'none',
-      secondaryLabel: 'Current item text',
-      secondaryValue: result.state.currentItemText ?? 'none',
-      logCursor: result.state.logCursor,
-      checkpoints: result.state.checkpoints,
-      verbose: options.verbose,
-   });
+   const entries: Array<[string, string]> = [
+      ['Last spoken phrase', spoken(result.state.lastSpokenPhrase)],
+      ['Current item text', spoken(result.state.currentItemText)],
+      ['Log cursor', String(result.state.logCursor)],
+      ...focusDetailFields(result, options.verbose),
+      ...performDetailFields(result, options.verbose),
+      ['Recording', formatRecording(result.session.recording)],
+   ];
+   if (options.verbose) {
+      entries.push(['Checkpoints', formatCheckpoints(result.state.checkpoints)]);
+   }
 
-   appendFocusDetails(lines, result, options.verbose);
-   appendPerformDetails(lines, result, options.verbose);
-   lines.push(`Recording: ${formatRecording(result.session.recording)}`);
-
-   return lines.join('\n');
+   return [
+      sessionHeading(result.action, result.session),
+      ...indent(fields(entries)),
+   ].join('\n');
 }
 
 // Fallow-ignore-next-line unused-export
@@ -256,23 +258,20 @@ export function renderDriveStopText(
       session: { sessionId: string; target: string; recording?: DriveRecording };
       details?: { alreadyGone?: boolean };
    };
+   const entries: Array<[string, string]> = [
+      ['Session ID', sessionId(result.session.sessionId)],
+   ];
 
    if (result.details?.alreadyGone) {
-      return [
-         'Drive session stopped',
-         '',
-         `Session ID: ${result.session.sessionId}`,
-         'Note: Session was already ended.',
-      ].join('\n');
+      entries.push(['Note', 'Session was already ended.']);
+   } else {
+      entries.push(
+         ['Target', target(result.session.target)],
+         ['Recording', formatRecording(result.session.recording)],
+      );
    }
 
-   return [
-      'Drive session stopped',
-      '',
-      `Session ID: ${result.session.sessionId}`,
-      `Target: ${result.session.target}`,
-      `Recording: ${formatRecording(result.session.recording)}`,
-   ].join('\n');
+   return [title('Drive session stopped'), '', ...indent(fields(entries))].join('\n');
 }
 
 // Fallow-ignore-next-line unused-export
@@ -289,20 +288,24 @@ export function renderDriveLogsText(
    options: { verbose: boolean },
 ): string {
    const result = envelope.result as unknown as DriveResult<DriveLogsState>;
+   const entries: Array<[string, string]> = [
+      ['Log cursor', String(result.state.logCursor)],
+      ['Recording', formatRecording(result.session.recording)],
+   ];
+   if (options.verbose) {
+      entries.push(['Checkpoints', formatCheckpoints(result.state.checkpoints)]);
+   }
 
-   const lines = buildDriveLines({
-      action: result.action,
-      sessionId: result.session.sessionId,
-      target: result.session.target,
-      detailLabel: 'Spoken phrases',
-      detailValue: result.state.spokenPhraseLog.join(' | ') || 'none',
-      secondaryLabel: 'Item text',
-      secondaryValue: result.state.itemTextLog.join(' | ') || 'none',
-      logCursor: result.state.logCursor,
-      checkpoints: result.state.checkpoints,
-      verbose: options.verbose,
-   });
-   lines.push(`Recording: ${formatRecording(result.session.recording)}`);
-
-   return lines.join('\n');
+   return [
+      sessionHeading(result.action, result.session),
+      ...indent(fields(entries)),
+      ...section(
+         `Spoken phrases ${dim(`(${result.state.spokenPhraseLog.length})`)}`,
+         numberedItems(result.state.spokenPhraseLog),
+      ),
+      ...section(
+         `Item text ${dim(`(${result.state.itemTextLog.length})`)}`,
+         numberedItems(result.state.itemTextLog),
+      ),
+   ].join('\n');
 }

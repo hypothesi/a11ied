@@ -23,8 +23,10 @@ export const topLevelHelpCases: HelpCase[] = [
         axe [options]     Run axe-core against a target.
         inspect           Explain criterion applicability for a target.
         mcp               Start the MCP stdio server.
-        doctor [options]  Report runtime details, browser policy, and supported
-                          automation targets.
+        doctor [options]  Check this machine for browser and screen reader readiness,
+                          and list the setup steps still needed.
+        setup [options]   Run the Guidepup setup and install commands this host needs
+                          for real screen reader sessions, then re-check with doctor.
         help-all          Print help for the full command tree in one shot.
         help [command]    display help for command
       "

@@ -1,4 +1,3 @@
-import { log } from '@clack/prompts';
 import type { Command } from 'commander';
 import type * as Core from '#core';
 import type { Platform } from '#contracts';
@@ -48,19 +47,6 @@ function delay(ms: number): Promise<void> {
    });
 }
 
-function emitDefaultTargetNotice(
-   fallback: Awaited<ReturnType<typeof Core.resolveAvailableDefaultTarget>>,
-   json: boolean | undefined,
-): void {
-   if (json) {
-      return;
-   }
-   log.message(fallback.message);
-   if (fallback.warning) {
-      log.warn(fallback.warning);
-   }
-}
-
 function buildDefaultTargetWarnings(
    fallback: Awaited<ReturnType<typeof Core.resolveAvailableDefaultTarget>>,
 ): Array<{ code: string; message: string }> {
@@ -88,7 +74,6 @@ async function applyDefaultDriverTarget(
    }
 
    const fallback = await core.resolveAvailableDefaultTarget();
-   emitDefaultTargetNotice(fallback, options.json);
    options.target = fallback.target;
    if (fallback.target === 'virtual') {
       options.allowVirtual = true;

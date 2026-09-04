@@ -13,12 +13,49 @@ export const targetSchema = z.object({
 });
 export type Target = z.infer<typeof targetSchema>;
 
+export const doctorCheckStatusSchema = z.enum(['pass', 'warn', 'fail']);
+export type DoctorCheckStatus = z.infer<typeof doctorCheckStatusSchema>;
+
+export const doctorCheckSchema = z.object({
+   id: z.string(),
+   label: z.string(),
+   status: doctorCheckStatusSchema,
+   detail: z.string().optional(),
+   action: z.string().optional(),
+   actionLabel: z.string().optional(),
+});
+export type DoctorCheck = z.infer<typeof doctorCheckSchema>;
+
+export const doctorTargetSchema = targetSchema.extend({
+   summary: z.string(),
+   checks: z.array(doctorCheckSchema),
+});
+export type DoctorTarget = z.infer<typeof doctorTargetSchema>;
+
+export const doctorActionSchema = z.object({
+   label: z.string(),
+   command: z.string(),
+   required: z.boolean(),
+});
+export type DoctorAction = z.infer<typeof doctorActionSchema>;
+
+export const doctorHostSchema = z.object({
+   platform: z.string(),
+   osName: z.string(),
+   release: z.string(),
+   arch: z.string(),
+});
+export type DoctorHost = z.infer<typeof doctorHostSchema>;
+
 export const doctorReportSchema = z.object({
+   ready: z.boolean(),
+   host: doctorHostSchema,
    packageVersion: z.string(),
    nodeVersion: z.string(),
    npmVersion: z.string(),
    browserAutomation: browserAutomationPolicySchema,
-   targets: z.array(targetSchema),
+   targets: z.array(doctorTargetSchema),
+   actions: z.array(doctorActionSchema),
 });
 export type DoctorReport = z.infer<typeof doctorReportSchema>;
 

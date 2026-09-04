@@ -167,7 +167,11 @@ function expectGuideSurfaceDocs(): void {
    expectSurfaceDoc('guides/recording.astro', 'sr start --target voiceover --recording');
    expectSurfaceDoc('guides/recording.astro', 'npx playwright install chromium');
    expectSurfaceDoc('guides/screen-reader.astro', 'a1 sr stop');
-   expectSurfaceDoc('install.astro', 'npx @guidepup/setup');
+   expectSurfaceDoc('install.astro', 'npx -y @guidepup/setup setup');
+   expectSurfaceDoc('install.astro', 'npx -y @guidepup/setup install');
+   expectSurfaceDoc('install.astro', 'a1 setup');
+   expectSurfaceDoc('install.astro', 'a1 doctor --strict');
+   expectSurfaceDoc('reference/cli.astro', 'a1 setup');
    expectSurfaceDoc('quickstart.astro', 'a1 sr stop');
 }
 

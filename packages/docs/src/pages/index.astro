@@ -29,22 +29,33 @@ const toc = [
 
 a1 doctor</code></pre>
          <p>
-            <code>doctor</code> prints the browser a11ied will automate and the state of each
-            screen reader target on this machine.
+            <code>doctor</code> checks this machine and leads with the verdict: what still needs
+            to run, then each screen reader target with its checks, then the browser a11ied will
+            automate.
          </p>
-         <pre data-label="OUTPUT"><code>Targets:
-- macos-voiceover [requires-setup]
-  Run `npx @guidepup/setup` before the first real-device session.
-- windows-nvda [requires-setup]
-  Run `npx @guidepup/setup` on Windows to provision NVDA automation.
-- virtual-dom [ready]
-  Use the virtual screen reader for fast, local feedback loops.</code></pre>
+         <pre data-label="OUTPUT"><code>✗ 1 setup step needed before a1 is fully usable on macOS 26.0 (arm64)
+
+Action items
+  1. Install the Guidepup VoiceOver preferences bundle
+     cd "/usr/local/lib/node_modules/a11ied" && npx -y @guidepup/setup install
+
+Targets
+  ✗ macos-voiceover  requires setup  1 setup step is missing.
+      ✓ AppleScript control enabled in VoiceOver settings
+      ✓ AppleScript control confirmed by macOS
+      ✓ VoiceOver local preferences exist
+      ✓ VoiceOver welcome dialog suppressed
+      ✗ Guidepup VoiceOver preferences bundle installed
+      ✓ Screen recording available to the current host app
+  - windows-nvda     Only available on Windows.
+  ✓ virtual-dom      ready  No setup needed.</code></pre>
       </div>
       <div class="split-aside">
          <div class="tag">No setup needed</div>
          <p class="aside-note">
             The virtual target is ready as soon as the package installs. VoiceOver and NVDA
-            need <code>npx @guidepup/setup</code> once per machine.
+            need <code>a1 setup</code> once per machine; it runs the Guidepup commands
+            <code>doctor</code> lists and re-checks when they finish.
          </p>
          <p class="aside-note">
             Drop <code>--global</code> to install into a project and use the TypeScript API.

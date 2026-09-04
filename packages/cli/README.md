@@ -8,12 +8,14 @@
 npm install a11ied
 ```
 
-After installing, run `a1 doctor` to confirm which browser and screen reader targets are available.
+After installing, run `a1 doctor` to see which browser and screen reader targets are ready and which setup steps are still missing. `a1 setup` runs the Guidepup steps for real VoiceOver or NVDA sessions.
 
 ## CLI
 
 ```sh
-a1 doctor                          # check runtime setup
+a1 doctor                          # check this machine, list missing setup steps
+a1 doctor --strict                 # same, exit 3 while a required step is missing
+a1 setup                           # run the Guidepup setup steps, then re-check
 a1 wcag show 4.1.3 --json          # look up a criterion
 a1 inspect criterion 4.1.3 --url <url> --json  # check applicability
 a1 axe --url <url> --json          # run axe-core scan

@@ -166,8 +166,10 @@ const toc = [
          assessment, matched signals, and reasons.
       </p>
       <p>
-         <code>doctor</code> takes no input. It returns the package, Node, and npm versions, the
-         browser policy with every detected candidate, and each target's status.
+         <code>doctor</code> takes no input. It returns <code>ready</code>, the ordered
+         <code>actions</code> still needed with their commands, the host, each target with its
+         <code>checks</code>, the browser policy with every detected candidate, and the package,
+         Node, and npm versions.
       </p>
    </section>
 

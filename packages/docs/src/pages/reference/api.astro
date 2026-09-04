@@ -160,8 +160,9 @@ console.log(focusOrder.assessment.reasons);</code></pre>
       <pre><code>import {'{'} createDoctorReport, renderDoctorText, resolveAvailableDefaultTarget {'}'} from 'a11ied';
 
 const report = createDoctorReport();
-const ready = report.targets.filter((target) => {'{'} return target.status === 'ready'; {'}'});
+const stepsLeft = report.actions.filter((action) => {'{'} return action.required; {'}'});
 
+console.log(report.ready, stepsLeft);
 console.log(renderDoctorText(report));
 
 const {'{'} target, targetType, warning {'}'} = await resolveAvailableDefaultTarget();</code></pre>

@@ -7,7 +7,7 @@ import {
 } from '#contracts';
 import { CliEnvironmentError, CliUsageError } from '#core';
 import { CLI_VERSION, JSON_INDENT } from './constants.js';
-import { styleCommandText } from './text.js';
+import { warningLine } from './format.js';
 
 export interface CommandExecution {
    ok?: boolean;
@@ -92,9 +92,12 @@ export function printOutput(opts: PrintOutputOptions): void {
       return;
    }
 
-   process.stdout.write(
-      `${styleCommandText(opts.renderText(opts.envelope, { verbose: Boolean(opts.verbose) }))}\n`,
-   );
+   const warnings = opts.envelope.warnings.map((warning) => warningLine(warning.message));
+   if (warnings.length > 0) {
+      warnings.push('');
+   }
+   const body = opts.renderText(opts.envelope, { verbose: Boolean(opts.verbose) });
+   process.stdout.write(`${[...warnings, body].join('\n')}\n`);
 }
 
 function buildCliUsageErrors(error: CliUsageError): {

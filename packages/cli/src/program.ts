@@ -1,8 +1,9 @@
-import { log } from '@clack/prompts';
 import { Command } from 'commander';
+import { cliExitCodes } from '#contracts';
 import { registerSessionCommands } from './commands/drive.js';
 import { registerInspectCommands } from './commands/inspect.js';
 import { registerAxeCommand } from './commands/axe.js';
+import { registerSetupCommand } from './commands/setup.js';
 import { registerWcagCommands } from './commands/wcag.js';
 import { CLI_VERSION, JSON_INDENT } from './lib/constants.js';
 import { renderFullHelp } from './lib/help.js';
@@ -12,17 +13,24 @@ function registerDoctorCommand(program: Command): void {
    program
       .command('doctor')
       .description(
-         'Report runtime details, browser policy, and supported automation targets.',
+         'Check this machine for browser and screen reader readiness, and list the setup steps still needed.',
       )
       .option('--json', 'Print JSON instead of human-readable text.')
-      .action(async (options: { json?: boolean }) => {
-         const { createDoctorReport, renderDoctorText } = await import('#core');
+      .option(
+         '--strict',
+         `Exit with code ${cliExitCodes.environment} when a required setup step is missing.`,
+      )
+      .action(async (options: { json?: boolean; strict?: boolean }) => {
+         const [{ createDoctorReport, renderDoctorText }, { doctorTextStyle }] =
+            await Promise.all([import('#core'), import('./lib/format.js')]);
          const report = createDoctorReport();
-         const renderedText = renderDoctorText(report);
          const output = options.json
             ? JSON.stringify(report, undefined, JSON_INDENT)
-            : styleCommandText(renderedText);
-         log.message(output);
+            : renderDoctorText(report, doctorTextStyle);
+         process.stdout.write(`${output}\n`);
+         if (options.strict && !report.ready) {
+            process.exitCode = cliExitCodes.environment;
+         }
       });
 }
 
@@ -61,6 +69,7 @@ function registerAllCommands(program: Command): void {
    registerInspectCommands(program);
    registerMcpCommand(program);
    registerDoctorCommand(program);
+   registerSetupCommand(program);
    registerHelpAllCommand(program);
 }
 
