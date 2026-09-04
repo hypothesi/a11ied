@@ -16,7 +16,6 @@ export {
    listDriverCommands,
    listSupportedTargets,
    listWcagCriteria,
-   listWcagLevels,
    openUrlInSystemAutomationBrowser,
    parseDriverCommandSet,
    renderDoctorText,
@@ -47,4 +46,10 @@ export type {
    SerializableDriverCommand,
    SessionActionOptions,
    TargetType,
+} from '@a11ied/core';
+
+export {
+   showWcagAxeRule,
+   showWcagCoverageSummary,
+   showWcagTechnique,
 } from '@a11ied/core';

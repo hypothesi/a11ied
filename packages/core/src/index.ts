@@ -8,7 +8,6 @@ export {
    inspectCriterionTarget,
    inspectCriterionUrl,
    listWcagCriteria,
-   listWcagLevels,
    searchWcagCriteria,
    showWcagCoverage,
    showWcagCriterion,
@@ -109,3 +108,9 @@ const cliCommands: CliCommand[] = [
 export function listCliCommands(): CliCommand[] {
    return cliCommands;
 }
+
+export {
+   showWcagAxeRule,
+   showWcagCoverageSummary,
+   showWcagTechnique,
+} from './wcag/runtime.js';

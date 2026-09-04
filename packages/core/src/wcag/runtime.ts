@@ -1,15 +1,21 @@
 import {
    wcagLevelSchema,
+   type AxeRuleLookupResult,
+   type CoverageSummaryArtifact,
    type CriterionLookupKey,
+   type EvidenceStrategy,
+   type TechniqueLookupResult,
    type WcagLevel,
    type WcagVersion,
 } from '@a11ied/contracts';
 import {
    WcagEngineNotFoundError,
    WcagEngineValidationError,
+   getAxeRule,
    getCoverage,
-   getCriterion,
+   getCoverageSummary,
    getCriterionApplicability,
+   getTechnique,
    listApplicableCriteria,
    listCriteriaByLevel,
    searchCriteria,
@@ -47,17 +53,6 @@ function normalizeEngineError(error: unknown): never {
    throw error;
 }
 
-/** Lists the supported WCAG conformance levels for one pinned WCAG version. */
-export function listWcagLevels(version: string): {
-   version: WcagVersion;
-   levels: WcagLevel[];
-} {
-   return {
-      version: parseWcagVersion(version),
-      levels: [...wcagLevelSchema.options],
-   };
-}
-
 type WcagCriteriaListing = Omit<ReturnType<typeof listCriteriaByLevel>, 'level'> & {
    level: WcagLevel | 'all';
 };
@@ -88,18 +83,34 @@ export function listWcagCriteria(
    }
 }
 
-/** Resolves one criterion by id or slug for the requested WCAG version. */
-export function showWcagCriterion(
+/** Returns the pinned coverage totals per conformance level for one WCAG version. */
+export function showWcagCoverageSummary(version: string): CoverageSummaryArtifact {
+   return getCoverageSummary({ version: parseWcagVersion(version) });
+}
+
+/** Returns coverage and testing-strategy metadata for one criterion. */
+export function showWcagCoverage(
    lookupKey: CriterionLookupKey,
    version: string,
-): ReturnType<typeof getCriterion> {
+): ReturnType<typeof getCoverage> {
    const parsedVersion = parseWcagVersion(version);
 
    try {
-      return getCriterion(lookupKey, { version: parsedVersion });
+      return getCoverage(lookupKey, { version: parsedVersion });
    } catch (error) {
       normalizeEngineError(error);
    }
+}
+
+/**
+ * Resolves one criterion by id or slug for the requested WCAG version, together with its
+ * coverage state and testing strategy.
+ */
+export function showWcagCriterion(
+   lookupKey: CriterionLookupKey,
+   version: string,
+): ReturnType<typeof getCoverage> {
+   return showWcagCoverage(lookupKey, version);
 }
 
 /** Searches the local criterion corpus with ranked match metadata. */
@@ -129,18 +140,62 @@ export function searchWcagCriteria(
    }
 }
 
-/** Returns coverage and testing-strategy metadata for one criterion. */
-export function showWcagCoverage(
-   lookupKey: CriterionLookupKey,
+/** Resolves one W3C technique or failure id (G18, F65) to the criteria that list it. */
+export function showWcagTechnique(
+   lookupKey: string,
    version: string,
-): ReturnType<typeof getCoverage> {
+): TechniqueLookupResult {
    const parsedVersion = parseWcagVersion(version);
 
    try {
-      return getCoverage(lookupKey, { version: parsedVersion });
+      return getTechnique(lookupKey, { version: parsedVersion });
    } catch (error) {
       normalizeEngineError(error);
    }
+}
+
+async function loadAxeRuleHelp(
+   ruleId: string,
+): Promise<Pick<AxeRuleLookupResult, 'description' | 'help' | 'helpUrl'>> {
+   const { default: axeCore } = await import('axe-core');
+   const rule = axeCore.getRules().find((entry) => entry.ruleId === ruleId);
+   if (!rule) {
+      return {};
+   }
+   return { description: rule.description, help: rule.help, helpUrl: rule.helpUrl };
+}
+
+/**
+ * Maps one axe-core rule id to the criteria it covers in the pinned data. The rule's help
+ * text and help URL come from the installed axe-core package, not from the data, so they
+ * follow the axe-core version in use.
+ */
+export async function showWcagAxeRule(
+   ruleId: string,
+   version: string,
+): Promise<AxeRuleLookupResult> {
+   const parsedVersion = parseWcagVersion(version);
+   let lookup: AxeRuleLookupResult | undefined = undefined;
+
+   try {
+      lookup = getAxeRule(ruleId, { version: parsedVersion });
+   } catch (error) {
+      normalizeEngineError(error);
+   }
+
+   return { ...lookup, ...(await loadAxeRuleHelp(ruleId)) };
+}
+
+function listStrategies(
+   criterionIds: string[],
+   version: WcagVersion,
+): Record<string, EvidenceStrategy> {
+   return Object.fromEntries(
+      criterionIds.map((criterionId) => [
+         criterionId,
+         getCoverage(criterionId, { version }).strategy,
+      ]),
+   );
 }
 
 interface InspectApplicableTargetResult {
@@ -148,9 +203,13 @@ interface InspectApplicableTargetResult {
    target: { kind: string; value: string };
    signals: ReturnType<typeof deriveApplicabilityInputFromHtml>['signals'];
    matrix: ReturnType<typeof listApplicableCriteria>;
+   strategies: Record<string, EvidenceStrategy>;
 }
 
-/** Runs applicability analysis for a resolved target input. */
+/**
+ * Runs applicability analysis for a resolved target input. The result carries the testing
+ * strategy of every assessed criterion so renderers can name the next command.
+ */
 export async function inspectApplicableTarget(
    targetInput: ResolveDocumentTargetInput,
    version: string,
@@ -164,11 +223,13 @@ export async function inspectApplicableTarget(
    });
 
    try {
+      const matrix = listApplicableCriteria(input, { version: parsedVersion });
       return {
          version: parsedVersion,
          target: input.target,
          signals: input.signals,
-         matrix: listApplicableCriteria(input, { version: parsedVersion }),
+         matrix,
+         strategies: listStrategies(Object.keys(matrix.assessments), parsedVersion),
       };
    } catch (error) {
       normalizeEngineError(error);
@@ -185,6 +246,7 @@ export async function inspectApplicableUrl(
 
 type CriterionApplicabilityResult = ReturnType<typeof getCriterionApplicability> & {
    signals: ReturnType<typeof deriveApplicabilityInputFromHtml>['signals'];
+   strategy: EvidenceStrategy;
 };
 
 /** Explains the applicability state of one criterion for a resolved target. */
@@ -194,9 +256,10 @@ export async function inspectCriterionTarget(
    version: string,
 ): Promise<CriterionApplicabilityResult> {
    const parsedVersion = parseWcagVersion(version);
+   let strategy: EvidenceStrategy | undefined = undefined;
 
    try {
-      getCriterion(lookupKey, { version: parsedVersion });
+      strategy = getCoverage(lookupKey, { version: parsedVersion }).strategy;
    } catch (error) {
       normalizeEngineError(error);
    }
@@ -212,6 +275,7 @@ export async function inspectCriterionTarget(
       return {
          ...getCriterionApplicability(lookupKey, input, { version: parsedVersion }),
          signals: input.signals,
+         strategy,
       };
    } catch (error) {
       normalizeEngineError(error);

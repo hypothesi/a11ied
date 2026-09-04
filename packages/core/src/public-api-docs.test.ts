@@ -62,11 +62,13 @@ const publicApiExpectations: PublicApiExpectation[] = [
    {
       file: 'packages/core/src/wcag/runtime.ts',
       functions: [
-         'listWcagLevels',
          'listWcagCriteria',
          'showWcagCriterion',
          'searchWcagCriteria',
          'showWcagCoverage',
+         'showWcagCoverageSummary',
+         'showWcagTechnique',
+         'showWcagAxeRule',
          'inspectApplicableTarget',
          'inspectApplicableUrl',
          'inspectCriterionTarget',
@@ -142,9 +144,20 @@ const publicApiExpectations: PublicApiExpectation[] = [
          'getCriterion',
          'listCriteriaByLevel',
          'getCoverage',
+         'getCoverageSummary',
          'getQuickrefTags',
+         'getTechnique',
+         'getAxeRule',
          'resetWcagEngineCache',
       ],
+   },
+   {
+      file: 'packages/wcag-engine/src/artifacts/load.ts',
+      functions: ['loadEngineArtifacts'],
+   },
+   {
+      file: 'packages/wcag-data/src/coverage/axe-rules.ts',
+      functions: ['buildAxeRuleIndex'],
    },
    {
       file: 'packages/wcag-engine/src/search/runtime.ts',
