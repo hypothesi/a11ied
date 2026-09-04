@@ -16,7 +16,9 @@ After installing, run `a1 doctor` to see which browser and screen reader targets
 a1 doctor                          # check this machine, list missing setup steps
 a1 doctor --strict                 # same, exit 3 while a required step is missing
 a1 setup                           # run the Guidepup setup steps, then re-check
-a1 wcag show 4.1.3 --json          # look up a criterion
+a1 wcag                            # interactive WCAG finder (terminal only)
+a1 wcag 4.1.3 --json               # look up a criterion with techniques, failures, and coverage
+a1 wcag rule color-contrast        # map an axe rule to its criteria and fixes
 a1 inspect criterion 4.1.3 --url <url> --json  # check applicability
 a1 axe --url <url> --json          # run axe-core scan
 a1 sr start --json                 # start a screen reader session

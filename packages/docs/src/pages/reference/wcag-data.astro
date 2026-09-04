@@ -52,8 +52,9 @@ const toc = [
             <h2>What ships in the package</h2>
          </div>
          <p>
-            The sync step writes raw upstream payloads, then generates normalized artifacts per
-            version. Both sets are committed, so a build never reaches the network.
+            The sync step fetches the raw upstream payloads into an ignored directory, then
+            generates normalized artifacts per version. The generated set is committed and ships
+            in the package, so a build never reaches the network.
          </p>
          <div class="route-list">
             <div class="route-row"><code>criteria</code><span>Full criterion records with techniques and failures.</span></div>
@@ -61,8 +62,9 @@ const toc = [
             <div class="route-row"><code>coverage</code><span>Coverage state and mapped rule IDs per criterion.</span></div>
             <div class="route-row"><code>coverage-summary</code><span>Totals per level, source counts, and representative IDs.</span></div>
             <div class="route-row"><code>strategy</code><span>Evidence mode, procedure IDs, and whether a real target is needed.</span></div>
-            <div class="route-row"><code>slug-index</code>, <code>tag-index</code><span>Lookup by slug and by Quickref tag.</span></div>
-            <div class="route-row"><code>technique-index</code>, <code>failure-index</code><span>Lookup by technique and failure key.</span></div>
+            <div class="route-row"><code>slug-index</code><span>Slug to criterion ID. Every lookup by slug reads it.</span></div>
+            <div class="route-row"><code>technique-index</code>, <code>failure-index</code><span>Technique or failure ID to its title, W3C page URL, and the criteria that list it. <code>a1 wcag G18</code> reads them.</span></div>
+            <div class="route-row"><code>axe-rules</code><span>axe rule ID to its tags, ACT rule IDs, and the criteria it maps to. <code>a1 wcag rule</code> reads it.</span></div>
          </div>
       </div>
       <div class="split-aside">
@@ -96,8 +98,17 @@ const toc = [
       <p>
          The record also carries <code>normativeText</code> as HTML, a parsed
          <code>details</code> list for the exceptions, <code>altIds</code> for older slugs, and the
-         resolved <code>techniques</code> and <code>failures</code>. <code>versions</code> says which
-         WCAG releases contain the criterion.
+         resolved <code>techniques</code>, <code>advisoryTechniques</code>, and
+         <code>failures</code>. Each technique has an <code>id</code>, <code>title</code>,
+         <code>technology</code>, and <code>url</code> pointing at its W3C page.
+         <code>versions</code> says which WCAG releases contain the criterion.
+      </p>
+      <p>
+         The Understanding documents and the technique bodies are not in the data. The
+         <code>w3c/wcag</code> repository publishes them under the W3C Document License, which
+         grants no general right to redistribute derivative text, so the data links to them by
+         <code>understandingUrl</code> and <code>url</code> instead. The package ships a
+         <code>NOTICE.md</code> with the W3C attribution for the material it does copy.
       </p>
    </section>
 

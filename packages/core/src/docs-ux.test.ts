@@ -52,7 +52,7 @@ function expectTaskFirstEntryPoints(homePage: string): void {
    expect(homePage).toContain('a1 doctor');
    expect(homePage).toContain('a1 axe --url');
    expect(homePage).toContain('a1 sr start');
-   expect(homePage).toContain('a1 wcag coverage');
+   expect(homePage).toContain('a1 wcag 2.4.3');
 }
 
 function expectGuidesLinkToConcepts(): void {

@@ -28,7 +28,7 @@ const toc = [
       </div>
       <div class="route-list">
          <div class="route-row"><code>a1 sr</code><span>Control a screen reader through a session.</span></div>
-         <div class="route-row"><code>a1 wcag</code><span>Look up criteria, levels, search results, and coverage.</span></div>
+         <div class="route-row"><code>a1 wcag</code><span>Look up criteria, techniques, axe rules, search results, and coverage.</span></div>
          <div class="route-row"><code>a1 axe</code><span>Run axe-core against a URL.</span></div>
          <div class="route-row"><code>a1 inspect</code><span>Explain which criteria apply to a page.</span></div>
          <div class="route-row"><code>a1 mcp</code><span>Start the stdio MCP server.</span></div>
@@ -134,15 +134,19 @@ a1 sr press "VO+ArrowRight" --session drv_c33f1d8f --json</code></pre>
          <h2>a1 wcag</h2>
       </div>
       <div class="route-list">
-         <div class="route-row"><code>wcag levels</code><span>List the conformance levels in the version.</span></div>
-         <div class="route-row"><code>wcag criteria</code><span>List criteria. <code>--level A</code>, <code>AA</code>, or <code>AAA</code> narrows it.</span></div>
-         <div class="route-row"><code>wcag show &lt;criterion&gt;</code><span>Full record for one criterion, by ID or slug.</span></div>
+         <div class="route-row"><code>wcag</code><span>With no arguments on a terminal, an interactive finder: fuzzy search on the left, the criterion on the right, <code>t</code>, <code>f</code>, and <code>c</code> for techniques, failures, and coverage, <code>y</code> to copy the <code>a1 axe --criterion</code> command. Piped output prints the help.</span></div>
+         <div class="route-row"><code>wcag &lt;criterion&gt;</code><span>One criterion by ID or slug, or one technique by ID such as <code>G18</code>. Same output as <code>wcag show</code>.</span></div>
+         <div class="route-row"><code>wcag criteria</code><span>List criteria. <code>--level A</code>, <code>AA</code>, or <code>AAA</code> narrows it. <code>--summary</code> prints coverage totals per level instead.</span></div>
+         <div class="route-row"><code>wcag show &lt;criterion&gt;</code><span>Normative text, sufficient and advisory techniques, failures, coverage state, mapped axe and ACT rules, testing strategy, and the next command.</span></div>
          <div class="route-row"><code>wcag search &lt;query&gt;</code><span>Ranked matches across titles, summaries, normative text, techniques, failures, and tags. <code>--limit</code> defaults to 10.</span></div>
-         <div class="route-row"><code>wcag coverage &lt;criterion&gt;</code><span>Coverage state, mapped rule IDs, and the testing strategy.</span></div>
+         <div class="route-row"><code>wcag rule &lt;ruleId&gt;</code><span>One axe-core rule: the criteria it maps to with their levels, their techniques and failures, and the axe help text and URL.</span></div>
       </div>
-      <pre><code>a1 wcag show status-messages --json
+      <pre><code>a1 wcag 1.4.3
+a1 wcag show status-messages --json
 a1 wcag criteria --level AA --version 2.1 --json
-a1 wcag search "focus order" --limit 3 --json</code></pre>
+a1 wcag criteria --summary
+a1 wcag search "focus order" --limit 3 --json
+a1 wcag rule color-contrast</code></pre>
       <p>These read bundled data. No command in this family opens a browser or makes a request.</p>
    </section>
 

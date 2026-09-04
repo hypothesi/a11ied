@@ -10,9 +10,9 @@ Use this skill when the task is specifically about the `a11ied` toolchain.
 ## Workflow
 
 1. Start with the CLI if the task can be expressed as a repeatable command.
-2. If the task is framed in WCAG terms, resolve the criterion or target level before testing.
+2. If the task is framed in WCAG terms, resolve the criterion or target level before testing: `a1 wcag 1.4.3` (or a slug such as `a1 wcag status-messages`) prints the normative text, techniques, failures, coverage state, and the next command; `a1 wcag search "focus order"` finds the number; `a1 wcag rule color-contrast` maps an axe violation back to its criteria and fixes.
 3. Determine whether the criterion is applicable to the page, story, or component under test.
-4. Check coverage and testing strategy before making claims.
+4. Check coverage and testing strategy before making claims. `a1 wcag <criterion>` shows both, and `a1 wcag criteria --summary` shows how many criteria per level automation decides.
 5. Choose the evidence lane on purpose:
    - automated when the runtime can make the verdict directly
    - hybrid when the runtime can gather evidence but a human still has to judge part of it

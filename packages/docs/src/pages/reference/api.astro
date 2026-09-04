@@ -127,9 +127,14 @@ if (strategy.requiresRealTarget) {'{'}
 const levelAA = listWcagCriteria('AA', '2.2');
 const matches = searchWcagCriteria('focus order', {'{'} version: '2.2', limit: 3 {'}'});</code></pre>
       <p>
-         These functions are synchronous. They read data bundled with the package, so they make no
-         network request. <code>listWcagCriteria</code> takes <code>undefined</code> as the level to
-         return every criterion. <code>listWcagLevels</code> returns the levels in a version.
+         These functions read data bundled with the package, so they make no network request.
+         <code>showWcagCriterion</code> returns the criterion with its <code>coverage</code> and
+         <code>strategy</code>. <code>listWcagCriteria</code> takes <code>undefined</code> as the
+         level to return every criterion. <code>showWcagTechnique('G18', '2.2')</code> resolves a
+         technique or failure ID to the criteria that list it, and
+         <code>showWcagCoverageSummary('2.2')</code> returns the totals per level.
+         <code>showWcagAxeRule('color-contrast', '2.2')</code> is the one asynchronous lookup: it
+         maps an axe rule ID to its criteria and reads the help text from the installed axe-core.
       </p>
    </section>
 
@@ -182,7 +187,7 @@ const {'{'} target, targetType, warning {'}'} = await resolveAvailableDefaultTar
          <div class="route-row"><strong>Sessions</strong><span><code>startDriverSession</code>, <code>getDriverSessionStatus</code>, <code>runDriverSessionAction</code>, <code>runEphemeralDriverAction</code>, <code>stopDriverSession</code>, <code>attachDocumentToDriverSession</code>, <code>cleanupStaleDriverSessions</code></span></div>
          <div class="route-row"><strong>Commands</strong><span><code>listDriverCommands</code>, <code>resolveDriverCommand</code>, <code>driverCommandSets</code>, <code>isDriverCommandSet</code>, <code>parseDriverCommandSet</code></span></div>
          <div class="route-row"><strong>axe</strong><span><code>runAxe</code></span></div>
-         <div class="route-row"><strong>WCAG</strong><span><code>listWcagLevels</code>, <code>listWcagCriteria</code>, <code>showWcagCriterion</code>, <code>searchWcagCriteria</code>, <code>showWcagCoverage</code></span></div>
+         <div class="route-row"><strong>WCAG</strong><span><code>listWcagCriteria</code>, <code>showWcagCriterion</code>, <code>searchWcagCriteria</code>, <code>showWcagCoverage</code>, <code>showWcagCoverageSummary</code>, <code>showWcagTechnique</code>, <code>showWcagAxeRule</code></span></div>
          <div class="route-row"><strong>Applicability</strong><span><code>inspectApplicableTarget</code>, <code>inspectApplicableUrl</code>, <code>inspectCriterionTarget</code>, <code>inspectCriterionUrl</code></span></div>
          <div class="route-row"><strong>Targets</strong><span><code>resolveDocumentTarget</code>, <code>openUrlInSystemAutomationBrowser</code>, <code>resolveDefaultTarget</code>, <code>resolveAvailableDefaultTarget</code>, <code>resolveTargetType</code>, <code>listSupportedTargets</code></span></div>
          <div class="route-row"><strong>Diagnostics</strong><span><code>createDoctorReport</code>, <code>renderDoctorText</code>, <code>listCliCommands</code></span></div>
