@@ -1,0 +1,176 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'shape', label: 'What a violation holds' },
+   { id: 'impact', label: 'Impact levels' },
+   { id: 'node', label: 'Reading a failing node' },
+   { id: 'rule', label: 'From a violation to a fix' },
+   { id: 'unmapped', label: 'Violations with no criterion' },
+];
+---
+
+<DocShell
+   title="Understand a violation"
+   summary="An axe violation names a rule, an impact, and the elements that failed it. Read the node before you fix it, then map the rule to its WCAG criterion and techniques with a1 wcag rule."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="panel" id="shape">
+      <div class="panel-head">
+         <p class="panel-kicker">Shape</p>
+         <h2>What a violation holds</h2>
+      </div>
+      <p>
+         <code>a1 axe</code> returns four arrays: <code>violations</code>, <code>passes</code>,
+         <code>incomplete</code> for checks axe could not decide on its own, and
+         <code>inapplicable</code> for rules that do not apply to this page. Each violation
+         carries the axe rule id, its impact, a description, help text and a help URL, the
+         WCAG and other standard tags it maps to, and the <code>nodes</code> that failed.
+      </p>
+      <pre><code>a1 axe http://localhost:3000/checkout --json</code></pre>
+      <pre data-label="OUTPUT"><code>"violations": [
+  &#123;
+    "id": "button-name",
+    "impact": "critical",
+    "description": "Ensure buttons have discernible text",
+    "help": "Buttons must have discernible text",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=axeAPI",
+    "tags": ["cat.name-role-value", "wcag2a", "wcag412", "ACT", "..."],
+    "nodes": [
+      &#123;
+        "target": ["button[type=\"button\"]"],
+        "html": "&lt;button type=\"button\"&gt;&lt;img src=\"cart.png\" alt=\"\"&gt;&lt;/button&gt;",
+        "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  ..."
+      &#125;
+    ]
+  &#125;
+]</code></pre>
+   </section>
+
+   <section class="ledger" id="impact">
+      <div class="panel-head">
+         <p class="panel-kicker">Impact</p>
+         <h2>The four impact levels</h2>
+      </div>
+      <p>
+         Impact comes from axe-core, one fixed value per rule, not per WCAG criterion. It says
+         how badly the rule's kind of failure affects a user, not how many users hit it on this
+         page.
+      </p>
+      <div class="route-list">
+         <div class="route-row">
+            <code>critical</code>
+            <span>Blocks access outright. <code>button-name</code> and <code>image-alt</code> are
+            critical: a control or image with no accessible name is unusable, not just harder to
+            use.</span>
+         </div>
+         <div class="route-row">
+            <code>serious</code>
+            <span><code>color-contrast</code> and <code>link-name</code> are serious: text is
+            there, but a low-vision or screen reader user has real trouble getting to it.</span>
+         </div>
+         <div class="route-row">
+            <code>moderate</code>
+            <span><code>heading-order</code> is moderate: a heading level that skips from 1 to 3
+            confuses navigation without blocking it.</span>
+         </div>
+         <div class="route-row">
+            <code>minor</code>
+            <span><code>empty-heading</code> is minor: an empty heading adds noise to the
+            structure without hiding content.</span>
+         </div>
+      </div>
+      <p>
+         <code>--fail-on &lt;impact&gt;</code> on <code>axe</code> and <code>audit</code> counts
+         only violations at or above that level toward the exit code, so
+         <code>--fail-on serious</code> lets a page ship with open moderate and minor findings
+         while still failing on critical and serious ones.
+      </p>
+   </section>
+
+   <section class="split panel" id="node">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Nodes</p>
+            <h2>Reading a failing node</h2>
+         </div>
+         <p>
+            Each entry in <code>nodes</code> is one element that failed the rule.
+            <code>target</code> is a CSS selector array; paste
+            <code>document.querySelector('button[type="button"]')</code> into the browser
+            console to find it. <code>html</code> is the failing markup as axe saw it.
+            <code>failureSummary</code> lists every way to satisfy the rule, not just the one
+            this element is missing, since axe cannot tell which fix you will pick.
+         </p>
+         <p>
+            A rule can have more than one failing node, and <code>axe</code> reports every one
+            it found, not just the first.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Thin pages</div>
+         <p class="aside-note">
+            Fewer than 10 elements and under 50 characters of text adds a warning that a
+            single-page app may not have mounted yet. Load the route in a browser first to
+            confirm it renders before trusting an empty result.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="rule">
+      <div class="panel-head">
+         <p class="panel-kicker">Fix guidance</p>
+         <h2>From a violation to a fix</h2>
+      </div>
+      <p>
+         <code>a1 wcag rule &lt;ruleId&gt;</code> maps one axe rule to the criteria it fails,
+         each with its level, techniques, and failures, plus the axe help text and URL.
+         <code>a1 audit</code> already suggests it: every failing rule gets an entry in
+         <code>result.nextCommands</code>.
+      </p>
+      <pre><code>a1 wcag rule button-name --json</code></pre>
+      <pre data-label="OUTPUT"><code>"ruleId": "button-name",
+"criteria": [
+  &#123;
+    "id": "4.1.2",
+    "title": "Name, Role, Value",
+    "level": "A",
+    "techniques": [
+      &#123; "id": "ARIA14", "title": "Using aria-label to provide an accessible name where a visible label cannot be used", "..." : "..." &#125;,
+      &#123; "id": "H44", "title": "Using label elements to associate text labels with form controls", "..." : "..." &#125;,
+      "..."
+    ],
+    "failures": [
+      &#123; "id": "F68", "title": "Failure of Success Criterion 4.1.2 due to a user interface control not having a programmatically determined name" &#125;,
+      "..."
+    ]
+  &#125;
+],
+"description": "Ensure buttons have discernible text",
+"help": "Buttons must have discernible text",
+"helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=axeAPI"</code></pre>
+      <p>
+         For the <code>&lt;button type="button"&gt;&lt;img src="cart.png" alt=""&gt;&lt;/button&gt;</code>
+         node above, <code>H44</code> is the fix that fits: wrap the image in a
+         <code>&lt;label&gt;</code>, or since this is a button rather than a form control, add
+         text or an <code>aria-label</code> per <code>ARIA14</code>.
+      </p>
+   </section>
+
+   <section class="field-note" id="unmapped">
+      <div class="panel-head">
+         <p class="panel-kicker">Not every rule maps</p>
+         <h2>Best-practice rules carry no criterion</h2>
+      </div>
+      <p>
+         <code>a1 wcag rule heading-order</code> still returns 0, with an empty
+         <code>criteria</code> array. axe tags <code>heading-order</code> best practice rather
+         than a specific success criterion, so no WCAG page decides whether to fix it. It is
+         still worth fixing: axe only runs it when named explicitly with <code>--rule</code>,
+         since a default <code>a1 axe</code> run covers the rules mapped in the WCAG version and
+         skips rules with no criterion behind them.
+      </p>
+   </section>
+</DocShell>

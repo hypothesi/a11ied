@@ -1,0 +1,151 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'doctor', label: 'Start with doctor' },
+   { id: 'session', label: 'Session errors' },
+   { id: 'browser', label: 'Browser errors' },
+   { id: 'voiceover', label: 'A command started VoiceOver' },
+   { id: 'recording', label: 'Recording problems' },
+   { id: 'thin', label: 'An empty or thin result' },
+];
+---
+
+<DocShell
+   title="Troubleshooting"
+   summary="Most a1 failures fall into a few shapes: no browser, no active session, the wrong screen reader started, or a page that had not rendered yet. doctor answers the first two. This page covers the rest, with the exact error text each one prints."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="panel" id="doctor">
+      <div class="panel-head">
+         <p class="panel-kicker">First step</p>
+         <h2>Run doctor before anything else</h2>
+      </div>
+      <p>
+         <code>a1 doctor</code> checks the browser and every screen reader target, and prints
+         the exact command to fix whatever is missing under Action items. Most environment
+         failures below are what running a command without first fixing a step
+         <code>doctor</code> already flagged looks like.
+      </p>
+      <pre><code>a1 doctor</code></pre>
+      <p>
+         See <a href="/install">install</a> for what each check does and
+         <a href="/install#screen-readers">setting up VoiceOver or NVDA</a> for the one-time
+         steps a real target needs.
+      </p>
+   </section>
+
+   <section class="panel" id="session">
+      <div class="panel-head">
+         <p class="panel-kicker">sr</p>
+         <h2>Session errors</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row">
+            <strong>missing-session</strong>
+            <span>
+               <code>✗ Error (missing-session): No active screen reader session. Start one with "a1 sr start".</code>
+               Every <code>sr</code> verb but <code>press</code>, <code>type</code>,
+               <code>do</code>, and <code>walk</code> needs a session already running. Run
+               <code>sr start --sr virtual --allow-virtual &lt;url&gt;</code> first.
+            </span>
+         </div>
+         <div class="route-row">
+            <strong>A command exits 4 that you expected to pass</strong>
+            <span>
+               <code>find</code>, <code>goto</code>, <code>wait --for</code>, and
+               <code>expect</code> exit 4 on a miss, by design, so a script can act on it. Check
+               <code>sr transcript</code> to see what the reader actually said. Word order
+               matters: the virtual reader announces <code>role, name</code>, such as
+               <code>"button, Pay"</code>, not <code>"Pay, button"</code>.
+            </span>
+         </div>
+         <div class="route-row">
+            <strong>sr wait --for never matches</strong>
+            <span>
+               <code>wait</code> only sees phrases spoken after it starts. A phrase the
+               triggering command already returned in its own response happened first and will
+               not match. Check that result directly, or use <code>expect --since</code> against
+               a checkpoint set before the triggering action. See
+               <a href="/guides/screen-reader#check">check what the reader said</a>.
+            </span>
+         </div>
+      </div>
+   </section>
+
+   <section class="panel" id="browser">
+      <div class="panel-head">
+         <p class="panel-kicker">axe, tree, audit</p>
+         <h2>Browser errors</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row">
+            <strong>browser-unavailable</strong>
+            <span>
+               <code>✗ Error (browser-unavailable): No usable Chromium-family browser is available for Playwright automation.</code>
+               Install one: <code>npx playwright install chromium</code>, or install Chrome,
+               Edge, Brave, or Chromium and a1 will find it. <code>a1 doctor --json</code> lists
+               every candidate it checked under <code>result.browserAutomation.candidates</code>.
+            </span>
+         </div>
+         <div class="route-row">
+            <strong>The scan hangs, then times out</strong>
+            <span>
+               <code>--timeout &lt;ms&gt;</code> bounds how long loading the target may take,
+               10000 ms by default. A route behind auth or a slow dev server needs a longer
+               timeout, or <code>--wait-for &lt;css&gt;</code> to wait for a specific element
+               instead of the page's own load event.
+            </span>
+         </div>
+      </div>
+   </section>
+
+   <section class="field-note" id="voiceover">
+      <div class="panel-head">
+         <p class="panel-kicker">macOS</p>
+         <h2>A command started VoiceOver by accident</h2>
+      </div>
+      <p>
+         <code>sr start</code> and <code>sr walk</code> default to VoiceOver on macOS when
+         <code>--sr</code> is not given and no session is active. If VoiceOver just took over
+         the screen, run <code>a1 sr stop</code> to end that session, then rerun the command
+         with <code>--sr virtual --allow-virtual</code>. This is worth adding to every script
+         and CI step; see <a href="/guides/ci#target">run in CI</a>.
+      </p>
+      <pre><code>a1 sr stop --json
+a1 sr walk http://localhost:3000/checkout --sr virtual --allow-virtual --json</code></pre>
+   </section>
+
+   <section class="panel" id="recording">
+      <div class="panel-head">
+         <p class="panel-kicker">Recording</p>
+         <h2>Recording problems</h2>
+      </div>
+      <p>
+         See <a href="/guides/recording#troubleshoot">record a session</a> for the full list:
+         screen recording permission belongs to the app running <code>a1</code>, not to
+         <code>a1</code> itself, the virtual target cannot record at all, and a recording that
+         starts empty means the session was stopped before the file finished writing.
+      </p>
+   </section>
+
+   <section class="panel" id="thin">
+      <div class="panel-head">
+         <p class="panel-kicker">Content</p>
+         <h2>An empty or thin result</h2>
+      </div>
+      <p>
+         Under 10 elements and 50 characters of text on the page adds a warning that a
+         single-page app may not have mounted. Load the route in a real browser first to confirm
+         it renders before trusting an empty <code>axe</code> or <code>tree</code> result.
+      </p>
+      <p>
+         Applicability's <code>not-detected</code> state has the same cause from a different
+         angle: it reads only the HTML the server returned, so content a client framework adds
+         after load produces no signal. See
+         <a href="/applicability#limits">what applicability does not tell you</a>.
+      </p>
+   </section>
+</DocShell>

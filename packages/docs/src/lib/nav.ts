@@ -33,6 +33,10 @@ export const docsLinks: DocSection[] = [
          { href: '/guides/agents', label: 'Test from an AI agent' },
          { href: '/guides/agent-skill', label: 'Install the agent skill' },
          { href: '/guides/recording', label: 'Record a session' },
+         { href: '/guides/violations', label: 'Understand a violation' },
+         { href: '/guides/scripting', label: 'Script the CLI' },
+         { href: '/guides/ci', label: 'Run in CI' },
+         { href: '/guides/troubleshooting', label: 'Troubleshooting' },
       ],
    },
    {

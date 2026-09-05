@@ -1,0 +1,171 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'envelope', label: 'The JSON envelope' },
+   { id: 'exit-codes', label: 'Exit codes' },
+   { id: 'shell', label: 'Shell scripts' },
+   { id: 'jq', label: 'Reading JSON with jq' },
+   { id: 'baseline', label: 'Accepting known findings' },
+   { id: 'stdin', label: 'No server needed' },
+];
+---
+
+<DocShell
+   title="Script the CLI"
+   summary="Every a1 command prints one JSON object with --json, and every command sets its exit code from the same rules. Read the envelope, check the exit code, and a1 fits into any shell script or CI step with no parsing beyond JSON."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="panel" id="envelope">
+      <div class="panel-head">
+         <p class="panel-kicker">Envelope</p>
+         <h2>One shape for every command</h2>
+      </div>
+      <p>
+         <code>--json</code> prints one object: <code>ok</code>, <code>command</code>,
+         <code>result</code> on success, <code>warnings</code>, <code>errors</code>, and
+         <code>meta</code>. Commands that resolve a page or a driver session add
+         <code>target</code>. <code>mcp</code> and <code>help-all</code> have no
+         <code>--json</code> option and print text only.
+      </p>
+      <pre><code>a1 axe http://localhost:3000 --level AA --json</code></pre>
+      <pre data-label="OUTPUT"><code>&#123;
+  "ok": true,
+  "command": &#123; "family": "axe", "subcommand": "axe", "version": "0.1.0", "wcagVersion": "2.2" &#125;,
+  "target": &#123; "kind": "url", "value": "http://localhost:3000/" &#125;,
+  "result": &#123; "violations": [], "passes": [], "incomplete": [], "inapplicable": [], "..." : "..." &#125;,
+  "warnings": [],
+  "errors": [],
+  "meta": &#123; "schemaVersion": "1", "startedAt": "...", "completedAt": "...", "durationMs": 842 &#125;
+&#125;</code></pre>
+      <p>
+         A failure keeps the same shape with <code>ok: false</code> and no
+         <code>result</code>. <code>errors</code> holds one or more entries with a
+         <code>code</code>, a <code>message</code>, and sometimes <code>details</code>.
+      </p>
+      <pre><code>a1 wcag show 9.9.9 --json</code></pre>
+      <pre data-label="OUTPUT"><code>&#123;
+  "ok": false,
+  "command": &#123; "family": "wcag", "subcommand": "show", "version": "0.1.0", "wcagVersion": "2.2" &#125;,
+  "warnings": [],
+  "errors": [
+    &#123; "code": "criterion-not-found", "message": "Criterion lookup failed for \"9.9.9\".", "details": &#123; "lookupKey": "9.9.9" &#125; &#125;
+  ],
+  "meta": &#123; "schemaVersion": "1", "startedAt": "...", "completedAt": "...", "durationMs": 13 &#125;
+&#125;</code></pre>
+      <p>
+         Check <code>ok</code>, not the exit code, when a command can succeed with a failed
+         check inside it. <code>a1 axe</code> keeps <code>ok: true</code> when violations
+         remain after <code>--fail-on</code> filtering. The verdict is
+         <code>result.verdict</code>, and the exit code carries it for a shell.
+      </p>
+   </section>
+
+   <section class="panel" id="exit-codes">
+      <div class="panel-head">
+         <p class="panel-kicker">Exit codes</p>
+         <h2>Five codes, one meaning each</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row"><strong>0</strong><span>The command ran and nothing it checked failed.</span></div>
+         <div class="route-row"><strong>2</strong><span>Usage error: a bad flag, a missing required argument, a command the target cannot run, or a verb run with no active <code>sr</code> session.</span></div>
+         <div class="route-row"><strong>3</strong><span>Environment error: the browser or the screen reader broker failed to start, a recording could not be written, or a required setup step is missing under <code>a1 doctor --strict</code>.</span></div>
+         <div class="route-row"><strong>4</strong><span>A check failed: an <code>a1 axe</code> or <code>a1 audit</code> violation past <code>--fail-on</code>, or a failed <code>sr find</code>, <code>sr goto</code>, <code>sr wait --for</code>, <code>sr expect</code>, or <code>sr batch</code> step.</span></div>
+         <div class="route-row"><strong>5</strong><span>An internal error a11ied did not classify. Worth a bug report.</span></div>
+      </div>
+      <p>
+         Exit code 4 is the one to fail a build on. It means the command ran to completion
+         and found something wrong, not that the command itself is broken.
+      </p>
+      <pre><code>a1 axe http://localhost:3000 --level AA --fail-on serious
+echo "exit code: $?"</code></pre>
+   </section>
+
+   <section class="split panel" id="shell">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Shell</p>
+            <h2>Use the exit code directly</h2>
+         </div>
+         <p>
+            A CI step or a pre-commit hook needs nothing beyond the exit code. No JSON
+            parsing is required to fail a build.
+         </p>
+         <pre><code>#!/usr/bin/env bash
+set -e
+
+a1 axe http://localhost:3000/checkout --level AA --fail-on serious</code></pre>
+         <p>
+            For a one-line result from a navigation verb, <code>--phrase</code> prints the
+            last spoken phrase alone, with no envelope to parse. It needs an active session;
+            <code>sr start</code> is the one command that takes <code>--sr</code> and
+            <code>--allow-virtual</code>.
+         </p>
+         <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout --json
+a1 sr next --phrase</code></pre>
+         <pre data-label="OUTPUT"><code>heading, Checkout, level 1</code></pre>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Errors go to stderr</div>
+         <p class="aside-note">
+            Both text and JSON output print to stdout. A human-readable error line prints to
+            stderr alongside the JSON, so <code>a1 ... --json 2&gt;/dev/null</code> is safe to
+            pipe into a JSON parser.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="jq">
+      <div class="panel-head">
+         <p class="panel-kicker">jq</p>
+         <h2>Read the envelope with jq</h2>
+      </div>
+      <pre><code>a1 axe http://localhost:3000 --level AA --json 2>/dev/null \
+  | jq -r '.result.violations[] | "\(.id) (\(.impact))"'</code></pre>
+      <pre data-label="OUTPUT"><code>button-name (critical)</code></pre>
+      <p>
+         <code>result.verdict</code> is the pass or fail decision after
+         <code>--fail-on</code> and <code>--baseline</code>. Read it instead of counting
+         <code>violations</code> yourself when a baseline is in play.
+      </p>
+      <pre><code>a1 audit http://localhost:3000 --json 2>/dev/null | jq -r '.result.nextCommands[]'</code></pre>
+      <pre data-label="OUTPUT"><code>a1 wcag rule button-name</code></pre>
+   </section>
+
+   <section class="panel" id="baseline">
+      <div class="panel-head">
+         <p class="panel-kicker">Baseline</p>
+         <h2>Accept today's findings, fail on new ones</h2>
+      </div>
+      <p>
+         <code>axe</code> and <code>audit</code> both take <code>--baseline &lt;file&gt;</code>
+         and <code>--update-baseline</code>. Adopting a11ied on an existing site usually
+         means accepting the current findings once, then failing only on regressions.
+      </p>
+      <pre><code>a1 axe http://localhost:3000 --level AA --baseline a11y-baseline.json --update-baseline
+git add a11y-baseline.json</code></pre>
+      <p>
+         Commit the file. Every later run without <code>--update-baseline</code> compares
+         against it, keyed by rule id and node target, and exits 4 only for a finding the
+         baseline does not already list.
+      </p>
+      <pre><code>a1 axe http://localhost:3000 --level AA --baseline a11y-baseline.json</code></pre>
+   </section>
+
+   <section class="field-note" id="stdin">
+      <div class="panel-head">
+         <p class="panel-kicker">No server</p>
+         <h2>Check a component with no dev server running</h2>
+      </div>
+      <p>
+         <code>axe</code>, <code>tree</code>, and <code>audit</code> take a file path,
+         <code>-</code> for HTML on stdin, or <code>--html</code> for inline markup, so a
+         pre-commit hook can check a component file directly.
+      </p>
+      <pre><code>echo '&lt;button&gt;&lt;/button&gt;' | a1 axe - --json
+a1 axe --html '&lt;img src="logo.png"&gt;' --json
+a1 axe src/components/Dialog.html --json</code></pre>
+   </section>
+</DocShell>

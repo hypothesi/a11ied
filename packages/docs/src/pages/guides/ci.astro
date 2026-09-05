@@ -1,0 +1,147 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'target', label: 'Use the virtual target' },
+   { id: 'browser', label: 'Install a browser' },
+   { id: 'preflight', label: 'Check the runner first' },
+   { id: 'workflow', label: 'A GitHub Actions job' },
+   { id: 'baseline', label: 'Adopting on an existing site' },
+   { id: 'sr', label: 'Screen reader checks in CI' },
+];
+---
+
+<DocShell
+   title="Run in CI"
+   summary="A CI runner has no VoiceOver or NVDA, so every a1 command that touches a screen reader needs --sr virtual --allow-virtual. axe, tree, and audit need a Chromium-family browser, and --fail-on plus --baseline turn a scan into a build gate."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="panel" id="target">
+      <div class="panel-head">
+         <p class="panel-kicker">Screen reader</p>
+         <h2>Use the virtual target</h2>
+      </div>
+      <p>
+         <code>voiceover</code> only exists on macOS and <code>nvda</code> only on Windows, and
+         neither runs unattended on a CI runner. Pass <code>--sr virtual --allow-virtual</code>
+         on every <code>sr start</code> or <code>sr walk</code> call in CI. Without a target,
+         <code>sr start</code> and <code>sr walk</code> default to the platform reader first,
+         which on a macOS runner means VoiceOver, so leaving <code>--sr</code> off is not a safe
+         default here the way it can be on a developer's own machine.
+      </p>
+      <pre><code>a1 sr walk http://localhost:3000/checkout --sr virtual --allow-virtual --json</code></pre>
+   </section>
+
+   <section class="split panel" id="browser">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Browser</p>
+            <h2>axe, tree, and audit need Chromium</h2>
+         </div>
+         <p>
+            These three commands run the page in a real browser. A CI image with no browser
+            installed needs one added before the job runs them.
+         </p>
+         <pre><code>npx playwright install chromium</code></pre>
+         <p>
+            The virtual reader also needs this browser when a session opens a URL, since the
+            headless Chromium page is what makes page scripts, live regions, and dialogs work.
+            With no Chromium-family browser at all, the virtual target falls back to jsdom and
+            page scripts do not run, which changes what a walk or an axe run can see.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">wcag needs nothing</div>
+         <p class="aside-note">
+            <code>a1 wcag</code> reads data bundled with the package. It starts no browser and
+            makes no network request, so it needs no setup step in CI.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="preflight">
+      <div class="panel-head">
+         <p class="panel-kicker">Preflight</p>
+         <h2>Check the runner before the real work</h2>
+      </div>
+      <p>
+         <code>a1 doctor --strict</code> exits 3 while a required step is missing, and prints
+         the exact command for each one under Action items. Run it as an early step so a missing
+         browser fails fast with a clear fix instead of a confusing timeout three steps later.
+      </p>
+      <pre><code>a1 doctor --strict</code></pre>
+   </section>
+
+   <section class="panel" id="workflow">
+      <div class="panel-head">
+         <p class="panel-kicker">Example</p>
+         <h2>A GitHub Actions job</h2>
+      </div>
+      <pre><code>jobs:
+  accessibility:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - run: npm ci
+      - run: npx playwright install chromium
+
+      - name: Start the app
+        run: npm run start &
+
+      - run: npx a1 doctor --strict
+      - run: npx a1 axe http://localhost:3000/checkout --level AA --fail-on serious
+      - run: npx a1 sr walk http://localhost:3000/checkout --sr virtual --allow-virtual --out walk.md
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: a11y-walk
+          path: walk.md</code></pre>
+      <p>
+         <code>axe</code> exits 4 on a violation at or above <code>--fail-on</code>, which fails
+         the step and the job. <code>sr walk --out</code> writes the transcript either way, and
+         <code>if: always()</code> uploads it so a failure includes the announcement order, not
+         just the axe result.
+      </p>
+   </section>
+
+   <section class="panel" id="baseline">
+      <div class="panel-head">
+         <p class="panel-kicker">Existing sites</p>
+         <h2>Start from where the site is today</h2>
+      </div>
+      <p>
+         Adding <code>a1 axe</code> to CI on a site with existing findings means the first run
+         fails on all of them. <a href="/guides/scripting#baseline">Commit a baseline</a> once,
+         so CI only fails on a new violation, and pay down the accepted ones on your own
+         schedule.
+      </p>
+      <pre><code>a1 axe http://localhost:3000/checkout --level AA --baseline a11y-baseline.json</code></pre>
+   </section>
+
+   <section class="field-note" id="sr">
+      <div class="panel-head">
+         <p class="panel-kicker">Screen reader checks</p>
+         <h2>Assert on the announcement order, not just axe</h2>
+      </div>
+      <p>
+         <code>sr goto</code>, <code>sr find</code>, and <code>sr expect</code> all exit 4 on a
+         miss, so a step that checks a specific announcement fails the job the same way a failed
+         axe run does.
+      </p>
+      <pre><code>a1 sr start http://localhost:3000/checkout --sr virtual --allow-virtual --json
+a1 sr goto --role button --name "Pay now"
+a1 sr expect "button, Pay now"
+a1 sr stop --json</code></pre>
+      <p>
+         For a test suite instead of shell steps, <a href="/guides/testing">write screen reader
+         tests</a> with <code>a11ied/test</code> or <code>a11ied/vitest</code> and run them
+         through the same <code>npm test</code> step as the rest of the suite.
+      </p>
+   </section>
+</DocShell>
