@@ -5,7 +5,8 @@ import { registerInspectCommands } from './commands/inspect.js';
 import { registerAxeCommand } from './commands/axe.js';
 import { registerSetupCommand } from './commands/setup.js';
 import { registerWcagCommands } from './commands/wcag.js';
-import { CLI_VERSION, JSON_INDENT } from './lib/constants.js';
+import { CLI_VERSION } from './lib/constants.js';
+import type { CommandExecution } from './lib/helpers.js';
 import { renderFullHelp } from './lib/help.js';
 import { styleCommandText } from './lib/text.js';
 
@@ -21,16 +22,29 @@ function registerDoctorCommand(program: Command): void {
          `Exit with code ${cliExitCodes.environment} when a required setup step is missing.`,
       )
       .action(async (options: { json?: boolean; strict?: boolean }) => {
-         const [{ createDoctorReport, renderDoctorText }, { doctorTextStyle }] =
-            await Promise.all([import('#core'), import('./lib/format.js')]);
-         const report = createDoctorReport();
-         const output = options.json
-            ? JSON.stringify(report, undefined, JSON_INDENT)
-            : renderDoctorText(report, doctorTextStyle);
-         process.stdout.write(`${output}\n`);
-         if (options.strict && !report.ready) {
-            process.exitCode = cliExitCodes.environment;
-         }
+         const [{ executeCommand }, { createDoctorReport }, renderers] = await Promise.all(
+            [import('./lib/execute.js'), import('#core'), import('./renderers/index.js')],
+         );
+
+         await executeCommand(
+            {
+               family: 'doctor',
+               subcommand: 'doctor',
+               wcagVersion: undefined,
+               json: options.json,
+            },
+            () => {
+               const report = createDoctorReport();
+               const execution: CommandExecution = {
+                  result: report as unknown as Record<string, unknown>,
+               };
+               if (options.strict && !report.ready) {
+                  execution.exitCode = cliExitCodes.environment;
+               }
+               return execution;
+            },
+            renderers.renderDoctorEnvelopeText,
+         );
       });
 }
 

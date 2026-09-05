@@ -1,12 +1,26 @@
 import type { Command } from 'commander';
-import { cliExitCodes } from '#contracts';
+import { cliExitCodes, type DoctorReport } from '#contracts';
 import type * as Core from '#core';
 import type { GuidepupSetupStep, GuidepupSetupStepResult } from '#core';
-import { code, dim, doctorTextStyle, errorLine, heading } from '../lib/format.js';
+import { code, dim, doctorTextStyle, heading } from '../lib/format.js';
+import type { CommandExecution } from '../lib/helpers.js';
 
 interface SetupOptions {
+   json?: boolean;
    skipSetup?: boolean;
    skipInstall?: boolean;
+}
+
+interface SetupStepOutcome {
+   id: string;
+   label: string;
+   command: string;
+   exitCode: number;
+}
+
+interface SetupResult {
+   steps: SetupStepOutcome[];
+   report?: DoctorReport;
 }
 
 function write(text: string): void {
@@ -20,68 +34,79 @@ function announceStep(step: GuidepupSetupStep, index: number, total: number): vo
    write('');
 }
 
-function reportFailedStep(failed: GuidepupSetupStepResult): void {
-   write('');
-   write(
-      errorLine(
-         'setup-step-failed',
-         `${failed.step.command} exited with code ${failed.exitCode}. Fix the error above and run a1 setup again.`,
-      ),
-   );
-   process.exitCode = cliExitCodes.environment;
+function toStepOutcome(result: GuidepupSetupStepResult): SetupStepOutcome {
+   return {
+      id: result.step.id,
+      label: result.step.label,
+      command: result.step.command,
+      exitCode: result.exitCode,
+   };
 }
 
-async function listSteps(
-   options: SetupOptions,
-): Promise<GuidepupSetupStep[] | undefined> {
-   const [core, { normalizeError }] = await Promise.all([
-      import('#core'),
-      import('../lib/helpers.js'),
-   ]);
+/** Runs the Guidepup setup steps, then the doctor check if every step passed. */
+async function runSetup(core: typeof Core, options: SetupOptions): Promise<SetupResult> {
+   const steps = core.listGuidepupSetupSteps(options);
 
-   try {
-      return core.listGuidepupSetupSteps(options);
-   } catch (error) {
-      const normalized = normalizeError(error);
-      write(
-         errorLine(
-            normalized.errors[0]?.code ?? 'unknown',
-            normalized.errors[0]?.message ?? '',
-         ),
-      );
-      process.exitCode = normalized.exitCode;
-      return undefined;
-   }
-}
-
-function printDoctorReport(core: typeof Core): void {
-   const report = core.createDoctorReport();
-   write('');
-   write(core.renderDoctorText(report, doctorTextStyle));
-   if (!report.ready) {
-      process.exitCode = cliExitCodes.environment;
-   }
-}
-
-async function handleSetupAction(options: SetupOptions): Promise<void> {
-   const core = await import('#core');
-   const steps = await listSteps(options);
-   if (!steps) {
-      return;
-   }
-
-   if (steps.length === 0) {
+   if (steps.length === 0 && !options.json) {
       write(dim('Every setup step was skipped. Running doctor only.'));
    }
 
-   const results = await core.runGuidepupSetup(steps, { onStepStart: announceStep });
-   const failed = results.find((result) => result.exitCode !== 0);
-   if (failed) {
-      reportFailedStep(failed);
-      return;
+   const hooks = options.json ? {} : { onStepStart: announceStep };
+   const results = await core.runGuidepupSetup(steps, hooks);
+   const outcomes = results.map((result) => toStepOutcome(result));
+   const failedStep = outcomes.find((outcome) => outcome.exitCode !== 0);
+   if (failedStep) {
+      return { steps: outcomes };
    }
 
-   printDoctorReport(core);
+   return { steps: outcomes, report: core.createDoctorReport() };
+}
+
+function findFailedStep(setupResult: SetupResult): SetupStepOutcome | undefined {
+   return setupResult.steps.find((step) => step.exitCode !== 0);
+}
+
+function buildExecution(setupResult: SetupResult): CommandExecution {
+   const execution: CommandExecution = {
+      result: setupResult as unknown as Record<string, unknown>,
+   };
+   const isEnvironmentFailure =
+      findFailedStep(setupResult) !== undefined ||
+      (setupResult.report !== undefined && !setupResult.report.ready);
+   if (isEnvironmentFailure) {
+      execution.exitCode = cliExitCodes.environment;
+   }
+   return execution;
+}
+
+function renderSetupResultText(core: typeof Core, setupResult: SetupResult): string {
+   const failedStep = findFailedStep(setupResult);
+   if (failedStep) {
+      return `${failedStep.command} exited with code ${failedStep.exitCode}. Fix the error above and run a1 setup again.`;
+   }
+   if (setupResult.report) {
+      return core.renderDoctorText(setupResult.report, doctorTextStyle);
+   }
+   return dim('No setup steps ran.');
+}
+
+async function handleSetupAction(options: SetupOptions): Promise<void> {
+   const [{ executeCommand }, core] = await Promise.all([
+      import('../lib/execute.js'),
+      import('#core'),
+   ]);
+
+   await executeCommand(
+      {
+         family: 'setup',
+         subcommand: 'setup',
+         wcagVersion: undefined,
+         json: options.json,
+      },
+      async () => buildExecution(await runSetup(core, options)),
+      (envelope) =>
+         renderSetupResultText(core, envelope.result as unknown as SetupResult),
+   );
 }
 
 export function registerSetupCommand(program: Command): void {
@@ -90,6 +115,7 @@ export function registerSetupCommand(program: Command): void {
       .description(
          'Run the Guidepup setup and install commands this host needs for real screen reader sessions, then re-check with doctor.',
       )
+      .option('--json', 'Print JSON instead of human-readable text.')
       .option('--skip-setup', 'Skip the OS permission step (macOS only).')
       .option('--skip-install', 'Skip downloading the screen reader assets.')
       .action(async (options: SetupOptions) => {

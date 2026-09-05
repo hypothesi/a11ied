@@ -79,7 +79,10 @@ export const cliCommandFamilySchema = z.enum([
    'inspect',
    'sr',
    'axe',
+   'tree',
+   'audit',
    'doctor',
+   'setup',
    'mcp',
 ]);
 export type CliCommandFamily = z.infer<typeof cliCommandFamilySchema>;

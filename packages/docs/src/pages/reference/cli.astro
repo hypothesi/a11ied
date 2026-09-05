@@ -233,6 +233,7 @@ a1 inspect criterion 3.3.8 --url http://localhost:3000 --json</code></pre>
 a1 doctor --json
 a1 doctor --strict
 a1 setup
+a1 setup --json
 a1 setup --skip-setup
 a1 mcp
 a1 help-all</code></pre>
@@ -244,6 +245,7 @@ a1 help-all</code></pre>
          exist on another OS get one dim line instead of instructions. On macOS it also runs a short
          screen recording probe for the current host app. The exit code is 0 unless you pass
          <code>--strict</code>, which exits with 3 while a required step is missing.
+         <code>--json</code> wraps the report in the standard envelope, under <code>result</code>.
       </p>
       <p>
          <code>setup</code> runs the Guidepup commands for this host in order,
@@ -252,7 +254,9 @@ a1 help-all</code></pre>
          where <code>@guidepup/guidepup</code> resolves. Each command keeps the terminal while it
          runs. It stops at the first failure, then prints the <code>doctor</code> report and exits
          with 3 when a required step is still missing. <code>--skip-setup</code> and
-         <code>--skip-install</code> drop one of the two steps.
+         <code>--skip-install</code> drop one of the two steps. <code>--json</code> replaces the
+         progress lines with an envelope carrying each step's exit code and the closing doctor
+         report under <code>result</code>.
       </p>
       <p>
          <code>mcp</code> takes no options and speaks stdio. <code>help-all</code> prints every
@@ -273,7 +277,7 @@ a1 help-all</code></pre>
       </p>
       <p>
          <code>a1 doctor --json</code> lists every candidate it found under
-         <code>browserAutomation.candidates</code>, with the executable path for each.
+         <code>result.browserAutomation.candidates</code>, with the executable path for each.
       </p>
    </section>
 </DocShell>

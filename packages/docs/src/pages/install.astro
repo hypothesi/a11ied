@@ -77,10 +77,10 @@ Environment
          The first line is the verdict. When a check fails, it switches to <code>✗</code> with the
          number of steps left, and an <strong>Action items</strong> list with the exact commands
          appears right below it. Targets that only exist on another OS get one dim line.
-         <code>a1 doctor --json</code> returns the same report as an object with
-         <code>ready</code>, the ordered <code>actions</code>, and each target's
-         <code>checks</code>. <code>a1 doctor --strict</code> exits with code 3 while a required
-         step is missing, which makes it usable as a CI gate.
+         <code>a1 doctor --json</code> wraps the same report in the standard envelope, under
+         <code>result</code>, with <code>ready</code>, the ordered <code>actions</code>, and each
+         target's <code>checks</code>. <code>a1 doctor --strict</code> exits with code 3 while a
+         required step is missing, which makes it usable as a CI gate.
       </p>
    </section>
 
@@ -131,7 +131,8 @@ Environment
       <p>
          Add <code>--skip-setup</code> or <code>--skip-install</code> to run one step only. The
          command exits with code 3 when a step fails or <code>doctor</code> still reports a
-         required step.
+         required step. <code>a1 setup --json</code> wraps the step outcomes and the closing
+         doctor report in the standard envelope instead of printing progress lines.
       </p>
       <p>
          To run Guidepup by hand instead: <code>install</code> reads the asset list from
