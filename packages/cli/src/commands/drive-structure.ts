@@ -61,7 +61,7 @@ export function registerFindCommand(driveCommand: Command): void {
       driveCommand
          .command('find <text>')
          .description(
-            `Move the cursor to the next place the text appears. Exits 4 when it is not found.`,
+            `Move the cursor to the next place the text appears. Exits 4 when it is not found. Needs an active session; run "a1 sr start --sr virtual --allow-virtual" first for the simulated reader instead of the VoiceOver default.`,
          ),
    ).action(async (text: string, options: DriveActionOptions) => {
       const { executeDriveActionCommand, renderDriveReadText } = await loadRunner();

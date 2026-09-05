@@ -90,7 +90,7 @@ export function registerWalkCommand(driveCommand: Command): void {
             driveCommand
                .command('walk [url]')
                .description(
-                  'Read the whole page top to bottom and print the transcript. Starts a session when none is active; with a URL, opens that page first.',
+                  'Read the whole page top to bottom and print the transcript. Starts a session when none is active, defaulting to VoiceOver; with a URL, opens that page first. Pass --sr virtual --allow-virtual for the simulated reader instead.',
                ),
          ),
       )

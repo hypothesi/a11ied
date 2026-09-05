@@ -135,7 +135,7 @@ export function registerBatchCommand(driveCommand: Command): void {
          .option('--continue', 'Keep going after a failed expect or action.')
          .addHelpText(
             'after',
-            `\nEach line is one action request, the same shape the MCP driver_action tool takes, or an expect line:\n${BATCH_EXAMPLES}\n\nBlank lines and lines starting with # are skipped. The exit code is 4 when any expect failed, else the first failed action's code, else 0.\n`,
+            `\nEach line is one action request, the same shape the MCP sr_action tool takes, or an expect line:\n${BATCH_EXAMPLES}\n\nBlank lines and lines starting with # are skipped. The exit code is 4 when any expect failed, else the first failed action's code, else 0.\n`,
          ),
    ).action(async (file: string | undefined, options: BatchOptions) => {
       const [{ executeCommand }, renderers] = await Promise.all([

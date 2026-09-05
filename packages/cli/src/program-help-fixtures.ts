@@ -123,25 +123,41 @@ export const driveRunHelpCases: HelpCase[] = [
         escape [options]                 Press Escape to dismiss a menu, dialog, or
                                          interaction.
         find [options] <text>            Move the cursor to the next place the text
-                                         appears. Exits 4 when it is not found.
+                                         appears. Exits 4 when it is not found. Needs
+                                         an active session; run "a1 sr start --sr
+                                         virtual --allow-virtual" first for the
+                                         simulated reader instead of the VoiceOver
+                                         default.
         table [options] <move>           Move inside the table the cursor is in, or
                                          read a header: next-cell, previous-cell,
                                          next-row, previous-row, next-column,
                                          previous-column, row-header, column-header.
         goto [options]                   Step forward until the current item has the
                                          given role, name, or both. Exits 4 when
-                                         nothing matches.
+                                         nothing matches. Needs an active session; run
+                                         "a1 sr start --sr virtual --allow-virtual"
+                                         first for the simulated reader instead of the
+                                         VoiceOver default.
         elements [options] <kind>        The rotor: move to the top, then list every
                                          element of one kind as the reader announces
                                          it. Kinds: heading, link, landmark, control,
                                          button, table, list, graphic, region,
-                                         form-field.
+                                         form-field. Needs an active session; run "a1
+                                         sr start --sr virtual --allow-virtual" first
+                                         for the simulated reader instead of the
+                                         VoiceOver default.
         read-all [options]               Say-all as a transcript: step item by item
                                          from the cursor to the end of the document,
-                                         bounded by --max.
+                                         bounded by --max. Needs an active session;
+                                         run "a1 sr start --sr virtual
+                                         --allow-virtual" first for the simulated
+                                         reader instead of the VoiceOver default.
         walk [options] [url]             Read the whole page top to bottom and print
                                          the transcript. Starts a session when none is
-                                         active; with a URL, opens that page first.
+                                         active, defaulting to VoiceOver; with a URL,
+                                         opens that page first. Pass --sr virtual
+                                         --allow-virtual for the simulated reader
+                                         instead.
         press [options] <chord...>       Press key chords in order, one chord per
                                          argument.
         type [options] <text>            Type text through the active target.
