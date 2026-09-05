@@ -9,6 +9,7 @@ import {
    type NormalizedCriterion,
 } from '@a11ied/contracts';
 import {
+   describeResolvedTarget,
    listWcagCriteria,
    resolveDefaultTarget,
    resolveDocumentTarget,
@@ -151,15 +152,16 @@ export async function resolveExecutionTarget(
 ): Promise<ResolvedExecutionTarget> {
    const targetInput = buildTargetInput(input);
    const resolved = await resolveDocumentTarget(targetInput);
+   const resolvedUrl = describeResolvedTarget(resolved);
 
    return {
-      resolvedUrl: resolved.resolvedUrl,
+      resolvedUrl,
       reportTarget: {
          kind: 'url',
          value: resolved.target.value,
-         resolvedUrl: resolved.resolvedUrl,
+         resolvedUrl,
       },
-      html: resolved.html,
+      html: await resolved.readHtml(),
    };
 }
 

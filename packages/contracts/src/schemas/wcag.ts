@@ -58,7 +58,7 @@ export const axeSelectionSchema = z.discriminatedUnion('kind', [
 export type AxeSelection = z.infer<typeof axeSelectionSchema>;
 
 export const axeRunResultSchema = z.object({
-   url: z.string().url(),
+   url: z.string().min(1),
    wcagVersion: wcagVersionSchema,
    selection: axeSelectionSchema,
    ruleIds: z.array(z.string()),

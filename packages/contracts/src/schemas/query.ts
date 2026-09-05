@@ -59,8 +59,11 @@ export const applicabilitySignalSchema = z.object({
 });
 export type ApplicabilitySignal = z.infer<typeof applicabilitySignalSchema>;
 
+export const documentTargetKindSchema = z.enum(['url', 'file', 'stdin', 'html', 'app']);
+export type DocumentTargetKind = z.infer<typeof documentTargetKindSchema>;
+
 export const targetReferenceSchema = z.object({
-   kind: z.literal('url'),
+   kind: documentTargetKindSchema,
    value: z.string(),
 });
 export type TargetReference = z.infer<typeof targetReferenceSchema>;

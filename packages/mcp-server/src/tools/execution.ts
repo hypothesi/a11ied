@@ -4,7 +4,7 @@ import {
    wcagLevelSchema,
    wcagVersionSchema,
 } from '@a11ied/contracts';
-import { runAxe } from '@a11ied/core';
+import { runAxe, type DocumentLoad } from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
@@ -55,30 +55,19 @@ interface AxeResolveArgs {
 async function resolveAxeResult(
    args: AxeResolveArgs,
 ): Promise<z.infer<typeof axeRunResultSchema>> {
+   const load: DocumentLoad = { kind: 'goto', url: args.resolvedUrl };
    if (args.criterion) {
       return axeRunResultSchema.parse(
-         await runAxe(args.resolvedUrl, {
-            url: args.resolvedUrl,
-            wcagVersion: args.version,
-            criterion: args.criterion,
-         }),
+         await runAxe(load, { wcagVersion: args.version, criterion: args.criterion }),
       );
    }
    if (args.level) {
       return axeRunResultSchema.parse(
-         await runAxe(args.resolvedUrl, {
-            url: args.resolvedUrl,
-            wcagVersion: args.version,
-            level: args.level,
-         }),
+         await runAxe(load, { wcagVersion: args.version, level: args.level }),
       );
    }
    return axeRunResultSchema.parse(
-      await runAxe(args.resolvedUrl, {
-         url: args.resolvedUrl,
-         wcagVersion: args.version,
-         ruleIds: args.ruleIds ?? [],
-      }),
+      await runAxe(load, { wcagVersion: args.version, ruleIds: args.ruleIds ?? [] }),
    );
 }
 

@@ -22,9 +22,12 @@ function registerDoctorCommand(program: Command): void {
          `Exit with code ${cliExitCodes.environment} when a required setup step is missing.`,
       )
       .action(async (options: { json?: boolean; strict?: boolean }) => {
-         const [{ executeCommand }, { createDoctorReport }, renderers] = await Promise.all(
-            [import('./lib/execute.js'), import('#core'), import('./renderers/index.js')],
-         );
+         const [{ executeCommand }, { createDoctorReport }, renderers] =
+            await Promise.all([
+               import('./lib/execute.js'),
+               import('#core'),
+               import('./renderers/index.js'),
+            ]);
 
          await executeCommand(
             {

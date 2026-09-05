@@ -216,7 +216,8 @@ export async function inspectApplicableTarget(
 ): Promise<InspectApplicableTargetResult> {
    const parsedVersion = parseWcagVersion(version);
    const resolved = await resolveDocumentTarget(targetInput);
-   const input = deriveApplicabilityInputFromHtml(resolved.resolvedUrl, resolved.html, {
+   const html = await resolved.readHtml();
+   const input = deriveApplicabilityInputFromHtml(resolved.target.value, html, {
       target: resolved.target,
       metadata: resolved.metadata,
       userHints: resolved.userHints,
@@ -265,7 +266,8 @@ export async function inspectCriterionTarget(
    }
 
    const resolved = await resolveDocumentTarget(targetInput);
-   const input = deriveApplicabilityInputFromHtml(resolved.resolvedUrl, resolved.html, {
+   const html = await resolved.readHtml();
+   const input = deriveApplicabilityInputFromHtml(resolved.target.value, html, {
       target: resolved.target,
       metadata: resolved.metadata,
       userHints: resolved.userHints,

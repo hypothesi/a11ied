@@ -50,7 +50,7 @@ function expectTaskFirstEntryPoints(homePage: string): void {
    expect(homePage).toContain('/targets');
    expect(homePage).toContain('/guides/agent-skill');
    expect(homePage).toContain('a1 doctor');
-   expect(homePage).toContain('a1 axe --url');
+   expect(homePage).toContain('a1 axe http://localhost:3000');
    expect(homePage).toContain('a1 sr start');
    expect(homePage).toContain('a1 wcag 2.4.3');
 }

@@ -6,8 +6,9 @@ import {
 } from '@a11ied/contracts';
 import axe from 'axe-core';
 
+import { withLoadedPage } from '../browser/shared-browser.js';
 import { CliUsageError } from '../errors/cli-errors.js';
-import { withLoadedPage } from '../browser/helper.js';
+import type { DocumentLoad } from '../targets/parse.js';
 import {
    resolveCriterionSelection,
    resolveAllSelection,
@@ -18,35 +19,12 @@ import {
 const LOW_CONTENT_NODE_THRESHOLD = 10;
 const LOW_CONTENT_TEXT_THRESHOLD = 50;
 
-export type AxeRunOptions =
-   | {
-        url: string;
-        wcagVersion: string;
-        criterion?: undefined;
-        level?: undefined;
-        ruleIds?: undefined;
-     }
-   | {
-        url: string;
-        wcagVersion: string;
-        criterion: string;
-        level?: undefined;
-        ruleIds?: undefined;
-     }
-   | {
-        url: string;
-        wcagVersion: string;
-        criterion?: undefined;
-        level: string;
-        ruleIds?: undefined;
-     }
-   | {
-        url: string;
-        wcagVersion: string;
-        criterion?: undefined;
-        level?: undefined;
-        ruleIds: string[];
-     };
+export type AxeRunOptions = { wcagVersion: string; timeoutMs?: number | undefined } & (
+   | { criterion?: undefined; level?: undefined; ruleIds?: undefined }
+   | { criterion: string; level?: undefined; ruleIds?: undefined }
+   | { criterion?: undefined; level: string; ruleIds?: undefined }
+   | { criterion?: undefined; level?: undefined; ruleIds: string[] }
+);
 
 interface RawAxeNode {
    target?: string[];
@@ -85,8 +63,26 @@ interface CachedAxeResult {
 
 const axeResultCache = new Map<string, CachedAxeResult>();
 
-function buildAxeCacheKey(url: string, wcagVersion: WcagVersion): string {
-   return `${url}::${wcagVersion}`;
+/** Describes a load target for reporting: the URL it navigated to, or a fixed label. */
+function describeLoad(load: DocumentLoad): string {
+   if (load.kind === 'goto') {
+      return load.url;
+   }
+   return 'inline-html';
+}
+
+/**
+ * Builds a cache key for a load target, or undefined when the result should not be
+ * cached.
+ */
+function buildAxeCacheKey(
+   load: DocumentLoad,
+   wcagVersion: WcagVersion,
+): string | undefined {
+   if (load.kind === 'html') {
+      return undefined;
+   }
+   return `${load.url}::${wcagVersion}`;
 }
 
 function isSuperset(haystack: string[], needles: string[]): boolean {
@@ -117,10 +113,13 @@ function filterAxeResult(
 }
 
 function getCachedAxeResult(args: {
-   cacheKey: string;
+   cacheKey: string | undefined;
    ruleIds: string[];
    selection: AxeRunResult['selection'];
 }): AxeRunResult | undefined {
+   if (!args.cacheKey) {
+      return undefined;
+   }
    const cached = axeResultCache.get(args.cacheKey);
    if (cached && isSuperset(cached.ruleIds, args.ruleIds)) {
       return filterAxeResult(cached.result, args.ruleIds, args.selection);
@@ -146,7 +145,7 @@ function normalizeRule(rule: RawAxeRule): AxeRuleResult {
 }
 
 function buildParsedAxeResult(args: {
-   url: string;
+   reportUrl: string;
    wcagVersion: WcagVersion;
    selection: AxeRunResult['selection'];
    ruleIds: string[];
@@ -154,7 +153,7 @@ function buildParsedAxeResult(args: {
    warnings?: string[];
 }): AxeRunResult {
    return axeRunResultSchema.parse({
-      url: args.url,
+      url: args.reportUrl,
       wcagVersion: args.wcagVersion,
       selection: args.selection,
       ruleIds: args.ruleIds,
@@ -167,10 +166,13 @@ function buildParsedAxeResult(args: {
 }
 
 function updateAxeCache(args: {
-   cacheKey: string;
+   cacheKey: string | undefined;
    ruleIds: string[];
    result: AxeRunResult;
 }): void {
+   if (!args.cacheKey) {
+      return;
+   }
    const cached = axeResultCache.get(args.cacheKey);
    if (!cached || isSuperset(args.ruleIds, cached.ruleIds)) {
       axeResultCache.set(args.cacheKey, { ruleIds: args.ruleIds, result: args.result });
@@ -193,14 +195,6 @@ function parseWcagVersion(version: string): WcagVersion {
    );
 }
 
-function parseAxeUrl(url: string): URL {
-   try {
-      return new URL(url);
-   } catch {
-      throw new CliUsageError('invalid-url', `URL "${url}" is invalid.`, { url });
-   }
-}
-
 function resolveAxeSelection(
    options: AxeRunOptions,
    wcagVersion: WcagVersion,
@@ -220,71 +214,86 @@ function resolveAxeSelection(
    return resolveAllSelection(wcagVersion);
 }
 
-async function executeAxeScan(parsedUrl: URL, ruleIds: string[]): Promise<AxeScanResult> {
-   return withLoadedPage(parsedUrl.toString(), async (page) => {
-      await page.addScriptTag({ content: axeScriptSource });
+async function executeAxeScan(
+   load: DocumentLoad,
+   ruleIds: string[],
+   timeoutMs: number | undefined,
+): Promise<AxeScanResult> {
+   return withLoadedPage(
+      load,
+      async (page) => {
+         await page.addScriptTag({ content: axeScriptSource });
 
-      return await page.evaluate(
-         async ({ values, nodeThreshold, textThreshold }) => {
-            const axeRef = (
-               globalThis as typeof globalThis & {
-                  axe: {
-                     run: (context: Document, options: unknown) => Promise<RawAxeResults>;
-                  };
+         return await page.evaluate(
+            async ({ values, nodeThreshold, textThreshold }) => {
+               const axeRef = (
+                  globalThis as typeof globalThis & {
+                     axe: {
+                        run: (
+                           context: Document,
+                           options: unknown,
+                        ) => Promise<RawAxeResults>;
+                     };
+                  }
+               ).axe;
+
+               const warnings: string[] = [];
+               const visibleNodes = document.body.querySelectorAll(
+                  ':not(script):not(style):not(link):not(meta)',
+               ).length;
+               const textLength = (document.body.textContent ?? '').trim().length;
+               if (visibleNodes < nodeThreshold && textLength < textThreshold) {
+                  warnings.push(
+                     `Low content detected (${visibleNodes} visible elements, ${textLength} characters). ` +
+                        'This page may be an unmounted SPA shell. axe-core results may be incomplete or misleading.',
+                  );
                }
-            ).axe;
 
-            const warnings: string[] = [];
-            const visibleNodes = document.body.querySelectorAll(
-               ':not(script):not(style):not(link):not(meta)',
-            ).length;
-            const textLength = (document.body.textContent ?? '').trim().length;
-            if (visibleNodes < nodeThreshold && textLength < textThreshold) {
-               warnings.push(
-                  `Low content detected (${visibleNodes} visible elements, ${textLength} characters). ` +
-                     'This page may be an unmounted SPA shell. axe-core results may be incomplete or misleading.',
-               );
-            }
-
-            const raw = await axeRef.run(document, {
-               runOnly: { type: 'rule', values },
-            });
-            return { raw, warnings };
-         },
-         {
-            values: ruleIds,
-            nodeThreshold: LOW_CONTENT_NODE_THRESHOLD,
-            textThreshold: LOW_CONTENT_TEXT_THRESHOLD,
-         },
-      );
-   });
+               const raw = await axeRef.run(document, {
+                  runOnly: { type: 'rule', values },
+               });
+               return { raw, warnings };
+            },
+            {
+               values: ruleIds,
+               nodeThreshold: LOW_CONTENT_NODE_THRESHOLD,
+               textThreshold: LOW_CONTENT_TEXT_THRESHOLD,
+            },
+         );
+      },
+      { timeoutMs },
+   );
 }
 
 function resolveAxeInput(
-   url: string,
+   load: DocumentLoad,
    options: AxeRunOptions,
 ): {
-   parsedUrl: URL;
    wcagVersion: WcagVersion;
    selection: AxeRunResult['selection'];
    ruleIds: string[];
-   cacheKey: string;
+   cacheKey: string | undefined;
 } {
-   const parsedUrl = parseAxeUrl(url);
    const wcagVersion = parseWcagVersion(options.wcagVersion);
    const { selection, ruleIds } = resolveAxeSelection(options, wcagVersion);
    return {
-      parsedUrl,
       wcagVersion,
       selection,
       ruleIds,
-      cacheKey: buildAxeCacheKey(parsedUrl.toString(), wcagVersion),
+      cacheKey: buildAxeCacheKey(load, wcagVersion),
    };
 }
 
-/** Runs axe-core against one URL using a criterion, level, or explicit rule selection. */
-export async function runAxe(url: string, options: AxeRunOptions): Promise<AxeRunResult> {
-   const resolved = resolveAxeInput(url, options);
+/**
+ * Runs axe-core against one resolved document target using a criterion, level, or
+ * explicit rule selection. Loads the target directly in Playwright; it does not make a
+ * separate network request first.
+ */
+export async function runAxe(
+   load: DocumentLoad,
+   options: AxeRunOptions,
+): Promise<AxeRunResult> {
+   const resolved = resolveAxeInput(load, options);
    const cached = getCachedAxeResult({
       cacheKey: resolved.cacheKey,
       ruleIds: resolved.ruleIds,
@@ -293,9 +302,13 @@ export async function runAxe(url: string, options: AxeRunOptions): Promise<AxeRu
    if (cached) {
       return cached;
    }
-   const { raw, warnings } = await executeAxeScan(resolved.parsedUrl, resolved.ruleIds);
+   const { raw, warnings } = await executeAxeScan(
+      load,
+      resolved.ruleIds,
+      options.timeoutMs,
+   );
    const parsed = buildParsedAxeResult({
-      url: resolved.parsedUrl.toString(),
+      reportUrl: describeLoad(load),
       wcagVersion: resolved.wcagVersion,
       selection: resolved.selection,
       ruleIds: resolved.ruleIds,

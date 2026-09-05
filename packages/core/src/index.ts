@@ -64,6 +64,14 @@ export {
    type GuidepupSetupStepResult,
 } from './doctor/setup.js';
 
+// Target resolution for page commands (axe, tree, audit, inspect).
+export {
+   DEFAULT_TARGET_TIMEOUT_MS,
+   describeResolvedTarget,
+   type ResolvedDocumentTarget,
+} from './targets/runtime.js';
+export type { DocumentLoad } from './targets/parse.js';
+
 const cliCommands: CliCommand[] = [
    {
       name: 'wcag',

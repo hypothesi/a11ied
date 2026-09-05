@@ -1,3 +1,5 @@
+import { resolve } from 'node:path';
+
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
@@ -6,6 +8,7 @@ import {
    runCli,
    parseJsonOutput,
    EXIT_SUCCESS,
+   EXIT_USAGE,
    TEST_TIMEOUT_MEDIUM,
 } from './setup.js';
 
@@ -20,7 +23,7 @@ afterAll(async () => {
 });
 
 async function assertAxeFullScan(baseUrl: string): Promise<void> {
-   const result = await runCli(['axe', '--url', `${baseUrl}/basic-page.html`, '--json']);
+   const result = await runCli(['axe', `${baseUrl}/basic-page.html`, '--json']);
    const json = parseJsonOutput(result.stdout);
    expect(result.status).toBe(EXIT_SUCCESS);
    const axeResult = json.result as {
@@ -38,7 +41,6 @@ async function assertAxeFullScan(baseUrl: string): Promise<void> {
 async function assertAxeCriterionScan(baseUrl: string): Promise<void> {
    const result = await runCli([
       'axe',
-      '--url',
       `${baseUrl}/button-name-failure.html`,
       '--criterion',
       '4.1.2',
@@ -66,7 +68,6 @@ async function assertAxeCriterionScan(baseUrl: string): Promise<void> {
 async function assertAxeLevelScan(baseUrl: string): Promise<void> {
    const result = await runCli([
       'axe',
-      '--url',
       `${baseUrl}/contrast-failure.html`,
       '--level',
       'AA',
@@ -88,7 +89,6 @@ async function assertAxeLevelScan(baseUrl: string): Promise<void> {
 async function assertAxeRuleFilter(baseUrl: string): Promise<void> {
    const result = await runCli([
       'axe',
-      '--url',
       `${baseUrl}/basic-page.html`,
       '--rule',
       'color-contrast',
@@ -114,7 +114,6 @@ async function assertAxeRuleFilter(baseUrl: string): Promise<void> {
 async function assertAxeIncomplete(baseUrl: string): Promise<void> {
    const result = await runCli([
       'axe',
-      '--url',
       `${baseUrl}/basic-page.html`,
       '--rule',
       'frame-tested',
@@ -131,7 +130,6 @@ async function assertAxeIncomplete(baseUrl: string): Promise<void> {
 async function assertAxeTextOutput(baseUrl: string): Promise<void> {
    const output = await runCli([
       'axe',
-      '--url',
       `${baseUrl}/button-name-failure.html`,
       '--criterion',
       '4.1.2',
@@ -171,7 +169,6 @@ async function assertAxeTextOutput(baseUrl: string): Promise<void> {
 async function assertAxeVerboseOutput(baseUrl: string): Promise<void> {
    const verbose = await runCli([
       'axe',
-      '--url',
       `${baseUrl}/button-name-failure.html`,
       '--criterion',
       '4.1.2',
@@ -180,6 +177,53 @@ async function assertAxeVerboseOutput(baseUrl: string): Promise<void> {
    expect(verbose.stdout).toMatch(/URL:\s+http/);
    expect(verbose.stdout).toContain(`${baseUrl}/button-name-failure.html`);
    expect(verbose.stdout).toContain('Rule ids');
+}
+
+const fixturePath = resolve(
+   import.meta.dirname,
+   '../../test/fixtures/button-name-failure.html',
+);
+
+async function assertAxeFileTarget(): Promise<void> {
+   const result = await runCli(['axe', fixturePath, '--criterion', '4.1.2', '--json']);
+   const json = parseJsonOutput(result.stdout);
+   expect(result.status).toBe(EXIT_SUCCESS);
+   expect((json.target as { kind: string }).kind).toBe('file');
+   expect(
+      (json.result as { violations: Array<{ id: string }> }).violations.some(
+         (entry) => entry.id === 'button-name',
+      ),
+   ).toBe(true);
+}
+
+async function assertAxeInlineHtmlTarget(): Promise<void> {
+   const result = await runCli(['axe', '--html', '<img src=x>', '--json']);
+   const json = parseJsonOutput(result.stdout);
+   expect(result.status).toBe(EXIT_SUCCESS);
+   expect((json.target as { kind: string }).kind).toBe('html');
+   expect(
+      (json.result as { violations: Array<{ id: string }> }).violations.some(
+         (entry) => entry.id === 'image-alt',
+      ),
+   ).toBe(true);
+}
+
+async function assertAxeMissingTarget(): Promise<void> {
+   const result = await runCli(['axe', '--json']);
+   const json = parseJsonOutput(result.stdout);
+   expect(result.status).toBe(EXIT_USAGE);
+   expect(json.ok).toBe(false);
+   expect((json.errors as Array<{ code: string }>)[0]?.code).toBe('missing-target');
+}
+
+async function assertAxeAppTargetRejected(): Promise<void> {
+   const result = await runCli(['axe', 'app:Safari', '--json']);
+   const json = parseJsonOutput(result.stdout);
+   expect(result.status).toBe(EXIT_USAGE);
+   expect((json.errors as Array<{ code: string; message: string }>)[0]?.code).toBe(
+      'target-unsupported',
+   );
+   expect((json.errors as Array<{ message: string }>)[0]?.message).toMatch(/a1 sr/);
 }
 
 describe('cli run axe / scan commands', () => {
@@ -222,6 +266,13 @@ describe('cli run axe / scan commands', () => {
       },
       TEST_TIMEOUT_MEDIUM,
    );
+});
+
+describe('cli run axe / target grammar', () => {
+   it('scans a local file target', assertAxeFileTarget, TEST_TIMEOUT_MEDIUM);
+   it('scans inline --html', assertAxeInlineHtmlTarget, TEST_TIMEOUT_MEDIUM);
+   it('rejects a missing target', assertAxeMissingTarget, TEST_TIMEOUT_MEDIUM);
+   it('rejects an app target', assertAxeAppTargetRejected, TEST_TIMEOUT_MEDIUM);
 });
 
 describe('cli run axe / output formatting', () => {

@@ -2,24 +2,10 @@ import { spawn } from 'node:child_process';
 import { basename } from 'node:path';
 
 import type { BrowserAutomationCandidate, DriverFocusTarget } from '@a11ied/contracts';
-import type { Browser, Page } from 'playwright';
 
-import { launchAutomationBrowser } from './policy.js';
 import { createBrowserAutomationPolicy } from './detection.js';
 
-const SHARED_BROWSER_IDLE_MS = 250;
 const BROWSER_OPEN_TIMEOUT_MS = 5000;
-const INTERACTIVE_BROWSER_READY_MS = 250;
-const BRING_TO_FRONT_SETTLE_MS = 150;
-
-let sharedBrowser: Browser | undefined = globalThis.undefined;
-let sharedBrowserPromise: Promise<Browser> | undefined = globalThis.undefined;
-let sharedBrowserUsers = 0;
-let sharedBrowserCloseTimer: NodeJS.Timeout | undefined = globalThis.undefined;
-let sharedPage: Page | undefined = globalThis.undefined;
-let sharedPageUrl: string | undefined = globalThis.undefined;
-let sharedPageUsers = 0;
-let sharedBrowserFocusTarget: DriverFocusTarget | undefined = globalThis.undefined;
 
 function resolveBundleId(candidate: BrowserAutomationCandidate): string | undefined {
    const bundleIds: Partial<Record<BrowserAutomationCandidate['id'], string>> = {
@@ -31,7 +17,8 @@ function resolveBundleId(candidate: BrowserAutomationCandidate): string | undefi
    return bundleIds[candidate.id];
 }
 
-function deriveFocusTarget(
+/** Derives the app-focus target a driver session should use for a browser candidate. */
+export function deriveFocusTarget(
    candidate: BrowserAutomationCandidate,
 ): DriverFocusTarget | undefined {
    const bundleId = resolveBundleId(candidate);
@@ -139,6 +126,7 @@ async function openUrlOnWindows(url: string): Promise<void> {
    await waitForChildExit(child, BROWSER_OPEN_TIMEOUT_MS);
 }
 
+/** Opens one URL in a real, user-visible window of the system's automation browser. */
 export async function openUrlInSystemAutomationBrowser(url: string): Promise<{
    candidate: BrowserAutomationCandidate;
    focusTarget: DriverFocusTarget | undefined;
@@ -165,180 +153,4 @@ export async function openUrlInSystemAutomationBrowser(url: string): Promise<{
       candidate,
       focusTarget: deriveFocusTarget(candidate),
    };
-}
-
-async function closeSharedBrowser(): Promise<void> {
-   if (!sharedBrowser || sharedBrowserUsers > 0) {
-      return;
-   }
-   const browser = sharedBrowser;
-   sharedBrowser = globalThis.undefined;
-   sharedPage = globalThis.undefined;
-   sharedPageUrl = globalThis.undefined;
-   sharedPageUsers = 0;
-   sharedBrowserFocusTarget = globalThis.undefined;
-   await browser.close();
-}
-
-function scheduleBrowserClose(): void {
-   if (sharedBrowserCloseTimer) {
-      clearTimeout(sharedBrowserCloseTimer);
-   }
-   sharedBrowserCloseTimer = setTimeout(() => {
-      sharedBrowserCloseTimer = globalThis.undefined;
-      closeSharedBrowser().catch(() => globalThis.undefined);
-   }, SHARED_BROWSER_IDLE_MS);
-}
-
-function clearCloseTimer(): void {
-   if (sharedBrowserCloseTimer) {
-      clearTimeout(sharedBrowserCloseTimer);
-      sharedBrowserCloseTimer = globalThis.undefined;
-   }
-}
-
-async function resolveSharedBrowserPromise(): Promise<Browser> {
-   if (sharedBrowser) {
-      return sharedBrowser;
-   }
-   if (!sharedBrowserPromise) {
-      sharedBrowserPromise = launchAutomationBrowser().then((result) => {
-         sharedBrowser = result.browser;
-         sharedBrowserFocusTarget = deriveFocusTarget(result.candidate);
-         sharedBrowserPromise = globalThis.undefined;
-         return result.browser;
-      });
-   }
-   try {
-      return await sharedBrowserPromise;
-   } catch (error) {
-      sharedBrowserPromise = globalThis.undefined;
-      throw error;
-   }
-}
-
-async function getSharedBrowser(): Promise<Browser> {
-   clearCloseTimer();
-   if (sharedBrowser) {
-      return sharedBrowser;
-   }
-   return await resolveSharedBrowserPromise();
-}
-
-async function ensurePageUrl(page: Page, url: string): Promise<void> {
-   if (sharedPageUrl !== url) {
-      await page.goto(url, { waitUntil: 'networkidle' });
-      sharedPageUrl = url;
-   }
-}
-
-async function tryReuseSharedPage(url: string): Promise<Page | undefined> {
-   if (!sharedPage || sharedPage.isClosed() || sharedPageUsers !== 0) {
-      return undefined;
-   }
-   await ensurePageUrl(sharedPage, url);
-   sharedPageUsers += 1;
-   return sharedPage;
-}
-
-async function createNewPage(browser: Browser, url: string): Promise<Page> {
-   const page = await browser.newPage();
-   await page.goto(url, { waitUntil: 'networkidle' });
-   return page;
-}
-
-function claimSharedPage(page: Page, url: string): boolean {
-   if (!sharedPage || sharedPage.isClosed()) {
-      sharedPage = page;
-      sharedPageUrl = url;
-      sharedPageUsers = 1;
-      return true;
-   }
-   return false;
-}
-
-async function getSharedPage(
-   browser: Browser,
-   url: string,
-): Promise<{
-   page: Page;
-   reusable: boolean;
-}> {
-   const reused = await tryReuseSharedPage(url);
-   if (reused) {
-      return { page: reused, reusable: true };
-   }
-
-   const page = await createNewPage(browser, url);
-   return { page, reusable: claimSharedPage(page, url) };
-}
-
-function releaseSharedPage(reusable: boolean, page: Page): Promise<void> {
-   if (reusable) {
-      sharedPageUsers = Math.max(0, sharedPageUsers - 1);
-      return Promise.resolve();
-   }
-   return page.close();
-}
-
-function releaseSharedBrowser(): void {
-   sharedBrowserUsers = Math.max(0, sharedBrowserUsers - 1);
-   if (sharedBrowserUsers === 0) {
-      scheduleBrowserClose();
-   }
-}
-
-export async function withBrowserPage<TResult>(
-   url: string,
-   callback: (page: Page) => Promise<TResult>,
-): Promise<TResult> {
-   const browser = await getSharedBrowser();
-   sharedBrowserUsers += 1;
-
-   try {
-      const { page, reusable } = await getSharedPage(browser, url);
-      try {
-         return await callback(page);
-      } finally {
-         await releaseSharedPage(reusable, page);
-      }
-   } finally {
-      releaseSharedBrowser();
-   }
-}
-
-export async function withLoadedPage<TResult>(
-   url: string,
-   callback: (page: Page) => Promise<TResult>,
-): Promise<TResult> {
-   return await withBrowserPage(url, callback);
-}
-
-export async function withInteractiveBrowserPage<TResult>(
-   url: string,
-   callback: (page: Page) => Promise<TResult>,
-): Promise<TResult> {
-   const launch = await launchAutomationBrowser(undefined, { headless: false });
-   sharedBrowserFocusTarget = deriveFocusTarget(launch.candidate);
-   const page = await launch.browser.newPage();
-
-   try {
-      await page.goto(url, { waitUntil: 'networkidle' });
-      await page.bringToFront();
-      await page.waitForTimeout(INTERACTIVE_BROWSER_READY_MS);
-      return await callback(page);
-   } finally {
-      await page.close().catch(() => globalThis.undefined);
-      await launch.browser.close().catch(() => globalThis.undefined);
-      sharedBrowserFocusTarget = globalThis.undefined;
-   }
-}
-
-export async function bringBrowserPageToFront(page: Page): Promise<void> {
-   await page.bringToFront();
-   await page.waitForTimeout(BRING_TO_FRONT_SETTLE_MS);
-}
-
-export function getActiveBrowserFocusTarget(): DriverFocusTarget | undefined {
-   return sharedBrowserFocusTarget;
 }

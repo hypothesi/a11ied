@@ -1,4 +1,5 @@
 import type { Command } from 'commander';
+import { DEFAULT_TARGET_TIMEOUT_MS } from '#core';
 import {
    getPlatformScreenReaders,
    getPlatformTargets,
@@ -52,5 +53,16 @@ export function addPhraseOption(command: Command): Command {
    return command.option(
       '--phrase',
       'Print only the last spoken phrase, one line, for shell loops.',
+export function addHtmlOption(command: Command): Command {
+   return command.option(
+      '--html <markup>',
+      'Load inline HTML instead of the positional target.',
+   );
+}
+
+export function addTargetTimeoutOption(command: Command): Command {
+   return command.option(
+      '--timeout <ms>',
+      `Timeout for loading the target, in milliseconds. Defaults to ${DEFAULT_TARGET_TIMEOUT_MS}.`,
    );
 }

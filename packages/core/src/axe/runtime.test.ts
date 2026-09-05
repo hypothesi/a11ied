@@ -7,6 +7,7 @@ import {
 } from '../../../cli/src/testing/fixtures.js';
 
 import { runAxe } from './runtime.js';
+import type { DocumentLoad } from '../targets/parse.js';
 
 let baseUrl = '';
 const testServer: TestServerHandle = createTestServer();
@@ -21,14 +22,15 @@ afterAll(async () => {
    await testServer.stop();
 });
 
+function loadFor(path: string): DocumentLoad {
+   return { kind: 'goto', url: `${baseUrl}/${path}` };
+}
+
 describe('axe runtime', () => {
    it(
       'runs all mapped axe rules when no selector is provided',
       async () => {
-         const result = await runAxe(`${baseUrl}/basic-page.html`, {
-            url: `${baseUrl}/basic-page.html`,
-            wcagVersion: '2.2',
-         });
+         const result = await runAxe(loadFor('basic-page.html'), { wcagVersion: '2.2' });
 
          expect(result.selection.kind).toBe('all');
          expect(result.ruleIds.length).toBeGreaterThan(10);
@@ -41,8 +43,7 @@ describe('axe runtime', () => {
    it(
       'runs criterion-mapped axe rules and preserves normalized details',
       async () => {
-         const result = await runAxe(`${baseUrl}/button-name-failure.html`, {
-            url: `${baseUrl}/button-name-failure.html`,
+         const result = await runAxe(loadFor('button-name-failure.html'), {
             wcagVersion: '2.2',
             criterion: '4.1.2',
          });
@@ -65,8 +66,7 @@ describe('axe runtime', () => {
    it(
       'runs level-based scans and preserves result collections',
       async () => {
-         const contrast = await runAxe(`${baseUrl}/contrast-failure.html`, {
-            url: `${baseUrl}/contrast-failure.html`,
+         const contrast = await runAxe(loadFor('contrast-failure.html'), {
             wcagVersion: '2.2',
             level: 'AA',
          });
@@ -85,8 +85,7 @@ describe('axe runtime explicit rules', () => {
    it(
       'preserves incomplete results when the selected rule reports them',
       async () => {
-         const incomplete = await runAxe(`${baseUrl}/basic-page.html`, {
-            url: `${baseUrl}/basic-page.html`,
+         const incomplete = await runAxe(loadFor('basic-page.html'), {
             wcagVersion: '2.2',
             ruleIds: ['frame-tested'],
          });
@@ -100,8 +99,7 @@ describe('axe runtime explicit rules', () => {
    it(
       'limits explicit rule execution to the requested ids',
       async () => {
-         const result = await runAxe(`${baseUrl}/basic-page.html`, {
-            url: `${baseUrl}/basic-page.html`,
+         const result = await runAxe(loadFor('basic-page.html'), {
             wcagVersion: '2.2',
             ruleIds: ['color-contrast'],
          });

@@ -183,18 +183,24 @@ a1 wcag rule color-contrast</code></pre>
             <h2>a1 axe</h2>
          </div>
          <div class="route-list">
-            <div class="route-row"><code>--url &lt;url&gt;</code><span>The page to run against. Required.</span></div>
+            <div class="route-row"><code>&lt;target&gt;</code><span>An http(s) URL, a local file path, or <code>-</code> for HTML on stdin.</span></div>
+            <div class="route-row"><code>--html &lt;markup&gt;</code><span>Load inline HTML instead of the positional target.</span></div>
+            <div class="route-row"><code>--timeout &lt;ms&gt;</code><span>Timeout for loading the target, in milliseconds. Defaults to 10000.</span></div>
             <div class="route-row"><code>--level &lt;level&gt;</code><span>Run the rules mapped to one WCAG level. <code>--level AA</code> resolves 72 rules for WCAG 2.2.</span></div>
             <div class="route-row"><code>--criterion &lt;criterion&gt;</code><span>Run the rules mapped to one criterion, by ID or slug.</span></div>
             <div class="route-row"><code>--rule &lt;ruleId...&gt;</code><span>Run named axe rules. Repeat the flag for more than one.</span></div>
          </div>
-         <pre><code>a1 axe --url http://localhost:3000 --level AA --json
-a1 axe --url http://localhost:3000 --criterion 1.4.3 --json
-a1 axe --url http://localhost:3000 --rule color-contrast --rule link-name --json</code></pre>
+         <pre><code>a1 axe http://localhost:3000 --level AA --json
+a1 axe http://localhost:3000 --criterion 1.4.3 --json
+a1 axe src/components/Dialog.html --rule color-contrast --rule link-name --json
+echo '&lt;button&gt;&lt;/button&gt;' | a1 axe -
+a1 axe --html '&lt;img src=x&gt;'</code></pre>
          <p>
             With no selector, the run covers every rule mapped in the WCAG version. The result has
             <code>violations</code>, <code>passes</code>, <code>incomplete</code>, and
             <code>inapplicable</code>, plus the resolved rule list under <code>selection</code>.
+            A file target loads through <code>file://</code>; axe never fetches a URL target's
+            HTML itself, since Playwright loads the page directly.
          </p>
       </div>
       <div class="split-aside">

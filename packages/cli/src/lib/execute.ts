@@ -28,7 +28,7 @@ import { buildVirtualTargetGuardOptions, parsePlatform } from './resolvers.js';
 
 export { parsePlatform, resolveOptionalCliTarget } from './resolvers.js';
 // Fallow-ignore-next-line unused-export
-export { resolveCliTarget } from './resolvers.js';
+export { resolveCliTarget, resolvePageTarget } from './resolvers.js';
 // Fallow-ignore-next-line unused-export
 export { resolveRunAxeSelection } from './resolvers.js';
 

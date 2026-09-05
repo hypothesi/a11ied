@@ -94,10 +94,10 @@ function printWarningsToStderr(warnings: CliMessage[]): void {
 
 /**
  * Prints one command's output. Envelopes (`--json`) and successful text results go to
- * stdout. Errors and warnings always go to stderr, so a piped `2>/dev/null` stdout
- * stream carries only the result. The JSON envelope itself still goes to stdout even
- * on failure, so scripts parsing `--json` output see the full error detail. A one-line
- * copy of the error goes to stderr for anyone watching the terminal.
+ * stdout. Errors and warnings always go to stderr, so a piped `2>/dev/null` stdout stream
+ * carries only the result. The JSON envelope itself still goes to stdout even on failure,
+ * so scripts parsing `--json` output see the full error detail. A one-line copy of the
+ * error goes to stderr for anyone watching the terminal.
  */
 export function printOutput(opts: PrintOutputOptions): void {
    printWarningsToStderr(opts.envelope.warnings);
