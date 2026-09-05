@@ -5,10 +5,10 @@ import { docsLinks } from '../../lib/nav';
 const toc = [
    { id: 'start', label: 'Starting the server' },
    { id: 'tools', label: 'Tools' },
-   { id: 'driver', label: 'driver_session and driver_action' },
-   { id: 'axe', label: 'run_axe' },
-   { id: 'knowledge', label: 'WCAG tools' },
-   { id: 'applicability', label: 'applicability and doctor' },
+   { id: 'wcag', label: 'wcag_show, wcag_criteria, wcag_search, wcag_rule' },
+   { id: 'axe', label: 'run_axe, tree, audit' },
+   { id: 'sr', label: 'sr_session and sr_action' },
+   { id: 'sr-checks', label: 'sr_list, sr_expect, sr_transcript' },
    { id: 'resources', label: 'Resources' },
    { id: 'effects', label: 'Side effects' },
 ];
@@ -16,7 +16,7 @@ const toc = [
 
 <DocShell
    title="MCP reference"
-   summary="Tool names, inputs, resource URIs, and side effects for the a11ied MCP server. Every tool calls the same runtime function as the matching CLI command, so results match across the two."
+   summary="Tool names, inputs, resource URIs, and side effects for the a11ied MCP server. Every tool calls the same runtime function as the matching CLI command, so results match across the two, and every tool name generated from the CLI command registry keeps them from drifting apart."
    links={docsLinks}
    toc={toc}
 >
@@ -52,132 +52,154 @@ const toc = [
    <section class="ledger" id="tools">
       <div class="panel-head">
          <p class="panel-kicker">Tools</p>
-         <h2>The eight tools</h2>
+         <h2>The 13 tools</h2>
       </div>
       <div class="route-list">
-         <div class="route-row"><code>driver_session</code><span>Start, inspect, or stop a screen reader session.</span></div>
-         <div class="route-row"><code>driver_action</code><span>Run one action against an open session.</span></div>
-         <div class="route-row"><code>run_axe</code><span>Run axe-core against a URL.</span></div>
-         <div class="route-row"><code>applicability</code><span>Return applicability for a URL, for all criteria or one.</span></div>
-         <div class="route-row"><code>wcag_lookup</code><span>Return one criterion, optionally with coverage.</span></div>
-         <div class="route-row"><code>wcag_levels</code><span>Return every criterion at one level.</span></div>
-         <div class="route-row"><code>wcag_search</code><span>Return ranked criterion matches for a query.</span></div>
-         <div class="route-row"><code>doctor</code><span>Return runtime details and the target support matrix.</span></div>
-      </div>
-   </section>
-
-   <section class="panel" id="driver">
-      <div class="panel-head">
-         <p class="panel-kicker">Driver</p>
-         <h2>driver_session and driver_action</h2>
-      </div>
-      <h3>driver_session</h3>
-      <div class="route-list">
-         <div class="route-row"><code>action</code><span><code>start</code>, <code>status</code>, or <code>stop</code>. Required.</span></div>
-         <div class="route-row"><code>target</code><span><code>voiceover</code>, <code>nvda</code>, or <code>virtual</code>.</span></div>
-         <div class="route-row"><code>allowVirtual</code><span>Set to <code>true</code> to accept the simulated reader.</span></div>
-         <div class="route-row"><code>url</code><span>Document to load into a virtual session. Without it the session starts against an empty document.</span></div>
+         <div class="route-row"><code>doctor</code><span>Return runtime details and the target support matrix. Same as <code>a1 doctor</code>.</span></div>
+         <div class="route-row"><code>wcag_show</code><span>Return one criterion with its techniques, failures, coverage, and strategy. Same as <code>a1 wcag show</code>.</span></div>
+         <div class="route-row"><code>wcag_criteria</code><span>List criteria, filtered by level or summarized. Same as <code>a1 wcag criteria</code>.</span></div>
+         <div class="route-row"><code>wcag_search</code><span>Return ranked criterion matches for a query. Same as <code>a1 wcag search</code>.</span></div>
+         <div class="route-row"><code>wcag_rule</code><span>Map an axe-core rule id to its criteria and fix guidance. Same as <code>a1 wcag rule</code>.</span></div>
+         <div class="route-row"><code>run_axe</code><span>Run axe-core against a target. Same as <code>a1 axe</code>.</span></div>
+         <div class="route-row"><code>tree</code><span>Print the accessibility tree for a target. Same as <code>a1 tree</code>.</span></div>
+         <div class="route-row"><code>audit</code><span>Run axe, the tree summary, and applicability together. Same as <code>a1 audit</code>.</span></div>
+         <div class="route-row"><code>sr_session</code><span>Start, open, stop, or check the one active screen reader session. Same as <code>a1 sr start</code>, <code>open</code>, <code>stop</code>, <code>status</code>.</span></div>
+         <div class="route-row"><code>sr_action</code><span>Run one action against the active session. Covers every other <code>a1 sr</code> subcommand except <code>expect</code>, <code>list</code>, <code>batch</code>, and <code>walk</code>.</span></div>
+         <div class="route-row"><code>sr_list</code><span>List the named commands <code>sr_action</code>'s <code>perform</code> action runs. Same as <code>a1 sr list</code>.</span></div>
+         <div class="route-row"><code>sr_expect</code><span>Check that the session announced a phrase. Same as <code>a1 sr expect</code>.</span></div>
+         <div class="route-row"><code>sr_transcript</code><span>Print the session transcript, or write it to a file. Same as <code>a1 sr transcript</code>.</span></div>
       </div>
       <p>
-         One session is active at a time, so <code>status</code> and <code>stop</code> take no
-         session id, and <code>start</code> stops any session already running. The start response
-         carries <code>sessionId</code>, <code>target</code>, and <code>targetType</code>.
-         <code>targetType</code> is <code>real</code> for VoiceOver and NVDA, and
-         <code>simulated</code> for virtual.
-      </p>
-      <h3>driver_action</h3>
-      <p>
-         Takes an <code>action</code> and runs it against the active session. The portable verbs
-         need nothing else and work on all three targets: <code>next</code>,
-         <code>previous</code>, <code>interact</code>, <code>stop-interacting</code>,
-         <code>activate</code>, <code>top</code>, <code>bottom</code>, and <code>escape</code>.
-         <code>read</code> and <code>transcript</code> read state back without moving the cursor.
-      </p>
-      <div class="route-list">
-         <div class="route-row"><code>press</code><span>Add <code>keys</code>, an array of chords pressed in order, such as <code>["Tab", "Tab"]</code>.</span></div>
-         <div class="route-row"><code>type</code><span>Add <code>text</code> with the string to type.</span></div>
-         <div class="route-row"><code>checkpoint</code><span>Add <code>label</code> to mark a point in the transcript.</span></div>
-         <div class="route-row"><code>perform</code><span>Add <code>command</code>, and <code>commandSet</code> when the name is ambiguous.</span></div>
-         <div class="route-row"><code>focus</code><span>Add one of <code>appName</code>, <code>bundleId</code>, <code>processName</code>, <code>pid</code>, or <code>windowTitle</code>.</span></div>
-      </div>
-      <p>
-         Every response state carries <code>transcript</code>, an array of entries with an
-         <code>index</code>, an ISO <code>at</code> timestamp, the <code>phrase</code>, and a
-         <code>checkpoint</code> label on the entries <code>checkpoint</code> added.
-      </p>
-      <p>
-         For a VoiceOver session, the response state includes <code>axFocusedElement</code> with the
-         accessibility role, subrole, title, description, value, and enabled state of the element the
-         system has focused.
-      </p>
-      <p>
-         <code>perform</code> accepts VoiceOver rotor and structural commands such as
-         <code>find next heading</code>, <code>find next landmark</code>,
-         <code>find next field</code>, <code>rotor</code>, and <code>next rotor item</code>.
+         <code>a1 sr batch</code> and <code>a1 sr walk</code> have no matching tool. <code>batch</code>
+         reads a file of actions for shell scripting. Call <code>sr_action</code> once per step
+         instead. <code>walk</code> composes <code>sr_session</code> (action <code>start</code>) with
+         <code>sr_action</code> (action <code>read-all</code>) and <code>sr_transcript</code>. Call
+         those three tools in that order.
       </p>
    </section>
 
-   <section class="split panel" id="axe">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">axe</p>
-            <h2>run_axe</h2>
-         </div>
-         <div class="route-list">
-            <div class="route-row"><code>url</code><span>The page to run against. Required.</span></div>
-            <div class="route-row"><code>criterion</code><span>Scope to one criterion, by ID or slug.</span></div>
-            <div class="route-row"><code>level</code><span>Scope to <code>A</code>, <code>AA</code>, or <code>AAA</code>.</span></div>
-            <div class="route-row"><code>ruleIds</code><span>Scope to named axe rules.</span></div>
-            <div class="route-row"><code>include</code><span>Which categories to return: <code>violations</code>, <code>passes</code>, <code>incomplete</code>, <code>inapplicable</code>.</span></div>
-            <div class="route-row"><code>version</code><span>WCAG version. Defaults to <code>2.2</code>.</span></div>
-         </div>
-         <p>
-            Provide exactly one of <code>criterion</code>, <code>level</code>, or
-            <code>ruleIds</code>. Passing none or more than one is a validation error. This differs
-            from <code>a1 axe</code>, which runs every mapped rule when no selector is given.
-         </p>
-      </div>
-      <div class="split-aside">
-         <div class="tag">Use include</div>
-         <p class="aside-note">
-            A level AA run returns results for 72 rules across four categories. Pass
-            <code>include: ["violations"]</code> to keep the response small enough to reason about.
-         </p>
-      </div>
-   </section>
-
-   <section class="panel" id="knowledge">
+   <section class="panel" id="wcag">
       <div class="panel-head">
          <p class="panel-kicker">Standards</p>
-         <h2>wcag_lookup, wcag_levels, and wcag_search</h2>
+         <h2>wcag_show, wcag_criteria, wcag_search, wcag_rule</h2>
       </div>
       <div class="route-list">
-         <div class="route-row"><code>wcag_lookup</code><span><code>criterion</code> required. <code>include_coverage: true</code> adds the coverage and strategy objects. Defaults to <code>false</code>.</span></div>
-         <div class="route-row"><code>wcag_levels</code><span><code>level</code> required: <code>A</code>, <code>AA</code>, or <code>AAA</code>.</span></div>
+         <div class="route-row"><code>wcag_show</code><span><code>criterion</code> required, an id such as <code>1.4.3</code> or a slug such as <code>contrast-minimum</code>. Always returns coverage and strategy alongside the criterion.</span></div>
+         <div class="route-row"><code>wcag_criteria</code><span><code>level</code> optional: <code>A</code>, <code>AA</code>, or <code>AAA</code>. Omit it to list every criterion. Set <code>summary: true</code> for coverage totals per level instead of the list.</span></div>
          <div class="route-row"><code>wcag_search</code><span><code>query</code> required. <code>limit</code> defaults to 10 and caps at 50.</span></div>
+         <div class="route-row"><code>wcag_rule</code><span><code>ruleId</code> required, an axe-core rule id such as <code>color-contrast</code>. Returns the criteria it covers and axe's help text and help URL.</span></div>
       </div>
       <p>
-         All three read bundled data. They make no network request and start no browser, so they are
+         All four read bundled data. They make no network request and start no browser, so they are
          safe for an agent to call freely.
       </p>
    </section>
 
-   <section class="panel" id="applicability">
+   <section class="panel" id="axe">
       <div class="panel-head">
-         <p class="panel-kicker">Applicability</p>
-         <h2>applicability and doctor</h2>
+         <p class="panel-kicker">Page checks</p>
+         <h2>run_axe, tree, audit</h2>
+      </div>
+      <div class="route-list">
+         <div class="route-row"><code>target</code><span>An http(s) URL or a local file path.</span></div>
+         <div class="route-row"><code>html</code><span>Inline HTML markup to load instead of <code>target</code>.</span></div>
       </div>
       <p>
-         <code>applicability</code> takes <code>url</code> and an optional <code>criterion</code>.
-         Without a criterion it returns the full applicability matrix. With one it returns that
-         criterion's assessment, matched signals, and reasons.
+         All three take one page target, exactly like the CLI's positional <code>&lt;target&gt;</code>
+         and <code>--html</code>. <code>run_axe</code> also takes <code>criterion</code>,
+         <code>level</code>, or <code>ruleIds</code> to narrow the run, and rejects more than one of
+         them. Omit all three, and <code>run_axe</code> runs every mapped rule, matching
+         <code>a1 axe</code> with no filter. <code>tree</code> takes <code>role</code> and
+         <code>name</code> to keep only matching nodes and their ancestors.
       </p>
       <p>
-         <code>doctor</code> takes no input. It returns <code>ready</code>, the ordered
-         <code>actions</code> still needed with their commands, the host, each target with its
-         <code>checks</code>, the browser policy with every detected candidate, and the package,
-         Node, and npm versions.
+         <code>run_axe</code> and <code>audit</code> each return a <code>verdict</code> object and an
+         <code>exitCode</code>. <code>exitCode</code> is 4, the CLI's assertion exit code, when a
+         violation at or above <code>failOn</code> (default <code>minor</code>) is not covered by
+         <code>baseline</code>, and 0 otherwise. Pass <code>baseline</code> as
+         <code>{`{ acceptedFindings: [...] }`}</code> to accept known findings, the same list the CLI
+         reads from a <code>--baseline</code> file.
       </p>
+   </section>
+
+   <section class="panel" id="sr">
+      <div class="panel-head">
+         <p class="panel-kicker">Screen reader</p>
+         <h2>sr_session and sr_action</h2>
+      </div>
+      <h3>sr_session</h3>
+      <div class="route-list">
+         <div class="route-row"><code>action</code><span><code>start</code>, <code>open</code>, <code>stop</code>, or <code>status</code>. Required.</span></div>
+         <div class="route-row"><code>target</code><span>(<code>start</code> only) <code>voiceover</code>, <code>nvda</code>, or <code>virtual</code>.</span></div>
+         <div class="route-row"><code>allowVirtual</code><span>(<code>start</code> only) Set to <code>true</code> to accept the simulated reader when a real one is available.</span></div>
+         <div class="route-row"><code>url</code><span>(<code>start</code> and <code>open</code>) The page to load. Virtual loads it directly. VoiceOver and NVDA open it in a system browser and refocus it.</span></div>
+         <div class="route-row"><code>app</code><span>(<code>start</code> only) A native app that is already open, to read instead of a page.</span></div>
+      </div>
+      <p>
+         One session is active at a time, so no action takes a session id, and <code>start</code>
+         stops any session already active. The start response carries <code>session</code>, which
+         includes <code>sessionId</code>, <code>target</code>, and <code>targetType</code>.
+         <code>targetType</code> is <code>real</code> for VoiceOver and NVDA, and
+         <code>simulated</code> for virtual. <code>status</code> returns
+         <code>{`{ noSession: true }`}</code> instead of throwing when no session is active.
+      </p>
+      <h3>sr_action</h3>
+      <p>
+         Takes the same <code>action</code> and <code>payload</code> shapes the CLI's driver runtime
+         takes, one action per call. The portable verbs need no payload and work on every target:
+         <code>next</code>, <code>previous</code>, <code>interact</code>, <code>stop-interacting</code>,
+         <code>activate</code>, <code>top</code>, <code>bottom</code>, <code>escape</code>,
+         <code>read</code>, <code>transcript</code>, and <code>title</code>. <code>next</code> and
+         <code>previous</code> take an optional payload to jump by kind: heading, link, landmark,
+         control, button, table, list, graphic, region, or form-field.
+      </p>
+      <div class="route-list">
+         <div class="route-row"><code>press</code><span>Payload <code>{`{ keys }`}</code>, one chord per entry, pressed in order, such as <code>["Tab", "Tab"]</code>.</span></div>
+         <div class="route-row"><code>type</code><span>Payload <code>{`{ text }`}</code>.</span></div>
+         <div class="route-row"><code>checkpoint</code><span>Payload <code>{`{ label }`}</code>, a named point in the transcript for <code>sr_expect</code>'s <code>since</code>.</span></div>
+         <div class="route-row"><code>perform</code><span>Payload <code>{`{ command, commandSet? }`}</code>. Runs a named screen reader command. Call <code>sr_list</code> for the names.</span></div>
+         <div class="route-row"><code>focus</code><span>Payload with one of <code>appName</code>, <code>bundleId</code>, <code>processName</code>, <code>pid</code>, or <code>windowTitle</code>.</span></div>
+         <div class="route-row"><code>find</code><span>Payload <code>{`{ text }`}</code>. Moves to the next place the text appears.</span></div>
+         <div class="route-row"><code>table</code><span>Payload <code>{`{ move }`}</code>: <code>next-cell</code>, <code>row-header</code>, and the other table moves.</span></div>
+         <div class="route-row"><code>elements</code><span>Payload <code>{`{ kind, max? }`}</code>. The rotor for one kind, from the top of the page.</span></div>
+         <div class="route-row"><code>read-all</code><span>Payload <code>{`{ max? }`}</code>. Say-all as a transcript from the cursor.</span></div>
+         <div class="route-row"><code>goto</code><span>Payload <code>{`{ role?, name?, max? }`}</code>. Steps forward until the item matches.</span></div>
+         <div class="route-row"><code>wait</code><span>Payload <code>{`{ for?, ms?, timeoutMs? }`}</code>. Polls the transcript for a phrase.</span></div>
+         <div class="route-row"><code>screenshot</code><span>Payload <code>{`{ path }`}</code>. VoiceOver cursor only.</span></div>
+      </div>
+      <p>
+         <code>find</code>, <code>goto</code>, and <code>wait</code> add <code>exitCode</code> to the
+         result: 4 when the search or wait did not match, matching <code>a1 sr find</code>,
+         <code>goto</code>, and <code>wait</code>, and 0 otherwise. Every response's
+         <code>state</code> carries the timestamped <code>transcript</code> so far, and a VoiceOver
+         session's state also carries <code>axFocusedElement</code>: the accessibility role, subrole,
+         title, description, value, and enabled state of the element system keyboard focus is on.
+      </p>
+   </section>
+
+   <section class="split panel" id="sr-checks">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Checks</p>
+            <h2>sr_list, sr_expect, sr_transcript</h2>
+         </div>
+         <div class="route-list">
+            <div class="route-row"><code>sr_list</code><span><code>query</code>, <code>sr</code>, and <code>commandSet</code> all optional. Start with <code>query</code>. The unfiltered list is over 400 entries.</span></div>
+            <div class="route-row"><code>sr_expect</code><span><code>pattern</code> required, text (case-insensitive) or <code>/regex/flags</code>. <code>since</code> limits the check to phrases after a checkpoint. <code>not</code> passes when the phrase was NOT announced.</span></div>
+            <div class="route-row"><code>sr_transcript</code><span><code>since</code>, <code>tail</code>, <code>out</code>, and <code>format</code> all optional. <code>out</code> also writes the transcript to a <code>.json</code> or <code>.md</code> path.</span></div>
+         </div>
+         <p>
+            <code>sr_expect</code> returns <code>exitCode</code> 4 (the CLI assertion exit code) and a
+            <code>message</code> when the phrase did not match, and 0 when it did.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Assertion pattern</div>
+         <p class="aside-note">
+            Move the session with <code>sr_action</code>, then call <code>sr_expect</code> to check
+            what was announced. This is the same pattern the agent skill's screen reader recipe uses.
+         </p>
+      </div>
    </section>
 
    <section class="ledger" id="resources">
@@ -204,14 +226,15 @@ const toc = [
          <h2>What each tool touches</h2>
       </div>
       <p>
-         <code>wcag_lookup</code>, <code>wcag_levels</code>, and <code>wcag_search</code> read local
-         files. <code>applicability</code> fetches the URL over HTTP and parses the HTML.
-         <code>run_axe</code> opens the URL in browser automation. <code>doctor</code> probes the
-         host and runs a short recording check on macOS.
+         <code>wcag_show</code>, <code>wcag_criteria</code>, <code>wcag_search</code>, and
+         <code>wcag_rule</code> read local files (<code>wcag_rule</code> also reads the installed
+         axe-core package for help text). <code>run_axe</code>, <code>tree</code>, and
+         <code>audit</code> open the target in browser automation. <code>doctor</code> probes the host
+         and runs a short recording check on macOS.
       </p>
       <p>
-         The driver tools change the state of the machine. A real session puts VoiceOver or NVDA
-         under automation control until the client calls <code>driver_session</code> with
+         The <code>sr_*</code> tools change the state of the machine. A real session puts VoiceOver
+         or NVDA under automation control until the client calls <code>sr_session</code> with
          <code>action: "stop"</code>.
       </p>
    </section>

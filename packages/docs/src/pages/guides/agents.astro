@@ -13,7 +13,7 @@ const toc = [
 
 <DocShell
    title="Test from an AI agent"
-   summary="The MCP server gives a coding agent eight tools: criterion lookup, level listing, keyword search, applicability inspection, axe runs, session control, driver actions, and host diagnostics. It runs locally over stdio and opens no network port."
+   summary="The MCP server gives a coding agent 13 tools: WCAG lookup, search, and axe rule mapping, axe runs, the accessibility tree, the full audit loop, screen reader session control and actions, and host diagnostics. It runs locally over stdio and opens no network port."
    links={docsLinks}
    toc={toc}
 >
@@ -61,11 +61,10 @@ const toc = [
 Use a11ied to run axe at WCAG level AA.
 For each violation, give me the selector, the impact, and the failing HTML.</code></pre>
       <p>
-         The agent calls <code>run_axe</code> with <code>url</code> and
-         <code>level: "AA"</code>. That tool needs exactly one of <code>criterion</code>,
-         <code>level</code>, or <code>ruleIds</code>. Add <code>include</code> to limit the response
-         to the categories you asked about, which keeps a full-page result from filling the agent's
-         context.
+         The agent calls <code>run_axe</code> with <code>target</code> and
+         <code>level: "AA"</code>. Omitting <code>criterion</code>, <code>level</code>, and
+         <code>ruleIds</code> runs every mapped rule. The response carries a <code>verdict</code>
+         object and <code>exitCode</code> 4 when a violation was found.
       </p>
    </section>
 
@@ -83,13 +82,13 @@ Move through every field in order and collect the spoken phrase log.
 Tell me which controls announce without a name and where the order
 does not match the visual order.</code></pre>
       <p>
-         The agent calls <code>driver_session</code> with <code>action: "start"</code>, then
-         <code>driver_action</code> for each step. For VoiceOver or NVDA, open the page in a browser
-         before the agent starts. For the virtual reader, the agent passes <code>url</code> and
-         <code>allowVirtual: true</code>.
+         The agent calls <code>sr_session</code> with <code>action: "start"</code>, then
+         <code>sr_action</code> for each step, then <code>sr_expect</code> to check what was
+         announced. For VoiceOver or NVDA, open the page in a browser before the agent starts. For
+         the virtual reader, the agent passes <code>url</code> and <code>allowVirtual: true</code>.
       </p>
       <p>
-         Remind the agent to call <code>driver_session</code> with <code>action: "stop"</code> when
+         Remind the agent to call <code>sr_session</code> with <code>action: "stop"</code> when
          it finishes. A session left open holds the screen reader under automation.
       </p>
    </section>
