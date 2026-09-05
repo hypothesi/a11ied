@@ -60,6 +60,14 @@ async function assertFindMissing(): Promise<void> {
    expect(text.stdout).toContain('was not found on the page');
 }
 
+async function assertScreenshotNeedsVoiceOver(): Promise<void> {
+   const denied = await runCli(['sr', 'screenshot', './shot.png', '--json']);
+   expectFirstErrorMessage({
+      result: denied,
+      match: /sr screenshot is not available on virtual/,
+   });
+}
+
 async function assertTitleAndFind(): Promise<void> {
    const title = await runSrJson(['title']);
    expect(title.status).toBe(EXIT_SUCCESS);
@@ -120,6 +128,12 @@ async function assertTableMoves(): Promise<void> {
 }
 
 describe('cli sr title, find, and table', () => {
+   it(
+      'refuses a screenshot on the virtual target with the reason',
+      withSession(assertScreenshotNeedsVoiceOver),
+      TEST_TIMEOUT_LONG,
+   );
+
    it(
       'reads the title and finds text, exiting 4 when the text is missing',
       withSession(assertTitleAndFind),

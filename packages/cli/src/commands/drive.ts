@@ -26,6 +26,7 @@ import {
    registerTableCommand,
    registerTitleCommand,
 } from './drive-structure.js';
+import { registerScreenshotCommand } from './drive-screenshot.js';
 import { registerTranscriptCommand } from './drive-transcript.js';
 import { registerWalkCommand } from './drive-walk.js';
 
@@ -48,6 +49,7 @@ const registrars: ReadonlyArray<(driveCommand: Command) => void> = [
    registerTypeCommand,
    registerDoCommand,
    registerFocusCommand,
+   registerScreenshotCommand,
    registerWaitCommand,
    registerExpectCommand,
    registerCheckpointCommand,

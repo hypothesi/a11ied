@@ -24,6 +24,7 @@ import {
    type DriverCommandSet,
 } from './command-registry.js';
 import { getPortableCommand } from './portable-commands.js';
+import { createScreenshotUnsupportedError } from './screenshot.js';
 import { ignoreError } from './sequential.js';
 import { loadVirtualReader, replaceVirtualDocument } from './virtual-dom.js';
 import { readVirtualItem } from './virtual-item.js';
@@ -190,6 +191,9 @@ export function createVirtualAdapter(): DriverAdapter {
       findText: async (text: string) => findVirtualText(await stepContext(state), text),
       moveInTable: async (move: DriverTableMove) =>
          moveInVirtualTable(await stepContext(state), move),
+      captureCursorScreenshot: async () => {
+         throw createScreenshotUnsupportedError('virtual');
+      },
       press: virtualPress,
       type: virtualType,
       performCommand: (command) => virtualPerformCommand(state, command),

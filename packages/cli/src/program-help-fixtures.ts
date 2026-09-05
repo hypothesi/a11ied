@@ -163,6 +163,9 @@ export const driveRunHelpCases: HelpCase[] = [
                                          list for all available commands.
         focus [options]                  Bring a window to the front. With no options,
                                          refocus the app the session opened.
+        screenshot [options] <path>      Save a picture of what the VoiceOver cursor
+                                         is on to the path. NVDA and the virtual
+                                         reader have no cursor screenshot and exit 2.
         wait [options]                   Pause, or wait until the reader announces a
                                          phrase. Polls the transcript, so a phrase
                                          that arrives between two commands is not

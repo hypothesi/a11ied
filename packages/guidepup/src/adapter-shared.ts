@@ -68,6 +68,14 @@ export interface DriverAdapter {
       move: DriverTableMove,
       options?: DriverActionOptions,
    ): Promise<{ moved?: boolean; header?: string }>;
+   /**
+    * Saves a picture of what the cursor is on to `path`. VoiceOver grabs it through its
+    * cursor; NVDA and the virtual reader throw a DriverCommandError that says so.
+    */
+   captureCursorScreenshot(
+      path: string,
+      options?: DriverActionOptions,
+   ): Promise<{ path: string; source: string }>;
    /** Presses each chord in order; one chord per array entry. */
    press(keys: readonly string[], options?: DriverActionOptions): Promise<void>;
    type(text: string, options?: DriverActionOptions): Promise<void>;

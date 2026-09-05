@@ -48,6 +48,7 @@ import {
    type RealTarget,
 } from './real-steps.js';
 import { findRealText, moveInRealTable, readRealTitle } from './real-structure.js';
+import { captureVoiceOverCursorScreenshot } from './screenshot.js';
 import { ignoreError } from './sequential.js';
 import { waitForSpeechStabilization } from './speech.js';
 import { createVirtualAdapter } from './virtual-adapter.js';
@@ -150,6 +151,13 @@ class RealScreenReaderAdapter implements DriverAdapter {
       options?: DriverActionOptions,
    ): Promise<{ moved?: boolean; header?: string }> {
       return moveInRealTable(this.stepContext(options), move);
+   }
+
+   async captureCursorScreenshot(
+      path: string,
+      options?: DriverActionOptions,
+   ): Promise<{ path: string; source: string }> {
+      return captureVoiceOverCursorScreenshot(this.stepContext(options), path);
    }
 
    async press(keys: readonly string[], options?: DriverActionOptions): Promise<void> {

@@ -122,6 +122,22 @@ async function handleLoop(
    return runGotoAction(context.adapter, request.payload, options);
 }
 
+/** Runs wait and screenshot, which observe the reader without moving its cursor. */
+async function handleObservation(
+   context: BrokerHandlerContext,
+   request: Extract<DriverActionRequest, { action: 'wait' | 'screenshot' }>,
+   options: DriverActionOptions,
+): Promise<ActionExecutionResult> {
+   if (request.action === 'wait') {
+      return runWaitAction(context, request.payload);
+   }
+   const saved = await context.adapter.captureCursorScreenshot(
+      request.payload.path,
+      options,
+   );
+   return { details: { screenshot: saved.path, source: saved.source } };
+}
+
 function recordCheckpoint(
    context: BrokerHandlerContext,
    label: string,
@@ -181,8 +197,9 @@ async function dispatchAction(
       case 'goto': {
          return handleLoop(context, request, options);
       }
-      case 'wait': {
-         return runWaitAction(context, request.payload);
+      case 'wait':
+      case 'screenshot': {
+         return handleObservation(context, request, options);
       }
       default: {
          await context.adapter.performPortable(request.action, options);

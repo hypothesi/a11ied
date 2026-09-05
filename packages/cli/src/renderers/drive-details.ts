@@ -24,6 +24,10 @@ export function structureEntries(details: Record<string, unknown>): Entry[] {
    if (typeof details.header === 'string') {
       entries.push(['Header', spoken(details.header)]);
    }
+   if (typeof details.screenshot === 'string') {
+      entries.push(['Screenshot', details.screenshot]);
+      entries.push(['Source', dim(String(details.source ?? ''))]);
+   }
    if (typeof details.move === 'string' && details.moved === false) {
       entries.push(['Moved', `no (no cell in the ${String(details.move)} direction)`]);
    }

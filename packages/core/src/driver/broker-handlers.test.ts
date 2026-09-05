@@ -89,6 +89,9 @@ function createMockAdapter(): DriverAdapter {
       }),
       findText: vi.fn<DriverAdapter['findText']>().mockResolvedValue({ found: true }),
       moveInTable: vi.fn<DriverAdapter['moveInTable']>().mockResolvedValue({}),
+      captureCursorScreenshot: vi
+         .fn<DriverAdapter['captureCursorScreenshot']>()
+         .mockResolvedValue({ path: '/tmp/shot.png', source: 'test' }),
       press: vi.fn<DriverAdapter['press']>(),
       focus: vi.fn<DriverAdapter['focus']>().mockResolvedValue({
          status: 'focused',

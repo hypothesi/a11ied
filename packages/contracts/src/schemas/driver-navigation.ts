@@ -120,6 +120,10 @@ export const driverWaitPayloadSchema = z.object({
 });
 export type DriverWaitPayload = z.infer<typeof driverWaitPayloadSchema>;
 
+/** `sr screenshot`: where to write the picture of what the cursor is on. */
+export const driverScreenshotPayloadSchema = z.object({ path: z.string().min(1) });
+export type DriverScreenshotPayload = z.infer<typeof driverScreenshotPayloadSchema>;
+
 /** One entry of a loop result: what the reader announced at each stop. */
 export const driverLoopItemSchema = z.object({
    index: z.number().int().positive(),
@@ -150,4 +154,5 @@ export const driverNavigationActionRequestSchemas = [
    z.object({ action: z.literal('read-all'), payload: driverReadAllPayloadSchema }),
    z.object({ action: z.literal('goto'), payload: driverGotoPayloadSchema }),
    z.object({ action: z.literal('wait'), payload: driverWaitPayloadSchema }),
+   z.object({ action: z.literal('screenshot'), payload: driverScreenshotPayloadSchema }),
 ] as const;
