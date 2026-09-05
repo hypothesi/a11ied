@@ -24,11 +24,6 @@ export interface TechniqueReference {
    technology?: string | undefined;
 }
 
-export interface StrategySummary {
-   preferredEvidenceMode: string;
-   procedureIds: string[];
-}
-
 /** What each applicability state means, in the order the text output lists them. */
 export const applicabilityStateDefinitions: ReadonlyArray<{
    state: string;
@@ -90,20 +85,22 @@ export function applicabilityDefinitionLines(): string[] {
 }
 
 /**
- * Names the command to run next for one criterion: the axe scan when automation decides
- * it, otherwise the manual procedures from the testing strategy.
+ * One dim line naming a copied W3C document and its URL. The W3C Document License
+ * requires attribution on every copy, and terminal output that prints the document's text
+ * is a copy, so every renderer that prints Understanding or technique prose calls this.
  */
-export function nextCommandLine(input: {
-   criterionId: string;
-   strategy: StrategySummary | undefined;
-   url?: string | undefined;
-}): string {
-   const target = input.url ? ` ${input.url}` : ' <target>';
-   if (input.strategy?.preferredEvidenceMode === 'automated') {
-      return `${code(`a1 axe --criterion ${input.criterionId}${target}`)}`;
-   }
-   const procedures = input.strategy?.procedureIds.join(', ') || 'manual_review';
-   return `${procedures} ${dim(`(${input.strategy?.preferredEvidenceMode ?? 'manual'})`)}; see ${code(`a1 wcag ${input.criterionId}`)}`;
+export function attributionLine(document: { title: string; url: string }): string {
+   return dim(`Source: ${document.title} (${document.url})`);
+}
+
+/**
+ * The dim meta line under a listing of criterion ids, naming the command that opens one
+ * in detail. The command itself prints at normal contrast so it stands out against the
+ * dim text around it without becoming a full color accent; `x.y.z` stays a placeholder
+ * because it stands for any id listed above it.
+ */
+export function showCriterionHintLine(): string {
+   return `${dim('Run')} a1 wcag x.y.z ${dim('for details')}`;
 }
 
 export function renderElementLines(elements: RenderedElement[], limit: number): string[] {

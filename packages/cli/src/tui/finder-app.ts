@@ -37,14 +37,14 @@ const PAGE_STEP = 10;
 const HALF = 2;
 const PANE_COUNT = 2;
 const sectionHotkeys: ReadonlyArray<{ hotkey: string; section: FinderSection }> = [
-   { hotkey: 't', section: 'techniques' },
-   { hotkey: 'f', section: 'failures' },
-   { hotkey: 'c', section: 'coverage' },
+   { hotkey: 't', section: 'testing' },
+   { hotkey: 'f', section: 'fails' },
+   { hotkey: 'u', section: 'understanding' },
    { hotkey: 'a', section: 'all' },
 ];
 
 const HELP_TEXT =
-   'up/down move  enter open detail  esc back or quit  t techniques  f failures  c coverage  a all  y copy axe command  q quit';
+   'up/down move  enter open detail  esc back or quit  t testing  f if it fails  u understanding  a all  y copy axe command  q quit';
 
 function useFinderStore(): FinderStore {
    const [state, setState] = useState<FinderState>({
@@ -200,6 +200,7 @@ function ListPane(props: {
 function DetailPane(props: {
    store: FinderStore;
    lines: string[];
+   width: number;
    height: number;
 }): ReactElement {
    const { state } = props.store;
@@ -208,7 +209,8 @@ function DetailPane(props: {
       Box,
       {
          flexDirection: 'column',
-         flexGrow: 1,
+         width: props.width,
+         flexShrink: 0,
          borderStyle: 'round',
          borderColor: state.pane === 'detail' ? 'cyan' : 'gray',
       },
@@ -267,8 +269,17 @@ export function FinderApp(props: FinderAppProps): ReactElement {
          Box,
          { flexDirection: 'row', height: paneHeight + BORDER_COLUMNS },
          createElement(ListPane, { store, rows, width: listWidth, height: paneHeight }),
-         createElement(DetailPane, { store, lines, height: paneHeight }),
+         createElement(DetailPane, {
+            store,
+            lines,
+            width: detailWidth,
+            height: paneHeight,
+         }),
       ),
-      createElement(Text, { wrap: 'truncate' }, chalk.dim(state.notice || HELP_TEXT)),
+      createElement(
+         Box,
+         { width: columns, flexShrink: 0 },
+         createElement(Text, { wrap: 'truncate' }, chalk.dim(state.notice || HELP_TEXT)),
+      ),
    );
 }

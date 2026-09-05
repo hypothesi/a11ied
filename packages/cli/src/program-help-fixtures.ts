@@ -51,25 +51,28 @@ export const topLevelHelpCases: HelpCase[] = [
       Look up pinned WCAG requirements and coverage data.
 
       Arguments:
-        criterion                   Show one criterion by id or slug, or one technique
-                                    by id such as G18.
+        criterion                            Show one criterion by id or slug, or one
+                                             technique by id such as G18.
 
       Options:
-        --wcag <version>            Use a specific WCAG version. Defaults to 2.2.
-                                    (default: "2.2")
-        --json                      Print JSON instead of human-readable text.
-        --verbose                   Print more detail in text output.
-        -h, --help                  display help for command
+        --wcag <version>                     Use a specific WCAG version. Defaults to
+                                             2.2. (default: "2.2")
+        --json                               Print JSON instead of human-readable
+                                             text.
+        --verbose                            Print more detail in text output.
+        -h, --help                           display help for command
 
       Commands:
-        criteria [options]          List criteria, optionally filtered to one
-                                    conformance level.
-        show [options] <criterion>  Show one criterion by id or slug with its
-                                    techniques, failures, and coverage.
-        search [options] <query>    Search criterion titles, summaries, techniques,
-                                    failures, and tags.
-        rule [options] <ruleId>     Map one axe-core rule id to its criteria,
-                                    techniques, failures, and fix guidance.
+        criteria [options]                   List criteria, optionally filtered to one
+                                             conformance level.
+        show [options] <criterion>           Show one criterion by id or slug with its
+                                             techniques, failures, and coverage.
+        understanding [options] <criterion>  Print the full Understanding document for
+                                             one criterion.
+        search [options] <query>             Search criterion titles, summaries,
+                                             techniques, failures, and tags.
+        rule [options] <ruleId>              Map one axe-core rule id to its criteria,
+                                             techniques, failures, and fix guidance.
       "
     `,
    },

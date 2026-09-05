@@ -1,10 +1,13 @@
 import {
    wcagLevelSchema,
    type AxeRuleLookupResult,
+   type CoverageLookupResult,
    type CoverageSummaryArtifact,
    type CriterionLookupKey,
+   type CriterionShowResult,
    type EvidenceStrategy,
    type TechniqueLookupResult,
+   type UnderstandingLookupResult,
    type WcagLevel,
    type WcagVersion,
 } from '@a11ied/contracts';
@@ -16,6 +19,7 @@ import {
    getCoverageSummary,
    getCriterionApplicability,
    getTechnique,
+   getUnderstanding,
    listApplicableCriteria,
    listCriteriaByLevel,
    searchCriteria,
@@ -27,6 +31,7 @@ import {
    resolveDocumentTarget,
    type ResolveDocumentTargetInput,
 } from '../targets/runtime.js';
+import { excerptUnderstanding } from './excerpt.js';
 import { parseWcagLevel, parseWcagVersion } from './parsing.js';
 
 export { CliEnvironmentError, CliUsageError } from '../errors/cli-errors.js';
@@ -92,7 +97,7 @@ export function showWcagCoverageSummary(version: string): CoverageSummaryArtifac
 export function showWcagCoverage(
    lookupKey: CriterionLookupKey,
    version: string,
-): ReturnType<typeof getCoverage> {
+): CoverageLookupResult {
    const parsedVersion = parseWcagVersion(version);
 
    try {
@@ -102,15 +107,34 @@ export function showWcagCoverage(
    }
 }
 
+function findUnderstandingExcerpt(
+   lookupKey: CriterionLookupKey,
+   version: WcagVersion,
+): string | undefined {
+   try {
+      return excerptUnderstanding(getUnderstanding(lookupKey, { version }).body);
+   } catch {
+      return undefined;
+   }
+}
+
 /**
  * Resolves one criterion by id or slug for the requested WCAG version, together with its
- * coverage state and testing strategy.
+ * coverage state, testing strategy, and a short excerpt of its Understanding document.
+ * Print the full document with `a1 wcag understanding <id>`.
  */
 export function showWcagCriterion(
    lookupKey: CriterionLookupKey,
    version: string,
-): ReturnType<typeof getCoverage> {
-   return showWcagCoverage(lookupKey, version);
+): CriterionShowResult {
+   const coverage = showWcagCoverage(lookupKey, version);
+   return {
+      ...coverage,
+      understandingExcerpt: findUnderstandingExcerpt(
+         lookupKey,
+         coverage.criterion.wcagVersion,
+      ),
+   };
 }
 
 /** Searches the local criterion corpus with ranked match metadata. */
@@ -149,6 +173,20 @@ export function showWcagTechnique(
 
    try {
       return getTechnique(lookupKey, { version: parsedVersion });
+   } catch (error) {
+      normalizeEngineError(error);
+   }
+}
+
+/** Returns one criterion's full Understanding document by id or slug. */
+export function showWcagUnderstanding(
+   lookupKey: CriterionLookupKey,
+   version: string,
+): UnderstandingLookupResult {
+   const parsedVersion = parseWcagVersion(version);
+
+   try {
+      return getUnderstanding(lookupKey, { version: parsedVersion });
    } catch (error) {
       normalizeEngineError(error);
    }

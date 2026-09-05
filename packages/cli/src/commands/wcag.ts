@@ -127,6 +127,21 @@ function registerShowCommand(wcagCommand: Command): void {
    });
 }
 
+function registerUnderstandingCommand(wcagCommand: Command): void {
+   withWcagOptions(
+      wcagCommand
+         .command('understanding <criterion>')
+         .description('Print the full Understanding document for one criterion.'),
+   ).action(async (criterion: string, options: WcagCommandOptions) => {
+      await runWcagCommand({
+         subcommand: 'understanding',
+         options,
+         buildResult: (core) => core.showWcagUnderstanding(criterion, options.wcag),
+         renderText: (renderers) => renderers.renderUnderstandingText,
+      });
+   });
+}
+
 function registerSearchCommand(wcagCommand: Command): void {
    withWcagOptions(
       wcagCommand
@@ -187,6 +202,7 @@ export function registerWcagCommands(program: Command): void {
 
    registerCriteriaCommand(wcagCommand);
    registerShowCommand(wcagCommand);
+   registerUnderstandingCommand(wcagCommand);
    registerSearchCommand(wcagCommand);
    registerRuleCommand(wcagCommand);
 }

@@ -4,7 +4,12 @@ import {
    type CliOutputEnvelope,
 } from '#contracts';
 import { count, dim, indent, section, title } from '../lib/format.js';
-import { criterionLine, type CriterionSummary, type RenderOptions } from './shared.js';
+import {
+   criterionLine,
+   showCriterionHintLine,
+   type CriterionSummary,
+   type RenderOptions,
+} from './shared.js';
 
 const MATCH_DEPTH = 2;
 const SUMMARY_COLUMN_WIDTH = 11;
@@ -45,6 +50,9 @@ export function renderCriteriaText(
 
    for (const group of groupByGuideline(result.criteria)) {
       lines.push(...section(group.label, group.criteria.map(criterionLine)));
+   }
+   if (result.criteria.length > 0) {
+      lines.push('', showCriterionHintLine());
    }
 
    return lines.join('\n');
@@ -105,9 +113,7 @@ export function renderSearchText(
 
    for (const entry of result.results) {
       const summary = { id: entry.criterionId, title: entry.title, level: entry.level };
-      lines.push(
-         ...indent([`${criterionLine(summary)}  ${dim(`score ${entry.score}`)}`]),
-      );
+      lines.push(...indent([criterionLine(summary)]));
       if (options.verbose && entry.matches.length > 0) {
          const matchLines = entry.matches.map(
             (match) => `${dim(`${match.field}:`)} ${match.text}`,
@@ -118,6 +124,8 @@ export function renderSearchText(
 
    if (result.results.length === 0) {
       lines.push(...indent([dim('No criteria matched.')]));
+   } else {
+      lines.push('', showCriterionHintLine());
    }
 
    return lines.join('\n');

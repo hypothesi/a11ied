@@ -149,11 +149,33 @@ async function assertWcagRule(): Promise<void> {
 
    const text = await runCli(['wcag', 'rule', 'color-contrast']);
    expect(text.stdout).toContain('1.4.3  Contrast (Minimum)  [AA]');
-   expect(text.stdout).toContain('Techniques:  G145, G148, G174, G18');
    expect(text.stdout).toContain('Fix');
 
    const missing = await runCli(['wcag', 'rule', 'not-a-rule', '--json']);
    expectFirstErrorMessage({ result: missing, match: /not-a-rule/ });
+}
+
+async function assertWcagUnderstanding(): Promise<void> {
+   const jsonResult = await runCli(['wcag', 'understanding', 'page-titled', '--json']);
+   const json = parseJsonOutput(jsonResult.stdout);
+   expect(jsonResult.status).toBe(EXIT_SUCCESS);
+   const payload = json.result as {
+      criterion: { id: string };
+      document: { title: string; url: string; status: string };
+      body: string;
+   };
+   expect(payload.criterion.id).toBe('2.4.2');
+   expect(payload.document.url).toBe(
+      'https://www.w3.org/WAI/WCAG22/Understanding/page-titled',
+   );
+   expect(payload.document.title).toBeTruthy();
+   expect(payload.document.status).toBeTruthy();
+   expect(payload.body.length).toBeGreaterThan(0);
+
+   const text = await runCli(['wcag', 'understanding', '2.4.2']);
+   expect(text.stdout).toContain('2.4.2  Page Titled  [A]');
+   expect(text.stdout).toContain(`Source: ${payload.document.title}`);
+   expect(text.stdout).toContain(payload.document.url);
 }
 
 async function assertWcagBareHelp(): Promise<void> {
@@ -187,44 +209,38 @@ async function assertWcagInvalidVersion(): Promise<void> {
 async function assertTextShowSnapshot(): Promise<void> {
    const show = await runCli(['wcag', 'show', 'status-messages']);
    const excerpt = show.stdout.split('\n').slice(0, SHOW_EXCERPT_LINES).join('\n');
-   expect(excerpt).toMatchInlineSnapshot(`
-     "4.1.3  Status Messages  [AA]
-     Guideline 4.1 Compatible
 
-     Normative text
-       In content implemented using markup languages, status messages can be
-       programmatically determined through role or properties such that they can be
-       presented to the user by assistive technologies without receiving focus.
-
-     Understanding
-       https://www.w3.org/WAI/WCAG22/Understanding/status-messages
-
-     Coverage
-       State:       hybrid
-       axe rules:   none"
-   `);
-   expect(show.stdout).toContain('Techniques (');
-   expect(show.stdout).toContain('ARIA22  Using role=status to present status messages');
-   expect(show.stdout).toContain('Failures (');
-   expect(show.stdout).toContain('F103  Failure of Success Criterion 4.1.3');
+   expect(excerpt).toContain('4.1.3  Status Messages  [AA]');
+   expect(excerpt).toContain('Guideline 4.1 Compatible');
+   expect(excerpt).toContain(
+      'In content implemented using markup languages, status messages can be',
+   );
+   // The old field-label view is gone: no bare headings over a URL or an enum table.
+   expect(show.stdout).not.toContain('Normative text');
+   expect(show.stdout).not.toContain('Understanding\n');
+   expect(show.stdout).not.toContain('Coverage');
+   expect(show.stdout).toContain('Testing it');
+   expect(show.stdout).toContain('a1 sr expect <text>');
+   expect(show.stdout).toContain('If it fails');
+   expect(show.stdout).toContain('ARIA22');
+   expect(show.stdout).toContain('a1 wcag understanding 4.1.3');
 }
 
 async function assertTextSearchSnapshot(): Promise<void> {
    const search = await runCli(['wcag', 'search', 'status message']);
    const excerpt = search.stdout.split('\n').slice(0, SEARCH_EXCERPT_LINES).join('\n');
-   expect(excerpt).toMatchInlineSnapshot(`
-     "Search results for "status message"  2 matches
 
-       4.1.3  Status Messages  [AA]  score 38"
-   `);
+   expect(excerpt).toContain('Search results for "status message"  2 matches');
+   expect(excerpt).toContain('4.1.3  Status Messages  [AA]');
+   expect(excerpt).not.toContain('score');
+   expect(search.stdout).toContain('Run a1 wcag x.y.z for details');
 }
 
 async function assertTextVerboseShow(): Promise<void> {
    const verboseShow = await runCli(['wcag', 'show', 'status-messages', '--verbose']);
    expect(verboseShow.stdout).toMatch(/Slug:\s+status-messages/);
-   expect(verboseShow.stdout).toContain(
-      'https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA22',
-   );
+   expect(verboseShow.stdout).toMatch(/Coverage state:\s+hybrid/);
+   expect(verboseShow.stdout).toMatch(/Procedure ids:\s+status_message_probe/);
 }
 
 describe('cli wcag commands', () => {
@@ -248,6 +264,9 @@ describe('cli wcag commands', () => {
    });
    it('maps an axe rule to criteria with wcag rule', async () => {
       await assertWcagRule();
+   });
+   it('prints the full Understanding document with the source attribution', async () => {
+      await assertWcagUnderstanding();
    });
    it('prints help and exits 0 for bare wcag without a terminal', async () => {
       await assertWcagBareHelp();

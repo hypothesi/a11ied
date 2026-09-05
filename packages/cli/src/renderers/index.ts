@@ -11,4 +11,5 @@ export {
    renderAxeRuleText,
    renderShowCriterionText,
    renderTechniqueText,
+   renderUnderstandingText,
 } from './wcag-show.js';

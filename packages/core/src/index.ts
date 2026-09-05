@@ -147,6 +147,7 @@ export {
    showWcagAxeRule,
    showWcagCoverageSummary,
    showWcagTechnique,
+   showWcagUnderstanding,
 } from './wcag/runtime.js';
 export {
    DEFAULT_IDLE_TIMEOUT_MINUTES,

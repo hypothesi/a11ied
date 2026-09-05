@@ -1,11 +1,17 @@
-import { listWcagCriteria, searchWcagCriteria, showWcagCriterion } from '#core';
+import {
+   listWcagCriteria,
+   searchWcagCriteria,
+   showWcagCriterion,
+   showWcagUnderstanding,
+} from '#core';
 import { errorLine } from '../lib/format.js';
 import {
    renderCriterionDetailLines,
+   understandingDetailLines,
    type CriterionDetailSection,
 } from '../renderers/wcag-show.js';
 
-export type FinderSection = 'all' | CriterionDetailSection;
+export type FinderSection = 'all' | CriterionDetailSection | 'understanding';
 
 export interface FinderRow {
    id: string;
@@ -16,13 +22,12 @@ export interface FinderRow {
 }
 
 const SEARCH_LIMIT = 50;
-const sectionFilters: Readonly<
+const sectionFilters: Partial<
    Record<FinderSection, ReadonlyArray<CriterionDetailSection> | undefined>
 > = {
    all: undefined,
-   coverage: ['coverage'],
-   techniques: ['techniques'],
-   failures: ['failures'],
+   testing: ['testing'],
+   fails: ['fails'],
 };
 
 function listAllRows(version: string): FinderRow[] {
@@ -72,6 +77,17 @@ export function listFinderRows(query: string, version: string): FinderRow[] {
    return [...direct, ...ranked];
 }
 
+function buildUnderstandingDetailLines(input: {
+   criterionId: string;
+   version: string;
+   width: number;
+}): string[] {
+   return understandingDetailLines(
+      showWcagUnderstanding(input.criterionId, input.version),
+      { verbose: true, width: input.width },
+   );
+}
+
 /** Detail pane lines for one criterion, limited to the section a hotkey selected. */
 export function buildDetailLines(input: {
    criterionId: string;
@@ -80,9 +96,16 @@ export function buildDetailLines(input: {
    width: number;
 }): string[] {
    try {
+      if (input.section === 'understanding') {
+         return buildUnderstandingDetailLines(input);
+      }
       return renderCriterionDetailLines(
          showWcagCriterion(input.criterionId, input.version),
-         { verbose: true, width: input.width, sections: sectionFilters[input.section] },
+         {
+            verbose: true,
+            width: input.width,
+            sections: sectionFilters[input.section],
+         },
       );
    } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

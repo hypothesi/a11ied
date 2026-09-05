@@ -5,8 +5,16 @@ const FIELD_SPACING_INDEX = 2;
 const FIELD_VALUE_INDEX = 3;
 const FIELD_LINE = /^([A-Z][A-Za-z0-9 /()_-]+:)(\s*)(.*)$/u;
 
+const BLOCK_CLOSING_TAGS = /<\/(?:p|div|li|dt|dd|section|h[1-6])>/giu;
+
+/**
+ * Strips markup and collapses whitespace to single spaces. Block-level closing tags get a
+ * space first, so minified HTML with no whitespace between elements (`<p>Note</p><p>...`)
+ * does not run two sentences together.
+ */
 export function stripHtml(value: string): string {
    return value
+      .replaceAll(BLOCK_CLOSING_TAGS, ' ')
       .replaceAll(/<[^>]+>/g, '')
       .replaceAll(/\s+/g, ' ')
       .trim();
