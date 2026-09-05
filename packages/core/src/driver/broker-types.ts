@@ -5,9 +5,9 @@ import type {
    DriverCheckpoint,
    SessionRecording,
 } from '@a11ied/contracts';
-import type { DriverAdapter } from '@a11ied/guidepup';
+import type { DriverAdapter } from '@a11ied/guidepup/browser';
 
-import type { TranscriptRecorder } from './transcript.js';
+import type { TranscriptRecorder } from './transcript-recorder.js';
 
 /** One newline-delimited JSON request to the broker. */
 export interface BrokerRequest {
@@ -30,11 +30,20 @@ export interface BrokerResponse {
    };
 }
 
-export interface BrokerHandlerContext {
+/**
+ * What running one action needs: the adapter, the checkpoints, the transcript, and the
+ * app a bare focus action returns to. The broker adds the session record and persistence;
+ * the test runners build this much and nothing more.
+ */
+export interface ActionContext {
    adapter: DriverAdapter;
-   session: AccessibilityDriverSession;
+   session: Pick<AccessibilityDriverSession, 'app'>;
    checkpoints: DriverCheckpoint[];
    transcript: TranscriptRecorder;
+}
+
+export interface BrokerHandlerContext extends ActionContext {
+   session: AccessibilityDriverSession;
    writeMetadata: (session: AccessibilityDriverSession) => Promise<void>;
    finishRecording?: () => Promise<SessionRecording | undefined>;
 }

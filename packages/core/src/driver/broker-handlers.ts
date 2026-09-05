@@ -2,21 +2,18 @@ import {
    driverActionResultSchema,
    type DriverActionName,
    type DriverActionResult,
+   type DriverStateSnapshot,
 } from '@a11ied/contracts';
 
 import { CliEnvironmentError, CliUsageError } from '../errors/cli-errors.js';
 import type {
-   ActionExecutionResult,
    BrokerHandlerContext,
    BrokerRequest,
    BrokerResponse,
    HandleResult,
 } from './broker-types.js';
-import {
-   executeAction,
-   parseActionRequest,
-   SPEECH_TRIGGERING_ACTIONS,
-} from './broker-actions.js';
+import { parseActionRequest } from './broker-actions.js';
+import { captureContextState, runContextAction } from './context-action.js';
 
 type BrokerError = NonNullable<BrokerResponse['error']>;
 
@@ -41,27 +38,31 @@ function toBrokerError(error: unknown): BrokerError {
    return { code: 'broker-error', message: String(error) };
 }
 
-/**
- * Reads the adapter state, stamps new phrases into the transcript, and persists the
- * session.
- */
+/** Persists the session with the log cursor the state reports and builds the result. */
+async function finishActionResult(
+   context: BrokerHandlerContext,
+   result: { action: DriverActionName; state: DriverStateSnapshot },
+   details?: Record<string, unknown>,
+): Promise<DriverActionResult> {
+   const updatedSession = { ...context.session, logCursor: result.state.logCursor };
+   context.session = updatedSession;
+   await context.writeMetadata(updatedSession);
+   return driverActionResultSchema.parse({
+      session: updatedSession,
+      action: result.action,
+      state: result.state,
+      details,
+   });
+}
+
+/** Captures the current state without running an action, for status and stop. */
 async function buildActionResult(
    context: BrokerHandlerContext,
    action: DriverActionName,
    details?: Record<string, unknown>,
 ): Promise<DriverActionResult> {
-   const rawState = await context.adapter.readState(context.checkpoints);
-   context.transcript.capture(rawState);
-   const state = context.transcript.attach(rawState);
-   const updatedSession = { ...context.session, logCursor: state.logCursor };
-   context.session = updatedSession;
-   await context.writeMetadata(updatedSession);
-   return driverActionResultSchema.parse({
-      session: updatedSession,
-      action,
-      state,
-      details,
-   });
+   const state = await captureContextState(context);
+   return finishActionResult(context, { action, state }, details);
 }
 
 async function handleStatusCommand(context: BrokerHandlerContext): Promise<HandleResult> {
@@ -109,35 +110,16 @@ async function handleAttachDocumentCommand(
    return { response: { ok: true, result }, shouldStop: false };
 }
 
-async function stabilizeSpeech(
-   context: BrokerHandlerContext,
-   action: DriverActionName,
-): Promise<void> {
-   if (SPEECH_TRIGGERING_ACTIONS.has(action)) {
-      await context.adapter.waitForSpeechStabilization();
-   }
-}
-
 async function handleActionCommand(
    context: BrokerHandlerContext,
    request: BrokerRequest,
 ): Promise<HandleResult> {
    const actionRequest = parseActionRequest(request.action, request.payload);
-   const startTime = Date.now();
    const options =
       request.timeoutMs === undefined ? {} : { timeoutMs: request.timeoutMs };
-   const execution: ActionExecutionResult = await executeAction(
-      context,
-      actionRequest,
-      options,
-   );
-   await stabilizeSpeech(context, actionRequest.action);
-   const result = await buildActionResult(
-      context,
-      actionRequest.action,
-      execution.details,
-   );
-   result.actionDurationMs = Date.now() - startTime;
+   const ran = await runContextAction(context, actionRequest, options);
+   const result = await finishActionResult(context, ran, ran.details);
+   result.actionDurationMs = ran.actionDurationMs;
    return { response: { ok: true, result }, shouldStop: false };
 }
 

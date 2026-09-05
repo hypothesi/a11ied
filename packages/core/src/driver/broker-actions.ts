@@ -5,12 +5,12 @@ import {
    type DriverActionRequest,
    type DriverFocusTarget,
 } from '@a11ied/contracts';
-import { DriverCommandError, type DriverActionOptions } from '@a11ied/guidepup';
+import { DriverCommandError, type DriverActionOptions } from '@a11ied/guidepup/browser';
 
 import { CliUsageError } from '../errors/cli-errors.js';
 import { runElementsAction, runGotoAction, runReadAllAction } from './broker-loops.js';
 import { runWaitAction } from './broker-wait.js';
-import type { ActionExecutionResult, BrokerHandlerContext } from './broker-types.js';
+import type { ActionContext, ActionExecutionResult } from './broker-types.js';
 
 /** Actions after which the broker waits for the reader to finish speaking. */
 export const SPEECH_TRIGGERING_ACTIONS: ReadonlySet<DriverActionName> =
@@ -47,7 +47,7 @@ export function parseActionRequest(
 }
 
 function resolveFocusTarget(
-   context: BrokerHandlerContext,
+   context: ActionContext,
    payload: DriverFocusTarget | undefined,
 ): DriverFocusTarget {
    if (payload) {
@@ -64,7 +64,7 @@ function resolveFocusTarget(
 }
 
 async function handlePerform(
-   context: BrokerHandlerContext,
+   context: ActionContext,
    request: Extract<DriverActionRequest, { action: 'perform' }>,
    options: DriverActionOptions,
 ): Promise<ActionExecutionResult> {
@@ -77,7 +77,7 @@ async function handlePerform(
  * jumps by kind through the navigation table.
  */
 async function handleNavigate(
-   context: BrokerHandlerContext,
+   context: ActionContext,
    request: Extract<DriverActionRequest, { action: 'next' | 'previous' }>,
    options: DriverActionOptions,
 ): Promise<ActionExecutionResult> {
@@ -92,7 +92,7 @@ async function handleNavigate(
 
 /** Runs title, find, and table, each of which reports its outcome in the details. */
 async function handleStructure(
-   context: BrokerHandlerContext,
+   context: ActionContext,
    request: DriverActionRequest,
    options: DriverActionOptions,
 ): Promise<ActionExecutionResult> {
@@ -109,7 +109,7 @@ async function handleStructure(
 
 /** Runs the bounded loops: the rotor, say-all, and goto. */
 async function handleLoop(
-   context: BrokerHandlerContext,
+   context: ActionContext,
    request: Extract<DriverActionRequest, { action: 'elements' | 'read-all' | 'goto' }>,
    options: DriverActionOptions,
 ): Promise<ActionExecutionResult> {
@@ -124,7 +124,7 @@ async function handleLoop(
 
 /** Runs wait and screenshot, which observe the reader without moving its cursor. */
 async function handleObservation(
-   context: BrokerHandlerContext,
+   context: ActionContext,
    request: Extract<DriverActionRequest, { action: 'wait' | 'screenshot' }>,
    options: DriverActionOptions,
 ): Promise<ActionExecutionResult> {
@@ -138,10 +138,7 @@ async function handleObservation(
    return { details: { screenshot: saved.path, source: saved.source } };
 }
 
-function recordCheckpoint(
-   context: BrokerHandlerContext,
-   label: string,
-): ActionExecutionResult {
+function recordCheckpoint(context: ActionContext, label: string): ActionExecutionResult {
    const createdAt = new Date().toISOString();
    context.checkpoints.push({ label, createdAt });
    context.transcript.addCheckpoint(label, createdAt);
@@ -149,7 +146,7 @@ function recordCheckpoint(
 }
 
 async function handleFocus(
-   context: BrokerHandlerContext,
+   context: ActionContext,
    payload: DriverFocusTarget | undefined,
 ): Promise<ActionExecutionResult> {
    const focusResult = await context.adapter.focus(resolveFocusTarget(context, payload));
@@ -157,7 +154,7 @@ async function handleFocus(
 }
 
 async function dispatchAction(
-   context: BrokerHandlerContext,
+   context: ActionContext,
    request: DriverActionRequest,
    options: DriverActionOptions,
 ): Promise<ActionExecutionResult> {
@@ -213,7 +210,7 @@ async function dispatchAction(
  * target and command come back as usage errors, so the CLI exits 2 with the message.
  */
 export async function executeAction(
-   context: BrokerHandlerContext,
+   context: ActionContext,
    request: DriverActionRequest,
    options: DriverActionOptions = {},
 ): Promise<ActionExecutionResult> {

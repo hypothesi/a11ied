@@ -1,7 +1,7 @@
 import { DEFAULT_WAIT_PAUSE_MS, type DriverWaitPayload } from '@a11ied/contracts';
-import { delay } from '@a11ied/guidepup';
+import { delay } from '@a11ied/guidepup/browser';
 
-import type { ActionExecutionResult, BrokerHandlerContext } from './broker-types.js';
+import type { ActionContext, ActionExecutionResult } from './broker-types.js';
 import {
    describeMatcher,
    matchesText,
@@ -12,7 +12,7 @@ import {
 const WAIT_POLL_INTERVAL_MS = 150;
 
 interface WaitPoll {
-   context: BrokerHandlerContext;
+   context: ActionContext;
    matcher: TextMatcher;
    /** Transcript entries before this index were spoken before the wait began. */
    startIndex: number;
@@ -67,7 +67,7 @@ async function pollUntilMatch(poll: WaitPoll): Promise<ActionExecutionResult> {
  * and is replaced by another before the next poll is still seen.
  */
 export async function runWaitAction(
-   context: BrokerHandlerContext,
+   context: ActionContext,
    payload: DriverWaitPayload,
 ): Promise<ActionExecutionResult> {
    const startedAt = Date.now();

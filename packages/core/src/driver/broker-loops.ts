@@ -7,7 +7,7 @@ import type {
    DriverNavigationKind,
    DriverReadAllPayload,
 } from '@a11ied/contracts';
-import type { DriverActionOptions, DriverAdapter } from '@a11ied/guidepup';
+import type { DriverActionOptions, DriverAdapter } from '@a11ied/guidepup/browser';
 
 import type { ActionExecutionResult } from './broker-types.js';
 
@@ -180,16 +180,26 @@ function normalizeWords(value: string): string {
       .trim();
 }
 
-function matchesGoto(item: DriverCurrentItem, payload: DriverGotoPayload): boolean {
-   if (payload.role !== undefined) {
-      const wanted = normalizeWords(payload.role);
-      if (normalizeWords(item.role ?? '') !== wanted) {
-         return false;
-      }
+/** What goto and the toBeOn matcher look for: a role, a name, or both. */
+export interface WantedItem {
+   role?: string | undefined;
+   name?: string | undefined;
+}
+
+/**
+ * Whether the item has the wanted role, spelled the way the reader or the caller spells
+ * it, and the wanted name somewhere in its name or phrase, without regard to case.
+ */
+export function matchesItem(item: DriverCurrentItem, wanted: WantedItem): boolean {
+   if (
+      wanted.role !== undefined &&
+      normalizeWords(item.role ?? '') !== normalizeWords(wanted.role)
+   ) {
+      return false;
    }
-   if (payload.name !== undefined) {
+   if (wanted.name !== undefined) {
       const haystack = normalizeWords(`${item.name ?? ''} ${item.phrase ?? ''}`);
-      return haystack.includes(normalizeWords(payload.name));
+      return haystack.includes(normalizeWords(wanted.name));
    }
    return true;
 }
@@ -202,14 +212,14 @@ export async function runGotoAction(
 ): Promise<ActionExecutionResult> {
    const kind = ROLE_KINDS[normalizeWords(payload.role ?? '')] ?? 'item';
    const start = await adapter.readCurrentItem();
-   if (matchesGoto(start.item, payload)) {
+   if (matchesItem(start.item, payload)) {
       return { details: { ...payload, found: true, steps: 0, kind } };
    }
    const { items, stoppedAt } = await runBoundedLoop({
       adapter,
       max: payload.max,
       step: () => adapter.navigate({ direction: 'next', kind }, options),
-      isMatch: (item) => matchesGoto(item, payload),
+      isMatch: (item) => matchesItem(item, payload),
    });
    return {
       details: {

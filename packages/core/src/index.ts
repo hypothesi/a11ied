@@ -214,3 +214,39 @@ export {
    resolveBrowserChoice,
    type BrowserChoice,
 } from './driver/browser-launch.js';
+export {
+   ScreenReader,
+   type LoopOptions,
+   type NavigateOptions,
+   type WaitOptions,
+} from './driver/screen-reader.js';
+export {
+   ScreenReaderAssertionError,
+   type SpokenFailureDetails,
+} from './driver/screen-reader-errors.js';
+export { screenReader, type ScreenReaderOptions } from './driver/screen-reader-node.js';
+export {
+   createContextTransport,
+   type ContextTransportOptions,
+} from './driver/screen-reader-context.js';
+export type {
+   ScreenReaderDocument,
+   ScreenReaderRunOptions,
+   ScreenReaderSession,
+   ScreenReaderStep,
+   ScreenReaderTransport,
+} from './driver/screen-reader-transport.js';
+export {
+   checkCurrentItem,
+   checkSpoken,
+   checkSpokenInOrder,
+   type SpokenCheck,
+   type SpokenMatch,
+   type SpokenOptions,
+} from './driver/spoken-matchers.js';
+export { matchesItem, type WantedItem } from './driver/broker-loops.js';
+export {
+   createVirtualHost,
+   type VirtualHostChoice,
+} from './driver/virtual-host-choice.js';
+export { createPlaywrightVirtualHost } from './driver/virtual-playwright-host.js';

@@ -92,6 +92,42 @@ const publicApiExpectations: PublicApiExpectation[] = [
       functions: ['runAxe'],
    },
    {
+      file: 'packages/core/src/driver/screen-reader-node.ts',
+      functions: ['screenReader'],
+   },
+   {
+      file: 'packages/core/src/driver/screen-reader.ts',
+      classes: ['ScreenReader'],
+   },
+   {
+      file: 'packages/core/src/driver/screen-reader-errors.ts',
+      classes: ['ScreenReaderAssertionError'],
+   },
+   {
+      file: 'packages/core/src/driver/spoken-matchers.ts',
+      functions: ['checkSpoken', 'checkSpokenInOrder', 'checkCurrentItem'],
+   },
+   {
+      file: 'packages/core/src/driver/virtual-host-choice.ts',
+      functions: ['createVirtualHost'],
+   },
+   {
+      file: 'packages/core/src/driver/virtual-playwright-host.ts',
+      functions: ['createPlaywrightVirtualHost'],
+   },
+   {
+      file: 'packages/guidepup/src/virtual-runtime.ts',
+      functions: ['createVirtualRuntime'],
+   },
+   {
+      file: 'packages/guidepup/src/virtual-dom.ts',
+      functions: ['createJsdomVirtualHost'],
+   },
+   {
+      file: 'packages/cli/src/browser/index.ts',
+      functions: ['screenReader'],
+   },
+   {
       file: 'packages/core/src/targets/runtime.ts',
       functions: ['resolveDocumentTarget'],
    },
