@@ -1,10 +1,12 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import { registerResources } from './resources/register.js';
-import { registerApplicabilityTools } from './tools/applicability.js';
-import { registerDriverTools } from './tools/driver.js';
 import { registerExecutionTools } from './tools/execution.js';
 import { registerKnowledgeTools } from './tools/knowledge.js';
+import { registerSrActionTool } from './tools/sr-action.js';
+import { registerSrListTool } from './tools/sr-list.js';
+import { registerSrSessionTool } from './tools/sr-session.js';
+import { registerSrTranscriptTools } from './tools/sr-transcript.js';
 
 /** Creates the MCP server with all shipped tools and read-only resources registered. */
 export function createMcpServer(): McpServer {
@@ -15,9 +17,11 @@ export function createMcpServer(): McpServer {
 
    registerResources(server);
    registerKnowledgeTools(server);
-   registerApplicabilityTools(server);
-   registerDriverTools(server);
    registerExecutionTools(server);
+   registerSrSessionTool(server);
+   registerSrActionTool(server);
+   registerSrListTool(server);
+   registerSrTranscriptTools(server);
 
    return server;
 }

@@ -1,108 +1,116 @@
 import {
-   accessibilityDriverSessionSchema,
+   axeRuleLookupResultSchema,
+   coverageLookupResultSchema,
    criterionSearchResponseSchema,
    type CriterionSearchResult,
-   wcagLookupResultSchema,
 } from '@a11ied/contracts';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { describe, expect, it } from 'vitest';
-import type { z } from 'zod';
-import { withStateDir } from '../../cli/src/testing/fixtures.js';
 
-import { createMcpServer } from './index.js';
+import {
+   BASIC_PAGE,
+   BUTTON_NAME_FAILURE,
+   ONE_MINUTE_MS,
+   withHarness,
+} from './testing/harness.js';
 
-const ONE_MINUTE_MS = 60_000;
-const tempRoots: string[] = [];
+const CLI_EXIT_ASSERTION = 4;
 
-function getInvalidContentText(content: unknown): string {
-   if (!Array.isArray(content)) {
-      return '';
-   }
-
-   const [first] = content;
-   if (first?.type !== 'text') {
-      return '';
-   }
-
-   return first.text;
-}
-
-async function createHarness(): Promise<{
-   client: Client;
-   close: () => Promise<void>;
-}> {
-   const mcpServer = createMcpServer();
-   const client = new Client(
-      { name: 'a11ied-mcp-test-client', version: '0.1.0' },
-      { capabilities: {} },
-   );
-   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-   await Promise.all([
-      mcpServer.connect(serverTransport),
-      client.connect(clientTransport),
-   ]);
-
-   return {
-      client,
-      close: async () => {
-         await client.close();
-         await mcpServer.close();
-      },
-   };
-}
-
-async function withHarness(
-   callback: (harness: Awaited<ReturnType<typeof createHarness>>) => Promise<void>,
-): Promise<void> {
-   const harness = await createHarness();
-   try {
-      await callback(harness);
-   } finally {
-      await harness.close();
-   }
-}
-
-async function startVirtualSession(
-   client: Client,
-): Promise<z.infer<typeof accessibilityDriverSessionSchema>> {
-   const start = await client.callTool({
-      name: 'driver_session',
-      arguments: { action: 'start', target: 'virtual', allowVirtual: true },
-   });
-
-   expect(start.isError).toBeFalsy();
-   return accessibilityDriverSessionSchema.parse(start.structuredContent);
-}
-
-describe('wcag lookup tool', () => {
-   it('matches CLI lookup semantics', async () => {
+describe('wcag show tool', () => {
+   it('matches the CLI wcag show command, coverage included', async () => {
       await withHarness(async (harness) => {
          const result = await harness.client.callTool({
-            name: 'wcag_lookup',
+            name: 'wcag_show',
             arguments: { criterion: '4.1.3', version: '2.2' },
          });
 
          expect(result.isError).toBeFalsy();
-         const payload = wcagLookupResultSchema.parse(result.structuredContent);
+         const payload = coverageLookupResultSchema.parse(result.structuredContent);
          expect(payload.lookupKey).toBe('4.1.3');
          expect(payload.criterion.id).toBe('4.1.3');
          expect(payload.criterion.slug).toBe('status-messages');
-         expect(payload.coverage).toBeUndefined();
+         expect(payload.coverage).toBeDefined();
+         expect(payload.strategy).toBeDefined();
       });
    });
 
-   it('includes coverage when requested', async () => {
+   it('looks up a technique id, matching wcag show G18', async () => {
       await withHarness(async (harness) => {
          const result = await harness.client.callTool({
-            name: 'wcag_lookup',
-            arguments: { criterion: '4.1.3', version: '2.2', include_coverage: true },
+            name: 'wcag_show',
+            arguments: { criterion: 'G18' },
          });
 
          expect(result.isError).toBeFalsy();
-         const payload = wcagLookupResultSchema.parse(result.structuredContent);
-         expect(payload.coverage).toBeDefined();
-         expect(payload.strategy).toBeDefined();
+         const payload = result.structuredContent as {
+            technique: { id: string };
+            criteria: Array<{ id: string }>;
+         };
+         expect(payload.technique.id).toBe('G18');
+         expect(payload.criteria.some((criterion) => criterion.id === '1.4.3')).toBe(
+            true,
+         );
+      });
+   });
+});
+
+describe('wcag criteria tool', () => {
+   it('lists every criterion when level is omitted, matching a1 wcag criteria', async () => {
+      await withHarness(async (harness) => {
+         const result = await harness.client.callTool({
+            name: 'wcag_criteria',
+            arguments: { version: '2.2' },
+         });
+
+         expect(result.isError).toBeFalsy();
+         const payload = result.structuredContent as {
+            level: string;
+            criteria: unknown[];
+         };
+         expect(payload.level).toBe('all');
+         expect(payload.criteria.length).toBeGreaterThan(0);
+      });
+   });
+
+   it('filters to one level, matching a1 wcag criteria --level', async () => {
+      await withHarness(async (harness) => {
+         const result = await harness.client.callTool({
+            name: 'wcag_criteria',
+            arguments: { level: 'A', version: '2.2' },
+         });
+
+         expect(result.isError).toBeFalsy();
+         const payload = result.structuredContent as { level: string };
+         expect(payload.level).toBe('A');
+      });
+   });
+
+   it('returns coverage totals when summary is set, matching a1 wcag criteria --summary', async () => {
+      await withHarness(async (harness) => {
+         const result = await harness.client.callTool({
+            name: 'wcag_criteria',
+            arguments: { summary: true, version: '2.2' },
+         });
+
+         expect(result.isError).toBeFalsy();
+         const payload = result.structuredContent as { totals: unknown };
+         expect(payload.totals).toBeDefined();
+      });
+   });
+});
+
+describe('wcag rule tool', () => {
+   it('maps an axe rule to its criteria, matching a1 wcag rule', async () => {
+      await withHarness(async (harness) => {
+         const result = await harness.client.callTool({
+            name: 'wcag_rule',
+            arguments: { ruleId: 'color-contrast', version: '2.2' },
+         });
+
+         expect(result.isError).toBeFalsy();
+         const payload = axeRuleLookupResultSchema.parse(result.structuredContent);
+         expect(payload.ruleId).toBe('color-contrast');
+         expect(payload.criteria.length).toBeGreaterThan(0);
+         expect(payload.helpUrl).toBeDefined();
       });
    });
 });
@@ -127,42 +135,116 @@ describe('wcag search tool', () => {
    });
 });
 
-describe('driver session tools', () => {
+describe('run_axe tool', () => {
    it(
-      'runs actions against the one active session without a session id',
+      'runs every mapped rule when criterion, level, and ruleIds are all omitted',
       async () => {
-         await withStateDir(tempRoots, async () => {
-            await withHarness(async (harness) => {
-               const session = await startVirtualSession(harness.client);
-               expect(session.sessionId).toMatch(/^drv_/);
-
-               const moved = await harness.client.callTool({
-                  name: 'driver_action',
-                  arguments: { action: 'next' },
-               });
-               expect(moved.isError).toBeFalsy();
-
-               const pressed = await harness.client.callTool({
-                  name: 'driver_action',
-                  arguments: { action: 'press', keys: ['Tab', 'Tab'] },
-               });
-               expect(pressed.isError).toBeFalsy();
-
-               const stop = await harness.client.callTool({
-                  name: 'driver_session',
-                  arguments: { action: 'stop' },
-               });
-               expect(stop.isError).toBeFalsy();
-
-               const orphaned = await harness.client.callTool({
-                  name: 'driver_action',
-                  arguments: { action: 'next' },
-               });
-               expect(orphaned.isError).toBe(true);
-               expect(getInvalidContentText(orphaned.content)).toContain(
-                  'No active screen reader session',
-               );
+         await withHarness(async (harness) => {
+            const result = await harness.client.callTool({
+               name: 'run_axe',
+               arguments: { target: BUTTON_NAME_FAILURE },
             });
+
+            expect(result.isError).toBeFalsy();
+            const payload = result.structuredContent as {
+               result: {
+                  violations: Array<{ id: string }>;
+                  verdict: { passed: boolean };
+               };
+               exitCode: number;
+            };
+            expect(
+               payload.result.violations.some(
+                  (violation) => violation.id === 'button-name',
+               ),
+            ).toBe(true);
+            expect(payload.result.verdict.passed).toBe(false);
+            expect(payload.exitCode).toBe(CLI_EXIT_ASSERTION);
+         });
+      },
+      ONE_MINUTE_MS,
+   );
+
+   it(
+      'rejects more than one of criterion, level, and ruleIds',
+      async () => {
+         await withHarness(async (harness) => {
+            const result = await harness.client.callTool({
+               name: 'run_axe',
+               arguments: { target: BASIC_PAGE, level: 'A', criterion: '1.1.1' },
+            });
+
+            expect(result.isError).toBe(true);
+         });
+      },
+      ONE_MINUTE_MS,
+   );
+});
+
+describe('tree tool', () => {
+   it(
+      'prints the accessibility tree, matching a1 tree',
+      async () => {
+         await withHarness(async (harness) => {
+            const result = await harness.client.callTool({
+               name: 'tree',
+               arguments: { target: BASIC_PAGE },
+            });
+
+            expect(result.isError).toBeFalsy();
+            const payload = result.structuredContent as { result: { yaml: string } };
+            expect(payload.result.yaml).toContain('heading');
+         });
+      },
+      ONE_MINUTE_MS,
+   );
+
+   it(
+      'filters by role, keeping only matching nodes and their ancestors',
+      async () => {
+         await withHarness(async (harness) => {
+            const result = await harness.client.callTool({
+               name: 'tree',
+               arguments: { target: BASIC_PAGE, role: 'heading' },
+            });
+
+            expect(result.isError).toBeFalsy();
+            const payload = result.structuredContent as {
+               result: { nodes: Array<{ role: string }> };
+            };
+            expect(payload.result.nodes.length).toBeGreaterThan(0);
+         });
+      },
+      ONE_MINUTE_MS,
+   );
+});
+
+describe('audit tool', () => {
+   it(
+      'runs axe, tree, and applicability, and matches the CLI exit meaning',
+      async () => {
+         await withHarness(async (harness) => {
+            const result = await harness.client.callTool({
+               name: 'audit',
+               arguments: { target: BUTTON_NAME_FAILURE },
+            });
+
+            expect(result.isError).toBeFalsy();
+            const payload = result.structuredContent as {
+               result: {
+                  axe: unknown;
+                  tree: unknown;
+                  criteria: unknown[];
+                  verdict: { passed: boolean };
+                  nextCommands: string[];
+               };
+               exitCode: number;
+            };
+            expect(payload.result.verdict.passed).toBe(false);
+            expect(payload.exitCode).toBe(CLI_EXIT_ASSERTION);
+            expect(
+               payload.result.nextCommands.some((cmd) => cmd.includes('button-name')),
+            ).toBe(true);
          });
       },
       ONE_MINUTE_MS,
@@ -191,10 +273,10 @@ describe('tool metadata', () => {
    it('documents side effects for active tools', async () => {
       await withHarness(async (harness) => {
          const result = await harness.client.listTools();
-         const driverTool = result.tools.find((entry) => entry.name === 'driver_session');
+         const sessionTool = result.tools.find((entry) => entry.name === 'sr_session');
 
-         expect(driverTool?.description).toContain('real');
-         expect(driverTool?.description).toContain('targetType');
+         expect(sessionTool?.description).toContain('real');
+         expect(sessionTool?.description).toContain('targetType');
       });
    });
 });

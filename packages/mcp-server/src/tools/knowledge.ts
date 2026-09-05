@@ -1,20 +1,20 @@
 import {
+   axeRuleLookupResultSchema,
    coverageLookupResultSchema,
-   criteriaByLevelResultSchema,
-   criterionLookupKeySchema,
-   criterionLookupResultSchema,
    criterionSearchResponseSchema,
    doctorReportSchema,
+   techniqueLookupResultSchema,
    wcagLevelSchema,
-   wcagLookupResultSchema,
    wcagVersionSchema,
 } from '@a11ied/contracts';
 import {
    createDoctorReport,
    listWcagCriteria,
    searchWcagCriteria,
+   showWcagAxeRule,
    showWcagCoverage,
-   showWcagCriterion,
+   showWcagCoverageSummary,
+   showWcagTechnique,
 } from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
@@ -41,60 +41,59 @@ function registerDoctorTool(server: McpServer): void {
    );
 }
 
-function registerWcagLookupTool(server: McpServer): void {
+const TECHNIQUE_ID_PATTERN = /^[A-Z]+\d+$/u;
+
+function registerWcagShowTool(server: McpServer): void {
    server.registerTool(
-      'wcag_lookup',
+      'wcag_show',
       {
-         title: 'WCAG lookup',
+         title: 'WCAG show',
          description:
-            'Look up one WCAG criterion by id or slug. ' +
-            'Set include_coverage to true to also return coverage and testing-strategy data.',
+            'Show one WCAG criterion by id (such as "1.4.3") or slug (such as "contrast-minimum"), ' +
+            'with its techniques, failures, coverage state, and testing strategy. A technique or ' +
+            'failure id (such as "G18" or "F65") returns the technique and the criteria that list it ' +
+            'instead. Matches the CLI wcag show <criterion> command, including its technique lookup.',
          inputSchema: z.object({
-            criterion: criterionLookupKeySchema,
+            criterion: z.string().min(1),
             version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
-            include_coverage: z.boolean().default(false),
          }),
-         outputSchema: wcagLookupResultSchema,
          annotations: readOnlyAnnotations,
       },
-      async ({ criterion, version, include_coverage }) => {
-         const base = criterionLookupResultSchema.parse(
-            showWcagCriterion(criterion, version),
-         );
-         if (!include_coverage) {
-            return createToolResponse(wcagLookupResultSchema.parse(base));
+      async ({ criterion, version }) => {
+         if (TECHNIQUE_ID_PATTERN.test(criterion)) {
+            return createToolResponse(
+               techniqueLookupResultSchema.parse(showWcagTechnique(criterion, version)),
+            );
          }
-         const coverage = coverageLookupResultSchema.parse(
-            showWcagCoverage(criterion, version),
-         );
          return createToolResponse(
-            wcagLookupResultSchema.parse({
-               ...base,
-               coverage: coverage.coverage,
-               strategy: coverage.strategy,
-            }),
+            coverageLookupResultSchema.parse(showWcagCoverage(criterion, version)),
          );
       },
    );
 }
 
-function registerWcagLevelsTool(server: McpServer): void {
+function registerWcagCriteriaTool(server: McpServer): void {
    server.registerTool(
-      'wcag_levels',
+      'wcag_criteria',
       {
-         title: 'WCAG levels',
-         description: 'List all WCAG criteria at one level for a WCAG version.',
+         title: 'WCAG criteria',
+         description:
+            'List WCAG criteria. Omit level to list every criterion. Set level to A, AA, or AAA to filter. ' +
+            'Set summary to return coverage totals per level instead of the list. ' +
+            'Matches the CLI wcag criteria [--level] [--summary] command.',
          inputSchema: z.object({
-            level: wcagLevelSchema,
+            level: wcagLevelSchema.optional(),
+            summary: z.boolean().default(false),
             version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
          }),
-         outputSchema: criteriaByLevelResultSchema,
          annotations: readOnlyAnnotations,
       },
-      async ({ level, version }) =>
-         createToolResponse(
-            criteriaByLevelResultSchema.parse(listWcagCriteria(level, version)),
-         ),
+      async ({ level, summary, version }) => {
+         if (summary) {
+            return createToolResponse(showWcagCoverageSummary(version));
+         }
+         return createToolResponse(listWcagCriteria(level, version));
+      },
    );
 }
 
@@ -126,9 +125,33 @@ function registerWcagSearchTool(server: McpServer): void {
    );
 }
 
+function registerWcagRuleTool(server: McpServer): void {
+   server.registerTool(
+      'wcag_rule',
+      {
+         title: 'WCAG rule',
+         description:
+            'Map one axe-core rule id (such as "color-contrast") to the WCAG criteria it covers, ' +
+            "the techniques and failures for those criteria, and the rule's fix guidance from axe-core. " +
+            'Matches the CLI wcag rule <ruleId> command.',
+         inputSchema: z.object({
+            ruleId: z.string().min(1),
+            version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
+         }),
+         outputSchema: axeRuleLookupResultSchema,
+         annotations: readOnlyAnnotations,
+      },
+      async ({ ruleId, version }) =>
+         createToolResponse(
+            axeRuleLookupResultSchema.parse(await showWcagAxeRule(ruleId, version)),
+         ),
+   );
+}
+
 export function registerKnowledgeTools(server: McpServer): void {
    registerDoctorTool(server);
-   registerWcagLookupTool(server);
-   registerWcagLevelsTool(server);
+   registerWcagShowTool(server);
+   registerWcagCriteriaTool(server);
    registerWcagSearchTool(server);
+   registerWcagRuleTool(server);
 }

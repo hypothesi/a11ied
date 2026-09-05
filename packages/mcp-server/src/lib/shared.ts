@@ -1,43 +1,49 @@
-import {
-   applicabilityMatrixSchema,
-   applicabilitySignalSchema,
-   criterionApplicabilityLookupResultSchema,
-   targetReferenceSchema,
-   wcagVersionSchema,
-   type Platform,
-   type CriteriaByLevelResult,
-   type NormalizedCriterion,
+import type {
+   AxeBaseline,
+   AxeFailOnImpact,
+   CriteriaByLevelResult,
+   NormalizedCriterion,
+   Platform,
 } from '@a11ied/contracts';
 import {
+   DEFAULT_FAIL_ON_IMPACT,
    describeResolvedTarget,
    listWcagCriteria,
    resolveDefaultTarget,
    resolveDocumentTarget,
    showWcagCoverage,
+   type DocumentLoad,
+   type ResolveDocumentTargetInput,
+   type ResolvedDocumentTarget,
 } from '@a11ied/core';
 import { z } from 'zod';
+
 const JSON_INDENT = 2;
+
 export const DEFAULT_WCAG_VERSION = '2.2' as const;
 export const MAX_SEARCH_RESULTS = 50;
 export const DEFAULT_SEARCH_RESULTS = 10;
 export const SUPPORTED_WCAG_VERSIONS = ['2.1', '2.2'] as const;
+
 export const readOnlyAnnotations = {
    readOnlyHint: true,
    destructiveHint: false,
    openWorldHint: false,
 } as const;
+
 export const activeAnnotations = {
    readOnlyHint: false,
    destructiveHint: false,
    openWorldHint: true,
 } as const;
+
+/** A URL a real screen reader can navigate to, used by every `sr_session` action. */
 export const targetInputSchema = z
    .object({
       url: z.string().url().optional(),
    })
    .superRefine((value, ctx) => {
-      const hasUrl = value.url !== undefined;
-      if (!hasUrl) {
+      if (value.url === undefined) {
          ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: 'Provide url.',
@@ -45,27 +51,37 @@ export const targetInputSchema = z
          });
       }
    });
-export const inspectApplicableResultSchema = z.object({
-   version: wcagVersionSchema,
-   target: targetReferenceSchema,
-   signals: z.array(applicabilitySignalSchema),
-   matrix: applicabilityMatrixSchema,
+
+/**
+ * The page target every `axe`, `tree`, and `audit` tool call accepts: an http(s) URL, a
+ * local file path, or inline HTML. Mirrors the CLI's positional `<target>` and `--html`.
+ */
+export const pageTargetInputSchema = z.object({
+   target: z.string().min(1).optional().describe('An http(s) URL or a local file path.'),
+   html: z.string().optional().describe('Inline HTML markup to load instead of target.'),
+   timeoutMs: z
+      .number()
+      .int()
+      .positive()
+      .optional()
+      .describe('Timeout for loading the target, in milliseconds. Defaults to 10000.'),
 });
-export const inspectCriterionResultSchema =
-   criterionApplicabilityLookupResultSchema.extend({
-      signals: z.array(applicabilitySignalSchema),
-   });
+export type PageTargetInput = z.infer<typeof pageTargetInputSchema>;
+
 export type SupportedWcagVersion = (typeof SUPPORTED_WCAG_VERSIONS)[number];
 export type TargetInput = z.infer<typeof targetInputSchema>;
+
 export interface ToolResponse<TPayload> {
    [key: string]: unknown;
    structuredContent: TPayload;
    content: Array<{ type: 'text'; text: string }>;
 }
+
 interface JsonResource {
    [key: string]: unknown;
    contents: Array<{ uri: string; mimeType: string; text: string }>;
 }
+
 interface ResolvedExecutionTarget {
    resolvedUrl: string;
    reportTarget: {
@@ -75,6 +91,14 @@ interface ResolvedExecutionTarget {
    };
    html: string;
 }
+
+/** The target a page-tool result reports: kind, the value given, and the resolved URL. */
+export interface PageReportTarget {
+   kind: string;
+   value: string;
+   resolvedUrl: string;
+}
+
 interface CriteriaResource {
    version: SupportedWcagVersion;
    criteria: CriteriaByLevelResult['criteria'];
@@ -147,6 +171,7 @@ export function buildTargetInput(input: TargetInput): {
    return {};
 }
 
+/** Resolves a session-lifecycle `url` input, the way `sr start` and `sr open` do. */
 export async function resolveExecutionTarget(
    input: TargetInput,
 ): Promise<ResolvedExecutionTarget> {
@@ -163,6 +188,56 @@ export async function resolveExecutionTarget(
       },
       html: await resolved.readHtml(),
    };
+}
+
+/** Resolves an `axe`/`tree`/`audit` page target the way the CLI's positional target does. */
+export async function resolvePageTarget(
+   input: PageTargetInput,
+   toolName: string,
+): Promise<ResolvedDocumentTarget> {
+   const request: ResolveDocumentTargetInput = { commandName: toolName };
+   if (input.target !== undefined) {
+      request.target = input.target;
+   }
+   if (input.html !== undefined) {
+      request.html = input.html;
+   }
+   if (input.timeoutMs !== undefined) {
+      request.timeoutMs = input.timeoutMs;
+   }
+   return resolveDocumentTarget(request);
+}
+
+/** A resolved page target always has a `load`; only `app` targets (unused here) lack one. */
+export function requireLoad(resolved: ResolvedDocumentTarget): DocumentLoad {
+   if (!resolved.load) {
+      throw new Error('This target has no page to load.');
+   }
+   return resolved.load;
+}
+
+export function describePageReportTarget(
+   resolved: ResolvedDocumentTarget,
+): PageReportTarget {
+   return {
+      kind: resolved.target.kind,
+      value: resolved.target.value,
+      resolvedUrl: describeResolvedTarget(resolved),
+   };
+}
+
+/** Fills in the `--fail-on` default the way `axe` and `audit` both do. */
+export function buildAxeVerdictInput(args: {
+   failOn: AxeFailOnImpact | undefined;
+   baseline: AxeBaseline | undefined;
+}): { failOn: AxeFailOnImpact; baseline?: AxeBaseline } {
+   const input: { failOn: AxeFailOnImpact; baseline?: AxeBaseline } = {
+      failOn: args.failOn ?? DEFAULT_FAIL_ON_IMPACT,
+   };
+   if (args.baseline) {
+      input.baseline = args.baseline;
+   }
+   return input;
 }
 
 function dedupeCriteria(
