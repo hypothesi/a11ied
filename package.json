@@ -15,6 +15,7 @@
       "format": "oxlint --fix && oxfmt",
       "lint": "oxlint && oxfmt --check",
       "pack:check": "npm pack --json --dry-run --workspace packages/contracts --workspace packages/wcag-data --workspace packages/wcag-engine --workspace packages/guidepup --workspace packages/core --workspace packages/mcp-server --workspace packages/cli",
+      "smoke:sr": "node scripts/smoke-screen-reader.mjs",
       "standards": "npm run lint && npm run typecheck && npm run build",
       "test": "rimraf .test-coverage && node -e \"const { mkdirSync } = require('node:fs'); mkdirSync('.test-coverage/.tmp', { recursive: true });\" && vitest run --coverage",
       "test:watch": "vitest",
