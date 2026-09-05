@@ -1,0 +1,19 @@
+# Words that name the move instead of the thing. Blocked, not reported.
+#
+# These sit between the other two lists. A word in vague.yml has no plain use at all, and
+# a word in substitutions.yml has exactly one plain replacement. A word here has several,
+# and which one is right depends on what the thing actually was: a "probe" is a test, or a
+# check, or a one-off script, and only the writer knows which.
+#
+# So this file asks rather than tells. That is also why these cannot live in
+# substitutions.yml, whose message is fixed at "Write '%s' instead of '%s'." and has to
+# name a replacement.
+#
+# Consumed by vale (npm: @vvago/vale) and by hooks/check-prose.mjs, which shells out to it.
+extends: existence
+message: "'%s' names the move, not the thing. Say what it actually is."
+level: error
+ignorecase: true
+tokens:
+  - prob(?:e|es|ed|ing)
+  - guard(?:ed|ing)

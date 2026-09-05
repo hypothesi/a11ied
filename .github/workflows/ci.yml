@@ -31,6 +31,9 @@ jobs:
          - name: Standards
            run: npm run standards
 
+         - name: Prose
+           run: npm run prose
+
    test:
       runs-on: ubuntu-latest
       steps:

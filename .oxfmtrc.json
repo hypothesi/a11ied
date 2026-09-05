@@ -5,7 +5,8 @@
       "**/coverage/**",
       "packages/docs/.astro/**",
       ".aix/**",
-      ".claude/**"
+      ".claude/**",
+      "styles/**"
    ],
    "printWidth": 90,
    "tabWidth": 3,

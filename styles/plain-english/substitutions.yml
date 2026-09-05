@@ -1,0 +1,62 @@
+# Words with a plain replacement. Reported, not blocked: some have a legitimate use when
+# quoting a spec, an API name, or someone else's copy, and a false positive should not
+# stop a turn.
+#
+# Keys are regular expressions. Verb forms are spelled out, because Vale matches the
+# pattern literally and does not stem: "leverage" alone will not catch "leverages".
+#
+# Consumed by vale (npm: @vvago/vale) and by hooks/check-prose.mjs, which shells out to it.
+extends: substitution
+message: "Write '%s' instead of '%s'."
+level: warning
+ignorecase: true
+swap:
+  leverag(?:e|es|ed|ing): use
+  utiliz(?:e|es|ed|ing): use
+  facilitat(?:e|es|ed|ing): help
+  streamlin(?:e|es|ed|ing): make faster
+  "delv(?:e|es|ed|ing)(?: into)?": examine
+  spearhead(?:s|ed|ing)?: lead
+  embark(?:s|ed|ing)?: start
+  unveil(?:s|ed|ing)?: show
+  highlight(?:s|ed|ing)?: show
+  plethora: many
+  myriad: many
+  paradigm: approach
+  landscape: name the subject, or "orientation" for a screen
+  synergy: overlap
+  intrinsic: built in
+  meticulous: careful
+  commendable: good
+  nuanced: say what the distinction is
+  intricate: say what makes it complex
+  simply: delete this
+  easily: delete this
+  effortlessly: delete this
+  hardened: say what changed
+  tightened: say what changed
+  landed: merged
+  shipped: released
+  drove: led
+  rallied: say what happened
+  "out of the box": by default
+  "under the hood": internally
+  "enables? you to": you can
+  "allows? you to": you can
+  "is designed to": say what it does
+  "aims to": say what it does
+  "gracefully handles": say what it does, such as "retries three times, then fails to the DLQ"
+  "it is worth noting that": delete this and state the fact
+  "it's important to": delete this and state the fact
+  "pushed over the finish line": merged
+  "stood up": added
+  "not only": say the thing once
+  "and/or": pick one, or write "X, or Y, or both"
+  whilst: while
+  Moreover: delete this
+  Furthermore: delete this
+  Notably: delete this
+  Importantly: delete this
+  Indeed: delete this
+  "as of my last knowledge update": delete this
+  "in this section": delete this

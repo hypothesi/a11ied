@@ -1,0 +1,52 @@
+# Terms with no plain-English use in my writing. Blocked, not reported.
+#
+# These are metaphors and intensifiers that stand in for a fact. Each reads as an
+# explanation without carrying one, which is the failure this style exists to stop.
+# Reaching for one of these means a value is missing. Go and get the value.
+#
+# Consumed by:
+#   - vale (https://vale.sh), if installed
+#   - hooks/check-prose.mjs, which shells out to it
+extends: existence
+message: "'%s' is a label, not an explanation. Name the thing or give the value."
+level: error
+ignorecase: true
+tokens:
+  # Metaphors that replace a mechanism with an image
+  - load.bearing
+  - blast radius
+  - happy path
+  - guardrail
+  - belt.and.suspenders
+  - under the hood
+  - belt.and
+  - gat(?:e|es|ed|ing)
+  - gatekeepers?
+  # Vague nouns that name a category instead of the thing
+  - tapestry
+  - realm
+  - beacon
+  - testament
+  - seam
+  - surface
+  - machinery
+  - mechanisms?
+  # Intensifiers that assert importance instead of showing it
+  - crucial
+  - vital
+  - pivotal
+  - holistic
+  - seamless
+  - cutting.edge
+  - groundbreaking
+  - transformative
+  - multifaceted
+  - comprehensive
+  - robust
+  - performant
+  - innovative
+  # Verbs that claim progress without naming it
+  - foster
+  - (?-i)underscore[sd]? (?:the|how|that|why|a|an|our|its|their)
+  - unravel
+  - travels
