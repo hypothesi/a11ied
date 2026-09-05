@@ -93,7 +93,7 @@ async function moveToFirstHeaderCell(): Promise<void> {
    await runSrJson(['next', 'table']);
    await runSrJson(['next', '--times', '4']);
    const header = await runSrJson(['read']);
-   expect(header.result.state.lastSpokenPhrase).toBe('rowheader, Plan');
+   expect(header.result.state.lastSpokenPhrase).toBe('columnheader, Plan');
 }
 
 async function assertTableEdges(): Promise<void> {
@@ -114,7 +114,7 @@ async function assertTableMoves(): Promise<void> {
 
    await moveToFirstHeaderCell();
    const price = await runSrJson(['table', 'next-column']);
-   expect(price.result.state.lastSpokenPhrase).toBe('rowheader, Price');
+   expect(price.result.state.lastSpokenPhrase).toBe('columnheader, Price');
    expect(price.result.details).toEqual({ move: 'next-column', moved: true });
 
    const starterPrice = await runSrJson(['table', 'next-row']);

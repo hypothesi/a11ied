@@ -1,7 +1,36 @@
-import { ignoreError, readVirtualPageScript, type VirtualHost } from '@a11ied/guidepup';
+import {
+   decodeDriverCommandError,
+   ignoreError,
+   readVirtualPageScript,
+   type VirtualHost,
+} from '@a11ied/guidepup';
 import type { Page } from 'playwright';
 
 import { launchAutomationBrowser } from '../browser/policy.js';
+
+type HostMethod = (...args: never[]) => Promise<unknown>;
+
+function decorate(method: HostMethod): HostMethod {
+   return async (...args) => {
+      try {
+         return await method(...args);
+      } catch (error) {
+         const decoded = decodeDriverCommandError(error);
+         throw decoded instanceof Error ? decoded : error;
+      }
+   };
+}
+
+/**
+ * Rebuilds the typed error a page threw, so a command the reader cannot run reports the
+ * same code and exit status it reports on the jsdom engine.
+ */
+function withDecodedErrors(host: VirtualHost): VirtualHost {
+   const entries = Object.entries(host).map(([name, value]) =>
+      typeof value === 'function' ? [name, decorate(value as HostMethod)] : [name, value],
+   );
+   return Object.fromEntries(entries) as VirtualHost;
+}
 
 const PAGE_URL_PATTERN = /^(?:https?|file):/iu;
 
@@ -45,7 +74,7 @@ export async function createPlaywrightVirtualHost(): Promise<VirtualHost> {
    ]);
    const page = await launch.browser.newPage();
    await page.addInitScript({ content: pageScript });
-   return {
+   return withDecodedErrors({
       engine: 'browser',
       async attachDocument(document): Promise<void> {
          await loadDocument(page, document);
@@ -85,5 +114,5 @@ export async function createPlaywrightVirtualHost(): Promise<VirtualHost> {
          ),
       moveInTable: (move) =>
          page.evaluate((step) => globalThis.a11iedVirtualRuntime.moveInTable(step), move),
-   };
+   });
 }

@@ -54,7 +54,10 @@ export interface ScreenReaderOptions {
    recordingPath?: string | undefined;
    /** Bounds every screen reader command unless a call passes its own. */
    timeoutMs?: number | undefined;
-   /** Broker mode only: the broker stops after this many idle minutes, and 0 disables that. */
+   /**
+    * Broker mode only: the broker stops after this many idle minutes, and 0 disables
+    * that.
+    */
    idleTimeoutMinutes?: number | undefined;
 }
 
@@ -96,7 +99,7 @@ function createDocumentLoader(
          return { html: '', url: document.url };
       }
       const resolved = await resolveDocumentTarget({ url: document.url });
-      return { html: resolved.html, url: resolved.resolvedUrl };
+      return { html: await resolved.readHtml(), url: resolved.target.value };
    };
 }
 

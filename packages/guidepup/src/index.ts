@@ -71,3 +71,7 @@ export {
    type VirtualRuntimeOptions,
    type VirtualSpeech,
 } from './virtual-runtime.js';
+export {
+   decodeDriverCommandError,
+   encodeDriverCommandError,
+} from './driver-command-wire.js';
