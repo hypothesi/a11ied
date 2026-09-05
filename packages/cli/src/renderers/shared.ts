@@ -39,13 +39,18 @@ export const applicabilityStateDefinitions: ReadonlyArray<{
       definition: 'a page signal (a form, a dialog, a live region) matched the criterion',
    },
    {
-      state: 'likely-applicable',
-      definition: 'only the criterion tags matched the detected signals; confirm by hand',
+      state: 'not-detected',
+      definition:
+         'no signal matched. The criterion may still apply to content the parser cannot see',
+   },
+   {
+      state: 'out-of-scope',
+      definition: 'the criterion covers content this target cannot contain',
    },
    {
       state: 'unknown',
       definition:
-         'an interactive widget was found but no recognized pattern; applicability is unresolved',
+         'an interactive widget was found but no recognized pattern, so applicability is unresolved',
    },
 ];
 
@@ -93,7 +98,7 @@ export function nextCommandLine(input: {
    strategy: StrategySummary | undefined;
    url?: string | undefined;
 }): string {
-   const target = input.url ? ` --url ${input.url}` : ' --url <url>';
+   const target = input.url ? ` ${input.url}` : ' <target>';
    if (input.strategy?.preferredEvidenceMode === 'automated') {
       return `${code(`a1 axe --criterion ${input.criterionId}${target}`)}`;
    }

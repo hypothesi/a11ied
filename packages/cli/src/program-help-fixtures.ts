@@ -20,7 +20,7 @@ export const topLevelHelpCases: HelpCase[] = [
       Commands:
         sr                          Control a target screen reader through stable
                                     sessions.
-        wcag                        Look up pinned WCAG requirements and coverage
+        wcag [options] [criterion]  Look up pinned WCAG requirements and coverage
                                     data.
         axe [options] [targets...]  Run axe-core against one or more targets: an
                                     http(s) URL, a file path, - for HTML on stdin, or
@@ -55,7 +55,7 @@ export const topLevelHelpCases: HelpCase[] = [
                                     by id such as G18.
 
       Options:
-        --version <version>         Use a specific WCAG version. Defaults to 2.2.
+        --wcag <version>            Use a specific WCAG version. Defaults to 2.2.
                                     (default: "2.2")
         --json                      Print JSON instead of human-readable text.
         --verbose                   Print more detail in text output.

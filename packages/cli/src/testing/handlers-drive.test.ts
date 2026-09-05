@@ -88,7 +88,7 @@ async function assertStartTextOutput(): Promise<void> {
 
    const verbose = await runCli(['sr', 'start', ...startArgs, '--verbose']);
    expect(verbose.stdout).toMatch(/Session ID:\s+drv_[a-f0-9]+/);
-   expect(verbose.stdout).toContain('Stopped the previous virtual session');
+   expect(verbose.stderr).toContain('Stopped the previous virtual session');
 }
 
 async function assertStartReplacesAndReports(stateDir: string): Promise<SessionShape> {

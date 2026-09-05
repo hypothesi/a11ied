@@ -93,11 +93,13 @@ function printWarningsToStderr(warnings: CliMessage[]): void {
 }
 
 /**
- * Prints one command's output. Envelopes (`--json`) and successful text results go to
- * stdout. Errors and warnings always go to stderr, so a piped `2>/dev/null` stdout stream
- * carries only the result. The JSON envelope itself still goes to stdout even on failure,
- * so scripts parsing `--json` output see the full error detail. A one-line copy of the
- * error goes to stderr for anyone watching the terminal.
+ * Prints one command's output. Warnings go to stderr, and the JSON envelope always goes
+ * to stdout so a script parsing `--json` sees the full detail either way.
+ *
+ * A command that produced a result prints it to stdout even when the result is a failed
+ * check, because the report is what the caller asked for and the exit code carries the
+ * verdict. `a1 sr expect "Save" > report.txt` keeps its report. A command that produced
+ * no result prints its error to stderr instead, so a piped stdout stream stays empty.
  */
 export function printOutput(opts: PrintOutputOptions): void {
    printWarningsToStderr(opts.envelope.warnings);
@@ -111,11 +113,11 @@ export function printOutput(opts: PrintOutputOptions): void {
       return;
    }
 
-   if (opts.envelope.ok) {
-      process.stdout.write(`${body}\n`);
+   if (opts.envelope.result === undefined) {
+      process.stderr.write(`${body}\n`);
       return;
    }
-   process.stderr.write(`${body}\n`);
+   process.stdout.write(`${body}\n`);
 }
 
 function buildCliUsageErrors(error: CliUsageError): {

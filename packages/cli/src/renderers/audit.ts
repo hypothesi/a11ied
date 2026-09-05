@@ -1,6 +1,10 @@
 import type { CliOutputEnvelope } from '#contracts';
 import { badge, code, count, dim, fields, section, title } from '../lib/format.js';
-import { criterionLine, type RenderOptions } from './shared.js';
+import {
+   applicabilityDefinitionLines,
+   criterionLine,
+   type RenderOptions,
+} from './shared.js';
 
 interface AxeSummary {
    violations: Array<{ id: string; impact?: string | null; help: string }>;
@@ -112,7 +116,10 @@ function renderTreeSection(report: AuditReport): string[] {
    return section('Accessibility tree', body);
 }
 
-function renderApplicabilitySection(report: AuditReport): string[] {
+function renderApplicabilitySection(
+   report: AuditReport,
+   options: RenderOptions,
+): string[] {
    const assessments = Object.values(report.applicability.assessments);
    if (assessments.length === 0) {
       return section('Applicability', [dim('No signal-backed criteria were detected.')]);
@@ -121,6 +128,9 @@ function renderApplicabilitySection(report: AuditReport): string[] {
       const line = criterionLine({ id: assessment.criterionId, title: assessment.title });
       return `${badge(assessment.state)}  ${line}`;
    });
+   if (options.verbose) {
+      body.push('', ...applicabilityDefinitionLines().map((line) => dim(line)));
+   }
    return section('Applicability', body);
 }
 

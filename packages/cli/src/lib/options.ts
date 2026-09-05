@@ -53,6 +53,9 @@ export function addPhraseOption(command: Command): Command {
    return command.option(
       '--phrase',
       'Print only the last spoken phrase, one line, for shell loops.',
+   );
+}
+
 export function addHtmlOption(command: Command): Command {
    return command.option(
       '--html <markup>',
