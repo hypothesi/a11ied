@@ -90,6 +90,32 @@ async function assertAuditFailOnRespected(baseUrl: string): Promise<void> {
    expect((json.result as unknown as AuditResult).verdict.passed).toBe(true);
 }
 
+/**
+ * The text report is what a person reads, so it states the finding and the command that
+ * follows it. The raw per-criterion values belong to --json and --verbose.
+ */
+async function assertAuditTextStatesFindings(baseUrl: string): Promise<void> {
+   const failing = await runCli(['audit', `${baseUrl}/button-name-failure.html`]);
+   expect(failing.stdout).toContain('1 problem to fix');
+   expect(failing.stdout).toContain('4.1.2  Name, Role, Value');
+   expect(failing.stdout).toContain('Buttons must have discernible text');
+   expect(failing.stdout).toContain('1 failing element');
+   expect(failing.stdout).toContain('a1 wcag rule button-name');
+   expect(failing.stdout).not.toContain('axe=fail');
+   expect(failing.stdout).not.toContain('applicability=not-detected');
+
+   const passing = await runCli(['audit', `${baseUrl}/basic-page.html`]);
+   expect(passing.stdout).toContain('Nothing failed the automated checks');
+   expect(passing.stdout).not.toContain('Problems');
+
+   const verbose = await runCli([
+      'audit',
+      `${baseUrl}/button-name-failure.html`,
+      '--verbose',
+   ]);
+   expect(verbose.stdout).toContain('axe=fail');
+}
+
 async function assertAuditInlineHtml(): Promise<void> {
    const result = await runCli(['audit', '--html', '<h1>Hi</h1>', '--json']);
    const json = parseJsonOutput(result.stdout);
@@ -117,6 +143,14 @@ describe('cli audit command', () => {
    );
 
    it('scans inline --html', assertAuditInlineHtml, TEST_TIMEOUT_LONG);
+
+   it(
+      'states each finding and its fix command in the text report',
+      async () => {
+         await assertAuditTextStatesFindings(testServer.getBaseUrl());
+      },
+      TEST_TIMEOUT_LONG,
+   );
 
    it(
       '--fail-on carries through to the audit verdict',

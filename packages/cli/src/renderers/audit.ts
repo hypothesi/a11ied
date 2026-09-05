@@ -1,15 +1,39 @@
 import type { CliOutputEnvelope } from '#contracts';
-import { badge, code, count, dim, fields, section, title } from '../lib/format.js';
 import {
-   applicabilityDefinitionLines,
-   criterionLine,
-   type RenderOptions,
-} from './shared.js';
+   badge,
+   code,
+   count,
+   dim,
+   indent,
+   level,
+   section,
+   symbols,
+   title,
+   wrap,
+} from '../lib/format.js';
+import { applicabilityDefinitionLines, type RenderOptions } from './shared.js';
+
+const MAX_ELEMENTS_PER_PROBLEM = 3;
+const MAX_MANUAL_CHECKS = 5;
+const DETAIL_DEPTH = 2;
+
+interface AxeNode {
+   target: string[];
+}
+
+interface AxeRule {
+   id: string;
+   impact?: string | null;
+   help: string;
+   tags: string[];
+   nodes: AxeNode[];
+}
 
 interface AxeSummary {
-   violations: Array<{ id: string; impact?: string | null; help: string }>;
+   url: string;
+   violations: AxeRule[];
    passes: unknown[];
-   incomplete: unknown[];
+   incomplete: AxeRule[];
 }
 
 interface TreeSummary {
@@ -76,105 +100,184 @@ function parseAuditReport(envelope: CliOutputEnvelope): AuditReport {
    };
 }
 
-function renderVerdictLine(verdict: AuditVerdict): string {
-   if (verdict.passed) {
-      return badge('pass');
-   }
-   return `${badge('fail')}  ${count(verdict.failingFindings.length, 'finding')} at or above --fail-on ${verdict.failOn}`;
+/** The axe tag for one criterion: 4.1.2 is tagged wcag412. */
+function criterionTag(criterionId: string): string {
+   return `wcag${criterionId.replaceAll('.', '')}`;
 }
 
-function renderAxeSection(report: AuditReport): string[] {
-   const body = [
-      `Violations: ${count(report.axe.violations.length, 'violation')}`,
-      `Incomplete: ${count(report.axe.incomplete.length, 'incomplete check')}`,
-      `Passes: ${count(report.axe.passes.length, 'pass', 'passes')}`,
-      `Verdict: ${renderVerdictLine(report.verdict)}`,
-      ...report.axe.violations.map(
-         (violation) =>
-            `${code(violation.id)}${violation.impact ? `  ${badge(violation.impact)}` : ''}  ${violation.help}`,
+function rulesForCriterion(criterionId: string, rules: AxeRule[]): AxeRule[] {
+   const tag = criterionTag(criterionId);
+   return rules.filter((rule) => rule.tags.includes(tag));
+}
+
+function headlineLines(report: AuditReport): string[] {
+   const { baselinedCount, failingFindings, passed } = report.verdict;
+   const accepted =
+      baselinedCount > 0
+         ? dim(`  ${count(baselinedCount, 'finding')} accepted by the baseline.`)
+         : '';
+
+   if (passed) {
+      return [`${symbols.pass} Nothing failed the automated checks.${accepted}`];
+   }
+   return [
+      `${symbols.fail} ${count(failingFindings.length, 'problem')} to fix.${accepted}`,
+   ];
+}
+
+function elementLines(rule: AxeRule): string[] {
+   const shown = rule.nodes
+      .slice(0, MAX_ELEMENTS_PER_PROBLEM)
+      .map((node) => code(node.target.join(' ')));
+   const hidden = rule.nodes.length - shown.length;
+   if (hidden > 0) {
+      shown.push(dim(`and ${count(hidden, 'more element')}`));
+   }
+   return shown;
+}
+
+function ruleLines(rule: AxeRule): string[] {
+   const impact = rule.impact ? `  ${badge(rule.impact)}` : '';
+   return [
+      `${rule.help}${impact}`,
+      dim(`${count(rule.nodes.length, 'failing element')}:`),
+      ...indent(elementLines(rule)),
+      `${dim('Fix it:')}  ${code(`a1 wcag rule ${rule.id}`)}`,
+   ];
+}
+
+function problemLines(entry: CriterionRollupEntry, rules: AxeRule[]): string[] {
+   return [
+      `${code(entry.id)}  ${entry.title}  ${level(entry.level)}`,
+      ...indent(
+         rules.flatMap((rule) => ruleLines(rule)),
+         DETAIL_DEPTH,
       ),
    ];
-   return section('axe', body);
 }
 
-function renderTreeSection(report: AuditReport): string[] {
-   const { counts } = report.tree;
-   const body = [
-      `Page title: ${report.tree.pageTitle || dim('(none)')}`,
-      `First heading: ${report.tree.firstHeading ?? dim('none')}`,
-      ...fields([
-         ['Landmarks', String(counts.landmarks)],
-         [
-            'Headings',
-            `${counts.headings} (levels ${report.tree.headingLevels.join(', ') || 'none'})`,
-         ],
-         ['Links', String(counts.links)],
-         ['Buttons', String(counts.buttons)],
-         ['Form controls', String(counts.formControls)],
-      ]),
+/** One block per failing criterion, each carrying the elements and the fix command. */
+function renderProblemsSection(report: AuditReport): string[] {
+   const failing = report.criteria.filter((entry) => entry.axeVerdict === 'fail');
+   if (failing.length === 0) {
+      return [];
+   }
+
+   const body = failing.flatMap((entry) =>
+      problemLines(entry, rulesForCriterion(entry.id, report.axe.violations)),
+   );
+   return section('Problems', body);
+}
+
+function manualCriteria(report: AuditReport): CriterionRollupEntry[] {
+   return report.criteria.filter(
+      (entry) =>
+         entry.applicability === 'applicable' && entry.coverageState !== 'automated',
+   );
+}
+
+function undecidedLines(report: AuditReport): string[] {
+   if (report.axe.incomplete.length === 0) {
+      return [];
+   }
+   const shown = report.axe.incomplete
+      .slice(0, MAX_MANUAL_CHECKS)
+      .map((rule) => `${symbols.bullet} ${rule.help}`);
+   return [
+      `${count(report.axe.incomplete.length, 'check')} could not be decided automatically:`,
+      ...indent(shown),
    ];
-   return section('Accessibility tree', body);
 }
 
-function renderApplicabilitySection(
-   report: AuditReport,
-   options: RenderOptions,
-): string[] {
-   const assessments = Object.values(report.applicability.assessments);
-   if (assessments.length === 0) {
-      return section('Applicability', [dim('No signal-backed criteria were detected.')]);
+function manualCriterionLines(entries: CriterionRollupEntry[]): string[] {
+   if (entries.length === 0) {
+      return [];
    }
-   const body = assessments.map((assessment) => {
-      const line = criterionLine({ id: assessment.criterionId, title: assessment.title });
-      return `${badge(assessment.state)}  ${line}`;
-   });
-   if (options.verbose) {
-      body.push('', ...applicabilityDefinitionLines().map((line) => dim(line)));
+   return [
+      `${count(entries.length, 'criterion', 'criteria')} this page triggers need a person:`,
+      ...indent(
+         entries.map((entry) => `${symbols.bullet} ${code(entry.id)}  ${entry.title}`),
+      ),
+   ];
+}
+
+/** What automation could not settle, and the command that helps settle it. */
+function renderByHandSection(report: AuditReport): string[] {
+   const manual = manualCriterionLines(manualCriteria(report)),
+      undecided = undecidedLines(report);
+   if (undecided.length === 0 && manual.length === 0) {
+      return [];
    }
-   return section('Applicability', body);
+
+   const spacer = undecided.length > 0 && manual.length > 0 ? [''] : [];
+   return section('Check by hand', [
+      ...undecided,
+      ...spacer,
+      ...manual,
+      '',
+      `${dim('Read the page as a screen reader does:')}  ${code(`a1 sr walk ${report.axe.url}`)}`,
+   ]);
 }
 
-function needsAttention(entry: CriterionRollupEntry): boolean {
-   return (
-      entry.axeVerdict === 'fail' ||
-      (entry.applicability === 'applicable' && entry.coverageState !== 'automated')
-   );
-}
-
-function renderCriterionRow(entry: CriterionRollupEntry): string {
-   const line = criterionLine({ id: entry.id, title: entry.title, level: entry.level });
-   return `${line}  axe=${entry.axeVerdict}  applicability=${entry.applicability}  coverage=${entry.coverageState}`;
-}
-
-function renderCriteriaSection(report: AuditReport, options: RenderOptions): string[] {
-   const rows = options.verbose
-      ? report.criteria
-      : report.criteria.filter(needsAttention);
-   const body = rows.map((entry) => renderCriterionRow(entry));
-   if (body.length === 0) {
-      body.push(dim('Nothing needs attention. Add --verbose for the full rollup.'));
-   } else if (!options.verbose) {
-      body.push(dim('Add --verbose for the full criterion rollup.'));
+/** Reads better in a sentence than "0 links". */
+function countOrNone(total: number, singular: string, plural = `${singular}s`): string {
+   if (total === 0) {
+      return `no ${plural}`;
    }
-   return section(`Criteria (${report.criteria.length})`, body);
+   return count(total, singular, plural);
 }
 
-function renderNextSection(report: AuditReport): string[] {
-   if (report.nextCommands.length === 0) {
-      return section('Next', [dim('Nothing to follow up on.')]);
+function describeCounts(tree: TreeSummary): string {
+   const { counts } = tree;
+   const levels = tree.headingLevels.join(', ');
+   const heading = counts.headings > 0 ? ` (level ${levels})` : '';
+   return [
+      countOrNone(counts.landmarks, 'landmark'),
+      `${countOrNone(counts.headings, 'heading')}${heading}`,
+      countOrNone(counts.links, 'link'),
+      countOrNone(counts.buttons, 'button'),
+      countOrNone(counts.formControls, 'form control'),
+   ].join(', ');
+}
+
+function renderPageSection(report: AuditReport): string[] {
+   const name = report.tree.pageTitle || dim('(no title)');
+   return section('The page', [
+      `Titled ${name}, opening with ${report.tree.firstHeading ?? dim('no heading')}.`,
+      `It holds ${describeCounts(report.tree)}.`,
+   ]);
+}
+
+function rollupRow(entry: CriterionRollupEntry): string {
+   return `${code(entry.id)}  ${entry.title}  ${level(entry.level)}  ${dim(
+      `axe=${entry.axeVerdict} applicability=${entry.applicability} coverage=${entry.coverageState}`,
+   )}`;
+}
+
+/** The raw per-criterion values, for a reader who wants every field. */
+function renderRollupSection(report: AuditReport, options: RenderOptions): string[] {
+   if (!options.verbose) {
+      return [
+         '',
+         dim(
+            `${String(report.criteria.length)} criteria were considered. Add --verbose for every one, or --json for the full report.`,
+         ),
+      ];
    }
-   return section(
-      'Next',
-      report.nextCommands.map((command) => code(command)),
-   );
+   return [
+      ...section(
+         `Every criterion (${String(report.criteria.length)})`,
+         report.criteria.map((entry) => rollupRow(entry)),
+      ),
+      ...section('What the applicability states mean', applicabilityDefinitionLines()),
+   ];
 }
 
 const auditSections: Array<(report: AuditReport, options: RenderOptions) => string[]> = [
-   renderAxeSection,
-   renderTreeSection,
-   renderApplicabilitySection,
-   renderCriteriaSection,
-   renderNextSection,
+   renderProblemsSection,
+   renderByHandSection,
+   renderPageSection,
+   renderRollupSection,
 ];
 
 // Fallow-ignore-next-line unused-export
@@ -184,7 +287,9 @@ export function renderAuditText(
 ): string {
    const report = parseAuditReport(envelope);
    const lines = [
-      title('audit'),
+      `${title('audit')}  ${report.axe.url}`,
+      '',
+      ...wrap(headlineLines(report).join('')),
       ...auditSections.flatMap((render) => render(report, options)),
    ];
    return lines.join('\n');
