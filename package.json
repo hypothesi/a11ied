@@ -18,6 +18,7 @@
       "smoke:sr": "node scripts/smoke-screen-reader.mjs",
       "standards": "npm run lint && npm run typecheck && npm run build",
       "test": "rimraf .test-coverage && node -e \"const { mkdirSync } = require('node:fs'); mkdirSync('.test-coverage/.tmp', { recursive: true });\" && vitest run --coverage",
+      "test:browser": "vitest run --config vitest.browser.config.ts",
       "test:watch": "vitest",
       "typecheck": "turbo run typecheck",
       "wcag:sync": "npm run sync --workspace @a11ied/wcag-data",
@@ -26,6 +27,8 @@
    "devDependencies": {
       "@types/jsdom": "^30.0.0",
       "@types/node": "^26.3.0",
+      "@vitest/browser": "4.1.11",
+      "@vitest/browser-playwright": "4.1.11",
       "@vitest/coverage-v8": "^4.1.11",
       "oxfmt": "0.65.0",
       "oxlint": "1.60.0",
