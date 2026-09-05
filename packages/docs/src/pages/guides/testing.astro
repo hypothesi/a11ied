@@ -1,0 +1,295 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'install', label: 'Install' },
+   { id: 'session', label: 'Start a reader' },
+   { id: 'methods', label: 'Drive and read' },
+   { id: 'checks', label: 'Check what was said' },
+   { id: 'vitest', label: 'Vitest matchers and fixture' },
+   { id: 'example', label: 'A test file' },
+   { id: 'browser', label: 'Vitest browser mode' },
+   { id: 'real', label: 'VoiceOver and NVDA' },
+];
+---
+
+<DocShell
+   title="Write screen reader tests"
+   summary="Start a screen reader from a test, move through the page the way a screen reader user does, and assert on what it announced. The runner-agnostic API is a11ied/test. a11ied/vitest adds matchers and a fixture. a11ied/browser drives a component already mounted in Vitest browser mode."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="split panel" id="install">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Install</p>
+            <h2>Three entry points, one package</h2>
+         </div>
+         <pre><code>npm install --save-dev a11ied</code></pre>
+         <div class="route-list">
+            <div class="route-row"><code>a11ied/test</code><span><code>screenReader()</code> and the <code>ScreenReader</code> class. No test runner in sight: it works under Vitest, Jest, Mocha, Playwright Test, or a script.</span></div>
+            <div class="route-row"><code>a11ied/vitest</code><span>The same, plus <code>expect</code> matchers and a <code>test</code> with an <code>sr</code> fixture. Vitest is a peer dependency, so the package installs and runs without it.</span></div>
+            <div class="route-row"><code>a11ied/browser</code><span>For Vitest browser mode: the virtual reader runs against the component the test mounted, with no broker and no second page load.</span></div>
+         </div>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Chromium</div>
+         <p class="aside-note">
+            A test that opens a URL runs the virtual reader inside a headless Chromium page, so the
+            page's scripts run. Chrome, Edge, Brave, or Chromium on the machine is used first, and
+            <code>npx playwright install chromium</code> adds one when none is installed. Inline
+            HTML runs in jsdom and needs no browser.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="session">
+      <div class="panel-head">
+         <p class="panel-kicker">Step 1</p>
+         <h2>Start a reader and let the test dispose it</h2>
+      </div>
+      <pre><code>import {'{'} screenReader {'}'} from 'a11ied/test';
+
+await using sr = await screenReader({'{'} url: 'http://localhost:3000/checkout' {'}'});</code></pre>
+      <p>
+         <code>screenReader</code> takes <code>sr</code> (<code>virtual</code> by default,
+         <code>voiceover</code>, or <code>nvda</code>), a <code>url</code> or inline
+         <code>html</code>, and <code>mode</code>. The default mode, <code>in-process</code>, runs
+         the reader inside the test process and never touches the per-user state directory, so
+         tests in parallel workers do not compete for the one active <code>a1 sr</code> session.
+         <code>mode: 'broker'</code> starts the detached process that <code>a1 sr</code> shares
+         instead, so <code>a1 sr transcript</code> in another terminal reads the same session.
+      </p>
+      <p>
+         The reader implements <code>Symbol.asyncDispose</code>. With <code>await using</code>, the
+         session stops when the block ends, whether the test passed or threw. A runner without
+         explicit resource management calls <code>await sr.stop()</code> in its cleanup hook
+         instead. Every call after a stop throws <code>session-stopped</code>.
+      </p>
+      <p>
+         <code>sr.session</code> reports what you got: <code>sr</code>, <code>mode</code>,
+         <code>url</code>, and for the virtual reader the <code>engine</code>, which is
+         <code>browser</code> for a Playwright page and <code>jsdom</code> for inline HTML or a
+         machine with no Chromium.
+      </p>
+   </section>
+
+   <section class="panel" id="methods">
+      <div class="panel-head">
+         <p class="panel-kicker">Step 2</p>
+         <h2>Move, type, and read</h2>
+      </div>
+      <p>
+         The methods mirror the <code>sr</code> subcommands. Every method that moves the cursor or
+         sends input returns the phrase the reader produced.
+      </p>
+      <div class="route-list">
+         <div class="route-row"><code>next(kind?, options?)</code>, <code>previous(kind?, options?)</code><span>One item, or a jump by <code>heading</code>, <code>link</code>, <code>landmark</code>, <code>control</code>, <code>button</code>, <code>table</code>, <code>list</code>, <code>graphic</code>, <code>region</code>, or <code>form-field</code>. Options: <code>level</code> for headings, <code>times</code>.</span></div>
+         <div class="route-row"><code>top()</code>, <code>bottom()</code>, <code>interact()</code>, <code>stopInteracting()</code>, <code>activate()</code>, <code>escape()</code><span>The portable verbs.</span></div>
+         <div class="route-row"><code>press(...chords)</code>, <code>type(text)</code><span><code>press('Tab', 'Enter')</code> sends two chords in order.</span></div>
+         <div class="route-row"><code>read()</code><span>The item under the cursor: <code>role</code>, <code>name</code>, <code>value</code>, <code>states</code>, <code>level</code>, <code>phrase</code>, and <code>source</code>, which names where each field came from.</span></div>
+         <div class="route-row"><code>title()</code><span>The page title, or the window summary on a real reader.</span></div>
+         <div class="route-row"><code>find(text)</code>, <code>goTo({'{'} role, name {'}'})</code><span>Move to the text, or step until the item has the role, the name, or both. Both throw when nothing matches.</span></div>
+         <div class="route-row"><code>elements(kind)</code>, <code>readAll()</code>, <code>walk()</code><span>The rotor, say-all from the cursor, and top plus say-all. Each returns the items announced, capped by <code>max</code>.</span></div>
+         <div class="route-row"><code>table(move)</code><span><code>next-cell</code> and the other moves return the phrase. <code>row-header</code> and <code>column-header</code> return the header text.</span></div>
+         <div class="route-row"><code>open(url)</code>, <code>open({'{'} html {'}'})</code><span>Another page in the same session.</span></div>
+         <div class="route-row"><code>checkpoint(label)</code>, <code>transcript({'{'} since, tail {'}'})</code><span>Mark a point, and read the timestamped entries since it.</span></div>
+         <div class="route-row"><code>wait({'{'} for, timeoutMs {'}'})</code><span>Polls the transcript for a phrase spoken after the call and returns it, or throws at the timeout, 5000 ms by default. <code>wait({'{'} ms {'}'})</code> pauses.</span></div>
+         <div class="route-row"><code>perform(command)</code>, <code>screenshot(path)</code>, <code>focus()</code><span>A named command from <code>a1 sr list</code>, a VoiceOver cursor screenshot, and a refocus of the session's window.</span></div>
+      </div>
+   </section>
+
+   <section class="split panel" id="checks">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Step 3</p>
+            <h2>Check what the reader said</h2>
+         </div>
+         <pre><code>await sr.checkpoint('opened');
+await sr.activate();
+await sr.expectSpoken('dialog, Preferences', {'{'} since: 'opened' {'}'});
+await sr.expectSpoken(/error/iu, {'{'} not: true {'}'});</code></pre>
+         <p>
+            <code>expectSpoken</code> takes text, matched without regard to case, or a
+            <code>RegExp</code>. <code>since</code> counts only phrases after that checkpoint, and
+            <code>not</code> passes when nothing matches. On failure it throws a
+            <code>ScreenReaderAssertionError</code> whose message names what was expected, how many
+            phrases were checked, and what the reader said:
+         </p>
+         <pre data-label="OUTPUT"><code>ScreenReaderAssertionError: "Pay now, button" was not announced in the transcript (3 phrases checked).
+The reader said:
+  "document"
+  "heading, Sign up, level 1"
+  "button, Create account"</code></pre>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Exit code 4</div>
+         <p class="aside-note">
+            The error carries <code>exitCode: 4</code>, the CLI's assertion code, plus
+            <code>expected</code> and <code>phrases</code>. A script can set
+            <code>process.exitCode</code> from it.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="vitest">
+      <div class="panel-head">
+         <p class="panel-kicker">Vitest</p>
+         <h2>Matchers and the sr fixture</h2>
+      </div>
+      <p>
+         Importing <code>a11ied/vitest</code> installs three matchers on <code>expect</code> and
+         adds their types. Given a reader, each matcher reads the transcript first, so it returns a
+         promise: await it. Given an array of phrases, transcript entries, or an item from
+         <code>read()</code>, it answers at once.
+      </p>
+      <div class="route-list">
+         <div class="route-row"><code>toHaveSpoken(match, {'{'} since, not {'}'})</code><span>A phrase matches. The failure message is the one <code>expectSpoken</code> throws.</span></div>
+         <div class="route-row"><code>toHaveSpokenInOrder([a, b, c])</code><span>Each match is found after the previous one, with any phrases between. The failure names the first match not found and the phrase it was looked for after.</span></div>
+         <div class="route-row"><code>toBeOn({'{'} role, name {'}'})</code><span>The item under the cursor has the role, the name, or both. The failure names what the cursor is on.</span></div>
+      </div>
+      <p>
+         The exported <code>test</code> provides <code>sr</code>, started from the
+         <code>srOptions</code> fixture before each test and stopped after it. Override the options
+         for a file with <code>test.extend({'{'} srOptions: {'{'} url {'}'} {'}'})</code>, or for a block with
+         <code>test.scoped</code>.
+      </p>
+   </section>
+
+   <section class="panel" id="example">
+      <div class="panel-head">
+         <p class="panel-kicker">Example</p>
+         <h2>A test file to copy</h2>
+      </div>
+      <p>
+         The page is the dialog fixture from this repository: a button that opens a modal
+         <code>dialog</code> named Preferences and moves focus into it, and an Escape handler that
+         closes it and returns focus to the button. The dev server runs on port 3000.
+      </p>
+      <pre><code>// checkout-dialog.test.ts
+import {'{'} describe, expect {'}'} from 'vitest';
+import {'{'} test {'}'} from 'a11ied/vitest';
+
+const page = test.extend({'{'}
+   srOptions: {'{'} url: 'http://localhost:3000/dialog.html' {'}'},
+{'}'});
+
+describe('the preferences dialog', () => {'{'}
+   page('lists the page structure', async ({'{'} sr {'}'}) => {'{'}
+      const headings = await sr.elements('heading');
+
+      expect(headings.map((item) => item.name)).toEqual(['Dialog demo']);
+      await expect(sr).toHaveSpokenInOrder(['document', 'Dialog demo']);
+   {'}'});
+
+   page('announces the dialog and returns focus on Escape', async ({'{'} sr {'}'}) => {'{'}
+      await sr.goTo({'{'} role: 'button', name: 'Open dialog' {'}'});
+      await sr.checkpoint('opened');
+      await sr.activate();
+
+      await expect(sr).toHaveSpoken('dialog, Preferences', {'{'} since: 'opened' {'}'});
+      await expect(sr).toBeOn({'{'} role: 'textbox', name: 'Nickname' {'}'});
+
+      await sr.escape();
+
+      await expect(sr).toBeOn({'{'} role: 'button', name: 'Open dialog' {'}'});
+   {'}'});
+
+   page('reads a status message the page script writes', async ({'{'} sr {'}'}) => {'{'}
+      await sr.open('http://localhost:3000/status-message.html');
+      await sr.goTo({'{'} role: 'button', name: 'Save' {'}'});
+      await sr.checkpoint('saving');
+      await sr.activate();
+
+      await expect(sr).toHaveSpoken(/profile saved/iu, {'{'} since: 'saving' {'}'});
+   {'}'});
+{'}'});</code></pre>
+      <p>
+         Without the fixture, the same test reads the same way with <code>await using</code>:
+      </p>
+      <pre><code>import {'{'} expect, it {'}'} from 'vitest';
+import {'{'} screenReader {'}'} from 'a11ied/test';
+
+it('announces the dialog', async () => {'{'}
+   await using sr = await screenReader({'{'} url: 'http://localhost:3000/dialog.html' {'}'});
+   await sr.goTo({'{'} role: 'button', name: 'Open dialog' {'}'});
+   await sr.activate();
+
+   await sr.expectSpoken('dialog, Preferences');
+   expect(await sr.read()).toMatchObject({'{'} role: 'textbox', name: 'Nickname' {'}'});
+{'}'});</code></pre>
+   </section>
+
+   <section class="split panel" id="browser">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Browser mode</p>
+            <h2>Test a mounted component</h2>
+         </div>
+         <p>
+            In Vitest browser mode the test already runs in a real browser, so
+            <code>a11ied/browser</code> starts the virtual reader on that page. There is no broker,
+            no second page load, and no <code>open()</code>: mount the component, then call
+            <code>screenReader()</code>. It reads the document body, or <code>container</code>.
+         </p>
+         <pre><code>// vitest.config.ts
+import {'{'} playwright {'}'} from '@vitest/browser-playwright';
+import {'{'} defineConfig {'}'} from 'vitest/config';
+
+export default defineConfig({'{'}
+   test: {'{'}
+      browser: {'{'}
+         enabled: true,
+         provider: playwright(),
+         instances: [{'{'} browser: 'chromium' {'}'}],
+      {'}'},
+   {'}'},
+{'}'});</code></pre>
+         <pre><code>// pay-button.browser.test.ts
+import {'{'} expect {'}'} from 'vitest';
+import {'{'} screenReader, test {'}'} from 'a11ied/browser';
+import {'{'} render {'}'} from 'vitest-browser-react';
+import {'{'} PayButton {'}'} from './pay-button';
+
+test('announces the price', async () => {'{'}
+   const screen = render(&lt;PayButton amount="12.00" /&gt;);
+   await using sr = await screenReader({'{'} container: screen.container {'}'});
+
+   await sr.next('button');
+
+   await expect(sr).toBeOn({'{'} role: 'button', name: 'Pay 12.00' {'}'});
+{'}'});</code></pre>
+         <p>
+            The exported <code>test</code> provides an <code>sr</code> fixture over the document
+            body, and <code>a11ied/browser</code> installs the same three matchers.
+            <code>@vitest/browser-playwright</code> needs a Chromium that
+            <code>npx playwright install chromium</code> provides.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Not available here</div>
+         <p class="aside-note">
+            <code>open()</code> throws, because the page is the test's own. <code>perform()</code>
+            throws too: the command registry that resolves names loads Guidepup's Node-only
+            tables. Every typed method is available.
+         </p>
+      </div>
+   </section>
+
+   <section class="field-note" id="real">
+      <div class="panel-head">
+         <p class="panel-kicker">Real readers</p>
+         <h2>VoiceOver and NVDA</h2>
+      </div>
+      <p>
+         <code>screenReader({'{'} sr: 'voiceover', url {'}'})</code> opens the URL in the system browser,
+         waits for that window to come to the front, starts VoiceOver, and refocuses the window,
+         the same steps <code>a1 sr start</code> takes. The reader needs the one-time
+         <code>a1 setup</code> on the machine, takes over the screen while the test runs, and
+         reads whatever is in front, so run these tests one at a time and never in a worker pool.
+         Prefer <code>mode: 'broker'</code> there: a session that outlives a crashed test can
+         be stopped with <code>a1 sr stop</code>.
+      </p>
+   </section>
+</DocShell>

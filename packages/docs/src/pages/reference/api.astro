@@ -4,6 +4,7 @@ import { docsLinks } from '../../lib/nav';
 
 const toc = [
    { id: 'install', label: 'Install' },
+   { id: 'test', label: 'Test API' },
    { id: 'driver', label: 'Driver sessions' },
    { id: 'axe', label: 'axe' },
    { id: 'wcag', label: 'WCAG lookup' },
@@ -16,7 +17,7 @@ const toc = [
 
 <DocShell
    title="TypeScript API"
-   summary="Import driver sessions, axe runs, WCAG lookups, applicability, and host diagnostics from the a11ied package. These are the same functions the CLI commands and the MCP tools call."
+   summary="Import the screen reader test API from a11ied/test, the Vitest matchers from a11ied/vitest, and driver sessions, axe runs, WCAG lookups, applicability, and host diagnostics from the a11ied package. These are the same functions the CLI commands and the MCP tools call."
    links={docsLinks}
    toc={toc}
 >
@@ -28,8 +29,10 @@ const toc = [
          </div>
          <pre><code>npm install a11ied</code></pre>
          <p>
-            The package ships ESM with type declarations. Import from the package entrypoint.
-            Internal file paths are not part of the public API and change between releases.
+            The package ships ESM with type declarations and four entry points:
+            <code>a11ied</code>, <code>a11ied/test</code>, <code>a11ied/vitest</code>, and
+            <code>a11ied/browser</code>. Internal file paths are not part of the public API and
+            change between releases.
          </p>
       </div>
       <div class="split-aside">
@@ -43,6 +46,32 @@ const toc = [
       </div>
    </section>
 
+   <section class="panel" id="test">
+      <div class="panel-head">
+         <p class="panel-kicker">Tests</p>
+         <h2>Drive a screen reader from a test</h2>
+      </div>
+      <pre><code>import {'{'} screenReader {'}'} from 'a11ied/test';
+
+await using sr = await screenReader({'{'} url: 'http://localhost:3000/checkout' {'}'});
+
+await sr.goTo({'{'} role: 'button', name: 'Pay' {'}'});
+await sr.activate();
+await sr.expectSpoken(/order placed/iu);</code></pre>
+      <div class="route-list">
+         <div class="route-row"><code>screenReader(options?)</code><span>Takes <code>sr</code>, <code>url</code> or <code>html</code>, <code>mode</code> (<code>in-process</code> by default, or <code>broker</code>), <code>engine</code>, <code>recordingPath</code>, and <code>timeoutMs</code>. Returns a <code>ScreenReader</code> with the page open.</span></div>
+         <div class="route-row"><code>ScreenReader</code><span><code>next</code>, <code>previous</code>, <code>press</code>, <code>type</code>, <code>read</code>, <code>title</code>, <code>find</code>, <code>goTo</code>, <code>elements</code>, <code>readAll</code>, <code>walk</code>, <code>wait</code>, <code>checkpoint</code>, <code>transcript</code>, <code>open</code>, <code>interact</code>, <code>stopInteracting</code>, <code>activate</code>, <code>top</code>, <code>bottom</code>, <code>escape</code>, <code>table</code>, <code>perform</code>, <code>screenshot</code>, <code>focus</code>, <code>expectSpoken</code>, <code>stop</code>, and <code>Symbol.asyncDispose</code>. Navigation methods return the phrase, and <code>read</code> returns a <code>DriverCurrentItem</code>.</span></div>
+         <div class="route-row"><code>ScreenReaderAssertionError</code><span>Thrown by <code>expectSpoken</code>, <code>wait</code>, <code>find</code>, and <code>goTo</code>. Carries <code>expected</code>, <code>phrases</code>, and <code>exitCode: 4</code>.</span></div>
+         <div class="route-row"><code>a11ied/vitest</code><span>Re-exports the above, installs <code>toHaveSpoken</code>, <code>toHaveSpokenInOrder</code>, and <code>toBeOn</code> on <code>expect</code>, and exports a <code>test</code> whose <code>sr</code> fixture is started from <code>srOptions</code> and stopped after each test.</span></div>
+         <div class="route-row"><code>a11ied/browser</code><span>For Vitest browser mode: <code>screenReader({'{'} container {'}'})</code> over the mounted component, the same matchers, and the same fixture.</span></div>
+      </div>
+      <p>
+         <code>await using</code> stops the reader when the block ends, so no <code>try</code> and
+         <code>finally</code> is needed. The <a href="/guides/testing">testing guide</a> has a test
+         file to copy and the browser mode configuration.
+      </p>
+   </section>
+
    <section class="panel" id="driver">
       <div class="panel-head">
          <p class="panel-kicker">Driver</p>
@@ -54,10 +83,10 @@ const toc = [
   stopDriverSession,
 {'}'} from 'a11ied';
 
-await startDriverSession({'{'} target: 'virtual' {'}'});
+await startDriverSession({'{'} target: 'virtual', url: 'http://localhost:3000/checkout' {'}'});
 
 try {'{'}
-  const result = await runDriverSessionAction({'{'} action: 'next' {'}'});
+  const result = await runDriverSessionAction({'{'} action: 'next', payload: {'{'} kind: 'heading' {'}'} {'}'});
 
   console.log(result.state.lastSpokenPhrase);
   console.log(result.state.transcript);
@@ -65,8 +94,8 @@ try {'{'}
   await stopDriverSession();
 {'}'}</code></pre>
       <div class="route-list">
-         <div class="route-row"><code>startDriverSession(options?)</code><span>Takes <code>target</code>, <code>mode</code>, <code>recordingPath</code>, <code>url</code>, <code>app</code>, <code>idleTimeoutMinutes</code>, and <code>timeoutMs</code>. Returns the new <code>session</code> and, when one was already running, the <code>replacedSession</code> it stopped.</span></div>
-         <div class="route-row"><code>runDriverSessionAction(request, options?)</code><span>The request is typed per action: <code>{'{'} action: 'next' {'}'}</code>, <code>{'{'} action: 'press', payload: {'{'} keys: ['Tab', 'Tab'] {'}'} {'}'}</code>, <code>{'{'} action: 'type', payload: {'{'} text {'}'} {'}'}</code>, <code>{'{'} action: 'checkpoint', payload: {'{'} label {'}'} {'}'}</code>.</span></div>
+         <div class="route-row"><code>startDriverSession(options?)</code><span>Takes <code>target</code>, <code>mode</code>, <code>engine</code>, <code>recordingPath</code>, <code>url</code>, <code>app</code>, <code>idleTimeoutMinutes</code>, and <code>timeoutMs</code>. Returns the new <code>session</code> and, when one was already running, the <code>replacedSession</code> it stopped.</span></div>
+         <div class="route-row"><code>runDriverSessionAction(request, options?)</code><span>The request is a <code>DriverActionRequestInput</code>, typed per action: <code>{'{'} action: 'next' {'}'}</code>, <code>{'{'} action: 'press', payload: {'{'} keys: ['Tab', 'Tab'] {'}'} {'}'}</code>, <code>{'{'} action: 'goto', payload: {'{'} role: 'button' {'}'} {'}'}</code>. A payload of the wrong shape does not compile, and payload fields with defaults, such as <code>max</code>, can be left out.</span></div>
          <div class="route-row"><code>getDriverSessionStatus(options?)</code><span>Read the session state without moving the cursor.</span></div>
          <div class="route-row"><code>attachDocumentToDriverSession(document, options?)</code><span>Point the session at another page.</span></div>
          <div class="route-row"><code>runEphemeralDriverAction(options)</code><span>One action in a session that is torn down before the call returns.</span></div>
@@ -75,16 +104,18 @@ try {'{'}
          <div class="route-row"><code>buildDriverTranscript(session, entries)</code><span>Build the transcript document. <code>formatTranscript</code> renders it, and <code>writeDriverTranscript</code> writes it to a file.</span></div>
       </div>
       <p>
-         One session is active per user, so no function takes a session id. Wrap every session in
-         <code>try</code> and <code>finally</code>. A session runs in its own process and outlives
-         the code that started it, unless it sits idle for <code>idleTimeoutMinutes</code>, which
-         defaults to 30.
+         These are the functions the CLI runs. One session is active per user, so no function takes
+         a session id, and a session started with <code>mode: 'broker'</code> lives in its own
+         process until <code>stopDriverSession</code> or <code>idleTimeoutMinutes</code>, which
+         defaults to 30. A test wants <code>screenReader</code> from <code>a11ied/test</code>
+         instead: it owns the lifecycle and disposes the session with the test.
       </p>
       <p>
-         Every action result carries <code>state.transcript</code>: an array of entries with an
-         <code>index</code>, an ISO <code>at</code> timestamp, the <code>phrase</code>, the
-         <code>itemText</code> when the reader reported one, and a <code>checkpoint</code> label on
-         the entries <code>checkpoint</code> added.
+         Every action result carries <code>session.engine</code> for a virtual session and
+         <code>state.transcript</code>: an array of entries with an <code>index</code>, an ISO
+         <code>at</code> timestamp, the <code>phrase</code>, the <code>itemText</code> when the
+         reader reported one, and a <code>checkpoint</code> label on the entries
+         <code>checkpoint</code> added.
       </p>
    </section>
 
@@ -195,6 +226,7 @@ const {'{'} target, targetType, warning {'}'} = await resolveAvailableDefaultTar
          <h2>Export map</h2>
       </div>
       <div class="route-list">
+         <div class="route-row"><strong>Tests</strong><span><code>a11ied/test</code>: <code>screenReader</code>, <code>ScreenReader</code>, <code>ScreenReaderAssertionError</code>. <code>a11ied/vitest</code> and <code>a11ied/browser</code>: <code>test</code>, <code>it</code>, <code>screenReaderMatchers</code></span></div>
          <div class="route-row"><strong>Sessions</strong><span><code>startDriverSession</code>, <code>getDriverSessionStatus</code>, <code>runDriverSessionAction</code>, <code>runEphemeralDriverAction</code>, <code>stopDriverSession</code>, <code>attachDocumentToDriverSession</code>, <code>cleanupStaleDriverSessions</code></span></div>
          <div class="route-row"><strong>Commands</strong><span><code>listDriverCommands</code>, <code>resolveDriverCommand</code>, <code>driverCommandSets</code>, <code>isDriverCommandSet</code>, <code>parseDriverCommandSet</code></span></div>
          <div class="route-row"><strong>axe</strong><span><code>runAxe</code></span></div>
@@ -206,8 +238,9 @@ const {'{'} target, targetType, warning {'}'} = await resolveAvailableDefaultTar
       </div>
       <p>
          The package also exports the option and result types, including
-         <code>AxeRunOptions</code>, <code>SessionActionOptions</code>,
-         <code>DriverCommandList</code>, and <code>TargetType</code>.
+         <code>AxeRunOptions</code>, <code>ScreenReaderOptions</code>,
+         <code>StartDriverSessionOptions</code>, <code>DriverCommandList</code>, and
+         <code>TargetType</code>.
       </p>
    </section>
 

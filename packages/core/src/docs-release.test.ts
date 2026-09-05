@@ -24,6 +24,7 @@ const requiredRuntimePages = [
    'coverage.astro',
    'applicability.astro',
    'guides/screen-reader.astro',
+   'guides/testing.astro',
    'guides/agents.astro',
    'guides/agent-skill.astro',
    'guides/recording.astro',
@@ -39,6 +40,7 @@ const requiredNavRoutes = [
    '/coverage',
    '/applicability',
    '/guides/screen-reader',
+   '/guides/testing',
    '/guides/agents',
    '/guides/agent-skill',
    '/guides/recording',
@@ -177,6 +179,14 @@ function expectGuideSurfaceDocs(): void {
    expectSurfaceDoc('quickstart.astro', 'a1 sr stop');
 }
 
+function expectTestApiDocs(): void {
+   expectSurfaceDoc('guides/testing.astro', 'await using sr = await screenReader');
+   expectSurfaceDoc('guides/testing.astro', 'toHaveSpokenInOrder');
+   expectSurfaceDoc('guides/testing.astro', '@vitest/browser-playwright');
+   expectSurfaceDoc('targets.astro', 'jsdom');
+   expectSurfaceDoc('reference/api.astro', 'a11ied/test');
+}
+
 function expectNoStaleAxeExample(): void {
    for (const page of requiredRuntimePages) {
       expect(readDocsPage(page)).not.toContain('a1 axe --criterion 4.1.3');
@@ -188,6 +198,7 @@ function expectPublicSurfaceDocs(): void {
    expectConceptSurfaceDocs();
    expectMcpAndApiSurfaceDocs();
    expectGuideSurfaceDocs();
+   expectTestApiDocs();
    expectNoStaleAxeExample();
    expect(existsSync(resolve(docsPagesDir, 'release-checklist.astro'))).toBe(false);
 }

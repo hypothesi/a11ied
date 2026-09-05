@@ -24,6 +24,18 @@ Use the runtime API:
 import { listWcagCriteria, runAxe, startDriverSession } from 'a11ied';
 ```
 
+Drive a screen reader from a test. `a11ied/test` works under any runner, and `a11ied/vitest`
+adds `toHaveSpoken`, `toHaveSpokenInOrder`, and `toBeOn` matchers plus a `test` with an `sr`
+fixture:
+
+```js
+import { screenReader } from 'a11ied/test';
+
+await using sr = await screenReader({ url: 'http://localhost:3000/checkout' });
+await sr.goTo({ role: 'button', name: 'Pay' });
+await sr.expectSpoken('Pay, button');
+```
+
 ## workspaces
 
 The repo is split into npm workspaces. `packages/cli` publishes the end-user `a11ied` package, and the scoped `@a11ied/*` libraries are publishable as standalone building blocks.
