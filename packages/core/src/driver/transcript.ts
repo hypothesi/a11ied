@@ -60,6 +60,28 @@ export class TranscriptRecorder {
       }
       this.phraseCount = state.spokenPhraseLog.length;
       this.itemCount = state.itemTextLog.length;
+      this.captureUnloggedPhrase(state, now);
+   }
+
+   /**
+    * VoiceOver's log only records phrases that followed a Guidepup command, so a live
+    * region that speaks on its own shows up in the last phrase alone. Keep it.
+    */
+   private captureUnloggedPhrase(state: DriverStateSnapshot, now: string): void {
+      const phrase = state.lastSpokenPhrase ?? '';
+      const lastPhrase = this.entries.findLast((entry) => entry.checkpoint === undefined);
+      if (!phrase || phrase === lastPhrase?.phrase) {
+         return;
+      }
+      const entry: DriverTranscriptEntry = {
+         index: this.entries.length,
+         at: now,
+         phrase,
+      };
+      if (state.currentItemText) {
+         entry.itemText = state.currentItemText;
+      }
+      this.entries.push(entry);
    }
 
    private buildEntry(args: {

@@ -147,3 +147,15 @@ export {
    navigationKindTable,
    type NavigationKindEntry,
 } from '@a11ied/guidepup';
+export {
+   describeMatcher,
+   matchesText,
+   parseTextMatcher,
+   type TextMatcher,
+} from './driver/matcher.js';
+export {
+   describeExpectationFailure,
+   evaluateExpectation,
+   type ExpectationOptions,
+   type ExpectationResult,
+} from './driver/expectation.js';

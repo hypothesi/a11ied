@@ -105,6 +105,21 @@ export const driverGotoPayloadSchema = z
    });
 export type DriverGotoPayload = z.infer<typeof driverGotoPayloadSchema>;
 
+export const DEFAULT_WAIT_TIMEOUT_MS = 5000;
+export const DEFAULT_WAIT_PAUSE_MS = 500;
+
+/**
+ * `sr wait`: pause, or poll the transcript until a phrase matches `for`. `for` is plain
+ * text matched without case, or `/pattern/flags` for a regular expression.
+ */
+export const driverWaitPayloadSchema = z.object({
+   for: z.string().min(1).optional(),
+   /** Fixed pause when `for` is absent. */
+   ms: z.number().int().nonnegative().optional(),
+   timeoutMs: z.number().int().positive().default(DEFAULT_WAIT_TIMEOUT_MS),
+});
+export type DriverWaitPayload = z.infer<typeof driverWaitPayloadSchema>;
+
 /** One entry of a loop result: what the reader announced at each stop. */
 export const driverLoopItemSchema = z.object({
    index: z.number().int().positive(),
@@ -134,4 +149,5 @@ export const driverNavigationActionRequestSchemas = [
    z.object({ action: z.literal('elements'), payload: driverElementsPayloadSchema }),
    z.object({ action: z.literal('read-all'), payload: driverReadAllPayloadSchema }),
    z.object({ action: z.literal('goto'), payload: driverGotoPayloadSchema }),
+   z.object({ action: z.literal('wait'), payload: driverWaitPayloadSchema }),
 ] as const;

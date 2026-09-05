@@ -144,6 +144,8 @@ async function assertGoto(): Promise<void> {
    expectFirstErrorMessage({ result: none, match: /Pass --role, --name, or both/ });
 }
 
+const WALK_MAX = 4;
+
 async function assertWalk(stateDir: string): Promise<void> {
    const pageUrl = `${testServer.getBaseUrl()}/structure.html`;
    const outPath = resolve(stateDir, 'walk.md');
@@ -156,7 +158,7 @@ async function assertWalk(stateDir: string): Promise<void> {
          'virtual',
          '--allow-virtual',
          '--max',
-         '4',
+         String(WALK_MAX),
          '--out',
          outPath,
          '--json',
@@ -168,7 +170,7 @@ async function assertWalk(stateDir: string): Promise<void> {
       );
       const transcript = (json.result as { transcript: { entries: unknown[] } })
          .transcript;
-      expect(transcript.entries).toHaveLength(4);
+      expect(transcript.entries).toHaveLength(WALK_MAX);
       expect(await readFile(outPath, 'utf8')).toContain('link, About us');
 
       const again = await runCli(['sr', 'walk', '--max', '2']);

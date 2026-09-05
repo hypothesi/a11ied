@@ -7,6 +7,7 @@ import {
    registerReadCommand,
    registerTypeCommand,
 } from './drive-actions.js';
+import { registerExpectCommand, registerWaitCommand } from './drive-assert.js';
 import { registerDoCommand, registerListCommand } from './drive-command-sets.js';
 import {
    registerElementsCommand,
@@ -46,6 +47,8 @@ const registrars: ReadonlyArray<(driveCommand: Command) => void> = [
    registerTypeCommand,
    registerDoCommand,
    registerFocusCommand,
+   registerWaitCommand,
+   registerExpectCommand,
    registerCheckpointCommand,
    registerTranscriptCommand,
    registerListCommand,

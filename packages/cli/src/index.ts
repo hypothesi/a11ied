@@ -75,3 +75,21 @@ export type {
    StartDriverSessionOptions,
    TranscriptSelection,
 } from '@a11ied/core';
+
+export {
+   describeExpectationFailure,
+   describeMatcher,
+   describeNavigation,
+   evaluateExpectation,
+   getNavigationKindEntry,
+   matchesText,
+   navigationKindTable,
+   parseTextMatcher,
+} from '@a11ied/core';
+
+export type {
+   ExpectationOptions,
+   ExpectationResult,
+   NavigationKindEntry,
+   TextMatcher,
+} from '@a11ied/core';

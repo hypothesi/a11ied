@@ -2,13 +2,13 @@ import chalk from 'chalk';
 import {
    accessibilityDriverSessionSchema,
    driverActionResultSchema,
-   driverNavigateRequestSchema,
    type AccessibilityDriverSession,
    type CliOutputEnvelope,
    type DriverActionResult,
    type DriverCurrentItem,
 } from '#contracts';
 import { dim, errorLine, fields, indent, title } from '../lib/format.js';
+import { navigationEntries, structureEntries, waitEntries } from './drive-details.js';
 
 export { formatDriveCommands, renderDriveCommandsText } from './drive-commands.js';
 
@@ -133,40 +133,6 @@ function currentItemEntries(result: DriverActionResult, withSource: boolean): En
    return entries;
 }
 
-/** Lines for title, find, and table results. */
-function structureEntries(details: Record<string, unknown>): Entry[] {
-   const entries: Entry[] = [];
-   if (typeof details.title === 'string') {
-      entries.push(['Title', spoken(details.title)]);
-      entries.push(['Source', dim(String(details.source ?? ''))]);
-   }
-   if (typeof details.found === 'boolean') {
-      entries.push(['Found', details.found ? 'yes' : 'no']);
-   }
-   if (typeof details.header === 'string') {
-      entries.push(['Header', spoken(details.header)]);
-   }
-   if (typeof details.move === 'string' && details.moved === false) {
-      entries.push(['Moved', `no (no cell in the ${String(details.move)} direction)`]);
-   }
-   return entries;
-}
-
-function navigationEntries(result: DriverActionResult): Entry[] {
-   if (result.details?.moved !== false || result.details.navigation === undefined) {
-      return [];
-   }
-   const parsed = driverNavigateRequestSchema.safeParse(result.details.navigation);
-   if (!parsed.success) {
-      return [['Moved', 'no (the cursor stayed put)']];
-   }
-   const level =
-      parsed.data.level === undefined ? '' : ` level ${String(parsed.data.level)}`;
-   return [
-      ['Moved', `no (no ${parsed.data.kind}${level} to jump to, the cursor stayed put)`],
-   ];
-}
-
 function detailEntries(result: DriverActionResult, verbose: boolean): Entry[] {
    const entries: Entry[] = [];
    const { details } = result;
@@ -197,7 +163,7 @@ function detailEntries(result: DriverActionResult, verbose: boolean): Entry[] {
    if (Array.isArray(details.keys)) {
       entries.push(['Keys', details.keys.map(String).join(' ')]);
    }
-   return [...entries, ...structureEntries(details)];
+   return [...entries, ...structureEntries(details), ...waitEntries(details)];
 }
 
 function axEntries(result: DriverActionResult, verbose: boolean): Entry[] {

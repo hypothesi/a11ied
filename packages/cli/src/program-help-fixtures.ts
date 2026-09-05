@@ -99,73 +99,84 @@ export const driveRunHelpCases: HelpCase[] = [
       Control a target screen reader through stable sessions.
 
       Options:
-        -h, --help                    display help for command
+        -h, --help                       display help for command
 
       Commands:
-        start [options] [url]         Start the screen reader session, replacing any
-                                      active one. press, type, and do start one when
-                                      none is active.
-        open [options] <url>          Navigate the active session to a page. Virtual
-                                      loads the document; VoiceOver and NVDA open the
-                                      system browser and refocus it.
-        stop [options]                Stop the active session. A transcript is written
-                                      next to any recording; --out writes one as .json
-                                      or .md.
-        status [options]              Show the active session: target, URL, uptime,
-                                      recording, and transcript counts.
-        read [options]                Read the current item without moving: role,
-                                      name, value, states, and the phrase, with the
-                                      source of each.
-        title [options]               Read the page title: document.title on virtual,
-                                      the window summary on VoiceOver, the window
-                                      title on NVDA.
-        next [options] [kind]         Move to the next item, or jump by kind: item,
-                                      heading, link, landmark, control, button, table,
-                                      list, graphic, region, form-field.
-        previous [options] [kind]     Move to the previous item, or jump by kind:
-                                      item, heading, link, landmark, control, button,
-                                      table, list, graphic, region, form-field.
-        interact [options]            Enter interaction mode for the current group or
-                                      control.
-        stop-interacting [options]    Leave interaction mode.
-        activate [options]            Activate the current item.
-        top [options]                 Move to the top of the current area or document.
-        bottom [options]              Move to the bottom of the current area or
-                                      document.
-        escape [options]              Press Escape to dismiss a menu, dialog, or
-                                      interaction.
-        find [options] <text>         Move the cursor to the next place the text
-                                      appears. Exits 4 when it is not found.
-        table [options] <move>        Move inside the table the cursor is in, or read
-                                      a header: next-cell, previous-cell, next-row,
-                                      previous-row, next-column, previous-column,
-                                      row-header, column-header.
-        goto [options]                Step forward until the current item has the
-                                      given role, name, or both. Exits 4 when nothing
-                                      matches.
-        elements [options] <kind>     The rotor: move to the top, then list every
-                                      element of one kind as the reader announces it.
-                                      Kinds: heading, link, landmark, control, button,
-                                      table, list, graphic, region, form-field.
-        read-all [options]            Say-all as a transcript: step item by item from
-                                      the cursor to the end of the document, bounded
-                                      by --max.
-        walk [options] [url]          Read the whole page top to bottom and print the
-                                      transcript. Starts a session when none is
-                                      active; with a URL, opens that page first.
-        press [options] <chord...>    Press key chords in order, one chord per
-                                      argument.
-        type [options] <text>         Type text through the active target.
-        do [options] <command>        Run a named screen-reader command. Use sr list
-                                      for all available commands.
-        focus [options]               Bring a window to the front. With no options,
-                                      refocus the app the session opened.
-        checkpoint [options] <label>  Mark a named point in the transcript for
-                                      --since.
-        transcript [options]          Print what the reader said, with timestamps and
-                                      checkpoints.
-        list [options]                List the named commands a screen reader accepts.
-        help [command]                display help for command
+        start [options] [url]            Start the screen reader session, replacing
+                                         any active one. press, type, and do start one
+                                         when none is active.
+        open [options] <url>             Navigate the active session to a page.
+                                         Virtual loads the document; VoiceOver and
+                                         NVDA open the system browser and refocus it.
+        stop [options]                   Stop the active session. A transcript is
+                                         written next to any recording; --out writes
+                                         one as .json or .md.
+        status [options]                 Show the active session: target, URL, uptime,
+                                         recording, and transcript counts.
+        read [options]                   Read the current item without moving: role,
+                                         name, value, states, and the phrase, with the
+                                         source of each.
+        title [options]                  Read the page title: document.title on
+                                         virtual, the window summary on VoiceOver, the
+                                         window title on NVDA.
+        next [options] [kind]            Move to the next item, or jump by kind: item,
+                                         heading, link, landmark, control, button,
+                                         table, list, graphic, region, form-field.
+        previous [options] [kind]        Move to the previous item, or jump by kind:
+                                         item, heading, link, landmark, control,
+                                         button, table, list, graphic, region,
+                                         form-field.
+        interact [options]               Enter interaction mode for the current group
+                                         or control.
+        stop-interacting [options]       Leave interaction mode.
+        activate [options]               Activate the current item.
+        top [options]                    Move to the top of the current area or
+                                         document.
+        bottom [options]                 Move to the bottom of the current area or
+                                         document.
+        escape [options]                 Press Escape to dismiss a menu, dialog, or
+                                         interaction.
+        find [options] <text>            Move the cursor to the next place the text
+                                         appears. Exits 4 when it is not found.
+        table [options] <move>           Move inside the table the cursor is in, or
+                                         read a header: next-cell, previous-cell,
+                                         next-row, previous-row, next-column,
+                                         previous-column, row-header, column-header.
+        goto [options]                   Step forward until the current item has the
+                                         given role, name, or both. Exits 4 when
+                                         nothing matches.
+        elements [options] <kind>        The rotor: move to the top, then list every
+                                         element of one kind as the reader announces
+                                         it. Kinds: heading, link, landmark, control,
+                                         button, table, list, graphic, region,
+                                         form-field.
+        read-all [options]               Say-all as a transcript: step item by item
+                                         from the cursor to the end of the document,
+                                         bounded by --max.
+        walk [options] [url]             Read the whole page top to bottom and print
+                                         the transcript. Starts a session when none is
+                                         active; with a URL, opens that page first.
+        press [options] <chord...>       Press key chords in order, one chord per
+                                         argument.
+        type [options] <text>            Type text through the active target.
+        do [options] <command>           Run a named screen-reader command. Use sr
+                                         list for all available commands.
+        focus [options]                  Bring a window to the front. With no options,
+                                         refocus the app the session opened.
+        wait [options]                   Pause, or wait until the reader announces a
+                                         phrase. Polls the transcript, so a phrase
+                                         that arrives between two commands is not
+                                         missed. Exits 4 on timeout.
+        expect [options] <text|/regex/>  Check that the reader announced a phrase.
+                                         Exits 4 when it did not, or with --not when
+                                         it did.
+        checkpoint [options] <label>     Mark a named point in the transcript for
+                                         --since.
+        transcript [options]             Print what the reader said, with timestamps
+                                         and checkpoints.
+        list [options]                   List the named commands a screen reader
+                                         accepts.
+        help [command]                   display help for command
       "
     `,
    },

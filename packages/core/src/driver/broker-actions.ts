@@ -9,6 +9,7 @@ import { DriverCommandError, type DriverActionOptions } from '@a11ied/guidepup';
 
 import { CliUsageError } from '../errors/cli-errors.js';
 import { runElementsAction, runGotoAction, runReadAllAction } from './broker-loops.js';
+import { runWaitAction } from './broker-wait.js';
 import type { ActionExecutionResult, BrokerHandlerContext } from './broker-types.js';
 
 /** Actions after which the broker waits for the reader to finish speaking. */
@@ -89,18 +90,21 @@ async function handleNavigate(
    return { details: { navigation, ...outcome } };
 }
 
-/** Runs find and table, each of which reports its outcome in the details. */
+/** Runs title, find, and table, each of which reports its outcome in the details. */
 async function handleStructure(
    context: BrokerHandlerContext,
-   request: Extract<DriverActionRequest, { action: 'find' | 'table' }>,
+   request: DriverActionRequest,
    options: DriverActionOptions,
 ): Promise<ActionExecutionResult> {
    if (request.action === 'find') {
       const outcome = await context.adapter.findText(request.payload.text, options);
       return { details: { text: request.payload.text, ...outcome } };
    }
-   const outcome = await context.adapter.moveInTable(request.payload.move, options);
-   return { details: { move: request.payload.move, ...outcome } };
+   if (request.action === 'table') {
+      const outcome = await context.adapter.moveInTable(request.payload.move, options);
+      return { details: { move: request.payload.move, ...outcome } };
+   }
+   return { details: await context.adapter.readTitle(options) };
 }
 
 /** Runs the bounded loops: the rotor, say-all, and goto. */
@@ -167,9 +171,7 @@ async function dispatchAction(
       case 'previous': {
          return handleNavigate(context, request, options);
       }
-      case 'title': {
-         return { details: await context.adapter.readTitle(options) };
-      }
+      case 'title':
       case 'find':
       case 'table': {
          return handleStructure(context, request, options);
@@ -178,6 +180,9 @@ async function dispatchAction(
       case 'read-all':
       case 'goto': {
          return handleLoop(context, request, options);
+      }
+      case 'wait': {
+         return runWaitAction(context, request.payload);
       }
       default: {
          await context.adapter.performPortable(request.action, options);
