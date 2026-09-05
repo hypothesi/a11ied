@@ -64,7 +64,7 @@ export function registerReadCommand(driveCommand: Command): void {
       driveCommand
          .command('read')
          .description(
-            'Read the current item: the last phrase and item text, without moving.',
+            'Read the current item without moving: role, name, value, states, and the phrase, with the source of each.',
          ),
    ).action(async (options: DriveActionOptions) => {
       const { executeDriveActionCommand, renderDriveReadText } = await loadDriveRunner();

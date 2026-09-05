@@ -25,6 +25,7 @@ import {
 import { getPortableCommand } from './portable-commands.js';
 import { ignoreError } from './sequential.js';
 import { loadVirtualReader, replaceVirtualDocument } from './virtual-dom.js';
+import { readVirtualItem } from './virtual-item.js';
 import {
    pressVirtualKeys,
    runVirtualNavigation,
@@ -57,7 +58,8 @@ async function virtualCheckReadiness(): Promise<DriverReadiness> {
 async function virtualReadState(
    checkpoints: DriverCheckpoint[],
 ): Promise<DriverStateSnapshot> {
-   return buildStateSnapshot(await loadVirtualReader(), checkpoints);
+   const virtual = await loadVirtualReader();
+   return buildStateSnapshot(virtual, checkpoints, () => readVirtualItem(virtual));
 }
 
 async function virtualFocus(

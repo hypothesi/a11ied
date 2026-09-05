@@ -4,7 +4,10 @@ import {
    driverFocusTargetFieldsSchema,
    driverFocusTargetSchema,
 } from './driver-focus.js';
-import { driverNavigationActionRequestSchemas } from './driver-navigation.js';
+import {
+   driverCurrentItemSchema,
+   driverNavigationActionRequestSchemas,
+} from './driver-navigation.js';
 import { platformSchema } from './platform.js';
 
 export { platformSchema, type Platform } from './platform.js';
@@ -282,6 +285,7 @@ export const driverStateSnapshotSchema = z.object({
    checkpoints: z.array(driverCheckpointSchema),
    transcript: z.array(driverTranscriptEntrySchema).default([]),
    axFocusedElement: axFocusedElementSchema.optional(),
+   currentItem: driverCurrentItemSchema.optional(),
 });
 export type DriverStateSnapshot = z.infer<typeof driverStateSnapshotSchema>;
 

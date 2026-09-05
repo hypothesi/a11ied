@@ -97,6 +97,36 @@ function actionHeading(
    return `${title(`sr ${commandLine}`)}  ${target(session.target)}`;
 }
 
+/**
+ * Role, name, value, and states of the current item. `read` and --verbose add where the
+ * fields came from, because VoiceOver's are parsed from speech and NVDA's from the phrase
+ * alone.
+ */
+function currentItemEntries(result: DriverActionResult, withSource: boolean): Entry[] {
+   const item = result.state.currentItem;
+   if (!item) {
+      return [];
+   }
+   const entries: Entry[] = [];
+   if (item.role) {
+      const level = item.level === undefined ? '' : ` level ${String(item.level)}`;
+      entries.push(['Role', `${item.role}${level}`]);
+   }
+   if (item.name) {
+      entries.push(['Name', item.name]);
+   }
+   if (item.value !== undefined) {
+      entries.push(['Value', item.value]);
+   }
+   if (item.states.length > 0) {
+      entries.push(['States', item.states.join(', ')]);
+   }
+   if (withSource) {
+      entries.push(['Source', dim(item.source)]);
+   }
+   return entries;
+}
+
 function navigationEntries(result: DriverActionResult): Entry[] {
    if (result.details?.moved !== false) {
       return [];
@@ -220,6 +250,7 @@ export function renderDriveReadText(
    const entries: Entry[] = [
       ['Phrase', spoken(result.state.lastSpokenPhrase)],
       ['Item', spoken(result.state.currentItemText)],
+      ...currentItemEntries(result, result.action === 'read' || options.verbose),
       ...navigationEntries(result),
       ...detailEntries(result, options.verbose),
       ...axEntries(result, options.verbose),

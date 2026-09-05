@@ -37,6 +37,25 @@ export const driverNavigateRequestSchema = driverNavigatePayloadSchema.extend({
 });
 export type DriverNavigateRequest = z.infer<typeof driverNavigateRequestSchema>;
 
+/**
+ * What the cursor is on, as far as the target can tell. `source` names where each field
+ * came from: the virtual reader's active node, VoiceOver's phrase and item text, or
+ * NVDA's phrase. VoiceOver's `axFocusedElement` is keyboard focus, not the cursor, and
+ * stays separate.
+ */
+export const driverCurrentItemSchema = z.object({
+   role: z.string().optional(),
+   name: z.string().optional(),
+   value: z.string().optional(),
+   states: z.array(z.string()),
+   /** Heading level when the item is a heading. */
+   level: z.number().int().optional(),
+   phrase: z.string().optional(),
+   itemText: z.string().optional(),
+   source: z.string(),
+});
+export type DriverCurrentItem = z.infer<typeof driverCurrentItemSchema>;
+
 /** The action-request variants that carry a navigation payload. */
 export const driverNavigationActionRequestSchemas = [
    z.object({

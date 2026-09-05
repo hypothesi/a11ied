@@ -3,6 +3,7 @@ import {
    driverStateSnapshotSchema,
    type DriverCapability,
    type DriverCheckpoint,
+   type DriverCurrentItem,
    type DriverFocusResult,
    type DriverFocusTarget,
    type DriverNavigateRequest,
@@ -56,7 +57,11 @@ export interface DriverAdapter {
    waitForSpeechStabilization(): Promise<void>;
 }
 
-/** Collects a normalized snapshot from the current screen-reader state. */
+/**
+ * Collects a normalized snapshot from the current screen-reader state. `describeItem`
+ * turns the phrase and item text into the current item; the virtual adapter passes one
+ * that reads its active node instead.
+ */
 export async function buildStateSnapshot(
    reader: {
       lastSpokenPhrase(): Promise<string>;
@@ -65,6 +70,7 @@ export async function buildStateSnapshot(
       itemTextLog(): Promise<string[]>;
    },
    checkpoints: DriverCheckpoint[],
+   describeItem?: (phrase: string, itemText: string) => Promise<DriverCurrentItem>,
 ): Promise<DriverStateSnapshot> {
    const [lastSpokenPhrase, currentItemText, spokenPhraseLog, itemTextLog] =
       await Promise.all([
@@ -73,6 +79,9 @@ export async function buildStateSnapshot(
          reader.spokenPhraseLog().catch(() => []),
          reader.itemTextLog().catch(() => []),
       ]);
+   const currentItem = describeItem
+      ? await describeItem(lastSpokenPhrase, currentItemText)
+      : undefined;
 
    return driverStateSnapshotSchema.parse({
       lastSpokenPhrase: lastSpokenPhrase || undefined,
@@ -81,5 +90,6 @@ export async function buildStateSnapshot(
       itemTextLog,
       logCursor: spokenPhraseLog.length,
       checkpoints,
+      currentItem,
    });
 }

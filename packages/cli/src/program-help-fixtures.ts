@@ -113,8 +113,9 @@ export const driveRunHelpCases: HelpCase[] = [
                                       or .md.
         status [options]              Show the active session: target, URL, uptime,
                                       recording, and transcript counts.
-        read [options]                Read the current item: the last phrase and item
-                                      text, without moving.
+        read [options]                Read the current item without moving: role,
+                                      name, value, states, and the phrase, with the
+                                      source of each.
         next [options] [kind]         Move to the next item, or jump by kind: item,
                                       heading, link, landmark, control, button, table,
                                       list, graphic, region, form-field.

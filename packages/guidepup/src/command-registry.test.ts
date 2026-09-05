@@ -7,6 +7,17 @@ import {
    resolveDriverCommand,
 } from './command-registry.js';
 
+const PORTABLE_VERBS = [
+   'next',
+   'previous',
+   'interact',
+   'stop-interacting',
+   'activate',
+   'top',
+   'bottom',
+   'escape',
+];
+
 describe('driver command listing', () => {
    it('lists portable, VoiceOver, and NVDA command sets', () => {
       const listed = listDriverCommands();
@@ -28,16 +39,7 @@ describe('driver command listing', () => {
       const aliases = listed.commandSets[0]?.commands.map((command) => command.alias);
 
       expect(listed.commandSets.map((group) => group.commandSet)).toEqual(['portable']);
-      expect(aliases?.slice(0, 8)).toEqual([
-         'next',
-         'previous',
-         'interact',
-         'stop-interacting',
-         'activate',
-         'top',
-         'bottom',
-         'escape',
-      ]);
+      expect(aliases?.slice(0, PORTABLE_VERBS.length)).toEqual(PORTABLE_VERBS);
       expect(aliases).toContain('next-heading');
       expect(aliases).toContain('previous-form-field');
       expect(aliases).not.toContain('next-item');
@@ -47,7 +49,10 @@ describe('driver command listing', () => {
       for (const target of ['voiceover', 'nvda', 'virtual'] as const) {
          const resolved = resolveDriverCommand({ target, command: 'previous-link' });
 
-         expect(resolved.portableNavigation).toEqual({ direction: 'previous', kind: 'link' });
+         expect(resolved.portableNavigation).toEqual({
+            direction: 'previous',
+            kind: 'link',
+         });
          expect(resolved.portableAction).toBeUndefined();
       }
    });

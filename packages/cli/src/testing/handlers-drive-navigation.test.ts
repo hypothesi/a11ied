@@ -15,9 +15,18 @@ const tempRoots: string[] = [];
 const testServer = useTestServer(tempRoots);
 const startArgs = ['--sr', 'virtual', '--allow-virtual', '--idle-timeout', '1'];
 
+interface CurrentItemShape {
+   role?: string;
+   name?: string;
+   value?: string;
+   states: string[];
+   level?: number;
+   source: string;
+}
+
 interface NavigationResult {
    action: string;
-   state: { lastSpokenPhrase: string | null };
+   state: { lastSpokenPhrase: string | null; currentItem?: CurrentItemShape };
    details?: { moved?: boolean; navigation?: Record<string, unknown> };
 }
 
@@ -138,7 +147,47 @@ async function assertUsageErrorsAndDo(): Promise<void> {
    expect(listed.stdout).toContain('previous-landmark');
 }
 
+async function assertReadDescribesTheItem(): Promise<void> {
+   await runSrJson(['next', 'heading']);
+   const heading = await runSrJson(['read']);
+   expect(heading.result.state.currentItem).toMatchObject({
+      role: 'heading',
+      name: 'Structure page',
+      level: 1,
+      states: [],
+   });
+   expect(heading.result.state.currentItem?.source).toContain('active node');
+
+   await runSrJson(['next', 'control']);
+   const email = await runSrJson(['read']);
+   expect(email.result.state.currentItem).toMatchObject({
+      role: 'textbox',
+      name: 'Email',
+   });
+
+   await runSrJson(['next']);
+   const checkbox = await runSrJson(['read']);
+   expect(checkbox.result.state.currentItem).toMatchObject({
+      role: 'checkbox',
+      name: 'Accept the terms',
+      states: ['unchecked'],
+   });
+
+   const text = await runCli(['sr', 'read']);
+   expect(text.stdout).toContain('Role:');
+   expect(text.stdout).toContain('checkbox');
+   expect(text.stdout).toContain('States:');
+   expect(text.stdout).toContain('Source:');
+   expect(text.stdout).toContain('virtual');
+}
+
 describe('cli sr structural navigation', () => {
+   it(
+      'reads the current item as role, name, states, and source',
+      withSession(assertReadDescribesTheItem),
+      TEST_TIMEOUT_LONG,
+   );
+
    it(
       'jumps by every kind on the virtual target',
       withSession(assertEveryKindJumps),

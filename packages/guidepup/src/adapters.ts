@@ -33,6 +33,7 @@ import {
    serializeResolvedDriverCommand,
    type DriverCommandSet,
 } from './command-registry.js';
+import { parseNvdaItem, parseVoiceOverItem } from './current-item.js';
 import { getPortableCommand } from './portable-commands.js';
 import {
    buildCommandOptions,
@@ -158,12 +159,16 @@ class RealScreenReaderAdapter implements DriverAdapter {
    async readState(checkpoints: DriverCheckpoint[]): Promise<DriverStateSnapshot> {
       if (this.target === 'voiceover') {
          const [snapshot, axFocusedElement] = await Promise.all([
-            buildStateSnapshot(this.reader, checkpoints),
+            buildStateSnapshot(this.reader, checkpoints, async (phrase, itemText) =>
+               parseVoiceOverItem(phrase, itemText),
+            ),
             queryFocusedAxProperties().catch(() => undefined as undefined),
          ]);
          return driverStateSnapshotSchema.parse({ ...snapshot, axFocusedElement });
       }
-      return buildStateSnapshot(this.reader, checkpoints);
+      return buildStateSnapshot(this.reader, checkpoints, async (phrase, itemText) =>
+         parseNvdaItem(phrase, itemText),
+      );
    }
 
    async waitForSpeechStabilization(): Promise<void> {
