@@ -50,6 +50,15 @@ export default defineConfig({
       environment: 'node',
       include: ['packages/*/src/**/*.test.ts'],
       exclude: ['**/node_modules/**', '**/*.browser.test.ts'],
+      /*
+       * Most CLI cases spawn packages/cli/dist/cli.js, and a virtual session there starts
+       * headless Chromium, so vitest's 5 second default fails on a loaded machine and on
+       * a CI runner slower than a developer laptop. Half the cores keeps those child
+       * processes from oversubscribing the machine they run on.
+       */
+      testTimeout: 30_000,
+      hookTimeout: 30_000,
+      maxWorkers: '50%',
       server: {
          deps: {
             inline: [/^@a11ied\//, /^#(contracts|core|mcp-server)$/],
