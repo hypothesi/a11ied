@@ -159,3 +159,11 @@ export {
    type ExpectationOptions,
    type ExpectationResult,
 } from './driver/expectation.js';
+export {
+   runDriverSessionBatch,
+   type BatchRunOptions,
+   type BatchRunResult,
+   type BatchStepError,
+   type BatchStepOutcome,
+   type BatchStepResult,
+} from './driver/batch.js';

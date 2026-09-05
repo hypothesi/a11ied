@@ -93,3 +93,13 @@ export type {
    NavigationKindEntry,
    TextMatcher,
 } from '@a11ied/core';
+
+export { runDriverSessionBatch } from '@a11ied/core';
+
+export type {
+   BatchRunOptions,
+   BatchRunResult,
+   BatchStepError,
+   BatchStepOutcome,
+   BatchStepResult,
+} from '@a11ied/core';

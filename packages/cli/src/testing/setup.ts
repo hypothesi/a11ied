@@ -105,13 +105,15 @@ function getChildEnv(): NodeJS.ProcessEnv {
    return { ...inherited, FORCE_COLOR: '0' };
 }
 
-export async function runCli(args: string[]): Promise<CliResult> {
+/** Runs the built CLI; `input`, when given, is written to its stdin. */
+export async function runCli(args: string[], input?: string): Promise<CliResult> {
    return new Promise((resolveResult, reject) => {
       const child = spawn(process.execPath, [getBuiltCliPath(), ...args], {
          cwd: process.cwd(),
          env: getChildEnv(),
-         stdio: ['ignore', 'pipe', 'pipe'],
+         stdio: ['pipe', 'pipe', 'pipe'],
       });
+      child.stdin.end(input ?? '');
 
       let stdout = '';
       let stderr = '';

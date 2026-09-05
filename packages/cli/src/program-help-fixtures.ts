@@ -174,6 +174,10 @@ export const driveRunHelpCases: HelpCase[] = [
                                          --since.
         transcript [options]             Print what the reader said, with timestamps
                                          and checkpoints.
+        batch [options] [file]           Run JSON lines of actions, one per line, over
+                                         one broker connection in one process. Reads
+                                         stdin when no file is given. Stops at the
+                                         first failed expect unless --continue.
         list [options]                   List the named commands a screen reader
                                          accepts.
         help [command]                   display help for command
