@@ -6,8 +6,9 @@ import {
    type AccessibilityDriverSession,
    type CliOutputEnvelope,
    type DriverActionResult,
+   type DriverCurrentItem,
 } from '#contracts';
-import { dim, fields, indent, title } from '../lib/format.js';
+import { dim, errorLine, fields, indent, title } from '../lib/format.js';
 
 export { formatDriveCommands, renderDriveCommandsText } from './drive-commands.js';
 
@@ -97,6 +98,18 @@ function actionHeading(
    return `${title(`sr ${commandLine}`)}  ${target(session.target)}`;
 }
 
+function itemIdentityEntries(item: DriverCurrentItem): Entry[] {
+   const entries: Entry[] = [];
+   if (item.role) {
+      const level = item.level === undefined ? '' : ` level ${String(item.level)}`;
+      entries.push(['Role', `${item.role}${level}`]);
+   }
+   if (item.name) {
+      entries.push(['Name', item.name]);
+   }
+   return entries;
+}
+
 /**
  * Role, name, value, and states of the current item. `read` and --verbose add where the
  * fields came from, because VoiceOver's are parsed from speech and NVDA's from the phrase
@@ -107,14 +120,7 @@ function currentItemEntries(result: DriverActionResult, withSource: boolean): En
    if (!item) {
       return [];
    }
-   const entries: Entry[] = [];
-   if (item.role) {
-      const level = item.level === undefined ? '' : ` level ${String(item.level)}`;
-      entries.push(['Role', `${item.role}${level}`]);
-   }
-   if (item.name) {
-      entries.push(['Name', item.name]);
-   }
+   const entries = itemIdentityEntries(item);
    if (item.value !== undefined) {
       entries.push(['Value', item.value]);
    }
@@ -127,8 +133,27 @@ function currentItemEntries(result: DriverActionResult, withSource: boolean): En
    return entries;
 }
 
+/** Lines for title, find, and table results. */
+function structureEntries(details: Record<string, unknown>): Entry[] {
+   const entries: Entry[] = [];
+   if (typeof details.title === 'string') {
+      entries.push(['Title', spoken(details.title)]);
+      entries.push(['Source', dim(String(details.source ?? ''))]);
+   }
+   if (typeof details.found === 'boolean') {
+      entries.push(['Found', details.found ? 'yes' : 'no']);
+   }
+   if (typeof details.header === 'string') {
+      entries.push(['Header', spoken(details.header)]);
+   }
+   if (typeof details.move === 'string' && details.moved === false) {
+      entries.push(['Moved', `no (no cell in the ${String(details.move)} direction)`]);
+   }
+   return entries;
+}
+
 function navigationEntries(result: DriverActionResult): Entry[] {
-   if (result.details?.moved !== false) {
+   if (result.details?.moved !== false || result.details.navigation === undefined) {
       return [];
    }
    const parsed = driverNavigateRequestSchema.safeParse(result.details.navigation);
@@ -172,7 +197,7 @@ function detailEntries(result: DriverActionResult, verbose: boolean): Entry[] {
    if (Array.isArray(details.keys)) {
       entries.push(['Keys', details.keys.map(String).join(' ')]);
    }
-   return entries;
+   return [...entries, ...structureEntries(details)];
 }
 
 function axEntries(result: DriverActionResult, verbose: boolean): Entry[] {
@@ -261,9 +286,19 @@ export function renderDriveReadText(
          result.state.checkpoints.map((entry) => entry.label).join(', ') || dim('none'),
       ]);
    }
-   return [actionHeading(envelope, result.session), ...indent(fields(entries))].join(
-      '\n',
-   );
+   return [
+      actionHeading(envelope, result.session),
+      ...indent(fields(entries)),
+      ...verdictLines(envelope),
+   ].join('\n');
+}
+
+/** A failed check (exit code 4) keeps the result block and adds its message below. */
+export function verdictLines(envelope: CliOutputEnvelope): string[] {
+   if (envelope.ok) {
+      return [];
+   }
+   return ['', ...envelope.errors.map((error) => errorLine(error.code, error.message))];
 }
 
 function transcriptFileLines(files: unknown): string[] {

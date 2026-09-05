@@ -56,7 +56,26 @@ export const driverCurrentItemSchema = z.object({
 });
 export type DriverCurrentItem = z.infer<typeof driverCurrentItemSchema>;
 
-/** The action-request variants that carry a navigation payload. */
+export const driverFindPayloadSchema = z.object({ text: z.string().min(1) });
+export type DriverFindPayload = z.infer<typeof driverFindPayloadSchema>;
+
+/** Moves inside a table the cursor has entered. Header reads do not move the cursor. */
+export const driverTableMoveSchema = z.enum([
+   'next-cell',
+   'previous-cell',
+   'next-row',
+   'previous-row',
+   'next-column',
+   'previous-column',
+   'row-header',
+   'column-header',
+]);
+export type DriverTableMove = z.infer<typeof driverTableMoveSchema>;
+
+export const driverTablePayloadSchema = z.object({ move: driverTableMoveSchema });
+export type DriverTablePayload = z.infer<typeof driverTablePayloadSchema>;
+
+/** The action-request variants that carry a navigation or structure payload. */
 export const driverNavigationActionRequestSchemas = [
    z.object({
       action: z.literal('next'),
@@ -66,4 +85,6 @@ export const driverNavigationActionRequestSchemas = [
       action: z.literal('previous'),
       payload: driverNavigatePayloadSchema.optional(),
    }),
+   z.object({ action: z.literal('find'), payload: driverFindPayloadSchema }),
+   z.object({ action: z.literal('table'), payload: driverTablePayloadSchema }),
 ] as const;

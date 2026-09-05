@@ -4,6 +4,7 @@ import {
    type CliMessage,
    type CliOutputEnvelope,
    type DriverActionRequest,
+   type DriverActionResult,
    type Platform,
 } from '#contracts';
 import {
@@ -190,6 +191,26 @@ interface DriveActionCommandInput {
    autoStart?: boolean;
    options: DriveAutoStartOptions;
    renderText: RenderText;
+   /** Turns a successful action into a failed check, such as text that was not found. */
+   verdict?: (result: DriverActionResult) => CliMessage | undefined;
+}
+
+/** Applies a verdict: a returned message fails the command with exit code 4. */
+function applyVerdict(
+   input: DriveActionCommandInput,
+   execution: CommandExecution,
+   result: DriverActionResult,
+): CommandExecution {
+   const failure = input.verdict?.(result);
+   if (!failure) {
+      return execution;
+   }
+   return {
+      ...execution,
+      ok: false,
+      exitCode: cliExitCodes.assertion,
+      errors: [failure],
+   };
 }
 
 function renderPhraseText(envelope: CliOutputEnvelope): string {
@@ -223,11 +244,15 @@ async function runEphemeral(input: DriveActionCommandInput): Promise<CommandExec
       request: resolveRequest(input),
       timeoutMs: parseTimeoutMs(input.options.timeout),
    });
-   return {
-      target: { kind: 'driver-target', value: target },
-      result: withCommandLine(input, result),
-      warnings,
-   };
+   return applyVerdict(
+      input,
+      {
+         target: { kind: 'driver-target', value: target },
+         result: withCommandLine(input, result),
+         warnings,
+      },
+      result,
+   );
 }
 
 async function runAutoStart(input: DriveActionCommandInput): Promise<CommandExecution> {
@@ -240,11 +265,15 @@ async function runAutoStart(input: DriveActionCommandInput): Promise<CommandExec
       code: 'session-auto-started',
       message: `No session was active, so a ${started.session.target} session was started.`,
    });
-   return {
-      target: { kind: 'driver-session', value: target },
-      result: withCommandLine(input, result),
-      warnings,
-   };
+   return applyVerdict(
+      input,
+      {
+         target: { kind: 'driver-session', value: target },
+         result: withCommandLine(input, result),
+         warnings,
+      },
+      result,
+   );
 }
 
 async function runDriveAction(input: DriveActionCommandInput): Promise<CommandExecution> {
@@ -269,11 +298,15 @@ async function runDriveAction(input: DriveActionCommandInput): Promise<CommandEx
    const result = await runDriverSessionAction(request, {
       timeoutMs: parseTimeoutMs(input.options.timeout),
    });
-   return {
-      target: { kind: 'driver-session', value: session.target },
-      result: withCommandLine(input, result),
-      warnings,
-   };
+   return applyVerdict(
+      input,
+      {
+         target: { kind: 'driver-session', value: session.target },
+         result: withCommandLine(input, result),
+         warnings,
+      },
+      result,
+   );
 }
 
 // Fallow-ignore-next-line unused-export

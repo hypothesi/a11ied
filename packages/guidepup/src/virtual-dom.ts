@@ -44,6 +44,11 @@ export async function loadVirtualReader(): Promise<VirtualReader> {
    return loaded.virtual;
 }
 
+/** The title of the document the virtual reader is attached to. */
+export function getVirtualDocumentTitle(): string {
+   return getDom().window.document.title;
+}
+
 /** Replaces the document's content and URL in place and returns the shared window. */
 export function replaceVirtualDocument(document: {
    html: string;

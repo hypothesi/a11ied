@@ -116,6 +116,9 @@ export const driveRunHelpCases: HelpCase[] = [
         read [options]                Read the current item without moving: role,
                                       name, value, states, and the phrase, with the
                                       source of each.
+        title [options]               Read the page title: document.title on virtual,
+                                      the window summary on VoiceOver, the window
+                                      title on NVDA.
         next [options] [kind]         Move to the next item, or jump by kind: item,
                                       heading, link, landmark, control, button, table,
                                       list, graphic, region, form-field.
@@ -131,6 +134,12 @@ export const driveRunHelpCases: HelpCase[] = [
                                       document.
         escape [options]              Press Escape to dismiss a menu, dialog, or
                                       interaction.
+        find [options] <text>         Move the cursor to the next place the text
+                                      appears. Exits 4 when it is not found.
+        table [options] <move>        Move inside the table the cursor is in, or read
+                                      a header: next-cell, previous-cell, next-row,
+                                      previous-row, next-column, previous-column,
+                                      row-header, column-header.
         press [options] <chord...>    Press key chords in order, one chord per
                                       argument.
         type [options] <text>         Type text through the active target.

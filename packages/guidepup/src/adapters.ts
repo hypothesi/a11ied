@@ -8,6 +8,7 @@ import {
    type DriverPerformPayload,
    type DriverReadiness,
    type DriverStateSnapshot,
+   type DriverTableMove,
    type Platform,
    type PortableDriverVerb,
 } from '@a11ied/contracts';
@@ -45,6 +46,7 @@ import {
    type RealStepContext,
    type RealTarget,
 } from './real-steps.js';
+import { findRealText, moveInRealTable, readRealTitle } from './real-structure.js';
 import { ignoreError } from './sequential.js';
 import { waitForSpeechStabilization } from './speech.js';
 import { createVirtualAdapter } from './virtual-adapter.js';
@@ -115,6 +117,26 @@ class RealScreenReaderAdapter implements DriverAdapter {
    ): Promise<{ moved?: boolean }> {
       await runRealNavigation(this.stepContext(options), request);
       return {};
+   }
+
+   async readTitle(
+      options?: DriverActionOptions,
+   ): Promise<{ title: string; source: string }> {
+      return readRealTitle(this.stepContext(options));
+   }
+
+   async findText(
+      text: string,
+      options?: DriverActionOptions,
+   ): Promise<{ found: boolean }> {
+      return findRealText(this.stepContext(options), text);
+   }
+
+   async moveInTable(
+      move: DriverTableMove,
+      options?: DriverActionOptions,
+   ): Promise<{ moved?: boolean; header?: string }> {
+      return moveInRealTable(this.stepContext(options), move);
    }
 
    async press(keys: readonly string[], options?: DriverActionOptions): Promise<void> {

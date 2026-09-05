@@ -79,6 +79,12 @@ function createMockAdapter(): DriverAdapter {
          phrases.push('Heading');
          return { moved: true };
       }),
+      readTitle: vi.fn<DriverAdapter['readTitle']>().mockResolvedValue({
+         title: 'Example',
+         source: 'test',
+      }),
+      findText: vi.fn<DriverAdapter['findText']>().mockResolvedValue({ found: true }),
+      moveInTable: vi.fn<DriverAdapter['moveInTable']>().mockResolvedValue({}),
       press: vi.fn<DriverAdapter['press']>(),
       focus: vi.fn<DriverAdapter['focus']>().mockResolvedValue({
          status: 'focused',

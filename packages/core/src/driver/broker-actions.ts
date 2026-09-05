@@ -17,6 +17,9 @@ export const SPEECH_TRIGGERING_ACTIONS: ReadonlySet<DriverActionName> =
       'press',
       'type',
       'perform',
+      'title',
+      'find',
+      'table',
    ]);
 
 /** Validates a raw broker action and payload into the typed request union. */
@@ -60,15 +63,8 @@ async function handlePerform(
    request: Extract<DriverActionRequest, { action: 'perform' }>,
    options: DriverActionOptions,
 ): Promise<ActionExecutionResult> {
-   try {
-      const performed = await context.adapter.performCommand(request.payload, options);
-      return { details: { command: performed } };
-   } catch (error) {
-      if (error instanceof DriverCommandError) {
-         throw new CliUsageError(error.code, error.message, error.details);
-      }
-      throw error;
-   }
+   const performed = await context.adapter.performCommand(request.payload, options);
+   return { details: { command: performed } };
 }
 
 /**
@@ -89,6 +85,20 @@ async function handleNavigate(
    return { details: { navigation, ...outcome } };
 }
 
+/** Runs find and table, each of which reports its outcome in the details. */
+async function handleStructure(
+   context: BrokerHandlerContext,
+   request: Extract<DriverActionRequest, { action: 'find' | 'table' }>,
+   options: DriverActionOptions,
+): Promise<ActionExecutionResult> {
+   if (request.action === 'find') {
+      const outcome = await context.adapter.findText(request.payload.text, options);
+      return { details: { text: request.payload.text, ...outcome } };
+   }
+   const outcome = await context.adapter.moveInTable(request.payload.move, options);
+   return { details: { move: request.payload.move, ...outcome } };
+}
+
 function recordCheckpoint(
    context: BrokerHandlerContext,
    label: string,
@@ -107,11 +117,10 @@ async function handleFocus(
    return { details: { focus: focusResult } };
 }
 
-/** Executes one typed action against the session adapter. */
-export async function executeAction(
+async function dispatchAction(
    context: BrokerHandlerContext,
    request: DriverActionRequest,
-   options: DriverActionOptions = {},
+   options: DriverActionOptions,
 ): Promise<ActionExecutionResult> {
    switch (request.action) {
       case 'press': {
@@ -139,9 +148,35 @@ export async function executeAction(
       case 'previous': {
          return handleNavigate(context, request, options);
       }
+      case 'title': {
+         return { details: await context.adapter.readTitle(options) };
+      }
+      case 'find':
+      case 'table': {
+         return handleStructure(context, request, options);
+      }
       default: {
          await context.adapter.performPortable(request.action, options);
          return {};
       }
+   }
+}
+
+/**
+ * Executes one typed action. Adapter errors that name an unsupported combination of
+ * target and command come back as usage errors, so the CLI exits 2 with the message.
+ */
+export async function executeAction(
+   context: BrokerHandlerContext,
+   request: DriverActionRequest,
+   options: DriverActionOptions = {},
+): Promise<ActionExecutionResult> {
+   try {
+      return await dispatchAction(context, request, options);
+   } catch (error) {
+      if (error instanceof DriverCommandError) {
+         throw new CliUsageError(error.code, error.message, error.details);
+      }
+      throw error;
    }
 }

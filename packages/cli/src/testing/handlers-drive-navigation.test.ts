@@ -147,6 +147,23 @@ async function assertUsageErrorsAndDo(): Promise<void> {
    expect(listed.stdout).toContain('previous-landmark');
 }
 
+async function assertReadShowsStates(): Promise<void> {
+   await runSrJson(['next']);
+   const checkbox = await runSrJson(['read']);
+   expect(checkbox.result.state.currentItem).toMatchObject({
+      role: 'checkbox',
+      name: 'Accept the terms',
+      states: ['unchecked'],
+   });
+
+   const text = await runCli(['sr', 'read']);
+   expect(text.stdout).toContain('Role:');
+   expect(text.stdout).toContain('checkbox');
+   expect(text.stdout).toContain('States:');
+   expect(text.stdout).toContain('Source:');
+   expect(text.stdout).toContain('virtual');
+}
+
 async function assertReadDescribesTheItem(): Promise<void> {
    await runSrJson(['next', 'heading']);
    const heading = await runSrJson(['read']);
@@ -165,20 +182,7 @@ async function assertReadDescribesTheItem(): Promise<void> {
       name: 'Email',
    });
 
-   await runSrJson(['next']);
-   const checkbox = await runSrJson(['read']);
-   expect(checkbox.result.state.currentItem).toMatchObject({
-      role: 'checkbox',
-      name: 'Accept the terms',
-      states: ['unchecked'],
-   });
-
-   const text = await runCli(['sr', 'read']);
-   expect(text.stdout).toContain('Role:');
-   expect(text.stdout).toContain('checkbox');
-   expect(text.stdout).toContain('States:');
-   expect(text.stdout).toContain('Source:');
-   expect(text.stdout).toContain('virtual');
+   await assertReadShowsStates();
 }
 
 describe('cli sr structural navigation', () => {

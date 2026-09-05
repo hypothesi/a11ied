@@ -7,13 +7,13 @@ import {
    type DriverPerformPayload,
    type DriverReadiness,
    type DriverStateSnapshot,
+   type DriverTableMove,
    type PortableDriverVerb,
 } from '@a11ied/contracts';
 
 import {
    buildStateSnapshot,
    driverCapabilities,
-   type DriverActionOptions,
    type DriverAdapter,
 } from './adapter-shared.js';
 import {
@@ -32,6 +32,11 @@ import {
    runVirtualStep,
    type VirtualStepContext,
 } from './virtual-steps.js';
+import {
+   findVirtualText,
+   moveInVirtualTable,
+   readVirtualTitle,
+} from './virtual-structure.js';
 
 const defaultVirtualHtml = `
 <!doctype html>
@@ -45,6 +50,11 @@ const defaultVirtualHtml = `
   </body>
 </html>
 `;
+
+/** The one piece of state an adapter keeps: the body the reader was started on. */
+interface VirtualAdapterState {
+   container: Node | undefined;
+}
 
 async function virtualCheckReadiness(): Promise<DriverReadiness> {
    return driverReadinessSchema.parse({
@@ -86,14 +96,44 @@ async function virtualWaitForSpeech(): Promise<void> {
    // The virtual screen reader speaks synchronously, so there is nothing to wait for.
 }
 
-interface VirtualPerformHandlers {
-   performPortable: (verb: PortableDriverVerb) => Promise<void>;
-   navigate: (request: DriverNavigateRequest) => Promise<{ moved?: boolean }>;
+async function stepContext(state: VirtualAdapterState): Promise<VirtualStepContext> {
+   return { virtual: await loadVirtualReader(), container: state.container };
+}
+
+async function stopVirtual(state: VirtualAdapterState): Promise<void> {
+   const virtual = await loadVirtualReader();
+   await virtual.stop().catch(ignoreError);
+   state.container = undefined;
+}
+
+async function attachVirtualDocument(
+   state: VirtualAdapterState,
+   document: { html: string; url: string },
+): Promise<void> {
+   const virtual = await loadVirtualReader();
+   await virtual.stop().catch(ignoreError);
+   const window = replaceVirtualDocument(document);
+   state.container = window.document.body;
+   await virtual.start({ container: window.document.body, window });
+}
+
+async function performVirtualPortable(
+   state: VirtualAdapterState,
+   verb: PortableDriverVerb,
+): Promise<void> {
+   await runVirtualStep(await stepContext(state), getPortableCommand(verb).virtual);
+}
+
+async function navigateVirtual(
+   state: VirtualAdapterState,
+   request: DriverNavigateRequest,
+): Promise<{ moved?: boolean }> {
+   return runVirtualNavigation(await stepContext(state), request);
 }
 
 async function virtualPerformCommand(
+   state: VirtualAdapterState,
    command: DriverPerformPayload,
-   handlers: VirtualPerformHandlers,
 ): Promise<ReturnType<typeof serializeResolvedDriverCommand>> {
    let commandSet: DriverCommandSet = 'auto';
    if (command.commandSet) {
@@ -105,67 +145,36 @@ async function virtualPerformCommand(
       commandSet,
    });
    if (resolved.portableNavigation) {
-      await handlers.navigate(resolved.portableNavigation);
+      await navigateVirtual(state, resolved.portableNavigation);
    } else if (resolved.portableAction) {
-      await handlers.performPortable(resolved.portableAction);
+      await performVirtualPortable(state, resolved.portableAction);
    }
    return serializeResolvedDriverCommand(resolved);
 }
 
 export function createVirtualAdapter(): DriverAdapter {
-   let container: Node | undefined = undefined;
-
-   async function stepContext(): Promise<VirtualStepContext> {
-      return { virtual: await loadVirtualReader(), container };
-   }
-
-   async function stopVirtual(): Promise<void> {
-      const virtual = await loadVirtualReader();
-      await virtual.stop().catch(ignoreError);
-      container = undefined;
-   }
-
-   async function attachDocument(document: { html: string; url: string }): Promise<void> {
-      const virtual = await loadVirtualReader();
-      await virtual.stop().catch(ignoreError);
-      const window = replaceVirtualDocument(document);
-      container = window.document.body;
-      await virtual.start({ container: window.document.body, window });
-   }
-
-   async function performPortable(
-      verb: PortableDriverVerb,
-      _options?: DriverActionOptions,
-   ): Promise<void> {
-      await runVirtualStep(await stepContext(), getPortableCommand(verb).virtual);
-   }
-
-   async function navigate(
-      request: DriverNavigateRequest,
-      _options?: DriverActionOptions,
-   ): Promise<{ moved?: boolean }> {
-      return runVirtualNavigation(await stepContext(), request);
-   }
-
+   const state: VirtualAdapterState = { container: undefined };
    return {
       target: 'virtual',
       capabilities: driverCapabilities,
       checkReadiness: virtualCheckReadiness,
-      start: async () => {
-         await attachDocument({
+      start: () =>
+         attachVirtualDocument(state, {
             html: defaultVirtualHtml,
             url: 'https://a11ied.local/virtual',
-         });
-      },
-      stop: stopVirtual,
-      attachDocument,
+         }),
+      stop: () => stopVirtual(state),
+      attachDocument: (document) => attachVirtualDocument(state, document),
       focus: virtualFocus,
-      performPortable,
-      navigate,
+      performPortable: (verb) => performVirtualPortable(state, verb),
+      navigate: (request) => navigateVirtual(state, request),
+      readTitle: async () => readVirtualTitle(),
+      findText: async (text: string) => findVirtualText(await stepContext(state), text),
+      moveInTable: async (move: DriverTableMove) =>
+         moveInVirtualTable(await stepContext(state), move),
       press: virtualPress,
       type: virtualType,
-      performCommand: (command) =>
-         virtualPerformCommand(command, { performPortable, navigate }),
+      performCommand: (command) => virtualPerformCommand(state, command),
       readState: virtualReadState,
       waitForSpeechStabilization: virtualWaitForSpeech,
    };

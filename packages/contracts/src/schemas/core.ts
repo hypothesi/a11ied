@@ -166,6 +166,9 @@ export const driverActionNameSchema = z.enum([
    'read',
    'transcript',
    'checkpoint',
+   'title',
+   'find',
+   'table',
 ]);
 export type DriverActionName = z.infer<typeof driverActionNameSchema>;
 
@@ -314,6 +317,7 @@ const payloadFreeActionSchema = z.enum([
    ...portableDriverVerbSchema.exclude(['next', 'previous']).options,
    'read',
    'transcript',
+   'title',
 ]);
 
 /**

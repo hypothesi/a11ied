@@ -92,44 +92,52 @@ async function runMethod(
    await run();
 }
 
-/**
- * Walks item by item until the announced role is one of the wanted roles. Reports no
- * movement when the walk comes back around to where it started, which on the wrapping
- * virtual reader means the page has no such element.
- */
-async function walkUntilRole(args: {
+export interface VirtualWalkArgs {
    context: VirtualStepContext;
-   step: VirtualRoleWalkStep;
-   start: string;
-   remaining: number;
-}): Promise<boolean> {
-   if (args.remaining <= 0) {
+   direction: 'next' | 'previous';
+   /** Decides whether the item the cursor is on ends the walk. */
+   isMatch: (phrase: string, node: Node | null) => boolean;
+}
+
+async function walkStep(
+   args: VirtualWalkArgs,
+   start: string,
+   remaining: number,
+): Promise<boolean> {
+   if (remaining <= 0) {
       return false;
    }
-   await runMethod(args.context.virtual, args.step.direction);
-   if ((await getVirtualPositionToken(args.context.virtual)) === args.start) {
+   await runMethod(args.context.virtual, args.direction);
+   if ((await getVirtualPositionToken(args.context.virtual)) === start) {
       return false;
    }
    const phrase = await args.context.virtual.lastSpokenPhrase();
-   if (
-      args.step.roles.includes(getVirtualPhraseRole(phrase)) &&
-      !phrase.startsWith('end of ')
-   ) {
+   if (args.isMatch(phrase, args.context.virtual.activeNode)) {
       return true;
    }
-   return walkUntilRole({ ...args, remaining: args.remaining - 1 });
+   return walkStep(args, start, remaining - 1);
+}
+
+/**
+ * Walks item by item until `isMatch` accepts the current item. Returns false, with the
+ * cursor back where it started, when the walk comes around to its starting point: the
+ * virtual reader wraps, so that means the page has no matching item.
+ */
+export async function walkVirtualUntil(args: VirtualWalkArgs): Promise<boolean> {
+   const start = await getVirtualPositionToken(args.context.virtual);
+   return walkStep(args, start, VIRTUAL_WALK_STEP_CAP);
 }
 
 async function runRoleWalk(
    context: VirtualStepContext,
    step: VirtualRoleWalkStep,
 ): Promise<VirtualMoveOutcome> {
-   const start = await getVirtualPositionToken(context.virtual);
-   const moved = await walkUntilRole({
+   const moved = await walkVirtualUntil({
       context,
-      step,
-      start,
-      remaining: VIRTUAL_WALK_STEP_CAP,
+      direction: step.direction,
+      isMatch: (phrase) =>
+         step.roles.includes(getVirtualPhraseRole(phrase)) &&
+         !phrase.startsWith('end of '),
    });
    return { moved };
 }

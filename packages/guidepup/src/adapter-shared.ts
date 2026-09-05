@@ -10,6 +10,7 @@ import {
    type DriverPerformPayload,
    type DriverReadiness,
    type DriverStateSnapshot,
+   type DriverTableMove,
    type Platform,
    type PortableDriverVerb,
 } from '@a11ied/contracts';
@@ -45,6 +46,18 @@ export interface DriverAdapter {
       request: DriverNavigateRequest,
       options?: DriverActionOptions,
    ): Promise<{ moved?: boolean }>;
+   /** The page title or window summary, with where it came from. */
+   readTitle(options?: DriverActionOptions): Promise<{ title: string; source: string }>;
+   /**
+    * Moves the cursor to the next place the text appears; `found` is false when it is not
+    * on the page.
+    */
+   findText(text: string, options?: DriverActionOptions): Promise<{ found: boolean }>;
+   /** Moves between cells of the table the cursor is in, or reads a header without moving. */
+   moveInTable(
+      move: DriverTableMove,
+      options?: DriverActionOptions,
+   ): Promise<{ moved?: boolean; header?: string }>;
    /** Presses each chord in order; one chord per array entry. */
    press(keys: readonly string[], options?: DriverActionOptions): Promise<void>;
    type(text: string, options?: DriverActionOptions): Promise<void>;
