@@ -167,3 +167,15 @@ export {
    type BatchStepOutcome,
    type BatchStepResult,
 } from './driver/batch.js';
+export {
+   isFrontmostMatch,
+   waitForWindowFocus,
+   WINDOW_FOCUS_TIMEOUT_MS,
+   type FrontmostWindow,
+   type WindowFocusResult,
+} from '@a11ied/guidepup';
+export {
+   openUrlInBrowser,
+   resolveBrowserChoice,
+   type BrowserChoice,
+} from './driver/browser-launch.js';

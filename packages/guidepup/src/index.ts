@@ -45,3 +45,11 @@ export {
    type GuidepupEnvironmentDeps,
 } from './environment.js';
 export { describePlatform, guidepupSetupCommand } from './readiness.js';
+export {
+   isFrontmostMatch,
+   readFrontmostWindow,
+   waitForWindowFocus,
+   WINDOW_FOCUS_TIMEOUT_MS,
+   type FrontmostWindow,
+   type WindowFocusResult,
+} from './window-focus.js';

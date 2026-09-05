@@ -1,7 +1,8 @@
 import chalk from 'chalk';
 import type { CliOutputEnvelope } from '#contracts';
 import type { DriverCommandList, SerializableDriverCommand } from '#core';
-import { heading, title } from '../lib/format.js';
+import { dim, heading, title } from '../lib/format.js';
+import { groupByCategory } from './drive-command-categories.js';
 
 const COMMAND_SET_LABELS: Readonly<Record<string, string>> = {
    portable: 'Portable',
@@ -39,10 +40,28 @@ function formatCommandLine(
       parts.push(chalk.dim(command.description));
    }
 
-   return `  ${parts.join('  ')}`;
+   return `    ${parts.join('  ')}`;
 }
 
-export function formatDriveCommands(result: DriverCommandList): string {
+function formatCommandSet(group: DriverCommandList['commandSets'][number]): string[] {
+   const label =
+      COMMAND_SET_LABELS[group.commandSet] ?? `${group.target} / ${group.commandSet}`;
+   const aliasWidth = Math.max(...group.commands.map((cmd) => cmd.alias.length));
+   const lines = ['', heading(`${label}  ${dim(`(${group.commandSet}:<name>)`)}`)];
+   for (const [category, commands] of groupByCategory(group.commands)) {
+      lines.push(`  ${chalk.bold(category)}`);
+      for (const command of commands) {
+         lines.push(formatCommandLine(command, aliasWidth));
+      }
+   }
+   return lines;
+}
+
+/** Renders the command list grouped by command set, then by what the commands do. */
+export function formatDriveCommands(
+   result: DriverCommandList,
+   options: { queried?: boolean } = {},
+): string {
    const relevantSets = result.commandSets.filter((group) =>
       isPlatformRelevantCommandSet(group.commandSet),
    );
@@ -52,14 +71,16 @@ export function formatDriveCommands(result: DriverCommandList): string {
    }
 
    const lines = [title('Driver commands')];
+   if (!options.queried) {
+      lines.push(
+         dim('Narrow this with --query, for example: a1 sr list --query heading'),
+         dim(
+            'Run one with sr do <name>, or <command-set>:<name> when two sets share a name.',
+         ),
+      );
+   }
    for (const group of relevantSets) {
-      const label =
-         COMMAND_SET_LABELS[group.commandSet] ?? `${group.target} / ${group.commandSet}`;
-      const aliasWidth = Math.max(...group.commands.map((cmd) => cmd.alias.length));
-      lines.push('', heading(label));
-      for (const command of group.commands) {
-         lines.push(formatCommandLine(command, aliasWidth));
-      }
+      lines.push(...formatCommandSet(group));
    }
    return lines.join('\n');
 }
@@ -75,5 +96,7 @@ export function renderDriveCommandsText(
    if (!isCommandList(envelope.result)) {
       return 'No driver commands matched.';
    }
-   return formatDriveCommands(envelope.result);
+   return formatDriveCommands(envelope.result, {
+      queried: typeof envelope.result.query === 'string',
+   });
 }

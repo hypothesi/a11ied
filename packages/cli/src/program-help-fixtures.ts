@@ -181,8 +181,10 @@ export const driveRunHelpCases: HelpCase[] = [
                                          one broker connection in one process. Reads
                                          stdin when no file is given. Stops at the
                                          first failed expect unless --continue.
-        list [options]                   List the named commands a screen reader
-                                         accepts.
+        list [options]                   List the named commands sr do accepts,
+                                         grouped by command set and by what they do.
+                                         Start with --query; the full list is over 400
+                                         lines.
         help [command]                   display help for command
       "
     `,

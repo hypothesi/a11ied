@@ -1,5 +1,10 @@
 import type { Command } from 'commander';
-import type { AccessibilityDriverSession, DriverActionResult } from '#contracts';
+import type {
+   AccessibilityDriverSession,
+   CliMessage,
+   DriverActionResult,
+   DriverFocusTarget,
+} from '#contracts';
 import { CliUsageError } from '#core';
 import type { CommandExecution } from '../lib/helpers.js';
 import {
@@ -8,11 +13,24 @@ import {
    type DriveActionOptions,
 } from './drive-options.js';
 
-export const REAL_BROWSER_LAUNCH_DELAY_MS = 1000;
-
-export function delay(ms: number): Promise<void> {
-   return new Promise((resolvePromise) => {
-      setTimeout(() => resolvePromise(), ms);
+/**
+ * Waits for the window to come to the front and adds a warning when it did not, naming
+ * what is in front instead. The reader can only read a window that is in front.
+ */
+export async function waitForFocusWithWarning(
+   target: DriverFocusTarget,
+   warnings: CliMessage[],
+): Promise<void> {
+   const core = await import('#core');
+   const focus = await core.waitForWindowFocus(target);
+   if (focus.focused) {
+      return;
+   }
+   const front = focus.frontmost?.appName ?? 'an unknown window';
+   warnings.push({
+      code: 'window-focus-unconfirmed',
+      message: `${target.appName ?? target.windowTitle ?? 'The window'} did not come to the front within ${String(focus.waitedMs)} ms; ${front} is in front.`,
+      details: { target, frontmost: focus.frontmost },
    });
 }
 
@@ -44,23 +62,29 @@ async function requireActiveSession(): Promise<AccessibilityDriverSession> {
    return session;
 }
 
-async function refocusRealTarget(
-   session: AccessibilityDriverSession,
-   url: string,
-   timeoutMs: number | undefined,
-): Promise<DriverActionResult> {
+async function refocusRealTarget(args: {
+   session: AccessibilityDriverSession;
+   url: string;
+   timeoutMs: number | undefined;
+   warnings: CliMessage[];
+}): Promise<DriverActionResult> {
    const core = await import('#core');
-   const opened = await core.openUrlInSystemAutomationBrowser(url);
-   await delay(REAL_BROWSER_LAUNCH_DELAY_MS);
+   const opened = await core.openUrlInBrowser(args.url);
+   const app = opened.focusTarget ?? args.session.app;
+   if (app) {
+      await waitForFocusWithWarning(app, args.warnings);
+   }
    const recorded = await core.attachDocumentToDriverSession(
-      { html: '', url },
-      { timeoutMs },
+      { html: '', url: args.url },
+      { timeoutMs: args.timeoutMs },
    );
-   const app = opened.focusTarget ?? session.app;
    if (!app) {
       return recorded;
    }
-   return core.runDriverSessionAction({ action: 'focus', payload: app }, { timeoutMs });
+   return core.runDriverSessionAction(
+      { action: 'focus', payload: app },
+      { timeoutMs: args.timeoutMs },
+   );
 }
 
 /** Points the active session at a page; `sr open` and `sr walk <url>` both run this. */
@@ -78,17 +102,24 @@ export async function executeOpenAction(
    if (!resolved) {
       throw new CliUsageError('missing-target', 'Provide a URL to open.');
    }
-   const timeoutMs = parseTimeoutMs(options.timeout);
+   const timeoutMs = parseTimeoutMs(options.timeout),
+      warnings: CliMessage[] = [];
    const result =
       session.target === 'virtual'
          ? await core.attachDocumentToDriverSession(
               { html: resolved.html, url: resolved.resolvedUrl },
               { timeoutMs },
            )
-         : await refocusRealTarget(session, resolved.resolvedUrl, timeoutMs);
+         : await refocusRealTarget({
+              session,
+              url: resolved.resolvedUrl,
+              timeoutMs,
+              warnings,
+           });
    return {
       target: resolved.reportTarget,
       result: { ...result, commandLine: `open ${url}` },
+      warnings,
    };
 }
 

@@ -270,7 +270,49 @@ async function assertGuards(): Promise<void> {
    expectFirstErrorMessage({ result: unknown, match: /was not found/ });
 }
 
+async function assertAppTargetAndGroupedList(): Promise<void> {
+   const both = await runCli([
+      'sr',
+      'start',
+      `${testServer.getBaseUrl()}/basic-page.html`,
+      ...startArgs,
+      '--app',
+      'Safari',
+      '--json',
+   ]);
+   expectFirstErrorMessage({
+      result: both,
+      match: /Pass a URL or --app <name>, not both/,
+   });
+
+   const started = await runSr(['start', ...startArgs, '--app', 'Safari']);
+   expect(started.status).toBe(EXIT_SUCCESS);
+   expect(
+      resultOf<{ session: { app?: { appName: string } } }>(started).session.app,
+   ).toEqual({
+      appName: 'Safari',
+   });
+   const focused = await runSr(['focus']);
+   expect(resultOf<ActionShape>(focused).details?.focus).toMatchObject({
+      status: 'skipped',
+   });
+
+   const grouped = await runCli(['sr', 'list', '--sr', 'voiceover', '--query', 'table']);
+   expect(grouped.stdout).toContain('Tables');
+   expect(grouped.stdout).toContain('(voiceover-keycode:<name>)');
+   expect(grouped.stdout).not.toContain('Narrow this with --query');
+   const full = await runCli(['sr', 'list', '--sr', 'virtual']);
+   expect(full.stdout).toContain('Narrow this with --query');
+   expect(full.stdout).toContain('Navigation');
+}
+
 describe('cli sr lifecycle commands', () => {
+   it(
+      'starts on a named app, rejects an app with a URL, and groups sr list',
+      withSession(assertAppTargetAndGroupedList),
+      TEST_TIMEOUT_LONG,
+   );
+
    it(
       'starts, replaces, reports, reads, and stops the one active session',
       withSession(assertLifecycle),

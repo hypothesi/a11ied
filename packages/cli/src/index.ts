@@ -103,3 +103,13 @@ export type {
    BatchStepOutcome,
    BatchStepResult,
 } from '@a11ied/core';
+
+export {
+   isFrontmostMatch,
+   openUrlInBrowser,
+   resolveBrowserChoice,
+   waitForWindowFocus,
+   WINDOW_FOCUS_TIMEOUT_MS,
+} from '@a11ied/core';
+
+export type { BrowserChoice, FrontmostWindow, WindowFocusResult } from '@a11ied/core';

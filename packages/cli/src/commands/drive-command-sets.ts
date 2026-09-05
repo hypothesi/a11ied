@@ -76,11 +76,25 @@ function buildCommandsExecution(args: {
       buildCommandListOptions({ target, commandSet, query: args.options.query }),
    );
    const result: Record<string, unknown> = { commandSets: list.commandSets };
+   if (args.options.query) {
+      result.query = args.options.query;
+   }
    if (!isCommandList(result) || !target) {
       return { result };
    }
    return { target: { kind: 'driver-target', value: target }, result };
 }
+
+const LIST_HELP = `
+Every command runs through sr do <name>. When two command sets share a name, prefix it
+with the set: sr do voiceover-keycode:move-to-next or sr do voiceover-commander:move-right.
+The portable set works on every target, including the virtual reader.
+
+Examples:
+  a1 sr list --query heading
+  a1 sr list --query "VO-Command" --sr voiceover
+  a1 sr list --command-set portable
+`;
 
 function buildDoExamples(): string {
    const examples = [
@@ -135,10 +149,16 @@ export function registerListCommand(driveCommand: Command): void {
       addJsonOption(
          driveCommand
             .command('list')
-            .description('List the named commands a screen reader accepts.')
+            .description(
+               'List the named commands sr do accepts, grouped by command set and by what they do. Start with --query; the full list is over 400 lines.',
+            )
+            .option(
+               '--query <text>',
+               'Keep only commands whose name, key sequence, or Commander phrase contains the text.',
+            )
             .option('--sr <reader>', `Filter by screen reader: ${getPlatformTargets()}.`)
             .option('--command-set <set>', DRIVE_COMMAND_SET_HELP)
-            .option('--query <query>', 'Filter by command name or key sequence.'),
+            .addHelpText('after', LIST_HELP),
       ),
    ).action(async (options: DriveCommandsOptions) => {
       const [{ executeCommand, parsePlatform }, core, renderers] = await Promise.all([
