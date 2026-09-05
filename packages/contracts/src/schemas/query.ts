@@ -172,9 +172,23 @@ export const coverageLookupResultSchema = z.object({
 });
 export type CoverageLookupResult = z.infer<typeof coverageLookupResultSchema>;
 
+/** The attribution a copied W3C document carries wherever its text is printed. */
+export const w3cDocumentSourceSchema = z.object({
+   title: z.string().min(1),
+   url: z.string().url(),
+   status: z.string().min(1),
+});
+export type W3cDocumentSource = z.infer<typeof w3cDocumentSourceSchema>;
+
 export const criterionShowResultSchema = coverageLookupResultSchema.extend({
    /** The In Brief or Intent opening of the Understanding document, when one was synced. */
    understandingExcerpt: z.string().optional(),
+   /**
+    * Names the document the excerpt was copied from. The W3C Document License requires
+    * the copyright notice, a link, and the document's status on every copy, and printing
+    * the excerpt in a terminal is a copy.
+    */
+   understandingSource: w3cDocumentSourceSchema.optional(),
 });
 export type CriterionShowResult = z.infer<typeof criterionShowResultSchema>;
 

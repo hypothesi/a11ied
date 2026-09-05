@@ -37,6 +37,25 @@ function removeFurniture(main: Element): void {
 }
 
 /**
+ * A W3C page links within the site with root-relative hrefs. Those resolve to nothing
+ * once the text is read in a terminal, so each one becomes an absolute URL against the
+ * page it was copied from.
+ */
+function absolutizeLinks(main: Element, documentUrl: string): void {
+   for (const anchor of main.querySelectorAll('a[href]')) {
+      const href = anchor.getAttribute('href') ?? '';
+      if (href.startsWith('#') || href === '') {
+         continue;
+      }
+      try {
+         anchor.setAttribute('href', new URL(href, documentUrl).toString());
+      } catch {
+         anchor.removeAttribute('href');
+      }
+   }
+}
+
+/**
  * Keeps only the In Brief, Intent, Benefits, and Examples sections of an Understanding
  * document, dropping the normative text repeat, the glossary, references, and test rules.
  * Used only when the full corpus would exceed the package size budget.
@@ -55,7 +74,11 @@ function keepCoreSections(main: Element): void {
  * Markdown. `mode` "core-sections" keeps only the substantive Understanding sections (In
  * Brief, Intent, Benefits, Examples) to stay under the package size budget.
  */
-export function convertDocumentHtml(input: { html: string; mode: DocumentExtractMode }): {
+export function convertDocumentHtml(input: {
+   html: string;
+   mode: DocumentExtractMode;
+   url: string;
+}): {
    status: string;
    markdown: string;
 } {
@@ -69,6 +92,7 @@ export function convertDocumentHtml(input: { html: string; mode: DocumentExtract
 
    const status = extractDocumentStatus(document);
    removeFurniture(main);
+   absolutizeLinks(main, input.url);
    if (input.mode === 'core-sections') {
       keepCoreSections(main);
    }

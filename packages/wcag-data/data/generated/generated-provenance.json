@@ -1,12 +1,12 @@
 {
-   "generatedAt": "2026-09-05T21:19:28.148Z",
+   "generatedAt": "2026-09-05T21:43:17.757Z",
    "rawSources": [
       {
          "fileName": "act-mapping.json",
          "sourceId": "act-mapping",
          "sourceUrl": "https://raw.githubusercontent.com/w3c/wcag/main/guidelines/act-mapping.json",
          "resolvedUrl": "https://raw.githubusercontent.com/w3c/wcag/main/guidelines/act-mapping.json",
-         "syncedAt": "2026-09-05T21:19:28.148Z",
+         "syncedAt": "2026-09-05T21:43:17.757Z",
          "sha256": "5d111710f92de504b978bf77fc5ac488e9230dca36a619c7ad9ef058ff07c4f5",
          "contentType": "json",
          "fallbackUsed": false
@@ -16,7 +16,7 @@
          "sourceId": "axe-rules",
          "sourceUrl": "npm:axe-core",
          "resolvedUrl": "npm:axe-core",
-         "syncedAt": "2026-09-05T21:19:28.148Z",
+         "syncedAt": "2026-09-05T21:43:17.757Z",
          "sha256": "e844400fe1e7768e51818f1c3c6e1c8a97cc83095db721a26ba930f7df3261ab",
          "contentType": "derived-json",
          "fallbackUsed": false,
@@ -27,7 +27,7 @@
          "sourceId": "quickref-tags",
          "sourceUrl": "https://raw.githubusercontent.com/w3c/wai-wcag-quickref/main/_data/tags-sc.yml",
          "resolvedUrl": "https://raw.githubusercontent.com/w3c/wai-wcag-quickref/gh-pages/_data/tags-sc.yml",
-         "syncedAt": "2026-09-05T21:19:28.148Z",
+         "syncedAt": "2026-09-05T21:43:17.757Z",
          "sha256": "87b97fdbcf32ae7355f60cf3cd42e9c13ee99f4d81bf9d677e0a07bf131a6a25",
          "contentType": "yaml",
          "fallbackUsed": true
@@ -37,7 +37,7 @@
          "sourceId": "wcag21",
          "sourceUrl": "https://www.w3.org/WAI/WCAG21/wcag.json",
          "resolvedUrl": "https://www.w3.org/WAI/WCAG21/wcag.json",
-         "syncedAt": "2026-09-05T21:19:28.148Z",
+         "syncedAt": "2026-09-05T21:43:17.757Z",
          "sha256": "fc9f2e8a94421fc305dced3ec4020fde088572493d44da70789ceb6f775bb4d7",
          "contentType": "json",
          "fallbackUsed": false,
@@ -48,7 +48,7 @@
          "sourceId": "wcag22",
          "sourceUrl": "https://www.w3.org/WAI/WCAG22/wcag.json",
          "resolvedUrl": "https://www.w3.org/WAI/WCAG22/wcag.json",
-         "syncedAt": "2026-09-05T21:19:28.148Z",
+         "syncedAt": "2026-09-05T21:43:17.757Z",
          "sha256": "3a034865a879a7d874b60ff2aec7f430cf37bc1597a1e00985680fd80ef5cf75",
          "contentType": "json",
          "fallbackUsed": false,
@@ -92,7 +92,7 @@
       },
       {
          "fileName": "coverage-summary.2.1.json",
-         "sha256": "2cefc987901311294e9519277118afe3daffc94e347c0bd41272a1c893cc3207",
+         "sha256": "adf07ddfc5d665a8e1278bf8d02c03bf5118cbe70b79c730693caa6ae4b71dac",
          "wcagVersion": "2.1",
          "sourceFileNames": [
             "wcag.2.1.json",
@@ -109,7 +109,7 @@
       },
       {
          "fileName": "coverage-summary.2.2.json",
-         "sha256": "cd76f0cd3dfed091ce98aa752825a4859fb278179eff54643933b0a339f51978",
+         "sha256": "0daac013b2c3eb6f6571458849d39c3ccbf3934ebfb9cd640f5803d95c893cd8",
          "wcagVersion": "2.2",
          "sourceFileNames": [
             "wcag.2.2.json",
@@ -126,7 +126,7 @@
       },
       {
          "fileName": "coverage.2.1.json",
-         "sha256": "be1e615efe53c9d42894792cadbdcef5ccb6e073dffbd07d7ac9d5bc281c7457",
+         "sha256": "9f67633cf2d4b55feb05b1c22f021aeec6bc6c189fdd147999a8e4a0c172624c",
          "wcagVersion": "2.1",
          "sourceFileNames": [
             "wcag.2.1.json",
@@ -143,7 +143,7 @@
       },
       {
          "fileName": "coverage.2.2.json",
-         "sha256": "53042108251678302735eb5df877bc2eb26cb7eb7b7f41f3f77ca32f85ced8ed",
+         "sha256": "d8377c56e2c572488e3742b6f3997c46cb55eb160b0545ec4312e14a5e00ee7b",
          "wcagVersion": "2.2",
          "sourceFileNames": [
             "wcag.2.2.json",

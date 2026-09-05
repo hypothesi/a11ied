@@ -114,6 +114,7 @@ async function fetchAndConvertOne(input: {
       const converted = convertDocumentHtml({
          html: fetched.html,
          mode: extractMode(input.request, input.understandingMode),
+         url: input.request.url,
       });
       return {
          ok: true,

@@ -107,14 +107,28 @@ export function showWcagCoverage(
    }
 }
 
-function findUnderstandingExcerpt(
+interface UnderstandingSummary {
+   excerpt: string | undefined;
+   source: { title: string; url: string; status: string } | undefined;
+}
+
+/** The opening of one Understanding document, with the attribution its copies carry. */
+function findUnderstanding(
    lookupKey: CriterionLookupKey,
    version: WcagVersion,
-): string | undefined {
+): UnderstandingSummary {
    try {
-      return excerptUnderstanding(getUnderstanding(lookupKey, { version }).body);
+      const result = getUnderstanding(lookupKey, { version });
+      return {
+         excerpt: excerptUnderstanding(result.body),
+         source: {
+            title: result.document.title,
+            url: result.document.url,
+            status: result.document.status,
+         },
+      };
    } catch {
-      return undefined;
+      return { excerpt: undefined, source: undefined };
    }
 }
 
@@ -128,12 +142,11 @@ export function showWcagCriterion(
    version: string,
 ): CriterionShowResult {
    const coverage = showWcagCoverage(lookupKey, version);
+   const understanding = findUnderstanding(lookupKey, coverage.criterion.wcagVersion);
    return {
       ...coverage,
-      understandingExcerpt: findUnderstandingExcerpt(
-         lookupKey,
-         coverage.criterion.wcagVersion,
-      ),
+      understandingExcerpt: understanding.excerpt,
+      understandingSource: understanding.source,
    };
 }
 

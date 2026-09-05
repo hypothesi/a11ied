@@ -8,6 +8,7 @@ import {
    type CriterionShowResult,
    type NormalizedCriterion,
    type NormalizedTechnique,
+   type W3cDocumentSource,
 } from '#contracts';
 import {
    badge,
@@ -55,10 +56,14 @@ function dedupeTechniques(techniques: NormalizedTechnique[]): NormalizedTechniqu
  * text under the title already answers "what must be true" and "what does that mean".
  */
 function requirementLines(
-   input: { criterion: NormalizedCriterion; understandingExcerpt: string | undefined },
+   input: {
+      criterion: NormalizedCriterion;
+      understandingExcerpt: string | undefined;
+      understandingSource: W3cDocumentSource | undefined;
+   },
    options: RenderOptions,
 ): string[] {
-   const { criterion, understandingExcerpt } = input;
+   const { criterion, understandingExcerpt, understandingSource } = input;
    const lines = ['', ...wrap(stripHtml(criterion.normativeText), 1, options.width)];
    const restatementIsNew =
       understandingExcerpt &&
@@ -67,12 +72,19 @@ function requirementLines(
       );
    if (restatementIsNew) {
       lines.push('', ...wrap(understandingExcerpt, 1, options.width));
+      if (understandingSource) {
+         lines.push('', ...wrap(attributionLine(understandingSource), 1, options.width));
+      }
    }
    return lines;
 }
 
 function headerLines(
-   input: { criterion: NormalizedCriterion; understandingExcerpt: string | undefined },
+   input: {
+      criterion: NormalizedCriterion;
+      understandingExcerpt: string | undefined;
+      understandingSource: W3cDocumentSource | undefined;
+   },
    options: RenderOptions,
 ): string[] {
    return [
@@ -117,7 +129,11 @@ export function renderCriterionDetailLines(
    const sections = options.sections ?? allSections;
    const { criterion } = result;
    const lines = headerLines(
-      { criterion, understandingExcerpt: result.understandingExcerpt },
+      {
+         criterion,
+         understandingExcerpt: result.understandingExcerpt,
+         understandingSource: result.understandingSource,
+      },
       options,
    );
 

@@ -89,8 +89,15 @@ export function applicabilityDefinitionLines(): string[] {
  * requires attribution on every copy, and terminal output that prints the document's text
  * is a copy, so every renderer that prints Understanding or technique prose calls this.
  */
-export function attributionLine(document: { title: string; url: string }): string {
-   return dim(`Source: ${document.title} (${document.url})`);
+export function attributionLine(document: {
+   title: string;
+   url: string;
+   status?: string;
+}): string {
+   const status = document.status ? ` ${document.status}.` : '';
+   return dim(
+      `Copyright W3C. From ${document.title}, used under the W3C Document License.${status} ${document.url}`,
+   );
 }
 
 /**

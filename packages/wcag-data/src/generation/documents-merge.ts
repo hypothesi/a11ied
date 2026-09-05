@@ -100,6 +100,35 @@ function mergeTechniqueBodies(
    return { version: fresh.version, bodies: { ...existing?.bodies, ...fresh.bodies } };
 }
 
+function referencedHashes(documents: AssembledDocuments): Set<string> {
+   const hashes = new Set<string>();
+   for (const version of wcagVersions) {
+      for (const entry of Object.values(
+         documents.understandingByVersion[version].documents,
+      )) {
+         hashes.add(entry.bodyHash);
+      }
+      for (const entry of Object.values(
+         documents.techniqueBodiesByVersion[version].bodies,
+      )) {
+         hashes.add(entry.bodyHash);
+      }
+   }
+   return hashes;
+}
+
+/**
+ * Drops stored bodies no document points at any more. A re-fetched page hashes to a new
+ * body, and without this the store keeps every version it has ever seen: one re-sync took
+ * it from 991 bodies to 1831 and the file to 10.8 MB.
+ */
+function pruneContentStore(documents: AssembledDocuments): DocumentContentStore {
+   const referenced = referencedHashes(documents);
+   return Object.fromEntries(
+      Object.entries(documents.contentStore).filter(([hash]) => referenced.has(hash)),
+   );
+}
+
 /**
  * Merges freshly fetched documents onto whatever is already committed, so a page that
  * fails this run but succeeded a previous one is not lost, and a sync interrupted partway
@@ -122,9 +151,10 @@ export async function mergeWithExistingArtifacts(
          fresh.techniqueBodiesByVersion[version],
       );
    }
-   return {
+   const merged = {
       contentStore: mergeContentStore(existing?.contentStore, fresh.contentStore),
       understandingByVersion,
       techniqueBodiesByVersion,
    };
+   return { ...merged, contentStore: pruneContentStore(merged) };
 }

@@ -155,6 +155,27 @@ async function assertWcagRule(): Promise<void> {
    expectFirstErrorMessage({ result: missing, match: /not-a-rule/ });
 }
 
+/** The W3C Document License asks each copy to carry the notice, the status, and a link. */
+async function assertUnderstandingTextAttribution(document: {
+   title: string;
+   url: string;
+   status: string;
+}): Promise<void> {
+   const text = await runCli(['wcag', 'understanding', '2.4.2']);
+   expect(text.stdout).toContain('2.4.2  Page Titled  [A]');
+   expect(text.stdout).toContain('Copyright W3C');
+   expect(text.stdout).toContain(document.title);
+   expect(text.stdout).toContain(document.status);
+   expect(text.stdout).toContain(document.url);
+}
+
+/** The short excerpt inside `wcag show` is a copy too, so it names its source. */
+async function assertExcerptAttribution(documentUrl: string): Promise<void> {
+   const excerpt = await runCli(['wcag', '2.4.2']);
+   expect(excerpt.stdout).toContain('Copyright W3C');
+   expect(excerpt.stdout).toContain(documentUrl);
+}
+
 async function assertWcagUnderstanding(): Promise<void> {
    const jsonResult = await runCli(['wcag', 'understanding', 'page-titled', '--json']);
    const json = parseJsonOutput(jsonResult.stdout);
@@ -172,10 +193,8 @@ async function assertWcagUnderstanding(): Promise<void> {
    expect(payload.document.status).toBeTruthy();
    expect(payload.body.length).toBeGreaterThan(0);
 
-   const text = await runCli(['wcag', 'understanding', '2.4.2']);
-   expect(text.stdout).toContain('2.4.2  Page Titled  [A]');
-   expect(text.stdout).toContain(`Source: ${payload.document.title}`);
-   expect(text.stdout).toContain(payload.document.url);
+   await assertUnderstandingTextAttribution(payload.document);
+   await assertExcerptAttribution(payload.document.url);
 }
 
 async function assertWcagBareHelp(): Promise<void> {
