@@ -35,6 +35,7 @@ const TOOL_BY_COMMAND: Readonly<Record<string, readonly string[]>> = {
    wcag: ['wcag_show', 'wcag_criteria', 'wcag_search', 'wcag_rule'],
    'wcag criteria': ['wcag_criteria'],
    'wcag show': ['wcag_show'],
+   'wcag understanding': ['wcag_show'],
    'wcag search': ['wcag_search'],
    'wcag rule': ['wcag_rule'],
    axe: ['run_axe'],

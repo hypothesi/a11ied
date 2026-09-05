@@ -1,20 +1,24 @@
 import {
    axeRuleLookupResultSchema,
-   coverageLookupResultSchema,
    criterionSearchResponseSchema,
+   criterionShowResultSchema,
    doctorReportSchema,
    techniqueLookupResultSchema,
    wcagLevelSchema,
    wcagVersionSchema,
+   type CriterionShowResult,
+   type UnderstandingDocumentEntry,
+   type WcagVersion,
 } from '@a11ied/contracts';
 import {
    createDoctorReport,
    listWcagCriteria,
    searchWcagCriteria,
    showWcagAxeRule,
-   showWcagCoverage,
    showWcagCoverageSummary,
+   showWcagCriterion,
    showWcagTechnique,
+   showWcagUnderstanding,
 } from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
@@ -43,6 +47,28 @@ function registerDoctorTool(server: McpServer): void {
 
 const TECHNIQUE_ID_PATTERN = /^[A-Z]+\d+$/u;
 
+type CriterionShowResponse = CriterionShowResult & {
+   understanding?: { document: UnderstandingDocumentEntry; body: string };
+};
+
+function buildCriterionShowResponse(input: {
+   criterion: string;
+   version: WcagVersion;
+   includeUnderstanding: boolean;
+}): CriterionShowResponse {
+   const result = criterionShowResultSchema.parse(
+      showWcagCriterion(input.criterion, input.version),
+   );
+   if (!input.includeUnderstanding) {
+      return result;
+   }
+   const understanding = showWcagUnderstanding(input.criterion, input.version);
+   return {
+      ...result,
+      understanding: { document: understanding.document, body: understanding.body },
+   };
+}
+
 function registerWcagShowTool(server: McpServer): void {
    server.registerTool(
       'wcag_show',
@@ -50,23 +76,32 @@ function registerWcagShowTool(server: McpServer): void {
          title: 'WCAG show',
          description:
             'Show one WCAG criterion by id (such as "1.4.3") or slug (such as "contrast-minimum"), ' +
-            'with its techniques, failures, coverage state, and testing strategy. A technique or ' +
-            'failure id (such as "G18" or "F65") returns the technique and the criteria that list it ' +
-            'instead. Matches the CLI wcag show <criterion> command, including its technique lookup.',
+            'with its techniques, failures, coverage state, testing strategy, and a short excerpt of ' +
+            'its Understanding document. Set includeUnderstanding to true for the full Understanding ' +
+            'document text, the primary source for how to fix a violation. A technique or failure id ' +
+            '(such as "G18" or "F65") returns the technique, the criteria that list it, and the ' +
+            "technique's full body text when the sync fetched one. Matches the CLI wcag show " +
+            '<criterion> and wcag understanding <criterion> commands.',
          inputSchema: z.object({
             criterion: z.string().min(1),
             version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
+            includeUnderstanding: z
+               .boolean()
+               .default(false)
+               .describe(
+                  'Include the full Understanding document text and its source metadata.',
+               ),
          }),
          annotations: readOnlyAnnotations,
       },
-      async ({ criterion, version }) => {
+      async ({ criterion, version, includeUnderstanding }) => {
          if (TECHNIQUE_ID_PATTERN.test(criterion)) {
             return createToolResponse(
                techniqueLookupResultSchema.parse(showWcagTechnique(criterion, version)),
             );
          }
          return createToolResponse(
-            coverageLookupResultSchema.parse(showWcagCoverage(criterion, version)),
+            buildCriterionShowResponse({ criterion, version, includeUnderstanding }),
          );
       },
    );

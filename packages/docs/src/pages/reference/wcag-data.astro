@@ -65,6 +65,9 @@ const toc = [
             <div class="route-row"><code>slug-index</code><span>Slug to criterion ID. Every lookup by slug reads it.</span></div>
             <div class="route-row"><code>technique-index</code>, <code>failure-index</code><span>Technique or failure ID to its title, W3C page URL, and the criteria that list it. <code>a1 wcag G18</code> reads them.</span></div>
             <div class="route-row"><code>axe-rules</code><span>axe rule ID to its tags, ACT rule IDs, and the criteria it maps to. <code>a1 wcag rule</code> reads it.</span></div>
+            <div class="route-row"><code>understanding</code><span>Each criterion's Understanding document, converted to Markdown, with its title, URL, and status. <code>a1 wcag understanding</code> reads it.</span></div>
+            <div class="route-row"><code>technique-bodies</code><span>Each technique and failure's page body, converted to Markdown. <code>a1 wcag G18</code> reads it when one was synced.</span></div>
+            <div class="route-row"><code>documents-content</code><span>The converted document bodies, one copy per distinct body, shared by <code>understanding</code> and <code>technique-bodies</code>.</span></div>
          </div>
       </div>
       <div class="split-aside">
@@ -111,11 +114,16 @@ const toc = [
          <code>result.strategy</code> hold.
       </p>
       <p>
-         The Understanding documents and the technique bodies are not in the data. The
-         <code>w3c/wcag</code> repository publishes them under the W3C Document License, which
-         grants no general right to redistribute derivative text, so the data links to them by
-         <code>understandingUrl</code> and <code>url</code> instead. The package ships a
-         <code>NOTICE.md</code> with the W3C attribution for the material it does copy.
+         The Understanding document and the technique body are in the data too, converted from
+         HTML to Markdown and stored under <code>understanding.&lt;version&gt;.json</code> and
+         <code>technique-bodies.&lt;version&gt;.json</code>. <code>a1 wcag understanding 1.4.3</code>
+         prints the full document, and <code>a1 wcag show 1.4.3</code> prints its In Brief or
+         Intent opening with a pointer to the rest.
+         <code>understandingUrl</code> and a technique's <code>url</code> still point at the
+         original W3C page. The W3C Document License permits this conversion to help
+         implementation, and the package ships a <code>NOTICE.md</code> with the required W3C
+         attribution. Every command that prints this material also prints a line naming the
+         source document and its URL.
       </p>
    </section>
 

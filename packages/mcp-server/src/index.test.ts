@@ -51,6 +51,49 @@ describe('wcag show tool', () => {
          );
       });
    });
+
+   it('includes a technique body when the sync fetched one', async () => {
+      await withHarness(async (harness) => {
+         const result = await harness.client.callTool({
+            name: 'wcag_show',
+            arguments: { criterion: 'G164' },
+         });
+
+         expect(result.isError).toBeFalsy();
+         const payload = result.structuredContent as {
+            technique: { id: string };
+            body?: string;
+            document?: { url: string };
+         };
+         expect(payload.technique.id).toBe('G164');
+         expect(payload.body?.length).toBeGreaterThan(0);
+         expect(payload.document?.url).toBe(
+            'https://www.w3.org/WAI/WCAG22/Techniques/general/G164',
+         );
+      });
+   });
+});
+
+describe('wcag show tool with includeUnderstanding', () => {
+   it('includes the full Understanding document when includeUnderstanding is set', async () => {
+      await withHarness(async (harness) => {
+         const result = await harness.client.callTool({
+            name: 'wcag_show',
+            arguments: { criterion: '2.4.2', includeUnderstanding: true },
+         });
+
+         expect(result.isError).toBeFalsy();
+         const payload = result.structuredContent as {
+            understandingExcerpt?: string;
+            understanding?: { body: string; document: { url: string } };
+         };
+         expect(payload.understandingExcerpt?.length).toBeGreaterThan(0);
+         expect(payload.understanding?.body.length).toBeGreaterThan(0);
+         expect(payload.understanding?.document.url).toBe(
+            'https://www.w3.org/WAI/WCAG22/Understanding/page-titled',
+         );
+      });
+   });
 });
 
 describe('wcag criteria tool', () => {
