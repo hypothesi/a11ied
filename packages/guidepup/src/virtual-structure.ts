@@ -11,7 +11,16 @@ export function readVirtualTitle(): { title: string; source: string } {
    return { title: getVirtualDocumentTitle(), source: VIRTUAL_TITLE_SOURCE };
 }
 
-/** Walks forward until the phrase or item text contains `text`, ignoring case. */
+function containsText(wanted: string, phrase: string, node: Node | null): boolean {
+   const own = node?.nodeType === node?.TEXT_NODE ? (node?.textContent ?? '') : '';
+   return phrase.toLowerCase().includes(wanted) || own.toLowerCase().includes(wanted);
+}
+
+/**
+ * Walks forward until the phrase or item text contains `text`, ignoring case, wrapping
+ * past the end. When the only match is the item the cursor started on, the walk comes
+ * back to it and reports it found.
+ */
 export async function findVirtualText(
    context: VirtualStepContext,
    text: string,
@@ -20,14 +29,13 @@ export async function findVirtualText(
    const found = await walkVirtualUntil({
       context,
       direction: 'next',
-      isMatch: (phrase, node) => {
-         const own = node?.nodeType === node?.TEXT_NODE ? (node?.textContent ?? '') : '';
-         return (
-            phrase.toLowerCase().includes(wanted) || own.toLowerCase().includes(wanted)
-         );
-      },
+      isMatch: (phrase, node) => containsText(wanted, phrase, node),
    });
-   return { found };
+   if (found) {
+      return { found };
+   }
+   const phrase = await context.virtual.lastSpokenPhrase();
+   return { found: containsText(wanted, phrase, context.virtual.activeNode) };
 }
 
 interface CellPosition {

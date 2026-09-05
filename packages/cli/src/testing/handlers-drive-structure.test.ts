@@ -81,6 +81,11 @@ async function assertTitleAndFind(): Promise<void> {
    expect(found.result.details).toEqual({ text: 'learn MORE', found: true });
    expect(found.result.state.lastSpokenPhrase).toBe('link, Learn more');
 
+   // The only match is the item under the cursor: the walk wraps back to it.
+   const again = await runSrJson(['find', 'Learn more']);
+   expect(again.status).toBe(EXIT_SUCCESS);
+   expect(again.result.state.lastSpokenPhrase).toBe('link, Learn more');
+
    await assertFindMissing();
 }
 
