@@ -16,6 +16,7 @@ import {
    getCriterionApplicability,
    getQuickrefTags,
    getTechnique,
+   getUnderstanding,
    listApplicableCriteria,
    listCriteriaByLevel,
    resetWcagEngineCache,
@@ -145,6 +146,36 @@ describe('wcag-engine technique and axe rule lookup', () => {
    it('throws typed not-found errors for unknown techniques and rules', () => {
       expect(() => getTechnique('G9999')).toThrowError(/technique lookup failed/i);
       expect(() => getAxeRule('not-a-rule')).toThrowError(WcagEngineNotFoundError);
+   });
+
+   it('includes a technique body and its source document when the sync fetched one', () => {
+      const technique = getTechnique('G164');
+
+      expect(technique.document?.title).toBeTruthy();
+      expect(technique.document?.url).toBe(
+         'https://www.w3.org/WAI/WCAG22/Techniques/general/G164',
+      );
+      expect(technique.body?.length).toBeGreaterThan(0);
+   });
+});
+
+describe('wcag-engine understanding document lookup', () => {
+   it('resolves a criterion by id or slug to its full Understanding document', () => {
+      const byId = getUnderstanding('2.4.2');
+      const bySlug = getUnderstanding('page-titled');
+
+      expect(byId.criterion.id).toBe('2.4.2');
+      expect(byId.document.url).toBe(
+         'https://www.w3.org/WAI/WCAG22/Understanding/page-titled',
+      );
+      expect(byId.document.title).toBeTruthy();
+      expect(byId.document.status).toBeTruthy();
+      expect(byId.body.length).toBeGreaterThan(0);
+      expect(bySlug.body).toBe(byId.body);
+   });
+
+   it('throws a typed not-found error for an unknown criterion', () => {
+      expect(() => getUnderstanding('9.9.9')).toThrowError(WcagEngineNotFoundError);
    });
 });
 

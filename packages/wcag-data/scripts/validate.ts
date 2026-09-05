@@ -3,6 +3,7 @@ import { join } from 'node:path';
 
 import {
    getWcagDataDirectories,
+   validateDocumentArtifacts,
    validateGeneratedArtifacts,
    validateRawSyncState,
 } from '../src/index.js';
@@ -19,6 +20,7 @@ const directories = getWcagDataDirectories(),
    hasRawInputs = existsSync(join(directories.raw, 'wcag.2.2.json'));
 
 const generatedArtifacts = await validateGeneratedArtifacts(directories);
+const documentArtifacts = await validateDocumentArtifacts(directories);
 
 log('wcag-data sync validated');
 if (hasRawInputs) {
@@ -28,3 +30,4 @@ if (hasRawInputs) {
    log('raw artifacts: not synced locally (run npm run wcag:sync to validate them)');
 }
 log(`generated artifacts: ${generatedArtifacts.length}`);
+log(`document artifacts: ${documentArtifacts.length}`);

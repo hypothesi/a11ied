@@ -1,0 +1,865 @@
+{
+   "version": "2.2",
+   "documents": {
+      "page-titled": {
+         "title": "Page Titled",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/page-titled",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "116c95aa9f8246edf8d4d583a050fb7f6f6fbebdb76e5abf9fe399c955b0fa18",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "bc1cd05d0c7dc2f6d42b84395fe68e24126d894e7ba29c2303897c9f384a3ea0",
+         "slug": "page-titled",
+         "criterionId": "2.4.2"
+      },
+      "non-text-content": {
+         "title": "Non-text Content",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-content",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "a9b933e0a1717f139bead7d36340777f4074b7ec3f07f68cadbebf744b89e8a9",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "351a100c2a9627b19a4d05dc7d458a755b18fc61367d3c248a7a6289c2dd2779",
+         "slug": "non-text-content",
+         "criterionId": "1.1.1"
+      },
+      "audio-only-and-video-only-prerecorded": {
+         "title": "Audio-only and Video-only (Prerecorded)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/audio-only-and-video-only-prerecorded",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "64ade0edb542db75517c206a412304e10168a99fda874f70c8d1c8c4e89a99ae",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "d5f85c68b32042fd125973a8adb52712093a7c7c30ca313f38278fd4536acd52",
+         "slug": "audio-only-and-video-only-prerecorded",
+         "criterionId": "1.2.1"
+      },
+      "captions-prerecorded": {
+         "title": "Captions (Prerecorded)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/captions-prerecorded",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "25bb5c531779c3f6358ee45886daa35e33bf6b9fd48a9613f5f28b6cfc84b183",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "df765bdbb9eb52531c2a783701f1ba7a81aa83da15f4aea686a38571f8f199aa",
+         "slug": "captions-prerecorded",
+         "criterionId": "1.2.2"
+      },
+      "audio-description-or-media-alternative-prerecorded": {
+         "title": "Audio Description or Media Alternative (Prerecorded)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/audio-description-or-media-alternative-prerecorded",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "f633415b1b8613671394fe73ff4be136b6eee48b84f1eb71d853b7d3d4b9044c",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "c9b69bd21f5c315ab78a3bb6de0d7bec85908c31d30151259e62b43829ca35c6",
+         "slug": "audio-description-or-media-alternative-prerecorded",
+         "criterionId": "1.2.3"
+      },
+      "captions-live": {
+         "title": "Captions (Live)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/captions-live",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "e0e2d67aec70804a622118b7a8c229b383a7c92639c69f1470e042bdc4842670",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "d4e27b2be151cbe2381174d3a5996b6365d895af27eba701535f45f50966f7d5",
+         "slug": "captions-live",
+         "criterionId": "1.2.4"
+      },
+      "audio-description-prerecorded": {
+         "title": "Audio Description (Prerecorded)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/audio-description-prerecorded",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "19b2cd4a324b697a1792b472e0abc46e849dc9b533f022b0b8af956de3fdb5a2",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "df261b4bddfb4c5e378d7dc3860f47adeff57c4af8dad98e42bf3787556e40c6",
+         "slug": "audio-description-prerecorded",
+         "criterionId": "1.2.5"
+      },
+      "sign-language-prerecorded": {
+         "title": "Sign Language (Prerecorded)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/sign-language-prerecorded",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "5e51f18e2687cd3f5feeba1d6de0b29064b49d2a7802fe6d741cf3f6e7dcb6a5",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "3bdfeba2c8984328edc0504e730864184057673eae61780120ed89193a157483",
+         "slug": "sign-language-prerecorded",
+         "criterionId": "1.2.6"
+      },
+      "extended-audio-description-prerecorded": {
+         "title": "Extended Audio Description (Prerecorded)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/extended-audio-description-prerecorded",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "52125c5360624348878af03d45fdfb91cff7b8ce686ba1ec550fa27f0d71e11f",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "bd6bdf445805af5db6fc759d3cdeef4cfe5d922b7980d3c16a69a8c1113c81e1",
+         "slug": "extended-audio-description-prerecorded",
+         "criterionId": "1.2.7"
+      },
+      "media-alternative-prerecorded": {
+         "title": "Media Alternative (Prerecorded)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/media-alternative-prerecorded",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "25dfe1f0242c8d15366f767f8e31dc4823c01065a9d81346e57882020e790417",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "6e822510872323ddc7a449d5892c616f5846d7419dfcc8ba9b56e10bfb6a6826",
+         "slug": "media-alternative-prerecorded",
+         "criterionId": "1.2.8"
+      },
+      "audio-only-live": {
+         "title": "Audio-only (Live)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/audio-only-live",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "8568d86527f3f33b8de22df47c97e8e60357b771e377191de59e27b2e514c526",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "67b0a1d4ba4c8e421d9771e34c0f2bedc613cb26fdb048d395f5668bbb70268c",
+         "slug": "audio-only-live",
+         "criterionId": "1.2.9"
+      },
+      "info-and-relationships": {
+         "title": "Info and Relationships",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "73c1817bc00626b8c2c9cabac114bf94914ce316be4b256815d49af6537e7bd2",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "d2217bafbd075bf3c93a043a2afac55c3025673c2ef1eacd664364f197a076de",
+         "slug": "info-and-relationships",
+         "criterionId": "1.3.1"
+      },
+      "meaningful-sequence": {
+         "title": "Meaningful Sequence",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/meaningful-sequence",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "4df85667b2ff845ee1f83c2d51fe0f1e79f3bab709b2170358aae3f3875d63b8",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "b02080ea84452b9aeb5e359df3c492c34be194b6e47efd363aa4adb02ceecbc4",
+         "slug": "meaningful-sequence",
+         "criterionId": "1.3.2"
+      },
+      "sensory-characteristics": {
+         "title": "Sensory Characteristics",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/sensory-characteristics",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "555e2ccecd61f34f2968df4baf48621d2861612b25a1afd5012b982e90c9a6d7",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "9a9df86a38ceef203cae3f61d064f6e42713c745db3210877a04c5ab974076b6",
+         "slug": "sensory-characteristics",
+         "criterionId": "1.3.3"
+      },
+      "orientation": {
+         "title": "Orientation",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/orientation",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "93e67978e3b5c7c7a3e289ae539553e8fe5e35a5c4eba4c2abc5e370e6b10755",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "dfdb9e3b8e7776a382868471fe0f63d34f5154511fec6d0be202dbf356b5341c",
+         "slug": "orientation",
+         "criterionId": "1.3.4"
+      },
+      "identify-input-purpose": {
+         "title": "Identify Input Purpose",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/identify-input-purpose",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "87f946b8c87b1e95a2b886b5835561d13f8badadb2ac85e583ed62bd88c760b7",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "1729f5d7395e6efc1e1ef8fdd898389ef32c4725620d1b3f5b32035ec72476de",
+         "slug": "identify-input-purpose",
+         "criterionId": "1.3.5"
+      },
+      "identify-purpose": {
+         "title": "Identify Purpose",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/identify-purpose",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "ba182a4d6ede0aa0aef19f624dc156063a5a86395580bea0230ee05a64aee67a",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "f104d3c9ee803dfb9b137ae3f9d7dce45ec2e417c2a5de4201a94e7aa5ae93a1",
+         "slug": "identify-purpose",
+         "criterionId": "1.3.6"
+      },
+      "use-of-color": {
+         "title": "Use of Color",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/use-of-color",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "a9bab2b8f419ee379b1ab37985d70b03bd6568952251d2f8a55036198990c9e8",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "160cf47519dd650e1848c2b94310f185b315642a22eeaf5885600dc1ade1760a",
+         "slug": "use-of-color",
+         "criterionId": "1.4.1"
+      },
+      "audio-control": {
+         "title": "Audio Control",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/audio-control",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "8547dec5b591160f627d85e8051e20c74ad72b4f4d9b903a221c4d7369be6d0f",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "a5e013fd4f52e082d7acaf28780e18b8b2d8e82bff8062c8235c97b6f8d1d320",
+         "slug": "audio-control",
+         "criterionId": "1.4.2"
+      },
+      "contrast-minimum": {
+         "title": "Contrast (Minimum)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "3352aaf477e9739155628467c4b62997e18ea4cab917c0eb4fc4fb39c5238a2e",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "5e65bf478dee79add87d9b291f710a919f43bceef7cbe13274ad9d4663322ee9",
+         "slug": "contrast-minimum",
+         "criterionId": "1.4.3"
+      },
+      "resize-text": {
+         "title": "Resize Text",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/resize-text",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "38c890a4e70ec24fee98480e08218503bc458e41f38d3ce85f20e86d984e6c0c",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "21b8859d81b0dba84bc3fa8a6c6da70fa26e29b60b89ca8057f164c61a17edf6",
+         "slug": "resize-text",
+         "criterionId": "1.4.4"
+      },
+      "images-of-text": {
+         "title": "Images of Text",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/images-of-text",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "bb62fabaecea238898045fb59501d17c63e2f55bfb6a52bf65f40fe8798d935d",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "c607a52e313f74d79e0f3135c4c3e7a9f1cd80c3bbab2e9eb0e1eb2996630464",
+         "slug": "images-of-text",
+         "criterionId": "1.4.5"
+      },
+      "contrast-enhanced": {
+         "title": "Contrast (Enhanced)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "01540725ddae2d686e8b272b13c4537bafec0d2cc52ff2f8e483e6da45451525",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "d019b6f7ad83a31f85b12c370e0c1df473956a8e0272f06215f999a1b5077ee4",
+         "slug": "contrast-enhanced",
+         "criterionId": "1.4.6"
+      },
+      "low-or-no-background-audio": {
+         "title": "Low or No Background Audio",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/low-or-no-background-audio",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "fb72115e383e5591ec238190b20bdc0305bbc6d7d5a8d7b5653f1f81bfd7d5c5",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "f07c7be08cb1fa7c5a53cb9de203e9ee019f24deb4ec247715fddddb540335bb",
+         "slug": "low-or-no-background-audio",
+         "criterionId": "1.4.7"
+      },
+      "visual-presentation": {
+         "title": "Visual Presentation",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/visual-presentation",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "1d7c017298d0e0a9c09cf6d6e3634de7c049cbdf04cf6066d1e82ffe8a7b0558",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "8af8a774ed5866b24dc2545f692bb0740f4ee6933862e9947ac02be61c148958",
+         "slug": "visual-presentation",
+         "criterionId": "1.4.8"
+      },
+      "images-of-text-no-exception": {
+         "title": "Images of Text (No Exception)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/images-of-text-no-exception",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "534d5b05dea7ec18b614ac6545280f473fdba2a95ad2fcc0f0e4471b24d9f34c",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "3e375ab303926c9f8e73bfbb946da13ed6af5f13411a4f9a4ba76bc99ed3dbe6",
+         "slug": "images-of-text-no-exception",
+         "criterionId": "1.4.9"
+      },
+      "reflow": {
+         "title": "Reflow",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/reflow",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "d322027ca3f1f43f516687120442c60f02ee3f82b09cb26933c9ee7abfeabb33",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "ff85ce12f97d14bcd5a1a7ee1e8f5378f5bbfb2c65d4990a56df88d14eb7b55a",
+         "slug": "reflow",
+         "criterionId": "1.4.10"
+      },
+      "non-text-contrast": {
+         "title": "Non-text Contrast",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "237cd64c8439ddbca50694708b5d24718a5b2ed74bb4eee90d02cf7707fd0674",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "08c2635e4bd320e273a8e8df7f79a90d167516fd79d330b714f8b838e520cf41",
+         "slug": "non-text-contrast",
+         "criterionId": "1.4.11"
+      },
+      "text-spacing": {
+         "title": "Text Spacing",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/text-spacing",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "48d38892c50739b98b6d7c4d54b83d15152e9c9dbba2a550bc5dec5bead38df2",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "9b21c4a03f3996e33e4fcab204ede54ee0aaed0ad68fe662e3284534e606aab9",
+         "slug": "text-spacing",
+         "criterionId": "1.4.12"
+      },
+      "content-on-hover-or-focus": {
+         "title": "Content on Hover or Focus",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/content-on-hover-or-focus",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "3803f84695f66fbef38e7ca6d9018a42c673fc52e61c18b969c6ba95abc64fca",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "42846d9a0c6408e858c41e40e1f42e494b78603757a489591eb53a222207b810",
+         "slug": "content-on-hover-or-focus",
+         "criterionId": "1.4.13"
+      },
+      "keyboard": {
+         "title": "Keyboard",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/keyboard",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "fb44d4faaa9fa54a49aee794e969ccc3b7738f4b09e23aa96e3a3c9d44984feb",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "50465009f184a296eaf8cd071d69cf8bb5149547b52308a145d8e1a9d01e62fb",
+         "slug": "keyboard",
+         "criterionId": "2.1.1"
+      },
+      "no-keyboard-trap": {
+         "title": "No Keyboard Trap",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/no-keyboard-trap",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "12e809054bdd4689bdbf4fd7ab78842eafa67a217bdac9dbf9ad7f6ef9ca3383",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "48a34c9446c08753b4dbe8f33f272a99f4feb741db617cc239d4af5b67ce1fd3",
+         "slug": "no-keyboard-trap",
+         "criterionId": "2.1.2"
+      },
+      "keyboard-no-exception": {
+         "title": "Keyboard (No Exception)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/keyboard-no-exception",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "0cfac192441cb978f4ba3a498b357bbfdb7afefeed24d176a5e89f4c67648709",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "91878b308da7fb3bf4ccc3b0ff32ef5750cbd90844f780d9c790a1cfa577be51",
+         "slug": "keyboard-no-exception",
+         "criterionId": "2.1.3"
+      },
+      "character-key-shortcuts": {
+         "title": "Character Key Shortcuts",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/character-key-shortcuts",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "53d9dc5260337c5bd2146f764d0bdb7e169acf9b78cf43cbf13686c35cfe4146",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "f6c63e7abff633aef28cf9accab483a6577c19715caaa3465d142a2769e4654b",
+         "slug": "character-key-shortcuts",
+         "criterionId": "2.1.4"
+      },
+      "timing-adjustable": {
+         "title": "Timing Adjustable",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/timing-adjustable",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "bf6c6a68a3fb4b6866ab144bd72d83996d90de4dec05c6ca14875e7ac6e5e9c5",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "5d253e1ad1db27c2db3b23faa939e760bfa49b9b7402609297f9da61a50e0fb9",
+         "slug": "timing-adjustable",
+         "criterionId": "2.2.1"
+      },
+      "pause-stop-hide": {
+         "title": "Pause, Stop, Hide",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "151b081b266ccb1df3818bcab210d6016145c3a2edb298fb597d7dae02c8f528",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "06cb1a300695a9203a1ab5aba052000dbeda5c948ff67e6bb83dd2d5d93d40db",
+         "slug": "pause-stop-hide",
+         "criterionId": "2.2.2"
+      },
+      "no-timing": {
+         "title": "No Timing",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/no-timing",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "8e3c2b4ded316bf8886a06e3da3112b55a6fbc32624ed41676517e9d334cbb86",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "4b2393680318af3c278459a7a8acaa3a92270cf65c59a7f4dd1bac81a257dea9",
+         "slug": "no-timing",
+         "criterionId": "2.2.3"
+      },
+      "interruptions": {
+         "title": "Interruptions",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/interruptions",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "9a62e74b931b62cc3bbc54faf11ad3c66e918b23dff1a36ccaa41255b7d86bbb",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "a09b7abf7762cbbe27834207b695ec6888d2eec65c6515aecf41d63a0c82d024",
+         "slug": "interruptions",
+         "criterionId": "2.2.4"
+      },
+      "re-authenticating": {
+         "title": "Re-authenticating",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/re-authenticating",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "d820d0a6c0cfd69e582f45886e18213bc7f1770cdba45890736ba81944e3b73e",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "4891df3096a775b63262d03488661cac09e8f32b960a0d806888034b4d0294ed",
+         "slug": "re-authenticating",
+         "criterionId": "2.2.5"
+      },
+      "timeouts": {
+         "title": "Timeouts",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/timeouts",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "998efbc5bf8e21c0d4eeb791e7ed7b80671e56cfeda5657f0f309a22089ca92d",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "ac0a4dd8a245dc7a27fe42d00d3d2cee1954607144a4c280661e4d0ff3bc0ccd",
+         "slug": "timeouts",
+         "criterionId": "2.2.6"
+      },
+      "three-flashes-or-below-threshold": {
+         "title": "Three Flashes or Below Threshold",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "28f0bc5e956224f95b617027d1d9f506bd25cb8ec7be20fc2744614a0794ce52",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "fc8c4826f1487ae9f57a0ca7d5ceaf5a5a00b617f4b30775e4ca90f897667d54",
+         "slug": "three-flashes-or-below-threshold",
+         "criterionId": "2.3.1"
+      },
+      "three-flashes": {
+         "title": "Three Flashes",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/three-flashes",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "8a829b6d15982b7ff206658d23c44602a49570ad851ef5e413fee9b6f33dad0a",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "e486a6fb3064afc29b3e26c370ae5fe4da7f588f43abeeafd6f8891789abec1a",
+         "slug": "three-flashes",
+         "criterionId": "2.3.2"
+      },
+      "animation-from-interactions": {
+         "title": "Animation from Interactions",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "14af35e29c3c990a8de49207a26b260c1812eb09b2c70b25f3750a9f114c12f2",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "ca91ce0190a676c486c8bb9552a0d7ace8b054de7a425d63135b1f01b16d8d9a",
+         "slug": "animation-from-interactions",
+         "criterionId": "2.3.3"
+      },
+      "bypass-blocks": {
+         "title": "Bypass Blocks",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/bypass-blocks",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "cb807f0bb26bebe4bd2aabb282a3c1a5e22af9e304230d5acd7dee978d048b8d",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "7f4b525b5ef5957ef1133fd6dc2122b59f385e0dc007c3a95b72de4e07b95c5e",
+         "slug": "bypass-blocks",
+         "criterionId": "2.4.1"
+      },
+      "focus-order": {
+         "title": "Focus Order",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/focus-order",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "d5f8571e397b91e54c58dc6a00eec27c4817305f84107f2252ef98be991489b5",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "0276f806bc47c47c647761ae3276247a20b0fed3be587dc425d10c8ed733ea38",
+         "slug": "focus-order",
+         "criterionId": "2.4.3"
+      },
+      "link-purpose-in-context": {
+         "title": "Link Purpose (In Context)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/link-purpose-in-context",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "43a641c965afa9d41fa2d964f6a0fdf0c1905bcf0ab55562231d0b7327546d0c",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "e0bf4d1c48f51aeb6437a17a46039e9b55ffdb9ae16c061ee13dcb3d9ed89dc7",
+         "slug": "link-purpose-in-context",
+         "criterionId": "2.4.4"
+      },
+      "multiple-ways": {
+         "title": "Multiple Ways",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/multiple-ways",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "af97bdbd36fdcc804dd9ae17125b88f2b4b1798887ec25a6ce9655e816300526",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "16acaff1d45adc6f237235bf4ef6bff68428005f57c7d692399f9461cfc2ce8d",
+         "slug": "multiple-ways",
+         "criterionId": "2.4.5"
+      },
+      "headings-and-labels": {
+         "title": "Headings and Labels",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/headings-and-labels",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "34aa1b70b35b3e3d966394256cfbc5e682a51e5bfea97bb7d5b80e7180a21978",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "42dbc82ada49f33870ec07e4229ebfd693d2492f7f68d0ceb4ba8a885b54483c",
+         "slug": "headings-and-labels",
+         "criterionId": "2.4.6"
+      },
+      "focus-visible": {
+         "title": "Focus Visible",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/focus-visible",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "80ec2e7fc5cd2aaa3ab9379dbceab3192b7873434ca03c2a66a7da4eeed18c3a",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "4f7f677f473cef20eaae0dee557ba8e8742f61062facb3615774d60b082c7939",
+         "slug": "focus-visible",
+         "criterionId": "2.4.7"
+      },
+      "location": {
+         "title": "Location",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/location",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "c7f7a8b5aed62b28d9c751669ef6cc5ecc918a5fc1fd1918600a6bc2c9539c5e",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "cbee34516041dfea8ba928b4637a927ffa481520ad2710d12e15cf38d97fd8bc",
+         "slug": "location",
+         "criterionId": "2.4.8"
+      },
+      "link-purpose-link-only": {
+         "title": "Link Purpose (Link Only)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/link-purpose-link-only",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "9589a4b5dab74e03225f7865a395f54b2b14f2d8bc4e7bb24b619c9359463f97",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "e30f91ac2208d67b778ae6785618f671ec8c429e9faa0461f41cbb0d716c9209",
+         "slug": "link-purpose-link-only",
+         "criterionId": "2.4.9"
+      },
+      "section-headings": {
+         "title": "Section Headings",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/section-headings",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "c5af5995136901ed3e353cffff9c3f237b1c6cfcad4693364cc2c472f0e0edea",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "d2ab4b48722a87cf4a22530a0b25a7effa48d295d2066258560984872da6b67e",
+         "slug": "section-headings",
+         "criterionId": "2.4.10"
+      },
+      "focus-not-obscured-minimum": {
+         "title": "Focus Not Obscured (Minimum)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "9515bdd0faab14d62528c5b1af1ea03383409c651b551c4e9b708c6f5bc8b607",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "bfbba645c8292ed106fc3940d91589ca4bd14953305de9410d5e72cefd7c59bf",
+         "slug": "focus-not-obscured-minimum",
+         "criterionId": "2.4.11"
+      },
+      "focus-not-obscured-enhanced": {
+         "title": "Focus Not Obscured (Enhanced)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-enhanced",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "a0c54a0b596613648caaa944cfa8cb79b54ece96b52086ddfab3f907545f7a46",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "2c2d25bf4a7f919a9f4adf8f8177050b8938f80aacae587b784a4fc88e484b4e",
+         "slug": "focus-not-obscured-enhanced",
+         "criterionId": "2.4.12"
+      },
+      "focus-appearance": {
+         "title": "Focus Appearance",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "f1235f0417a97501af3e9d21d46042cc19e13ee977e40bbb3e13bab665dd1a7e",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "9a9113e586ade060fc19b480f698b5e2c57e10f9d87c2c18b051e4c188f4bc23",
+         "slug": "focus-appearance",
+         "criterionId": "2.4.13"
+      },
+      "pointer-gestures": {
+         "title": "Pointer Gestures",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/pointer-gestures",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "b42109151ffd48c9efe62f0505a34519aa29154e5aa8a5059132aab26245b104",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "7f1be5a69d197a323edbbd833058d6a49be609898fe0dfd0706302de38132ec5",
+         "slug": "pointer-gestures",
+         "criterionId": "2.5.1"
+      },
+      "pointer-cancellation": {
+         "title": "Pointer Cancellation",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/pointer-cancellation",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "066bf257f1658dfe5d8ec6de33a0c0af10f708473f5ac46787f15d84de2efd4b",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "03caf9f0643782d3e5f344735946d15e42a3d2d9d2ba42195098b8ee32be43c1",
+         "slug": "pointer-cancellation",
+         "criterionId": "2.5.2"
+      },
+      "label-in-name": {
+         "title": "Label in Name",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/label-in-name",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "56c1f7c367df6b55119d34ce09bb1a036b14a1b3236212470dbbd8ac24f5f290",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "e5deaadbd5e13f15098933d11a487bc8b3f63fc68e81bb9f3b21cd5a41194810",
+         "slug": "label-in-name",
+         "criterionId": "2.5.3"
+      },
+      "motion-actuation": {
+         "title": "Motion Actuation",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/motion-actuation",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "3c8cc2c6afda432289801e025aeebea39cd5f2e213150fe62f9f76db01264597",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "aeb80574cdbb8eb13879c0629370c18eac83a9c18cccf69be86b465cffad5d0e",
+         "slug": "motion-actuation",
+         "criterionId": "2.5.4"
+      },
+      "target-size-enhanced": {
+         "title": "Target Size (Enhanced)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/target-size-enhanced",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "9282017b57b2bcb523513abda1d679e3bf4eef9eaa1d7000837e5b57b4083645",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "7a8d1164b504f577e473f6d7cc90831babb5d049e095e2341aecb2ea6b0cd3f6",
+         "slug": "target-size-enhanced",
+         "criterionId": "2.5.5"
+      },
+      "concurrent-input-mechanisms": {
+         "title": "Concurrent Input Mechanisms",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/concurrent-input-mechanisms",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "ef7f12aa2625ecf38b7149eaac5fad3cf9bc8c048297bcc12d83384e8256c83c",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "fdbbb7027f37b99bd362e30e83a75a77d523f82c039299fad2bc300e7be601c5",
+         "slug": "concurrent-input-mechanisms",
+         "criterionId": "2.5.6"
+      },
+      "dragging-movements": {
+         "title": "Dragging Movements",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "c3905630a35b6e8246aba32c1769f3ff82b217d464d41e4b1b2a34b9df5771c6",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "014997007b0bb6002ccd8a4598ba600a66b6dc0b01a48e8e2c6d22104382b4a4",
+         "slug": "dragging-movements",
+         "criterionId": "2.5.7"
+      },
+      "target-size-minimum": {
+         "title": "Target Size (Minimum)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "361694575d2a4ca5834de57dbc44b24c27ecc67956625703a140b9f1d79c62d4",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "092dd0b11380f3c52c521f2fb1fbaf3a2e17be35d669248423c83d855727808a",
+         "slug": "target-size-minimum",
+         "criterionId": "2.5.8"
+      },
+      "language-of-page": {
+         "title": "Language of Page",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/language-of-page",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "091b815394cbe46f1a63ecdbb729e840a00fcdd2c70521d6322acab1a5f70596",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "6fb9569f577d631a3ffb3c62906ecf17a86747e250352fc4c7dd643dfd92c3ba",
+         "slug": "language-of-page",
+         "criterionId": "3.1.1"
+      },
+      "language-of-parts": {
+         "title": "Language of Parts",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/language-of-parts",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "2eaee0eca1010bb446967924236928fe244d05b9fb5e5465af4c58f6ce81b2bf",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "e75d4a3b16be347a6fbfc048f3200344113997a930cb933015ac0938818f0d0a",
+         "slug": "language-of-parts",
+         "criterionId": "3.1.2"
+      },
+      "unusual-words": {
+         "title": "Unusual Words",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/unusual-words",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "c4600d49878319e82e35ff0354ff2d5eff720875a92675facaecccd54cb62541",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "b9981a130134bd7fc8bc3a8423ca8833d6397664d5a559f254edce48897c011d",
+         "slug": "unusual-words",
+         "criterionId": "3.1.3"
+      },
+      "abbreviations": {
+         "title": "Abbreviations",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/abbreviations",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "3e71df0b7853cda68963bb4f1ab1a0fa188b93224be70887f227f5fe22c65773",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "aa290b53276b39c8b3be7e3be81d026d3c87dc34b83c60eec5f38c6b823285b4",
+         "slug": "abbreviations",
+         "criterionId": "3.1.4"
+      },
+      "reading-level": {
+         "title": "Reading Level",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/reading-level",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "b3499db8202b999b699066e3a678245cba730705d2547bd043b13004bec46838",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "62fa13bc18e836d6950c140870e0d7289b3d40f76e74fe1349b27b834ce0ce60",
+         "slug": "reading-level",
+         "criterionId": "3.1.5"
+      },
+      "pronunciation": {
+         "title": "Pronunciation",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/pronunciation",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "cbdc1386975f0f615e4b2dfc3d21fc23a3258011180568b1efc5c07bfe902938",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "d130bdb096843eea28ebb81074787cb6cfa91e48d53d7e5324b9840bfdc31b57",
+         "slug": "pronunciation",
+         "criterionId": "3.1.6"
+      },
+      "on-focus": {
+         "title": "On Focus",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/on-focus",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "7c091de08983bd1ecb36e16413bf688f0696bf7a8cf6ca9358d3b98c88822518",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "4558c52061686d32521611809107a38c65eb74ff470eecb750d331c9ee750d46",
+         "slug": "on-focus",
+         "criterionId": "3.2.1"
+      },
+      "on-input": {
+         "title": "On Input",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/on-input",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "b5f7e43b68fbbb9cc3dd6db557791a9304326b78c9edb0a26675376fe25aad3e",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "365b0cdd16e71c624df273e6c2a42dd3e348d10c68ef1bfe84bde55052297e82",
+         "slug": "on-input",
+         "criterionId": "3.2.2"
+      },
+      "consistent-navigation": {
+         "title": "Consistent Navigation",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/consistent-navigation",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "aaad0da894a88a8aee73088a8bbfb5d27cfb249da908f8ba50156fbed56a8a9d",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "035cb68fe722b44c4f3b92270da9d638f2542cf3f8a83562ff1fb5dbbaf5eb0c",
+         "slug": "consistent-navigation",
+         "criterionId": "3.2.3"
+      },
+      "consistent-identification": {
+         "title": "Consistent Identification",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/consistent-identification",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "ef1f3ec780fe59891963cf8dedd6e7d44542ca42da675d6f19063b4039c3b4e9",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "c2b58bc0c214d2b2ba40aead678e347fa8bc4e713af695aaec5ea1d15ff61c9f",
+         "slug": "consistent-identification",
+         "criterionId": "3.2.4"
+      },
+      "change-on-request": {
+         "title": "Change on Request",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/change-on-request",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "9dc8631ec30f7b3f0b1b177addd6d3a7ed1f1318d13f8d93448c83828ad48d00",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "b9d4e0f0bb50e9c67011900b0b0ba43657c3210e4c8fd88d7bd8831e7aec9024",
+         "slug": "change-on-request",
+         "criterionId": "3.2.5"
+      },
+      "consistent-help": {
+         "title": "Consistent Help",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/consistent-help",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "446fbc385d6c6494368d0389318db29f1f25f54603e69665ad9d9db151ab0238",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "fcbd7f8d8b8b877edbc0d675d57a7c595d52dce68b94e4ae134c2df676c65f0a",
+         "slug": "consistent-help",
+         "criterionId": "3.2.6"
+      },
+      "error-identification": {
+         "title": "Error Identification",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/error-identification",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "0c33f7d1c0643f3b86d9585cc1b4dfa365950100869d6f67bd0e2b949834e361",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "f985b8ce2bdc6fdb804dfb23e947fb876a00aa10df2ace1b7bb820b8b189200e",
+         "slug": "error-identification",
+         "criterionId": "3.3.1"
+      },
+      "labels-or-instructions": {
+         "title": "Labels or Instructions",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/labels-or-instructions",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "bef4cfd96fbd2a38e382ef4c408069869521afaa435849ca86175f34ad3bc846",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "3ddae4e2b22029646fc46c1c7b17769e5ef489cce8f1fd08a80de2d4571dab30",
+         "slug": "labels-or-instructions",
+         "criterionId": "3.3.2"
+      },
+      "error-suggestion": {
+         "title": "Error Suggestion",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/error-suggestion",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "4f4a68a0035ce362c6e54c50b9f5d4b4969b0b26b8d96cd92c472710ae9b09d2",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "699702fbc9bc8b75d91100f7e0aa0dc3c9025533908e12cc0470cf8df64549dd",
+         "slug": "error-suggestion",
+         "criterionId": "3.3.3"
+      },
+      "error-prevention-legal-financial-data": {
+         "title": "Error Prevention (Legal, Financial, Data)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/error-prevention-legal-financial-data",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "2fabde98b3657a963115c7e207b794b2eac1beb22f870ca33e298a665c8d5c8c",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "d0958bdf4fe102d5065a59e6bae80b9c9d90e047f7f2115c9d483b0754897ccf",
+         "slug": "error-prevention-legal-financial-data",
+         "criterionId": "3.3.4"
+      },
+      "help": {
+         "title": "Help",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/help",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "3b2dd0da80fc7e7cb29da054e922689af8d9d72a1fa1bf33c3a35074d6e77ab8",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "3aced622d3ec46f443f09fae4f5970a7ddd5b77b1618fd743d2e2e78710c8aee",
+         "slug": "help",
+         "criterionId": "3.3.5"
+      },
+      "error-prevention-all": {
+         "title": "Error Prevention (All)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/error-prevention-all",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "60ffeba9e93f8acf745b6c4fe23534821d2719d8cf806ff5de926d6ed2b6fac3",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "e3846941a3ac33012e58c813d64e618da8f667c9756510c4c08e398480e12427",
+         "slug": "error-prevention-all",
+         "criterionId": "3.3.6"
+      },
+      "redundant-entry": {
+         "title": "Redundant Entry",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/redundant-entry",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "d945ac6dea17b9b57ce2d530a1381e935fa231059b10c2edf9219c4dd3cd6706",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "048cd330f0995238bdd23688033d88ec6c93d808a1e0beb64e0b61e38a993d3a",
+         "slug": "redundant-entry",
+         "criterionId": "3.3.7"
+      },
+      "accessible-authentication-minimum": {
+         "title": "Accessible Authentication (Minimum)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/accessible-authentication-minimum",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "3c6496948b93fda1f7e45b0094853bf39141c01f615c340367dda5cee6871629",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "98bf563daf8895e09059d40ef2f53e94c542405583cceb98e8ec3b2d622e292b",
+         "slug": "accessible-authentication-minimum",
+         "criterionId": "3.3.8"
+      },
+      "accessible-authentication-enhanced": {
+         "title": "Accessible Authentication (Enhanced)",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/accessible-authentication-enhanced",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "efaffde14b23eb2e7b9e28beed96b0fe88c8e293e7d4b2b91f760410e2338c76",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "92333868b712ee40382436cadfdab0784509e1523d40b4b2c6e0ca36a7038d98",
+         "slug": "accessible-authentication-enhanced",
+         "criterionId": "3.3.9"
+      },
+      "name-role-value": {
+         "title": "Name, Role, Value",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/name-role-value",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "8c62f3e1f2dc70597a4b290e76354c4ca2639762fa76032d7bccb113c7b96641",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "48079a31ccda5c2bba4a407b821e7756bd08d927b4ed5a3052a6dfd6806a74b4",
+         "slug": "name-role-value",
+         "criterionId": "4.1.2"
+      },
+      "status-messages": {
+         "title": "Status Messages",
+         "url": "https://www.w3.org/WAI/WCAG22/Understanding/status-messages",
+         "status": "Informative explanations, not required to meet WCAG",
+         "sourceSha256": "d5a085f7be8814e4f01520db08d41d09b62491f40dc0fb6fb4941ec762cf3746",
+         "syncedAt": "2026-09-05T21:19:28.562Z",
+         "bodyHash": "7cc07678efc95281dc96dd4f239320f5de0181914277d0c5d7b2320372d2d957",
+         "slug": "status-messages",
+         "criterionId": "4.1.3"
+      }
+   }
+}

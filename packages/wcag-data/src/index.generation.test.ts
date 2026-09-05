@@ -176,7 +176,11 @@ function assertSummaryTotals(summaryArtifact: {
          EXPECTED_22_COVERAGE_COUNTS.unknown,
       ...EXPECTED_22_COVERAGE_COUNTS,
    });
-   expect(summaryArtifact.representativeCriterionIds.hybrid).toEqual(['2.4.7', '4.1.3']);
+   expect(summaryArtifact.representativeCriterionIds.hybrid).toEqual([
+      '2.4.1',
+      '2.4.7',
+      '4.1.3',
+   ]);
 }
 
 async function assertStrategyAndSummaryArtifacts(

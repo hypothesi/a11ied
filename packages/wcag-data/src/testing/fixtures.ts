@@ -39,6 +39,52 @@ function createTextAlternativeCriterion(): unknown {
    };
 }
 
+/**
+ * Reproduces the WCAG 2.4.1 shape: a `sufficient` entry placed directly at the top level
+ * (title + suffix + `using`), with no `{title, techniques}` wrapper. A normalizer that
+ * only reads `group.techniques` drops every id under an entry shaped like this.
+ */
+function createBypassBlocksCriterion(): unknown {
+   return {
+      id: 'bypass-blocks',
+      num: '2.4.1',
+      content:
+         '<p>A mechanism is available to bypass blocks of content that are repeated on multiple web pages.</p>',
+      handle: 'Bypass Blocks',
+      title: 'A mechanism is available to bypass blocks of content that are repeated on multiple web pages.',
+      versions: ['2.1', '2.2'],
+      level: 'A',
+      details: [],
+      techniques: {
+         sufficient: [
+            {
+               title: 'Creating links to skip blocks of repeated material',
+               suffix: 'using one of the following techniques:',
+               using: [
+                  {
+                     id: 'G1',
+                     technology: 'general',
+                     title: 'Adding a link at the top of each page that goes directly to the main content area',
+                  },
+                  {
+                     id: 'G123',
+                     technology: 'general',
+                     title: 'Adding a link at the beginning of a block of repeated content to go to the end of the block',
+                  },
+               ],
+            },
+         ],
+         advisory: [
+            {
+               id: 'C6',
+               technology: 'css',
+               title: 'Positioning content based on structural markup',
+            },
+         ],
+      },
+   };
+}
+
 function createFocusVisibleCriterion(): unknown {
    return {
       id: 'focus-visible',
@@ -232,7 +278,10 @@ function buildOperablePrinciple(versionOnlyCriteria: unknown[]): unknown {
             num: '2.4',
             handle: 'Navigable',
             title: 'Help users navigate and find content.',
-            successcriteria: [createFocusVisibleCriterion()],
+            successcriteria: [
+               createBypassBlocksCriterion(),
+               createFocusVisibleCriterion(),
+            ],
          },
          {
             id: 'guideline2-5',

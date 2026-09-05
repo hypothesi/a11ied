@@ -47,8 +47,8 @@ export interface CriterionPayload {
    level: 'A' | 'AA' | 'AAA';
    details?: unknown[];
    techniques?: {
-      sufficient?: TechniqueGroupPayload[];
-      advisory?: TechniqueGroupPayload[];
+      sufficient?: TechniqueOrGroupPayload[];
+      advisory?: TechniqueOrGroupPayload[];
       failure?: TechniquePayload[];
    };
 }
@@ -83,6 +83,13 @@ export interface TechniquePayload {
    using?: TechniquePayload[];
    and?: TechniquePayload[];
 }
+
+/**
+ * A `sufficient`/`advisory` entry is either a `{title, techniques}` "Situation" group, or
+ * a technique node placed directly at the top level (a real technique, or a synthetic
+ * OR/AND wrapper with `using`/`and` children and no `techniques` list of its own).
+ */
+export type TechniqueOrGroupPayload = TechniqueGroupPayload | TechniquePayload;
 
 export type QuickrefTagsPayload = Record<string, Record<string, string>>;
 

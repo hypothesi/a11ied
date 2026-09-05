@@ -1,23 +1,22 @@
 {
-   "generatedAt": "2026-09-04T18:35:21.040Z",
+   "generatedAt": "2026-09-05T21:19:28.148Z",
    "rawSources": [
       {
          "fileName": "act-mapping.json",
          "sourceId": "act-mapping",
          "sourceUrl": "https://raw.githubusercontent.com/w3c/wcag/main/guidelines/act-mapping.json",
          "resolvedUrl": "https://raw.githubusercontent.com/w3c/wcag/main/guidelines/act-mapping.json",
-         "syncedAt": "2026-09-04T18:35:21.040Z",
+         "syncedAt": "2026-09-05T21:19:28.148Z",
          "sha256": "5d111710f92de504b978bf77fc5ac488e9230dca36a619c7ad9ef058ff07c4f5",
          "contentType": "json",
-         "fallbackUsed": false,
-         "etag": "W/\"42643a05d95adfd63d52a77121d463f1dc181b384758087bc78b87bcfb88fe28\""
+         "fallbackUsed": false
       },
       {
          "fileName": "axe-rules.json",
          "sourceId": "axe-rules",
          "sourceUrl": "npm:axe-core",
          "resolvedUrl": "npm:axe-core",
-         "syncedAt": "2026-09-04T18:35:21.040Z",
+         "syncedAt": "2026-09-05T21:19:28.148Z",
          "sha256": "e844400fe1e7768e51818f1c3c6e1c8a97cc83095db721a26ba930f7df3261ab",
          "contentType": "derived-json",
          "fallbackUsed": false,
@@ -28,37 +27,32 @@
          "sourceId": "quickref-tags",
          "sourceUrl": "https://raw.githubusercontent.com/w3c/wai-wcag-quickref/main/_data/tags-sc.yml",
          "resolvedUrl": "https://raw.githubusercontent.com/w3c/wai-wcag-quickref/gh-pages/_data/tags-sc.yml",
-         "syncedAt": "2026-09-04T18:35:21.040Z",
+         "syncedAt": "2026-09-05T21:19:28.148Z",
          "sha256": "87b97fdbcf32ae7355f60cf3cd42e9c13ee99f4d81bf9d677e0a07bf131a6a25",
          "contentType": "yaml",
-         "fallbackUsed": true,
-         "etag": "W/\"61fa6e456db9679572835b6f62307ae87f8eaa32a498b288afba3c60013f180e\""
+         "fallbackUsed": true
       },
       {
          "fileName": "wcag.2.1.json",
          "sourceId": "wcag21",
          "sourceUrl": "https://www.w3.org/WAI/WCAG21/wcag.json",
          "resolvedUrl": "https://www.w3.org/WAI/WCAG21/wcag.json",
-         "syncedAt": "2026-09-04T18:35:21.040Z",
+         "syncedAt": "2026-09-05T21:19:28.148Z",
          "sha256": "fc9f2e8a94421fc305dced3ec4020fde088572493d44da70789ceb6f775bb4d7",
          "contentType": "json",
          "fallbackUsed": false,
-         "upstreamVersion": "2.1",
-         "etag": "W/\"73a38-65a95c2420f00\"",
-         "lastModified": "Thu, 03 Sep 2026 15:25:16 GMT"
+         "upstreamVersion": "2.1"
       },
       {
          "fileName": "wcag.2.2.json",
          "sourceId": "wcag22",
          "sourceUrl": "https://www.w3.org/WAI/WCAG22/wcag.json",
          "resolvedUrl": "https://www.w3.org/WAI/WCAG22/wcag.json",
-         "syncedAt": "2026-09-04T18:35:21.040Z",
+         "syncedAt": "2026-09-05T21:19:28.148Z",
          "sha256": "3a034865a879a7d874b60ff2aec7f430cf37bc1597a1e00985680fd80ef5cf75",
          "contentType": "json",
          "fallbackUsed": false,
-         "upstreamVersion": "2.2",
-         "etag": "W/\"7e37d-65a95a826b580\"",
-         "lastModified": "Thu, 03 Sep 2026 15:17:58 GMT"
+         "upstreamVersion": "2.2"
       }
    ],
    "artifacts": [
@@ -98,7 +92,7 @@
       },
       {
          "fileName": "coverage-summary.2.1.json",
-         "sha256": "6d69aa2e20ca8adc567dd5698137ffddeb7bba0bf618bb9b692458bd0167d4cc",
+         "sha256": "2cefc987901311294e9519277118afe3daffc94e347c0bd41272a1c893cc3207",
          "wcagVersion": "2.1",
          "sourceFileNames": [
             "wcag.2.1.json",
@@ -115,7 +109,7 @@
       },
       {
          "fileName": "coverage-summary.2.2.json",
-         "sha256": "fd19ed62b1fccb989f0bdd83e9d88caba73d3f84340005aba1c460f2255d321e",
+         "sha256": "cd76f0cd3dfed091ce98aa752825a4859fb278179eff54643933b0a339f51978",
          "wcagVersion": "2.2",
          "sourceFileNames": [
             "wcag.2.2.json",
@@ -132,7 +126,7 @@
       },
       {
          "fileName": "coverage.2.1.json",
-         "sha256": "f0248827c1e48da4773bbd05f54b36d4b037f1c45e8232ed676fff9c943e566d",
+         "sha256": "be1e615efe53c9d42894792cadbdcef5ccb6e073dffbd07d7ac9d5bc281c7457",
          "wcagVersion": "2.1",
          "sourceFileNames": [
             "wcag.2.1.json",
@@ -149,7 +143,7 @@
       },
       {
          "fileName": "coverage.2.2.json",
-         "sha256": "a66f7137e9fe3e07e63063184476c9ecc21f13c5a785d352a9a8516c956568cd",
+         "sha256": "53042108251678302735eb5df877bc2eb26cb7eb7b7f41f3f77ca32f85ced8ed",
          "wcagVersion": "2.2",
          "sourceFileNames": [
             "wcag.2.2.json",
@@ -186,7 +180,7 @@
       },
       {
          "fileName": "criteria.2.1.json",
-         "sha256": "091ed9026c9365785bd1b85b29f38499359cd26513a819a64da685d0fc3214a0",
+         "sha256": "45a03e2e20848bbe2ca3d120941adf19c3f899208e0ac70e9d189442c158dbd2",
          "wcagVersion": "2.1",
          "sourceFileNames": ["wcag.2.1.json", "quickref-tags.yml"],
          "sourceUrls": [
@@ -196,7 +190,7 @@
       },
       {
          "fileName": "criteria.2.2.json",
-         "sha256": "bb33129537416264cb62f92fc26f99eecde001eea73c630e09fb21671eec0cc0",
+         "sha256": "08fe990756be494608d8166af5a243b611b56cdbd3c9fd43317e2493f08c7fd4",
          "wcagVersion": "2.2",
          "sourceFileNames": ["wcag.2.2.json", "quickref-tags.yml"],
          "sourceUrls": [
@@ -280,7 +274,7 @@
       },
       {
          "fileName": "technique-index.2.1.json",
-         "sha256": "a8d7db1b9fe8b5acf7d0d78c78009f88d256061b522f4b217f58125a72b3e499",
+         "sha256": "c0bdae162c4200c16ecd60eed735f22a1acfb5251ac5d122500f9d85b07ee34a",
          "wcagVersion": "2.1",
          "sourceFileNames": ["wcag.2.1.json", "quickref-tags.yml"],
          "sourceUrls": [
@@ -290,7 +284,7 @@
       },
       {
          "fileName": "technique-index.2.2.json",
-         "sha256": "bef2266e95b40cb34b37e5db08324df9d170b0e49c52877e19c027edb7cd0abc",
+         "sha256": "9fce830122afc016232fd41d6f6107f20deb7d5fb0752899699fac845d908d66",
          "wcagVersion": "2.2",
          "sourceFileNames": ["wcag.2.2.json", "quickref-tags.yml"],
          "sourceUrls": [

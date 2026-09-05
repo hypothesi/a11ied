@@ -6,8 +6,11 @@ import {
    type ApplicabilityState,
    type AxeRuleIndexArtifact,
    type CoverageSummaryArtifact,
+   type DocumentContentStore,
    type NormalizedCriterion,
+   type TechniqueBodyArtifact,
    type TechniqueIndexArtifact,
+   type UnderstandingArtifact,
    type WcagLevel,
    type WcagVersion,
    type coverageArtifactSchema,
@@ -48,9 +51,19 @@ export interface EngineArtifacts {
    failures: TechniqueIndexArtifact['techniques'];
    axeRules: AxeRuleIndexArtifact['rules'];
    coverageSummary: CoverageSummaryArtifact;
+   understanding: UnderstandingArtifact['documents'];
+   techniqueBodies: TechniqueBodyArtifact['bodies'];
 }
 
 export const artifactsCache = new Map<WcagVersion, EngineArtifacts>();
+
+/**
+ * The Understanding document and technique body content store is shared across versions,
+ * so it is cached once rather than per version like `artifactsCache`.
+ */
+export const contentStoreCache: { store: DocumentContentStore | undefined } = {
+   store: undefined,
+};
 
 export const applicabilitySignalTagHints: Record<ApplicabilitySignalCategory, string[]> =
    {

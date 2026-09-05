@@ -61,6 +61,10 @@ What to review after a sync:
    - `technique-index.<version>.json`
    - `failure-index.<version>.json`
    - `axe-rules.<version>.json`
+   - `understanding.<version>.json`
+   - `technique-bodies.<version>.json`
+   - `documents-content.json`
    - `generated-provenance.json`
 - `data/generated/` ships in the published package next to `dist/`; `@a11ied/wcag-engine` reads it from there.
-- Techniques carry a `url` to the W3C technique page and criteria carry `understandingUrl`. The Understanding prose and technique bodies are not copied into the data: the `w3c/wcag` repository is under the W3C Document License, which does not grant a general right to redistribute derivative text. See `NOTICE.md`.
+- Techniques carry a `url` to the W3C technique page and criteria carry `understandingUrl`. The Understanding document and the technique body are also copied into the data, converted from HTML to Markdown, under `understanding.<version>.json` and `technique-bodies.<version>.json`. The W3C Document License permits this conversion to help implementation. See `NOTICE.md`.
+- `npm run wcag:sync` fetches the Understanding documents and technique bodies with a separate step (`syncDocumentArtifacts`) that runs after the main sync, at low concurrency and with a pause between requests, and merges its results onto whatever is already committed so an incomplete run only adds to the corpus.

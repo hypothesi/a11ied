@@ -1,6 +1,10 @@
 import { notFoundErrorSchema, type EngineQueryError } from '@a11ied/contracts';
 
-export type LookupKind = 'criterion' | 'technique' | 'axe rule';
+export type LookupKind =
+   | 'criterion'
+   | 'technique'
+   | 'axe rule'
+   | 'understanding document';
 
 /** Raised when a criterion, technique, or axe rule lookup cannot be resolved. */
 export class WcagEngineNotFoundError extends Error {

@@ -12,6 +12,7 @@ export {
    getCriterion,
    getQuickrefTags,
    getTechnique,
+   getUnderstanding,
    listCriteriaByLevel,
    resetWcagEngineCache,
 } from './artifacts/runtime.js';

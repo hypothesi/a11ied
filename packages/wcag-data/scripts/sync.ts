@@ -8,8 +8,10 @@ import {
    SyncValidationError,
    getWcagDataDirectories,
    runWcagDataSync,
+   syncDocumentArtifacts,
    type GeneratedProvenanceManifest,
 } from '../src/index.js';
+import { curlFetch } from '../src/shared/curl-fetch.js';
 import { toJsonString } from '../src/shared/utils.js';
 
 const execFileAsync = promisify(execFile);
@@ -50,7 +52,11 @@ async function refreshGeneratedManifest(generatedRoot: string): Promise<void> {
 
 try {
    const directories = getWcagDataDirectories();
-   const result = await runWcagDataSync({ directories });
+   const result = await runWcagDataSync({ directories, fetchImpl: curlFetch });
+   const documentResult = await syncDocumentArtifacts({
+      directories,
+      fetchImpl: curlFetch,
+   });
    const generatedEntries = await readdir(directories.generated);
 
    if (generatedEntries.length > 0) {
@@ -68,6 +74,17 @@ try {
          .map(([version, count]) => `${version}=${count}`)
          .join(', ')}`,
    );
+   log(
+      `Understanding documents: ${documentResult.understandingCount}, ` +
+         `technique bodies: ${documentResult.techniqueBodyCount}, ` +
+         `unique bodies stored: ${documentResult.uniqueBodyCount}`,
+   );
+   if (documentResult.failures.length > 0) {
+      log(`document fetch failures: ${documentResult.failures.length}`);
+      for (const failure of documentResult.failures) {
+         log(`  ${failure.request.url}: ${failure.message}`);
+      }
+   }
 } catch (error) {
    if (error instanceof SyncValidationError) {
       process.stderr.write(`${error.message}\n`);

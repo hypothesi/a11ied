@@ -54,7 +54,7 @@ export const committedArtifactRegressionFixture = {
          title: 'Focus Order',
          level: 'A',
          requiredTags: ['focus', 'keyboard', 'modals'],
-         techniqueCount: 0,
+         techniqueCount: 8,
          failureCount: 2,
       },
       '3.3.8': {
@@ -62,7 +62,7 @@ export const committedArtifactRegressionFixture = {
          title: 'Accessible Authentication (Minimum)',
          level: 'AA',
          requiredTags: ['forms', 'logins'],
-         techniqueCount: 0,
+         techniqueCount: 5,
          failureCount: 1,
       },
       '4.1.3': {

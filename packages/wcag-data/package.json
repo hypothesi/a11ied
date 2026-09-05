@@ -29,6 +29,11 @@
    "dependencies": {
       "@a11ied/contracts": "0.1.0",
       "axe-core": "^4.13.0",
+      "jsdom": "30.0.1",
+      "turndown": "7.2.4",
       "yaml": "^2.9.0"
+   },
+   "devDependencies": {
+      "@types/turndown": "5.0.6"
    }
 }

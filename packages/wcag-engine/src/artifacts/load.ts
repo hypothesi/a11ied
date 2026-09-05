@@ -3,11 +3,15 @@ import {
    coverageArtifactSchema,
    coverageSummaryArtifactSchema,
    criteriaByLevelArtifactSchema,
+   documentContentStoreSchema,
    failureIndexArtifactSchema,
    normalizedCriteriaArtifactSchema,
    slugIndexArtifactSchema,
    strategyArtifactSchema,
+   techniqueBodyArtifactSchema,
    techniqueIndexArtifactSchema,
+   understandingArtifactSchema,
+   type DocumentContentStore,
    type WcagVersion,
 } from '@a11ied/contracts';
 
@@ -114,5 +118,18 @@ export function loadEngineArtifacts(version: WcagVersion): EngineArtifacts {
          coverageSummaryArtifactSchema,
          `coverage-summary.${version}.json`,
       ),
+      understanding: loadArtifact(
+         understandingArtifactSchema,
+         `understanding.${version}.json`,
+      ).documents,
+      techniqueBodies: loadArtifact(
+         techniqueBodyArtifactSchema,
+         `technique-bodies.${version}.json`,
+      ).bodies,
    };
+}
+
+/** Reads the shared, deduplicated document content store from disk. */
+export function loadDocumentContentStore(): DocumentContentStore {
+   return loadArtifact(documentContentStoreSchema, 'documents-content.json');
 }

@@ -25,5 +25,11 @@ export { normalizeCriteriaArtifacts } from './normalization/criteria.js';
 
 export { generateNormalizedArtifacts, runWcagDataSync } from './generation/build.js';
 
+export {
+   syncDocumentArtifacts,
+   type SyncDocumentArtifactsResult,
+} from './generation/documents.js';
+
 export { validateRawSyncState } from './validation/raw.js';
 export { validateGeneratedArtifacts } from './validation/generated.js';
+export { validateDocumentArtifacts } from './validation/documents.js';

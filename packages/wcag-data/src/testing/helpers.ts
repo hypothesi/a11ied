@@ -20,8 +20,8 @@ const HTTP_OK = 200;
 const HTTP_NOT_FOUND = 404;
 export const EXPECTED_RAW_SOURCE_COUNT = 5;
 export const EXPECTED_GENERATED_ARTIFACT_COUNT = 19;
-const EXPECTED_22_CRITERIA_COUNT = 6;
-const EXPECTED_21_CRITERIA_COUNT = 3;
+const EXPECTED_22_CRITERIA_COUNT = 7;
+const EXPECTED_21_CRITERIA_COUNT = 4;
 export const LEVEL_A = 'A';
 export const SYNC_TIMESTAMP = '2026-04-06T19:00:00.000Z';
 
@@ -35,13 +35,13 @@ export const EXPECTED_CRITERIA_COUNTS_BY_VERSION = {
 
 export const EXPECTED_22_COVERAGE_COUNTS = {
    automated: 2,
-   hybrid: 2,
+   hybrid: 3,
    manual: 2,
    unknown: 0,
 };
 const EXPECTED_21_COVERAGE_COUNTS = {
    automated: 1,
-   hybrid: 2,
+   hybrid: 3,
    manual: 0,
    unknown: 0,
 };

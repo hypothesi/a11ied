@@ -11,8 +11,10 @@ import type {
    QuickrefTagsPayload,
    TechniqueGroupPayload,
    TechniqueKind,
+   TechniqueOrGroupPayload,
    TechniquePayload,
 } from '../shared/types.js';
+import { normalizeDetails, normalizeTags } from './details.js';
 
 interface TechniqueKeyInput {
    criterionId: string;
@@ -57,80 +59,6 @@ function techniqueUrl(
       return undefined;
    }
    return `https://www.w3.org/WAI/${versionToken(version)}/Techniques/${technique.technology}/${technique.id}`;
-}
-
-function normalizeTags(tagPayload: Record<string, string> | undefined): string[] {
-   if (!tagPayload) {
-      return [];
-   }
-   return [
-      ...new Set(
-         Object.values(tagPayload)
-            .flatMap((value) => value.split(/\s+/))
-            .map((tag) => tag.trim())
-            .filter((tag) => tag.length > 0),
-      ),
-   ].toSorted((left, right) => left.localeCompare(right));
-}
-
-function extractHandleAndText(value: Record<string, unknown>): {
-   handle: string | undefined;
-   text: string | undefined;
-} {
-   let handle: string | undefined = undefined;
-   if (typeof value.handle === 'string') {
-      handle = value.handle.trim() || undefined;
-   }
-   let text: string | undefined = undefined;
-   if (typeof value.text === 'string') {
-      text = value.text.trim() || undefined;
-   }
-   return { handle, text };
-}
-
-function formatHandleText(
-   handle: string | undefined,
-   text: string | undefined,
-): string[] | undefined {
-   if (handle && text) {
-      return [`${handle}: ${text}`];
-   }
-   if (text) {
-      return [text];
-   }
-   return undefined;
-}
-
-function extractStringDetail(value: string): string[] {
-   const normalized = value.trim();
-   if (normalized) {
-      return [normalized];
-   }
-   return [];
-}
-
-function extractDetailText(value: unknown): string[] {
-   if (typeof value === 'string') {
-      return extractStringDetail(value);
-   }
-   if (Array.isArray(value)) {
-      return value.flatMap((entry) => extractDetailText(entry));
-   }
-   if (!isRecord(value)) {
-      return [];
-   }
-   const parsed = extractHandleAndText(value);
-   return (
-      formatHandleText(parsed.handle, parsed.text) ??
-      Object.values(value).flatMap((entry) => extractDetailText(entry))
-   );
-}
-
-function normalizeDetails(details: unknown[] | undefined): string[] {
-   if (!details) {
-      return [];
-   }
-   return [...new Set(details.flatMap((detail) => extractDetailText(detail)))];
 }
 
 function techniqueKey(input: TechniqueKeyInput): string {
@@ -195,25 +123,70 @@ interface CriterionScope {
    version: WcagVersion;
 }
 
-function normalizeTechniqueGroups(
-   scope: CriterionScope,
-   kind: Extract<TechniqueKind, 'sufficient' | 'advisory'>,
-   groups: TechniqueGroupPayload[] | undefined,
-): NormalizedTechnique[] {
-   if (!groups) {
-      return [];
-   }
-   return groups.flatMap((group, gi) =>
-      (group.techniques ?? []).flatMap((tech, ti) =>
+function hasSituationTechniques(
+   entry: TechniqueOrGroupPayload,
+): entry is TechniqueGroupPayload & { techniques: TechniquePayload[] } {
+   return isRecord(entry) && Array.isArray(entry.techniques);
+}
+
+/**
+ * A top-level entry with no `techniques` list is a technique node in disguise, but its
+ * declared type still allows an untitled `TechniqueGroupPayload`, which
+ * `TechniquePayload` does not. Reading its fields explicitly (rather than casting) keeps
+ * that honest: a titleless entry falls back to an empty title instead of being asserted
+ * away.
+ */
+function toTechniquePayload(entry: TechniqueOrGroupPayload): TechniquePayload {
+   const fields: Partial<TechniquePayload> = entry;
+   return { ...fields, title: fields.title ?? '' };
+}
+
+/**
+ * A "Situation" entry (`{title, techniques: [...]}`) lists the techniques for one
+ * situation, tagged with that situation's title. Any other entry sits directly at the top
+ * level: a real technique, or a synthetic OR/AND wrapper (`using`/`and`) with no
+ * `techniques` list of its own. Both shapes appear as siblings in the same array, so
+ * dropping either kind silently drops real, id-bearing techniques with it.
+ */
+function normalizeGroupEntry(input: {
+   scope: CriterionScope;
+   kind: Extract<TechniqueKind, 'sufficient' | 'advisory'>;
+   entry: TechniqueOrGroupPayload;
+   groupIndex: number;
+}): NormalizedTechnique[] {
+   const { scope, kind, entry, groupIndex } = input;
+   if (hasSituationTechniques(entry)) {
+      return entry.techniques.flatMap((tech, ti) =>
          normalizeTechniqueTree({
             ...scope,
             technique: tech,
             kind,
-            groupTitle: group.title,
-            groupNote: group.note,
-            lineage: [gi, ti],
+            groupTitle: entry.title,
+            groupNote: entry.note,
+            lineage: [groupIndex, ti],
          }),
-      ),
+      );
+   }
+   return normalizeTechniqueTree({
+      ...scope,
+      technique: toTechniquePayload(entry),
+      kind,
+      groupTitle: undefined,
+      groupNote: undefined,
+      lineage: [groupIndex],
+   });
+}
+
+function normalizeTechniqueGroups(
+   scope: CriterionScope,
+   kind: Extract<TechniqueKind, 'sufficient' | 'advisory'>,
+   groups: TechniqueOrGroupPayload[] | undefined,
+): NormalizedTechnique[] {
+   if (!groups) {
+      return [];
+   }
+   return groups.flatMap((entry, groupIndex) =>
+      normalizeGroupEntry({ scope, kind, entry, groupIndex }),
    );
 }
 
@@ -240,6 +213,30 @@ function sortTechniques(techniques: NormalizedTechnique[]): NormalizedTechnique[
    return [...techniques].toSorted((left, right) => left.key.localeCompare(right.key));
 }
 
+/**
+ * The upstream payload sometimes places a `sufficient`/`advisory` entry directly at the
+ * top level instead of inside a `{title, techniques}` group; missing that shape drops
+ * every technique under it silently. Comparing raw counts against the normalized result
+ * catches a regression here before it ships a criterion with no techniques upstream
+ * actually publishes some for.
+ */
+function assertTechniquesNotDropped(input: {
+   criterionId: string;
+   raw: CriterionPayload['techniques'];
+   normalizedCount: number;
+}): void {
+   const rawCount =
+      (input.raw?.sufficient?.length ?? 0) +
+      (input.raw?.advisory?.length ?? 0) +
+      (input.raw?.failure?.length ?? 0);
+   if (rawCount > 0 && input.normalizedCount === 0) {
+      throw new Error(
+         `Criterion ${input.criterionId} has ${rawCount} upstream technique group(s) but ` +
+            'normalized to none. The sufficient/advisory/failure normalizer is dropping a shape it does not recognize.',
+      );
+   }
+}
+
 export function normalizeSingleCriterion(input: {
    criterion: CriterionPayload;
    version: WcagVersion;
@@ -258,6 +255,11 @@ export function normalizeSingleCriterion(input: {
    const failures = sortTechniques(
       normalizeFailureTechniques(scope, criterion.techniques?.failure),
    );
+   assertTechniquesNotDropped({
+      criterionId: criterion.num,
+      raw: criterion.techniques,
+      normalizedCount: techniques.length + advisoryTechniques.length + failures.length,
+   });
    const normalizedCriterion = normalizedCriterionSchema.parse({
       id: criterion.num,
       slug: criterion.id,

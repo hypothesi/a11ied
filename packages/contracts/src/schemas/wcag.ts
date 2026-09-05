@@ -265,3 +265,47 @@ export const coverageSummaryArtifactSchema = z.object({
    }),
 });
 export type CoverageSummaryArtifact = z.infer<typeof coverageSummaryArtifactSchema>;
+
+/**
+ * Attribution and freshness fields every copied W3C document carries, per the W3C
+ * Document License: a link to the original, its status, and enough provenance to tell
+ * when it was last synced. `bodyHash` points into the shared, deduplicated content store
+ * so identical documents are stored once even when several ids reference them.
+ */
+export const w3cDocumentMetaSchema = z.object({
+   title: z.string().min(1),
+   url: z.string().url(),
+   status: z.string().min(1),
+   sourceSha256: z.string().min(1),
+   syncedAt: z.string().datetime(),
+   etag: z.string().optional(),
+   bodyHash: z.string().min(1),
+});
+export type W3cDocumentMeta = z.infer<typeof w3cDocumentMetaSchema>;
+
+export const understandingDocumentEntrySchema = w3cDocumentMetaSchema.extend({
+   slug: z.string(),
+   criterionId: criterionIdSchema,
+});
+export type UnderstandingDocumentEntry = z.infer<typeof understandingDocumentEntrySchema>;
+
+export const understandingArtifactSchema = z.object({
+   version: wcagVersionSchema,
+   documents: z.record(z.string(), understandingDocumentEntrySchema),
+});
+export type UnderstandingArtifact = z.infer<typeof understandingArtifactSchema>;
+
+export const techniqueBodyEntrySchema = w3cDocumentMetaSchema.extend({
+   id: z.string(),
+});
+export type TechniqueBodyEntry = z.infer<typeof techniqueBodyEntrySchema>;
+
+export const techniqueBodyArtifactSchema = z.object({
+   version: wcagVersionSchema,
+   bodies: z.record(z.string(), techniqueBodyEntrySchema),
+});
+export type TechniqueBodyArtifact = z.infer<typeof techniqueBodyArtifactSchema>;
+
+/** Content-addressed store of extracted document bodies, keyed by `bodyHash`. */
+export const documentContentStoreSchema = z.record(z.string(), z.string().min(1));
+export type DocumentContentStore = z.infer<typeof documentContentStoreSchema>;

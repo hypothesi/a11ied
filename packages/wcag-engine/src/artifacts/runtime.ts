@@ -5,6 +5,7 @@ import {
    criterionLookupResultSchema,
    quickrefTagLookupResultSchema,
    techniqueLookupResultSchema,
+   understandingLookupResultSchema,
    wcagLevelSchema,
    wcagVersionSchema,
    type AxeRuleLookupResult,
@@ -13,20 +14,23 @@ import {
    type CriteriaByLevelResult,
    type CriterionLookupKey,
    type CriterionLookupResult,
+   type DocumentContentStore,
    type NormalizedCriterion,
    type QuickrefTagLookupResult,
    type TechniqueLookupResult,
+   type UnderstandingLookupResult,
    type WcagLevel,
    type WcagVersion,
 } from '@a11ied/contracts';
 
 import {
    artifactsCache,
+   contentStoreCache,
    supportedVersions,
    type EngineArtifacts,
 } from '../shared/data.js';
 import { WcagEngineNotFoundError, WcagEngineValidationError } from '../errors/index.js';
-import { loadEngineArtifacts } from './load.js';
+import { loadDocumentContentStore, loadEngineArtifacts } from './load.js';
 
 /** Loads the generated artifact bundle for one supported WCAG version. */
 export function getArtifacts(version: WcagVersion): EngineArtifacts {
@@ -38,6 +42,23 @@ export function getArtifacts(version: WcagVersion): EngineArtifacts {
    const nextArtifacts = loadEngineArtifacts(version);
    artifactsCache.set(version, nextArtifacts);
    return nextArtifacts;
+}
+
+/**
+ * Loads and caches the shared document content store used by Understanding and technique
+ * bodies.
+ */
+export function getContentStore(): DocumentContentStore {
+   contentStoreCache.store ??= loadDocumentContentStore();
+   return contentStoreCache.store;
+}
+
+function resolveBody(bodyHash: string, lookupKey: string): string {
+   const body = getContentStore()[bodyHash];
+   if (!body) {
+      throw new WcagEngineNotFoundError(lookupKey, 'understanding document');
+   }
+   return body;
 }
 
 /** Parses one supported WCAG version string for artifact access. */
@@ -173,7 +194,8 @@ export function getQuickrefTags(
 
 /**
  * Resolves one technique or failure by its W3C id (G18, F65, ARIA22) from the generated
- * technique and failure indexes, with every criterion it is listed under.
+ * technique and failure indexes, with every criterion it is listed under. The technique
+ * body is included when the sync fetched one for this id.
  */
 export function getTechnique(
    lookupKey: string,
@@ -186,10 +208,39 @@ export function getTechnique(
       throw new WcagEngineNotFoundError(lookupKey, 'technique');
    }
 
+   const document = artifacts.techniqueBodies[lookupKey];
+
    return techniqueLookupResultSchema.parse({
       lookupKey,
       technique,
       criteria: listCriteriaByIds(artifacts, technique.criterionIds),
+      document,
+      body: document ? resolveBody(document.bodyHash, lookupKey) : undefined,
+   });
+}
+
+/**
+ * Resolves one criterion's Understanding document by criterion id or slug, with the
+ * criterion it explains and the document's full converted body.
+ */
+export function getUnderstanding(
+   lookupKey: CriterionLookupKey,
+   options?: { version?: string },
+): UnderstandingLookupResult {
+   const version = parseVersion(options?.version);
+   const criterion = resolveCriterion(version, lookupKey);
+   const artifacts = getArtifacts(version);
+   const document = artifacts.understanding[criterion.slug];
+
+   if (!document) {
+      throw new WcagEngineNotFoundError(lookupKey, 'understanding document');
+   }
+
+   return understandingLookupResultSchema.parse({
+      lookupKey,
+      criterion,
+      document,
+      body: resolveBody(document.bodyHash, lookupKey),
    });
 }
 
@@ -215,4 +266,5 @@ export function getAxeRule(
 /** Clears the in-memory artifact cache used by the WCAG engine. */
 export function resetWcagEngineCache(): void {
    artifactsCache.clear();
+   contentStoreCache.store = undefined;
 }

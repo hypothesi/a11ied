@@ -10,7 +10,9 @@ import {
    evidenceStrategySchema,
    normalizedCriterionSchema,
    applicabilityStateSchema,
+   techniqueBodyEntrySchema,
    techniqueIndexEntrySchema,
+   understandingDocumentEntrySchema,
 } from './wcag.js';
 
 export const applicabilitySignalCategorySchema = z.enum([
@@ -170,6 +172,12 @@ export const coverageLookupResultSchema = z.object({
 });
 export type CoverageLookupResult = z.infer<typeof coverageLookupResultSchema>;
 
+export const criterionShowResultSchema = coverageLookupResultSchema.extend({
+   /** The In Brief or Intent opening of the Understanding document, when one was synced. */
+   understandingExcerpt: z.string().optional(),
+});
+export type CriterionShowResult = z.infer<typeof criterionShowResultSchema>;
+
 export const wcagLookupResultSchema = z.object({
    lookupKey: criterionLookupKeySchema,
    criterion: normalizedCriterionSchema,
@@ -192,8 +200,18 @@ export const techniqueLookupResultSchema = z.object({
    lookupKey: z.string(),
    technique: techniqueIndexEntrySchema,
    criteria: z.array(normalizedCriterionSchema),
+   document: techniqueBodyEntrySchema.optional(),
+   body: z.string().optional(),
 });
 export type TechniqueLookupResult = z.infer<typeof techniqueLookupResultSchema>;
+
+export const understandingLookupResultSchema = z.object({
+   lookupKey: criterionLookupKeySchema,
+   criterion: normalizedCriterionSchema,
+   document: understandingDocumentEntrySchema,
+   body: z.string(),
+});
+export type UnderstandingLookupResult = z.infer<typeof understandingLookupResultSchema>;
 
 export const notFoundErrorSchema = z.object({
    type: z.literal('not-found'),

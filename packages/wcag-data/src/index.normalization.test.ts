@@ -13,6 +13,7 @@ function assertCriteriaKeysAreCorrect(
 ): void {
    expect(Object.keys(artifacts.criteriaArtifact.criteria)).toEqual([
       '1.1.1',
+      '2.4.1',
       '2.4.7',
       '2.5.7',
       '2.5.8',
@@ -21,11 +22,27 @@ function assertCriteriaKeysAreCorrect(
    ]);
 }
 
+/**
+ * Regression coverage for the WCAG 2.4.1 shape: a `sufficient` entry with no `{title,
+ * techniques}` wrapper must still return its `using` children's real ids.
+ */
+function assertBypassBlocksTechniquesSurviveNormalization(
+   criterion: NormalizedCriterion | undefined,
+): void {
+   expect(criterion?.techniques.map((tech) => tech.id).filter(Boolean)).toEqual([
+      'G1',
+      'G123',
+   ]);
+   expect(criterion?.advisoryTechniques.map((tech) => tech.id).filter(Boolean)).toEqual([
+      'C6',
+   ]);
+}
+
 function assertLevelIndexIsCorrect(
    artifacts: ReturnType<typeof normalizeCriteriaArtifacts>,
 ): void {
    expect(artifacts.criteriaByLevelArtifact.levels).toEqual({
-      [LEVEL_A]: ['1.1.1'],
+      [LEVEL_A]: ['1.1.1', '2.4.1'],
       AA: ['2.4.7', '2.5.7', '2.5.8', '3.3.8', '4.1.3'],
       AAA: [],
    });
@@ -90,6 +107,9 @@ describe('wcag-data normalization / criteria artifact shape', () => {
       assertLevelIndexIsCorrect(artifacts);
       assertStatusMessagesCriterionShape(artifacts.criteriaArtifact.criteria['4.1.3']);
       assertTechniqueAndFailureCrossRefs(artifacts);
+      assertBypassBlocksTechniquesSurviveNormalization(
+         artifacts.criteriaArtifact.criteria['2.4.1'],
+      );
    });
 });
 
