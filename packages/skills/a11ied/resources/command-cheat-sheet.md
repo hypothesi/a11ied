@@ -1,0 +1,141 @@
+# Command cheat sheet
+
+Every `a1` command this skill uses, and the MCP tool that matches it. Run `a1 help-all`
+for the full option list. This page keeps the common ones copy-pasteable.
+
+## Setup and diagnosis
+
+```txt
+a1 doctor
+a1 doctor --strict
+a1 setup
+```
+
+`doctor` reports browser and screen reader readiness. `--strict` exits 3 when a required
+step is missing. `setup` runs the Guidepup install and OS permission steps `doctor`
+lists, then re-checks. MCP tool: `doctor` (no `--strict` equivalent, so check the
+`ready` field in its result instead).
+
+## WCAG lookup
+
+```txt
+a1 wcag 1.4.3
+a1 wcag contrast-minimum
+a1 wcag criteria --level AA
+a1 wcag criteria --summary
+a1 wcag search "focus order"
+a1 wcag rule color-contrast
+```
+
+| Command                                          | MCP tool        | Arguments                              |
+| ------------------------------------------------ | --------------- | -------------------------------------- |
+| `wcag <id-or-slug>` / `wcag show <id-or-slug>`   | `wcag_show`     | `criterion` (required), `version`      |
+| `wcag criteria [--level A\|AA\|AAA] [--summary]` | `wcag_criteria` | `level`, `summary`, `version`          |
+| `wcag search <query> [--limit n]`                | `wcag_search`   | `query` (required), `limit`, `version` |
+| `wcag rule <axe-rule-id>`                        | `wcag_rule`     | `ruleId` (required), `version`         |
+
+## Page checks
+
+```txt
+a1 axe http://localhost:3000/checkout
+a1 axe src/components/Dialog.html
+a1 axe --html '<button></button>'
+a1 tree http://localhost:3000/checkout --role button
+a1 audit http://localhost:3000/checkout
+```
+
+`<target>` is an http(s) URL, a local file path, `-` for HTML on stdin, or `--html
+'<markup>'`, on `axe`, `tree`, and `audit` alike.
+
+| Command          | MCP tool  | Arguments                                                                                                                                                         |
+| ---------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `axe <target>`   | `run_axe` | `target`/`html`, `criterion`/`level`/`ruleIds` (at most one), `selector`, `exclude`, `waitFor`, `viewport`, `headers`, `cookies`, `failOn`, `baseline`, `version` |
+| `tree <target>`  | `tree`    | `target`/`html`, `role`, `name`                                                                                                                                   |
+| `audit <target>` | `audit`   | `target`/`html`, `failOn`, `baseline`, `version`                                                                                                                  |
+
+`axe` and `audit` exit 4 on a violation at or above `--fail-on` (default `minor`) not
+covered by `--baseline`. The MCP tools return the matching `verdict` and `exitCode`.
+
+## Screen reader session
+
+```txt
+a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout
+a1 sr open http://localhost:3000/settings
+a1 sr status
+a1 sr stop --out transcript.md
+```
+
+| Command                | MCP tool action                                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `sr start [url]`       | `sr_session` `{ action: "start", target, allowVirtual, url, app, browser, recording, idleTimeoutMinutes }` |
+| `sr open <url>`        | `sr_session` `{ action: "open", url }`                                                                     |
+| `sr stop [--out path]` | `sr_session` `{ action: "stop", out, format }`                                                             |
+| `sr status`            | `sr_session` `{ action: "status" }`                                                                        |
+
+## Screen reader actions
+
+```txt
+a1 sr read
+a1 sr next heading
+a1 sr previous
+a1 sr press Tab Tab
+a1 sr type "jane@example.com"
+a1 sr checkpoint before-submit
+a1 sr do move-right --sr voiceover
+a1 sr find "Continue"
+a1 sr goto --role button --name "Place order"
+a1 sr wait --for "Order placed"
+a1 sr expect --since before-submit "Order placed"
+```
+
+Every row below is one `sr_action` call: `{ action: "<name>", payload: {...} }`. Actions
+with no payload column take none.
+
+| Command                           | `sr_action` action | Payload                                                             |
+| --------------------------------- | ------------------ | ------------------------------------------------------------------- |
+| `sr read`                         | `read`             | none                                                                |
+| `sr title`                        | `title`            | none                                                                |
+| `sr next [kind]`                  | `next`             | `{ kind?, level?, times? }`                                         |
+| `sr previous [kind]`              | `previous`         | `{ kind?, level?, times? }`                                         |
+| `sr interact`                     | `interact`         | none                                                                |
+| `sr stop-interacting`             | `stop-interacting` | none                                                                |
+| `sr activate`                     | `activate`         | none                                                                |
+| `sr top`                          | `top`              | none                                                                |
+| `sr bottom`                       | `bottom`           | none                                                                |
+| `sr escape`                       | `escape`           | none                                                                |
+| `sr find <text>`                  | `find`             | `{ text }`                                                          |
+| `sr table <move>`                 | `table`            | `{ move }`                                                          |
+| `sr goto --role r --name n`       | `goto`             | `{ role?, name?, max? }`                                            |
+| `sr elements <kind>`              | `elements`         | `{ kind, max? }`                                                    |
+| `sr read-all`                     | `read-all`         | `{ max? }`                                                          |
+| `sr press <chord...>`             | `press`            | `{ keys }`                                                          |
+| `sr type <text>`                  | `type`             | `{ text }`                                                          |
+| `sr do <command>`                 | `perform`          | `{ command, commandSet? }`                                          |
+| `sr focus --app name`             | `focus`            | `{ appName? \| bundleId? \| processName? \| pid? \| windowTitle? }` |
+| `sr screenshot <path>`            | `screenshot`       | `{ path }`                                                          |
+| `sr wait --for text`              | `wait`             | `{ for?, ms?, timeoutMs? }`                                         |
+| `sr checkpoint <label>`           | `checkpoint`       | `{ label }`                                                         |
+| `sr transcript` (raw, unfiltered) | `transcript`       | none                                                                |
+
+`find`, `goto`, and `wait` return `exitCode` 4 when they did not match.
+
+## Checks with no per-step tool
+
+```txt
+a1 sr list --query heading
+a1 sr expect "Order placed"
+a1 sr transcript --since before-submit --tail 5
+```
+
+| Command                                                    | MCP tool        | Arguments                            |
+| ---------------------------------------------------------- | --------------- | ------------------------------------ |
+| `sr list [--query text] [--sr reader] [--command-set set]` | `sr_list`       | `query`, `sr`, `commandSet`          |
+| `sr expect <text\|/regex/> [--since checkpoint] [--not]`   | `sr_expect`     | `pattern` (required), `since`, `not` |
+| `sr transcript [--since c] [--tail n] [--out path]`        | `sr_transcript` | `since`, `tail`, `out`, `format`     |
+
+## Not exposed over MCP
+
+`a1 sr batch <file>` runs JSON-lines actions from a file in one process. Call `sr_action`
+once per line instead. `a1 sr walk [url]` starts a session (if needed), reads the whole
+page, and prints the transcript. Call `sr_session` (`start`), `sr_action` (`read-all`),
+then `sr_transcript` in that order for the same result.
