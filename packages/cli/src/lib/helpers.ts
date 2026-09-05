@@ -86,18 +86,36 @@ interface PrintOutputOptions {
    renderText: (envelope: CliOutputEnvelope, options: { verbose: boolean }) => string;
 }
 
+function printWarningsToStderr(warnings: CliMessage[]): void {
+   for (const warning of warnings) {
+      process.stderr.write(`${warningLine(warning.message)}\n`);
+   }
+}
+
+/**
+ * Prints one command's output. Envelopes (`--json`) and successful text results go to
+ * stdout; errors and warnings always go to stderr, so a piped `2>/dev/null` stdout
+ * stream carries only the result. The JSON envelope itself still goes to stdout even
+ * on failure, so scripts parsing `--json` output see the full error detail; a one-line
+ * copy goes to stderr for anyone watching the terminal.
+ */
 export function printOutput(opts: PrintOutputOptions): void {
+   printWarningsToStderr(opts.envelope.warnings);
+   const body = opts.renderText(opts.envelope, { verbose: Boolean(opts.verbose) });
+
    if (opts.json) {
       process.stdout.write(`${JSON.stringify(opts.envelope, undefined, JSON_INDENT)}\n`);
+      if (!opts.envelope.ok) {
+         process.stderr.write(`${body}\n`);
+      }
       return;
    }
 
-   const warnings = opts.envelope.warnings.map((warning) => warningLine(warning.message));
-   if (warnings.length > 0) {
-      warnings.push('');
+   if (opts.envelope.ok) {
+      process.stdout.write(`${body}\n`);
+      return;
    }
-   const body = opts.renderText(opts.envelope, { verbose: Boolean(opts.verbose) });
-   process.stdout.write(`${[...warnings, body].join('\n')}\n`);
+   process.stderr.write(`${body}\n`);
 }
 
 function buildCliUsageErrors(error: CliUsageError): {
