@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import { browserAutomationPolicySchema } from './browser.js';
+import { driverFocusTargetFieldsSchema, driverFocusTargetSchema } from './driver-focus.js';
+import { platformSchema } from './platform.js';
 
-export const platformSchema = z.enum(['voiceover', 'nvda', 'virtual']);
-export type Platform = z.infer<typeof platformSchema>;
+export { platformSchema, type Platform } from './platform.js';
 
 export const targetSchema = z.object({
    id: z.string(),
@@ -133,26 +134,39 @@ export const cliExitCodeSchema = z.union([
 ]);
 export type CliExitCode = z.infer<typeof cliExitCodeSchema>;
 
-export const driverCapabilitySchema = z.enum([
-   'start',
-   'stop',
-   'status',
-   'attach-document',
-   'focus',
+export const portableDriverVerbSchema = z.enum([
    'next',
    'previous',
-   'perform',
-   'key',
-   'type',
    'interact',
    'stop-interacting',
-   'click-current-item',
+   'activate',
+   'top',
+   'bottom',
+   'escape',
+]);
+export type PortableDriverVerb = z.infer<typeof portableDriverVerbSchema>;
+
+export const driverActionNameSchema = z.enum([
+   'start',
+   'status',
+   'stop',
+   'attach-document',
+   'focus',
+   ...portableDriverVerbSchema.options,
+   'press',
+   'type',
+   'perform',
    'read',
-   'logs',
-   'clear-logs',
+   'transcript',
    'checkpoint',
 ]);
+export type DriverActionName = z.infer<typeof driverActionNameSchema>;
+
+export const driverCapabilitySchema = driverActionNameSchema;
 export type DriverCapability = z.infer<typeof driverCapabilitySchema>;
+
+export const driverModeSchema = z.enum(['broker', 'in-process']);
+export type DriverMode = z.infer<typeof driverModeSchema>;
 
 export const driverReadinessStatusSchema = z.enum([
    'ready',
@@ -200,6 +214,11 @@ export const accessibilityDriverSessionSchema = z.object({
    socketPath: z.string().min(1),
    metadataFile: z.string().min(1),
    recording: sessionRecordingSchema.optional(),
+   /** The page the session opened, updated by attach-document. */
+   url: z.string().optional(),
+   /** The app or browser window the session opened, used by a bare focus action. */
+   app: driverFocusTargetFieldsSchema.optional(),
+   idleTimeoutMinutes: z.number().nonnegative().optional(),
 });
 export type AccessibilityDriverSession = z.infer<typeof accessibilityDriverSessionSchema>;
 
@@ -208,6 +227,31 @@ export const driverCheckpointSchema = z.object({
    createdAt: z.string().datetime(),
 });
 export type DriverCheckpoint = z.infer<typeof driverCheckpointSchema>;
+
+/**
+ * One captured phrase, timestamped by the broker when the action that produced it
+ * finished. Checkpoint entries carry the label in `checkpoint` and an empty phrase.
+ */
+export const driverTranscriptEntrySchema = z.object({
+   index: z.number().int().nonnegative(),
+   at: z.string().datetime(),
+   phrase: z.string(),
+   itemText: z.string().optional(),
+   checkpoint: z.string().optional(),
+});
+export type DriverTranscriptEntry = z.infer<typeof driverTranscriptEntrySchema>;
+
+export const driverTranscriptSchema = z.object({
+   target: platformSchema,
+   url: z.string().optional(),
+   startedAt: z.string().datetime(),
+   exportedAt: z.string().datetime(),
+   entries: z.array(driverTranscriptEntrySchema),
+});
+export type DriverTranscript = z.infer<typeof driverTranscriptSchema>;
+
+export const driverTranscriptFormatSchema = z.enum(['json', 'md']);
+export type DriverTranscriptFormat = z.infer<typeof driverTranscriptFormatSchema>;
 
 /**
  * AX properties of the element that held system keyboard focus at the time of a driver
@@ -232,30 +276,47 @@ export const driverStateSnapshotSchema = z.object({
    itemTextLog: z.array(z.string()),
    logCursor: z.number().int().nonnegative(),
    checkpoints: z.array(driverCheckpointSchema),
+   transcript: z.array(driverTranscriptEntrySchema).default([]),
    axFocusedElement: axFocusedElementSchema.optional(),
 });
 export type DriverStateSnapshot = z.infer<typeof driverStateSnapshotSchema>;
 
-export const driverActionNameSchema = z.enum([
-   'start',
-   'status',
-   'stop',
-   'attach-document',
-   'focus',
-   'next',
-   'previous',
-   'perform',
-   'key',
-   'type',
-   'interact',
-   'stop-interacting',
-   'click-current-item',
+export const driverPressPayloadSchema = z.object({
+   keys: z.array(z.string().min(1)).min(1),
+});
+export type DriverPressPayload = z.infer<typeof driverPressPayloadSchema>;
+
+export const driverTypePayloadSchema = z.object({ text: z.string() });
+export type DriverTypePayload = z.infer<typeof driverTypePayloadSchema>;
+
+export const driverPerformPayloadSchema = z.object({
+   command: z.string().min(1),
+   commandSet: z.string().optional(),
+});
+export type DriverPerformPayload = z.infer<typeof driverPerformPayloadSchema>;
+
+export const driverCheckpointPayloadSchema = z.object({ label: z.string().min(1) });
+export type DriverCheckpointPayload = z.infer<typeof driverCheckpointPayloadSchema>;
+
+const payloadFreeActionSchema = z.enum([
+   ...portableDriverVerbSchema.options,
    'read',
-   'logs',
-   'clear-logs',
-   'checkpoint',
+   'transcript',
 ]);
-export type DriverActionName = z.infer<typeof driverActionNameSchema>;
+
+/**
+ * One action request keyed by action name. Actions that take input declare their payload
+ * here so a caller cannot send the wrong shape.
+ */
+export const driverActionRequestSchema = z.discriminatedUnion('action', [
+   z.object({ action: payloadFreeActionSchema }),
+   z.object({ action: z.literal('press'), payload: driverPressPayloadSchema }),
+   z.object({ action: z.literal('type'), payload: driverTypePayloadSchema }),
+   z.object({ action: z.literal('perform'), payload: driverPerformPayloadSchema }),
+   z.object({ action: z.literal('checkpoint'), payload: driverCheckpointPayloadSchema }),
+   z.object({ action: z.literal('focus'), payload: driverFocusTargetSchema.optional() }),
+]);
+export type DriverActionRequest = z.infer<typeof driverActionRequestSchema>;
 
 export const driverActionResultSchema = z.object({
    session: accessibilityDriverSessionSchema,

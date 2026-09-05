@@ -1,5 +1,14 @@
 export { createDriverAdapter } from './adapters.js';
-export { driverCapabilities, type DriverAdapter } from './adapter-shared.js';
+export {
+   driverCapabilities,
+   type DriverActionOptions,
+   type DriverAdapter,
+} from './adapter-shared.js';
+export {
+   getPortableCommand,
+   portableCommandTable,
+   type PortableCommandEntry,
+} from './portable-commands.js';
 export { queryFocusedAxProperties } from './ax-properties-mac.js';
 export {
    DriverCommandError,

@@ -2,12 +2,13 @@ import { nvda, voiceOver } from '@guidepup/guidepup';
 import {
    driverStateSnapshotSchema,
    type DriverCheckpoint,
-   type DriverActionName,
    type DriverFocusResult,
    type DriverFocusTarget,
+   type DriverPerformPayload,
    type DriverReadiness,
    type DriverStateSnapshot,
    type Platform,
+   type PortableDriverVerb,
 } from '@a11ied/contracts';
 
 import { queryFocusedAxProperties } from './ax-properties-mac.js';
@@ -22,6 +23,7 @@ import {
 import {
    buildStateSnapshot,
    driverCapabilities,
+   type DriverActionOptions,
    type DriverAdapter,
 } from './adapter-shared.js';
 import { normalizeDriverKeys } from './key-aliases.js';
@@ -31,106 +33,39 @@ import {
    serializeResolvedDriverCommand,
    type DriverCommandSet,
 } from './command-registry.js';
+import {
+   getNvdaKeyCodeCommand,
+   getPortableCommand,
+   getVoiceOverKeyCodeCommand,
+   type NvdaPortableStep,
+   type PortableReaderMethod,
+   type VoiceOverPortableStep,
+} from './portable-commands.js';
+import { waitForSpeechStabilization } from './speech.js';
 import { createVirtualAdapter } from './virtual-adapter.js';
-
-const SPEECH_POLL_INTERVAL_MS = 150;
-const SPEECH_STABLE_THRESHOLD_MS = 300;
-const SPEECH_STABILIZATION_TIMEOUT_MS = 5000;
 
 const REAL_TARGET_NAV_TIMEOUT_MS = 10_000;
 const REAL_TARGET_INPUT_TIMEOUT_MS = 15_000;
 const REAL_TARGET_RETRIES = 2;
 
-const navCommandOptions = {
-   timeout: REAL_TARGET_NAV_TIMEOUT_MS,
-   retries: REAL_TARGET_RETRIES,
-};
+type RealTarget = Extract<Platform, 'voiceover' | 'nvda'>;
 
-const inputCommandOptions = {
-   timeout: REAL_TARGET_INPUT_TIMEOUT_MS,
-   retries: REAL_TARGET_RETRIES,
-};
-
-function delay(ms: number): Promise<void> {
-   return new Promise((resolve) => {
-      setTimeout(resolve, ms);
-   });
-}
-
-interface SpeechPollState {
-   startedAt: number;
-   lastPhrase: string;
-   stableSince: number;
-}
-
-function updateSpeechState(
-   state: SpeechPollState,
-   phrase: string,
-   now: number,
-): { next: SpeechPollState; isStable: boolean } {
-   if (phrase !== '' && phrase === state.lastPhrase) {
-      return {
-         next: {
-            startedAt: state.startedAt,
-            lastPhrase: state.lastPhrase,
-            stableSince: state.stableSince,
-         },
-         isStable: true,
-      };
-   }
-
+function buildCommandOptions(
+   defaultTimeoutMs: number,
+   options?: DriverActionOptions,
+): { timeout: number; retries: number } {
    return {
-      next: {
-         startedAt: state.startedAt,
-         lastPhrase: phrase,
-         stableSince: now,
-      },
-      isStable: false,
+      timeout: options?.timeoutMs ?? defaultTimeoutMs,
+      retries: REAL_TARGET_RETRIES,
    };
-}
-
-function shouldStopPolling(
-   state: SpeechPollState,
-   now: number,
-   isStable: boolean,
-): boolean {
-   if (isStable && now - state.stableSince >= SPEECH_STABLE_THRESHOLD_MS) {
-      return true;
-   }
-   return now - state.startedAt >= SPEECH_STABILIZATION_TIMEOUT_MS;
-}
-
-async function waitForSpeechStabilization(reader: ScreenReaderLike): Promise<void> {
-   const startedAt = Date.now();
-   const initialState = {
-      startedAt,
-      lastPhrase: '',
-      stableSince: startedAt,
-   };
-
-   async function poll(state: SpeechPollState): Promise<void> {
-      const phrase = await reader.lastSpokenPhrase().catch(() => '');
-      const now = Date.now();
-      const { next, isStable } = updateSpeechState(state, phrase, now);
-      if (shouldStopPolling(next, now, isStable)) {
-         return;
-      }
-      await delay(SPEECH_POLL_INTERVAL_MS);
-      return poll(next);
-   }
-
-   await poll(initialState);
 }
 
 class RealScreenReaderAdapter implements DriverAdapter {
    readonly capabilities = driverCapabilities;
-   readonly target: Extract<Platform, 'voiceover' | 'nvda'>;
+   readonly target: RealTarget;
    private readonly reader: ScreenReaderLike;
 
-   constructor(
-      target: Extract<Platform, 'voiceover' | 'nvda'>,
-      reader: ScreenReaderLike,
-   ) {
+   constructor(target: RealTarget, reader: ScreenReaderLike) {
       this.target = target;
       this.reader = reader;
    }
@@ -157,11 +92,7 @@ class RealScreenReaderAdapter implements DriverAdapter {
    }
 
    async attachDocument(): Promise<void> {
-      // Real screen readers use the live host environment, no document attachment needed.
-      // Verify the adapter is configured before proceeding.
-      if (this.reader === undefined) {
-         throw new Error('Reader is not initialized');
-      }
+      // Real screen readers read the live host window; the caller opens the page itself.
    }
 
    async focus(target: DriverFocusTarget): Promise<DriverFocusResult> {
@@ -171,29 +102,83 @@ class RealScreenReaderAdapter implements DriverAdapter {
       return focusWindowsTarget(target);
    }
 
-   async next(): Promise<void> {
-      await this.reader.next(navCommandOptions);
+   async performPortable(
+      verb: PortableDriverVerb,
+      options?: DriverActionOptions,
+   ): Promise<void> {
+      const entry = getPortableCommand(verb);
+      if (this.target === 'voiceover') {
+         await this.runVoiceOverStep(entry.voiceover, options);
+         return;
+      }
+      await this.runNvdaStep(entry.nvda, options);
    }
 
-   async previous(): Promise<void> {
-      await this.reader.previous(navCommandOptions);
+   private async runVoiceOverStep(
+      step: VoiceOverPortableStep,
+      options?: DriverActionOptions,
+   ): Promise<void> {
+      if (step.kind === 'keycode') {
+         await this.reader.perform(
+            getVoiceOverKeyCodeCommand(step),
+            buildCommandOptions(REAL_TARGET_INPUT_TIMEOUT_MS, options),
+         );
+         return;
+      }
+      await this.runSharedStep(step, options);
    }
 
-   async press(keys: string): Promise<void> {
-      await this.reader.press(
-         normalizeDriverKeys(keys, this.target),
-         inputCommandOptions,
+   private async runNvdaStep(
+      step: NvdaPortableStep,
+      options?: DriverActionOptions,
+   ): Promise<void> {
+      if (step.kind === 'keycode') {
+         await this.reader.perform(
+            getNvdaKeyCodeCommand(step),
+            buildCommandOptions(REAL_TARGET_INPUT_TIMEOUT_MS, options),
+         );
+         return;
+      }
+      await this.runSharedStep(step, options);
+   }
+
+   private async runSharedStep(
+      step: { kind: 'method'; method: PortableReaderMethod } | { kind: 'press'; keys: string },
+      options?: DriverActionOptions,
+   ): Promise<void> {
+      if (step.kind === 'press') {
+         await this.press([step.keys], options);
+         return;
+      }
+      const navOptions = buildCommandOptions(REAL_TARGET_NAV_TIMEOUT_MS, options);
+      const methods: Record<PortableReaderMethod, () => Promise<void>> = {
+         next: () => this.reader.next(navOptions),
+         previous: () => this.reader.previous(navOptions),
+         interact: () => this.reader.interact(navOptions),
+         stopInteracting: () => this.reader.stopInteracting(navOptions),
+         act: () => this.reader.act(navOptions),
+      };
+      await methods[step.method]();
+   }
+
+   async press(keys: readonly string[], options?: DriverActionOptions): Promise<void> {
+      const inputOptions = buildCommandOptions(REAL_TARGET_INPUT_TIMEOUT_MS, options);
+      for (const chord of keys) {
+         await this.reader.press(normalizeDriverKeys(chord, this.target), inputOptions);
+      }
+   }
+
+   async type(text: string, options?: DriverActionOptions): Promise<void> {
+      await this.reader.type(
+         text,
+         buildCommandOptions(REAL_TARGET_INPUT_TIMEOUT_MS, options),
       );
    }
 
-   async type(text: string): Promise<void> {
-      await this.reader.type(text, inputCommandOptions);
-   }
-
-   async performCommand(command: {
-      command: string;
-      commandSet?: string;
-   }): Promise<ReturnType<typeof serializeResolvedDriverCommand>> {
+   async performCommand(
+      command: DriverPerformPayload,
+      options?: DriverActionOptions,
+   ): Promise<ReturnType<typeof serializeResolvedDriverCommand>> {
       let commandSet: DriverCommandSet = 'auto';
       if (command.commandSet) {
          commandSet = parseDriverCommandSet(command.commandSet);
@@ -203,38 +188,15 @@ class RealScreenReaderAdapter implements DriverAdapter {
          command: command.command,
          commandSet,
       });
-      if (!resolved.portableAction) {
-         await this.reader.perform(resolved.command, inputCommandOptions);
+      if (resolved.portableAction) {
+         await this.performPortable(resolved.portableAction, options);
          return serializeResolvedDriverCommand(resolved);
       }
-      await this.performPortableAction(resolved.portableAction);
+      await this.reader.perform(
+         resolved.command,
+         buildCommandOptions(REAL_TARGET_INPUT_TIMEOUT_MS, options),
+      );
       return serializeResolvedDriverCommand(resolved);
-   }
-
-   private async performPortableAction(action: DriverActionName): Promise<void> {
-      const handlers: Partial<Record<DriverActionName, () => Promise<void>>> = {
-         next: () => this.next(),
-         previous: () => this.previous(),
-         interact: () => this.interact(),
-         'stop-interacting': () => this.stopInteracting(),
-         'click-current-item': () => this.activateCurrentItem(),
-      };
-      const handler = handlers[action];
-      if (handler) {
-         await handler();
-      }
-   }
-
-   async interact(): Promise<void> {
-      await this.reader.interact(navCommandOptions);
-   }
-
-   async stopInteracting(): Promise<void> {
-      await this.reader.stopInteracting(navCommandOptions);
-   }
-
-   async activateCurrentItem(): Promise<void> {
-      await this.reader.act(navCommandOptions);
    }
 
    async readState(checkpoints: DriverCheckpoint[]): Promise<DriverStateSnapshot> {
@@ -246,14 +208,6 @@ class RealScreenReaderAdapter implements DriverAdapter {
          return driverStateSnapshotSchema.parse({ ...snapshot, axFocusedElement });
       }
       return buildStateSnapshot(this.reader, checkpoints);
-   }
-
-   async clearLogs(checkpoints: DriverCheckpoint[]): Promise<DriverStateSnapshot> {
-      await Promise.all([
-         this.reader.clearSpokenPhraseLog(),
-         this.reader.clearItemTextLog(),
-      ]);
-      return this.readState(checkpoints);
    }
 
    async waitForSpeechStabilization(): Promise<void> {

@@ -3,37 +3,17 @@ import {
    VoiceOverCommanderCommands,
    voiceOverKeyCodeCommands,
 } from '@guidepup/guidepup';
-import type { DriverActionName, Platform } from '@a11ied/contracts';
+import type { Platform, PortableDriverVerb } from '@a11ied/contracts';
 import type {
    ConcreteDriverCommandSet,
    SerializableDriverCommand,
 } from './command-registry.js';
+import { portableCommandTable } from './portable-commands.js';
 
 export interface DriverCommandEntry extends SerializableDriverCommand {
    command: unknown;
-   portableAction?: DriverActionName;
+   portableAction?: PortableDriverVerb;
 }
-
-const portableCommands: Record<
-   string,
-   { action: DriverActionName; description: string }
-> = {
-   next: { action: 'next', description: 'Move to the next item.' },
-   previous: { action: 'previous', description: 'Move to the previous item.' },
-   interact: { action: 'interact', description: 'Enter interaction mode.' },
-   'stop-interacting': {
-      action: 'stop-interacting',
-      description: 'Leave interaction mode.',
-   },
-   activate: {
-      action: 'click-current-item',
-      description: 'Activate the current item.',
-   },
-   'click-current-item': {
-      action: 'click-current-item',
-      description: 'Activate the current item.',
-   },
-};
 
 function toKebabCase(value: string): string {
    return value
@@ -94,14 +74,14 @@ function getCommandRepresentation(command: unknown): string | undefined {
 }
 
 function createPortableEntries(): DriverCommandEntry[] {
-   return Object.entries(portableCommands).map(([alias, command]) => ({
+   return portableCommandTable.map((entry) => ({
       target: 'portable',
       commandSet: 'portable',
-      alias,
-      upstreamKey: alias,
-      description: command.description,
-      command: command.action,
-      portableAction: command.action,
+      alias: entry.verb,
+      upstreamKey: entry.verb,
+      description: entry.description,
+      command: entry.verb,
+      portableAction: entry.verb,
    }));
 }
 

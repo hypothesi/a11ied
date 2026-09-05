@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { platformSchema } from './core.js';
+import { platformSchema } from './platform.js';
 
 export const driverFocusMatchSchema = z.enum(['contains', 'exact']);
 export type DriverFocusMatch = z.infer<typeof driverFocusMatchSchema>;

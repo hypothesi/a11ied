@@ -1,4 +1,4 @@
-import type { DriverActionName, Platform } from '@a11ied/contracts';
+import type { Platform, PortableDriverVerb } from '@a11ied/contracts';
 import {
    commandEntries,
    getLookupValues,
@@ -31,7 +31,7 @@ export interface SerializableDriverCommand {
 export interface ResolvedDriverCommand extends SerializableDriverCommand {
    requestedCommand: string;
    command: unknown;
-   portableAction?: DriverActionName;
+   portableAction?: PortableDriverVerb;
 }
 export interface ListDriverCommandsOptions {
    target?: Platform;
@@ -127,7 +127,7 @@ function getDefaultCommandSets(target: Platform): ConcreteDriverCommandSet[] {
    if (target === 'nvda') {
       return ['portable', 'nvda-keycode'];
    }
-   return [];
+   return ['portable'];
 }
 
 function getCandidateEntries(args: {
@@ -240,6 +240,17 @@ function assertTargetSupportsCommandSet(args: {
    if (isValidCommandSetForTarget(args.target, args.commandSet)) {
       return;
    }
+   if (args.target === 'virtual') {
+      throw new DriverCommandError(
+         'driver-command-target-unsupported',
+         'The virtual target only runs the portable commands; VoiceOver and NVDA command sets need a real target.',
+         {
+            target: args.target,
+            commandSet: args.commandSet,
+            command: args.command,
+         },
+      );
+   }
    throw new DriverCommandError(
       'driver-command-set-mismatch',
       `Command set "${args.commandSet}" is not valid for target "${args.target}".`,
@@ -275,16 +286,6 @@ export function resolveDriverCommand(
       command: requestedCommand,
       commandSet: requestedSet,
    });
-   if (options.target === 'virtual') {
-      throw new DriverCommandError(
-         'driver-command-target-unsupported',
-         'Named driver commands require a real VoiceOver or NVDA target.',
-         {
-            target: options.target,
-            command: requestedCommand,
-         },
-      );
-   }
    assertTargetSupportsCommandSet({
       target: options.target,
       commandSet: parsed.commandSet,

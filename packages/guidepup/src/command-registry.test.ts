@@ -22,6 +22,22 @@ describe('driver command listing', () => {
          ]),
       );
    });
+
+   it('advertises only the portable verbs for the virtual target', () => {
+      const listed = listDriverCommands({ target: 'virtual' });
+
+      expect(listed.commandSets.map((group) => group.commandSet)).toEqual(['portable']);
+      expect(listed.commandSets[0]?.commands.map((command) => command.alias)).toEqual([
+         'next',
+         'previous',
+         'interact',
+         'stop-interacting',
+         'activate',
+         'top',
+         'bottom',
+         'escape',
+      ]);
+   });
 });
 
 describe('driver command resolution', () => {
@@ -52,6 +68,15 @@ describe('driver command resolution', () => {
             command: 'voiceover-commander:move-right',
          }),
       ).toThrow(DriverCommandError);
+   });
+
+   it('resolves portable verbs on every target through the one table', () => {
+      for (const target of ['voiceover', 'nvda', 'virtual'] as const) {
+         const resolved = resolveDriverCommand({ target, command: 'top' });
+
+         expect(resolved.portableAction).toBe('top');
+         expect(resolved.commandSet).toBe('portable');
+      }
    });
 
    it('validates command-set values', () => {

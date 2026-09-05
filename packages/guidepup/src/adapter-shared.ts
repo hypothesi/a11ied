@@ -1,35 +1,26 @@
 import {
+   driverActionNameSchema,
    driverStateSnapshotSchema,
    type DriverCapability,
    type DriverCheckpoint,
    type DriverFocusResult,
    type DriverFocusTarget,
+   type DriverPerformPayload,
    type DriverReadiness,
    type DriverStateSnapshot,
    type Platform,
+   type PortableDriverVerb,
 } from '@a11ied/contracts';
 import type { SerializableDriverCommand } from './command-registry.js';
 
 /** Lists the driver actions exposed by the shipped adapter surface. */
-export const driverCapabilities: DriverCapability[] = [
-   'start',
-   'stop',
-   'status',
-   'attach-document',
-   'focus',
-   'next',
-   'previous',
-   'key',
-   'type',
-   'perform',
-   'interact',
-   'stop-interacting',
-   'click-current-item',
-   'read',
-   'logs',
-   'clear-logs',
-   'checkpoint',
-];
+export const driverCapabilities: DriverCapability[] = [...driverActionNameSchema.options];
+
+/** Per-call options an adapter action accepts. */
+export interface DriverActionOptions {
+   /** Bounds the underlying screen reader command; adapters fall back to their defaults. */
+   timeoutMs?: number;
+}
 
 export interface DriverAdapter {
    target: Platform;
@@ -39,19 +30,16 @@ export interface DriverAdapter {
    stop(): Promise<void>;
    attachDocument(document: { html: string; url: string }): Promise<void>;
    focus(target: DriverFocusTarget): Promise<DriverFocusResult>;
-   next(): Promise<void>;
-   previous(): Promise<void>;
-   press(keys: string): Promise<void>;
-   type(text: string): Promise<void>;
-   performCommand(command: {
-      command: string;
-      commandSet?: string;
-   }): Promise<SerializableDriverCommand & { requestedCommand: string }>;
-   interact(): Promise<void>;
-   stopInteracting(): Promise<void>;
-   activateCurrentItem(): Promise<void>;
+   /** Runs one portable verb through the shared portable table. */
+   performPortable(verb: PortableDriverVerb, options?: DriverActionOptions): Promise<void>;
+   /** Presses each chord in order; one chord per array entry. */
+   press(keys: readonly string[], options?: DriverActionOptions): Promise<void>;
+   type(text: string, options?: DriverActionOptions): Promise<void>;
+   performCommand(
+      command: DriverPerformPayload,
+      options?: DriverActionOptions,
+   ): Promise<SerializableDriverCommand & { requestedCommand: string }>;
    readState(checkpoints: DriverCheckpoint[]): Promise<DriverStateSnapshot>;
-   clearLogs(checkpoints: DriverCheckpoint[]): Promise<DriverStateSnapshot>;
    /** Waits for screen reader speech to settle after an action. No-op for virtual targets. */
    waitForSpeechStabilization(): Promise<void>;
 }
