@@ -189,13 +189,25 @@ function formatClock(iso: string): string {
    return iso.slice(ISO_TIME_START, ISO_TIME_END);
 }
 
-function formatEntryLine(entry: DriverTranscriptEntry): string {
-   if (entry.checkpoint !== undefined) {
-      return `\n## ${entry.checkpoint} (${formatClock(entry.at)})\n`;
-   }
-   const item =
-      entry.itemText && entry.itemText !== entry.phrase ? ` (${entry.itemText})` : '';
-   return `${String(entry.index + 1)}. [${formatClock(entry.at)}] ${entry.phrase}${item}`;
+function pluralize(total: number, singular: string): string {
+   return `${String(total)} ${total === 1 ? singular : `${singular}s`}`;
+}
+
+/**
+ * Numbers the phrases 1, 2, 3 in the order they print. A checkpoint renders as a heading
+ * and takes no number, so the numbering never skips.
+ */
+function formatEntryLines(entries: DriverTranscriptEntry[]): string[] {
+   let number = 0;
+   return entries.map((entry) => {
+      if (entry.checkpoint !== undefined) {
+         return `\n## ${entry.checkpoint} (${formatClock(entry.at)})\n`;
+      }
+      number += 1;
+      const item =
+         entry.itemText && entry.itemText !== entry.phrase ? ` (${entry.itemText})` : '';
+      return `${String(number)}. [${formatClock(entry.at)}] ${entry.phrase}${item}`;
+   });
 }
 
 /**
@@ -212,9 +224,9 @@ export function formatTranscriptMarkdown(transcript: DriverTranscript): string {
    const lines = [
       `# Transcript: ${title}`,
       '',
-      `Started ${transcript.startedAt}. Exported ${transcript.exportedAt}. ${String(phraseCount)} phrases.`,
+      `Started ${transcript.startedAt}. Exported ${transcript.exportedAt}. ${pluralize(phraseCount, 'phrase')}.`,
       '',
-      ...transcript.entries.map(formatEntryLine),
+      ...formatEntryLines(transcript.entries),
    ];
    return `${lines.join('\n').replaceAll(/\n{3,}/gu, '\n\n')}\n`;
 }

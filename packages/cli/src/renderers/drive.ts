@@ -7,7 +7,7 @@ import {
    type DriverActionResult,
    type DriverCurrentItem,
 } from '#contracts';
-import { dim, errorLine, fields, indent, title } from '../lib/format.js';
+import { count, dim, errorLine, fields, indent, title } from '../lib/format.js';
 import { navigationEntries, structureEntries, waitEntries } from './drive-details.js';
 
 export { formatDriveCommands, renderDriveCommandsText } from './drive-commands.js';
@@ -221,7 +221,7 @@ export function renderDriveStatusText(
       ['Uptime', formatUptime(session.startedAt)],
       [
          'Transcript',
-         `${String(phrases)} phrases, ${String(state.checkpoints.length)} checkpoints`,
+         `${count(phrases, 'phrase')}, ${count(state.checkpoints.length, 'checkpoint')}`,
       ],
       ...sessionDetailEntries(session, options.verbose),
    ];
