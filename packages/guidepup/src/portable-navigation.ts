@@ -1,29 +1,27 @@
 import type {
    DriverNavigateRequest,
-   DriverNavigationDirection,
    DriverNavigationKind,
    Platform,
 } from '@a11ied/contracts';
 import { VoiceOverCommanderCommands } from '@guidepup/guidepup';
 
 import {
+   headingLevelCommandName,
+   virtualNavigationSteps,
+   type DirectionalSteps,
+} from './portable-navigation-virtual.js';
+import {
    methodStep,
    nvdaKeyCodeStep,
-   virtualCommandStep,
-   virtualRoleWalkStep,
    voiceOverCommanderStep,
    voiceOverKeyCodeStep,
    type NvdaPortableStep,
    type RepeatUntilPhraseStep,
-   type VirtualCommandName,
    type VirtualPortableStep,
    type VoiceOverPortableStep,
 } from './portable-steps.js';
 
-interface DirectionalSteps<TStep> {
-   next: TStep;
-   previous: TStep;
-}
+export { resolveVirtualNavigationStep } from './portable-navigation-virtual.js';
 
 /** One row of the navigation table: how each target jumps by one kind of element. */
 export interface NavigationKindEntry {
@@ -32,37 +30,6 @@ export interface NavigationKindEntry {
    voiceover: DirectionalSteps<VoiceOverPortableStep>;
    nvda: DirectionalSteps<NvdaPortableStep>;
    virtual: DirectionalSteps<VirtualPortableStep>;
-}
-
-/** Roles the virtual reader announces first in its phrase for each walked kind. */
-const VIRTUAL_CONTROL_ROLES = [
-   'button',
-   'checkbox',
-   'combobox',
-   'listbox',
-   'menuitem',
-   'option',
-   'radio',
-   'searchbox',
-   'slider',
-   'spinbutton',
-   'switch',
-   'tab',
-   'textbox',
-] as const;
-const VIRTUAL_FORM_FIELD_ROLES = [
-   'textbox',
-   'searchbox',
-   'combobox',
-   'spinbutton',
-] as const;
-const VIRTUAL_GRAPHIC_ROLES = ['image', 'img', 'figure'] as const;
-
-function virtualWalk(roles: readonly string[]): DirectionalSteps<VirtualPortableStep> {
-   return {
-      next: virtualRoleWalkStep('next', roles),
-      previous: virtualRoleWalkStep('previous', roles),
-   };
 }
 
 /**
@@ -77,7 +44,7 @@ export const navigationKindTable: readonly NavigationKindEntry[] = [
       description: 'Move to the next or previous item.',
       voiceover: { next: methodStep('next'), previous: methodStep('previous') },
       nvda: { next: methodStep('next'), previous: methodStep('previous') },
-      virtual: { next: methodStep('next'), previous: methodStep('previous') },
+      virtual: virtualNavigationSteps.item,
    },
    {
       kind: 'heading',
@@ -87,20 +54,14 @@ export const navigationKindTable: readonly NavigationKindEntry[] = [
          previous: methodStep('previousHeading'),
       },
       nvda: { next: methodStep('nextHeading'), previous: methodStep('previousHeading') },
-      virtual: {
-         next: virtualCommandStep('moveToNextHeading'),
-         previous: virtualCommandStep('moveToPreviousHeading'),
-      },
+      virtual: virtualNavigationSteps.heading,
    },
    {
       kind: 'link',
       description: 'Jump by link.',
       voiceover: { next: methodStep('nextLink'), previous: methodStep('previousLink') },
       nvda: { next: methodStep('nextLink'), previous: methodStep('previousLink') },
-      virtual: {
-         next: virtualCommandStep('moveToNextLink'),
-         previous: virtualCommandStep('moveToPreviousLink'),
-      },
+      virtual: virtualNavigationSteps.link,
    },
    {
       kind: 'landmark',
@@ -117,10 +78,7 @@ export const navigationKindTable: readonly NavigationKindEntry[] = [
          next: methodStep('nextLandmark'),
          previous: methodStep('previousLandmark'),
       },
-      virtual: {
-         next: virtualCommandStep('moveToNextLandmark'),
-         previous: virtualCommandStep('moveToPreviousLandmark'),
-      },
+      virtual: virtualNavigationSteps.landmark,
    },
    {
       kind: 'control',
@@ -134,7 +92,7 @@ export const navigationKindTable: readonly NavigationKindEntry[] = [
          next: nvdaKeyCodeStep('moveToNextFormField'),
          previous: nvdaKeyCodeStep('moveToPreviousFormField'),
       },
-      virtual: virtualWalk(VIRTUAL_CONTROL_ROLES),
+      virtual: virtualNavigationSteps.control,
    },
    {
       kind: 'button',
@@ -149,7 +107,7 @@ export const navigationKindTable: readonly NavigationKindEntry[] = [
          next: nvdaKeyCodeStep('moveToNextButton'),
          previous: nvdaKeyCodeStep('moveToPreviousButton'),
       },
-      virtual: virtualWalk(['button']),
+      virtual: virtualNavigationSteps.button,
    },
    {
       kind: 'table',
@@ -162,7 +120,7 @@ export const navigationKindTable: readonly NavigationKindEntry[] = [
          next: nvdaKeyCodeStep('moveToNextTable'),
          previous: nvdaKeyCodeStep('moveToPreviousTable'),
       },
-      virtual: virtualWalk(['table']),
+      virtual: virtualNavigationSteps.table,
    },
    {
       kind: 'list',
@@ -175,7 +133,7 @@ export const navigationKindTable: readonly NavigationKindEntry[] = [
          next: nvdaKeyCodeStep('moveToNextList'),
          previous: nvdaKeyCodeStep('moveToPreviousList'),
       },
-      virtual: virtualWalk(['list']),
+      virtual: virtualNavigationSteps.list,
    },
    {
       kind: 'graphic',
@@ -188,7 +146,7 @@ export const navigationKindTable: readonly NavigationKindEntry[] = [
          next: nvdaKeyCodeStep('moveToNextGraphic'),
          previous: nvdaKeyCodeStep('moveToPreviousGraphic'),
       },
-      virtual: virtualWalk(VIRTUAL_GRAPHIC_ROLES),
+      virtual: virtualNavigationSteps.graphic,
    },
    {
       kind: 'region',
@@ -204,10 +162,7 @@ export const navigationKindTable: readonly NavigationKindEntry[] = [
          next: nvdaKeyCodeStep('moveToNextLandmark'),
          previous: nvdaKeyCodeStep('moveToPreviousLandmark'),
       },
-      virtual: {
-         next: virtualCommandStep('moveToNextRegion'),
-         previous: virtualCommandStep('moveToPreviousRegion'),
-      },
+      virtual: virtualNavigationSteps.region,
    },
    {
       kind: 'form-field',
@@ -221,7 +176,7 @@ export const navigationKindTable: readonly NavigationKindEntry[] = [
          next: nvdaKeyCodeStep('moveToNextEditField'),
          previous: nvdaKeyCodeStep('moveToPreviousEditField'),
       },
-      virtual: virtualWalk(VIRTUAL_FORM_FIELD_ROLES),
+      virtual: virtualNavigationSteps['form-field'],
    },
 ];
 
@@ -232,23 +187,6 @@ export function getNavigationKindEntry(kind: DriverNavigationKind): NavigationKi
       throw new Error(`Navigation kind "${kind}" is missing from the navigation table.`);
    }
    return entry;
-}
-
-const HEADING_LEVEL_SUFFIXES = ['1', '2', '3', '4', '5', '6'] as const;
-
-type HeadingLevelCommandName =
-   `moveTo${'Next' | 'Previous'}HeadingLevel${(typeof HEADING_LEVEL_SUFFIXES)[number]}`;
-
-function headingLevelCommandName(
-   direction: DriverNavigationDirection,
-   level: number,
-): HeadingLevelCommandName {
-   const prefix = direction === 'next' ? 'moveToNext' : 'moveToPrevious';
-   const suffix = HEADING_LEVEL_SUFFIXES[level - 1];
-   if (suffix === undefined) {
-      throw new Error(`Heading level ${String(level)} is outside 1 to 6.`);
-   }
-   return `${prefix}HeadingLevel${suffix}`;
 }
 
 /**
@@ -277,20 +215,6 @@ export function resolveNvdaNavigationStep(
       return nvdaKeyCodeStep(headingLevelCommandName(request.direction, request.level));
    }
    return getNavigationKindEntry(request.kind).nvda[request.direction];
-}
-
-/** Resolves the virtual step for one move; heading levels use the per-level commands. */
-export function resolveVirtualNavigationStep(
-   request: DriverNavigateRequest,
-): VirtualPortableStep {
-   if (request.kind === 'heading' && request.level !== undefined) {
-      const command: VirtualCommandName = headingLevelCommandName(
-         request.direction,
-         request.level,
-      );
-      return virtualCommandStep(command);
-   }
-   return getNavigationKindEntry(request.kind).virtual[request.direction];
 }
 
 /** Names the reader and kind in one line for errors that say a jump is not possible. */

@@ -1,7 +1,7 @@
 import type { DriverTranscriptEntry } from '@a11ied/contracts';
 
 import { describeMatcher, matchesText, type TextMatcher } from './matcher.js';
-import { selectTranscriptEntries } from './transcript.js';
+import { selectTranscriptEntries } from './transcript-recorder.js';
 
 export interface ExpectationOptions {
    matcher: TextMatcher;

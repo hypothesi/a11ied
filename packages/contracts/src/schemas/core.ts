@@ -1,19 +1,7 @@
 import { z } from 'zod';
 import { browserAutomationPolicySchema } from './browser.js';
-import {
-   driverFocusTargetFieldsSchema,
-   driverFocusTargetSchema,
-} from './driver-focus.js';
-import {
-   driverCurrentItemSchema,
-   driverNavigationActionRequestSchemas,
-} from './driver-navigation.js';
-import {
-   driverCheckpointPayloadSchema,
-   driverPerformPayloadSchema,
-   driverPressPayloadSchema,
-   driverTypePayloadSchema,
-} from './driver-payloads.js';
+import { driverFocusTargetFieldsSchema } from './driver-focus.js';
+import { driverCurrentItemSchema } from './driver-navigation.js';
 import { platformSchema } from './platform.js';
 
 export { platformSchema, type Platform } from './platform.js';
@@ -82,12 +70,10 @@ export type CliCommand = z.infer<typeof cliCommandSchema>;
 
 export const cliCommandFamilySchema = z.enum([
    'wcag',
+   'inspect',
    'sr',
    'axe',
-   'tree',
-   'audit',
    'doctor',
-   'setup',
    'mcp',
 ]);
 export type CliCommandFamily = z.infer<typeof cliCommandFamilySchema>;
@@ -191,6 +177,13 @@ export type DriverCapability = z.infer<typeof driverCapabilitySchema>;
 export const driverModeSchema = z.enum(['broker', 'in-process']);
 export type DriverMode = z.infer<typeof driverModeSchema>;
 
+/**
+ * Where a virtual session keeps its document: a headless Chromium page driven by
+ * Playwright, where the page's own scripts run, or a jsdom document, where they do not.
+ */
+export const virtualEngineSchema = z.enum(['browser', 'jsdom']);
+export type VirtualEngine = z.infer<typeof virtualEngineSchema>;
+
 export const driverReadinessStatusSchema = z.enum([
    'ready',
    'requires-setup',
@@ -242,6 +235,8 @@ export const accessibilityDriverSessionSchema = z.object({
    /** The app or browser window the session opened, used by a bare focus action. */
    app: driverFocusTargetFieldsSchema.optional(),
    idleTimeoutMinutes: z.number().nonnegative().optional(),
+   /** The engine a virtual session runs in; absent for VoiceOver and NVDA. */
+   engine: virtualEngineSchema.optional(),
 });
 export type AccessibilityDriverSession = z.infer<typeof accessibilityDriverSessionSchema>;
 
@@ -304,32 +299,6 @@ export const driverStateSnapshotSchema = z.object({
    currentItem: driverCurrentItemSchema.optional(),
 });
 export type DriverStateSnapshot = z.infer<typeof driverStateSnapshotSchema>;
-
-/**
- * `next` and `previous` carry an optional navigation payload, so they have their own
- * variants.
- */
-const payloadFreeActionSchema = z.enum([
-   ...portableDriverVerbSchema.exclude(['next', 'previous']).options,
-   'read',
-   'transcript',
-   'title',
-]);
-
-/**
- * One action request keyed by action name. Actions that take input declare their payload
- * here so a caller cannot send the wrong shape.
- */
-export const driverActionRequestSchema = z.discriminatedUnion('action', [
-   z.object({ action: payloadFreeActionSchema }),
-   ...driverNavigationActionRequestSchemas,
-   z.object({ action: z.literal('press'), payload: driverPressPayloadSchema }),
-   z.object({ action: z.literal('type'), payload: driverTypePayloadSchema }),
-   z.object({ action: z.literal('perform'), payload: driverPerformPayloadSchema }),
-   z.object({ action: z.literal('checkpoint'), payload: driverCheckpointPayloadSchema }),
-   z.object({ action: z.literal('focus'), payload: driverFocusTargetSchema.optional() }),
-]);
-export type DriverActionRequest = z.infer<typeof driverActionRequestSchema>;
 
 export const driverActionResultSchema = z.object({
    session: accessibilityDriverSessionSchema,

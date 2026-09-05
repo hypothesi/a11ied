@@ -4,7 +4,11 @@ import { basename, dirname, resolve } from 'node:path';
 import net from 'node:net';
 import { fileURLToPath } from 'node:url';
 
-import type { AccessibilityDriverSession, Platform } from '@a11ied/contracts';
+import type {
+   AccessibilityDriverSession,
+   Platform,
+   VirtualEngine,
+} from '@a11ied/contracts';
 
 import type { BrokerRequest, BrokerResponse } from './broker-types.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
@@ -14,8 +18,11 @@ const VIRTUAL_SOCKET_TIMEOUT_MS = 2000;
 const REAL_TARGET_SOCKET_TIMEOUT_MS = 30_000;
 const REAL_TARGET_STOP_SOCKET_TIMEOUT_MS = 20_000;
 const VIRTUAL_STOP_SOCKET_TIMEOUT_MS = 7000;
+/** A page load in the browser engine, plus the reader's first read of it. */
+const ATTACH_DOCUMENT_SOCKET_TIMEOUT_MS = 30_000;
 const BROKER_POLL_DELAY_MS = 100;
-const DEFAULT_BROKER_READY_TIMEOUT_MS = 5000;
+/** Covers a Chromium launch for the browser engine on a loaded machine. */
+const DEFAULT_BROKER_READY_TIMEOUT_MS = 15_000;
 const REAL_TARGET_BROKER_READY_TIMEOUT_MS = 15_000;
 /** Extra time the reply gets on top of a caller-supplied command timeout. */
 const BROKER_RESPONSE_GRACE_MS = 6000;
@@ -111,6 +118,9 @@ export function resolveBrokerSocketTimeoutMs(
    const isReal = target === 'voiceover' || target === 'nvda';
    if (request.command === 'stop') {
       return isReal ? REAL_TARGET_STOP_SOCKET_TIMEOUT_MS : VIRTUAL_STOP_SOCKET_TIMEOUT_MS;
+   }
+   if (request.command === 'attach-document') {
+      return ATTACH_DOCUMENT_SOCKET_TIMEOUT_MS;
    }
    const base = isReal ? REAL_TARGET_SOCKET_TIMEOUT_MS : VIRTUAL_SOCKET_TIMEOUT_MS;
    const max = readPayloadMax(request.payload);
@@ -257,6 +267,7 @@ export interface BrokerSpawnOptions {
    recordingPath?: string | undefined;
    url?: string | undefined;
    app?: AccessibilityDriverSession['app'] | undefined;
+   engine?: VirtualEngine | undefined;
 }
 
 function getBaseSpawnArgs(entry: string): string[] {
@@ -288,6 +299,9 @@ function brokerSpawnArgs(options: BrokerSpawnOptions): string[] {
    }
    if (options.app) {
       args.push('--app', JSON.stringify(options.app));
+   }
+   if (options.engine) {
+      args.push('--engine', options.engine);
    }
    return args;
 }

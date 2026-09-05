@@ -10,7 +10,8 @@ import {
    resolveBrokerSocketTimeoutMs,
 } from './broker-client.js';
 
-const DEFAULT_READY_TIMEOUT_MS = 5000;
+/** Covers a Chromium launch for the browser engine. */
+const DEFAULT_READY_TIMEOUT_MS = 15_000;
 const REAL_TARGET_READY_TIMEOUT_MS = 15_000;
 const VIRTUAL_SOCKET_TIMEOUT_MS = 2000;
 const VIRTUAL_STOP_SOCKET_TIMEOUT_MS = 7000;
@@ -46,7 +47,7 @@ describe('broker entry lookup', () => {
 });
 
 describe('broker startup timing', () => {
-   it('keeps the short timeout for virtual sessions', () => {
+   it('gives a virtual session time to launch a headless browser', () => {
       expect(resolveBrokerReadyTimeoutMs('virtual')).toBe(DEFAULT_READY_TIMEOUT_MS);
    });
 

@@ -1,4 +1,4 @@
-export { createDriverAdapter } from './adapters.js';
+export { createDriverAdapter, type CreateDriverAdapterOptions } from './adapters.js';
 export {
    driverCapabilities,
    type DriverActionOptions,
@@ -53,3 +53,21 @@ export {
    type FrontmostWindow,
    type WindowFocusResult,
 } from './window-focus.js';
+export {
+   createVirtualAdapter,
+   defaultVirtualDocument,
+   type VirtualAdapterOptions,
+   type VirtualCommandResolution,
+   type VirtualCommandResolver,
+} from './virtual-adapter.js';
+export { createJsdomVirtualHost } from './virtual-dom.js';
+export type { VirtualHost } from './virtual-host.js';
+export { readVirtualPageScript } from './virtual-page-script.js';
+export type { VirtualReader, VirtualWindow } from './virtual-reader.js';
+export {
+   createVirtualRuntime,
+   type VirtualCurrentItem,
+   type VirtualRuntime,
+   type VirtualRuntimeOptions,
+   type VirtualSpeech,
+} from './virtual-runtime.js';

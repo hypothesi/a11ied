@@ -4,9 +4,11 @@ import { dirname } from 'node:path';
 import {
    driverFocusTargetFieldsSchema,
    platformSchema,
+   virtualEngineSchema,
    type AccessibilityDriverSession,
    type Platform,
    type SessionRecording,
+   type VirtualEngine,
 } from '@a11ied/contracts';
 import { createDriverAdapter, ignoreError, type DriverAdapter } from '@a11ied/guidepup';
 
@@ -27,6 +29,7 @@ interface BrokerArgs {
    recordingPath?: string;
    url?: string;
    app?: AccessibilityDriverSession['app'];
+   engine?: VirtualEngine;
 }
 
 interface BrokerState {
@@ -83,6 +86,10 @@ function parseArgs(argv: string[]): BrokerArgs {
    const app = parseApp(values.get('--app'));
    if (app) {
       args.app = app;
+   }
+   const engine = values.get('--engine');
+   if (engine) {
+      args.engine = virtualEngineSchema.parse(engine);
    }
    return args;
 }

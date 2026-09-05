@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { driverActionRequestSchema } from './core.js';
+import { driverActionRequestSchema } from './driver-actions.js';
 
 /** A batch line that checks the transcript instead of driving the reader. */
 export const driverBatchExpectStepSchema = z.object({

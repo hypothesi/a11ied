@@ -1,22 +1,16 @@
 import { copyFile, mkdir, rename, unlink } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
-import type { Platform } from '@a11ied/contracts';
-
-import { DriverCommandError } from './command-registry.js';
 import {
    buildCommandOptions,
    REAL_TARGET_INPUT_TIMEOUT_MS,
    type RealStepContext,
 } from './real-steps.js';
+import { createScreenshotUnsupportedError } from './screenshot-unsupported.js';
+
+export { createScreenshotUnsupportedError } from './screenshot-unsupported.js';
 
 const SCREENSHOT_SOURCE = 'VoiceOver cursor screenshot (VoiceOver "grab screenshot")';
-
-const NO_SCREENSHOT_REASON: Record<Exclude<Platform, 'voiceover'>, string> = {
-   nvda: 'NVDA has no cursor screenshot command. Record the session with sr start --recording instead.',
-   virtual:
-      'The virtual reader has no screen to capture. Screenshots need a VoiceOver session.',
-};
 
 interface CursorScreenshotReader {
    takeCursorScreenshot(options?: { timeout: number; retries: number }): Promise<string>;
@@ -32,16 +26,6 @@ function canTakeCursorScreenshot(reader: unknown): reader is CursorScreenshotRea
 }
 
 /** The error every target without a cursor screenshot throws, naming the target. */
-export function createScreenshotUnsupportedError(
-   target: Exclude<Platform, 'voiceover'>,
-): DriverCommandError {
-   return new DriverCommandError(
-      'driver-screenshot-unsupported',
-      `sr screenshot is not available on ${target}. ${NO_SCREENSHOT_REASON[target]}`,
-      { target },
-   );
-}
-
 async function moveFile(from: string, to: string): Promise<void> {
    await mkdir(dirname(to), { recursive: true });
    try {

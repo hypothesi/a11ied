@@ -1,9 +1,10 @@
 import type {
    AccessibilityDriverSession,
-   DriverActionRequest,
+   DriverActionRequestInput,
    DriverActionResult,
    DriverMode,
    Platform,
+   VirtualEngine,
 } from '@a11ied/contracts';
 
 import {
@@ -57,6 +58,12 @@ export interface StartDriverSessionOptions {
    idleTimeoutMinutes?: number | undefined;
    /** Bounds how long to wait for the broker to come up. */
    timeoutMs?: number | undefined;
+   /**
+    * Where a virtual session runs. Without it, a session with an http(s) URL uses the
+    * browser when Chromium launches and jsdom otherwise; a session without a URL uses
+    * jsdom.
+    */
+   engine?: VirtualEngine | undefined;
 }
 
 export interface DriverSessionStart {
@@ -137,6 +144,7 @@ async function launchSession(
       url: options.url,
       app: options.app,
       idleTimeoutMinutes,
+      engine: options.engine,
    };
    if ((options.mode ?? resolveDriverMode()) === 'in-process') {
       return startInProcessSession(shared);
@@ -225,7 +233,7 @@ export async function attachDocumentToDriverSession(
 
 /** Runs one typed action against the active session. */
 export async function runDriverSessionAction(
-   request: DriverActionRequest,
+   request: DriverActionRequestInput,
    options: DriverRequestOptions = {},
 ): Promise<DriverActionResult> {
    const session = await requireActiveSession();
@@ -243,7 +251,7 @@ export async function runDriverSessionAction(
 
 export interface EphemeralDriverActionOptions extends DriverRequestOptions {
    target?: Platform;
-   request: DriverActionRequest;
+   request: DriverActionRequestInput;
    recordingPath?: string | undefined;
 }
 

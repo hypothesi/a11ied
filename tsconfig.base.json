@@ -3,7 +3,7 @@
       "target": "ES2023",
       "module": "NodeNext",
       "moduleResolution": "NodeNext",
-      "lib": ["ES2023"],
+      "lib": ["ES2023", "ESNext.Disposable"],
       "strict": true,
       "types": ["node"],
       "noUncheckedIndexedAccess": true,
@@ -27,6 +27,7 @@
          "@a11ied/contracts": ["packages/contracts/src/index.ts"],
          "@a11ied/core": ["packages/core/src/index.ts"],
          "@a11ied/guidepup": ["packages/guidepup/src/index.ts"],
+         "@a11ied/guidepup/browser": ["packages/guidepup/src/browser.ts"],
          "@a11ied/mcp-server": ["packages/mcp-server/src/index.ts"],
          "@a11ied/wcag-engine": ["packages/wcag-engine/src/index.ts"],
          "@a11ied/wcag-data": ["packages/wcag-data/src/index.ts"]

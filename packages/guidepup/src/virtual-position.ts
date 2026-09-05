@@ -1,4 +1,4 @@
-import type { VirtualReader } from './virtual-dom.js';
+import type { VirtualReader } from './virtual-reader.js';
 
 /**
  * Stable ids for DOM nodes the cursor has visited, so two reads of the same node compare

@@ -4,13 +4,15 @@ import {
    type DriverCheckpoint,
    type Platform,
    type SessionRecording,
+   type VirtualEngine,
 } from '@a11ied/contracts';
 import { createDriverAdapter, type DriverAdapter } from '@a11ied/guidepup';
 
 import type { BrokerHandlerContext } from './broker-types.js';
 import type { ActiveSessionRecording } from './recording.js';
 import { writeSessionMetadata } from './session-utils.js';
-import { TranscriptRecorder } from './transcript.js';
+import { TranscriptRecorder } from './transcript-recorder.js';
+import { createVirtualHost } from './virtual-host-choice.js';
 
 export interface SessionContextOptions {
    target: Platform;
@@ -23,12 +25,31 @@ export interface SessionContextOptions {
    url?: string | undefined;
    app?: AccessibilityDriverSession['app'] | undefined;
    idleTimeoutMinutes?: number | undefined;
+   /** Where a virtual session runs; picked from the URL and the host when absent. */
+   engine?: VirtualEngine | undefined;
+}
+
+/** The adapter for the target, and for virtual the engine its document ended up in. */
+async function createSessionAdapter(
+   options: SessionContextOptions,
+): Promise<{ adapter: DriverAdapter; engine: VirtualEngine | undefined }> {
+   if (options.target !== 'virtual') {
+      return { adapter: createDriverAdapter(options.target), engine: undefined };
+   }
+   const virtualHost = await createVirtualHost({
+      engine: options.engine,
+      url: options.url,
+   });
+   return {
+      adapter: createDriverAdapter('virtual', { virtualHost }),
+      engine: virtualHost.engine,
+   };
 }
 
 function buildSessionRecord(
    options: SessionContextOptions,
    adapter: DriverAdapter,
-   logCursor: number,
+   state: { logCursor: number; engine: VirtualEngine | undefined },
 ): AccessibilityDriverSession {
    return accessibilityDriverSessionSchema.parse({
       sessionId: options.sessionId,
@@ -36,7 +57,7 @@ function buildSessionRecord(
       targetType: options.target === 'virtual' ? 'simulated' : 'real',
       startedAt: new Date().toISOString(),
       capabilities: adapter.capabilities,
-      logCursor,
+      logCursor: state.logCursor,
       brokerPid: process.pid,
       socketPath: options.socketPath,
       metadataFile: options.metadataFile,
@@ -44,6 +65,7 @@ function buildSessionRecord(
       url: options.url,
       app: options.app,
       idleTimeoutMinutes: options.idleTimeoutMinutes,
+      engine: state.engine,
    });
 }
 
@@ -58,7 +80,7 @@ async function noopWriteMetadata(): Promise<void> {
 export async function createDriverSessionContext(
    options: SessionContextOptions,
 ): Promise<{ adapter: DriverAdapter; context: BrokerHandlerContext }> {
-   const adapter = createDriverAdapter(options.target),
+   const { adapter, engine } = await createSessionAdapter(options),
       checkpoints: DriverCheckpoint[] = [],
       transcript = new TranscriptRecorder();
    let recording = options.recording;
@@ -67,7 +89,10 @@ export async function createDriverSessionContext(
    transcript.capture(initialState);
    const context: BrokerHandlerContext = {
       adapter,
-      session: buildSessionRecord(options, adapter, initialState.logCursor),
+      session: buildSessionRecord(options, adapter, {
+         logCursor: initialState.logCursor,
+         engine,
+      }),
       checkpoints,
       transcript,
       writeMetadata: options.persist ? writeSessionMetadata : noopWriteMetadata,

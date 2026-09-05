@@ -1,15 +1,15 @@
 import type { DriverNavigateRequest } from '@a11ied/contracts';
 
 import { normalizeDriverKeys } from './key-aliases.js';
-import { resolveVirtualNavigationStep } from './portable-navigation.js';
+import { resolveVirtualNavigationStep } from './portable-navigation-virtual.js';
 import type {
    MethodStep,
    VirtualPortableStep,
    VirtualRoleWalkStep,
 } from './portable-steps.js';
 import { repeatTimes, repeatUntil, runInOrder } from './sequential.js';
-import type { VirtualReader } from './virtual-dom.js';
 import { getVirtualPhraseRole, getVirtualPositionToken } from './virtual-position.js';
+import type { VirtualReader, VirtualWindow } from './virtual-reader.js';
 
 /**
  * The virtual reader wraps at both ends, so a walk to an edge is bounded by this many
@@ -21,6 +21,8 @@ export interface VirtualStepContext {
    virtual: VirtualReader;
    /** The body the reader was started on; undefined before the first document attaches. */
    container: Node | undefined;
+   /** The window that holds the document, for reads that need more than the cursor node. */
+   window: VirtualWindow;
 }
 
 /** What one virtual move reports back: whether the cursor ended somewhere new. */

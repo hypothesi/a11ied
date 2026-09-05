@@ -18,6 +18,10 @@ export default defineConfig({
             'packages/contracts/src/index.ts',
          ),
          '@a11ied/core': resolve(import.meta.dirname, 'packages/core/src/index.ts'),
+         '@a11ied/guidepup/browser': resolve(
+            import.meta.dirname,
+            'packages/guidepup/src/browser.ts',
+         ),
          '@a11ied/guidepup': resolve(
             import.meta.dirname,
             'packages/guidepup/src/index.ts',
@@ -45,6 +49,7 @@ export default defineConfig({
       },
       environment: 'node',
       include: ['packages/*/src/**/*.test.ts'],
+      exclude: ['**/node_modules/**', '**/*.browser.test.ts'],
       server: {
          deps: {
             inline: [/^@a11ied\//, /^#(contracts|core|mcp-server)$/],

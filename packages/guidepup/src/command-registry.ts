@@ -3,6 +3,7 @@ import type {
    Platform,
    PortableDriverVerb,
 } from '@a11ied/contracts';
+import { DriverCommandError } from './driver-command-error.js';
 import {
    commandEntries,
    getLookupValues,
@@ -11,6 +12,8 @@ import {
    serializeCommand,
    type DriverCommandEntry,
 } from './command-registry-data.js';
+
+export { DriverCommandError } from './driver-command-error.js';
 
 const SUGGESTION_LIMIT = 8;
 
@@ -55,16 +58,6 @@ export interface ResolveDriverCommandOptions {
    target: Platform;
    command: string;
    commandSet?: DriverCommandSet;
-}
-export class DriverCommandError extends Error {
-   readonly code: string;
-   readonly details: Record<string, unknown>;
-   constructor(code: string, message: string, details: Record<string, unknown>) {
-      super(message);
-      this.name = 'DriverCommandError';
-      this.code = code;
-      this.details = details;
-   }
 }
 export function isDriverCommandSet(value: string): value is DriverCommandSet {
    return driverCommandSets.includes(value as DriverCommandSet);

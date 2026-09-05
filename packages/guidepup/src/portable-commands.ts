@@ -1,6 +1,7 @@
 import type { PortableDriverVerb } from '@a11ied/contracts';
 import { NVDAKeyCodeCommands, voiceOverKeyCodeCommands } from '@guidepup/guidepup';
 
+import { virtualPortableSteps } from './portable-commands-virtual.js';
 import {
    methodStep,
    pressStep,
@@ -37,56 +38,56 @@ export const portableCommandTable: readonly PortableCommandEntry[] = [
       description: 'Move to the next item.',
       voiceover: methodStep('next'),
       nvda: methodStep('next'),
-      virtual: methodStep('next'),
+      virtual: virtualPortableSteps.next,
    },
    {
       verb: 'previous',
       description: 'Move to the previous item.',
       voiceover: methodStep('previous'),
       nvda: methodStep('previous'),
-      virtual: methodStep('previous'),
+      virtual: virtualPortableSteps.previous,
    },
    {
       verb: 'interact',
       description: 'Enter interaction mode for the current group or control.',
       voiceover: methodStep('interact'),
       nvda: methodStep('interact'),
-      virtual: methodStep('interact'),
+      virtual: virtualPortableSteps.interact,
    },
    {
       verb: 'stop-interacting',
       description: 'Leave interaction mode.',
       voiceover: methodStep('stopInteracting'),
       nvda: methodStep('stopInteracting'),
-      virtual: methodStep('stopInteracting'),
+      virtual: virtualPortableSteps['stop-interacting'],
    },
    {
       verb: 'activate',
       description: 'Activate the current item.',
       voiceover: methodStep('act'),
       nvda: methodStep('act'),
-      virtual: methodStep('act'),
+      virtual: virtualPortableSteps.activate,
    },
    {
       verb: 'top',
       description: 'Move to the top of the current area or document.',
       voiceover: { kind: 'keycode', command: 'moveToAreaTop' },
       nvda: pressStep('Control+Home'),
-      virtual: { kind: 'walk', edge: 'top' },
+      virtual: virtualPortableSteps.top,
    },
    {
       verb: 'bottom',
       description: 'Move to the bottom of the current area or document.',
       voiceover: { kind: 'keycode', command: 'moveToAreaBottom' },
       nvda: pressStep('Control+End'),
-      virtual: { kind: 'walk', edge: 'bottom' },
+      virtual: virtualPortableSteps.bottom,
    },
    {
       verb: 'escape',
       description: 'Press Escape to dismiss a menu, dialog, or interaction.',
       voiceover: pressStep('Escape'),
       nvda: pressStep('Escape'),
-      virtual: pressStep('Escape'),
+      virtual: virtualPortableSteps.escape,
    },
 ];
 

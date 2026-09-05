@@ -79,9 +79,19 @@ function sessionDetailEntries(
    ];
 }
 
+function formatEngine(engine: AccessibilityDriverSession['engine']): string {
+   if (engine === 'browser') {
+      return 'browser (a headless Chromium page; the page scripts run)';
+   }
+   return 'jsdom (an in-memory document; the page scripts do not run)';
+}
+
 function sessionSummaryEntries(session: AccessibilityDriverSession): Entry[] {
    return [
       ['Target', target(session.target)],
+      ...(session.engine === undefined
+         ? []
+         : [['Engine', formatEngine(session.engine)] satisfies Entry]),
       ['URL', session.url ?? dim('none')],
       ['Recording', formatRecording(session.recording)],
       ['Idle timeout', formatIdleTimeout(session.idleTimeoutMinutes)],

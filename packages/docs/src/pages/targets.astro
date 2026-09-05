@@ -40,9 +40,11 @@ const toc = [
          <div class="route-row">
             <code>virtual</code>
             <span>
-               Any platform. Runs Guidepup's virtual screen reader against a document loaded from a
-               URL. No browser window, no recording. <code>targetType</code> is
-               <code>simulated</code>.
+               Any platform. Runs Guidepup's virtual screen reader inside a headless Chromium page
+               when the session opens a URL and a Chromium-family browser is installed, and inside a
+               jsdom document otherwise. No window on screen, no recording. <code>targetType</code>
+               is <code>simulated</code>, and <code>engine</code> is <code>browser</code> or
+               <code>jsdom</code>.
             </span>
          </div>
       </div>
@@ -92,10 +94,20 @@ const toc = [
       </p>
       <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout --json</code></pre>
       <p>
-         Pass the URL so the reader has a page to read. a11ied fetches the document and loads it
-         into the simulator, so nothing needs to be open on screen. Without a URL the session
-         starts against an empty document. Needing no window is what makes this target usable in
-         CI and in fast local loops.
+         Pass the URL so the reader has a page to read. Nothing opens on screen: the session loads
+         the page in a headless Chromium page and injects the virtual reader into it, so the page's
+         own scripts run and a live region a script fills or a dialog a click opens is announced.
+         <code>a1 sr status</code> reports the engine, and so does <code>session.engine</code> in
+         every JSON result. Chrome, Edge, Brave, or Chromium on the machine is used first, then
+         Playwright's Chromium from <code>npx playwright install chromium</code>.
+      </p>
+      <p>
+         Two cases use jsdom instead, an in-memory document where page scripts do not run: a
+         session started without a URL, which reads a placeholder document until
+         <code>sr open</code>, and a machine with no Chromium-family browser, where the session
+         falls back and reports <code>engine: "jsdom"</code>. Inline HTML passed to the test API
+         renders in jsdom too. Needing no window is what makes this target usable in CI and in
+         fast local loops.
       </p>
       <p>
          MCP clients pass the same two fields: <code>target: "virtual"</code> and

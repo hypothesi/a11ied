@@ -1,5 +1,5 @@
 import type {
-   DriverActionRequest,
+   DriverActionRequestInput,
    DriverActionResult,
    Platform,
 } from '@a11ied/contracts';
@@ -14,7 +14,7 @@ import { createSessionId } from './session-utils.js';
 
 export interface EphemeralActionOptions {
    target: Platform;
-   request: DriverActionRequest;
+   request: DriverActionRequestInput;
    recordingPath?: string | undefined;
    timeoutMs?: number | undefined;
 }

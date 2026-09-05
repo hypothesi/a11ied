@@ -1,7 +1,7 @@
 import type { DriverCurrentItem } from '@a11ied/contracts';
 import { computeAccessibleName, getRole, isDisabled } from 'dom-accessibility-api';
 
-import type { VirtualReader } from './virtual-dom.js';
+import type { VirtualReader } from './virtual-reader.js';
 import { getVirtualPhraseRole } from './virtual-position.js';
 
 const VIRTUAL_ITEM_SOURCE =

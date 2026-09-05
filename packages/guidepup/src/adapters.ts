@@ -51,7 +51,12 @@ import { findRealText, moveInRealTable, readRealTitle } from './real-structure.j
 import { captureVoiceOverCursorScreenshot } from './screenshot.js';
 import { ignoreError } from './sequential.js';
 import { waitForSpeechStabilization } from './speech.js';
-import { createVirtualAdapter } from './virtual-adapter.js';
+import {
+   createVirtualAdapter,
+   type VirtualCommandResolution,
+} from './virtual-adapter.js';
+import { createJsdomVirtualHost } from './virtual-dom.js';
+import type { VirtualHost } from './virtual-host.js';
 
 class RealScreenReaderAdapter implements DriverAdapter {
    readonly capabilities = driverCapabilities;
@@ -219,10 +224,43 @@ class RealScreenReaderAdapter implements DriverAdapter {
    }
 }
 
+/** Resolves `sr do <name>` for the virtual target through the shared command registry. */
+function resolveVirtualCommand(command: DriverPerformPayload): VirtualCommandResolution {
+   let commandSet: DriverCommandSet = 'auto';
+   if (command.commandSet) {
+      commandSet = parseDriverCommandSet(command.commandSet);
+   }
+   const resolved = resolveDriverCommand({
+      target: 'virtual',
+      command: command.command,
+      commandSet,
+   });
+   const resolution: VirtualCommandResolution = {
+      command: serializeResolvedDriverCommand(resolved),
+   };
+   if (resolved.portableNavigation) {
+      resolution.navigation = resolved.portableNavigation;
+   }
+   if (resolved.portableAction) {
+      resolution.verb = resolved.portableAction;
+   }
+   return resolution;
+}
+
+export interface CreateDriverAdapterOptions {
+   /** Where a virtual session runs; defaults to a jsdom document in this process. */
+   virtualHost?: VirtualHost | undefined;
+}
+
 /** Creates the adapter for one supported driver target. */
-export function createDriverAdapter(target: Platform): DriverAdapter {
+export function createDriverAdapter(
+   target: Platform,
+   options: CreateDriverAdapterOptions = {},
+): DriverAdapter {
    if (target === 'virtual') {
-      return createVirtualAdapter();
+      return createVirtualAdapter(options.virtualHost ?? createJsdomVirtualHost(), {
+         resolveCommand: resolveVirtualCommand,
+      });
    }
    if (target === 'voiceover') {
       return new RealScreenReaderAdapter('voiceover', voiceOver);

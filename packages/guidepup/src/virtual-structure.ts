@@ -1,14 +1,16 @@
 import type { DriverTableMove } from '@a11ied/contracts';
 
-import { DriverCommandError } from './command-registry.js';
-import { getVirtualDocumentTitle } from './virtual-dom.js';
+import { DriverCommandError } from './driver-command-error.js';
 import { walkVirtualUntil, type VirtualStepContext } from './virtual-steps.js';
 
 const VIRTUAL_TITLE_SOURCE = 'virtual: document.title';
 
 /** The document title of the attached page. */
-export function readVirtualTitle(): { title: string; source: string } {
-   return { title: getVirtualDocumentTitle(), source: VIRTUAL_TITLE_SOURCE };
+export function readVirtualTitle(context: VirtualStepContext): {
+   title: string;
+   source: string;
+} {
+   return { title: context.window.document.title, source: VIRTUAL_TITLE_SOURCE };
 }
 
 function containsText(wanted: string, phrase: string, node: Node | null): boolean {

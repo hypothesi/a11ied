@@ -1,10 +1,14 @@
 import type * as VirtualScreenReader from '@guidepup/virtual-screen-reader';
 import { JSDOM, type DOMWindow } from 'jsdom';
 
-type VirtualModule = typeof VirtualScreenReader;
-export type VirtualReader = VirtualModule['virtual'];
+import type { VirtualHost } from './virtual-host.js';
+import type { VirtualReader } from './virtual-reader.js';
+import { createVirtualRuntime } from './virtual-runtime.js';
 
-const PLACEHOLDER_URL = 'https://a11ied.local/virtual';
+type VirtualModule = typeof VirtualScreenReader;
+
+/** Not an http(s) URL on purpose: the browser host renders the HTML instead of navigating. */
+const PLACEHOLDER_URL = 'about:a11ied-virtual';
 
 /**
  * One JSDOM per process. The virtual reader presses keys through user-event, which
@@ -44,16 +48,8 @@ export async function loadVirtualReader(): Promise<VirtualReader> {
    return loaded.virtual;
 }
 
-/** The title of the document the virtual reader is attached to. */
-export function getVirtualDocumentTitle(): string {
-   return getDom().window.document.title;
-}
-
-/** Replaces the document's content and URL in place and returns the shared window. */
-export function replaceVirtualDocument(document: {
-   html: string;
-   url: string;
-}): DOMWindow {
+/** Replaces the document's content and URL in place. */
+function replaceVirtualDocument(document: { html: string; url: string }): void {
    const current = getDom();
    const { window } = current;
    current.reconfigure({ url: document.url });
@@ -62,5 +58,26 @@ export function replaceVirtualDocument(document: {
       window.document.importNode(parsed.documentElement, true),
       window.document.documentElement,
    );
-   return window;
+}
+
+/**
+ * The jsdom host: the reader runs in this process against a parsed document. Page scripts
+ * do not run, so a live region a script fills or a dialog a click opens never announces
+ * here. Used for inline HTML and when no Chromium is available.
+ */
+export function createJsdomVirtualHost(): VirtualHost {
+   const runtime = createVirtualRuntime({
+      getVirtual: loadVirtualReader,
+      getWindow: () => getDom().window,
+   });
+   return {
+      ...runtime,
+      engine: 'jsdom',
+      async attachDocument(document): Promise<void> {
+         await runtime.stop();
+         replaceVirtualDocument(document);
+         await runtime.start();
+      },
+      dispose: runtime.stop,
+   };
 }

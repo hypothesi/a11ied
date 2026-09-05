@@ -1,4 +1,8 @@
-import type { AccessibilityDriverSession, Platform } from '@a11ied/contracts';
+import type {
+   AccessibilityDriverSession,
+   Platform,
+   VirtualEngine,
+} from '@a11ied/contracts';
 import { ignoreError, type DriverAdapter } from '@a11ied/guidepup';
 
 import { handleBrokerRequest } from './broker-handlers.js';
@@ -31,6 +35,7 @@ export interface InProcessStartOptions {
    url?: string | undefined;
    app?: AccessibilityDriverSession['app'] | undefined;
    idleTimeoutMinutes?: number | undefined;
+   engine?: VirtualEngine | undefined;
 }
 
 /** Starts a session whose adapter and transcript live in the calling process. */

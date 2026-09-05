@@ -43,7 +43,11 @@ a1 sr start --sr voiceover --browser Safari http://localhost:3000/checkout</code
             page. The session focuses the app by name and waits for it to come to the front.
          </p>
          <pre><code>a1 sr start --sr voiceover --app Calendar</code></pre>
-         <p>For the virtual reader, a11ied loads the document into an in-memory DOM.</p>
+         <p>
+            For the virtual reader, a11ied loads the URL in a headless Chromium page and runs the
+            reader inside it; see <a href="/targets#virtual">targets</a> for when it falls back to
+            jsdom.
+         </p>
          <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout --json</code></pre>
          <p>
             One session is active at a time. Every later <code>sr</code> command uses it, and no
@@ -55,9 +59,10 @@ a1 sr start --sr voiceover --browser Safari http://localhost:3000/checkout</code
       <div class="split-aside">
          <div class="tag">The virtual reader</div>
          <p class="aside-note">
-            The virtual reader parses the page's HTML. Its scripts do not run, so a live region
-            that a script fills, or a dialog a click opens, only announces on VoiceOver and NVDA.
-            Use it for structure, names, order, and states that are in the markup.
+            With the <code>browser</code> engine the page's scripts run, so a live region that a
+            script fills, or a dialog a click opens, is announced. With the <code>jsdom</code>
+            engine, used when no Chromium is installed, only what is in the markup is announced.
+            <code>a1 sr status</code> names the engine.
          </p>
       </div>
    </section>

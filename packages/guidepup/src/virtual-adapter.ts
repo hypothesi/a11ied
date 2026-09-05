@@ -1,48 +1,25 @@
 import {
    driverFocusResultSchema,
    driverReadinessSchema,
+   driverStateSnapshotSchema,
    type DriverCheckpoint,
-   type DriverCurrentItem,
    type DriverFocusTarget,
    type DriverNavigateRequest,
    type DriverPerformPayload,
    type DriverReadiness,
    type DriverStateSnapshot,
-   type DriverTableMove,
    type PortableDriverVerb,
 } from '@a11ied/contracts';
 
-import {
-   buildStateSnapshot,
-   driverCapabilities,
-   type DriverAdapter,
-} from './adapter-shared.js';
-import {
-   parseDriverCommandSet,
-   resolveDriverCommand,
-   serializeResolvedDriverCommand,
-   type DriverCommandSet,
-} from './command-registry.js';
-import { getPortableCommand } from './portable-commands.js';
-import { createScreenshotUnsupportedError } from './screenshot.js';
-import { ignoreError } from './sequential.js';
-import { loadVirtualReader, replaceVirtualDocument } from './virtual-dom.js';
-import { readVirtualItem } from './virtual-item.js';
-import { getVirtualPositionToken } from './virtual-position.js';
-import {
-   isAtTreeEnd,
-   pressVirtualKeys,
-   runVirtualNavigation,
-   runVirtualStep,
-   type VirtualStepContext,
-} from './virtual-steps.js';
-import {
-   findVirtualText,
-   moveInVirtualTable,
-   readVirtualTitle,
-} from './virtual-structure.js';
+import { driverCapabilities, type DriverAdapter } from './adapter-shared.js';
+import type { SerializableDriverCommand } from './command-registry.js';
+import { DriverCommandError } from './driver-command-error.js';
+import { createScreenshotUnsupportedError } from './screenshot-unsupported.js';
+import type { VirtualHost } from './virtual-host.js';
 
-const defaultVirtualHtml = `
+/** The document a virtual session reads before a page is attached. */
+export const defaultVirtualDocument = {
+   html: `
 <!doctype html>
 <html lang="en">
   <body>
@@ -53,11 +30,28 @@ const defaultVirtualHtml = `
     </main>
   </body>
 </html>
-`;
+`,
+   url: 'about:a11ied-virtual',
+};
 
-/** The one piece of state an adapter keeps: the body the reader was started on. */
-interface VirtualAdapterState {
-   container: Node | undefined;
+/** What a named command resolved to: its description plus the portable step to run. */
+export interface VirtualCommandResolution {
+   command: SerializableDriverCommand & { requestedCommand: string };
+   navigation?: DriverNavigateRequest;
+   verb?: PortableDriverVerb;
+}
+
+/**
+ * Resolves `sr do <name>` for the virtual target. The Node adapter passes the command
+ * registry. The browser runner passes nothing, because the registry imports Guidepup's
+ * Node-only command tables.
+ */
+export type VirtualCommandResolver = (
+   command: DriverPerformPayload,
+) => VirtualCommandResolution;
+
+export interface VirtualAdapterOptions {
+   resolveCommand?: VirtualCommandResolver | undefined;
 }
 
 async function virtualCheckReadiness(): Promise<DriverReadiness> {
@@ -65,15 +59,29 @@ async function virtualCheckReadiness(): Promise<DriverReadiness> {
       target: 'virtual',
       status: 'ready',
       summary: 'Virtual screen reader is ready.',
-      details: ['Uses an in-memory DOM when no live page is attached.'],
+      details: [
+         'Runs the page in a headless Chromium when one is installed, and in an in-memory DOM otherwise.',
+      ],
    });
 }
 
 async function virtualReadState(
+   host: VirtualHost,
    checkpoints: DriverCheckpoint[],
 ): Promise<DriverStateSnapshot> {
-   const virtual = await loadVirtualReader();
-   return buildStateSnapshot(virtual, checkpoints, () => readVirtualItem(virtual));
+   const [speech, current] = await Promise.all([
+      host.readSpeech(),
+      host.readCurrentItem(),
+   ]);
+   return driverStateSnapshotSchema.parse({
+      lastSpokenPhrase: speech.lastSpokenPhrase || undefined,
+      currentItemText: speech.itemText || undefined,
+      spokenPhraseLog: speech.spokenPhraseLog,
+      itemTextLog: speech.itemTextLog,
+      logCursor: speech.spokenPhraseLog.length,
+      checkpoints,
+      currentItem: current.item,
+   });
 }
 
 async function virtualFocus(
@@ -87,117 +95,60 @@ async function virtualFocus(
    });
 }
 
-async function virtualPress(keys: readonly string[]): Promise<void> {
-   await pressVirtualKeys(await loadVirtualReader(), keys);
-}
-
-async function virtualType(text: string): Promise<void> {
-   const virtual = await loadVirtualReader();
-   await virtual.type(text);
-}
-
 async function virtualWaitForSpeech(): Promise<void> {
    // The virtual screen reader speaks synchronously, so there is nothing to wait for.
 }
 
-async function stepContext(state: VirtualAdapterState): Promise<VirtualStepContext> {
-   return { virtual: await loadVirtualReader(), container: state.container };
-}
-
-async function virtualReadCurrentItem(state: VirtualAdapterState): Promise<{
-   item: DriverCurrentItem;
-   position: string;
-   atEnd: boolean;
-}> {
-   const context = await stepContext(state);
-   const [item, position, atEnd] = await Promise.all([
-      readVirtualItem(context.virtual),
-      getVirtualPositionToken(context.virtual),
-      isAtTreeEnd(context),
-   ]);
-   return { item, position, atEnd };
-}
-
-async function stopVirtual(state: VirtualAdapterState): Promise<void> {
-   const virtual = await loadVirtualReader();
-   await virtual.stop().catch(ignoreError);
-   state.container = undefined;
-}
-
-async function attachVirtualDocument(
-   state: VirtualAdapterState,
-   document: { html: string; url: string },
-): Promise<void> {
-   const virtual = await loadVirtualReader();
-   await virtual.stop().catch(ignoreError);
-   const window = replaceVirtualDocument(document);
-   state.container = window.document.body;
-   await virtual.start({ container: window.document.body, window });
-}
-
-async function performVirtualPortable(
-   state: VirtualAdapterState,
-   verb: PortableDriverVerb,
-): Promise<void> {
-   await runVirtualStep(await stepContext(state), getPortableCommand(verb).virtual);
-}
-
-async function navigateVirtual(
-   state: VirtualAdapterState,
-   request: DriverNavigateRequest,
-): Promise<{ moved?: boolean }> {
-   return runVirtualNavigation(await stepContext(state), request);
-}
-
-async function virtualPerformCommand(
-   state: VirtualAdapterState,
-   command: DriverPerformPayload,
-): Promise<ReturnType<typeof serializeResolvedDriverCommand>> {
-   let commandSet: DriverCommandSet = 'auto';
-   if (command.commandSet) {
-      commandSet = parseDriverCommandSet(command.commandSet);
+async function performVirtualCommand(
+   host: VirtualHost,
+   resolveCommand: VirtualCommandResolver | undefined,
+   payload: DriverPerformPayload,
+): Promise<VirtualCommandResolution['command']> {
+   if (!resolveCommand) {
+      throw new DriverCommandError(
+         'driver-command-unsupported',
+         'Named commands need the command registry, which the browser runner does not load. Call the typed method for the move instead.',
+         { command: payload.command },
+      );
    }
-   const resolved = resolveDriverCommand({
-      target: 'virtual',
-      command: command.command,
-      commandSet,
-   });
-   if (resolved.portableNavigation) {
-      await navigateVirtual(state, resolved.portableNavigation);
-   } else if (resolved.portableAction) {
-      await performVirtualPortable(state, resolved.portableAction);
+   const resolution = resolveCommand(payload);
+   if (resolution.navigation) {
+      await host.navigate(resolution.navigation);
+   } else if (resolution.verb) {
+      await host.runPortable(resolution.verb);
    }
-   return serializeResolvedDriverCommand(resolved);
+   return resolution.command;
 }
 
-export function createVirtualAdapter(): DriverAdapter {
-   const state: VirtualAdapterState = { container: undefined };
+/** Builds the virtual adapter over one host: jsdom, a Playwright page, or the test's page. */
+export function createVirtualAdapter(
+   host: VirtualHost,
+   options: VirtualAdapterOptions = {},
+): DriverAdapter {
    return {
       target: 'virtual',
       capabilities: driverCapabilities,
       checkReadiness: virtualCheckReadiness,
-      start: () =>
-         attachVirtualDocument(state, {
-            html: defaultVirtualHtml,
-            url: 'https://a11ied.local/virtual',
-         }),
-      stop: () => stopVirtual(state),
-      attachDocument: (document) => attachVirtualDocument(state, document),
+      start: () => host.attachDocument(defaultVirtualDocument),
+      stop: () => host.dispose(),
+      attachDocument: (document) => host.attachDocument(document),
       focus: virtualFocus,
-      performPortable: (verb) => performVirtualPortable(state, verb),
-      navigate: (request) => navigateVirtual(state, request),
-      readCurrentItem: () => virtualReadCurrentItem(state),
-      readTitle: async () => readVirtualTitle(),
-      findText: async (text: string) => findVirtualText(await stepContext(state), text),
-      moveInTable: async (move: DriverTableMove) =>
-         moveInVirtualTable(await stepContext(state), move),
+      performPortable: async (verb) => {
+         await host.runPortable(verb);
+      },
+      navigate: (request) => host.navigate(request),
+      readCurrentItem: () => host.readCurrentItem(),
+      readTitle: () => host.readTitle(),
+      findText: (text) => host.findText(text),
+      moveInTable: (move) => host.moveInTable(move),
       captureCursorScreenshot: async () => {
          throw createScreenshotUnsupportedError('virtual');
       },
-      press: virtualPress,
-      type: virtualType,
-      performCommand: (command) => virtualPerformCommand(state, command),
-      readState: virtualReadState,
+      press: (keys) => host.press(keys),
+      type: (text) => host.type(text),
+      performCommand: (command) =>
+         performVirtualCommand(host, options.resolveCommand, command),
+      readState: (checkpoints) => virtualReadState(host, checkpoints),
       waitForSpeechStabilization: virtualWaitForSpeech,
    };
 }
