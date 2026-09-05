@@ -1,0 +1,8 @@
+{
+   "$schema": "https://x.a1st.dev/schemas/v1/ai.json",
+   "skills": {
+      "a11ied": {
+         "path": "./a11ied/"
+      }
+   }
+}

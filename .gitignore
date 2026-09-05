@@ -26,3 +26,7 @@ output/
 
 # bv (beads viewer) local config and caches
 .bv/
+
+# packages/skills/ai.json declares the a11ied skill and ships with the repo. A global
+# gitignore excludes every ai.json, so re-include this one.
+!packages/skills/ai.json
