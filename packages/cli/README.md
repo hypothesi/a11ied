@@ -43,9 +43,9 @@ import { listWcagCriteria, runAxe, startDriverSession, createDoctorReport } from
 
 The CLI and API support three target types:
 
-- `voiceover` — real VoiceOver (macOS only)
-- `nvda` — real NVDA (Windows only)
-- `virtual` — headless virtual screen reader backed by `@guidepup/virtual-screen-reader`
+- `voiceover`: real VoiceOver (macOS only)
+- `nvda`: real NVDA (Windows only)
+- `virtual`: headless virtual screen reader backed by `@guidepup/virtual-screen-reader`
 
 Pass `--sr virtual --allow-virtual` for fast, deterministic local runs.
 

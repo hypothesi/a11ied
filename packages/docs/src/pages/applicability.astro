@@ -95,7 +95,7 @@ const toc = [
          server exposes the same matrix through its <code>applicability</code> tool, which takes an
          optional <code>criterion</code> to narrow the result to one assessment.
       </p>
-      <pre><code>a1 audit http://localhost:3000/checkout --json</code></pre>
+      <pre><code>a1 audit http://localhost:3000/dialog.html --json</code></pre>
       <pre data-label="OUTPUT"><code>"applicability": &#123;
   "matrix": &#123;
     "assessments": &#123;
@@ -104,23 +104,26 @@ const toc = [
         "title": "Focus Order",
         "state": "applicable",
         "reasons": [
-          "Detected heading and form signals (heading structure and form controls) and matching criterion tags (structure, forms, controls, and errors)."
+          "Detected landmark, heading, form, dialog structure, and fixed or overlay signals (landmark structure, heading structure, form controls, and dialog structure) and matching criterion tags (navigation, structure, forms, controls, errors, modals, focus, keyboard, and menus)."
         ],
-        "matchedSignalCategories": ["heading", "form"],
-        "matchedTags": ["structure", "forms", "controls", "errors"],
+        "matchedSignalCategories": ["landmark", "heading", "form", "dialog", "overlay"],
+        "matchedTags": ["navigation", "structure", "forms", "controls", "errors", "modals", "focus", "keyboard", "menus"],
         "elements": [
+          &#123; "xpath": "/html/body/main", "tag": "main", "snippet": "&lt;main&gt;" &#125;,
           &#123; "xpath": "/html/body/main/h1", "tag": "h1", "snippet": "&lt;h1&gt;" &#125;,
-          &#123; "xpath": "/html/body/main/form", "tag": "form", "snippet": "&lt;form action=\"/save\" method=\"post\"&gt;" &#125;
+          &#123; "xpath": "/html/body/div/div[2]", "tag": "div", "snippet": "&lt;div role=\"dialog\" aria-modal=\"true\" aria-label=\"Preferences\"&gt;" &#125;
         ]
       &#125;
     &#125;
   &#125;
 &#125;</code></pre>
       <p>
+         The page opens a hidden <code>Preferences</code> dialog on a button click. Its markup
+         still parses, so the dialog signal counts even before the click runs.
          <code>reasons</code> names the signals and the tags that produced the state. Read it before
          acting on the state. <code>elements</code> lists the nodes behind it, merged across the
          matched signals and capped at 20. Paste an XPath into the browser console as
-         <code>$x('/html/body/main/form')</code> to jump to the node. The text output shows the
+         <code>$x('/html/body/main')</code> to jump to the node. The text output shows the
          first few with <code>--verbose</code>.
       </p>
    </section>

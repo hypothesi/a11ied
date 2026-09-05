@@ -29,7 +29,8 @@ const toc = [
          <p>
             The result has four arrays: <code>violations</code>, <code>passes</code>,
             <code>incomplete</code>, and <code>inapplicable</code>. Each violation names the axe
-            rule, its impact, the failing selector, and the failing HTML.
+            rule, its impact, the failing selector, and the failing HTML. See
+            <a href="/guides/violations">understand a violation</a> for what to do with one.
          </p>
          <pre data-label="OUTPUT"><code>"violations": [
   &#123;
@@ -114,12 +115,11 @@ a1 wcag 1.4.3 --json</code></pre>
          <h2>Step through the page and read the log</h2>
       </div>
       <p>
-         <code>sr next</code> moves to the next element and returns what the reader announced.
-         <code>sr read</code> returns the current state without moving.
+         <code>sr next</code> moves one item and returns what the reader announced.
+         <code>sr read-all</code> steps from the cursor to the end of the document and returns
+         the whole transcript in one call.
       </p>
-      <pre><code>a1 sr next --json
-a1 sr next --json
-a1 sr transcript --json</code></pre>
+      <pre><code>a1 sr read-all --json</code></pre>
       <pre data-label="OUTPUT"><code>"spokenPhraseLog": [
   "document",
   "heading, Checkout, level 1",
@@ -130,11 +130,12 @@ a1 sr transcript --json</code></pre>
   "textbox, Card number",
   "button, Pay now",
   "button",
-  "end of form"
+  "end of form",
+  "end of document"
 ]</code></pre>
       <p>
-         Read the log as a sequence. The email field announces its required state. The last button
-         announces as <code>button</code> with nothing after it, which matches the
+         Read the log as a sequence. The email field announces its required state. The second to
+         last entry announces as <code>button</code> with nothing after it, which matches the
          <code>button-name</code> violation from step 1.
       </p>
    </section>
@@ -157,8 +158,8 @@ a1 sr transcript --json</code></pre>
          <h2>What this run supports</h2>
       </div>
       <p>
-         You have an axe result for the 72 rules mapped to level AA, and a transcript of the
-         announcement order for one route on one target.
+         You have an axe result for the 73 rules mapped to levels A and AA, and a transcript of
+         the announcement order for one route on one target.
       </p>
       <p>
          It is not a conformance claim. The virtual reader is a simulation, and 12 of the 24 level

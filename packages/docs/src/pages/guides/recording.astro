@@ -85,8 +85,9 @@ a1 sr stop --json</code></pre>
       </p>
       <pre><code>a1 doctor</code></pre>
       <p>
-         On macOS, <code>doctor</code> runs a short native recording probe for the current host app
-         and reports the result in the VoiceOver target's notes. Run it from the same app you plan to
+         On macOS, <code>doctor</code> records a few seconds of screen video with
+         <code>screencapture</code> for the current host app, to confirm the permission works, and
+         reports the result in the VoiceOver target's notes. Run it from the same app you plan to
          test from.
       </p>
    </section>
@@ -103,7 +104,8 @@ a1 sr stop --json</code></pre>
          </div>
          <div class="route-row">
             <strong>The command fails before recording starts</strong>
-            <span>Run <code>npx playwright install chromium</code>. A browser-backed step is failing first.</span>
+            <span>Install Chrome, Edge, Brave, or Chromium. Opening a real target's page runs
+            through the system browser, not Playwright, so it needs one already installed.</span>
          </div>
          <div class="route-row">
             <strong>The target reports requires-setup</strong>

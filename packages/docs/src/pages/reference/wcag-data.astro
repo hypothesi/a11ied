@@ -82,26 +82,33 @@ const toc = [
          <h2>What a criterion record holds</h2>
       </div>
       <pre><code>a1 wcag show 1.4.3 --json</code></pre>
-      <pre data-label="OUTPUT"><code>&#123;
-  "id": "1.4.3",
-  "slug": "contrast-minimum",
-  "title": "Contrast (Minimum)",
-  "level": "AA",
-  "wcagVersion": "2.2",
-  "summary": "The visual presentation of text and images of text has a contrast ratio of at least 4.5:1, except for the following:",
-  "understandingUrl": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum",
-  "versions": ["2.0", "2.1", "2.2"],
-  "tags": ["buttons", "color", "content", "contrast", "errors", "focus", "forms", "images-of-text", "messaging", "navigation", "text"],
-  "principle": &#123; "id": "perceivable", "number": "1", "title": "Perceivable" &#125;,
-  "guideline": &#123; "id": "distinguishable", "number": "1.4", "title": "Distinguishable" &#125;
+      <pre data-label="OUTPUT"><code>"result": &#123;
+  "lookupKey": "1.4.3",
+  "criterion": &#123;
+    "id": "1.4.3",
+    "slug": "contrast-minimum",
+    "title": "Contrast (Minimum)",
+    "level": "AA",
+    "wcagVersion": "2.2",
+    "summary": "The visual presentation of text and images of text has a contrast ratio of at least 4.5:1, except for the following:",
+    "understandingUrl": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum",
+    "versions": ["2.0", "2.1", "2.2"],
+    "tags": ["buttons", "color", "content", "contrast", "errors", "focus", "forms", "images-of-text", "messaging", "navigation", "text"],
+    "principle": &#123; "id": "perceivable", "number": "1", "title": "Perceivable" &#125;,
+    "guideline": &#123; "id": "distinguishable", "number": "1.4", "title": "Distinguishable" &#125;
+  &#125;,
+  "coverage": &#123; "criterionId": "1.4.3", "coverageState": "automated", "..." : "..." &#125;,
+  "strategy": &#123; "criterionId": "1.4.3", "preferredEvidenceMode": "automated", "..." : "..." &#125;
 &#125;</code></pre>
       <p>
-         The record also carries <code>normativeText</code> as HTML, a parsed
+         <code>result.criterion</code> also carries <code>normativeText</code> as HTML, a parsed
          <code>details</code> list for the exceptions, <code>altIds</code> for older slugs, and the
          resolved <code>techniques</code>, <code>advisoryTechniques</code>, and
          <code>failures</code>. Each technique has an <code>id</code>, <code>title</code>,
          <code>technology</code>, and <code>url</code> pointing at its W3C page.
-         <code>versions</code> says which WCAG releases contain the criterion.
+         <code>versions</code> says which WCAG releases contain the criterion. See
+         <a href="/coverage">coverage</a> for what <code>result.coverage</code> and
+         <code>result.strategy</code> hold.
       </p>
       <p>
          The Understanding documents and the technique bodies are not in the data. The

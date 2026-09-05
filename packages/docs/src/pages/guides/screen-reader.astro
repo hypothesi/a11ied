@@ -45,7 +45,7 @@ a1 sr start --sr voiceover --browser Safari http://localhost:3000/checkout</code
          <pre><code>a1 sr start --sr voiceover --app Calendar</code></pre>
          <p>
             For the virtual reader, a11ied loads the URL in a headless Chromium page and runs the
-            reader inside it; see <a href="/targets#virtual">targets</a> for when it falls back to
+            reader inside it. See <a href="/targets#virtual">targets</a> for when it falls back to
             jsdom.
          </p>
          <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout --json</code></pre>
@@ -99,7 +99,7 @@ a1 sr start --sr voiceover --browser Safari http://localhost:3000/checkout</code
          </div>
          <div class="route-row">
             <code>sr find "Learn more"</code>
-            <span>Move the cursor to the next place the text appears. Exits 4 when it is not on the page.</span>
+            <span>Move the cursor to the next place the text appears. Exits 4 when it is not on the page. Needs an active session.</span>
          </div>
          <div class="route-row">
             <code>sr press Tab Tab</code>
@@ -124,7 +124,7 @@ a1 sr start --sr voiceover --browser Safari http://localhost:3000/checkout</code
          On NVDA all three are parsed from the phrase. The <code>source</code> field says which.
       </p>
       <pre data-label="OUTPUT"><code>sr read  virtual
-  Phrase:  textbox, Accept the terms
+  Phrase:  checkbox, Accept the terms, not checked
   Item:    Accept the terms
   Role:    checkbox
   Name:    Accept the terms
@@ -157,7 +157,11 @@ a1 sr next control --times 3</code></pre>
          <p>
             <code>sr elements &lt;kind&gt;</code> is the rotor: it moves to the top and lists every
             element of one kind as the reader announces it. It stops at the end of the page or at
-            <code>--max</code>, which defaults to 200, and says which.
+            <code>--max</code>, which defaults to 200, and says which. <code>elements</code>,
+            <code>read-all</code>, <code>goto</code>, and <code>find</code> need an active
+            session and exit with <code>missing-session</code> without one. Run
+            <code>sr start --sr virtual --allow-virtual &lt;url&gt;</code> first for the simulated
+            reader, since a plain <code>sr start</code> falls back to VoiceOver on macOS.
          </p>
          <pre data-label="OUTPUT"><code>sr elements heading  virtual
 4 heading elements from the top of the page.
@@ -204,7 +208,9 @@ Stopped at the end of the document.</code></pre>
          to the end of the document, bounded by <code>--max</code> (default 500), and says whether it
          stopped at the end or at the cap. <code>sr walk [url]</code> does the whole thing from cold:
          it starts a session when none is active, opens the URL in the active one otherwise, moves
-         to the top, runs read-all, and prints the transcript of that walk.
+         to the top, runs read-all, and prints the transcript of that walk. With no session and no
+         <code>--sr</code>, <code>walk</code> starts VoiceOver on macOS. Pass
+         <code>--sr virtual --allow-virtual</code> for the simulated reader instead.
       </p>
       <pre><code>a1 sr walk http://localhost:3000/checkout --sr virtual --allow-virtual
 a1 sr walk --max 40 --out ./evidence/checkout-walk.md</code></pre>
@@ -218,7 +224,7 @@ a1 sr walk --max 40 --out ./evidence/checkout-walk.md</code></pre>
          </div>
          <p>
             <code>sr expect</code> checks the transcript for a phrase and exits 4 when it is not there.
-            Plain text matches without regard to case; <code>/pattern/flags</code> is a regular
+            Plain text matches without regard to case. <code>/pattern/flags</code> is a regular
             expression. <code>--since &lt;checkpoint&gt;</code> only counts phrases after that
             checkpoint, and <code>--not</code> passes when the phrase was not announced.
          </p>
@@ -228,8 +234,12 @@ a1 sr expect /error/i --not</code></pre>
             <code>sr wait --for &lt;text|/regex/&gt;</code> polls the transcript until a phrase spoken
             after the wait began matches, and exits 4 at <code>--timeout</code> (default 5000 ms).
             It polls the transcript rather than the last phrase, so an announcement that arrives and
-            is replaced before the next poll is still caught. Without <code>--for</code> it pauses
-            for <code>--ms</code>.
+            is replaced before the next poll is still caught. Use it for a phrase that arrives on its
+            own timeline, such as a live region a network response fills, or the delay before a real
+            screen reader finishes speaking. A phrase the triggering command already returned in its
+            own response happened before the wait began, so <code>expect</code> on that result is
+            the right check instead. Without <code>--for</code>, <code>wait</code> pauses for
+            <code>--ms</code>.
          </p>
          <pre><code>a1 sr press Enter
 a1 sr wait --for /saved/i --timeout 3000</code></pre>
@@ -239,7 +249,8 @@ a1 sr wait --for /saved/i --timeout 3000</code></pre>
          <p class="aside-note">
             <code>find</code>, <code>goto</code>, <code>wait --for</code>, <code>expect</code>, and a
             <code>batch</code> with a failed expect exit 4. Usage errors, including a command a
-            target cannot run, exit 2. A session that is missing or a broker that stopped exits 3.
+            target cannot run or a verb run with no active session, exit 2. A browser or broker
+            process that fails to start exits 3.
          </p>
       </div>
    </section>
@@ -252,19 +263,32 @@ a1 sr wait --for /saved/i --timeout 3000</code></pre>
       <p>
          <code>sr batch [file]</code> reads one action per line, or stdin, and runs them all over
          one broker connection in one process. Each line is the action request the MCP
-         <code>driver_action</code> tool takes, or an <code>expect</code> line. Blank lines and lines
+         <code>sr_action</code> tool takes, or an <code>expect</code> line. Blank lines and lines
          starting with <code>#</code> are skipped. The batch stops at the first failed expect unless
          <code>--continue</code> is set.
       </p>
       <pre><code>a1 sr batch &lt;&lt;'EOF'
 &#123;"action":"goto","payload":&#123;"role":"button","name":"Open dialog"&#125;&#125;
-&#123;"action":"activate"&#125;
 &#123;"action":"checkpoint","payload":&#123;"label":"opened"&#125;&#125;
-&#123;"action":"wait","payload":&#123;"for":"dialog","timeoutMs":3000&#125;&#125;
+&#123;"action":"activate"&#125;
 &#123;"action":"expect","payload":&#123;"match":"Preferences","since":"opened"&#125;&#125;
 &#123;"action":"escape"&#125;
 &#123;"action":"expect","payload":&#123;"match":"Open dialog"&#125;&#125;
 EOF</code></pre>
+      <pre data-label="OUTPUT"><code>sr batch
+✓ 1. goto &#123;"role":"button","name":"Open dialog","max":500&#125;  button, Open dialog
+✓ 2. checkpoint &#123;"label":"opened"&#125;  button, Open dialog
+✓ 3. activate  textbox, Nickname
+✓ 4. expect Preferences since "opened"  pass
+✓ 5. escape  button, Open dialog
+✓ 6. expect Open dialog  pass
+
+6 steps passed.</code></pre>
+      <p>
+         The checkpoint runs before <code>activate</code>, not after, so <code>expect --since</code>
+         sees the dialog's announcement. A phrase already in the triggering action's own response
+         happened before a later checkpoint and would not count.
+      </p>
    </section>
 
    <section class="split panel" id="commands">
@@ -349,7 +373,8 @@ a1 sr transcript --since "opened the dialog"</code></pre>
   "textbox, Card number",
   "button, Pay now",
   "button",
-  "end of form"
+  "end of form",
+  "end of document"
 ]</code></pre>
       <p>
          Three things to check in a log like this. Every control has a name, so

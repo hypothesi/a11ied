@@ -47,7 +47,7 @@ const toc = [
          <h2>Check the host with doctor</h2>
       </div>
       <pre><code>a1 doctor</code></pre>
-      <pre data-label="OUTPUT"><code>✓ Ready for a1 commands on macOS 26.0 (arm64)
+      <pre data-label="OUTPUT"><code>✓ Ready for a1 commands on macOS 26.5.2 (arm64)
 
 Targets
   ✓ macos-voiceover  ready  Ready for real screen reader sessions.
@@ -64,6 +64,7 @@ Browser automation
   ✓ Google Chrome  ready  Used for a1 axe scans.
       Path    /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
       Launch  system install, opened through the "chrome" browser channel
+      Others  Playwright Chromium
 
   Policy    system-browser-first: an installed Chrome, Edge, Brave, or Chromium is used before Playwright's Chromium
   Fallback  npx playwright install chromium
@@ -72,7 +73,7 @@ Environment
   a11ied  0.1.0
   Node    v24.19.0
   npm     11.17.0
-  Host    macOS 26.0 (arm64) [darwin]</code></pre>
+  Host    macOS 26.5.2 (arm64) [darwin]</code></pre>
       <p>
          The first line is the verdict. When a check fails, it switches to <code>✗</code> with the
          number of steps left, and an <strong>Action items</strong> list with the exact commands
@@ -80,7 +81,7 @@ Environment
          <code>a1 doctor --json</code> wraps the same report in the standard envelope, under
          <code>result</code>, with <code>ready</code>, the ordered <code>actions</code>, and each
          target's <code>checks</code>. <code>a1 doctor --strict</code> exits with code 3 while a
-         required step is missing, which makes it usable as a CI gate.
+         required step is missing, so a CI job can fail the build until setup is complete.
       </p>
    </section>
 

@@ -33,7 +33,7 @@ import { screenReader } from 'a11ied/test';
 
 await using sr = await screenReader({ url: 'http://localhost:3000/checkout' });
 await sr.goTo({ role: 'button', name: 'Pay' });
-await sr.expectSpoken('Pay, button');
+await sr.expectSpoken('button, Pay');
 ```
 
 ## workspaces
@@ -82,7 +82,7 @@ For the package-level details, see [packages/wcag-data/README.md](packages/wcag-
 
 ## release readiness
 
-The current release record is [internal-docs/releases/v0.3.0-readiness.md](internal-docs/releases/v0.3.0-readiness.md).
+The current release record is [internal-docs/releases/v0.1.0-readiness.md](internal-docs/releases/v0.1.0-readiness.md).
 
 That file is the one to read before a public minor or major cut. It includes:
 

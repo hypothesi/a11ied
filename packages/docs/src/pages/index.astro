@@ -33,7 +33,7 @@ a1 doctor</code></pre>
             to run, then each screen reader target with its checks, then the browser a11ied will
             automate.
          </p>
-         <pre data-label="OUTPUT"><code>✗ 1 setup step needed before a1 is fully usable on macOS 26.0 (arm64)
+         <pre data-label="OUTPUT"><code>✗ 1 setup step needed before a1 is fully usable on macOS 26.5.2 (arm64)
 
 Action items
   1. Install the Guidepup VoiceOver preferences bundle
@@ -54,7 +54,7 @@ Targets
          <div class="tag">No setup needed</div>
          <p class="aside-note">
             The virtual target is ready as soon as the package installs. VoiceOver and NVDA
-            need <code>a1 setup</code> once per machine; it runs the Guidepup commands
+            need <code>a1 setup</code> once per machine. It runs the Guidepup commands
             <code>doctor</code> lists and re-checks when they finish.
          </p>
          <p class="aside-note">
@@ -69,12 +69,11 @@ Targets
          <h2>Read the announcement order for a page</h2>
       </div>
       <p>
-         Start a session, step through the page, and read the phrase log. Every step returns the
-         spoken text as JSON.
+         Start a session, then read the whole page top to bottom. <code>sr walk</code> returns
+         the spoken text as JSON, one entry per item.
       </p>
       <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout --json
-a1 sr next --json
-a1 sr read --json</code></pre>
+a1 sr walk --json</code></pre>
       <pre data-label="OUTPUT"><code>"spokenPhraseLog": [
   "document",
   "heading, Checkout, level 1",
@@ -85,15 +84,16 @@ a1 sr read --json</code></pre>
   "textbox, Card number",
   "button, Pay now",
   "button",
-  "end of form"
+  "end of form",
+  "end of document"
 ]</code></pre>
       <p>
          The log is the order a screen reader user moves through. This one shows the required state
-         on the email field, and a ninth entry that announces as <code>button</code> with no name.
+         on the email field, and a tenth entry that announces as <code>button</code> with no name.
       </p>
       <p>
          Swap <code>--sr virtual --allow-virtual</code> for <code>--sr voiceover</code> to
-         run the same steps against the real screen reader.
+         run the same walk against the real screen reader.
       </p>
    </section>
 
@@ -103,8 +103,8 @@ a1 sr read --json</code></pre>
          <h2>Run axe against a URL</h2>
       </div>
       <p>
-         <code>--level AA</code> resolves the 72 axe rules mapped to WCAG 2.2 level AA and runs
-         them against the page.
+         <code>--level AA</code> resolves the 73 axe rules mapped to WCAG 2.2 levels A and AA
+         and runs them against the page.
       </p>
       <pre><code>a1 axe http://localhost:3000/checkout --level AA --json</code></pre>
       <pre data-label="OUTPUT"><code>"violations": [
@@ -152,8 +152,8 @@ a1 sr read --json</code></pre>
   "requiresRealTarget": true
 &#125;</code></pre>
          <p>
-            No axe rule decides Focus Order. The strategy names the probe to run and says the test
-            needs a real target, which is what the driver session provides.
+            No axe rule decides Focus Order. The strategy names the procedure to run and says the
+            test needs a real target, which is what the driver session provides.
             <a href="/coverage">Coverage</a> explains the four states and the mapping behind them.
          </p>
       </div>
@@ -202,7 +202,7 @@ Report the axe violations and the spoken phrase log separately.</code></pre>
       <div class="route-list">
          <div class="route-row">
             <strong><a href="/reference/cli">CLI</a></strong>
-            <span>The <code>a1</code> command. Every subcommand takes <code>--json</code> and prints one structured object.</span>
+            <span>The <code>a1</code> command. Most subcommands take <code>--json</code> and print one structured object. <code>mcp</code> and <code>help-all</code> print plain text only.</span>
          </div>
          <div class="route-row">
             <strong><a href="/reference/mcp">MCP server</a></strong>

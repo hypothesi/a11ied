@@ -86,12 +86,12 @@ const toc = [
          <div class="route-row"><code>sr top</code>, <code>sr bottom</code><span>Move to the start or the end of the document or the current area.</span></div>
          <div class="route-row"><code>sr interact</code>, <code>sr stop-interacting</code>, <code>sr activate</code><span>Enter a group or control, leave it, and activate the current item.</span></div>
          <div class="route-row"><code>sr escape</code><span>Press Escape to dismiss a menu or a dialog.</span></div>
-         <div class="route-row"><code>sr find &lt;text&gt;</code><span>Move the cursor to the next place the text appears. Exits 4 when it is not found.</span></div>
+         <div class="route-row"><code>sr find &lt;text&gt;</code><span>Move the cursor to the next place the text appears. Exits 4 when it is not found. Needs an active session.</span></div>
          <div class="route-row"><code>sr table &lt;move&gt;</code><span>Inside a table: <code>next-cell</code>, <code>previous-cell</code>, <code>next-row</code>, <code>previous-row</code>, <code>next-column</code>, <code>previous-column</code>, <code>row-header</code>, <code>column-header</code>.</span></div>
-         <div class="route-row"><code>sr goto</code><span>Step forward until the current item matches <code>--role &lt;role&gt;</code>, <code>--name &lt;text&gt;</code>, or both. Takes <code>--max</code>. Exits 4 when nothing matches.</span></div>
-         <div class="route-row"><code>sr elements &lt;kind&gt;</code><span>The rotor: from the top, every element of one kind as the reader announces it. Takes <code>--max</code>, default 200.</span></div>
-         <div class="route-row"><code>sr read-all</code><span>Step item by item from the cursor to the end of the document, or to <code>--max</code> (default 500), and say which.</span></div>
-         <div class="route-row"><code>sr walk [url]</code><span>Start a session when none is active, move to the top, read the whole page, and print the transcript of the walk. Takes <code>--sr</code>, <code>--allow-virtual</code>, <code>--max</code>, <code>--out</code>, <code>--format</code>.</span></div>
+         <div class="route-row"><code>sr goto</code><span>Step forward until the current item matches <code>--role &lt;role&gt;</code>, <code>--name &lt;text&gt;</code>, or both. Takes <code>--max</code>. Exits 4 when nothing matches. Needs an active session.</span></div>
+         <div class="route-row"><code>sr elements &lt;kind&gt;</code><span>The rotor: from the top, every element of one kind as the reader announces it. Takes <code>--max</code>, default 200. Needs an active session.</span></div>
+         <div class="route-row"><code>sr read-all</code><span>Step item by item from the cursor to the end of the document, or to <code>--max</code> (default 500), and say which. Needs an active session.</span></div>
+         <div class="route-row"><code>sr walk [url]</code><span>Start a session when none is active, move to the top, read the whole page, and print the transcript of the walk. Takes <code>--sr</code>, <code>--allow-virtual</code>, <code>--max</code>, <code>--out</code>, <code>--format</code>. With no <code>--sr</code> and no active session, this starts VoiceOver on macOS.</span></div>
          <div class="route-row"><code>sr press &lt;chord...&gt;</code><span>Press key chords in order, one chord per argument.</span></div>
          <div class="route-row"><code>sr type &lt;text&gt;</code><span>Type text through the active target.</span></div>
          <div class="route-row"><code>sr do &lt;command&gt;</code><span>Run a named command, or <code>&lt;command-set&gt;:&lt;name&gt;</code> when two sets share a name. Takes <code>--command-set</code>.</span></div>
@@ -115,13 +115,14 @@ const toc = [
       </div>
       <p>
          Exit codes: 0 when the command ran, 2 for a usage error, including a command the target
-         cannot run, 3 when no session is active, and 4 when a check failed: <code>find</code>,
-         <code>goto</code>, <code>wait --for</code>, <code>expect</code>, and a <code>batch</code> with
-         a failed expect.
+         cannot run or a verb run with no active session, 3 when the browser or the broker process
+         fails to start, and 4 when a check failed: <code>find</code>, <code>goto</code>,
+         <code>wait --for</code>, <code>expect</code>, and a <code>batch</code> with a failed
+         expect.
       </p>
       <p>
-         <code>press</code>, <code>type</code>, and <code>do</code> start a session when none is
-         active. The other verbs need one and exit 2 without it.
+         <code>press</code>, <code>type</code>, <code>do</code>, and <code>walk</code> start a
+         session when none is active. The other verbs need one and exit 2 without it.
       </p>
    </section>
 
@@ -144,14 +145,17 @@ const toc = [
             <div class="route-row"><strong>VoiceOver</strong><span><code>VO</code> for Control and Option, plus <code>Command</code>, <code>Option</code>, <code>Meta</code>, and <code>Fn</code></span></div>
             <div class="route-row"><strong>NVDA</strong><span><code>NVDA</code> for Insert, plus <code>Windows</code>, <code>Application</code>, and the <code>NumPad0</code> to <code>NumPad9</code> keys</span></div>
          </div>
-         <pre><code>a1 sr press Tab Tab --json
+         <pre><code>a1 sr press Tab Tab --sr virtual --allow-virtual --json
 a1 sr press "VO+ArrowRight" --json</code></pre>
       </div>
       <div class="split-aside">
          <div class="tag">Full list</div>
          <p class="aside-note">
             <code>a1 sr press --help</code> prints every token the current platform accepts,
-            including function keys and punctuation names.
+            including function keys and punctuation names. <code>press</code> starts a
+            session when none is active, defaulting to VoiceOver on macOS, so pass
+            <code>--sr virtual --allow-virtual</code> unless a VoiceOver chord such as
+            <code>VO+ArrowRight</code> is what you want to run.
          </p>
       </div>
    </section>
@@ -188,7 +192,7 @@ a1 wcag rule color-contrast</code></pre>
             <div class="route-row"><code>&lt;targets...&gt;</code><span>One or more http(s) URLs or file paths, or <code>-</code> for HTML on stdin. Multiple targets print one report each.</span></div>
             <div class="route-row"><code>--html &lt;markup&gt;</code><span>Load inline HTML instead of the positional target.</span></div>
             <div class="route-row"><code>--timeout &lt;ms&gt;</code><span>Timeout for loading the target, in milliseconds. Defaults to 10000.</span></div>
-            <div class="route-row"><code>--level &lt;level&gt;</code><span>Run the rules mapped to one WCAG level. <code>--level AA</code> resolves 72 rules for WCAG 2.2.</span></div>
+            <div class="route-row"><code>--level &lt;level&gt;</code><span>Run the rules mapped to one WCAG level and every level below it. <code>--level AA</code> resolves 73 rules for WCAG 2.2.</span></div>
             <div class="route-row"><code>--criterion &lt;criterion&gt;</code><span>Run the rules mapped to one criterion, by ID or slug.</span></div>
             <div class="route-row"><code>--rule &lt;ruleId...&gt;</code><span>Run named axe rules. Repeat the flag for more than one.</span></div>
             <div class="route-row"><code>--selector &lt;css&gt;</code><span>Scope the scan to elements matching this CSS selector.</span></div>
@@ -231,10 +235,14 @@ a1 axe http://localhost:3000/a http://localhost:3000/b --json</code></pre>
          <p>
             axe exits 4 when a violation remains after <code>--fail-on</code> and
             <code>--baseline</code> filtering, and 0 otherwise. The JSON envelope's
-            <code>ok</code> field stays <code>true</code> either way; the exit code carries the
+            <code>ok</code> field stays <code>true</code> either way. The exit code carries the
             verdict, under <code>result.verdict</code> in the envelope. Run with
             <code>--update-baseline</code> once to accept the current findings, then commit the
-            baseline file so CI only fails on new ones.
+            baseline file so CI only fails on new ones. See
+            <a href="/guides/violations">understand a violation</a> for what impact means and how
+            to get from a violation to a fix, and
+            <a href="/guides/scripting">script the CLI</a> for the exit codes and the envelope
+            shape.
          </p>
       </div>
       <div class="split-aside">
@@ -339,8 +347,9 @@ a1 help-all</code></pre>
          <code>✗</code> with the number of setup steps still needed. Action items with the exact
          commands come first, then each target with its individual checks, the browser a11ied will
          automate, and the a11ied, Node, npm, and host versions at the bottom. Targets that only
-         exist on another OS get one dim line instead of instructions. On macOS it also runs a short
-         screen recording probe for the current host app. The exit code is 0 unless you pass
+         exist on another OS get one dim line instead of instructions. On macOS it also records a
+         few seconds of screen video with <code>screencapture</code> for the current host app, to
+         confirm the permission works. The exit code is 0 unless you pass
          <code>--strict</code>, which exits with 3 while a required step is missing.
          <code>--json</code> wraps the report in the standard envelope, under <code>result</code>.
       </p>

@@ -1,6 +1,6 @@
 # CLI purpose audit
 
-Date: 2026-09-04. Scope: every shipped command, the MCP server, the agent skill, the
+Date: 2026-09-04. Scope: every released command, the MCP server, the agent skill, the
 TypeScript library, and the docs site, measured against the stated purpose:
 
 > An intuitive, DX-friendly CLI, MCP server, and agent skill for accessibility testing,
@@ -17,7 +17,7 @@ on this machine. File references are to the current `master`.
 The pieces exist but they do not connect. There is a knowledge layer (`wcag`), a static
 heuristic layer (`inspect`), and two automation layers (`axe`, `sr`), and nothing joins
 them: no assertion, no verdict, no exit code, no "what do I do next" link. The `sr`
-session model is a real achievement, but it has no test-authoring surface, the virtual
+session model is a real achievement, but it has no test-authoring API, the virtual
 target is jsdom without script execution, and state is stored per working directory.
 The `wcag` data ships techniques and failures that no command shows, and the fix
 guidance every developer wants still ends at a W3C URL. Use cases 1, 3, and 6 are not
@@ -66,7 +66,7 @@ What is missing for "browse without web fetches" and "understand how to fix":
   body text and no technique URL, and no Understanding prose. "How do I fix 1.4.3"
   still requires opening `understandingUrl`.
 - Four generated artifacts (`technique-index`, `failure-index`, `tag-index`,
-  `slug-index`, plus `coverage-summary`) are built, validated, and shipped but never
+  `slug-index`, plus `coverage-summary`) are built, validated, and released but never
   read at runtime (`wcag-engine/src/artifacts/runtime.ts:101-131`).
 - There is no reverse lookup from an axe rule id to a criterion. `wcag search
 button-name` happens to rank 4.1.2 first through the failure text, by luck.
@@ -139,7 +139,7 @@ What is missing or wrong:
 
 ### `doctor` and `setup`
 
-These are now in good shape and are the only commands with a CI gate
+These are now in good shape and are the only commands with a check that fails CI
 (`doctor --strict`). Keep them as the model for the rest.
 
 ### `mcp`
@@ -153,8 +153,8 @@ screenshot, and any target that is not a public URL.
 
 ### Agent skill
 
-`packages/skills/a11ied/SKILL.md` has eleven workflow steps and ten guardrails and not
-one command example, while guardrail 10 says "Keep command examples copy-pasteable".
+`packages/skills/a11ied/SKILL.md` has eleven workflow steps and ten rules and not
+one command example, while rule 10 says "Keep command examples copy-pasteable".
 It never names `wcag show`, `inspect`, or `axe`. No session recipe, no assertion
 pattern, no cleanup rule, no `resources/` directory.
 
@@ -218,7 +218,7 @@ What a screen reader said is the product. Make it a file, not a memory:
   `logs`, `stop`.
 - `sr goto --role button --name Pay` moves until the spoken phrase matches, with a
   bound, and fails with exit 4 if it never does.
-- `sr expect "Pay, button"` (or `--match /regex/`) asserts against the last phrase or
+- `sr expect "button, Pay"` (or `--match /regex/`) asserts against the last phrase or
   the log since a checkpoint, exit 4 on mismatch. `checkpoint` then has a purpose:
   `sr expect --since form-opened "required"`.
 - `sr batch` reads one action per line (JSON lines on stdin) and runs them in one
@@ -356,7 +356,11 @@ Concrete tasks from the stated use cases, and the primitive each one is missing.
 - **Print just the phrase.** Shell scripts want `sr next --phrase` to print one line;
   today they parse the envelope with `jq`.
 
+<!-- vale off -->
+
 ### 6.3 Clarity problems in the current surface
+
+<!-- vale on -->
 
 - `sr status` and `sr read` print the same block. `status` should be session
   metadata: target, URL, uptime, recording, transcript length. `read` should be the
@@ -382,7 +386,11 @@ Concrete tasks from the stated use cases, and the primitive each one is missing.
 - NVDA has only a key-code command set. There is no NVDA equivalent of the commander
   phrases, so `sr do` on NVDA is `sr press` with a lookup table.
 
+<!-- vale off -->
+
 ### 6.4 Proposed `sr` surface
+
+<!-- vale on -->
 
 One active session. No ids. Target-independent verbs first, target-specific escape
 hatches second. Every navigation verb prints the phrase it produced and, when known,
@@ -454,7 +462,7 @@ Every item is tracked as a bead under the epics created 2026-09-04.
    `guidepup/setup-action`, and a Windows job for NVDA, so defect 16 stops being true.
 2. Knowledge completeness: techniques and failures in `wcag show`, Understanding and
    technique text in the data, `wcag rule`, `wcag <id>` shorthand, coverage folded in.
-3. The `sr` surface from Part 5: portable `next <kind>`, first-class portable verbs,
+3. The `sr` command set from Part 5: portable `next <kind>`, first-class portable verbs,
    `read` with role and name, `transcript` files, `elements`, `walk`, `goto`, `wait`,
    `expect`, `open`, `batch`. Then the target abstraction and `a1 tree`.
 4. `a1 audit` and the skill rewrite with copy-pasteable recipes for the dev loop.
