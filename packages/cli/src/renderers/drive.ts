@@ -1,79 +1,20 @@
 import chalk from 'chalk';
-import type { CliOutputEnvelope } from '#contracts';
-import type { DriverCommandList, SerializableDriverCommand } from '#core';
 import {
-   dim,
-   fields,
-   heading,
-   indent,
-   numberedItems,
-   section,
-   title,
-} from '../lib/format.js';
+   accessibilityDriverSessionSchema,
+   driverActionResultSchema,
+   type AccessibilityDriverSession,
+   type CliOutputEnvelope,
+   type DriverActionResult,
+} from '#contracts';
+import { dim, fields, indent, title } from '../lib/format.js';
 
-const COMMAND_SET_LABELS: Readonly<Record<string, string>> = {
-   portable: 'Portable',
-   'voiceover-commander': 'VoiceOver — Commander',
-   'voiceover-keycode': 'VoiceOver — Key Codes',
-   'nvda-keycode': 'NVDA — Key Codes',
-} as const;
+export { formatDriveCommands, renderDriveCommandsText } from './drive-commands.js';
 
-const VOICEOVER_COMMAND_SETS = new Set(['voiceover-commander', 'voiceover-keycode']);
-const NVDA_COMMAND_SETS = new Set(['nvda-keycode']);
+const MS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
 
-function isPlatformRelevantCommandSet(commandSet: string): boolean {
-   if (process.platform === 'darwin' && NVDA_COMMAND_SETS.has(commandSet)) {
-      return false;
-   }
-   if (process.platform === 'win32' && VOICEOVER_COMMAND_SETS.has(commandSet)) {
-      return false;
-   }
-   return true;
-}
-
-interface DriveRecording {
-   path: string;
-   status: string;
-   format: string;
-}
-
-interface DriveSessionInfo {
-   sessionId: string;
-   target: string;
-   recording?: DriveRecording;
-}
-
-interface DriveStateWithCursor {
-   logCursor: number;
-   checkpoints?: Array<{ label: string }>;
-}
-
-interface DriveStatusState extends DriveStateWithCursor {
-   lastSpokenPhrase: string | null;
-   currentItemText: string | null;
-}
-
-interface DriveLogsState extends DriveStateWithCursor {
-   spokenPhraseLog: string[];
-   itemTextLog: string[];
-}
-
-interface DriveResult<TState extends DriveStateWithCursor> {
-   action: string;
-   session: DriveSessionInfo;
-   state: TState;
-   details?: {
-      focus?: {
-         status?: string;
-         details?: string[];
-      };
-      command?: SerializableDriverCommand & { requestedCommand: string };
-   };
-}
-
-function sessionId(value: string): string {
-   return chalk.greenBright(value);
-}
+type Entry = [string, string];
 
 function target(value: string): string {
    return chalk.magentaBright(value);
@@ -86,226 +27,185 @@ function spoken(value: string | null | undefined): string {
    return chalk.bold(value);
 }
 
-function formatCheckpoints(checkpoints?: Array<{ label: string }>): string {
-   return checkpoints?.map((entry) => entry.label).join(', ') || dim('none');
-}
-
-function formatRecording(recording?: DriveRecording): string {
+function formatRecording(recording: AccessibilityDriverSession['recording']): string {
    if (!recording) {
       return dim('none');
    }
    return `${recording.status} ${recording.format} ${recording.path}`;
 }
 
-function sessionHeading(action: string, session: DriveSessionInfo): string {
-   return `${title(`sr ${action}`)}  ${sessionId(session.sessionId)}  ${target(session.target)}`;
+function formatUptime(startedAt: string): string {
+   const totalSeconds = Math.max(0, Math.round((Date.now() - Date.parse(startedAt)) / MS_PER_SECOND));
+   const hours = Math.floor(totalSeconds / (SECONDS_PER_MINUTE * MINUTES_PER_HOUR)),
+         minutes = Math.floor(totalSeconds / SECONDS_PER_MINUTE) % MINUTES_PER_HOUR,
+         seconds = totalSeconds % SECONDS_PER_MINUTE;
+   if (hours > 0) {
+      return `${String(hours)}h ${String(minutes)}m ${String(seconds)}s`;
+   }
+   if (minutes > 0) {
+      return `${String(minutes)}m ${String(seconds)}s`;
+   }
+   return `${String(seconds)}s`;
 }
 
-function focusDetailFields(
-   result: DriveResult<DriveStatusState>,
-   verbose: boolean,
-): Array<[string, string]> {
-   if (result.action !== 'focus' || !result.details?.focus) {
+function formatIdleTimeout(minutes: number | undefined): string {
+   if (minutes === undefined) {
+      return dim('default');
+   }
+   if (minutes === 0) {
+      return 'disabled';
+   }
+   return `${String(minutes)} min`;
+}
+
+function sessionDetailEntries(session: AccessibilityDriverSession, verbose: boolean): Entry[] {
+   if (!verbose) {
       return [];
    }
-   const entries: Array<[string, string]> = [
-      ['Focus status', result.details.focus.status ?? 'unknown'],
+   return [
+      ['Session ID', session.sessionId],
+      ['Broker PID', String(session.brokerPid)],
+      ['Socket', session.socketPath],
+      ['State file', session.metadataFile],
+      ['Started', session.startedAt],
    ];
-   if (verbose && result.details.focus.details?.length) {
-      entries.push(['Focus notes', result.details.focus.details.join(' | ')]);
-   }
-   return entries;
 }
 
-function performDetailFields(
-   result: DriveResult<DriveStatusState>,
-   verbose: boolean,
-): Array<[string, string]> {
-   if (result.action !== 'perform' || !result.details?.command) {
-      return [];
-   }
-   const command = result.details.command;
-   const entries: Array<[string, string]> = [
-      ['Command', `${command.alias} ${dim(`(${command.commandSet})`)}`],
-      ['Requested command', command.requestedCommand],
-      ['Upstream key', command.upstreamKey],
+function sessionSummaryEntries(session: AccessibilityDriverSession): Entry[] {
+   return [
+      ['Target', target(session.target)],
+      ['URL', session.url ?? dim('none')],
+      ['Recording', formatRecording(session.recording)],
+      ['Idle timeout', formatIdleTimeout(session.idleTimeoutMinutes)],
    ];
-   if (verbose && command.representation) {
-      entries.push(['Key sequence', command.representation]);
-   }
-   if (verbose && command.upstreamValue) {
-      entries.push(['Upstream value', command.upstreamValue]);
-   }
-   return entries;
 }
 
-function formatCommandLine(
-   command: SerializableDriverCommand,
-   aliasWidth: number,
-): string {
-   const paddedAlias = command.alias.padEnd(aliasWidth);
-   const parts = [chalk.cyan(paddedAlias)];
-
-   const keySeq = command.representation ?? command.upstreamValue ?? '';
-   if (keySeq) {
-      parts.push(chalk.yellow(keySeq));
-   }
-
-   if (command.description) {
-      parts.push(chalk.dim(command.description));
-   }
-
-   return `  ${parts.join('  ')}`;
+function actionHeading(action: string, session: AccessibilityDriverSession): string {
+   return `${title(`sr ${action}`)}  ${target(session.target)}`;
 }
 
-// Fallow-ignore-next-line unused-export
-export function formatDriveCommands(result: DriverCommandList): string {
-   const relevantSets = result.commandSets.filter((group) =>
-      isPlatformRelevantCommandSet(group.commandSet),
-   );
-
-   if (relevantSets.length === 0) {
-      return 'No driver commands matched.';
+function detailEntries(result: DriverActionResult, verbose: boolean): Entry[] {
+   const entries: Entry[] = [];
+   const { details } = result;
+   if (!details) {
+      return entries;
    }
-
-   const lines = [title('Driver commands')];
-   for (const group of relevantSets) {
-      const label =
-         COMMAND_SET_LABELS[group.commandSet] ?? `${group.target} / ${group.commandSet}`;
-      const aliasWidth = Math.max(...group.commands.map((cmd) => cmd.alias.length));
-      lines.push('', heading(label));
-      for (const command of group.commands) {
-         lines.push(formatCommandLine(command, aliasWidth));
+   if (typeof details.focus === 'object' && details.focus !== null && 'status' in details.focus) {
+      entries.push(['Focus status', String(details.focus.status)]);
+   }
+   if (typeof details.command === 'object' && details.command !== null && 'alias' in details.command) {
+      const command = details.command;
+      entries.push(['Command', `${String(command.alias)} ${dim(`(${String('commandSet' in command ? command.commandSet : '')})`)}`]);
+      if (verbose && 'representation' in command && command.representation) {
+         entries.push(['Key sequence', String(command.representation)]);
       }
    }
-   return lines.join('\n');
+   if (Array.isArray(details.keys)) {
+      entries.push(['Keys', details.keys.map(String).join(' ')]);
+   }
+   return entries;
 }
 
-// Fallow-ignore-next-line unused-export
+function axEntries(result: DriverActionResult, verbose: boolean): Entry[] {
+   const element = result.state.axFocusedElement;
+   if (!verbose || !element) {
+      return [];
+   }
+   return Object.entries(element)
+      .filter(([, value]) => value !== undefined)
+      .map(([key, value]): Entry => [`AX ${key}`, String(value)]);
+}
+
+/** Text for `sr start`: what the session is, with ids only under --verbose. */
 export function renderDriveSessionText(
    envelope: CliOutputEnvelope,
-   _options: { verbose: boolean },
+   options: { verbose: boolean },
 ): string {
-   const result = envelope.result as {
-      session: {
-         sessionId: string;
-         target: string;
-         startedAt: string;
-         brokerPid: number;
-         socketPath: string;
-         recording?: DriveRecording;
-      };
-   };
-
+   const parsed = accessibilityDriverSessionSchema.safeParse(envelope.result?.session);
+   if (!parsed.success) {
+      return 'Session ready';
+   }
+   const session = parsed.data;
    return [
-      chalk.bold.green('Drive session ready'),
+      chalk.bold.green('Session ready'),
       '',
-      ...indent(
-         fields([
-            ['Session ID', sessionId(result.session.sessionId)],
-            ['Target', target(result.session.target)],
-            ['Started', result.session.startedAt],
-            ['Broker PID', String(result.session.brokerPid)],
-            ['Socket', result.session.socketPath],
-            ['Recording', formatRecording(result.session.recording)],
-         ]),
-      ),
+      ...indent(fields([...sessionSummaryEntries(session), ...sessionDetailEntries(session, options.verbose)])),
       '',
-      dim('Session cached — run sr commands without --session'),
+      dim('Every sr command now uses this session. Stop it with: a1 sr stop'),
    ].join('\n');
 }
 
-// Fallow-ignore-next-line unused-export
+/** Text for `sr status`: session metadata, not the current item. */
 export function renderDriveStatusText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },
 ): string {
-   const result = envelope.result as unknown as DriveResult<DriveStatusState> & {
-      noSession?: boolean;
-   };
-
-   if (result.noSession) {
-      return ['No active session.', '', dim('Start one with: a11ied sr start')].join(
-         '\n',
-      );
+   if (envelope.result?.noSession === true) {
+      return ['No active session.', '', dim('Start one with: a1 sr start')].join('\n');
    }
-
-   const entries: Array<[string, string]> = [
-      ['Last spoken phrase', spoken(result.state.lastSpokenPhrase)],
-      ['Current item text', spoken(result.state.currentItemText)],
-      ['Log cursor', String(result.state.logCursor)],
-      ...focusDetailFields(result, options.verbose),
-      ...performDetailFields(result, options.verbose),
-      ['Recording', formatRecording(result.session.recording)],
+   const parsed = driverActionResultSchema.safeParse(envelope.result);
+   if (!parsed.success) {
+      return 'No active session.';
+   }
+   const { session, state } = parsed.data;
+   const phrases = state.transcript.filter((entry) => entry.checkpoint === undefined).length;
+   const entries: Entry[] = [
+      ...sessionSummaryEntries(session),
+      ['Uptime', formatUptime(session.startedAt)],
+      ['Transcript', `${String(phrases)} phrases, ${String(state.checkpoints.length)} checkpoints`],
+      ...sessionDetailEntries(session, options.verbose),
    ];
-   if (options.verbose) {
-      entries.push(['Checkpoints', formatCheckpoints(result.state.checkpoints)]);
-   }
-
-   return [
-      sessionHeading(result.action, result.session),
-      ...indent(fields(entries)),
-   ].join('\n');
+   return [title('Session active'), '', ...indent(fields(entries))].join('\n');
 }
 
-// Fallow-ignore-next-line unused-export
+/** Text for read and every navigation or input verb: the phrase and the item it landed on. */
+export function renderDriveReadText(
+   envelope: CliOutputEnvelope,
+   options: { verbose: boolean },
+): string {
+   const parsed = driverActionResultSchema.safeParse(envelope.result);
+   if (!parsed.success) {
+      return 'No result.';
+   }
+   const result = parsed.data;
+   const entries: Entry[] = [
+      ['Phrase', spoken(result.state.lastSpokenPhrase)],
+      ['Item', spoken(result.state.currentItemText)],
+      ...detailEntries(result, options.verbose),
+      ...axEntries(result, options.verbose),
+   ];
+   if (options.verbose) {
+      entries.push([
+         'Checkpoints',
+         result.state.checkpoints.map((entry) => entry.label).join(', ') || dim('none'),
+      ]);
+   }
+   return [actionHeading(result.action, result.session), ...indent(fields(entries))].join('\n');
+}
+
+function transcriptFileLines(files: unknown): string[] {
+   if (!Array.isArray(files) || files.length === 0) {
+      return [];
+   }
+   return files
+      .filter((file): file is { path: string } => typeof file === 'object' && file !== null && 'path' in file)
+      .map((file) => `  ${dim('Transcript written to')} ${file.path}`);
+}
+
+/** Text for `sr stop`. */
 export function renderDriveStopText(
    envelope: CliOutputEnvelope,
    _options: { verbose: boolean },
 ): string {
-   const result = envelope.result as {
-      action: string;
-      session: { sessionId: string; target: string; recording?: DriveRecording };
-      details?: { alreadyGone?: boolean };
-   };
-   const entries: Array<[string, string]> = [
-      ['Session ID', sessionId(result.session.sessionId)],
-   ];
-
-   if (result.details?.alreadyGone) {
-      entries.push(['Note', 'Session was already ended.']);
-   } else {
-      entries.push(
-         ['Target', target(result.session.target)],
-         ['Recording', formatRecording(result.session.recording)],
-      );
+   const parsed = driverActionResultSchema.safeParse(envelope.result);
+   if (!parsed.success) {
+      return 'Session stopped';
    }
-
-   return [title('Drive session stopped'), '', ...indent(fields(entries))].join('\n');
-}
-
-// Fallow-ignore-next-line unused-export
-export function renderDriveCommandsText(
-   envelope: CliOutputEnvelope,
-   _options: { verbose: boolean },
-): string {
-   return formatDriveCommands(envelope.result as unknown as DriverCommandList);
-}
-
-// Fallow-ignore-next-line unused-export
-export function renderDriveLogsText(
-   envelope: CliOutputEnvelope,
-   options: { verbose: boolean },
-): string {
-   const result = envelope.result as unknown as DriveResult<DriveLogsState>;
-   const entries: Array<[string, string]> = [
-      ['Log cursor', String(result.state.logCursor)],
-      ['Recording', formatRecording(result.session.recording)],
-   ];
-   if (options.verbose) {
-      entries.push(['Checkpoints', formatCheckpoints(result.state.checkpoints)]);
-   }
-
+   const { session } = parsed.data;
    return [
-      sessionHeading(result.action, result.session),
-      ...indent(fields(entries)),
-      ...section(
-         `Spoken phrases ${dim(`(${result.state.spokenPhraseLog.length})`)}`,
-         numberedItems(result.state.spokenPhraseLog),
-      ),
-      ...section(
-         `Item text ${dim(`(${result.state.itemTextLog.length})`)}`,
-         numberedItems(result.state.itemTextLog),
-      ),
+      title('Session stopped'),
+      '',
+      ...indent(fields([['Target', target(session.target)], ['Recording', formatRecording(session.recording)]])),
+      ...transcriptFileLines(envelope.result?.transcriptFiles),
    ].join('\n');
 }

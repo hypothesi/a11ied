@@ -1,6 +1,5 @@
 import { platformSchema, type Platform } from '#contracts';
 import { CliUsageError, resolveDefaultTarget, resolveDocumentTarget } from '#core';
-import { resolveImplicitDriveSession, type DriveSessionSource } from './drive-session.js';
 import { getPlatformScreenReaders } from '../commands/drive-key-help.js';
 
 interface VirtualTargetGuardOptions {
@@ -35,7 +34,7 @@ function ensureVirtualTargetAllowed(
 
    throw new CliUsageError(
       'virtual-target-disallowed',
-      `The virtual target is a simulation. Omit --target to use ${getPlatformScreenReaders()}, or pass --allow-virtual to proceed.`,
+      `The virtual target is a simulation. Omit --sr to use ${getPlatformScreenReaders()}, or pass --allow-virtual to proceed.`,
       {
          target,
          defaultTarget: fallback.target,
@@ -51,9 +50,9 @@ export function parsePlatform(
       const fallback = resolveDefaultTarget();
       throw new CliUsageError(
          'validation-error',
-         `${fallback.message} Provide --target to override.`,
+         `${fallback.message} Provide --sr to override.`,
          {
-            field: 'target',
+            field: 'sr',
             value: target ?? undefined,
             defaultTarget: fallback.target,
          },
@@ -64,9 +63,9 @@ export function parsePlatform(
    if (!parsed.success) {
       throw new CliUsageError(
          'validation-error',
-         `Driver target "${target ?? ''}" is unsupported.`,
+         `Screen reader "${target ?? ''}" is unsupported.`,
          {
-            field: 'target',
+            field: 'sr',
             value: target ?? undefined,
             supportedTargets: [...platformSchema.options],
          },
@@ -75,92 +74,6 @@ export function parsePlatform(
 
    ensureVirtualTargetAllowed(parsed.data, options);
    return parsed.data;
-}
-
-function buildResolvedSessionOptions(options: { session?: string; cwd?: string }): {
-   session?: string;
-   cwd?: string;
-} {
-   const sessionOptions: { session?: string; cwd?: string } = {};
-
-   if (options.session) {
-      sessionOptions.session = options.session;
-   }
-   if (options.cwd) {
-      sessionOptions.cwd = options.cwd;
-   }
-
-   return sessionOptions;
-}
-
-function resolveEphemeralDriveSession(options: {
-   target?: string;
-   allowVirtual?: boolean;
-}): { target?: Platform; ephemeral: true; sessionSource: 'none' } {
-   if (!options.target) {
-      return {
-         ephemeral: true,
-         sessionSource: 'none',
-      };
-   }
-
-   return {
-      ephemeral: true,
-      sessionSource: 'none',
-      target: parsePlatform(
-         options.target,
-         buildVirtualTargetGuardOptions(options.allowVirtual),
-      ),
-   };
-}
-
-export async function resolveDriveSession(options: {
-   session?: string;
-   target?: string;
-   ephemeral?: boolean;
-   allowVirtual?: boolean;
-   cwd?: string;
-   allowMissing?: boolean;
-}): Promise<{
-   sessionId?: string;
-   target?: Platform;
-   ephemeral: boolean;
-   sessionSource: DriveSessionSource;
-}> {
-   if (options.ephemeral && options.session) {
-      throw new CliUsageError(
-         'ephemeral-session-conflict',
-         'Use either --session or --ephemeral, not both.',
-         { session: options.session },
-      );
-   }
-
-   if (options.ephemeral) {
-      return resolveEphemeralDriveSession(options);
-   }
-
-   const resolvedSession = await resolveImplicitDriveSession(
-      buildResolvedSessionOptions(options),
-   );
-
-   if (!resolvedSession.sessionId) {
-      if (options.allowMissing) {
-         return {
-            ephemeral: false,
-            sessionSource: 'none',
-         };
-      }
-      throw new CliUsageError(
-         'missing-session',
-         'A session id is required unless --ephemeral is present.',
-      );
-   }
-
-   return {
-      ephemeral: false,
-      sessionId: resolvedSession.sessionId,
-      sessionSource: resolvedSession.source,
-   };
 }
 
 export interface ResolvedCliTarget {
@@ -199,7 +112,7 @@ function toCliTarget(
 
 // Fallow-ignore-next-line unused-export
 export async function resolveCliTarget(options: {
-   url?: string;
+   url?: string | undefined;
 }): Promise<ResolvedCliTarget> {
    if (!options.url) {
       throw new CliUsageError('missing-target', 'Provide a --url to resolve the target.');
@@ -209,7 +122,7 @@ export async function resolveCliTarget(options: {
 }
 
 export async function resolveOptionalCliTarget(options: {
-   url?: string;
+   url?: string | undefined;
 }): Promise<ResolvedCliTarget | undefined> {
    if (!options.url) {
       return undefined;

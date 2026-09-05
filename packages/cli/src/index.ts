@@ -4,7 +4,7 @@ export {
    createDoctorReport,
    DriverCommandError,
    driverCommandSets,
-   getDriverSessionMetadataPath,
+   getActiveSessionFile,
    getDriverSessionStatus,
    getDriverSocketPath,
    inspectApplicableTarget,
@@ -44,12 +44,34 @@ export type {
    ListDriverCommandsOptions,
    ResolveDocumentTargetInput,
    SerializableDriverCommand,
-   SessionActionOptions,
    TargetType,
 } from '@a11ied/core';
 
 export {
+   buildDriverTranscript,
+   DEFAULT_IDLE_TIMEOUT_MINUTES,
+   DRIVER_MODE_ENV_VAR,
+   formatTranscript,
+   getActiveDriverSession,
+   getPortableCommand,
+   portableCommandTable,
+   resolveDriverMode,
+   resolveRecordingTranscriptPath,
+   resolveStateRoot,
+   resolveTranscriptFormat,
+   selectTranscriptEntries,
    showWcagAxeRule,
    showWcagCoverageSummary,
    showWcagTechnique,
+   STATE_DIR_ENV_VAR,
+   writeDriverTranscript,
+} from '@a11ied/core';
+
+export type {
+   DriverRequestOptions,
+   DriverSessionStart,
+   EphemeralDriverActionOptions,
+   PortableCommandEntry,
+   StartDriverSessionOptions,
+   TranscriptSelection,
 } from '@a11ied/core';

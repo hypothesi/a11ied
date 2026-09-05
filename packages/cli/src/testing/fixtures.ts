@@ -4,15 +4,13 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { extname, resolve } from 'node:path';
 
+import { DRIVER_MODE_ENV_VAR, STATE_DIR_ENV_VAR } from '#core';
+
 const HTTP_STATUS_OK = 200;
 const HTTP_STATUS_NOT_FOUND = 404;
 
 const fixtureRoot = resolve(import.meta.dirname, '../../test/fixtures');
-let cwdLock: Promise<void> = Promise.resolve();
-
-function noopReleaseLock(): void {
-   /* Noop. */
-}
+const { env: processEnv } = process;
 
 export interface TestServerHandle {
    server: ReturnType<typeof createServer>;
@@ -96,23 +94,32 @@ export async function cleanupTempRoots(tempRoots: string[]): Promise<void> {
    await Promise.all(roots.map((root) => rm(root, { recursive: true, force: true })));
 }
 
-export async function withTempDir(
+function restoreEnv(name: string, previous: string | undefined): void {
+   if (previous === undefined) {
+      delete processEnv[name];
+      return;
+   }
+   processEnv[name] = previous;
+}
+
+/**
+ * Runs one test against a fresh per-test state directory. Driver sessions started inside
+ * this process stay in-process; CLIs spawned by `runCli` inherit the same directory and
+ * run a real broker there.
+ */
+export async function withStateDir(
    tempRoots: string[],
-   fn: (tempRoot: string) => Promise<void>,
+   fn: (stateDir: string) => Promise<void>,
 ): Promise<void> {
-   const tempRoot = await createTempRoot(tempRoots);
-   let releaseLock: () => void = noopReleaseLock;
-   const priorLock = cwdLock;
-   cwdLock = new Promise<void>((resolveLock) => {
-      releaseLock = resolveLock;
-   });
-   await priorLock;
-   const previousCwd = process.cwd();
-   process.chdir(tempRoot);
+   const stateDir = await createTempRoot(tempRoots);
+   const previousStateDir = processEnv[STATE_DIR_ENV_VAR],
+         previousMode = processEnv[DRIVER_MODE_ENV_VAR];
+   processEnv[STATE_DIR_ENV_VAR] = stateDir;
+   processEnv[DRIVER_MODE_ENV_VAR] = 'in-process';
    try {
-      await fn(tempRoot);
+      await fn(stateDir);
    } finally {
-      process.chdir(previousCwd);
-      releaseLock();
+      restoreEnv(STATE_DIR_ENV_VAR, previousStateDir);
+      restoreEnv(DRIVER_MODE_ENV_VAR, previousMode);
    }
 }

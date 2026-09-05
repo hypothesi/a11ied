@@ -1,46 +1,21 @@
 import type { Command } from 'commander';
 import type { Platform } from '#contracts';
-import type { DriverCommandSet, ListDriverCommandsOptions } from '#core';
+import type { DriverCommandList, DriverCommandSet, ListDriverCommandsOptions } from '#core';
 import type * as Core from '#core';
-import {
-   addAllowVirtualOption,
-   addEphemeralOption,
-   addJsonOption,
-   addSessionOption,
-   addTargetOption,
-   addVerboseOption,
-} from '../lib/options.js';
+import { addJsonOption, addVerboseOption } from '../lib/options.js';
 import type { CommandExecution } from '../lib/helpers.js';
 import { getPlatformCommandSets, getPlatformTargets } from './drive-key-help.js';
-
-interface DriveActionOptions {
-   json?: boolean;
-   verbose?: boolean;
-   session?: string;
-   target?: string;
-   ephemeral?: boolean;
-   allowVirtual?: boolean;
-}
+import { addDriveAutoStartOptions, type DriveAutoStartOptions } from './drive-options.js';
 
 interface DriveCommandsOptions {
    json?: boolean;
    verbose?: boolean;
-   target?: string;
+   sr?: string;
    commandSet?: string;
    query?: string;
 }
 
 const DRIVE_COMMAND_SET_HELP = `Command set: ${getPlatformCommandSets()}.`;
-
-function addDrivePerformOptions(command: Command): Command {
-   return addVerboseOption(
-      addJsonOption(
-         addEphemeralOption(
-            addAllowVirtualOption(addTargetOption(addSessionOption(command))),
-         ),
-      ),
-   );
-}
 
 function buildCommandListOptions(args: {
    target: Platform | undefined;
@@ -77,17 +52,8 @@ function resolveCommandSet(
    }
 }
 
-function resolveCommandsTarget(args: {
-   rawTarget: string | undefined;
-   parsePlatform: (
-      target: string | undefined,
-      options?: { allowVirtual?: boolean },
-   ) => Platform;
-}): Platform | undefined {
-   if (!args.rawTarget) {
-      return undefined;
-   }
-   return args.parsePlatform(args.rawTarget, { allowVirtual: true });
+function isCommandList(value: unknown): value is DriverCommandList {
+   return typeof value === 'object' && value !== null && 'commandSets' in value;
 }
 
 function buildCommandsExecution(args: {
@@ -98,19 +64,15 @@ function buildCommandsExecution(args: {
    ) => Platform;
    core: typeof Core;
 }): CommandExecution {
-   const target = resolveCommandsTarget({
-      rawTarget: args.options.target,
-      parsePlatform: args.parsePlatform,
-   });
+   const target = args.options.sr
+      ? args.parsePlatform(args.options.sr, { allowVirtual: true })
+      : undefined;
    const commandSet = resolveCommandSet(args.options.commandSet, args.core);
-   const result = args.core.listDriverCommands(
-      buildCommandListOptions({
-         target,
-         commandSet,
-         query: args.options.query,
-      }),
-   ) as unknown as Record<string, unknown>;
-   if (!target) {
+   const list = args.core.listDriverCommands(
+      buildCommandListOptions({ target, commandSet, query: args.options.query }),
+   );
+   const result: Record<string, unknown> = { commandSets: list.commandSets };
+   if (!isCommandList(result) || !target) {
       return { result };
    }
    return { target: { kind: 'driver-target', value: target }, result };
@@ -119,19 +81,19 @@ function buildCommandsExecution(args: {
 function buildDoExamples(): string {
    const examples = [
       '  a11ied sr do next',
-      '  a11ied sr do move-right --target voiceover --ephemeral',
-      '  a11ied sr do move-to-area-bottom --target voiceover --ephemeral',
+      '  a11ied sr do move-right --sr voiceover --ephemeral',
+      '  a11ied sr do move-to-area-bottom --sr voiceover --ephemeral',
    ];
 
    if (process.platform !== 'darwin') {
-      examples.push('  a11ied sr do report-current-focus --target nvda --ephemeral');
+      examples.push('  a11ied sr do report-current-focus --sr nvda --ephemeral');
    }
 
    return `\nExamples:\n${examples.join('\n')}\n\nUse "a11ied sr list" to see every available command.\n`;
 }
 
 export function registerDoCommand(driveCommand: Command): void {
-   addDrivePerformOptions(
+   addDriveAutoStartOptions(
       driveCommand
          .command('do <command>')
          .description(
@@ -140,7 +102,7 @@ export function registerDoCommand(driveCommand: Command): void {
          .option('--command-set <set>', DRIVE_COMMAND_SET_HELP, 'auto')
          .addHelpText('after', buildDoExamples()),
    ).action(
-      async (command: string, options: DriveActionOptions & { commandSet: string }) => {
+      async (command: string, options: DriveAutoStartOptions & { commandSet: string }) => {
          const [{ executeDriveActionCommand }, renderers] = await Promise.all([
             import('../lib/execute.js'),
             import('../renderers/drive.js'),
@@ -148,11 +110,10 @@ export function registerDoCommand(driveCommand: Command): void {
 
          await executeDriveActionCommand({
             subcommand: 'do',
-            action: 'perform',
+            request: { action: 'perform', payload: { command, commandSet: options.commandSet } },
             autoStart: true,
             options,
-            payload: { command, commandSet: options.commandSet },
-            renderText: renderers.renderDriveStatusText,
+            renderText: renderers.renderDriveReadText,
          });
       },
    );
@@ -163,8 +124,8 @@ export function registerListCommand(driveCommand: Command): void {
       addJsonOption(
          driveCommand
             .command('list')
-            .description('List all named commands available for the current target.')
-            .option('--target <target>', `Filter by target: ${getPlatformTargets()}.`)
+            .description('List the named commands a screen reader accepts.')
+            .option('--sr <reader>', `Filter by screen reader: ${getPlatformTargets()}.`)
             .option('--command-set <set>', DRIVE_COMMAND_SET_HELP)
             .option('--query <query>', 'Filter by command name or key sequence.'),
       ),
@@ -172,7 +133,7 @@ export function registerListCommand(driveCommand: Command): void {
       const [{ executeCommand, parsePlatform }, core, renderers] = await Promise.all([
          import('../lib/execute.js'),
          import('#core'),
-         import('../renderers/drive.js'),
+         import('../renderers/drive-commands.js'),
       ]);
 
       await executeCommand(
@@ -187,9 +148,4 @@ export function registerListCommand(driveCommand: Command): void {
          renderers.renderDriveCommandsText,
       );
    });
-}
-
-export function registerCommandSetActions(driveCommand: Command): void {
-   registerDoCommand(driveCommand);
-   registerListCommand(driveCommand);
 }

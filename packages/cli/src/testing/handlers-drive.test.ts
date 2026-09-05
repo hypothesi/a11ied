@@ -1,254 +1,197 @@
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
 import {
-   withTempDir,
+   withStateDir,
    runCli,
    parseJsonOutput,
    EXIT_SUCCESS,
    EXIT_USAGE,
-   TEST_TIMEOUT_SHORT,
+   TEST_TIMEOUT_LONG,
    useTestServer,
 } from './setup.js';
-import { expectFirstErrorMessage, expectJsonLogCursor } from './helpers.js';
+import { expectFirstErrorMessage } from './helpers.js';
 
 const tempRoots: string[] = [];
-useTestServer(tempRoots);
-const virtualTargetArgs = ['--target', 'virtual', '--allow-virtual'];
+const testServer = useTestServer(tempRoots);
+const virtualArgs = ['--sr', 'virtual', '--allow-virtual', '--idle-timeout', '1'];
 
-function getImplicitDriveSessionFile(): string {
-   return resolve(process.cwd(), '.a11ied/state/current-drive-session');
+interface SrResult {
+   status: number;
+   json: Record<string, unknown>;
+   stdout: string;
 }
 
-async function startSession(): Promise<string> {
-   const started = await runCli(['sr', 'start', ...virtualTargetArgs, '--json']);
-   const json = parseJsonOutput(started.stdout);
-   return (json.result as { session: { sessionId: string } }).session.sessionId;
+interface SessionShape {
+   sessionId: string;
+   target: string;
+   url?: string;
 }
 
-async function stopSession(sessionId: string): Promise<void> {
-   await runCli(['sr', 'stop', '--session', sessionId, '--json']);
+interface ActionShape {
+   action: string;
+   session: SessionShape;
+   state: {
+      lastSpokenPhrase: string | null;
+      transcript: Array<{ index: number; at: string; phrase: string; checkpoint?: string }>;
+   };
+   details?: Record<string, unknown>;
 }
 
-async function assertSessionStart(): Promise<string> {
-   const started = await runCli(['sr', 'start', ...virtualTargetArgs, '--json']);
-   const json = parseJsonOutput(started.stdout);
-   const session = (
-      json.result as {
-         session: { sessionId: string; metadataFile: string; target: string };
-      }
-   ).session;
+async function sr(args: string[]): Promise<SrResult> {
+   const result = await runCli(['sr', ...args, '--json']);
+   return { status: result.status, json: parseJsonOutput(result.stdout), stdout: result.stdout };
+}
+
+function resultOf<T>(result: SrResult): T {
+   return result.json.result as T;
+}
+
+function warningCodes(result: SrResult): string[] {
+   return (result.json.warnings as Array<{ code: string }>).map((warning) => warning.code);
+}
+
+/** Runs one scenario in its own state directory and stops whatever session it leaves behind. */
+function withSession(fn: (stateDir: string) => Promise<void>): () => Promise<void> {
+   return () =>
+      withStateDir(tempRoots, async (stateDir) => {
+         try {
+            await fn(stateDir);
+         } finally {
+            await runCli(['sr', 'stop', '--json']);
+         }
+      });
+}
+
+async function assertLifecycle(stateDir: string): Promise<void> {
+   const text = await runCli(['sr', 'start', ...virtualArgs]);
+   expect(text.status).toBe(EXIT_SUCCESS);
+   expect(text.stdout).toContain('Session ready');
+   expect(text.stdout).not.toContain('Session ID');
+
+   const verbose = await runCli(['sr', 'start', ...virtualArgs, '--verbose']);
+   expect(verbose.stdout).toMatch(/Session ID:\s+drv_[a-f0-9]+/);
+   expect(verbose.stdout).toContain('Stopped the previous virtual session');
+
+   const started = await sr(['start', ...virtualArgs]);
    expect(started.status).toBe(EXIT_SUCCESS);
+   expect(warningCodes(started)).toContain('session-replaced');
+   const session = resultOf<{ session: SessionShape }>(started).session;
    expect(session.sessionId).toMatch(/^drv_/);
    expect(session.target).toBe('virtual');
-   return session.sessionId;
-}
 
-async function assertSessionStatus(sessionId: string): Promise<void> {
-   const result = await runCli(['sr', 'status', '--session', sessionId, '--json']);
-   const json = expectJsonLogCursor(result);
-   expect(
-      (json.result as { state: { lastSpokenPhrase: string | null } }).state
-         .lastSpokenPhrase,
-   ).toBeTruthy();
-}
-
-async function assertSessionStop(sessionId: string): Promise<void> {
-   const result = await runCli(['sr', 'stop', '--session', sessionId, '--json']);
-   const json = parseJsonOutput(result.stdout);
-
-   expect(result.status).toBe(EXIT_SUCCESS);
-   expect((json.result as { session: { sessionId: string } }).session.sessionId).toBe(
-      sessionId,
-   );
-}
-
-async function assertStartTextOutput(): Promise<void> {
-   const result = await runCli(['sr', 'start', ...virtualTargetArgs]);
-   const sessionId = result.stdout.match(/Session ID:\s+(drv_[a-f0-9-]+)/)?.[1];
-
-   expect(result.status).toBe(EXIT_SUCCESS);
-   expect(result.stdout).toContain('Drive session ready');
-   expect(result.stdout).toMatch(/Session ID:\s+drv_[a-f0-9-]+/);
-   expect(result.stdout).toContain('Broker PID:');
-   expect(sessionId).toBeTruthy();
-
-   await runCli(['sr', 'stop', '--session', sessionId ?? '', '--json']);
-}
-
-async function assertMissingSessionError(): Promise<void> {
-   const result = await runCli([
-      'sr',
-      'status',
-      '--session',
-      'missing-session',
-      '--json',
-   ]);
-   const json = parseJsonOutput(result.stdout);
-
-   expect(result.status).toBe(EXIT_SUCCESS);
-   expect((json.result as { noSession?: boolean }).noSession).toBe(true);
-}
-
-async function assertNextRequiresSession(): Promise<void> {
-   const result = await runCli(['sr', 'next', ...virtualTargetArgs, '--json']);
-   expectFirstErrorMessage({
-      result,
-      match: /session id is required/i,
-   });
-}
-
-async function assertNoSessionsDir(tempRoot: string): Promise<void> {
-   const sessionsDir = resolve(tempRoot, '.a11ied/state/sessions');
-   let entries: string[] = [];
-   try {
-      entries = await readdir(sessionsDir);
-   } catch {
-      entries = [];
-   }
-   expect(entries).toEqual([]);
-}
-
-async function assertEphemeralAction(tempRoot: string): Promise<void> {
-   const result = await runCli([
-      'sr',
-      'next',
-      ...virtualTargetArgs,
-      '--ephemeral',
-      '--json',
-   ]);
-   const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_SUCCESS);
-   expect((json.result as { action: string }).action).toBe('next');
-   await assertNoSessionsDir(tempRoot);
-}
-
-async function assertVirtualRecordingRejected(): Promise<void> {
-   const result = await runCli([
-      'sr',
-      'start',
-      ...virtualTargetArgs,
-      '--recording',
-      './recordings/virtual.mov',
-      '--json',
-   ]);
-   const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_USAGE);
-   expect((json.errors as Array<{ code: string }>)[0]?.code).toBe(
-      'recording-target-unsupported',
-   );
-}
-
-async function assertReadState(sessionId: string): Promise<void> {
-   const result = await runCli(['sr', 'read', '--session', sessionId, '--json']);
-   const json = expectJsonLogCursor(result);
-   expect(
-      (json.result as { state: { lastSpokenPhrase: string | null } }).state
-         .lastSpokenPhrase,
-   ).toBeTruthy();
-}
-
-async function assertClearLogs(sessionId: string): Promise<void> {
-   await runCli(['sr', 'next', '--session', sessionId, '--json']);
-   const result = await runCli(['sr', 'clear-logs', '--session', sessionId, '--json']);
-   const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_SUCCESS);
-   expect((json.result as { action: string }).action).toBe('clear-logs');
-}
-
-async function assertFocus(sessionId: string): Promise<void> {
-   const result = await runCli([
-      'sr',
-      'focus',
-      '--session',
-      sessionId,
-      '--app',
-      'Test App',
-      '--json',
-   ]);
-   const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_SUCCESS);
-   expect((json.result as { action: string }).action).toBe('focus');
-   expect(
-      (json.result as { details?: { focus?: { status?: string } } }).details?.focus
-         ?.status,
-   ).toBe('skipped');
-}
-
-async function assertLogsAfterClear(sessionId: string): Promise<void> {
-   const result = await runCli(['sr', 'logs', '--session', sessionId, '--json']);
-   const json = parseJsonOutput(result.stdout);
-
-   expect(result.status).toBe(EXIT_SUCCESS);
-   expect(
-      (json.result as { state: { spokenPhraseLog: string[] } }).state.spokenPhraseLog,
-   ).toEqual([]);
-   const verbose = await runCli(['sr', 'logs', '--session', sessionId, '--verbose']);
-   expect(verbose.stdout).toContain('Checkpoints:');
-}
-
-async function assertImplicitSessionReuse(): Promise<void> {
-   const sessionId = await startSession();
-   const status = await runCli(['sr', 'status', '--json']);
-   const statusJson = parseJsonOutput(status.stdout);
-   const stopped = await runCli(['sr', 'stop', '--json']);
-   const stoppedJson = parseJsonOutput(stopped.stdout);
-
+   const status = await sr(['status']);
    expect(status.status).toBe(EXIT_SUCCESS);
-   expect(
-      (statusJson.result as { session: { sessionId: string } }).session.sessionId,
-   ).toBe(sessionId);
+   expect(resultOf<ActionShape>(status).session.sessionId).toBe(session.sessionId);
+   expect(resultOf<ActionShape>(status).state.transcript.length).toBeGreaterThanOrEqual(1);
+   expect(await readFile(resolve(stateDir, 'session.json'), 'utf8')).toContain(session.sessionId);
+
+   const read = await sr(['read']);
+   expect(resultOf<ActionShape>(read).action).toBe('read');
+   expect(resultOf<ActionShape>(read).state.lastSpokenPhrase).toBeTruthy();
+
+   const outPath = resolve(stateDir, 'out', 'transcript.json');
+   const stopped = await sr(['stop', '--out', outPath]);
    expect(stopped.status).toBe(EXIT_SUCCESS);
-   expect(
-      (stoppedJson.result as { session: { sessionId: string } }).session.sessionId,
-   ).toBe(sessionId);
+   expect(resultOf<{ transcriptFiles: Array<{ path: string }> }>(stopped).transcriptFiles[0]?.path).toBe(outPath);
+   const written = JSON.parse(await readFile(outPath, 'utf8')) as { target: string; entries: unknown[] };
+   expect(written.target).toBe('virtual');
+   expect(written.entries.length).toBeGreaterThanOrEqual(1);
+
+   const gone = await sr(['status']);
+   expect(gone.status).toBe(EXIT_SUCCESS);
+   expect(resultOf<{ noSession: boolean }>(gone).noSession).toBe(true);
 }
 
-async function assertStaleImplicitSessionClears(): Promise<void> {
-   const implicitDriveSessionFile = getImplicitDriveSessionFile();
+async function assertNavigationAndTranscript(stateDir: string): Promise<void> {
+   const pageUrl = `${testServer.getBaseUrl()}/basic-page.html`;
+   const started = await sr(['start', pageUrl, ...virtualArgs]);
+   expect(started.status).toBe(EXIT_SUCCESS);
+   expect(resultOf<{ session: SessionShape }>(started).session.url).toBe(pageUrl);
 
-   await mkdir(resolve(process.cwd(), '.a11ied/state'), { recursive: true });
-   await writeFile(implicitDriveSessionFile, 'missing-session\n', 'utf8');
-   const result = await runCli(['sr', 'status', '--json']);
-   const json = parseJsonOutput(result.stdout);
+   for (const verb of ['next', 'previous', 'top', 'bottom', 'escape', 'interact', 'stop-interacting', 'activate']) {
+      const moved = await sr([verb]);
+      expect(moved.status, verb).toBe(EXIT_SUCCESS);
+      expect(resultOf<ActionShape>(moved).action).toBe(verb);
+   }
+   const doNext = await sr(['do', 'next']);
+   expect(resultOf<ActionShape>(doNext).action).toBe('perform');
 
-   expect(result.status).toBe(EXIT_SUCCESS);
-   expect((json.result as { noSession?: boolean }).noSession).toBe(true);
-   await expect(readFile(implicitDriveSessionFile, 'utf8')).rejects.toThrow();
+   const pressed = await sr(['press', 'Tab', 'Tab']);
+   expect(pressed.status).toBe(EXIT_SUCCESS);
+   expect(resultOf<ActionShape>(pressed).details?.keys).toEqual(['Tab', 'Tab']);
+
+   await sr(['checkpoint', 'x']);
+   await sr(['next']);
+   const since = await sr(['transcript', '--since', 'x']);
+   const entries = resultOf<{ transcript: { entries: ActionShape['state']['transcript'] } }>(since).transcript.entries;
+   expect(entries.length).toBeGreaterThanOrEqual(1);
+   expect(entries.every((entry) => entry.checkpoint === undefined)).toBe(true);
+   expect(entries[0]?.at).toMatch(/^\d{4}-/);
+
+   const mdPath = resolve(stateDir, 'transcript.md');
+   const tail = await sr(['transcript', '--tail', '2', '--out', mdPath]);
+   expect(tail.status).toBe(EXIT_SUCCESS);
+   expect(await readFile(mdPath, 'utf8')).toContain('# Transcript: virtual on');
+
+   const missing = await runCli(['sr', 'transcript', '--since', 'nope', '--json']);
+   expectFirstErrorMessage({ result: missing, match: /No checkpoint named "nope"/ });
+
+   const phrase = await runCli(['sr', 'next', '--phrase']);
+   expect(phrase.stdout.trim().split('\n')).toHaveLength(1);
+   expect(phrase.stdout.trim()).toBe(resultOf<ActionShape>(await sr(['read'])).state.lastSpokenPhrase);
+
+   const otherUrl = `${testServer.getBaseUrl()}/dialog.html`;
+   const opened = await sr(['open', otherUrl]);
+   expect(opened.status).toBe(EXIT_SUCCESS);
+   expect(resultOf<ActionShape>(await sr(['status'])).session.url).toBe(otherUrl);
+}
+
+async function assertAutoStart(): Promise<void> {
+   const pressed = await sr(['press', 'Tab', ...virtualArgs]);
+   expect(pressed.status).toBe(EXIT_SUCCESS);
+   expect(warningCodes(pressed)).toContain('session-auto-started');
+   expect(resultOf<ActionShape>(pressed).session.target).toBe('virtual');
+   expect(resultOf<ActionShape>(await sr(['status'])).session.target).toBe('virtual');
+
+   const ignored = await sr(['type', 'hello', '--sr', 'virtual', '--allow-virtual']);
+   expect(warningCodes(ignored)).not.toContain('session-auto-started');
+
+   await sr(['stop']);
+   const next = await runCli(['sr', 'next', '--json']);
+   expectFirstErrorMessage({ result: next, match: /No active screen reader session/ });
+   const stop = await runCli(['sr', 'stop', '--json']);
+   expectFirstErrorMessage({ result: stop, match: /No active screen reader session/ });
+}
+
+async function assertGuards(): Promise<void> {
+   const recording = await sr(['start', ...virtualArgs, '--recording', './recordings/virtual.mov']);
+   expect(recording.status).toBe(EXIT_USAGE);
+   expect((recording.json.errors as Array<{ code: string }>)[0]?.code).toBe('recording-target-unsupported');
+
+   await sr(['start', ...virtualArgs]);
+   const focused = await sr(['focus', '--app', 'Test App']);
+   expect(focused.status).toBe(EXIT_SUCCESS);
+   expect((resultOf<ActionShape>(focused).details?.focus as { status: string }).status).toBe('skipped');
+   const bare = await runCli(['sr', 'focus', '--json']);
+   expectFirstErrorMessage({ result: bare, match: /did not open an app/ });
+
+   const list = await runCli(['sr', 'list', '--sr', 'virtual']);
+   expect(list.stdout).toContain('Portable');
+   expect(list.stdout).toContain('bottom');
+   expect(list.stdout).not.toContain('move-right');
+   const unknown = await runCli(['sr', 'do', 'move-right', '--json']);
+   expectFirstErrorMessage({ result: unknown, match: /was not found/ });
 }
 
 describe('cli sr lifecycle commands', () => {
-   it(
-      'starts, checks status, and stops a session',
-      () =>
-         withTempDir(tempRoots, async () => {
-            await assertStartTextOutput();
-            const sessionId = await assertSessionStart();
-            await assertSessionStatus(sessionId);
-            await assertSessionStop(sessionId);
-            await assertMissingSessionError();
-         }),
-      TEST_TIMEOUT_SHORT,
-   );
+   it('starts, replaces, reports, reads, and stops the one active session', withSession(assertLifecycle), TEST_TIMEOUT_LONG);
 
-   it(
-      'handles ephemeral and action scenarios',
-      () =>
-         withTempDir(tempRoots, async (tempRoot) => {
-            await assertNextRequiresSession();
-            await assertImplicitSessionReuse();
-            await assertStaleImplicitSessionClears();
-            await assertVirtualRecordingRejected();
-            await assertEphemeralAction(tempRoot);
-            const sessionId = await startSession();
-            await assertReadState(sessionId);
-            await assertClearLogs(sessionId);
-            await assertFocus(sessionId);
-            await assertLogsAfterClear(sessionId);
-            await stopSession(sessionId);
-         }),
-      TEST_TIMEOUT_SHORT,
-   );
+   it('navigates with the portable verbs and keeps a timestamped transcript', withSession(assertNavigationAndTranscript), TEST_TIMEOUT_LONG);
+
+   it('auto-starts for press and type, and rejects other verbs without a session', withSession(assertAutoStart), TEST_TIMEOUT_LONG);
+
+   it('rejects virtual recording, handles focus, and lists only portable commands for virtual', withSession(assertGuards), TEST_TIMEOUT_LONG);
 });

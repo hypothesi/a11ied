@@ -1,22 +1,15 @@
 import type { Command } from 'commander';
-import {
-   addAllowVirtualOption,
-   addEphemeralOption,
-   addJsonOption,
-   addSessionOption,
-   addTargetOption,
-   addVerboseOption,
-} from '../lib/options.js';
+import { portableDriverVerbSchema, type DriverFocusTarget } from '#contracts';
+import { getPortableCommand } from '#core';
+import { addPhraseOption } from '../lib/options.js';
 import { getDriveKeyHelp } from './drive-key-help.js';
-
-interface DriveActionOptions {
-   json?: boolean;
-   verbose?: boolean;
-   session?: string;
-   target?: string;
-   ephemeral?: boolean;
-   allowVirtual?: boolean;
-}
+import {
+   addDriveActionOptions,
+   addDriveAutoStartOptions,
+   addDriveNavigationOptions,
+   type DriveActionOptions,
+   type DriveAutoStartOptions,
+} from './drive-options.js';
 
 interface FocusActionOptions extends DriveActionOptions {
    app?: string;
@@ -27,86 +20,81 @@ interface FocusActionOptions extends DriveActionOptions {
    match?: string;
 }
 
-interface SimpleActionConfig {
-   name: string;
-   description: string;
-   renderer: 'status' | 'logs';
+async function loadDriveRunner(): Promise<{
+   executeDriveActionCommand: (typeof import('../lib/execute.js'))['executeDriveActionCommand'];
+   renderDriveReadText: (typeof import('../renderers/drive.js'))['renderDriveReadText'];
+}> {
+   const [{ executeDriveActionCommand }, { renderDriveReadText }] = await Promise.all([
+      import('../lib/execute.js'),
+      import('../renderers/drive.js'),
+   ]);
+   return { executeDriveActionCommand, renderDriveReadText };
 }
 
-function addDriveActionOptions(command: Command): Command {
-   return addVerboseOption(
-      addJsonOption(
-         addEphemeralOption(
-            addAllowVirtualOption(addTargetOption(addSessionOption(command))),
-         ),
-      ),
-   );
+/** Registers next, previous, top, bottom, interact, stop-interacting, activate, and escape. */
+export function registerNavigationCommands(driveCommand: Command): void {
+   for (const verb of portableDriverVerbSchema.options) {
+      addDriveNavigationOptions(
+         driveCommand.command(verb).description(getPortableCommand(verb).description),
+      ).action(async (options: DriveActionOptions) => {
+         const { executeDriveActionCommand, renderDriveReadText } = await loadDriveRunner();
+         await executeDriveActionCommand({
+            subcommand: verb,
+            request: { action: verb },
+            options,
+            renderText: renderDriveReadText,
+         });
+      });
+   }
 }
 
-function registerSimpleAction(driveCommand: Command, config: SimpleActionConfig): void {
-   addDriveActionOptions(
-      driveCommand.command(config.name).description(config.description),
+export function registerReadCommand(driveCommand: Command): void {
+   addDriveNavigationOptions(
+      driveCommand
+         .command('read')
+         .description('Read the current item: the last phrase and item text, without moving.'),
    ).action(async (options: DriveActionOptions) => {
-      const [{ executeDriveActionCommand }, renderers] = await Promise.all([
-         import('../lib/execute.js'),
-         import('../renderers/drive.js'),
-      ]);
-      let renderText = renderers.renderDriveStatusText;
-      if (config.renderer === 'logs') {
-         renderText = renderers.renderDriveLogsText;
-      }
-
+      const { executeDriveActionCommand, renderDriveReadText } = await loadDriveRunner();
       await executeDriveActionCommand({
-         subcommand: config.name,
-         action: config.name as 'next',
+         subcommand: 'read',
+         request: { action: 'read' },
          options,
-         payload: undefined,
-         renderText,
+         renderText: renderDriveReadText,
       });
    });
 }
 
 export function registerPressCommand(driveCommand: Command): void {
-   addDriveActionOptions(
-      driveCommand
-         .command('press <keys>')
-         .description('Send one or more key chords to the screen reader.')
-         .addHelpText('after', () => getDriveKeyHelp()),
-   ).action(async (keys: string, options: DriveActionOptions) => {
-      const [{ executeDriveActionCommand }, renderers] = await Promise.all([
-         import('../lib/execute.js'),
-         import('../renderers/drive.js'),
-      ]);
-
+   addPhraseOption(
+      addDriveAutoStartOptions(
+         driveCommand
+            .command('press <chord...>')
+            .description('Press key chords in order, one chord per argument.')
+            .addHelpText('after', () => getDriveKeyHelp()),
+      ),
+   ).action(async (chords: string[], options: DriveAutoStartOptions) => {
+      const { executeDriveActionCommand, renderDriveReadText } = await loadDriveRunner();
       await executeDriveActionCommand({
          subcommand: 'press',
-         action: 'key',
+         request: { action: 'press', payload: { keys: chords } },
          autoStart: true,
          options,
-         payload: { keys },
-         renderText: renderers.renderDriveStatusText,
+         renderText: renderDriveReadText,
       });
    });
 }
 
 export function registerTypeCommand(driveCommand: Command): void {
-   addDriveActionOptions(
-      driveCommand
-         .command('type <text>')
-         .description('Type text through the active driver target.'),
-   ).action(async (text: string, options: DriveActionOptions) => {
-      const [{ executeDriveActionCommand }, renderers] = await Promise.all([
-         import('../lib/execute.js'),
-         import('../renderers/drive.js'),
-      ]);
-
+   addDriveAutoStartOptions(
+      driveCommand.command('type <text>').description('Type text through the active target.'),
+   ).action(async (text: string, options: DriveAutoStartOptions) => {
+      const { executeDriveActionCommand, renderDriveReadText } = await loadDriveRunner();
       await executeDriveActionCommand({
          subcommand: 'type',
-         action: 'type',
+         request: { action: 'type', payload: { text } },
          autoStart: true,
          options,
-         payload: { text },
-         renderText: renderers.renderDriveStatusText,
+         renderText: renderDriveReadText,
       });
    });
 }
@@ -116,41 +104,36 @@ function parsePidValue(pid: string | undefined): number | undefined {
       return undefined;
    }
    const parsed = Number(pid);
-   if (Number.isNaN(parsed)) {
-      return undefined;
-   }
-   return parsed;
+   return Number.isNaN(parsed) ? undefined : parsed;
 }
 
-function buildFocusEntries(options: FocusActionOptions): Array<[string, unknown]> {
-   return [
-      ['appName', options.app],
-      ['bundleId', options.bundleId],
-      ['processName', options.process],
-      ['windowTitle', options.windowTitle],
-      ['match', options.match],
-      ['pid', parsePidValue(options.pid)],
-   ];
-}
-
-function buildFocusPayload(options: FocusActionOptions): Record<string, unknown> {
-   const payload: Record<string, unknown> = {};
-   for (const [key, value] of buildFocusEntries(options)) {
-      if (value !== undefined && value !== '') {
-         payload[key] = value;
-      }
+function buildFocusPayload(options: FocusActionOptions): DriverFocusTarget | undefined {
+   const payload: DriverFocusTarget = {};
+   if (options.app) {
+      payload.appName = options.app;
    }
-   if (!payload.match && payload.windowTitle) {
-      payload.match = 'contains';
+   if (options.bundleId) {
+      payload.bundleId = options.bundleId;
    }
-   return payload;
+   if (options.process) {
+      payload.processName = options.process;
+   }
+   if (options.windowTitle) {
+      payload.windowTitle = options.windowTitle;
+      payload.match = options.match === 'exact' ? 'exact' : 'contains';
+   }
+   const pid = parsePidValue(options.pid);
+   if (pid !== undefined) {
+      payload.pid = pid;
+   }
+   return Object.keys(payload).length > 0 ? payload : undefined;
 }
 
 export function registerFocusCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('focus')
-         .description('Focus a window so the screen reader follows the right app.')
+         .description('Bring a window to the front. With no options, refocus the app the session opened.')
          .option('--app <name>', 'macOS app name to bring to the front.')
          .option('--bundle-id <id>', 'macOS bundle identifier to focus.')
          .option('--process <name>', 'Windows process name to focus.')
@@ -158,42 +141,12 @@ export function registerFocusCommand(driveCommand: Command): void {
          .option('--window-title <title>', 'Window title to focus.')
          .option('--match <mode>', 'Window title match: contains or exact.'),
    ).action(async (options: FocusActionOptions) => {
-      const [{ executeDriveActionCommand }, renderers] = await Promise.all([
-         import('../lib/execute.js'),
-         import('../renderers/drive.js'),
-      ]);
-
+      const { executeDriveActionCommand, renderDriveReadText } = await loadDriveRunner();
       await executeDriveActionCommand({
          subcommand: 'focus',
-         action: 'focus',
+         request: { action: 'focus', payload: buildFocusPayload(options) },
          options,
-         payload: buildFocusPayload(options),
-         renderText: renderers.renderDriveStatusText,
-      });
-   });
-}
-
-export function registerClearLogsCommand(driveCommand: Command): void {
-   addVerboseOption(
-      addJsonOption(
-         addSessionOption(
-            driveCommand
-               .command('clear-logs')
-               .description('Clear captured speech and action logs.'),
-         ),
-      ),
-   ).action(async (options: { json?: boolean; verbose?: boolean; session?: string }) => {
-      const [{ executeDriveActionCommand }, renderers] = await Promise.all([
-         import('../lib/execute.js'),
-         import('../renderers/drive.js'),
-      ]);
-
-      await executeDriveActionCommand({
-         subcommand: 'clear-logs',
-         action: 'clear-logs',
-         options,
-         payload: undefined,
-         renderText: renderers.renderDriveLogsText,
+         renderText: renderDriveReadText,
       });
    });
 }
@@ -202,43 +155,14 @@ export function registerCheckpointCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('checkpoint <label>')
-         .description('Record a named checkpoint in the current session.'),
+         .description('Mark a named point in the transcript for --since.'),
    ).action(async (label: string, options: DriveActionOptions) => {
-      const [{ executeDriveActionCommand }, renderers] = await Promise.all([
-         import('../lib/execute.js'),
-         import('../renderers/drive.js'),
-      ]);
-
+      const { executeDriveActionCommand, renderDriveReadText } = await loadDriveRunner();
       await executeDriveActionCommand({
          subcommand: 'checkpoint',
-         action: 'checkpoint',
+         request: { action: 'checkpoint', payload: { label } },
          options,
-         payload: { label },
-         renderText: renderers.renderDriveStatusText,
+         renderText: renderDriveReadText,
       });
-   });
-}
-
-export function registerNextCommand(driveCommand: Command): void {
-   registerSimpleAction(driveCommand, {
-      name: 'next',
-      description: 'Move to the next screen reader element. Requires an active session.',
-      renderer: 'status',
-   });
-}
-
-export function registerReadCommand(driveCommand: Command): void {
-   registerSimpleAction(driveCommand, {
-      name: 'read',
-      description: 'Read the current driver state.',
-      renderer: 'status',
-   });
-}
-
-export function registerLogsCommand(driveCommand: Command): void {
-   registerSimpleAction(driveCommand, {
-      name: 'logs',
-      description: 'Read captured speech and action logs.',
-      renderer: 'logs',
    });
 }

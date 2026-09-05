@@ -2,12 +2,13 @@ import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
 import { afterAll, afterEach, beforeAll } from 'vitest';
 
+import { DRIVER_MODE_ENV_VAR } from '#core';
 import { cleanupTempRoots, createTestServer, type TestServerHandle } from './fixtures.js';
 export {
    createTestServer,
    cleanupTempRoots,
    type TestServerHandle,
-   withTempDir,
+   withStateDir,
 } from './fixtures.js';
 
 export const EXIT_SUCCESS = 0;
@@ -89,7 +90,8 @@ function captureProcessOutput(): {
 function getChildEnv(): NodeJS.ProcessEnv {
    const inherited = Object.fromEntries(
       Object.entries(processEnv).filter(([key]) => {
-         if (key === 'NODE_OPTIONS') {
+         if (key === 'NODE_OPTIONS' || key === DRIVER_MODE_ENV_VAR) {
+            // Spawned CLIs run the real broker; only this process stays in-process.
             return false;
          }
          if (key.startsWith('VITEST')) {

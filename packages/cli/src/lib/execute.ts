@@ -1,20 +1,21 @@
 import {
    cliExitCodes,
    type CliCommandFamily,
+   type CliMessage,
    type CliOutputEnvelope,
+   type DriverActionRequest,
    type Platform,
 } from '#contracts';
 import {
    CliUsageError,
+   getActiveDriverSession,
    resolveAvailableDefaultTarget,
+   resolveDriverMode,
    runDriverSessionAction,
    runEphemeralDriverAction,
    startDriverSession,
 } from '#core';
-import {
-   persistImplicitDriveSession,
-   withImplicitDriveSessionGuard,
-} from './drive-session.js';
+import { parseTimeoutMs, type DriveAutoStartOptions } from '../commands/drive-options.js';
 import { errorLine } from './format.js';
 import {
    type CommandExecution,
@@ -22,17 +23,15 @@ import {
    normalizeError,
    printOutput,
 } from './helpers.js';
-import {
-   buildVirtualTargetGuardOptions,
-   parsePlatform,
-   resolveDriveSession,
-} from './resolvers.js';
+import { buildVirtualTargetGuardOptions, parsePlatform } from './resolvers.js';
 
 export { parsePlatform, resolveOptionalCliTarget } from './resolvers.js';
 // Fallow-ignore-next-line unused-export
 export { resolveCliTarget } from './resolvers.js';
 // Fallow-ignore-next-line unused-export
 export { resolveRunAxeSelection } from './resolvers.js';
+
+type RenderText = (envelope: CliOutputEnvelope, options: { verbose: boolean }) => string;
 
 function resolveExitCode(execution: CommandExecution, ok: boolean): number {
    if (execution.exitCode !== undefined) {
@@ -114,7 +113,7 @@ export async function executeCommand(
       verbose?: boolean | undefined;
    },
    handler: () => Promise<CommandExecution> | CommandExecution,
-   renderText: (envelope: CliOutputEnvelope, options: { verbose: boolean }) => string,
+   renderText: RenderText,
 ): Promise<void> {
    const startedAt = new Date();
 
@@ -140,167 +139,104 @@ export async function executeCommand(
    }
 }
 
-type DriveAction =
-   | 'next'
-   | 'previous'
-   | 'key'
-   | 'type'
-   | 'perform'
-   | 'interact'
-   | 'stop-interacting'
-   | 'click-current-item'
-   | 'read'
-   | 'logs'
-   | 'clear-logs'
-   | 'checkpoint'
-   | 'focus';
+/** Raised by every sr verb that needs a session when none is active. */
+export function createNoSessionError(): CliUsageError {
+   return new CliUsageError(
+      'missing-session',
+      'No active screen reader session. Start one with "a1 sr start".',
+   );
+}
+
+/** Builds the warnings that explain which screen reader was chosen when --sr was omitted. */
+export function buildDefaultTargetWarnings(
+   fallback: Awaited<ReturnType<typeof resolveAvailableDefaultTarget>>,
+): CliMessage[] {
+   const warnings: CliMessage[] = [
+      { code: 'default-target-selected', message: fallback.message },
+   ];
+   if (fallback.warning) {
+      warnings.push({ code: 'virtual-target-simulation-warning', message: fallback.warning });
+   }
+   return warnings;
+}
+
+/** Resolves --sr and --allow-virtual to a target, defaulting to the platform reader. */
+export async function resolveScreenReaderTarget(options: {
+   sr?: string | undefined;
+   allowVirtual?: boolean | undefined;
+}): Promise<{ target: Platform; warnings: CliMessage[] }> {
+   if (options.sr) {
+      return {
+         target: parsePlatform(options.sr, buildVirtualTargetGuardOptions(options.allowVirtual)),
+         warnings: [],
+      };
+   }
+   const fallback = await resolveAvailableDefaultTarget();
+   return { target: fallback.target, warnings: buildDefaultTargetWarnings(fallback) };
+}
 
 interface DriveActionCommandInput {
    subcommand: string;
-   action: DriveAction;
+   request: DriverActionRequest;
    autoStart?: boolean;
-   options: {
-      json?: boolean;
-      verbose?: boolean;
-      session?: string;
-      target?: string;
-      ephemeral?: boolean;
-      allowVirtual?: boolean;
-   };
-   payload: Record<string, unknown> | undefined;
-   renderText: (envelope: CliOutputEnvelope, options: { verbose: boolean }) => string;
+   options: DriveAutoStartOptions;
+   renderText: RenderText;
 }
 
-async function resolveEphemeralTarget(resolved: { target?: Platform }): Promise<{
-   target: Platform;
-   warnings?: Array<{ code: string; message: string }>;
-}> {
-   if (resolved.target) {
-      return { target: resolved.target };
+function renderPhraseText(envelope: CliOutputEnvelope): string {
+   const result = envelope.result;
+   if (!result || typeof result.state !== 'object' || result.state === null) {
+      return '';
    }
-
-   const fallback = await resolveAvailableDefaultTarget();
-   const warnings: Array<{ code: string; message: string }> = [
-      {
-         code: 'default-target-selected',
-         message: fallback.message,
-      },
-   ];
-   if (fallback.warning) {
-      warnings.push({
-         code: 'virtual-target-simulation-warning',
-         message: fallback.warning,
-      });
-   }
-   return { target: fallback.target, warnings };
+   const phrase = 'lastSpokenPhrase' in result.state ? result.state.lastSpokenPhrase : '';
+   return typeof phrase === 'string' ? phrase : '';
 }
 
-async function runEphemeralAction(
-   input: DriveActionCommandInput,
-   resolved: { target?: Platform },
-): Promise<CommandExecution> {
-   const { target, warnings } = await resolveEphemeralTarget(resolved);
-   let actionOptions: { payload: Record<string, unknown> } | undefined = undefined;
-   if (input.payload) {
-      actionOptions = { payload: input.payload };
-   }
-   const result = await runEphemeralDriverAction(target, input.action, actionOptions);
-   const execution: CommandExecution = {
-      target: { kind: 'driver-target', value: target },
-      result,
-   };
-   if (warnings) {
-      execution.warnings = warnings;
-   }
-   return execution;
+async function runEphemeral(input: DriveActionCommandInput): Promise<CommandExecution> {
+   const { target, warnings } = await resolveScreenReaderTarget(input.options);
+   const result = await runEphemeralDriverAction({
+      target,
+      request: input.request,
+      timeoutMs: parseTimeoutMs(input.options.timeout),
+   });
+   return { target: { kind: 'driver-target', value: target }, result, warnings };
 }
 
-async function resolveAutoStartTarget(options: {
-   target?: string;
-   allowVirtual?: boolean;
-}): Promise<{ platform: Platform; warnings: Array<{ code: string; message: string }> }> {
-   let targetStr = options.target;
-   let allowVirtual = options.allowVirtual;
-   const warnings: Array<{ code: string; message: string }> = [];
-
-   if (!targetStr) {
-      const fallback = await resolveAvailableDefaultTarget();
-      warnings.push({ code: 'default-target-selected', message: fallback.message });
-      if (fallback.warning) {
-         warnings.push({
-            code: 'virtual-target-simulation-warning',
-            message: fallback.warning,
-         });
-      }
-      targetStr = fallback.target;
-      if (fallback.target === 'virtual') {
-         allowVirtual = true;
-      }
-   }
-
-   return {
-      platform: parsePlatform(targetStr, buildVirtualTargetGuardOptions(allowVirtual)),
-      warnings,
-   };
-}
-
-async function runAutoStartAction(
-   input: DriveActionCommandInput,
-): Promise<CommandExecution> {
-   const { platform, warnings } = await resolveAutoStartTarget(input.options);
-   const session = await startDriverSession(platform, process.cwd());
-   await persistImplicitDriveSession(session.sessionId);
-
-   let actionOptions: { payload: Record<string, unknown> } | undefined = undefined;
-   if (input.payload) {
-      actionOptions = { payload: input.payload };
-   }
-   const result = await runDriverSessionAction(
-      session.sessionId,
-      input.action,
-      actionOptions,
-   );
-
-   const execution: CommandExecution = {
-      target: { kind: 'driver-session', value: session.sessionId },
-      result,
-   };
-   if (warnings.length > 0) {
-      execution.warnings = warnings;
-   }
-   return execution;
+async function runAutoStart(input: DriveActionCommandInput): Promise<CommandExecution> {
+   const { target, warnings } = await resolveScreenReaderTarget(input.options);
+   const started = await startDriverSession({ target, mode: resolveDriverMode() });
+   const result = await runDriverSessionAction(input.request, {
+      timeoutMs: parseTimeoutMs(input.options.timeout),
+   });
+   warnings.push({
+      code: 'session-auto-started',
+      message: `No session was active, so a ${started.session.target} session was started.`,
+   });
+   return { target: { kind: 'driver-session', value: target }, result, warnings };
 }
 
 async function runDriveAction(input: DriveActionCommandInput): Promise<CommandExecution> {
-   const sessionOptions = input.autoStart
-      ? { ...input.options, allowMissing: true as const }
-      : input.options;
-   const resolved = await resolveDriveSession(sessionOptions);
-
-   if (resolved.ephemeral) {
-      return runEphemeralAction(input, resolved);
+   if (input.options.ephemeral) {
+      return runEphemeral(input);
    }
-
-   if (!resolved.sessionId) {
+   const session = await getActiveDriverSession();
+   if (!session) {
       if (input.autoStart) {
-         return runAutoStartAction(input);
+         return runAutoStart(input);
       }
-      throw new CliUsageError('missing-session', 'Session ID is required.');
+      throw createNoSessionError();
    }
-   const sessionId = resolved.sessionId;
-   let actionOptions: { payload: Record<string, unknown> } | undefined = undefined;
-   if (input.payload) {
-      actionOptions = { payload: input.payload };
+   const warnings: CliMessage[] = [];
+   if (input.options.sr && input.options.sr !== session.target) {
+      warnings.push({
+         code: 'session-target-ignored',
+         message: `A ${session.target} session is active; --sr ${input.options.sr} only applies when a session has to be started.`,
+      });
    }
-   const result = await withImplicitDriveSessionGuard({
-      source: resolved.sessionSource,
-      run: () => runDriverSessionAction(sessionId, input.action, actionOptions),
+   const result = await runDriverSessionAction(input.request, {
+      timeoutMs: parseTimeoutMs(input.options.timeout),
    });
-
-   return {
-      target: { kind: 'driver-session', value: sessionId },
-      result,
-   };
+   return { target: { kind: 'driver-session', value: session.target }, result, warnings };
 }
 
 // Fallow-ignore-next-line unused-export
@@ -316,6 +252,6 @@ export async function executeDriveActionCommand(
          verbose: input.options.verbose,
       },
       () => runDriveAction(input),
-      input.renderText,
+      input.options.phrase ? renderPhraseText : input.renderText,
    );
 }

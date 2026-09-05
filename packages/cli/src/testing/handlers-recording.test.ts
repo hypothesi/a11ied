@@ -6,7 +6,7 @@ import {
    TEST_TIMEOUT_SHORT,
    parseJsonOutput,
    runCliInProcess,
-   withTempDir,
+   withStateDir,
 } from './setup.js';
 
 const coreMocks = vi.hoisted(() => ({
@@ -28,15 +28,15 @@ afterEach(() => {
    coreMocks.startDriverSessionMock.mockReset();
 });
 
-async function runDriveRecordingSmoke(): Promise<void> {
-   coreMocks.startDriverSessionMock.mockResolvedValueOnce(
-      createMockDriveSession(process.cwd()),
-   );
+async function runDriveRecordingSmoke(stateDir: string): Promise<void> {
+   coreMocks.startDriverSessionMock.mockResolvedValueOnce({
+      session: createMockDriveSession(stateDir),
+   });
 
    const result = await runCliInProcess([
       'sr',
       'start',
-      '--target',
+      '--sr',
       'voiceover',
       '--recording',
       './recordings/voiceover.mov',
@@ -47,9 +47,11 @@ async function runDriveRecordingSmoke(): Promise<void> {
 
    expect(result.status).toBe(EXIT_SUCCESS);
    expect(coreMocks.startDriverSessionMock).toHaveBeenCalledWith(
-      'voiceover',
-      process.cwd(),
-      './recordings/voiceover.mov',
+      expect.objectContaining({
+         target: 'voiceover',
+         mode: 'in-process',
+         recordingPath: './recordings/voiceover.mov',
+      }),
    );
    expect(
       (json.result as { session: { recording: { path: string } } }).session.recording
@@ -60,7 +62,7 @@ async function runDriveRecordingSmoke(): Promise<void> {
 describe('cli recording flag wiring', () => {
    it(
       'passes recording through sr start',
-      () => withTempDir(tempRoots, runDriveRecordingSmoke),
+      () => withStateDir(tempRoots, runDriveRecordingSmoke),
       TEST_TIMEOUT_SHORT,
    );
 });

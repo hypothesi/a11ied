@@ -4,9 +4,6 @@ import {
    getPlatformTargets,
 } from '../commands/drive-key-help.js';
 
-const SESSION_OPTION_DESCRIPTION =
-   'Reuse an existing screen-reader session. Defaults to the current session or $A11IED_DRIVE_SESSION when available.';
-
 export function addJsonOption(command: Command): Command {
    return command.option('--json', 'Print JSON instead of human-readable text.');
 }
@@ -23,21 +20,10 @@ export function addWcagVersionOption(command: Command): Command {
    );
 }
 
-export function addSessionOption(command: Command): Command {
-   return command.option('--session <id>', SESSION_OPTION_DESCRIPTION);
-}
-
-export function addEphemeralOption(command: Command): Command {
+export function addScreenReaderOption(command: Command): Command {
    return command.option(
-      '--ephemeral',
-      'Run one action in a temporary session and tear it down immediately.',
-   );
-}
-
-export function addTargetOption(command: Command): Command {
-   return command.option(
-      '--target <platform>',
-      `Choose one target: ${getPlatformTargets()}. Defaults to an available ${getPlatformScreenReaders()} target, then falls back to virtual as a last resort. Use --allow-virtual to explicitly request simulation.`,
+      '--sr <reader>',
+      `Screen reader to drive: ${getPlatformTargets()}. Defaults to an available ${getPlatformScreenReaders()} target, then falls back to virtual as a last resort. Use --allow-virtual to explicitly request simulation.`,
    );
 }
 
@@ -52,5 +38,19 @@ export function addRecordingOption(command: Command): Command {
    return command.option(
       '--recording <path>',
       'Write one screen recording to the given .mov or .mp4 path when the target supports it.',
+   );
+}
+
+export function addTimeoutOption(command: Command): Command {
+   return command.option(
+      '--timeout <ms>',
+      'Bound the screen reader command in milliseconds instead of using the built-in limits.',
+   );
+}
+
+export function addPhraseOption(command: Command): Command {
+   return command.option(
+      '--phrase',
+      'Print only the last spoken phrase, one line, for shell loops.',
    );
 }
