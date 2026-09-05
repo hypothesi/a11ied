@@ -1,4 +1,4 @@
-export { renderRunAxeText } from './axe.js';
+export { renderRunAxeText, renderMultiAxeText } from './axe.js';
 export { renderDoctorEnvelopeText } from './doctor.js';
 export { renderApplicableText, renderCriterionApplicabilityText } from './inspect.js';
 export {

@@ -207,21 +207,17 @@ function formatVerdict(verdict: AxeVerdict): string {
    return `${badge('fail')}  ${count(verdict.failingFindings.length, 'finding')} at or above --fail-on ${verdict.failOn}`;
 }
 
-// Fallow-ignore-next-line unused-export
-export function renderRunAxeText(
-   envelope: CliOutputEnvelope,
-   options: RenderOptions,
-): string {
-   const result = envelope.result as {
-      url: string;
-      selection: { kind: string; criterion?: string; level?: string; ruleIds?: string[] };
-      ruleIds: string[];
-      violations: AxeRule[];
-      passes: AxeRule[];
-      incomplete: AxeRule[];
-      verdict: AxeVerdict;
-   };
+interface AxeReport {
+   url: string;
+   selection: { kind: string; criterion?: string; level?: string; ruleIds?: string[] };
+   ruleIds: string[];
+   violations: AxeRule[];
+   passes: AxeRule[];
+   incomplete: AxeRule[];
+   verdict: AxeVerdict;
+}
 
+function renderOneAxeReport(result: AxeReport, options: RenderOptions): string[] {
    const lines = [
       title('axe scan'),
       ...indent(
@@ -258,5 +254,32 @@ export function renderRunAxeText(
       lines.push(...section('Rule ids', [result.ruleIds.join(', ') || dim('none')]));
    }
 
-   return lines.join('\n');
+   return lines;
+}
+
+// Fallow-ignore-next-line unused-export
+export function renderRunAxeText(
+   envelope: CliOutputEnvelope,
+   options: RenderOptions,
+): string {
+   return renderOneAxeReport(envelope.result as unknown as AxeReport, options).join('\n');
+}
+
+// Fallow-ignore-next-line unused-export
+export function renderMultiAxeText(
+   envelope: CliOutputEnvelope,
+   options: RenderOptions,
+): string {
+   const result = envelope.result as unknown as {
+      targets: Array<{ target: { value: string }; result: AxeReport }>;
+   };
+
+   return result.targets
+      .map((entry, index) => {
+         const header = title(
+            `Target ${index + 1} of ${result.targets.length}: ${entry.target.value}`,
+         );
+         return [header, ...renderOneAxeReport(entry.result, options)].join('\n');
+      })
+      .join('\n\n');
 }

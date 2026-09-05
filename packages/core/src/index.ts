@@ -76,6 +76,8 @@ export {
    buildBaselineFromViolations,
    evaluateAxeVerdict,
 } from './axe/verdict.js';
+export { buildAxeSarifLog, type AxeSarifLog } from './axe/sarif.js';
+export type { PageCookie } from './browser/page-setup.js';
 
 const cliCommands: CliCommand[] = [
    {

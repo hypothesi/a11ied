@@ -8,8 +8,14 @@ import {
 } from '#contracts';
 import type * as Core from '#core';
 import type { DocumentLoad } from '#core';
+import {
+   parseCookies,
+   parseHeaders,
+   parseViewport,
+   type AxeScanCliOptions,
+} from './axe-scan-options.js';
 
-export interface AxeActionOptions {
+export interface AxeActionOptions extends AxeScanCliOptions {
    json?: boolean;
    verbose?: boolean;
    html?: string;
@@ -36,14 +42,39 @@ function parseTimeoutMs(timeout: string | undefined): number | undefined {
    return Number.parseInt(timeout, 10);
 }
 
+function buildScanOptions(
+   core: typeof Core,
+   options: AxeActionOptions,
+   load: DocumentLoad,
+): {
+   timeoutMs: number | undefined;
+   selector: string | undefined;
+   exclude: string | undefined;
+   waitFor: string | undefined;
+   viewport: { width: number; height: number } | undefined;
+   extraHeaders: Record<string, string> | undefined;
+   cookies: Array<{ name: string; value: string; url: string }> | undefined;
+} {
+   const url = load.kind === 'goto' ? load.url : undefined;
+   return {
+      timeoutMs: parseTimeoutMs(options.timeout),
+      selector: options.selector,
+      exclude: options.exclude,
+      waitFor: options.waitFor,
+      viewport: parseViewport(core.CliUsageError, options.viewport),
+      extraHeaders: parseHeaders(core.CliUsageError, options.header),
+      cookies: parseCookies(core.CliUsageError, options.cookie, url),
+   };
+}
+
 async function runAxeForSelection(args: {
    core: typeof Core;
    load: DocumentLoad;
    selection: RunAxeSelection;
    wcagVersion: string;
-   timeoutMs: number | undefined;
+   scanOptions: ReturnType<typeof buildScanOptions>;
 }): Promise<AxeRunResult> {
-   const base = { wcagVersion: args.wcagVersion, timeoutMs: args.timeoutMs };
+   const base = { wcagVersion: args.wcagVersion, ...args.scanOptions };
 
    if (args.selection.kind === 'criterion') {
       return args.core.runAxe(args.load, {
@@ -137,7 +168,7 @@ export async function handleAxeAction(
       load: resolved.load,
       selection,
       wcagVersion: options.wcag,
-      timeoutMs: parseTimeoutMs(options.timeout),
+      scanOptions: buildScanOptions(core, options, resolved.load),
    });
    const verdict = await buildVerdict(core, result, options);
 

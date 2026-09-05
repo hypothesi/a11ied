@@ -14,24 +14,26 @@ export const topLevelHelpCases: HelpCase[] = [
       CLI-first accessibility automation for VoiceOver, NVDA, and MCP.
 
       Options:
-        -V, --version           output the version number
-        -h, --help              display help for command
+        -V, --version               output the version number
+        -h, --help                  display help for command
 
       Commands:
-        sr                      Control a target screen reader through stable
-                                sessions.
-        wcag                    Look up pinned WCAG requirements and coverage data.
-        axe [options] [target]  Run axe-core against a target: an http(s) URL, a file
-                                path, - for HTML on stdin, or --html.
-        inspect                 Explain criterion applicability for a target.
-        mcp                     Start the MCP stdio server.
-        doctor [options]        Check this machine for browser and screen reader
-                                readiness, and list the setup steps still needed.
-        setup [options]         Run the Guidepup setup and install commands this host
-                                needs for real screen reader sessions, then re-check
-                                with doctor.
-        help-all                Print help for the full command tree in one shot.
-        help [command]          display help for command
+        sr                          Control a target screen reader through stable
+                                    sessions.
+        wcag                        Look up pinned WCAG requirements and coverage
+                                    data.
+        axe [options] [targets...]  Run axe-core against one or more targets: an
+                                    http(s) URL, a file path, - for HTML on stdin, or
+                                    --html.
+        inspect                     Explain criterion applicability for a target.
+        mcp                         Start the MCP stdio server.
+        doctor [options]            Check this machine for browser and screen reader
+                                    readiness, and list the setup steps still needed.
+        setup [options]             Run the Guidepup setup and install commands this
+                                    host needs for real screen reader sessions, then
+                                    re-check with doctor.
+        help-all                    Print help for the full command tree in one shot.
+        help [command]              display help for command
       "
     `,
    },

@@ -4,6 +4,7 @@ import type { Browser, Page } from 'playwright';
 import type { DocumentLoad } from '../targets/parse.js';
 import { deriveFocusTarget } from './helper.js';
 import { loadDocumentIntoPage } from './load.js';
+import { applyPageSetup, hasPageSetup, type PageSetupOptions } from './page-setup.js';
 import { launchAutomationBrowser } from './policy.js';
 
 const SHARED_BROWSER_IDLE_MS = 250;
@@ -148,7 +149,7 @@ function releaseSharedBrowser(): void {
    }
 }
 
-export interface WithBrowserPageOptions {
+export interface WithBrowserPageOptions extends PageSetupOptions {
    /** Navigation or content-load timeout, in milliseconds. Defaults to Playwright's own. */
    timeoutMs?: number | undefined;
 }
@@ -174,10 +175,14 @@ export async function withBrowserPage<TResult>(
    }
 }
 
-async function withHtmlPage<TResult>(
-   html: string,
+/**
+ * A fresh, uncached page: used for html loads and any custom viewport, headers, or
+ * cookies.
+ */
+async function withCustomPage<TResult>(
+   load: DocumentLoad,
    callback: (page: Page) => Promise<TResult>,
-   options?: WithBrowserPageOptions,
+   options: WithBrowserPageOptions,
 ): Promise<TResult> {
    const browser = await getSharedBrowser();
    sharedBrowserUsers += 1;
@@ -185,7 +190,8 @@ async function withHtmlPage<TResult>(
    try {
       const page = await browser.newPage();
       try {
-         await loadDocumentIntoPage(page, { kind: 'html', html }, options);
+         await applyPageSetup(page, options);
+         await loadDocumentIntoPage(page, load, options);
          return await callback(page);
       } finally {
          await page.close();
@@ -197,16 +203,18 @@ async function withHtmlPage<TResult>(
 
 /**
  * Runs `callback` against a loaded page for one resolved document target. A `goto` load
- * reuses the shared cached page when the URL matches. An `html` load (stdin or `--html`)
- * always gets a fresh page, since there is no URL to key a cache on.
+ * with no custom viewport, headers, or cookies reuses the shared cached page when the URL
+ * matches. Everything else, including any `html` load (stdin or `--html`), gets a fresh
+ * page, since there is no stable cache key or the page must not carry over prior
+ * settings.
  */
 export async function withLoadedPage<TResult>(
    load: DocumentLoad,
    callback: (page: Page) => Promise<TResult>,
-   options?: WithBrowserPageOptions,
+   options: WithBrowserPageOptions = {},
 ): Promise<TResult> {
-   if (load.kind === 'html') {
-      return await withHtmlPage(load.html, callback, options);
+   if (load.kind === 'html' || hasPageSetup(options)) {
+      return await withCustomPage(load, callback, options);
    }
    return await withBrowserPage(load.url, callback, options);
 }

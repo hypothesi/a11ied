@@ -183,29 +183,48 @@ a1 wcag rule color-contrast</code></pre>
             <h2>a1 axe</h2>
          </div>
          <div class="route-list">
-            <div class="route-row"><code>&lt;target&gt;</code><span>An http(s) URL, a local file path, or <code>-</code> for HTML on stdin.</span></div>
+            <div class="route-row"><code>&lt;targets...&gt;</code><span>One or more http(s) URLs or file paths, or <code>-</code> for HTML on stdin. Multiple targets print one report each.</span></div>
             <div class="route-row"><code>--html &lt;markup&gt;</code><span>Load inline HTML instead of the positional target.</span></div>
             <div class="route-row"><code>--timeout &lt;ms&gt;</code><span>Timeout for loading the target, in milliseconds. Defaults to 10000.</span></div>
             <div class="route-row"><code>--level &lt;level&gt;</code><span>Run the rules mapped to one WCAG level. <code>--level AA</code> resolves 72 rules for WCAG 2.2.</span></div>
             <div class="route-row"><code>--criterion &lt;criterion&gt;</code><span>Run the rules mapped to one criterion, by ID or slug.</span></div>
             <div class="route-row"><code>--rule &lt;ruleId...&gt;</code><span>Run named axe rules. Repeat the flag for more than one.</span></div>
+            <div class="route-row"><code>--selector &lt;css&gt;</code><span>Scope the scan to elements matching this CSS selector.</span></div>
+            <div class="route-row"><code>--exclude &lt;css&gt;</code><span>Exclude elements matching this CSS selector from the scan.</span></div>
+            <div class="route-row"><code>--wait-for &lt;css&gt;</code><span>Wait for an element matching this CSS selector before scanning.</span></div>
+            <div class="route-row"><code>--viewport &lt;WxH&gt;</code><span>Set the browser viewport, for example <code>1280x800</code>.</span></div>
+            <div class="route-row"><code>--header &lt;header...&gt;</code><span>Repeatable. Add a request header, as <code>Name: value</code>.</span></div>
+            <div class="route-row"><code>--cookie &lt;cookie...&gt;</code><span>Repeatable. Add a cookie, as <code>name=value</code>.</span></div>
             <div class="route-row"><code>--fail-on &lt;impact&gt;</code><span>Only count violations at or above this impact toward the exit code: minor, moderate, serious, or critical. Defaults to any violation.</span></div>
             <div class="route-row"><code>--baseline &lt;file&gt;</code><span>JSON file of accepted findings, keyed by rule id and node target, that do not count toward the exit code.</span></div>
             <div class="route-row"><code>--update-baseline</code><span>Write the current violations to <code>--baseline</code> instead of asserting against it.</span></div>
+            <div class="route-row"><code>--format &lt;format&gt;</code><span>text, json, or sarif. Defaults to text, or json with <code>--json</code>.</span></div>
+            <div class="route-row"><code>--out &lt;file&gt;</code><span>Write the report to this file instead of stdout.</span></div>
          </div>
          <pre><code>a1 axe http://localhost:3000 --level AA --json
 a1 axe http://localhost:3000 --criterion 1.4.3 --json
 a1 axe src/components/Dialog.html --rule color-contrast --rule link-name --json
 echo '&lt;button&gt;&lt;/button&gt;' | a1 axe -
 a1 axe --html '&lt;img src=x&gt;'
+a1 axe http://localhost:3000 --selector '#app' --exclude '.ads'
 a1 axe http://localhost:3000 --fail-on critical --json
-a1 axe http://localhost:3000 --baseline known-findings.json --update-baseline</code></pre>
+a1 axe http://localhost:3000 --baseline known-findings.json --update-baseline
+a1 axe http://localhost:3000 --format sarif --out results.sarif
+a1 axe http://localhost:3000/a http://localhost:3000/b --json</code></pre>
          <p>
             With no selector, the run covers every rule mapped in the WCAG version. The result has
             <code>violations</code>, <code>passes</code>, <code>incomplete</code>, and
             <code>inapplicable</code>, plus the resolved rule list under <code>selection</code>.
             A file target loads through <code>file://</code>. axe never fetches a URL target's
-            HTML itself, since Playwright loads the page directly.
+            HTML itself, since Playwright loads the page directly. With more than one target, the
+            JSON result's <code>targets</code> array carries one report per target, and text mode
+            prints one report after another.
+         </p>
+         <p>
+            <code>--format sarif</code> writes a SARIF 2.1.0 log with one rule descriptor per
+            unique axe rule and one result per violating node, merged across every target when
+            more than one is given. It bypasses the envelope entirely, so combine it with
+            <code>--out</code> to feed a static analysis tool such as GitHub code scanning.
          </p>
          <p>
             axe exits 4 when a violation remains after <code>--fail-on</code> and
