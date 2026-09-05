@@ -8,7 +8,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { describe, expect, it } from 'vitest';
 import type { z } from 'zod';
-import { createTempRoot } from '../../cli/src/testing/fixtures.js';
+import { withStateDir } from '../../cli/src/testing/fixtures.js';
 
 import { createMcpServer } from './index.js';
 
@@ -129,30 +129,40 @@ describe('wcag search tool', () => {
 
 describe('driver session tools', () => {
    it(
-      'require a session id after session start',
+      'runs actions against the one active session without a session id',
       async () => {
-         const tempRoot = await createTempRoot(tempRoots);
-         process.chdir(tempRoot);
-         await withHarness(async (harness) => {
-            const session = await startVirtualSession(harness.client);
-            expect(session.sessionId).toMatch(/^drv_/);
+         await withStateDir(tempRoots, async () => {
+            await withHarness(async (harness) => {
+               const session = await startVirtualSession(harness.client);
+               expect(session.sessionId).toMatch(/^drv_/);
 
-            const invalid = await harness.client.callTool({
-               name: 'driver_action',
-               arguments: { action: 'next' },
+               const moved = await harness.client.callTool({
+                  name: 'driver_action',
+                  arguments: { action: 'next' },
+               });
+               expect(moved.isError).toBeFalsy();
+
+               const pressed = await harness.client.callTool({
+                  name: 'driver_action',
+                  arguments: { action: 'press', keys: ['Tab', 'Tab'] },
+               });
+               expect(pressed.isError).toBeFalsy();
+
+               const stop = await harness.client.callTool({
+                  name: 'driver_session',
+                  arguments: { action: 'stop' },
+               });
+               expect(stop.isError).toBeFalsy();
+
+               const orphaned = await harness.client.callTool({
+                  name: 'driver_action',
+                  arguments: { action: 'next' },
+               });
+               expect(orphaned.isError).toBe(true);
+               expect(getInvalidContentText(orphaned.content)).toContain(
+                  'No active screen reader session',
+               );
             });
-
-            expect(invalid.isError).toBe(true);
-            expect(getInvalidContentText(invalid.content)).toContain(
-               'sessionId is required',
-            );
-
-            const stop = await harness.client.callTool({
-               name: 'driver_session',
-               arguments: { action: 'stop', sessionId: session.sessionId },
-            });
-
-            expect(stop.isError).toBeFalsy();
          });
       },
       ONE_MINUTE_MS,

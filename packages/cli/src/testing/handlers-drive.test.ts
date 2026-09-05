@@ -16,7 +16,8 @@ import { expectFirstErrorMessage } from './helpers.js';
 
 const tempRoots: string[] = [];
 const testServer = useTestServer(tempRoots);
-const virtualArgs = ['--sr', 'virtual', '--allow-virtual', '--idle-timeout', '1'];
+const virtualArgs = ['--sr', 'virtual', '--allow-virtual'];
+const startArgs = [...virtualArgs, '--idle-timeout', '1'];
 
 interface SrResult {
    status: number;
@@ -66,16 +67,16 @@ function withSession(fn: (stateDir: string) => Promise<void>): () => Promise<voi
 }
 
 async function assertLifecycle(stateDir: string): Promise<void> {
-   const text = await runCli(['sr', 'start', ...virtualArgs]);
+   const text = await runCli(['sr', 'start', ...startArgs]);
    expect(text.status).toBe(EXIT_SUCCESS);
    expect(text.stdout).toContain('Session ready');
    expect(text.stdout).not.toContain('Session ID');
 
-   const verbose = await runCli(['sr', 'start', ...virtualArgs, '--verbose']);
+   const verbose = await runCli(['sr', 'start', ...startArgs, '--verbose']);
    expect(verbose.stdout).toMatch(/Session ID:\s+drv_[a-f0-9]+/);
    expect(verbose.stdout).toContain('Stopped the previous virtual session');
 
-   const started = await sr(['start', ...virtualArgs]);
+   const started = await sr(['start', ...startArgs]);
    expect(started.status).toBe(EXIT_SUCCESS);
    expect(warningCodes(started)).toContain('session-replaced');
    const session = resultOf<{ session: SessionShape }>(started).session;
@@ -107,7 +108,7 @@ async function assertLifecycle(stateDir: string): Promise<void> {
 
 async function assertNavigationAndTranscript(stateDir: string): Promise<void> {
    const pageUrl = `${testServer.getBaseUrl()}/basic-page.html`;
-   const started = await sr(['start', pageUrl, ...virtualArgs]);
+   const started = await sr(['start', pageUrl, ...startArgs]);
    expect(started.status).toBe(EXIT_SUCCESS);
    expect(resultOf<{ session: SessionShape }>(started).session.url).toBe(pageUrl);
 
@@ -167,11 +168,11 @@ async function assertAutoStart(): Promise<void> {
 }
 
 async function assertGuards(): Promise<void> {
-   const recording = await sr(['start', ...virtualArgs, '--recording', './recordings/virtual.mov']);
+   const recording = await sr(['start', ...startArgs, '--recording', './recordings/virtual.mov']);
    expect(recording.status).toBe(EXIT_USAGE);
    expect((recording.json.errors as Array<{ code: string }>)[0]?.code).toBe('recording-target-unsupported');
 
-   await sr(['start', ...virtualArgs]);
+   await sr(['start', ...startArgs]);
    const focused = await sr(['focus', '--app', 'Test App']);
    expect(focused.status).toBe(EXIT_SUCCESS);
    expect((resultOf<ActionShape>(focused).details?.focus as { status: string }).status).toBe('skipped');

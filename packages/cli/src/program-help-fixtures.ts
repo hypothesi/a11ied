@@ -102,28 +102,42 @@ export const driveRunHelpCases: HelpCase[] = [
         -h, --help                    display help for command
 
       Commands:
+        start [options] [url]         Start the screen reader session, replacing any
+                                      active one. press, type, and do start one when
+                                      none is active.
+        open [options] <url>          Navigate the active session to a page. Virtual
+                                      loads the document; VoiceOver and NVDA open the
+                                      system browser and refocus it.
+        stop [options]                Stop the active session. A transcript is written
+                                      next to any recording; --out writes one as .json
+                                      or .md.
+        status [options]              Show the active session: target, URL, uptime,
+                                      recording, and transcript counts.
+        read [options]                Read the current item: the last phrase and item
+                                      text, without moving.
+        next [options]                Move to the next item.
+        previous [options]            Move to the previous item.
+        interact [options]            Enter interaction mode for the current group or
+                                      control.
+        stop-interacting [options]    Leave interaction mode.
+        activate [options]            Activate the current item.
+        top [options]                 Move to the top of the current area or document.
+        bottom [options]              Move to the bottom of the current area or
+                                      document.
+        escape [options]              Press Escape to dismiss a menu, dialog, or
+                                      interaction.
+        press [options] <chord...>    Press key chords in order, one chord per
+                                      argument.
+        type [options] <text>         Type text through the active target.
         do [options] <command>        Run a named screen-reader command. Use sr list
                                       for all available commands.
-        press [options] <keys>        Send one or more key chords to the screen
-                                      reader.
-        type [options] <text>         Type text through the active driver target.
-        start [options]               Start a persistent driver session. press, type,
-                                      and do auto-start a session if none is active.
-        stop [options]                Stop a persistent driver session and remove its
-                                      state file.
-        status [options]              Show persisted session state and capability
-                                      metadata.
-        focus [options]               Focus a window so the screen reader follows the
-                                      right app.
-        next [options]                Move to the next screen reader element. Requires
-                                      an active session.
-        read [options]                Read the current driver state.
-        logs [options]                Read captured speech and action logs.
-        clear-logs [options]          Clear captured speech and action logs.
-        checkpoint [options] <label>  Record a named checkpoint in the current
-                                      session.
-        list [options]                List all named commands available for the
-                                      current target.
+        focus [options]               Bring a window to the front. With no options,
+                                      refocus the app the session opened.
+        checkpoint [options] <label>  Mark a named point in the transcript for
+                                      --since.
+        transcript [options]          Print what the reader said, with timestamps and
+                                      checkpoints.
+        list [options]                List the named commands a screen reader accepts.
         help [command]                display help for command
       "
     `,
@@ -132,24 +146,25 @@ export const driveRunHelpCases: HelpCase[] = [
       name: 'lists supported sr key tokens',
       args: ['sr', 'press', '--help'],
       expected: `
-      "Usage: a11ied sr press [options] <keys>
+      "Usage: a11ied sr press [options] <chord...>
 
-      Send one or more key chords to the screen reader.
+      Press key chords in order, one chord per argument.
 
       Options:
-        --session <id>       Reuse an existing screen-reader session. Defaults to the
-                             current session or $A11IED_DRIVE_SESSION when available.
-        --target <platform>  Choose one target: voiceover or virtual. Defaults to an
-                             available VoiceOver target, then falls back to virtual as
-                             a last resort. Use --allow-virtual to explicitly request
-                             simulation.
-        --allow-virtual      Allow the virtual (simulated) screen reader when a real
-                             target is available.
-        --ephemeral          Run one action in a temporary session and tear it down
-                             immediately.
-        --json               Print JSON instead of human-readable text.
-        --verbose            Print more detail in text output.
-        -h, --help           display help for command
+        --sr <reader>    Screen reader to drive: voiceover or virtual. Defaults to an
+                         available VoiceOver target, then falls back to virtual as a
+                         last resort. Use --allow-virtual to explicitly request
+                         simulation.
+        --allow-virtual  Allow the virtual (simulated) screen reader when a real
+                         target is available.
+        --ephemeral      Run one action in a temporary session and tear it down
+                         immediately.
+        --timeout <ms>   Bound the screen reader command in milliseconds instead of
+                         using the built-in limits.
+        --json           Print JSON instead of human-readable text.
+        --verbose        Print more detail in text output.
+        --phrase         Print only the last spoken phrase, one line, for shell loops.
+        -h, --help       display help for command
 
       Supported key tokens:
         Chord syntax: join tokens with "+", for example Tab, Shift+Tab, Control+F,

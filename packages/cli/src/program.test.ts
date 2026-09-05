@@ -66,7 +66,7 @@ describe('cli sr command listing', () => {
       const result = await runCli([
          'sr',
          'list',
-         '--target',
+         '--sr',
          'voiceover',
          '--command-set',
          'voiceover-commander',
@@ -78,5 +78,14 @@ describe('cli sr command listing', () => {
       expect(result.stdout).toContain('VoiceOver — Commander');
       expect(result.stdout).toContain('move-right');
       expect(result.stdout).toContain('move right');
+   });
+
+   it('lists only the portable verbs for the virtual screen reader', async () => {
+      const result = await runCli(['sr', 'list', '--sr', 'virtual']);
+
+      expect(result.status).toBe(EXIT_SUCCESS);
+      expect(result.stdout).toContain('Portable');
+      expect(result.stdout).toContain('stop-interacting');
+      expect(result.stdout).not.toContain('VoiceOver — Commander');
    });
 });
