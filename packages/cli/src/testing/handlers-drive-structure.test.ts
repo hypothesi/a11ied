@@ -47,6 +47,19 @@ function withSession(fn: () => Promise<void>): () => Promise<void> {
       });
 }
 
+async function assertFindMissing(): Promise<void> {
+   const missing = await runSrJson(['find', 'not on this page']);
+   expect(missing.status).toBe(EXIT_ASSERTION);
+   expect(missing.result.details).toEqual({ text: 'not on this page', found: false });
+   expect(missing.errors[0]?.code).toBe('text-not-found');
+   expect(missing.result.state.lastSpokenPhrase).toBe('link, Learn more');
+
+   const text = await runCli(['sr', 'find', 'not on this page']);
+   expect(text.status).toBe(EXIT_ASSERTION);
+   expect(text.stdout).toContain('Found:');
+   expect(text.stdout).toContain('was not found on the page');
+}
+
 async function assertTitleAndFind(): Promise<void> {
    const title = await runSrJson(['title']);
    expect(title.status).toBe(EXIT_SUCCESS);
@@ -60,16 +73,7 @@ async function assertTitleAndFind(): Promise<void> {
    expect(found.result.details).toEqual({ text: 'learn MORE', found: true });
    expect(found.result.state.lastSpokenPhrase).toBe('link, Learn more');
 
-   const missing = await runSrJson(['find', 'not on this page']);
-   expect(missing.status).toBe(EXIT_ASSERTION);
-   expect(missing.result.details).toEqual({ text: 'not on this page', found: false });
-   expect(missing.errors[0]?.code).toBe('text-not-found');
-   expect(missing.result.state.lastSpokenPhrase).toBe('link, Learn more');
-
-   const text = await runCli(['sr', 'find', 'not on this page']);
-   expect(text.status).toBe(EXIT_ASSERTION);
-   expect(text.stdout).toContain('Found:');
-   expect(text.stdout).toContain('was not found on the page');
+   await assertFindMissing();
 }
 
 async function moveToFirstHeaderCell(): Promise<void> {
@@ -77,6 +81,18 @@ async function moveToFirstHeaderCell(): Promise<void> {
    await runSrJson(['next', '--times', '4']);
    const header = await runSrJson(['read']);
    expect(header.result.state.lastSpokenPhrase).toBe('rowheader, Plan');
+}
+
+async function assertTableEdges(): Promise<void> {
+   const seats = await runSrJson(['table', 'next-cell']);
+   expect(seats.result.state.lastSpokenPhrase).toBe('cell, 1');
+   const wrapped = await runSrJson(['table', 'next-cell']);
+   expect(wrapped.result.state.lastSpokenPhrase).toBe('rowheader, Team');
+
+   const edge = await runSrJson(['table', 'previous-row']);
+   expect(edge.result.state.lastSpokenPhrase).toBe('rowheader, Starter');
+   const beyond = await runSrJson(['table', 'previous-column']);
+   expect(beyond.result.details).toEqual({ move: 'previous-column', moved: false });
 }
 
 async function assertTableMoves(): Promise<void> {
@@ -100,16 +116,7 @@ async function assertTableMoves(): Promise<void> {
 
    const rowHeader = await runSrJson(['table', 'row-header']);
    expect(rowHeader.result.details).toEqual({ move: 'row-header', header: 'Starter' });
-
-   const seats = await runSrJson(['table', 'next-cell']);
-   expect(seats.result.state.lastSpokenPhrase).toBe('cell, 1');
-   const wrapped = await runSrJson(['table', 'next-cell']);
-   expect(wrapped.result.state.lastSpokenPhrase).toBe('rowheader, Team');
-
-   const edge = await runSrJson(['table', 'previous-row']);
-   expect(edge.result.state.lastSpokenPhrase).toBe('rowheader, Starter');
-   const beyond = await runSrJson(['table', 'previous-column']);
-   expect(beyond.result.details).toEqual({ move: 'previous-column', moved: false });
+   await assertTableEdges();
 }
 
 describe('cli sr title, find, and table', () => {

@@ -140,6 +140,16 @@ export const driveRunHelpCases: HelpCase[] = [
                                       a header: next-cell, previous-cell, next-row,
                                       previous-row, next-column, previous-column,
                                       row-header, column-header.
+        goto [options]                Step forward until the current item has the
+                                      given role, name, or both. Exits 4 when nothing
+                                      matches.
+        elements [options] <kind>     The rotor: move to the top, then list every
+                                      element of one kind as the reader announces it.
+                                      Kinds: heading, link, landmark, control, button,
+                                      table, list, graphic, region, form-field.
+        read-all [options]            Say-all as a transcript: step item by item from
+                                      the cursor to the end of the document, bounded
+                                      by --max.
         press [options] <chord...>    Press key chords in order, one chord per
                                       argument.
         type [options] <text>         Type text through the active target.

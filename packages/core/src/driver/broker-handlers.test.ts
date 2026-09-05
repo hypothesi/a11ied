@@ -79,6 +79,10 @@ function createMockAdapter(): DriverAdapter {
          phrases.push('Heading');
          return { moved: true };
       }),
+      readCurrentItem: vi.fn<DriverAdapter['readCurrentItem']>(async () => ({
+         item: { states: [], phrase: phrases.at(-1) ?? '', source: 'test' },
+         position: phrases.at(-1) ?? '',
+      })),
       readTitle: vi.fn<DriverAdapter['readTitle']>().mockResolvedValue({
          title: 'Example',
          source: 'test',

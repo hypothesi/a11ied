@@ -8,6 +8,7 @@ import {
 import { DriverCommandError, type DriverActionOptions } from '@a11ied/guidepup';
 
 import { CliUsageError } from '../errors/cli-errors.js';
+import { runElementsAction, runGotoAction, runReadAllAction } from './broker-loops.js';
 import type { ActionExecutionResult, BrokerHandlerContext } from './broker-types.js';
 
 /** Actions after which the broker waits for the reader to finish speaking. */
@@ -20,6 +21,9 @@ export const SPEECH_TRIGGERING_ACTIONS: ReadonlySet<DriverActionName> =
       'title',
       'find',
       'table',
+      'elements',
+      'read-all',
+      'goto',
    ]);
 
 /** Validates a raw broker action and payload into the typed request union. */
@@ -99,6 +103,21 @@ async function handleStructure(
    return { details: { move: request.payload.move, ...outcome } };
 }
 
+/** Runs the bounded loops: the rotor, say-all, and goto. */
+async function handleLoop(
+   context: BrokerHandlerContext,
+   request: Extract<DriverActionRequest, { action: 'elements' | 'read-all' | 'goto' }>,
+   options: DriverActionOptions,
+): Promise<ActionExecutionResult> {
+   if (request.action === 'elements') {
+      return runElementsAction(context.adapter, request.payload, options);
+   }
+   if (request.action === 'read-all') {
+      return runReadAllAction(context.adapter, request.payload, options);
+   }
+   return runGotoAction(context.adapter, request.payload, options);
+}
+
 function recordCheckpoint(
    context: BrokerHandlerContext,
    label: string,
@@ -154,6 +173,11 @@ async function dispatchAction(
       case 'find':
       case 'table': {
          return handleStructure(context, request, options);
+      }
+      case 'elements':
+      case 'read-all':
+      case 'goto': {
+         return handleLoop(context, request, options);
       }
       default: {
          await context.adapter.performPortable(request.action, options);

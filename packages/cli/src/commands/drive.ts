@@ -9,6 +9,11 @@ import {
 } from './drive-actions.js';
 import { registerDoCommand, registerListCommand } from './drive-command-sets.js';
 import {
+   registerElementsCommand,
+   registerGotoCommand,
+   registerReadAllCommand,
+} from './drive-loops.js';
+import {
    registerOpenCommand,
    registerStatusCommand,
    registerStopCommand,
@@ -32,6 +37,9 @@ const registrars: ReadonlyArray<(driveCommand: Command) => void> = [
    registerNavigationCommands,
    registerFindCommand,
    registerTableCommand,
+   registerGotoCommand,
+   registerElementsCommand,
+   registerReadAllCommand,
    registerPressCommand,
    registerTypeCommand,
    registerDoCommand,

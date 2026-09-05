@@ -75,6 +75,50 @@ export type DriverTableMove = z.infer<typeof driverTableMoveSchema>;
 export const driverTablePayloadSchema = z.object({ move: driverTableMoveSchema });
 export type DriverTablePayload = z.infer<typeof driverTablePayloadSchema>;
 
+/** Default caps for the bounded loops, so a page with no end detector still stops. */
+export const DEFAULT_ELEMENTS_MAX = 200;
+export const DEFAULT_READ_ALL_MAX = 500;
+export const DEFAULT_GOTO_MAX = 500;
+
+/** `sr elements <kind>`: jump from the top through every element of one kind. */
+export const driverElementsPayloadSchema = z.object({
+   kind: driverNavigationKindSchema.exclude(['item']),
+   max: z.number().int().min(1).default(DEFAULT_ELEMENTS_MAX),
+});
+export type DriverElementsPayload = z.infer<typeof driverElementsPayloadSchema>;
+
+/** `sr read-all`: step item by item from the cursor to the end of the document. */
+export const driverReadAllPayloadSchema = z.object({
+   max: z.number().int().min(1).default(DEFAULT_READ_ALL_MAX),
+});
+export type DriverReadAllPayload = z.infer<typeof driverReadAllPayloadSchema>;
+
+/** `sr goto`: step forward until the current item has the role, the name, or both. */
+export const driverGotoPayloadSchema = z
+   .object({
+      role: z.string().min(1).optional(),
+      name: z.string().min(1).optional(),
+      max: z.number().int().min(1).default(DEFAULT_GOTO_MAX),
+   })
+   .refine((payload) => payload.role !== undefined || payload.name !== undefined, {
+      message: 'Provide a role, a name, or both.',
+   });
+export type DriverGotoPayload = z.infer<typeof driverGotoPayloadSchema>;
+
+/** One entry of a loop result: what the reader announced at each stop. */
+export const driverLoopItemSchema = z.object({
+   index: z.number().int().positive(),
+   phrase: z.string(),
+   role: z.string().optional(),
+   name: z.string().optional(),
+   level: z.number().int().optional(),
+});
+export type DriverLoopItem = z.infer<typeof driverLoopItemSchema>;
+
+/** Why a bounded loop stopped: it reached the end of the page or hit its cap. */
+export const driverLoopStopSchema = z.enum(['end', 'cap', 'match']);
+export type DriverLoopStop = z.infer<typeof driverLoopStopSchema>;
+
 /** The action-request variants that carry a navigation or structure payload. */
 export const driverNavigationActionRequestSchemas = [
    z.object({
@@ -87,4 +131,7 @@ export const driverNavigationActionRequestSchemas = [
    }),
    z.object({ action: z.literal('find'), payload: driverFindPayloadSchema }),
    z.object({ action: z.literal('table'), payload: driverTablePayloadSchema }),
+   z.object({ action: z.literal('elements'), payload: driverElementsPayloadSchema }),
+   z.object({ action: z.literal('read-all'), payload: driverReadAllPayloadSchema }),
+   z.object({ action: z.literal('goto'), payload: driverGotoPayloadSchema }),
 ] as const;

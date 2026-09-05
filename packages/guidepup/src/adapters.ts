@@ -2,6 +2,7 @@ import { nvda, voiceOver } from '@guidepup/guidepup';
 import {
    driverStateSnapshotSchema,
    type DriverCheckpoint,
+   type DriverCurrentItem,
    type DriverFocusResult,
    type DriverFocusTarget,
    type DriverNavigateRequest,
@@ -117,6 +118,18 @@ class RealScreenReaderAdapter implements DriverAdapter {
    ): Promise<{ moved?: boolean }> {
       await runRealNavigation(this.stepContext(options), request);
       return {};
+   }
+
+   async readCurrentItem(): Promise<{ item: DriverCurrentItem; position: string }> {
+      const [phrase, itemText] = await Promise.all([
+         this.reader.lastSpokenPhrase().catch(() => ''),
+         this.reader.itemText().catch(() => ''),
+      ]);
+      const item =
+         this.target === 'voiceover'
+            ? parseVoiceOverItem(phrase, itemText)
+            : parseNvdaItem(phrase, itemText);
+      return { item, position: `${phrase}\n${itemText}` };
    }
 
    async readTitle(

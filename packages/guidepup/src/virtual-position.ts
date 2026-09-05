@@ -33,9 +33,12 @@ export async function getVirtualPositionToken(virtual: VirtualReader): Promise<s
 
 /**
  * The role the virtual reader announces first, such as `heading` in `heading, Title,
- * level 1`.
+ * level 1`. A closing phrase like `end of main` reports the role of the container.
  */
 export function getVirtualPhraseRole(phrase: string): string {
    const [role = ''] = phrase.split(',');
-   return role.trim().toLowerCase();
+   return role
+      .trim()
+      .toLowerCase()
+      .replace(/^end of /u, '');
 }

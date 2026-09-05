@@ -169,6 +169,9 @@ export const driverActionNameSchema = z.enum([
    'title',
    'find',
    'table',
+   'elements',
+   'read-all',
+   'goto',
 ]);
 export type DriverActionName = z.infer<typeof driverActionNameSchema>;
 

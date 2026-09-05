@@ -2,6 +2,7 @@ import {
    driverFocusResultSchema,
    driverReadinessSchema,
    type DriverCheckpoint,
+   type DriverCurrentItem,
    type DriverFocusTarget,
    type DriverNavigateRequest,
    type DriverPerformPayload,
@@ -26,7 +27,9 @@ import { getPortableCommand } from './portable-commands.js';
 import { ignoreError } from './sequential.js';
 import { loadVirtualReader, replaceVirtualDocument } from './virtual-dom.js';
 import { readVirtualItem } from './virtual-item.js';
+import { getVirtualPositionToken } from './virtual-position.js';
 import {
+   isAtTreeEnd,
    pressVirtualKeys,
    runVirtualNavigation,
    runVirtualStep,
@@ -100,6 +103,20 @@ async function stepContext(state: VirtualAdapterState): Promise<VirtualStepConte
    return { virtual: await loadVirtualReader(), container: state.container };
 }
 
+async function virtualReadCurrentItem(state: VirtualAdapterState): Promise<{
+   item: DriverCurrentItem;
+   position: string;
+   atEnd: boolean;
+}> {
+   const context = await stepContext(state);
+   const [item, position, atEnd] = await Promise.all([
+      readVirtualItem(context.virtual),
+      getVirtualPositionToken(context.virtual),
+      isAtTreeEnd(context),
+   ]);
+   return { item, position, atEnd };
+}
+
 async function stopVirtual(state: VirtualAdapterState): Promise<void> {
    const virtual = await loadVirtualReader();
    await virtual.stop().catch(ignoreError);
@@ -168,6 +185,7 @@ export function createVirtualAdapter(): DriverAdapter {
       focus: virtualFocus,
       performPortable: (verb) => performVirtualPortable(state, verb),
       navigate: (request) => navigateVirtual(state, request),
+      readCurrentItem: () => virtualReadCurrentItem(state),
       readTitle: async () => readVirtualTitle(),
       findText: async (text: string) => findVirtualText(await stepContext(state), text),
       moveInTable: async (move: DriverTableMove) =>

@@ -89,8 +89,20 @@ export async function connectToBroker(
    });
 }
 
+/** Actions that step up to `payload.max` times, so their reply budget scales with it. */
+const LOOP_ACTIONS: ReadonlySet<string> = new Set(['elements', 'read-all', 'goto']);
+const REAL_TARGET_LOOP_STEP_MS = 1500;
+const VIRTUAL_LOOP_STEP_MS = 50;
+
+function readPayloadMax(
+   payload: Record<string, unknown> | undefined,
+): number | undefined {
+   const max = payload?.max;
+   return typeof max === 'number' ? max : undefined;
+}
+
 export function resolveBrokerSocketTimeoutMs(
-   request: Pick<BrokerRequest, 'command' | 'timeoutMs'>,
+   request: Pick<BrokerRequest, 'command' | 'action' | 'payload' | 'timeoutMs'>,
    target?: Platform,
 ): number {
    if (request.timeoutMs !== undefined) {
@@ -100,7 +112,16 @@ export function resolveBrokerSocketTimeoutMs(
    if (request.command === 'stop') {
       return isReal ? REAL_TARGET_STOP_SOCKET_TIMEOUT_MS : VIRTUAL_STOP_SOCKET_TIMEOUT_MS;
    }
-   return isReal ? REAL_TARGET_SOCKET_TIMEOUT_MS : VIRTUAL_SOCKET_TIMEOUT_MS;
+   const base = isReal ? REAL_TARGET_SOCKET_TIMEOUT_MS : VIRTUAL_SOCKET_TIMEOUT_MS;
+   const max = readPayloadMax(request.payload);
+   if (
+      request.action !== undefined &&
+      LOOP_ACTIONS.has(request.action) &&
+      max !== undefined
+   ) {
+      return base + max * (isReal ? REAL_TARGET_LOOP_STEP_MS : VIRTUAL_LOOP_STEP_MS);
+   }
+   return base;
 }
 
 export function resolveBrokerReadyTimeoutMs(target: Platform): number {

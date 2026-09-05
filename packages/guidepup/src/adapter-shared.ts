@@ -46,6 +46,16 @@ export interface DriverAdapter {
       request: DriverNavigateRequest,
       options?: DriverActionOptions,
    ): Promise<{ moved?: boolean }>;
+   /**
+    * The current item plus a position token that is equal for two reads of the same spot.
+    * Cheaper than readState; the loops call it after every step. `atEnd` is true when the
+    * cursor sits on the last item of the document; only the virtual reader knows.
+    */
+   readCurrentItem(): Promise<{
+      item: DriverCurrentItem;
+      position: string;
+      atEnd?: boolean;
+   }>;
    /** The page title or window summary, with where it came from. */
    readTitle(options?: DriverActionOptions): Promise<{ title: string; source: string }>;
    /**

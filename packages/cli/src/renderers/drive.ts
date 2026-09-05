@@ -262,6 +262,14 @@ export function renderDriveStatusText(
    return [title('Session active'), '', ...indent(fields(entries))].join('\n');
 }
 
+/** A failed check (exit code 4) keeps the result block and adds its message below. */
+export function verdictLines(envelope: CliOutputEnvelope): string[] {
+   if (envelope.ok) {
+      return [];
+   }
+   return ['', ...envelope.errors.map((error) => errorLine(error.code, error.message))];
+}
+
 /** Text for read and every navigation or input verb: the phrase and the current item. */
 export function renderDriveReadText(
    envelope: CliOutputEnvelope,
@@ -291,14 +299,6 @@ export function renderDriveReadText(
       ...indent(fields(entries)),
       ...verdictLines(envelope),
    ].join('\n');
-}
-
-/** A failed check (exit code 4) keeps the result block and adds its message below. */
-export function verdictLines(envelope: CliOutputEnvelope): string[] {
-   if (envelope.ok) {
-      return [];
-   }
-   return ['', ...envelope.errors.map((error) => errorLine(error.code, error.message))];
 }
 
 function transcriptFileLines(files: unknown): string[] {

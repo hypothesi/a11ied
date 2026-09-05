@@ -53,6 +53,16 @@ async function isAtTreeTop(context: VirtualStepContext): Promise<boolean> {
    return !phrase.startsWith('end of ');
 }
 
+/** True when the cursor is on the closing "end of ..." phrase of the document or dialog. */
+export async function isAtTreeEnd(context: VirtualStepContext): Promise<boolean> {
+   const node = context.virtual.activeNode;
+   if (!node || !isTreeRoot(node, context.container)) {
+      return false;
+   }
+   const phrase = await context.virtual.lastSpokenPhrase();
+   return phrase.startsWith('end of ');
+}
+
 /** Moves the virtual cursor back to the first node of the document or open dialog. */
 export async function walkToTop(context: VirtualStepContext): Promise<void> {
    await repeatUntil(
