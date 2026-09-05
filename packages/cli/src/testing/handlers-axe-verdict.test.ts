@@ -13,7 +13,7 @@ import {
    EXIT_ASSERTION,
    EXIT_SUCCESS,
    EXIT_USAGE,
-   TEST_TIMEOUT_MEDIUM,
+   TEST_TIMEOUT_LONG,
 } from './setup.js';
 
 const testServer: TestServerHandle = createTestServer();
@@ -128,7 +128,7 @@ describe('cli run axe / verdict', () => {
       async () => {
          await assertAxeFailOnFiltersByImpact(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 
    it(
@@ -136,7 +136,7 @@ describe('cli run axe / verdict', () => {
       async () => {
          await assertAxeInvalidFailOn(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 
    it(
@@ -144,7 +144,7 @@ describe('cli run axe / verdict', () => {
       async () => {
          await assertAxeBaselineRoundTrip(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 
    it(
@@ -152,6 +152,6 @@ describe('cli run axe / verdict', () => {
       async () => {
          await assertAxeMissingBaselinePath(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 });

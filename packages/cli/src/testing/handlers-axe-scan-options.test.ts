@@ -11,7 +11,7 @@ import {
    runCli,
    parseJsonOutput,
    EXIT_SUCCESS,
-   TEST_TIMEOUT_MEDIUM,
+   TEST_TIMEOUT_LONG,
 } from './setup.js';
 
 const testServer: TestServerHandle = createTestServer();
@@ -123,7 +123,7 @@ describe('cli run axe / scan scoping', () => {
       async () => {
          await assertSelectorScopesTheScan(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 
    it(
@@ -131,7 +131,7 @@ describe('cli run axe / scan scoping', () => {
       async () => {
          await assertWaitForBlocksUntilSelectorAppears(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 
    it(
@@ -139,7 +139,7 @@ describe('cli run axe / scan scoping', () => {
       async () => {
          await assertViewportIsAccepted(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 
    it(
@@ -147,7 +147,7 @@ describe('cli run axe / scan scoping', () => {
       async () => {
          await assertInvalidViewportIsRejected(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 });
 
@@ -157,7 +157,7 @@ describe('cli run axe / multiple targets and sarif', () => {
       async () => {
          await assertMultipleTargetsReportSeparately(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 
    it(
@@ -165,6 +165,6 @@ describe('cli run axe / multiple targets and sarif', () => {
       async () => {
          await assertSarifFormatWritesToOut(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 });

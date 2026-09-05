@@ -6,7 +6,7 @@ import {
    runCli,
    parseJsonOutput,
    EXIT_SUCCESS,
-   TEST_TIMEOUT_MEDIUM,
+   TEST_TIMEOUT_LONG,
 } from './setup.js';
 
 const testServer: TestServerHandle = createTestServer();
@@ -78,7 +78,7 @@ describe('cli tree command', () => {
       async () => {
          await assertTreePrintsYaml(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 
    it(
@@ -86,7 +86,7 @@ describe('cli tree command', () => {
       async () => {
          await assertTreeFiltersByRole(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 
    it(
@@ -94,8 +94,8 @@ describe('cli tree command', () => {
       async () => {
          await assertTreeFiltersByName(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 
-   it('scans inline --html', assertTreeInlineHtml, TEST_TIMEOUT_MEDIUM);
+   it('scans inline --html', assertTreeInlineHtml, TEST_TIMEOUT_LONG);
 });

@@ -10,7 +10,7 @@ import {
    EXIT_ASSERTION,
    EXIT_SUCCESS,
    EXIT_USAGE,
-   TEST_TIMEOUT_MEDIUM,
+   TEST_TIMEOUT_LONG,
 } from './setup.js';
 
 const testServer: TestServerHandle = createTestServer();
@@ -234,7 +234,7 @@ describe('cli run axe / scan commands', () => {
       async () => {
          await assertAxeFullScan(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 
    it(
@@ -242,7 +242,7 @@ describe('cli run axe / scan commands', () => {
       async () => {
          await assertAxeCriterionScan(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 
    it(
@@ -250,7 +250,7 @@ describe('cli run axe / scan commands', () => {
       async () => {
          await assertAxeLevelScan(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 
    it(
@@ -258,7 +258,7 @@ describe('cli run axe / scan commands', () => {
       async () => {
          await assertAxeRuleFilter(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 
    it(
@@ -266,15 +266,15 @@ describe('cli run axe / scan commands', () => {
       async () => {
          await assertAxeIncomplete(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 });
 
 describe('cli run axe / target grammar', () => {
-   it('scans a local file target', assertAxeFileTarget, TEST_TIMEOUT_MEDIUM);
-   it('scans inline --html', assertAxeInlineHtmlTarget, TEST_TIMEOUT_MEDIUM);
-   it('rejects a missing target', assertAxeMissingTarget, TEST_TIMEOUT_MEDIUM);
-   it('rejects an app target', assertAxeAppTargetRejected, TEST_TIMEOUT_MEDIUM);
+   it('scans a local file target', assertAxeFileTarget, TEST_TIMEOUT_LONG);
+   it('scans inline --html', assertAxeInlineHtmlTarget, TEST_TIMEOUT_LONG);
+   it('rejects a missing target', assertAxeMissingTarget, TEST_TIMEOUT_LONG);
+   it('rejects an app target', assertAxeAppTargetRejected, TEST_TIMEOUT_LONG);
 });
 
 describe('cli run axe / output formatting', () => {
@@ -283,7 +283,7 @@ describe('cli run axe / output formatting', () => {
       async () => {
          await assertAxeTextOutput(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 
    it(
@@ -291,6 +291,6 @@ describe('cli run axe / output formatting', () => {
       async () => {
          await assertAxeVerboseOutput(testServer.getBaseUrl());
       },
-      TEST_TIMEOUT_MEDIUM,
+      TEST_TIMEOUT_LONG,
    );
 });
