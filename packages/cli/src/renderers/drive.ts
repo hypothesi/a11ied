@@ -29,11 +29,18 @@ function spoken(value: string | null | undefined): string {
    return chalk.bold(value);
 }
 
+const RECORDING_STATES: Readonly<Record<string, string>> = {
+   recording: 'recording to',
+   stopped: 'saved to',
+   failed: 'failed, meant for',
+};
+
 function formatRecording(recording: AccessibilityDriverSession['recording']): string {
    if (!recording) {
       return dim('none');
    }
-   return `${recording.status} ${recording.format} ${recording.path}`;
+   const state = RECORDING_STATES[recording.status] ?? recording.status;
+   return `${state} ${recording.path} ${dim(`(${recording.format})`)}`;
 }
 
 function formatUptime(startedAt: string): string {

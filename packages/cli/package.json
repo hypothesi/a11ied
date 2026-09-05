@@ -47,6 +47,7 @@
       "commander": "^15.0.0",
       "ink": "7.1.1",
       "react": "19.2.8",
+      "string-width": "8.1.0",
       "wrap-ansi": "10.0.1"
    },
    "devDependencies": {

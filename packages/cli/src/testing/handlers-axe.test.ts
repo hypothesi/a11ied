@@ -138,9 +138,9 @@ async function assertAxeTextOutput(baseUrl: string): Promise<void> {
    expect(output.stdout.replaceAll(baseUrl, '<base>')).toMatchInlineSnapshot(`
      "axe scan
        URL:        <base>/button-name-failure.html
-       Selection:  criterion=4.1.2
+       Selection:  the rules mapped to criterion 4.1.2
        Result:     1 violation, 0 incomplete checks, 2 passes
-       Verdict:    fail  1 finding at or above --fail-on minor
+       Verdict:    ✗ 1 problem to fix
 
      Violations (1)
        ✗ button-name  critical  WCAG 4.1.2 (A)

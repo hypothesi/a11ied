@@ -8,6 +8,7 @@ import {
    level,
    section,
    symbols,
+   table,
    title,
    wrap,
 } from '../lib/format.js';
@@ -248,13 +249,38 @@ function renderPageSection(report: AuditReport): string[] {
    ]);
 }
 
-function rollupRow(entry: CriterionRollupEntry): string {
-   return `${code(entry.id)}  ${entry.title}  ${level(entry.level)}  ${dim(
-      `axe=${entry.axeVerdict} applicability=${entry.applicability} coverage=${entry.coverageState}`,
-   )}`;
+const AXE_VERDICTS: Readonly<Record<string, string>> = {
+   pass: `${symbols.pass} passed`,
+   fail: `${symbols.fail} failed`,
+   'not-covered': `${symbols.skip} ${dim('no rule')}`,
+};
+
+const APPLIES_HERE: Readonly<Record<string, string>> = {
+   applicable: 'yes',
+   'not-detected': dim('not seen'),
+   'out-of-scope': dim('n/a'),
+   unknown: 'unclear',
+};
+
+const HOW_TO_CHECK: Readonly<Record<string, string>> = {
+   automated: 'scan',
+   hybrid: 'scan and a person',
+   manual: 'a person',
+};
+
+const TITLE_COLUMN_CAP = 46;
+
+function rollupRow(entry: CriterionRollupEntry): string[] {
+   return [
+      `${code(entry.id)}  ${entry.title}`,
+      level(entry.level),
+      AXE_VERDICTS[entry.axeVerdict] ?? entry.axeVerdict,
+      APPLIES_HERE[entry.applicability] ?? entry.applicability,
+      HOW_TO_CHECK[entry.coverageState] ?? entry.coverageState,
+   ];
 }
 
-/** The raw per-criterion values, for a reader who wants every field. */
+/** Every criterion as a table, so a reader compares columns instead of reading fields. */
 function renderRollupSection(report: AuditReport, options: RenderOptions): string[] {
    if (!options.verbose) {
       return [
@@ -264,12 +290,14 @@ function renderRollupSection(report: AuditReport, options: RenderOptions): strin
          ),
       ];
    }
+   const rows = table(
+      ['Criterion', 'Level', 'Automated check', 'Applies here', 'How to check'],
+      report.criteria.map((entry) => rollupRow(entry)),
+      [TITLE_COLUMN_CAP],
+   );
    return [
-      ...section(
-         `Every criterion (${String(report.criteria.length)})`,
-         report.criteria.map((entry) => rollupRow(entry)),
-      ),
-      ...section('What the applicability states mean', applicabilityDefinitionLines()),
+      ...section(`Every criterion (${String(report.criteria.length)})`, rows),
+      ...section('What "applies here" means', applicabilityDefinitionLines()),
    ];
 }
 

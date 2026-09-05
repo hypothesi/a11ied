@@ -28,6 +28,7 @@ interface AxeRule {
 }
 
 const MAX_NODES = 5;
+const LOWEST_IMPACT = 'minor';
 const MAX_HTML_LENGTH = 100;
 const NODE_DEPTH = 2;
 const WCAG_CRITERION_TAG = /^wcag(\d)(\d)(\d+)$/u;
@@ -43,12 +44,12 @@ function formatRunAxeSelector(selection: {
       return 'all mapped axe rules';
    }
    if (selection.kind === 'criterion') {
-      return `criterion=${selection.criterion}`;
+      return `the rules mapped to criterion ${selection.criterion ?? ''}`;
    }
    if (selection.kind === 'level') {
-      return `level=${selection.level}`;
+      return `the rules mapped to level ${selection.level ?? ''} and below`;
    }
-   return `rules=${selection.ruleIds?.join(',')}`;
+   return `chosen rules: ${selection.ruleIds?.join(', ') ?? ''}`;
 }
 
 /** Turns axe tags like wcag311 and wcag2a into "WCAG 3.1.1 (A)". */
@@ -197,14 +198,22 @@ interface AxeVerdict {
    failingFindings: unknown[];
 }
 
+/**
+ * States the outcome rather than the stored value. The impact threshold only appears when
+ * it was raised, because the default counts every violation.
+ */
 function formatVerdict(verdict: AxeVerdict): string {
+   const accepted =
+      verdict.baselinedCount > 0
+         ? dim(`  ${count(verdict.baselinedCount, 'finding')} accepted from the baseline`)
+         : '';
+
    if (verdict.passed) {
-      if (verdict.baselinedCount > 0) {
-         return `${badge('pass')}  (${count(verdict.baselinedCount, 'baselined finding')} accepted)`;
-      }
-      return badge('pass');
+      return `${symbols.pass} nothing to fix${accepted}`;
    }
-   return `${badge('fail')}  ${count(verdict.failingFindings.length, 'finding')} at or above --fail-on ${verdict.failOn}`;
+   const threshold =
+      verdict.failOn === LOWEST_IMPACT ? '' : ` at ${verdict.failOn} impact or higher`;
+   return `${symbols.fail} ${count(verdict.failingFindings.length, 'problem')} to fix${threshold}${accepted}`;
 }
 
 interface AxeReport {

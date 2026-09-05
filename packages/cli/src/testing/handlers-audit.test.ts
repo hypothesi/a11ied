@@ -90,6 +90,20 @@ async function assertAuditFailOnRespected(baseUrl: string): Promise<void> {
    expect((json.result as unknown as AuditResult).verdict.passed).toBe(true);
 }
 
+/** --verbose shows every criterion as a table, not as stored field names. */
+async function assertAuditVerboseTable(baseUrl: string): Promise<void> {
+   const verbose = await runCli([
+      'audit',
+      `${baseUrl}/button-name-failure.html`,
+      '--verbose',
+   ]);
+   expect(verbose.stdout).toContain('Every criterion');
+   expect(verbose.stdout).toMatch(/Criterion\s+Level\s+Automated check\s+Applies here/);
+   expect(verbose.stdout).toContain('failed');
+   expect(verbose.stdout).not.toContain('axe=fail');
+   expect(verbose.stdout).not.toContain('coverage=automated');
+}
+
 /**
  * The text report is what a person reads, so it states the finding and the command that
  * follows it. The raw per-criterion values belong to --json and --verbose.
@@ -108,12 +122,7 @@ async function assertAuditTextStatesFindings(baseUrl: string): Promise<void> {
    expect(passing.stdout).toContain('Nothing failed the automated checks');
    expect(passing.stdout).not.toContain('Problems');
 
-   const verbose = await runCli([
-      'audit',
-      `${baseUrl}/button-name-failure.html`,
-      '--verbose',
-   ]);
-   expect(verbose.stdout).toContain('axe=fail');
+   await assertAuditVerboseTable(baseUrl);
 }
 
 async function assertAuditInlineHtml(): Promise<void> {

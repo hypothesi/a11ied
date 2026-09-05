@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import stringWidth from 'string-width';
 import wrapAnsi from 'wrap-ansi';
 import type { DoctorTextStyle } from '#core';
 
@@ -6,6 +7,8 @@ const DEFAULT_WIDTH = 80;
 const MAX_WIDTH = 110;
 const INDENT = '  ';
 const LABEL_GAP = 2;
+const COLUMN_GAP = 2;
+const ELLIPSIS = '…';
 
 export const symbols = {
    pass: chalk.green('✓'),
@@ -87,6 +90,60 @@ export function count(total: number, singular: string, plural = `${singular}s`):
       return `1 ${singular}`;
    }
    return `${total} ${plural}`;
+}
+
+/** Truncates to a printed width, counting what the terminal shows, not escape codes. */
+function clip(text: string, width: number): string {
+   if (stringWidth(text) <= width) {
+      return text;
+   }
+   let out = '';
+   for (const character of text) {
+      if (stringWidth(out + character) > width - 1) {
+         break;
+      }
+      out += character;
+   }
+   return `${out}${ELLIPSIS}`;
+}
+
+function padCell(text: string, width: number): string {
+   return `${text}${' '.repeat(Math.max(0, width - stringWidth(text)))}`;
+}
+
+function columnWidths(headers: string[], rows: string[][], caps: number[]): number[] {
+   return headers.map((header, index) => {
+      const widest = Math.max(
+         stringWidth(header),
+         ...rows.map((row) => stringWidth(row[index] ?? '')),
+      );
+      const cap = caps[index];
+      return cap === undefined ? widest : Math.min(widest, cap);
+   });
+}
+
+/**
+ * Renders a column-aligned table with a dim header row. Cells may carry color, because
+ * widths count printed characters rather than escape codes. `caps` limits a column's
+ * width, and anything longer is clipped.
+ */
+export function table(
+   headers: string[],
+   rows: string[][],
+   caps: number[] = [],
+): string[] {
+   const widths = columnWidths(headers, rows, caps);
+
+   function line(cells: string[]): string {
+      return cells
+         .map((cell, index) =>
+            padCell(clip(cell, widths[index] ?? 0), widths[index] ?? 0),
+         )
+         .join(' '.repeat(COLUMN_GAP))
+         .trimEnd();
+   }
+
+   return [dim(line(headers)), ...rows.map((row) => line(row))];
 }
 
 /** Renders aligned "Label: value" rows with a shared label column. */
