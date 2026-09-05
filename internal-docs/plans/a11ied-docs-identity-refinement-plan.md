@@ -82,7 +82,7 @@ Refine the docs visual identity so it feels like a11ied's own field manual rathe
 
 - `packages/docs/src/layouts/doc-shell.astro`: final shell identity system.
 - `packages/docs/src/pages/*.astro`: copy or structure adjustments required by the honesty audit.
-- `internal-docs/releases/v0.3.0-readiness.md` or later readiness notes if the docs audit surfaces mismatches.
+- `internal-docs/releases/v0.1.0-readiness.md` or later readiness notes if the docs audit surfaces mismatches.
 - Docs regression tests and manual-run evidence for the identity pass.
 
 ## Tests

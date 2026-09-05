@@ -22,7 +22,7 @@ a1 doctor --json
 
 ## Release record
 
-The current release record lives in `internal-docs/releases/v0.3.0-readiness.md`. It documents the package release order, the docs publish path, the Agent Skill release path, and deferred items.
+The current release record lives in `internal-docs/releases/v0.1.0-readiness.md`. It documents the package release order, the docs publish path, the Agent Skill release path, and deferred items.
 
 ## Publish order
 
