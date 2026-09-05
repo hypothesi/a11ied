@@ -74,32 +74,49 @@ const toc = [
          One session is active at a time. No command takes or prints a session id.
       </p>
       <div class="route-list">
-         <div class="route-row"><code>sr start [url]</code><span>Start the session, stopping any active one first. Takes <code>--sr</code>, <code>--allow-virtual</code>, <code>--recording &lt;path&gt;</code>, <code>--idle-timeout &lt;minutes&gt;</code>.</span></div>
+         <div class="route-row"><code>sr start [url]</code><span>Start the session, stopping any active one first. Opens the URL in a browser and waits until its window is in front. Takes <code>--sr</code>, <code>--allow-virtual</code>, <code>--browser &lt;name&gt;</code>, <code>--app &lt;name&gt;</code> for a native app instead of a page, <code>--recording &lt;path&gt;</code>, <code>--idle-timeout &lt;minutes&gt;</code>.</span></div>
          <div class="route-row"><code>sr open &lt;url&gt;</code><span>Move the running session to another page.</span></div>
          <div class="route-row"><code>sr status</code><span>Print the session target, URL, uptime, recording, and transcript counts.</span></div>
          <div class="route-row"><code>sr stop</code><span>Stop the session and delete its state file. Takes <code>--out &lt;path&gt;</code> and <code>--format</code>.</span></div>
-         <div class="route-row"><code>sr read</code><span>Return the current item without moving the cursor.</span></div>
-         <div class="route-row"><code>sr next</code>, <code>sr previous</code><span>Move one item forward or back.</span></div>
+         <div class="route-row"><code>sr read</code><span>The current item without moving: role, name, value, states, the phrase, and the source of each field.</span></div>
+         <div class="route-row"><code>sr title</code><span>The page title: <code>document.title</code>, the VoiceOver window summary, or the NVDA window title.</span></div>
+         <div class="route-row"><code>sr next [kind]</code>, <code>sr previous [kind]</code><span>Move one item, or jump by kind: <code>heading</code>, <code>link</code>, <code>landmark</code>, <code>control</code>, <code>button</code>, <code>table</code>, <code>list</code>, <code>graphic</code>, <code>region</code>, <code>form-field</code>. Takes <code>--level &lt;1-6&gt;</code> with heading and <code>--times &lt;n&gt;</code>.</span></div>
          <div class="route-row"><code>sr top</code>, <code>sr bottom</code><span>Move to the start or the end of the document or the current area.</span></div>
          <div class="route-row"><code>sr interact</code>, <code>sr stop-interacting</code>, <code>sr activate</code><span>Enter a group or control, leave it, and activate the current item.</span></div>
          <div class="route-row"><code>sr escape</code><span>Press Escape to dismiss a menu or a dialog.</span></div>
+         <div class="route-row"><code>sr find &lt;text&gt;</code><span>Move the cursor to the next place the text appears. Exits 4 when it is not found.</span></div>
+         <div class="route-row"><code>sr table &lt;move&gt;</code><span>Inside a table: <code>next-cell</code>, <code>previous-cell</code>, <code>next-row</code>, <code>previous-row</code>, <code>next-column</code>, <code>previous-column</code>, <code>row-header</code>, <code>column-header</code>.</span></div>
+         <div class="route-row"><code>sr goto</code><span>Step forward until the current item matches <code>--role &lt;role&gt;</code>, <code>--name &lt;text&gt;</code>, or both. Takes <code>--max</code>. Exits 4 when nothing matches.</span></div>
+         <div class="route-row"><code>sr elements &lt;kind&gt;</code><span>The rotor: from the top, every element of one kind as the reader announces it. Takes <code>--max</code>, default 200.</span></div>
+         <div class="route-row"><code>sr read-all</code><span>Step item by item from the cursor to the end of the document, or to <code>--max</code> (default 500), and say which.</span></div>
+         <div class="route-row"><code>sr walk [url]</code><span>Start a session when none is active, move to the top, read the whole page, and print the transcript of the walk. Takes <code>--sr</code>, <code>--allow-virtual</code>, <code>--max</code>, <code>--out</code>, <code>--format</code>.</span></div>
          <div class="route-row"><code>sr press &lt;chord...&gt;</code><span>Press key chords in order, one chord per argument.</span></div>
          <div class="route-row"><code>sr type &lt;text&gt;</code><span>Type text through the active target.</span></div>
-         <div class="route-row"><code>sr do &lt;command&gt;</code><span>Run a named command. Takes <code>--command-set</code>.</span></div>
-         <div class="route-row"><code>sr list</code><span>List the commands a screen reader accepts. Takes <code>--sr</code>, <code>--command-set</code>, <code>--query</code>.</span></div>
+         <div class="route-row"><code>sr do &lt;command&gt;</code><span>Run a named command, or <code>&lt;command-set&gt;:&lt;name&gt;</code> when two sets share a name. Takes <code>--command-set</code>.</span></div>
+         <div class="route-row"><code>sr list</code><span>The commands <code>sr do</code> accepts, grouped by command set and by what they do. Takes <code>--query</code>, <code>--sr</code>, <code>--command-set</code>.</span></div>
          <div class="route-row"><code>sr focus</code><span>Bring a window to the front. With no options, refocus the app the session opened. Takes <code>--app</code>, <code>--bundle-id</code>, <code>--process</code>, <code>--pid</code>, <code>--window-title</code>, <code>--match</code>.</span></div>
+         <div class="route-row"><code>sr screenshot &lt;path&gt;</code><span>Save a picture of what the VoiceOver cursor is on. NVDA and virtual exit 2.</span></div>
+         <div class="route-row"><code>sr wait</code><span>Pause for <code>--ms</code>, or poll the transcript until <code>--for &lt;text|/regex/&gt;</code> is announced. Exits 4 at <code>--timeout</code>, default 5000 ms.</span></div>
+         <div class="route-row"><code>sr expect &lt;text|/regex/&gt;</code><span>Check the transcript for a phrase. Takes <code>--since &lt;checkpoint&gt;</code> and <code>--not</code>. Exits 4 on a mismatch.</span></div>
          <div class="route-row"><code>sr checkpoint &lt;label&gt;</code><span>Mark a point in the transcript for <code>--since</code>.</span></div>
          <div class="route-row"><code>sr transcript</code><span>Print what the reader said, with timestamps. Takes <code>--since</code>, <code>--tail</code>, <code>--out</code>, <code>--format</code>.</span></div>
+         <div class="route-row"><code>sr batch [file]</code><span>Run JSON lines of actions, one per line or from stdin, over one broker connection. Stops at the first failed expect unless <code>--continue</code>.</span></div>
       </div>
       <h3>Session options</h3>
       <div class="route-list">
-         <div class="route-row"><code>--sr &lt;reader&gt;</code><span><code>voiceover</code>, <code>nvda</code>, or <code>virtual</code>, on <code>sr start</code> and on the commands that start a session. Without it, a11ied picks the platform reader and falls back to virtual.</span></div>
+         <div class="route-row"><code>--sr &lt;reader&gt;</code><span><code>voiceover</code>, <code>nvda</code>, or <code>virtual</code>, on <code>sr start</code>, <code>sr walk</code>, and the commands that start a session. Without it, a11ied picks the platform reader and falls back to virtual.</span></div>
          <div class="route-row"><code>--allow-virtual</code><span>Confirm you want the simulated reader when a real one is available.</span></div>
-         <div class="route-row"><code>--timeout &lt;ms&gt;</code><span>Bound the screen reader command instead of using the built-in limits.</span></div>
+         <div class="route-row"><code>--timeout &lt;ms&gt;</code><span>Bound the screen reader command instead of using the built-in limits. On <code>sr wait</code> it is how long to wait for the phrase.</span></div>
          <div class="route-row"><code>--phrase</code><span>On a navigation verb, print the last spoken phrase alone, one line.</span></div>
          <div class="route-row"><code>--ephemeral</code><span>Run one action in a temporary session and tear it down.</span></div>
          <div class="route-row"><code>--command-set &lt;set&gt;</code><span><code>auto</code>, <code>portable</code>, <code>voiceover-commander</code>, or <code>voiceover-keycode</code>. Defaults to <code>auto</code>.</span></div>
       </div>
+      <p>
+         Exit codes: 0 when the command ran, 2 for a usage error, including a command the target
+         cannot run, 3 when no session is active, and 4 when a check failed: <code>find</code>,
+         <code>goto</code>, <code>wait --for</code>, <code>expect</code>, and a <code>batch</code> with
+         a failed expect.
+      </p>
       <p>
          <code>press</code>, <code>type</code>, and <code>do</code> start a session when none is
          active. The other verbs need one and exit 2 without it.
