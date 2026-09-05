@@ -71,6 +71,11 @@ export {
    type ResolvedDocumentTarget,
 } from './targets/runtime.js';
 export type { DocumentLoad } from './targets/parse.js';
+export {
+   DEFAULT_FAIL_ON_IMPACT,
+   buildBaselineFromViolations,
+   evaluateAxeVerdict,
+} from './axe/verdict.js';
 
 const cliCommands: CliCommand[] = [
    {

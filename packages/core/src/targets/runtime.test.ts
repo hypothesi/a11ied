@@ -32,6 +32,14 @@ describe('resolveDocumentTarget / url targets', () => {
       });
       expect(fetchSpy).not.toHaveBeenCalled();
    });
+});
+
+describe('resolveDocumentTarget / url targets / readHtml', () => {
+   const originalFetch = globalThis.fetch;
+
+   afterEach(() => {
+      globalThis.fetch = originalFetch;
+   });
 
    it('fetches the markup only when readHtml is called, with a timeout signal', async () => {
       const fetchSpy = vi.fn().mockResolvedValue({

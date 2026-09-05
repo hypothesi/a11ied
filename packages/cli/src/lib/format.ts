@@ -31,6 +31,8 @@ const stateColors: Readonly<Record<string, (text: string) => string>> = {
    serious: chalk.red,
    moderate: chalk.yellow,
    minor: chalk.blue,
+   pass: chalk.green.bold,
+   fail: chalk.red.bold,
 };
 
 export function getTerminalWidth(): number {

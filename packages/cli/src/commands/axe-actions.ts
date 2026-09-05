@@ -1,4 +1,12 @@
-import type { AxeRunResult } from '#contracts';
+import {
+   axeFailOnImpactSchema,
+   cliExitCodes,
+   type AxeBaseline,
+   type AxeFailOnImpact,
+   type AxeRunResult,
+   type AxeVerdict,
+} from '#contracts';
+import type * as Core from '#core';
 import type { DocumentLoad } from '#core';
 
 export interface AxeActionOptions {
@@ -10,6 +18,9 @@ export interface AxeActionOptions {
    criterion?: string;
    level?: string;
    rule?: string[];
+   failOn?: string;
+   baseline?: string;
+   updateBaseline?: boolean;
 }
 
 type RunAxeSelection =
@@ -26,24 +37,83 @@ function parseTimeoutMs(timeout: string | undefined): number | undefined {
 }
 
 async function runAxeForSelection(args: {
+   core: typeof Core;
    load: DocumentLoad;
    selection: RunAxeSelection;
    wcagVersion: string;
    timeoutMs: number | undefined;
 }): Promise<AxeRunResult> {
-   const { runAxe } = await import('#core');
    const base = { wcagVersion: args.wcagVersion, timeoutMs: args.timeoutMs };
 
    if (args.selection.kind === 'criterion') {
-      return runAxe(args.load, { ...base, criterion: args.selection.criterion });
+      return args.core.runAxe(args.load, {
+         ...base,
+         criterion: args.selection.criterion,
+      });
    }
    if (args.selection.kind === 'level') {
-      return runAxe(args.load, { ...base, level: args.selection.level });
+      return args.core.runAxe(args.load, { ...base, level: args.selection.level });
    }
    if (args.selection.kind === 'all') {
-      return runAxe(args.load, base);
+      return args.core.runAxe(args.load, base);
    }
-   return runAxe(args.load, { ...base, ruleIds: args.selection.ruleIds });
+   return args.core.runAxe(args.load, { ...base, ruleIds: args.selection.ruleIds });
+}
+
+function parseFailOn(core: typeof Core, failOn: string | undefined): AxeFailOnImpact {
+   if (failOn === undefined) {
+      return 'minor';
+   }
+   const parsed = axeFailOnImpactSchema.safeParse(failOn);
+   if (parsed.success) {
+      return parsed.data;
+   }
+   throw new core.CliUsageError(
+      'validation-error',
+      `--fail-on "${failOn}" is unsupported.`,
+      { field: 'failOn', value: failOn, supportedValues: axeFailOnImpactSchema.options },
+   );
+}
+
+async function resolveBaseline(
+   core: typeof Core,
+   result: AxeRunResult,
+   options: AxeActionOptions,
+): Promise<AxeBaseline | undefined> {
+   if (!options.baseline) {
+      if (options.updateBaseline) {
+         throw new core.CliUsageError(
+            'missing-baseline-path',
+            '--update-baseline requires --baseline <file>.',
+         );
+      }
+      return undefined;
+   }
+
+   const { readAxeBaseline, writeAxeBaseline } = await import('./axe-baseline.js');
+   if (options.updateBaseline) {
+      const baseline = core.buildBaselineFromViolations(result.violations);
+      await writeAxeBaseline(options.baseline, baseline);
+      return baseline;
+   }
+
+   return readAxeBaseline(options.baseline);
+}
+
+async function buildVerdict(
+   core: typeof Core,
+   result: AxeRunResult,
+   options: AxeActionOptions,
+): Promise<AxeVerdict> {
+   const baseline = await resolveBaseline(core, result, options);
+   const input: Parameters<typeof core.evaluateAxeVerdict>[0] = {
+      violations: result.violations,
+      failOn: parseFailOn(core, options.failOn),
+   };
+   if (baseline) {
+      input.baseline = baseline;
+   }
+   return core.evaluateAxeVerdict(input);
 }
 
 export async function handleAxeAction(
@@ -51,18 +121,29 @@ export async function handleAxeAction(
    options: AxeActionOptions,
 ): Promise<{
    target: { kind: string; value: string };
-   result: AxeRunResult;
+   result: AxeRunResult & { verdict: AxeVerdict };
+   exitCode: number;
 }> {
-   const [{ resolvePageTarget, resolveRunAxeSelection }, { buildPageTargetInput }] =
-      await Promise.all([import('../lib/execute.js'), import('../lib/target-input.js')]);
+   const [{ resolvePageTarget, resolveRunAxeSelection }, { buildPageTargetInput }, core] =
+      await Promise.all([
+         import('../lib/execute.js'),
+         import('../lib/target-input.js'),
+         import('#core'),
+      ]);
    const resolved = await resolvePageTarget(buildPageTargetInput(target, options, 'axe'));
    const selection = resolveRunAxeSelection(options);
    const result = await runAxeForSelection({
+      core,
       load: resolved.load,
       selection,
       wcagVersion: options.wcag,
       timeoutMs: parseTimeoutMs(options.timeout),
    });
+   const verdict = await buildVerdict(core, result, options);
 
-   return { target: resolved.reportTarget, result };
+   return {
+      target: resolved.reportTarget,
+      result: { ...result, verdict },
+      exitCode: verdict.passed ? cliExitCodes.success : cliExitCodes.assertion,
+   };
 }

@@ -7,6 +7,7 @@ import {
    createTestServer,
    runCli,
    parseJsonOutput,
+   EXIT_ASSERTION,
    EXIT_SUCCESS,
    EXIT_USAGE,
    TEST_TIMEOUT_MEDIUM,
@@ -47,7 +48,7 @@ async function assertAxeCriterionScan(baseUrl: string): Promise<void> {
       '--json',
    ]);
    const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_SUCCESS);
+   expect(result.status).toBe(EXIT_ASSERTION);
    const violations = (
       json.result as {
          violations: Array<{
@@ -74,7 +75,7 @@ async function assertAxeLevelScan(baseUrl: string): Promise<void> {
       '--json',
    ]);
    const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_SUCCESS);
+   expect(result.status).toBe(EXIT_ASSERTION);
    expect(
       (json.result as { violations: Array<{ id: string }> }).violations.some(
          (entry) => entry.id === 'color-contrast',
@@ -139,6 +140,7 @@ async function assertAxeTextOutput(baseUrl: string): Promise<void> {
        URL:        <base>/button-name-failure.html
        Selection:  criterion=4.1.2
        Result:     1 violation, 0 incomplete checks, 2 passes
+       Verdict:    fail  1 finding at or above --fail-on minor
 
      Violations (1)
        ✗ button-name  critical  WCAG 4.1.2 (A)
@@ -187,7 +189,7 @@ const fixturePath = resolve(
 async function assertAxeFileTarget(): Promise<void> {
    const result = await runCli(['axe', fixturePath, '--criterion', '4.1.2', '--json']);
    const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_SUCCESS);
+   expect(result.status).toBe(EXIT_ASSERTION);
    expect((json.target as { kind: string }).kind).toBe('file');
    expect(
       (json.result as { violations: Array<{ id: string }> }).violations.some(
@@ -199,7 +201,7 @@ async function assertAxeFileTarget(): Promise<void> {
 async function assertAxeInlineHtmlTarget(): Promise<void> {
    const result = await runCli(['axe', '--html', '<img src=x>', '--json']);
    const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_SUCCESS);
+   expect(result.status).toBe(EXIT_ASSERTION);
    expect((json.target as { kind: string }).kind).toBe('html');
    expect(
       (json.result as { violations: Array<{ id: string }> }).violations.some(

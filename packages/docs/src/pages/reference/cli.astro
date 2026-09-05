@@ -189,18 +189,31 @@ a1 wcag rule color-contrast</code></pre>
             <div class="route-row"><code>--level &lt;level&gt;</code><span>Run the rules mapped to one WCAG level. <code>--level AA</code> resolves 72 rules for WCAG 2.2.</span></div>
             <div class="route-row"><code>--criterion &lt;criterion&gt;</code><span>Run the rules mapped to one criterion, by ID or slug.</span></div>
             <div class="route-row"><code>--rule &lt;ruleId...&gt;</code><span>Run named axe rules. Repeat the flag for more than one.</span></div>
+            <div class="route-row"><code>--fail-on &lt;impact&gt;</code><span>Only count violations at or above this impact toward the exit code: minor, moderate, serious, or critical. Defaults to any violation.</span></div>
+            <div class="route-row"><code>--baseline &lt;file&gt;</code><span>JSON file of accepted findings, keyed by rule id and node target, that do not count toward the exit code.</span></div>
+            <div class="route-row"><code>--update-baseline</code><span>Write the current violations to <code>--baseline</code> instead of asserting against it.</span></div>
          </div>
          <pre><code>a1 axe http://localhost:3000 --level AA --json
 a1 axe http://localhost:3000 --criterion 1.4.3 --json
 a1 axe src/components/Dialog.html --rule color-contrast --rule link-name --json
 echo '&lt;button&gt;&lt;/button&gt;' | a1 axe -
-a1 axe --html '&lt;img src=x&gt;'</code></pre>
+a1 axe --html '&lt;img src=x&gt;'
+a1 axe http://localhost:3000 --fail-on critical --json
+a1 axe http://localhost:3000 --baseline known-findings.json --update-baseline</code></pre>
          <p>
             With no selector, the run covers every rule mapped in the WCAG version. The result has
             <code>violations</code>, <code>passes</code>, <code>incomplete</code>, and
             <code>inapplicable</code>, plus the resolved rule list under <code>selection</code>.
-            A file target loads through <code>file://</code>; axe never fetches a URL target's
+            A file target loads through <code>file://</code>. axe never fetches a URL target's
             HTML itself, since Playwright loads the page directly.
+         </p>
+         <p>
+            axe exits 4 when a violation remains after <code>--fail-on</code> and
+            <code>--baseline</code> filtering, and 0 otherwise. The JSON envelope's
+            <code>ok</code> field stays <code>true</code> either way; the exit code carries the
+            verdict, under <code>result.verdict</code> in the envelope. Run with
+            <code>--update-baseline</code> once to accept the current findings, then commit the
+            baseline file so CI only fails on new ones.
          </p>
       </div>
       <div class="split-aside">

@@ -70,6 +70,31 @@ export const axeRunResultSchema = z.object({
 });
 export type AxeRunResult = z.infer<typeof axeRunResultSchema>;
 
+export const axeFailOnImpactSchema = z.enum(['minor', 'moderate', 'serious', 'critical']);
+export type AxeFailOnImpact = z.infer<typeof axeFailOnImpactSchema>;
+
+/** A baseline file's accepted findings, one key per rule id plus violating node target. */
+export const axeBaselineSchema = z.object({
+   acceptedFindings: z.array(z.string()),
+});
+export type AxeBaseline = z.infer<typeof axeBaselineSchema>;
+
+export const axeVerdictFindingSchema = z.object({
+   ruleId: z.string(),
+   impact: axeImpactSchema,
+   target: z.array(z.string()),
+});
+export type AxeVerdictFinding = z.infer<typeof axeVerdictFindingSchema>;
+
+export const axeVerdictSchema = z.object({
+   failOn: axeFailOnImpactSchema,
+   passed: z.boolean(),
+   totalViolationNodes: z.number().int().nonnegative(),
+   baselinedCount: z.number().int().nonnegative(),
+   failingFindings: z.array(axeVerdictFindingSchema),
+});
+export type AxeVerdict = z.infer<typeof axeVerdictSchema>;
+
 export const coverageStateSchema = z.enum(['automated', 'hybrid', 'manual', 'unknown']);
 export type CoverageState = z.infer<typeof coverageStateSchema>;
 

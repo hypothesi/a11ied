@@ -190,6 +190,23 @@ function summarizeCounts(result: {
    ].join(', ');
 }
 
+interface AxeVerdict {
+   passed: boolean;
+   failOn: string;
+   baselinedCount: number;
+   failingFindings: unknown[];
+}
+
+function formatVerdict(verdict: AxeVerdict): string {
+   if (verdict.passed) {
+      if (verdict.baselinedCount > 0) {
+         return `${badge('pass')}  (${count(verdict.baselinedCount, 'baselined finding')} accepted)`;
+      }
+      return badge('pass');
+   }
+   return `${badge('fail')}  ${count(verdict.failingFindings.length, 'finding')} at or above --fail-on ${verdict.failOn}`;
+}
+
 // Fallow-ignore-next-line unused-export
 export function renderRunAxeText(
    envelope: CliOutputEnvelope,
@@ -202,6 +219,7 @@ export function renderRunAxeText(
       violations: AxeRule[];
       passes: AxeRule[];
       incomplete: AxeRule[];
+      verdict: AxeVerdict;
    };
 
    const lines = [
@@ -211,6 +229,7 @@ export function renderRunAxeText(
             ['URL', result.url],
             ['Selection', formatRunAxeSelector(result.selection)],
             ['Result', summarizeCounts(result)],
+            ['Verdict', formatVerdict(result.verdict)],
          ]),
       ),
       ...renderRuleGroup({

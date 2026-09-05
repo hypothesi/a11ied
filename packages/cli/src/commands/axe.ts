@@ -28,6 +28,21 @@ function buildAxeCommand(program: Command): Command {
                      .option(
                         '--rule <ruleId...>',
                         'Limit the run to one or more explicit axe rule ids.',
+                     )
+                     .option(
+                        '--fail-on <impact>',
+                        'Only fail on violations at or above this impact: minor, ' +
+                           'moderate, serious, or critical. Defaults to any violation.',
+                     )
+                     .option(
+                        '--baseline <file>',
+                        'JSON file of accepted findings, keyed by rule id and node ' +
+                           'target, that do not count toward the exit code.',
+                     )
+                     .option(
+                        '--update-baseline',
+                        'Write the current violations to --baseline instead of ' +
+                           'asserting against it.',
                      ),
                ),
             ),
