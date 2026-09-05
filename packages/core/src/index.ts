@@ -78,6 +78,13 @@ export {
 } from './axe/verdict.js';
 export { buildAxeSarifLog, type AxeSarifLog } from './axe/sarif.js';
 export type { PageCookie } from './browser/page-setup.js';
+export { getAccessibilityTree, type AccessibilityTree } from './tree/runtime.js';
+export {
+   filterAriaTree,
+   parseAriaSnapshot,
+   serializeAriaTree,
+   type AriaTreeNode,
+} from './tree/parse.js';
 
 const cliCommands: CliCommand[] = [
    {

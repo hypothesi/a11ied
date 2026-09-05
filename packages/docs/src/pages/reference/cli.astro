@@ -9,6 +9,7 @@ const toc = [
    { id: 'keys', label: 'Key chords' },
    { id: 'wcag', label: 'a1 wcag' },
    { id: 'axe', label: 'a1 axe' },
+   { id: 'tree', label: 'a1 tree' },
    { id: 'inspect', label: 'a1 inspect' },
    { id: 'doctor', label: 'a1 doctor and mcp' },
    { id: 'browser', label: 'Browser selection' },
@@ -29,7 +30,8 @@ const toc = [
       <div class="route-list">
          <div class="route-row"><code>a1 sr</code><span>Control a screen reader through a session.</span></div>
          <div class="route-row"><code>a1 wcag</code><span>Look up criteria, techniques, axe rules, search results, and coverage.</span></div>
-         <div class="route-row"><code>a1 axe</code><span>Run axe-core against a URL.</span></div>
+         <div class="route-row"><code>a1 axe</code><span>Run axe-core against one or more targets.</span></div>
+         <div class="route-row"><code>a1 tree</code><span>Print a target's accessibility tree.</span></div>
          <div class="route-row"><code>a1 inspect</code><span>Explain which criteria apply to a page.</span></div>
          <div class="route-row"><code>a1 mcp</code><span>Start the stdio MCP server.</span></div>
          <div class="route-row"><code>a1 doctor</code><span>Check the host and list the setup steps still needed.</span></div>
@@ -240,6 +242,39 @@ a1 axe http://localhost:3000/a http://localhost:3000/b --json</code></pre>
          <p class="aside-note">
             If the page has fewer than 10 elements and under 50 characters of text, the result adds a
             warning that a single-page app may not have mounted.
+         </p>
+      </div>
+   </section>
+
+   <section class="split panel" id="tree">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">tree</p>
+            <h2>a1 tree</h2>
+         </div>
+         <div class="route-list">
+            <div class="route-row"><code>&lt;target&gt;</code><span>An http(s) URL, a file path, - for HTML on stdin, or --html.</span></div>
+            <div class="route-row"><code>--role &lt;role&gt;</code><span>Keep only nodes with this role, and their ancestors.</span></div>
+            <div class="route-row"><code>--name &lt;text&gt;</code><span>Keep only nodes whose accessible name contains this text, and their ancestors.</span></div>
+         </div>
+         <pre><code>a1 tree http://localhost:3000
+a1 tree http://localhost:3000 --role link
+a1 tree http://localhost:3000 --name "Sign in" --json</code></pre>
+         <p>
+            <code>tree</code> reads Playwright's <code>ariaSnapshot()</code> for the target: the
+            role and name tree a screen reader sees, including JavaScript-rendered content, with
+            no heuristics. Text output is the YAML Playwright produces. <code>--json</code> parses
+            it into <code>result.nodes</code>, an array of <code>{'{'} role, name, level,
+            children {'}'}</code> objects. <code>--role</code> and <code>--name</code> keep a
+            matching node together with every ancestor needed to reach it, so the tree's shape
+            stays intact.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">No heuristics</div>
+         <p class="aside-note">
+            Unlike <code>inspect</code>, <code>tree</code> runs the page in a real browser, so it
+            sees content a client-side framework renders after load.
          </p>
       </div>
    </section>

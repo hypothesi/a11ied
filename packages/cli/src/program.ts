@@ -3,6 +3,7 @@ import { cliExitCodes } from '#contracts';
 import { registerSessionCommands } from './commands/drive.js';
 import { registerInspectCommands } from './commands/inspect.js';
 import { registerAxeCommand } from './commands/axe.js';
+import { registerTreeCommand } from './commands/tree.js';
 import { registerSetupCommand } from './commands/setup.js';
 import { registerWcagCommands } from './commands/wcag.js';
 import { CLI_VERSION } from './lib/constants.js';
@@ -83,6 +84,7 @@ function registerAllCommands(program: Command): void {
    registerSessionCommands(program);
    registerWcagCommands(program);
    registerAxeCommand(program);
+   registerTreeCommand(program);
    registerInspectCommands(program);
    registerMcpCommand(program);
    registerDoctorCommand(program);

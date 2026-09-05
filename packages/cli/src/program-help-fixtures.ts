@@ -25,6 +25,9 @@ export const topLevelHelpCases: HelpCase[] = [
         axe [options] [targets...]  Run axe-core against one or more targets: an
                                     http(s) URL, a file path, - for HTML on stdin, or
                                     --html.
+        tree [options] [target]     Print the accessibility tree for a target: an
+                                    http(s) URL, a file path, - for HTML on stdin, or
+                                    --html.
         inspect                     Explain criterion applicability for a target.
         mcp                         Start the MCP stdio server.
         doctor [options]            Check this machine for browser and screen reader

@@ -1,4 +1,5 @@
 export { renderRunAxeText, renderMultiAxeText } from './axe.js';
+export { renderTreeText } from './tree.js';
 export { renderDoctorEnvelopeText } from './doctor.js';
 export { renderApplicableText, renderCriterionApplicabilityText } from './inspect.js';
 export {
