@@ -88,19 +88,22 @@ a1 wcag 1.4.3 --json</code></pre>
             The virtual target loads the URL into a simulated reader. Pass
             <code>--allow-virtual</code> to say the simulation is what you want.
          </p>
-         <pre><code>a1 sr start --target virtual --allow-virtual --url http://localhost:3000/checkout --json</code></pre>
+         <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout --json</code></pre>
          <pre data-label="OUTPUT"><code>"session": &#123;
-  "sessionId": "drv_c33f1d8f-4f8c-4a78-afe6-f54d7f0b0b50",
+  "sessionId": "drv_c33f1d8f4461",
   "target": "virtual",
-  "targetType": "simulated"
+  "targetType": "simulated",
+  "url": "http://localhost:3000/checkout"
 &#125;</code></pre>
-         <p>Copy the <code>sessionId</code>. Every later command takes it as <code>--session</code>.</p>
+         <p>
+            Every later <code>sr</code> command uses this session. No command takes a session id.
+         </p>
       </div>
       <div class="split-aside">
-         <div class="tag">Skip the flag</div>
+         <div class="tag">One session</div>
          <p class="aside-note">
-            Set <code>A11IED_DRIVE_SESSION</code> to the session id and the other
-            <code>sr</code> commands pick it up without <code>--session</code>.
+            One session is active per user. A second <code>a1 sr start</code> stops the first one
+            and reports it in the warnings.
          </p>
       </div>
    </section>
@@ -114,9 +117,9 @@ a1 wcag 1.4.3 --json</code></pre>
          <code>sr next</code> moves to the next element and returns what the reader announced.
          <code>sr read</code> returns the current state without moving.
       </p>
-      <pre><code>a1 sr next --session drv_c33f1d8f --json
-a1 sr next --session drv_c33f1d8f --json
-a1 sr logs --session drv_c33f1d8f --json</code></pre>
+      <pre><code>a1 sr next --json
+a1 sr next --json
+a1 sr transcript --json</code></pre>
       <pre data-label="OUTPUT"><code>"spokenPhraseLog": [
   "document",
   "heading, Checkout, level 1",
@@ -141,7 +144,7 @@ a1 sr logs --session drv_c33f1d8f --json</code></pre>
          <p class="panel-kicker">Step 5</p>
          <h2>Stop the session</h2>
       </div>
-      <pre><code>a1 sr stop --session drv_c33f1d8f --json</code></pre>
+      <pre><code>a1 sr stop --json</code></pre>
       <p>
          Stopping shuts down the driver process, finishes any recording, and deletes the session
          state file. Sessions outlive the shell that started them, so stop each one you start.

@@ -21,10 +21,11 @@ a1 wcag 4.1.3 --json               # look up a criterion with techniques, failur
 a1 wcag rule color-contrast        # map an axe rule to its criteria and fixes
 a1 inspect criterion 4.1.3 --url <url> --json  # check applicability
 a1 axe --url <url> --json          # run axe-core scan
-a1 sr start --json                 # start a screen reader session
-a1 sr next --session <id> --json   # move to next element
-a1 sr read --session <id> --json   # read current element
-a1 sr stop --session <id> --json   # end session
+a1 sr start <url> --json           # start the screen reader session on a page
+a1 sr next --json                  # move to the next item
+a1 sr read --json                  # read the current item
+a1 sr transcript --json            # print what the reader said, with timestamps
+a1 sr stop --json                  # end the session
 a1 mcp                             # start the MCP server
 a1 help-all                        # print full command tree
 ```
@@ -45,4 +46,8 @@ The CLI and API support three target types:
 - `nvda` — real NVDA (Windows only)
 - `virtual` — headless virtual screen reader backed by `@guidepup/virtual-screen-reader`
 
-Pass `--target virtual --allow-virtual` for fast, deterministic local runs.
+Pass `--sr virtual --allow-virtual` for fast, deterministic local runs.
+
+One session is active per user. `sr start` stops any session already running, and no
+other command takes a session id. The session state file is `~/.a11ied/state/session.json`,
+or the same file under `$XDG_STATE_HOME/a11ied` or `$A11IED_STATE_DIR` when either is set.

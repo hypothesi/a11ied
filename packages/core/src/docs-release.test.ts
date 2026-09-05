@@ -138,7 +138,8 @@ function expectCliSurfaceDocs(): void {
    expectSurfaceDoc('reference/cli.astro', 'a1 wcag show status-messages');
    expectSurfaceDoc('reference/cli.astro', 'npx playwright install chromium');
    expectSurfaceDoc('reference/cli.astro', 'Chrome, Edge, Brave, or Chromium');
-   expectSurfaceDoc('reference/cli.astro', 'A11IED_DRIVE_SESSION');
+   expectSurfaceDoc('reference/cli.astro', 'A11IED_STATE_DIR');
+   expectSurfaceDoc('reference/cli.astro', 'One session is active at a time');
 }
 
 function expectConceptSurfaceDocs(): void {
@@ -164,7 +165,8 @@ function expectGuideSurfaceDocs(): void {
    expectSurfaceDoc('guides/recording.astro', 'What can be recorded');
    expectSurfaceDoc('guides/recording.astro', '.mov');
    expectSurfaceDoc('guides/recording.astro', '.mp4');
-   expectSurfaceDoc('guides/recording.astro', 'sr start --target voiceover --recording');
+   expectSurfaceDoc('guides/recording.astro', 'sr start --sr voiceover --recording');
+   expectSurfaceDoc('guides/recording.astro', 'transcript');
    expectSurfaceDoc('guides/recording.astro', 'npx playwright install chromium');
    expectSurfaceDoc('guides/screen-reader.astro', 'a1 sr stop');
    expectSurfaceDoc('install.astro', 'npx -y @guidepup/setup setup');

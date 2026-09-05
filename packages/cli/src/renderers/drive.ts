@@ -185,7 +185,7 @@ export function renderDriveStatusText(
    return [title('Session active'), '', ...indent(fields(entries))].join('\n');
 }
 
-/** Text for read and every navigation or input verb: the phrase and the item it landed on. */
+/** Text for read and every navigation or input verb: the phrase and the current item. */
 export function renderDriveReadText(
    envelope: CliOutputEnvelope,
    options: { verbose: boolean },

@@ -54,26 +54,37 @@ const toc = [
   stopDriverSession,
 {'}'} from 'a11ied';
 
-const session = await startDriverSession('virtual');
+await startDriverSession({'{'} target: 'virtual' {'}'});
 
 try {'{'}
-  const result = await runDriverSessionAction(session.sessionId, 'next');
+  const result = await runDriverSessionAction({'{'} action: 'next' {'}'});
 
   console.log(result.state.lastSpokenPhrase);
-  console.log(result.state.spokenPhraseLog);
+  console.log(result.state.transcript);
 {'}'} finally {'{'}
-  await stopDriverSession(session.sessionId);
+  await stopDriverSession();
 {'}'}</code></pre>
       <div class="route-list">
-         <div class="route-row"><code>startDriverSession(target, cwd?, recordingPath?)</code><span>Pass <code>'voiceover'</code>, <code>'nvda'</code>, <code>'virtual'</code>, or <code>undefined</code> to take the platform default. <code>recordingPath</code> starts a recording on targets that support one.</span></div>
-         <div class="route-row"><code>runDriverSessionAction(sessionId, action, options?)</code><span>Actions needing input take it under <code>options.payload</code>, such as <code>{'{'} payload: {'{'} key: 'Tab' {'}'} {'}'}</code>.</span></div>
-         <div class="route-row"><code>getDriverSessionStatus(sessionId)</code><span>Read state without moving the cursor.</span></div>
-         <div class="route-row"><code>runEphemeralDriverAction(target, action, options?)</code><span>One action in a session that is torn down immediately. No transcript.</span></div>
-         <div class="route-row"><code>stopDriverSession(sessionId)</code><span>Stop the driver, finish any recording, and delete the state file.</span></div>
+         <div class="route-row"><code>startDriverSession(options?)</code><span>Takes <code>target</code>, <code>mode</code>, <code>recordingPath</code>, <code>url</code>, <code>app</code>, <code>idleTimeoutMinutes</code>, and <code>timeoutMs</code>. Returns the new <code>session</code> and, when one was already running, the <code>replacedSession</code> it stopped.</span></div>
+         <div class="route-row"><code>runDriverSessionAction(request, options?)</code><span>The request is typed per action: <code>{'{'} action: 'next' {'}'}</code>, <code>{'{'} action: 'press', payload: {'{'} keys: ['Tab', 'Tab'] {'}'} {'}'}</code>, <code>{'{'} action: 'type', payload: {'{'} text {'}'} {'}'}</code>, <code>{'{'} action: 'checkpoint', payload: {'{'} label {'}'} {'}'}</code>.</span></div>
+         <div class="route-row"><code>getDriverSessionStatus(options?)</code><span>Read the session state without moving the cursor.</span></div>
+         <div class="route-row"><code>attachDocumentToDriverSession(document, options?)</code><span>Point the session at another page.</span></div>
+         <div class="route-row"><code>runEphemeralDriverAction(options)</code><span>One action in a session that is torn down before the call returns.</span></div>
+         <div class="route-row"><code>stopDriverSession(options?)</code><span>Stop the driver, finish any recording, and delete the state file.</span></div>
+         <div class="route-row"><code>getActiveDriverSession()</code><span>The active session, or <code>undefined</code> when the broker behind it is gone.</span></div>
+         <div class="route-row"><code>buildDriverTranscript(session, entries)</code><span>Build the transcript document. <code>formatTranscript</code> renders it, and <code>writeDriverTranscript</code> writes it to a file.</span></div>
       </div>
       <p>
-         Wrap every session in <code>try</code> and <code>finally</code>. A session runs in its own
-         process and outlives the code that started it.
+         One session is active per user, so no function takes a session id. Wrap every session in
+         <code>try</code> and <code>finally</code>. A session runs in its own process and outlives
+         the code that started it, unless it sits idle for <code>idleTimeoutMinutes</code>, which
+         defaults to 30.
+      </p>
+      <p>
+         Every action result carries <code>state.transcript</code>: an array of entries with an
+         <code>index</code>, an ISO <code>at</code> timestamp, the <code>phrase</code>, the
+         <code>itemText</code> when the reader reported one, and a <code>checkpoint</code> label on
+         the entries <code>checkpoint</code> added.
       </p>
    </section>
 

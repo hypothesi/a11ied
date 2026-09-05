@@ -13,7 +13,7 @@ const toc = [
 
 <DocShell
    title="Targets"
-   summary="A target is the screen reader a driver session controls. VoiceOver and NVDA drive the real software and return its speech. The virtual target simulates a reader in memory. Every driver command takes --target, and the result says which kind you got."
+   summary="A target is the screen reader a driver session controls. VoiceOver and NVDA drive the real software and return its speech. The virtual target simulates a reader in memory. sr start takes --sr to pick one, and the result says which kind you got."
    links={docsLinks}
    toc={toc}
 >
@@ -56,7 +56,7 @@ const toc = [
       <div class="stack">
          <div class="panel-head">
             <p class="panel-kicker">Defaults</p>
-            <h2>What you get without --target</h2>
+            <h2>What you get without --sr</h2>
          </div>
          <p>a11ied picks a target from the operating system, then checks that it is ready:</p>
          <ol>
@@ -87,15 +87,15 @@ const toc = [
          <h2>Ask for the virtual target on purpose</h2>
       </div>
       <p>
-         Naming <code>--target virtual</code> is not enough when a real reader is available. Add
+         Naming <code>--sr virtual</code> is not enough when a real reader is available. Add
          <code>--allow-virtual</code> to confirm you want the simulation.
       </p>
-      <pre><code>a1 sr start --target virtual --allow-virtual --url http://localhost:3000/checkout --json</code></pre>
+      <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout --json</code></pre>
       <p>
-         Pass <code>--url</code> so the reader has a page to read. a11ied fetches the document and
-         loads it into the simulator, so nothing needs to be open on screen. Without a URL the
-         session starts against an empty document. Needing no window is what makes this target
-         usable in CI and in fast local loops.
+         Pass the URL so the reader has a page to read. a11ied fetches the document and loads it
+         into the simulator, so nothing needs to be open on screen. Without a URL the session
+         starts against an empty document. Needing no window is what makes this target usable in
+         CI and in fast local loops.
       </p>
       <p>
          MCP clients pass the same two fields: <code>target: "virtual"</code> and
@@ -110,17 +110,18 @@ const toc = [
             <h2>Open the page before you start</h2>
          </div>
          <p>
-            VoiceOver and NVDA read whatever is already on screen. They do not navigate for you. Open
-            the browser, go to the route, wait for it to finish rendering, then start the session and
-            focus that window.
+            VoiceOver and NVDA read whatever is already on screen. Give <code>sr start</code> the
+            URL and it opens the page in the system browser, waits, and focuses that window before
+            the session begins.
          </p>
-         <pre><code>a1 sr start --target voiceover --json
-a1 sr focus --session drv_c33f1d8f --app "Google Chrome" --json
-a1 sr next --session drv_c33f1d8f --json</code></pre>
+         <pre><code>a1 sr start --sr voiceover http://localhost:3000/checkout --json
+a1 sr next --json</code></pre>
          <p>
-            <code>sr focus</code> accepts <code>--app</code> or <code>--bundle-id</code> on macOS,
-            <code>--process</code> or <code>--pid</code> on Windows, and
-            <code>--window-title</code> on either.
+            <code>sr start</code> opens the URL in the system browser and focuses that window, and
+            records which app it opened. A bare <code>a1 sr focus</code> brings that app back to
+            the front later. <code>sr focus</code> also accepts <code>--app</code> or
+            <code>--bundle-id</code> on macOS, <code>--process</code> or <code>--pid</code> on
+            Windows, and <code>--window-title</code> on either.
          </p>
       </div>
       <div class="split-aside">

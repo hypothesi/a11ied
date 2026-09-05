@@ -6,7 +6,7 @@ const toc = [
    { id: 'session', label: 'Open a session' },
    { id: 'move', label: 'Move and read' },
    { id: 'commands', label: 'Named commands' },
-   { id: 'checkpoints', label: 'Checkpoints' },
+   { id: 'transcript', label: 'Checkpoints and transcripts' },
    { id: 'form', label: 'Worked example' },
    { id: 'cleanup', label: 'Cleanup' },
 ];
@@ -14,7 +14,7 @@ const toc = [
 
 <DocShell
    title="Test with a screen reader"
-   summary="Open a driver session, move through the page, and keep what the reader announced. The same commands work against VoiceOver, NVDA, and the virtual reader. Only the target changes."
+   summary="Open a driver session, move through the page, and keep what the reader announced. The same commands work against VoiceOver, NVDA, and the virtual reader. Only the screen reader changes."
    links={docsLinks}
    toc={toc}
 >
@@ -25,24 +25,27 @@ const toc = [
             <h2>Open a session</h2>
          </div>
          <p>
-            For VoiceOver or NVDA, open the browser and load the route first. The reader operates
-            the window already on screen.
+            <code>sr start</code> takes the page as a positional argument and the screen reader as
+            <code>--sr</code>. For VoiceOver or NVDA, a11ied opens the URL in the system browser
+            and brings that window to the front.
          </p>
-         <pre><code>a1 sr start --target voiceover --json
-a1 sr focus --session drv_c33f1d8f --app "Google Chrome" --json</code></pre>
-         <p>For the virtual reader, pass the URL and let a11ied load the document.</p>
-         <pre><code>a1 sr start --target virtual --allow-virtual --url http://localhost:3000/checkout --json</code></pre>
+         <pre><code>a1 sr start --sr voiceover http://localhost:3000/checkout --json</code></pre>
+         <p>For the virtual reader, a11ied loads the document into an in-memory DOM.</p>
+         <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout --json</code></pre>
          <p>
-            The response returns a <code>sessionId</code>. Pass it to every later command as
-            <code>--session</code>, or export it as <code>A11IED_DRIVE_SESSION</code> and leave the
-            flag off.
+            One session is active at a time. Every later <code>sr</code> command uses it, and no
+            command takes a session id. A second <code>sr start</code> stops the first session and
+            reports it in the warnings.
          </p>
       </div>
       <div class="split-aside">
          <div class="tag">Sessions persist</div>
          <p class="aside-note">
-            A session runs in its own process with a state file under <code>.a11ied/state</code>. It
-            survives across shell commands until you stop it.
+            A session runs in its own process. Its state file is
+            <code>~/.a11ied/state/session.json</code>, or the same file under
+            <code>$XDG_STATE_HOME/a11ied</code> or <code>$A11IED_STATE_DIR</code> when either is
+            set. The session lasts across shell commands until you stop it or it sits idle for 30
+            minutes.
          </p>
       </div>
    </section>
@@ -55,30 +58,47 @@ a1 sr focus --session drv_c33f1d8f --app "Google Chrome" --json</code></pre>
       <div class="route-list">
          <div class="route-row">
             <code>sr next</code>
-            <span>Move to the next element and return what the reader said about it.</span>
+            <span>Move to the next item and return what the reader said about it.</span>
+         </div>
+         <div class="route-row">
+            <code>sr previous</code>
+            <span>Move back one item.</span>
+         </div>
+         <div class="route-row">
+            <code>sr top</code>, <code>sr bottom</code>
+            <span>Move to the start or the end of the document or the current area.</span>
+         </div>
+         <div class="route-row">
+            <code>sr interact</code>, <code>sr stop-interacting</code>, <code>sr activate</code>
+            <span>Enter a group or control, leave it, and activate the current item.</span>
+         </div>
+         <div class="route-row">
+            <code>sr escape</code>
+            <span>Press Escape to dismiss a menu or a dialog.</span>
          </div>
          <div class="route-row">
             <code>sr read</code>
-            <span>Return the current state without moving the cursor.</span>
+            <span>Return the current item without moving the cursor.</span>
          </div>
          <div class="route-row">
-            <code>sr press "Tab"</code>
-            <span>Send a key chord. Use it for keyboard order and for shortcuts the page defines.</span>
+            <code>sr press Tab Tab</code>
+            <span>Press key chords in order, one chord per argument.</span>
          </div>
          <div class="route-row">
             <code>sr type "test@example.com"</code>
             <span>Type into the focused control.</span>
          </div>
          <div class="route-row">
-            <code>sr logs</code>
-            <span>Return the full speech and action log for the session.</span>
+            <code>sr open &lt;url&gt;</code>
+            <span>Move the running session to another page.</span>
          </div>
       </div>
       <p>
          Every response carries a <code>state</code> object with
-         <code>lastSpokenPhrase</code>, <code>currentItemText</code>, and the running
-         <code>spokenPhraseLog</code>. <code>sr clear-logs</code> empties the log so the next
-         sequence starts clean.
+         <code>lastSpokenPhrase</code>, <code>currentItemText</code>, the running
+         <code>spokenPhraseLog</code>, and the timestamped <code>transcript</code>. Add
+         <code>--phrase</code> to print the phrase alone, one line, for shell loops. Add
+         <code>--timeout &lt;ms&gt;</code> to bound how long the screen reader command may take.
       </p>
    </section>
 
@@ -89,14 +109,15 @@ a1 sr focus --session drv_c33f1d8f --app "Google Chrome" --json</code></pre>
             <h2>Run named screen reader commands</h2>
          </div>
          <p>
-            <code>sr do</code> runs a command by name. Six portable commands work on every target:
+            <code>sr do</code> runs a command by name. Eight portable commands work on every
+            target and resolve through the same table the subcommands use:
             <code>next</code>, <code>previous</code>, <code>interact</code>,
-            <code>stop-interacting</code>, <code>activate</code>, and
-            <code>click-current-item</code>.
+            <code>stop-interacting</code>, <code>activate</code>, <code>top</code>,
+            <code>bottom</code>, and <code>escape</code>.
          </p>
-         <pre><code>a1 sr do interact --session drv_c33f1d8f --json
-a1 sr do next --session drv_c33f1d8f --json
-a1 sr do stop-interacting --session drv_c33f1d8f --json</code></pre>
+         <pre><code>a1 sr do interact --json
+a1 sr do next --json
+a1 sr do stop-interacting --json</code></pre>
          <p>
             VoiceOver adds its own set, including rotor and structural navigation. List what the
             current target accepts:
@@ -109,21 +130,33 @@ a1 sr list --query heading --json</code></pre>
          <p class="aside-note">
             <code>--command-set</code> picks between <code>portable</code>,
             <code>voiceover-commander</code>, and <code>voiceover-keycode</code>. The default,
-            <code>auto</code>, resolves the name against whichever set has it.
+            <code>auto</code>, resolves the name against whichever set has it. The virtual target
+            accepts the portable set only, and <code>sr list --sr virtual</code> lists just those
+            eight commands.
          </p>
       </div>
    </section>
 
-   <section class="panel" id="checkpoints">
+   <section class="panel" id="transcript">
       <div class="panel-head">
          <p class="panel-kicker">Step 4</p>
-         <h2>Mark the steps of a test</h2>
+         <h2>Mark the steps and keep the transcript</h2>
       </div>
       <p>
-         A checkpoint writes a label into the session log. It turns one long transcript into
-         readable sections when you paste it into a bug report.
+         A checkpoint marks a point in the transcript. <code>sr transcript --since</code> then
+         returns only what the reader said after it.
       </p>
-      <pre><code>a1 sr checkpoint "opened the dialog" --session drv_c33f1d8f --json</code></pre>
+      <pre><code>a1 sr checkpoint "opened the dialog"
+a1 sr next
+a1 sr transcript --since "opened the dialog"</code></pre>
+      <p>
+         Each entry carries an index, an ISO timestamp, the phrase, and the item text when the
+         reader reported one. <code>--tail &lt;count&gt;</code> keeps the last N phrases.
+         <code>--out &lt;path&gt;</code> writes the transcript to a file, as JSON for a
+         <code>.json</code> path and as Markdown for a <code>.md</code> path. Pass
+         <code>--format json</code> or <code>--format md</code> to pick the format yourself.
+      </p>
+      <pre><code>a1 sr transcript --out ./evidence/checkout.md</code></pre>
    </section>
 
    <section class="panel" id="form">
@@ -132,8 +165,8 @@ a1 sr list --query heading --json</code></pre>
          <h2>Check a form's announcement order</h2>
       </div>
       <p>
-         Step through the form field by field and read the log as a sequence. Each entry is what the
-         reader said at that position.
+         Step through the form field by field and read the transcript as a sequence. Each entry is
+         what the reader said at that position.
       </p>
       <pre data-label="OUTPUT"><code>"spokenPhraseLog": [
   "document",
@@ -154,8 +187,8 @@ a1 sr list --query heading --json</code></pre>
          and not on the card field.
       </p>
       <p>
-         For validation messages, submit the form with <code>sr press "Enter"</code>, then read the
-         log to see whether the error was announced. Status Messages is criterion 4.1.3, and
+         For validation messages, submit the form with <code>sr press Enter</code>, then read the
+         transcript to see whether the error was announced. Status Messages is criterion 4.1.3, and
          <a href="/coverage">its coverage state</a> is hybrid for exactly this reason.
       </p>
    </section>
@@ -165,14 +198,23 @@ a1 sr list --query heading --json</code></pre>
          <p class="panel-kicker">Cleanup</p>
          <h2>Stop every session you start</h2>
       </div>
-      <pre><code>a1 sr stop --session drv_c33f1d8f --json</code></pre>
+      <pre><code>a1 sr stop --out ./evidence/checkout.json</code></pre>
       <p>
-         Stopping shuts down the driver process, finishes any recording, and deletes the state file.
-         A session left running keeps the screen reader under automation control.
+         Stopping shuts down the driver process, finishes any recording, and deletes the state
+         file. A session left running keeps the screen reader under automation control, so stop
+         each one you start. A session nobody has used for 30 minutes stops itself. Pass
+         <code>--idle-timeout &lt;minutes&gt;</code> on <code>sr start</code> to change that, or
+         <code>--idle-timeout 0</code> to turn it off.
       </p>
       <p>
-         For a single action with no transcript, add <code>--ephemeral</code>. It starts a session,
-         runs the action, and tears it down in one command.
+         <code>sr stop --out</code> writes the transcript on the way out. When the session recorded
+         video, a11ied also writes the Markdown transcript next to the recording file, so you can
+         read the two together.
+      </p>
+      <p>
+         For a single action with no session, add <code>--ephemeral</code> to
+         <code>press</code>, <code>type</code>, or <code>do</code>. It starts a session, runs the
+         action, and tears it down in one command.
       </p>
    </section>
 </DocShell>

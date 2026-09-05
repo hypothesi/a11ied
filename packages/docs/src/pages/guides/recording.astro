@@ -56,14 +56,20 @@ const toc = [
          Pass <code>--recording</code> with an output path when you start the session. The file
          closes when you stop it.
       </p>
-      <pre><code>a1 sr start --target voiceover --recording ./recordings/checkout.mov --json
-a1 sr focus --session drv_c33f1d8f --app "Google Chrome" --json
-a1 sr next --session drv_c33f1d8f --json
-a1 sr logs --session drv_c33f1d8f --json
-a1 sr stop --session drv_c33f1d8f --json</code></pre>
+      <pre><code>a1 sr start --sr voiceover --recording ./recordings/checkout.mov http://localhost:3000/checkout --json
+a1 sr next --json
+a1 sr checkpoint "submitted the form" --json
+a1 sr transcript --json
+a1 sr stop --json</code></pre>
       <p>
          Recording covers the whole session, so keep sessions short and scoped to one behavior. Add
          <code>sr checkpoint</code> calls to mark the moments you want a reviewer to look for.
+      </p>
+      <p>
+         Stopping writes the Markdown transcript next to the recording. For
+         <code>./recordings/checkout.mov</code> that file is
+         <code>./recordings/checkout.transcript.md</code>, and it carries an ISO timestamp per
+         phrase, so a reviewer can match what the reader said to the point in the video.
       </p>
    </section>
 
@@ -105,7 +111,7 @@ a1 sr stop --session drv_c33f1d8f --json</code></pre>
          </div>
          <div class="route-row">
             <strong>The file is empty</strong>
-            <span>Stop the session with <code>sr stop</code>. The file is finished at teardown.</span>
+            <span>Stop the session with <code>sr stop</code>. The recorder finishes the file at teardown.</span>
          </div>
       </div>
    </section>

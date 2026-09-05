@@ -74,30 +74,37 @@ const toc = [
       <h3>driver_session</h3>
       <div class="route-list">
          <div class="route-row"><code>action</code><span><code>start</code>, <code>status</code>, or <code>stop</code>. Required.</span></div>
-         <div class="route-row"><code>sessionId</code><span>Required for <code>status</code> and <code>stop</code>.</span></div>
          <div class="route-row"><code>target</code><span><code>voiceover</code>, <code>nvda</code>, or <code>virtual</code>.</span></div>
          <div class="route-row"><code>allowVirtual</code><span>Set to <code>true</code> to accept the simulated reader.</span></div>
          <div class="route-row"><code>url</code><span>Document to load into a virtual session. Without it the session starts against an empty document.</span></div>
       </div>
       <p>
-         The start response carries <code>sessionId</code>, <code>target</code>, and
-         <code>targetType</code>. <code>targetType</code> is <code>real</code> for VoiceOver and
-         NVDA, and <code>simulated</code> for virtual.
+         One session is active at a time, so <code>status</code> and <code>stop</code> take no
+         session id, and <code>start</code> stops any session already running. The start response
+         carries <code>sessionId</code>, <code>target</code>, and <code>targetType</code>.
+         <code>targetType</code> is <code>real</code> for VoiceOver and NVDA, and
+         <code>simulated</code> for virtual.
       </p>
       <h3>driver_action</h3>
       <p>
-         Takes <code>sessionId</code> and an <code>action</code>. Most actions need nothing else:
-         <code>next</code>, <code>previous</code>, <code>interact</code>,
-         <code>stop-interacting</code>, <code>click-current-item</code>, <code>read</code>,
-         <code>logs</code>, and <code>clear-logs</code>.
+         Takes an <code>action</code> and runs it against the active session. The portable verbs
+         need nothing else and work on all three targets: <code>next</code>,
+         <code>previous</code>, <code>interact</code>, <code>stop-interacting</code>,
+         <code>activate</code>, <code>top</code>, <code>bottom</code>, and <code>escape</code>.
+         <code>read</code> and <code>transcript</code> read state back without moving the cursor.
       </p>
       <div class="route-list">
-         <div class="route-row"><code>key</code><span>Add <code>key</code> with the chord to send.</span></div>
+         <div class="route-row"><code>press</code><span>Add <code>keys</code>, an array of chords pressed in order, such as <code>["Tab", "Tab"]</code>.</span></div>
          <div class="route-row"><code>type</code><span>Add <code>text</code> with the string to type.</span></div>
-         <div class="route-row"><code>checkpoint</code><span>Add <code>label</code> to mark the log.</span></div>
+         <div class="route-row"><code>checkpoint</code><span>Add <code>label</code> to mark a point in the transcript.</span></div>
          <div class="route-row"><code>perform</code><span>Add <code>command</code>, and <code>commandSet</code> when the name is ambiguous.</span></div>
          <div class="route-row"><code>focus</code><span>Add one of <code>appName</code>, <code>bundleId</code>, <code>processName</code>, <code>pid</code>, or <code>windowTitle</code>.</span></div>
       </div>
+      <p>
+         Every response state carries <code>transcript</code>, an array of entries with an
+         <code>index</code>, an ISO <code>at</code> timestamp, the <code>phrase</code>, and a
+         <code>checkpoint</code> label on the entries <code>checkpoint</code> added.
+      </p>
       <p>
          For a VoiceOver session, the response state includes <code>axFocusedElement</code> with the
          accessibility role, subrole, title, description, value, and enabled state of the element the

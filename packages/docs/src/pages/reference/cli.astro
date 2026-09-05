@@ -57,8 +57,10 @@ const toc = [
       <div class="split-aside">
          <div class="tag">Environment</div>
          <p class="aside-note">
-            <code>A11IED_DRIVE_SESSION</code> supplies the session id when a driver command has no
-            <code>--session</code> flag.
+            <code>A11IED_STATE_DIR</code> holds the active screen reader session. Without it,
+            a11ied uses <code>$XDG_STATE_HOME/a11ied</code>, then
+            <code>~/.a11ied/state</code>. <code>A11IED_DRIVER_MODE=in-process</code> runs the
+            session inside the calling process instead of a separate broker.
          </p>
       </div>
    </section>
@@ -68,32 +70,39 @@ const toc = [
          <p class="panel-kicker">Screen reader</p>
          <h2>a1 sr</h2>
       </div>
+      <p>
+         One session is active at a time. No command takes or prints a session id.
+      </p>
       <div class="route-list">
-         <div class="route-row"><code>sr start</code><span>Start a persistent session. Takes <code>--target</code>, <code>--url</code>, <code>--allow-virtual</code>, <code>--recording &lt;path&gt;</code>.</span></div>
-         <div class="route-row"><code>sr status</code><span>Print the persisted session state and its capability list.</span></div>
-         <div class="route-row"><code>sr stop</code><span>Stop the session and delete its state file.</span></div>
-         <div class="route-row"><code>sr focus</code><span>Bring a window to the front. Takes <code>--app</code>, <code>--bundle-id</code>, <code>--process</code>, <code>--pid</code>, <code>--window-title</code>, <code>--match</code>.</span></div>
-         <div class="route-row"><code>sr next</code><span>Move to the next element.</span></div>
-         <div class="route-row"><code>sr read</code><span>Read the current state without moving.</span></div>
-         <div class="route-row"><code>sr press &lt;keys&gt;</code><span>Send one or more key chords.</span></div>
+         <div class="route-row"><code>sr start [url]</code><span>Start the session, stopping any active one first. Takes <code>--sr</code>, <code>--allow-virtual</code>, <code>--recording &lt;path&gt;</code>, <code>--idle-timeout &lt;minutes&gt;</code>.</span></div>
+         <div class="route-row"><code>sr open &lt;url&gt;</code><span>Move the running session to another page.</span></div>
+         <div class="route-row"><code>sr status</code><span>Print the session target, URL, uptime, recording, and transcript counts.</span></div>
+         <div class="route-row"><code>sr stop</code><span>Stop the session and delete its state file. Takes <code>--out &lt;path&gt;</code> and <code>--format</code>.</span></div>
+         <div class="route-row"><code>sr read</code><span>Return the current item without moving the cursor.</span></div>
+         <div class="route-row"><code>sr next</code>, <code>sr previous</code><span>Move one item forward or back.</span></div>
+         <div class="route-row"><code>sr top</code>, <code>sr bottom</code><span>Move to the start or the end of the document or the current area.</span></div>
+         <div class="route-row"><code>sr interact</code>, <code>sr stop-interacting</code>, <code>sr activate</code><span>Enter a group or control, leave it, and activate the current item.</span></div>
+         <div class="route-row"><code>sr escape</code><span>Press Escape to dismiss a menu or a dialog.</span></div>
+         <div class="route-row"><code>sr press &lt;chord...&gt;</code><span>Press key chords in order, one chord per argument.</span></div>
          <div class="route-row"><code>sr type &lt;text&gt;</code><span>Type text through the active target.</span></div>
          <div class="route-row"><code>sr do &lt;command&gt;</code><span>Run a named command. Takes <code>--command-set</code>.</span></div>
-         <div class="route-row"><code>sr list</code><span>List the commands the target accepts. Takes <code>--target</code>, <code>--command-set</code>, <code>--query</code>.</span></div>
-         <div class="route-row"><code>sr logs</code><span>Return the speech and action log.</span></div>
-         <div class="route-row"><code>sr clear-logs</code><span>Empty the log for the session.</span></div>
-         <div class="route-row"><code>sr checkpoint &lt;label&gt;</code><span>Write a named marker into the log.</span></div>
+         <div class="route-row"><code>sr list</code><span>List the commands a screen reader accepts. Takes <code>--sr</code>, <code>--command-set</code>, <code>--query</code>.</span></div>
+         <div class="route-row"><code>sr focus</code><span>Bring a window to the front. With no options, refocus the app the session opened. Takes <code>--app</code>, <code>--bundle-id</code>, <code>--process</code>, <code>--pid</code>, <code>--window-title</code>, <code>--match</code>.</span></div>
+         <div class="route-row"><code>sr checkpoint &lt;label&gt;</code><span>Mark a point in the transcript for <code>--since</code>.</span></div>
+         <div class="route-row"><code>sr transcript</code><span>Print what the reader said, with timestamps. Takes <code>--since</code>, <code>--tail</code>, <code>--out</code>, <code>--format</code>.</span></div>
       </div>
       <h3>Session options</h3>
       <div class="route-list">
-         <div class="route-row"><code>--session &lt;id&gt;</code><span>Which session to act on. Falls back to the current session, then to <code>A11IED_DRIVE_SESSION</code>.</span></div>
-         <div class="route-row"><code>--target &lt;platform&gt;</code><span><code>voiceover</code>, <code>nvda</code>, or <code>virtual</code>. Without it, a11ied picks the platform reader and falls back to virtual.</span></div>
+         <div class="route-row"><code>--sr &lt;reader&gt;</code><span><code>voiceover</code>, <code>nvda</code>, or <code>virtual</code>, on <code>sr start</code> and on the commands that start a session. Without it, a11ied picks the platform reader and falls back to virtual.</span></div>
          <div class="route-row"><code>--allow-virtual</code><span>Confirm you want the simulated reader when a real one is available.</span></div>
+         <div class="route-row"><code>--timeout &lt;ms&gt;</code><span>Bound the screen reader command instead of using the built-in limits.</span></div>
+         <div class="route-row"><code>--phrase</code><span>On a navigation verb, print the last spoken phrase alone, one line.</span></div>
          <div class="route-row"><code>--ephemeral</code><span>Run one action in a temporary session and tear it down.</span></div>
          <div class="route-row"><code>--command-set &lt;set&gt;</code><span><code>auto</code>, <code>portable</code>, <code>voiceover-commander</code>, or <code>voiceover-keycode</code>. Defaults to <code>auto</code>.</span></div>
       </div>
       <p>
-         <code>press</code>, <code>type</code>, and <code>do</code> start a session automatically when
-         none is active. <code>next</code> requires one.
+         <code>press</code>, <code>type</code>, and <code>do</code> start a session when none is
+         active. The other verbs need one and exit 2 without it.
       </p>
    </section>
 
@@ -104,9 +113,9 @@ const toc = [
             <h2>Key chord syntax</h2>
          </div>
          <p>
-            <code>sr press</code> takes tokens joined with <code>+</code>, such as
-            <code>Tab</code>, <code>Shift+Tab</code>, <code>VO+ArrowRight</code>, or
-            <code>NVDA+N</code>.
+            <code>sr press</code> takes one chord per argument, and each chord joins its tokens
+            with <code>+</code>: <code>Tab</code>, <code>Shift+Tab</code>,
+            <code>VO+ArrowRight</code>, or <code>NVDA+N</code>.
          </p>
          <div class="route-list">
             <div class="route-row"><strong>Modifiers</strong><span><code>Shift</code>, <code>Control</code>, <code>Alt</code></span></div>
@@ -116,8 +125,8 @@ const toc = [
             <div class="route-row"><strong>VoiceOver</strong><span><code>VO</code> for Control and Option, plus <code>Command</code>, <code>Option</code>, <code>Meta</code>, and <code>Fn</code></span></div>
             <div class="route-row"><strong>NVDA</strong><span><code>NVDA</code> for Insert, plus <code>Windows</code>, <code>Application</code>, and the <code>NumPad0</code> to <code>NumPad9</code> keys</span></div>
          </div>
-         <pre><code>a1 sr press "Tab" --session drv_c33f1d8f --json
-a1 sr press "VO+ArrowRight" --session drv_c33f1d8f --json</code></pre>
+         <pre><code>a1 sr press Tab Tab --json
+a1 sr press "VO+ArrowRight" --json</code></pre>
       </div>
       <div class="split-aside">
          <div class="tag">Full list</div>

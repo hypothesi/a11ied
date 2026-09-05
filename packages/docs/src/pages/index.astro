@@ -72,9 +72,9 @@ Targets
          Start a session, step through the page, and read the phrase log. Every step returns the
          spoken text as JSON.
       </p>
-      <pre><code>a1 sr start --target virtual --allow-virtual --url http://localhost:3000/checkout --json
-a1 sr next --session drv_c33f1d8f --json
-a1 sr read --session drv_c33f1d8f --json</code></pre>
+      <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout --json
+a1 sr next --json
+a1 sr read --json</code></pre>
       <pre data-label="OUTPUT"><code>"spokenPhraseLog": [
   "document",
   "heading, Checkout, level 1",
@@ -92,7 +92,7 @@ a1 sr read --session drv_c33f1d8f --json</code></pre>
          on the email field, and a ninth entry that announces as <code>button</code> with no name.
       </p>
       <p>
-         Swap <code>--target virtual --allow-virtual</code> for <code>--target voiceover</code> to
+         Swap <code>--sr virtual --allow-virtual</code> for <code>--sr voiceover</code> to
          run the same steps against the real screen reader.
       </p>
    </section>
