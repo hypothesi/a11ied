@@ -85,7 +85,10 @@ async function executeOpenAction(
               { timeoutMs },
            )
          : await refocusRealTarget(session, resolved.resolvedUrl, timeoutMs);
-   return { target: resolved.reportTarget, result };
+   return {
+      target: resolved.reportTarget,
+      result: { ...result, commandLine: `open ${url}` },
+   };
 }
 
 async function writeStopTranscripts(

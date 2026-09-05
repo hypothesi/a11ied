@@ -3,16 +3,26 @@ import {
    VoiceOverCommanderCommands,
    voiceOverKeyCodeCommands,
 } from '@guidepup/guidepup';
-import type { Platform, PortableDriverVerb } from '@a11ied/contracts';
+import type {
+   DriverNavigateRequest,
+   Platform,
+   PortableDriverVerb,
+} from '@a11ied/contracts';
 import type {
    ConcreteDriverCommandSet,
    SerializableDriverCommand,
 } from './command-registry.js';
 import { portableCommandTable } from './portable-commands.js';
+import { navigationKindTable } from './portable-navigation.js';
 
 export interface DriverCommandEntry extends SerializableDriverCommand {
    command: unknown;
    portableAction?: PortableDriverVerb;
+   /**
+    * Set on `next-<kind>` and `previous-<kind>`, which route through the navigation
+    * table.
+    */
+   portableNavigation?: DriverNavigateRequest;
 }
 
 function toKebabCase(value: string): string {
@@ -85,6 +95,23 @@ function createPortableEntries(): DriverCommandEntry[] {
    }));
 }
 
+/** `next-heading`, `previous-link`, and the rest; `item` is already `next` and `previous`. */
+function createNavigationEntries(): DriverCommandEntry[] {
+   return navigationKindTable
+      .filter((entry) => entry.kind !== 'item')
+      .flatMap((entry) =>
+         (['next', 'previous'] as const).map((direction): DriverCommandEntry => ({
+            target: 'portable',
+            commandSet: 'portable',
+            alias: `${direction}-${entry.kind}`,
+            upstreamKey: `${direction}-${entry.kind}`,
+            description: entry.description,
+            command: `${direction}-${entry.kind}`,
+            portableNavigation: { direction, kind: entry.kind },
+         })),
+      );
+}
+
 function createCommanderEntries(): DriverCommandEntry[] {
    return Object.entries(VoiceOverCommanderCommands).map(([upstreamKey, value]) => ({
       target: 'voiceover',
@@ -137,6 +164,7 @@ function createKeyCodeEntries(args: {
 
 export const commandEntries: DriverCommandEntry[] = [
    ...createPortableEntries(),
+   ...createNavigationEntries(),
    ...createCommanderEntries(),
    ...createKeyCodeEntries({
       target: 'voiceover',

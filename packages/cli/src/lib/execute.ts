@@ -183,7 +183,10 @@ export async function resolveScreenReaderTarget(options: {
 
 interface DriveActionCommandInput {
    subcommand: string;
-   request: DriverActionRequest;
+   /** What the user typed after `sr`, printed as the heading; defaults to the subcommand. */
+   commandLine?: string | undefined;
+   /** A function runs inside the command, so its usage errors become the error envelope. */
+   request: DriverActionRequest | (() => DriverActionRequest);
    autoStart?: boolean;
    options: DriveAutoStartOptions;
    renderText: RenderText;
@@ -198,30 +201,54 @@ function renderPhraseText(envelope: CliOutputEnvelope): string {
    return typeof phrase === 'string' ? phrase : '';
 }
 
+/** Adds the typed command line to the result so the text renderer can print it. */
+function withCommandLine(
+   input: DriveActionCommandInput,
+   result: Record<string, unknown>,
+): Record<string, unknown> {
+   return { ...result, commandLine: input.commandLine ?? input.subcommand };
+}
+
+function resolveRequest(input: DriveActionCommandInput): DriverActionRequest {
+   if (typeof input.request === 'function') {
+      return input.request();
+   }
+   return input.request;
+}
+
 async function runEphemeral(input: DriveActionCommandInput): Promise<CommandExecution> {
    const { target, warnings } = await resolveScreenReaderTarget(input.options);
    const result = await runEphemeralDriverAction({
       target,
-      request: input.request,
+      request: resolveRequest(input),
       timeoutMs: parseTimeoutMs(input.options.timeout),
    });
-   return { target: { kind: 'driver-target', value: target }, result, warnings };
+   return {
+      target: { kind: 'driver-target', value: target },
+      result: withCommandLine(input, result),
+      warnings,
+   };
 }
 
 async function runAutoStart(input: DriveActionCommandInput): Promise<CommandExecution> {
    const { target, warnings } = await resolveScreenReaderTarget(input.options);
    const started = await startDriverSession({ target, mode: resolveDriverMode() });
-   const result = await runDriverSessionAction(input.request, {
+   const result = await runDriverSessionAction(resolveRequest(input), {
       timeoutMs: parseTimeoutMs(input.options.timeout),
    });
    warnings.push({
       code: 'session-auto-started',
       message: `No session was active, so a ${started.session.target} session was started.`,
    });
-   return { target: { kind: 'driver-session', value: target }, result, warnings };
+   return {
+      target: { kind: 'driver-session', value: target },
+      result: withCommandLine(input, result),
+      warnings,
+   };
 }
 
 async function runDriveAction(input: DriveActionCommandInput): Promise<CommandExecution> {
+   const request = resolveRequest(input);
    if (input.options.ephemeral) {
       return runEphemeral(input);
    }
@@ -239,10 +266,14 @@ async function runDriveAction(input: DriveActionCommandInput): Promise<CommandEx
          message: `A ${session.target} session is active; --sr ${input.options.sr} only applies when a session has to be started.`,
       });
    }
-   const result = await runDriverSessionAction(input.request, {
+   const result = await runDriverSessionAction(request, {
       timeoutMs: parseTimeoutMs(input.options.timeout),
    });
-   return { target: { kind: 'driver-session', value: session.target }, result, warnings };
+   return {
+      target: { kind: 'driver-session', value: session.target },
+      result: withCommandLine(input, result),
+      warnings,
+   };
 }
 
 // Fallow-ignore-next-line unused-export

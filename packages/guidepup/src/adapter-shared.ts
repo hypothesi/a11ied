@@ -5,6 +5,7 @@ import {
    type DriverCheckpoint,
    type DriverFocusResult,
    type DriverFocusTarget,
+   type DriverNavigateRequest,
    type DriverPerformPayload,
    type DriverReadiness,
    type DriverStateSnapshot,
@@ -35,6 +36,14 @@ export interface DriverAdapter {
       verb: PortableDriverVerb,
       options?: DriverActionOptions,
    ): Promise<void>;
+   /**
+    * Jumps by kind through the navigation table. `moved` is reported by the virtual
+    * reader, which knows its cursor node; the real readers say so in their phrase.
+    */
+   navigate(
+      request: DriverNavigateRequest,
+      options?: DriverActionOptions,
+   ): Promise<{ moved?: boolean }>;
    /** Presses each chord in order; one chord per array entry. */
    press(keys: readonly string[], options?: DriverActionOptions): Promise<void>;
    type(text: string, options?: DriverActionOptions): Promise<void>;

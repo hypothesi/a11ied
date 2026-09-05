@@ -75,6 +75,10 @@ function createMockAdapter(): DriverAdapter {
       performPortable: vi.fn<DriverAdapter['performPortable']>(async () => {
          phrases.push('Link');
       }),
+      navigate: vi.fn<DriverAdapter['navigate']>(async () => {
+         phrases.push('Heading');
+         return { moved: true };
+      }),
       press: vi.fn<DriverAdapter['press']>(),
       focus: vi.fn<DriverAdapter['focus']>().mockResolvedValue({
          status: 'focused',
@@ -164,6 +168,26 @@ describe('broker action handling', () => {
       expect(result.response.result?.details?.command).toMatchObject({
          alias: 'move-right',
          commandSet: 'voiceover-commander',
+      });
+   });
+
+   it('routes a next with a kind through navigate and reports the move', async () => {
+      const context = createContext({});
+
+      const result = await handleBrokerRequest(context, {
+         command: 'action',
+         action: 'next',
+         payload: { kind: 'heading', level: 2 },
+      });
+
+      expect(context.adapter.navigate).toHaveBeenCalledWith(
+         { direction: 'next', kind: 'heading', level: 2 },
+         {},
+      );
+      expect(context.adapter.performPortable).not.toHaveBeenCalled();
+      expect(result.response.result?.details).toEqual({
+         navigation: { direction: 'next', kind: 'heading', level: 2 },
+         moved: true,
       });
    });
 

@@ -115,8 +115,12 @@ export const driveRunHelpCases: HelpCase[] = [
                                       recording, and transcript counts.
         read [options]                Read the current item: the last phrase and item
                                       text, without moving.
-        next [options]                Move to the next item.
-        previous [options]            Move to the previous item.
+        next [options] [kind]         Move to the next item, or jump by kind: item,
+                                      heading, link, landmark, control, button, table,
+                                      list, graphic, region, form-field.
+        previous [options] [kind]     Move to the previous item, or jump by kind:
+                                      item, heading, link, landmark, control, button,
+                                      table, list, graphic, region, form-field.
         interact [options]            Enter interaction mode for the current group or
                                       control.
         stop-interacting [options]    Leave interaction mode.

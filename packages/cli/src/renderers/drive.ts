@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import {
    accessibilityDriverSessionSchema,
    driverActionResultSchema,
+   driverNavigateRequestSchema,
    type AccessibilityDriverSession,
    type CliOutputEnvelope,
    type DriverActionResult,
@@ -86,8 +87,29 @@ function sessionSummaryEntries(session: AccessibilityDriverSession): Entry[] {
    ];
 }
 
-function actionHeading(action: string, session: AccessibilityDriverSession): string {
-   return `${title(`sr ${action}`)}  ${target(session.target)}`;
+/** The heading names the command the user typed, not the broker action behind it. */
+function actionHeading(
+   envelope: CliOutputEnvelope,
+   session: AccessibilityDriverSession,
+): string {
+   const typed = envelope.result?.commandLine;
+   const commandLine = typeof typed === 'string' ? typed : envelope.command.subcommand;
+   return `${title(`sr ${commandLine}`)}  ${target(session.target)}`;
+}
+
+function navigationEntries(result: DriverActionResult): Entry[] {
+   if (result.details?.moved !== false) {
+      return [];
+   }
+   const parsed = driverNavigateRequestSchema.safeParse(result.details.navigation);
+   if (!parsed.success) {
+      return [['Moved', 'no (the cursor stayed put)']];
+   }
+   const level =
+      parsed.data.level === undefined ? '' : ` level ${String(parsed.data.level)}`;
+   return [
+      ['Moved', `no (no ${parsed.data.kind}${level} to jump to, the cursor stayed put)`],
+   ];
 }
 
 function detailEntries(result: DriverActionResult, verbose: boolean): Entry[] {
@@ -198,6 +220,7 @@ export function renderDriveReadText(
    const entries: Entry[] = [
       ['Phrase', spoken(result.state.lastSpokenPhrase)],
       ['Item', spoken(result.state.currentItemText)],
+      ...navigationEntries(result),
       ...detailEntries(result, options.verbose),
       ...axEntries(result, options.verbose),
    ];
@@ -207,7 +230,7 @@ export function renderDriveReadText(
          result.state.checkpoints.map((entry) => entry.label).join(', ') || dim('none'),
       ]);
    }
-   return [actionHeading(result.action, result.session), ...indent(fields(entries))].join(
+   return [actionHeading(envelope, result.session), ...indent(fields(entries))].join(
       '\n',
    );
 }

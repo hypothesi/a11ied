@@ -141,3 +141,9 @@ export {
    portableCommandTable,
    type PortableCommandEntry,
 } from '@a11ied/guidepup';
+export {
+   describeNavigation,
+   getNavigationKindEntry,
+   navigationKindTable,
+   type NavigationKindEntry,
+} from '@a11ied/guidepup';

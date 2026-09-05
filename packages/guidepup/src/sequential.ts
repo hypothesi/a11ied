@@ -15,6 +15,17 @@ export async function runInOrder<TItem>(
    return runInOrder(items, run, index + 1);
 }
 
+/** Runs one async step `times` times, in order. */
+export async function repeatTimes(
+   times: number,
+   run: (index: number) => Promise<void>,
+): Promise<void> {
+   await runInOrder(
+      Array.from({ length: times }, (_unused, index) => index),
+      run,
+   );
+}
+
 /**
  * Repeats one async step until it reports it is done or the cap is reached. Returns true
  * when the step finished on its own.

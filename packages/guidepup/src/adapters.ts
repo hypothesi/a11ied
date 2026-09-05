@@ -4,6 +4,7 @@ import {
    type DriverCheckpoint,
    type DriverFocusResult,
    type DriverFocusTarget,
+   type DriverNavigateRequest,
    type DriverPerformPayload,
    type DriverReadiness,
    type DriverStateSnapshot,
@@ -26,40 +27,26 @@ import {
    type DriverActionOptions,
    type DriverAdapter,
 } from './adapter-shared.js';
-import { normalizeDriverKeys } from './key-aliases.js';
 import {
    parseDriverCommandSet,
    resolveDriverCommand,
    serializeResolvedDriverCommand,
    type DriverCommandSet,
 } from './command-registry.js';
+import { getPortableCommand } from './portable-commands.js';
 import {
-   getNvdaKeyCodeCommand,
-   getPortableCommand,
-   getVoiceOverKeyCodeCommand,
-   type NvdaPortableStep,
-   type PortableReaderMethod,
-   type VoiceOverPortableStep,
-} from './portable-commands.js';
-import { ignoreError, runInOrder } from './sequential.js';
+   buildCommandOptions,
+   pressRealKeys,
+   REAL_TARGET_INPUT_TIMEOUT_MS,
+   runNvdaStep,
+   runRealNavigation,
+   runVoiceOverStep,
+   type RealStepContext,
+   type RealTarget,
+} from './real-steps.js';
+import { ignoreError } from './sequential.js';
 import { waitForSpeechStabilization } from './speech.js';
 import { createVirtualAdapter } from './virtual-adapter.js';
-
-const REAL_TARGET_NAV_TIMEOUT_MS = 10_000;
-const REAL_TARGET_INPUT_TIMEOUT_MS = 15_000;
-const REAL_TARGET_RETRIES = 2;
-
-type RealTarget = Extract<Platform, 'voiceover' | 'nvda'>;
-
-function buildCommandOptions(
-   defaultTimeoutMs: number,
-   options?: DriverActionOptions,
-): { timeout: number; retries: number } {
-   return {
-      timeout: options?.timeoutMs ?? defaultTimeoutMs,
-      retries: REAL_TARGET_RETRIES,
-   };
-}
 
 class RealScreenReaderAdapter implements DriverAdapter {
    readonly capabilities = driverCapabilities;
@@ -69,6 +56,10 @@ class RealScreenReaderAdapter implements DriverAdapter {
    constructor(target: RealTarget, reader: ScreenReaderLike) {
       this.target = target;
       this.reader = reader;
+   }
+
+   private stepContext(options?: DriverActionOptions): RealStepContext {
+      return { reader: this.reader, target: this.target, options };
    }
 
    async checkReadiness(): Promise<DriverReadiness> {
@@ -111,66 +102,22 @@ class RealScreenReaderAdapter implements DriverAdapter {
    ): Promise<void> {
       const entry = getPortableCommand(verb);
       if (this.target === 'voiceover') {
-         await this.runVoiceOverStep(entry.voiceover, options);
+         await runVoiceOverStep(this.stepContext(options), entry.voiceover);
          return;
       }
-      await this.runNvdaStep(entry.nvda, options);
+      await runNvdaStep(this.stepContext(options), entry.nvda);
    }
 
-   private async runVoiceOverStep(
-      step: VoiceOverPortableStep,
+   async navigate(
+      request: DriverNavigateRequest,
       options?: DriverActionOptions,
-   ): Promise<void> {
-      if (step.kind === 'keycode') {
-         await this.reader.perform(
-            getVoiceOverKeyCodeCommand(step),
-            buildCommandOptions(REAL_TARGET_INPUT_TIMEOUT_MS, options),
-         );
-         return;
-      }
-      await this.runSharedStep(step, options);
-   }
-
-   private async runNvdaStep(
-      step: NvdaPortableStep,
-      options?: DriverActionOptions,
-   ): Promise<void> {
-      if (step.kind === 'keycode') {
-         await this.reader.perform(
-            getNvdaKeyCodeCommand(step),
-            buildCommandOptions(REAL_TARGET_INPUT_TIMEOUT_MS, options),
-         );
-         return;
-      }
-      await this.runSharedStep(step, options);
-   }
-
-   private async runSharedStep(
-      step:
-         | { kind: 'method'; method: PortableReaderMethod }
-         | { kind: 'press'; keys: string },
-      options?: DriverActionOptions,
-   ): Promise<void> {
-      if (step.kind === 'press') {
-         await this.press([step.keys], options);
-         return;
-      }
-      const navOptions = buildCommandOptions(REAL_TARGET_NAV_TIMEOUT_MS, options);
-      const methods: Record<PortableReaderMethod, () => Promise<void>> = {
-         next: () => this.reader.next(navOptions),
-         previous: () => this.reader.previous(navOptions),
-         interact: () => this.reader.interact(navOptions),
-         stopInteracting: () => this.reader.stopInteracting(navOptions),
-         act: () => this.reader.act(navOptions),
-      };
-      await methods[step.method]();
+   ): Promise<{ moved?: boolean }> {
+      await runRealNavigation(this.stepContext(options), request);
+      return {};
    }
 
    async press(keys: readonly string[], options?: DriverActionOptions): Promise<void> {
-      const inputOptions = buildCommandOptions(REAL_TARGET_INPUT_TIMEOUT_MS, options);
-      await runInOrder(keys, (chord) =>
-         this.reader.press(normalizeDriverKeys(chord, this.target), inputOptions),
-      );
+      await pressRealKeys(this.stepContext(options), keys);
    }
 
    async type(text: string, options?: DriverActionOptions): Promise<void> {
@@ -193,6 +140,10 @@ class RealScreenReaderAdapter implements DriverAdapter {
          command: command.command,
          commandSet,
       });
+      if (resolved.portableNavigation) {
+         await this.navigate(resolved.portableNavigation, options);
+         return serializeResolvedDriverCommand(resolved);
+      }
       if (resolved.portableAction) {
          await this.performPortable(resolved.portableAction, options);
          return serializeResolvedDriverCommand(resolved);

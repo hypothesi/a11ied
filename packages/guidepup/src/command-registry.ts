@@ -1,4 +1,8 @@
-import type { Platform, PortableDriverVerb } from '@a11ied/contracts';
+import type {
+   DriverNavigateRequest,
+   Platform,
+   PortableDriverVerb,
+} from '@a11ied/contracts';
 import {
    commandEntries,
    getLookupValues,
@@ -32,6 +36,7 @@ export interface ResolvedDriverCommand extends SerializableDriverCommand {
    requestedCommand: string;
    command: unknown;
    portableAction?: PortableDriverVerb;
+   portableNavigation?: DriverNavigateRequest;
 }
 export interface ListDriverCommandsOptions {
    target?: Platform;
@@ -273,6 +278,9 @@ function createResolvedCommand(args: {
    };
    if (args.match.portableAction) {
       resolved.portableAction = args.match.portableAction;
+   }
+   if (args.match.portableNavigation) {
+      resolved.portableNavigation = args.match.portableNavigation;
    }
    return resolved;
 }

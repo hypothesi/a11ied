@@ -9,6 +9,12 @@ export {
    portableCommandTable,
    type PortableCommandEntry,
 } from './portable-commands.js';
+export {
+   describeNavigation,
+   getNavigationKindEntry,
+   navigationKindTable,
+   type NavigationKindEntry,
+} from './portable-navigation.js';
 export { delay, ignoreError, repeatUntil, runInOrder } from './sequential.js';
 export { queryFocusedAxProperties } from './ax-properties-mac.js';
 export {

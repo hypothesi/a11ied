@@ -117,6 +117,7 @@ export function registerDoCommand(driveCommand: Command): void {
 
          await executeDriveActionCommand({
             subcommand: 'do',
+            commandLine: `do ${command}`,
             request: {
                action: 'perform',
                payload: { command, commandSet: options.commandSet },

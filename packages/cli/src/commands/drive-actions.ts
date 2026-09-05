@@ -5,6 +5,7 @@ import { portableDriverVerbSchema, type DriverFocusTarget } from '#contracts';
 import { getPortableCommand } from '#core';
 import { addPhraseOption } from '../lib/options.js';
 import { getDriveKeyHelp } from './drive-key-help.js';
+import { registerDirectionCommand } from './drive-navigate.js';
 import {
    addDriveActionOptions,
    addDriveAutoStartOptions,
@@ -36,11 +37,13 @@ async function loadDriveRunner(): Promise<DriveRunner> {
 }
 
 /**
- * Registers next, previous, top, bottom, interact, stop-interacting, activate, and
- * escape.
+ * Registers next and previous with their kinds, then top, bottom, interact,
+ * stop-interacting, activate, and escape.
  */
 export function registerNavigationCommands(driveCommand: Command): void {
-   for (const verb of portableDriverVerbSchema.options) {
+   registerDirectionCommand(driveCommand, 'next');
+   registerDirectionCommand(driveCommand, 'previous');
+   for (const verb of portableDriverVerbSchema.exclude(['next', 'previous']).options) {
       addDriveNavigationOptions(
          driveCommand.command(verb).description(getPortableCommand(verb).description),
       ).action(async (options: DriveActionOptions) => {
@@ -86,6 +89,7 @@ export function registerPressCommand(driveCommand: Command): void {
       const { executeDriveActionCommand, renderDriveReadText } = await loadDriveRunner();
       await executeDriveActionCommand({
          subcommand: 'press',
+         commandLine: `press ${chords.join(' ')}`,
          request: { action: 'press', payload: { keys: chords } },
          autoStart: true,
          options,
@@ -174,6 +178,7 @@ export function registerCheckpointCommand(driveCommand: Command): void {
       const { executeDriveActionCommand, renderDriveReadText } = await loadDriveRunner();
       await executeDriveActionCommand({
          subcommand: 'checkpoint',
+         commandLine: `checkpoint ${label}`,
          request: { action: 'checkpoint', payload: { label } },
          options,
          renderText: renderDriveReadText,

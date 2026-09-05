@@ -23,11 +23,12 @@ describe('driver command listing', () => {
       );
    });
 
-   it('advertises only the portable verbs for the virtual target', () => {
+   it('advertises only the portable verbs and kind jumps for the virtual target', () => {
       const listed = listDriverCommands({ target: 'virtual' });
+      const aliases = listed.commandSets[0]?.commands.map((command) => command.alias);
 
       expect(listed.commandSets.map((group) => group.commandSet)).toEqual(['portable']);
-      expect(listed.commandSets[0]?.commands.map((command) => command.alias)).toEqual([
+      expect(aliases?.slice(0, 8)).toEqual([
          'next',
          'previous',
          'interact',
@@ -37,6 +38,18 @@ describe('driver command listing', () => {
          'bottom',
          'escape',
       ]);
+      expect(aliases).toContain('next-heading');
+      expect(aliases).toContain('previous-form-field');
+      expect(aliases).not.toContain('next-item');
+   });
+
+   it('resolves a kind jump to its navigation request on every target', () => {
+      for (const target of ['voiceover', 'nvda', 'virtual'] as const) {
+         const resolved = resolveDriverCommand({ target, command: 'previous-link' });
+
+         expect(resolved.portableNavigation).toEqual({ direction: 'previous', kind: 'link' });
+         expect(resolved.portableAction).toBeUndefined();
+      }
    });
 });
 

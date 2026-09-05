@@ -3,6 +3,7 @@ import {
    driverReadinessSchema,
    type DriverCheckpoint,
    type DriverFocusTarget,
+   type DriverNavigateRequest,
    type DriverPerformPayload,
    type DriverReadiness,
    type DriverStateSnapshot,
@@ -15,30 +16,21 @@ import {
    type DriverActionOptions,
    type DriverAdapter,
 } from './adapter-shared.js';
-import { normalizeDriverKeys } from './key-aliases.js';
 import {
    parseDriverCommandSet,
    resolveDriverCommand,
    serializeResolvedDriverCommand,
    type DriverCommandSet,
 } from './command-registry.js';
+import { getPortableCommand } from './portable-commands.js';
+import { ignoreError } from './sequential.js';
+import { loadVirtualReader, replaceVirtualDocument } from './virtual-dom.js';
 import {
-   getPortableCommand,
-   type PortableReaderMethod,
-   type VirtualPortableStep,
-} from './portable-commands.js';
-import { ignoreError, repeatUntil, runInOrder } from './sequential.js';
-import {
-   loadVirtualReader,
-   replaceVirtualDocument,
-   type VirtualReader,
-} from './virtual-dom.js';
-
-/**
- * The virtual reader wraps at both ends, so a walk to an edge is bounded by this many
- * steps instead of by a "no movement" check.
- */
-const VIRTUAL_WALK_STEP_CAP = 5000;
+   pressVirtualKeys,
+   runVirtualNavigation,
+   runVirtualStep,
+   type VirtualStepContext,
+} from './virtual-steps.js';
 
 const defaultVirtualHtml = `
 <!doctype html>
@@ -80,88 +72,26 @@ async function virtualFocus(
 }
 
 async function virtualPress(keys: readonly string[]): Promise<void> {
+   await pressVirtualKeys(await loadVirtualReader(), keys);
+}
+
+async function virtualType(text: string): Promise<void> {
    const virtual = await loadVirtualReader();
-   await runInOrder(keys, (chord) =>
-      virtual.press(normalizeDriverKeys(chord, 'virtual')),
-   );
+   await virtual.type(text);
 }
 
-async function runMethod(
-   virtual: VirtualReader,
-   method: PortableReaderMethod,
-): Promise<void> {
-   const methods: Record<PortableReaderMethod, () => Promise<void>> = {
-      next: () => virtual.next(),
-      previous: () => virtual.previous(),
-      interact: () => virtual.interact(),
-      stopInteracting: () => virtual.stopInteracting(),
-      act: () => virtual.act(),
-   };
-   await methods[method]();
+async function virtualWaitForSpeech(): Promise<void> {
+   // The virtual screen reader speaks synchronously, so there is nothing to wait for.
 }
 
-function isElementNode(node: Node): node is Element {
-   return node.nodeType === node.ELEMENT_NODE;
-}
-
-function isTreeRoot(node: Node, container: Node | undefined): boolean {
-   if (node === container) {
-      return true;
-   }
-   // A modal dialog replaces the document as the root of the tree the reader walks.
-   return isElementNode(node) && node.getAttribute('aria-modal') === 'true';
-}
-
-async function isAtTreeTop(
-   virtual: VirtualReader,
-   container: Node | undefined,
-): Promise<boolean> {
-   const node = virtual.activeNode;
-   if (!node) {
-      return true;
-   }
-   if (!isTreeRoot(node, container)) {
-      return false;
-   }
-   // The root appears twice in the tree: once at the start and once as "end of ...".
-   const phrase = await virtual.lastSpokenPhrase();
-   return !phrase.startsWith('end of ');
-}
-
-async function walkToTop(
-   virtual: VirtualReader,
-   container: Node | undefined,
-): Promise<void> {
-   await repeatUntil(
-      () => isAtTreeTop(virtual, container),
-      () => virtual.previous(),
-      VIRTUAL_WALK_STEP_CAP,
-   );
-}
-
-async function runVirtualStep(
-   step: VirtualPortableStep,
-   container: Node | undefined,
-): Promise<void> {
-   const virtual = await loadVirtualReader();
-   if (step.kind === 'method') {
-      await runMethod(virtual, step.method);
-      return;
-   }
-   if (step.kind === 'press') {
-      await virtualPress([step.keys]);
-      return;
-   }
-   await walkToTop(virtual, container);
-   if (step.edge === 'bottom') {
-      // Moving backwards from the top wraps to the last item in the tree.
-      await virtual.previous();
-   }
+interface VirtualPerformHandlers {
+   performPortable: (verb: PortableDriverVerb) => Promise<void>;
+   navigate: (request: DriverNavigateRequest) => Promise<{ moved?: boolean }>;
 }
 
 async function virtualPerformCommand(
    command: DriverPerformPayload,
-   performPortable: (verb: PortableDriverVerb) => Promise<void>,
+   handlers: VirtualPerformHandlers,
 ): Promise<ReturnType<typeof serializeResolvedDriverCommand>> {
    let commandSet: DriverCommandSet = 'auto';
    if (command.commandSet) {
@@ -172,14 +102,20 @@ async function virtualPerformCommand(
       command: command.command,
       commandSet,
    });
-   if (resolved.portableAction) {
-      await performPortable(resolved.portableAction);
+   if (resolved.portableNavigation) {
+      await handlers.navigate(resolved.portableNavigation);
+   } else if (resolved.portableAction) {
+      await handlers.performPortable(resolved.portableAction);
    }
    return serializeResolvedDriverCommand(resolved);
 }
 
 export function createVirtualAdapter(): DriverAdapter {
    let container: Node | undefined = undefined;
+
+   async function stepContext(): Promise<VirtualStepContext> {
+      return { virtual: await loadVirtualReader(), container };
+   }
 
    async function stopVirtual(): Promise<void> {
       const virtual = await loadVirtualReader();
@@ -199,7 +135,14 @@ export function createVirtualAdapter(): DriverAdapter {
       verb: PortableDriverVerb,
       _options?: DriverActionOptions,
    ): Promise<void> {
-      await runVirtualStep(getPortableCommand(verb).virtual, container);
+      await runVirtualStep(await stepContext(), getPortableCommand(verb).virtual);
+   }
+
+   async function navigate(
+      request: DriverNavigateRequest,
+      _options?: DriverActionOptions,
+   ): Promise<{ moved?: boolean }> {
+      return runVirtualNavigation(await stepContext(), request);
    }
 
    return {
@@ -216,15 +159,12 @@ export function createVirtualAdapter(): DriverAdapter {
       attachDocument,
       focus: virtualFocus,
       performPortable,
+      navigate,
       press: virtualPress,
-      type: async (text: string) => {
-         const virtual = await loadVirtualReader();
-         await virtual.type(text);
-      },
-      performCommand: (command) => virtualPerformCommand(command, performPortable),
+      type: virtualType,
+      performCommand: (command) =>
+         virtualPerformCommand(command, { performPortable, navigate }),
       readState: virtualReadState,
-      waitForSpeechStabilization: async () => {
-         // The virtual screen reader speaks synchronously, so there is nothing to wait for.
-      },
+      waitForSpeechStabilization: virtualWaitForSpeech,
    };
 }

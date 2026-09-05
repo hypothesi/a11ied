@@ -1,0 +1,303 @@
+import type {
+   DriverNavigateRequest,
+   DriverNavigationDirection,
+   DriverNavigationKind,
+   Platform,
+} from '@a11ied/contracts';
+import { VoiceOverCommanderCommands } from '@guidepup/guidepup';
+
+import {
+   methodStep,
+   nvdaKeyCodeStep,
+   virtualCommandStep,
+   virtualRoleWalkStep,
+   voiceOverCommanderStep,
+   voiceOverKeyCodeStep,
+   type NvdaPortableStep,
+   type RepeatUntilPhraseStep,
+   type VirtualCommandName,
+   type VirtualPortableStep,
+   type VoiceOverPortableStep,
+} from './portable-steps.js';
+
+interface DirectionalSteps<TStep> {
+   next: TStep;
+   previous: TStep;
+}
+
+/** One row of the navigation table: how each target jumps by one kind of element. */
+export interface NavigationKindEntry {
+   kind: DriverNavigationKind;
+   description: string;
+   voiceover: DirectionalSteps<VoiceOverPortableStep>;
+   nvda: DirectionalSteps<NvdaPortableStep>;
+   virtual: DirectionalSteps<VirtualPortableStep>;
+}
+
+/** Roles the virtual reader announces first in its phrase for each walked kind. */
+const VIRTUAL_CONTROL_ROLES = [
+   'button',
+   'checkbox',
+   'combobox',
+   'listbox',
+   'menuitem',
+   'option',
+   'radio',
+   'searchbox',
+   'slider',
+   'spinbutton',
+   'switch',
+   'tab',
+   'textbox',
+] as const;
+const VIRTUAL_FORM_FIELD_ROLES = [
+   'textbox',
+   'searchbox',
+   'combobox',
+   'spinbutton',
+] as const;
+const VIRTUAL_GRAPHIC_ROLES = ['image', 'img', 'figure'] as const;
+
+function virtualWalk(roles: readonly string[]): DirectionalSteps<VirtualPortableStep> {
+   return {
+      next: virtualRoleWalkStep('next', roles),
+      previous: virtualRoleWalkStep('previous', roles),
+   };
+}
+
+/**
+ * The one table `sr next <kind>` and `sr previous <kind>` route through: one row per
+ * kind, one column per target. VoiceOver uses the Guidepup jump methods, its key-code
+ * commands, or a Commander phrase. NVDA uses its single-letter key commands. The virtual
+ * reader uses `virtual.commands` where one exists and walks item by item otherwise.
+ */
+export const navigationKindTable: readonly NavigationKindEntry[] = [
+   {
+      kind: 'item',
+      description: 'Move to the next or previous item.',
+      voiceover: { next: methodStep('next'), previous: methodStep('previous') },
+      nvda: { next: methodStep('next'), previous: methodStep('previous') },
+      virtual: { next: methodStep('next'), previous: methodStep('previous') },
+   },
+   {
+      kind: 'heading',
+      description: 'Jump by heading. --level N limits the jump to one heading level.',
+      voiceover: {
+         next: methodStep('nextHeading'),
+         previous: methodStep('previousHeading'),
+      },
+      nvda: { next: methodStep('nextHeading'), previous: methodStep('previousHeading') },
+      virtual: {
+         next: virtualCommandStep('moveToNextHeading'),
+         previous: virtualCommandStep('moveToPreviousHeading'),
+      },
+   },
+   {
+      kind: 'link',
+      description: 'Jump by link.',
+      voiceover: { next: methodStep('nextLink'), previous: methodStep('previousLink') },
+      nvda: { next: methodStep('nextLink'), previous: methodStep('previousLink') },
+      virtual: {
+         next: virtualCommandStep('moveToNextLink'),
+         previous: virtualCommandStep('moveToPreviousLink'),
+      },
+   },
+   {
+      kind: 'landmark',
+      description: 'Jump by landmark: banner, navigation, main, and the others.',
+      // Guidepup's VoiceOver nextLandmark presses VO-Command-N, the auto web spot key,
+      // So the Commander phrase is the real landmark jump.
+      voiceover: {
+         next: voiceOverCommanderStep(VoiceOverCommanderCommands.FIND_NEXT_LANDMARK),
+         previous: voiceOverCommanderStep(
+            VoiceOverCommanderCommands.FIND_PREVIOUS_LANDMARK,
+         ),
+      },
+      nvda: {
+         next: methodStep('nextLandmark'),
+         previous: methodStep('previousLandmark'),
+      },
+      virtual: {
+         next: virtualCommandStep('moveToNextLandmark'),
+         previous: virtualCommandStep('moveToPreviousLandmark'),
+      },
+   },
+   {
+      kind: 'control',
+      description:
+         'Jump by control: buttons, fields, checkboxes, and other form controls.',
+      voiceover: {
+         next: voiceOverKeyCodeStep('findNextControl'),
+         previous: voiceOverKeyCodeStep('findPreviousControl'),
+      },
+      nvda: {
+         next: nvdaKeyCodeStep('moveToNextFormField'),
+         previous: nvdaKeyCodeStep('moveToPreviousFormField'),
+      },
+      virtual: virtualWalk(VIRTUAL_CONTROL_ROLES),
+   },
+   {
+      kind: 'button',
+      description: 'Jump by button.',
+      voiceover: {
+         next: voiceOverCommanderStep(VoiceOverCommanderCommands.FIND_NEXT_BUTTON),
+         previous: voiceOverCommanderStep(
+            VoiceOverCommanderCommands.FIND_PREVIOUS_BUTTON,
+         ),
+      },
+      nvda: {
+         next: nvdaKeyCodeStep('moveToNextButton'),
+         previous: nvdaKeyCodeStep('moveToPreviousButton'),
+      },
+      virtual: virtualWalk(['button']),
+   },
+   {
+      kind: 'table',
+      description: 'Jump by table.',
+      voiceover: {
+         next: voiceOverKeyCodeStep('findNextTable'),
+         previous: voiceOverKeyCodeStep('findPreviousTable'),
+      },
+      nvda: {
+         next: nvdaKeyCodeStep('moveToNextTable'),
+         previous: nvdaKeyCodeStep('moveToPreviousTable'),
+      },
+      virtual: virtualWalk(['table']),
+   },
+   {
+      kind: 'list',
+      description: 'Jump by list.',
+      voiceover: {
+         next: voiceOverKeyCodeStep('findNextList'),
+         previous: voiceOverKeyCodeStep('findPreviousList'),
+      },
+      nvda: {
+         next: nvdaKeyCodeStep('moveToNextList'),
+         previous: nvdaKeyCodeStep('moveToPreviousList'),
+      },
+      virtual: virtualWalk(['list']),
+   },
+   {
+      kind: 'graphic',
+      description: 'Jump by graphic: images and figures.',
+      voiceover: {
+         next: voiceOverKeyCodeStep('findNextGraphic'),
+         previous: voiceOverKeyCodeStep('findPreviousGraphic'),
+      },
+      nvda: {
+         next: nvdaKeyCodeStep('moveToNextGraphic'),
+         previous: nvdaKeyCodeStep('moveToPreviousGraphic'),
+      },
+      virtual: virtualWalk(VIRTUAL_GRAPHIC_ROLES),
+   },
+   {
+      kind: 'region',
+      description:
+         'Jump by named region. NVDA treats a named region as a landmark, so it uses the landmark key.',
+      voiceover: {
+         next: voiceOverCommanderStep(VoiceOverCommanderCommands.FIND_NEXT_LIVE_REGION),
+         previous: voiceOverCommanderStep(
+            VoiceOverCommanderCommands.FIND_PREVIOUS_REGION,
+         ),
+      },
+      nvda: {
+         next: nvdaKeyCodeStep('moveToNextLandmark'),
+         previous: nvdaKeyCodeStep('moveToPreviousLandmark'),
+      },
+      virtual: {
+         next: virtualCommandStep('moveToNextRegion'),
+         previous: virtualCommandStep('moveToPreviousRegion'),
+      },
+   },
+   {
+      kind: 'form-field',
+      description:
+         'Jump by text entry field. Use control for every kind of form control.',
+      voiceover: {
+         next: voiceOverCommanderStep(VoiceOverCommanderCommands.FIND_NEXT_TEXT_FIELD),
+         previous: voiceOverCommanderStep(VoiceOverCommanderCommands.FIND_PREVIOUS_FIELD),
+      },
+      nvda: {
+         next: nvdaKeyCodeStep('moveToNextEditField'),
+         previous: nvdaKeyCodeStep('moveToPreviousEditField'),
+      },
+      virtual: virtualWalk(VIRTUAL_FORM_FIELD_ROLES),
+   },
+];
+
+/** Looks up the navigation table row for one kind. */
+export function getNavigationKindEntry(kind: DriverNavigationKind): NavigationKindEntry {
+   const entry = navigationKindTable.find((candidate) => candidate.kind === kind);
+   if (!entry) {
+      throw new Error(`Navigation kind "${kind}" is missing from the navigation table.`);
+   }
+   return entry;
+}
+
+const HEADING_LEVEL_SUFFIXES = ['1', '2', '3', '4', '5', '6'] as const;
+
+type HeadingLevelCommandName =
+   `moveTo${'Next' | 'Previous'}HeadingLevel${(typeof HEADING_LEVEL_SUFFIXES)[number]}`;
+
+function headingLevelCommandName(
+   direction: DriverNavigationDirection,
+   level: number,
+): HeadingLevelCommandName {
+   const prefix = direction === 'next' ? 'moveToNext' : 'moveToPrevious';
+   const suffix = HEADING_LEVEL_SUFFIXES[level - 1];
+   if (suffix === undefined) {
+      throw new Error(`Heading level ${String(level)} is outside 1 to 6.`);
+   }
+   return `${prefix}HeadingLevel${suffix}`;
+}
+
+/**
+ * Resolves the VoiceOver step for one move. VoiceOver has no per-level heading key, so a
+ * level filter repeats the heading jump until the phrase names that level.
+ */
+export function resolveVoiceOverNavigationStep(
+   request: DriverNavigateRequest,
+): VoiceOverPortableStep | RepeatUntilPhraseStep<VoiceOverPortableStep> {
+   const step = getNavigationKindEntry(request.kind).voiceover[request.direction];
+   if (request.kind === 'heading' && request.level !== undefined) {
+      return {
+         kind: 'repeat-until',
+         step,
+         phraseIncludes: `level ${String(request.level)}`,
+      };
+   }
+   return step;
+}
+
+/** Resolves the NVDA step for one move; heading levels use NVDA's 1 to 6 keys. */
+export function resolveNvdaNavigationStep(
+   request: DriverNavigateRequest,
+): NvdaPortableStep {
+   if (request.kind === 'heading' && request.level !== undefined) {
+      return nvdaKeyCodeStep(headingLevelCommandName(request.direction, request.level));
+   }
+   return getNavigationKindEntry(request.kind).nvda[request.direction];
+}
+
+/** Resolves the virtual step for one move; heading levels use the per-level commands. */
+export function resolveVirtualNavigationStep(
+   request: DriverNavigateRequest,
+): VirtualPortableStep {
+   if (request.kind === 'heading' && request.level !== undefined) {
+      const command: VirtualCommandName = headingLevelCommandName(
+         request.direction,
+         request.level,
+      );
+      return virtualCommandStep(command);
+   }
+   return getNavigationKindEntry(request.kind).virtual[request.direction];
+}
+
+/** Names the reader and kind in one line for errors that say a jump is not possible. */
+export function describeNavigation(
+   target: Platform,
+   request: DriverNavigateRequest,
+): string {
+   const level = request.level === undefined ? '' : ` level ${String(request.level)}`;
+   return `${request.direction} ${request.kind}${level} on ${target}`;
+}

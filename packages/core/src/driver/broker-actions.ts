@@ -71,6 +71,24 @@ async function handlePerform(
    }
 }
 
+/**
+ * Runs `next` and `previous`. A bare verb is the reader's own next-item step; a payload
+ * jumps by kind through the navigation table.
+ */
+async function handleNavigate(
+   context: BrokerHandlerContext,
+   request: Extract<DriverActionRequest, { action: 'next' | 'previous' }>,
+   options: DriverActionOptions,
+): Promise<ActionExecutionResult> {
+   if (!request.payload) {
+      await context.adapter.performPortable(request.action, options);
+      return {};
+   }
+   const navigation = { direction: request.action, ...request.payload };
+   const outcome = await context.adapter.navigate(navigation, options);
+   return { details: { navigation, ...outcome } };
+}
+
 function recordCheckpoint(
    context: BrokerHandlerContext,
    label: string,
@@ -116,6 +134,10 @@ export async function executeAction(
       case 'read':
       case 'transcript': {
          return {};
+      }
+      case 'next':
+      case 'previous': {
+         return handleNavigate(context, request, options);
       }
       default: {
          await context.adapter.performPortable(request.action, options);

@@ -1,42 +1,22 @@
 import type { PortableDriverVerb } from '@a11ied/contracts';
 import { NVDAKeyCodeCommands, voiceOverKeyCodeCommands } from '@guidepup/guidepup';
 
-/** Guidepup screen reader methods a portable verb can map onto directly. */
-export type PortableReaderMethod =
-   | 'next'
-   | 'previous'
-   | 'interact'
-   | 'stopInteracting'
-   | 'act';
+import {
+   methodStep,
+   pressStep,
+   type NvdaKeyCodeStep,
+   type NvdaPortableStep,
+   type VirtualPortableStep,
+   type VoiceOverKeyCodeStep,
+   type VoiceOverPortableStep,
+} from './portable-steps.js';
 
-interface MethodStep {
-   kind: 'method';
-   method: PortableReaderMethod;
-}
-
-interface PressStep {
-   kind: 'press';
-   keys: string;
-}
-
-interface VoiceOverKeyCodeStep {
-   kind: 'keycode';
-   command: keyof typeof voiceOverKeyCodeCommands;
-}
-
-interface NvdaKeyCodeStep {
-   kind: 'keycode';
-   command: keyof typeof NVDAKeyCodeCommands;
-}
-
-interface VirtualWalkStep {
-   kind: 'walk';
-   edge: 'top' | 'bottom';
-}
-
-export type VoiceOverPortableStep = MethodStep | PressStep | VoiceOverKeyCodeStep;
-export type NvdaPortableStep = MethodStep | PressStep | NvdaKeyCodeStep;
-export type VirtualPortableStep = MethodStep | PressStep | VirtualWalkStep;
+export type {
+   NvdaPortableStep,
+   PortableReaderMethod,
+   VirtualPortableStep,
+   VoiceOverPortableStep,
+} from './portable-steps.js';
 
 export interface PortableCommandEntry {
    verb: PortableDriverVerb;
@@ -46,17 +26,10 @@ export interface PortableCommandEntry {
    virtual: VirtualPortableStep;
 }
 
-function methodStep(method: PortableReaderMethod): MethodStep {
-   return { kind: 'method', method };
-}
-
-function pressStep(keys: string): PressStep {
-   return { kind: 'press', keys };
-}
-
 /**
  * The one table every portable verb routes through. `sr next`, `sr do next`, and the MCP
  * `next` action all resolve here, so each target behaves the same way for a given verb.
+ * Structural jumps (`sr next heading`) live in the navigation table next to this one.
  */
 export const portableCommandTable: readonly PortableCommandEntry[] = [
    {

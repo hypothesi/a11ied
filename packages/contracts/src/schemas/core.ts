@@ -4,6 +4,7 @@ import {
    driverFocusTargetFieldsSchema,
    driverFocusTargetSchema,
 } from './driver-focus.js';
+import { driverNavigationActionRequestSchemas } from './driver-navigation.js';
 import { platformSchema } from './platform.js';
 
 export { platformSchema, type Platform } from './platform.js';
@@ -301,8 +302,12 @@ export type DriverPerformPayload = z.infer<typeof driverPerformPayloadSchema>;
 export const driverCheckpointPayloadSchema = z.object({ label: z.string().min(1) });
 export type DriverCheckpointPayload = z.infer<typeof driverCheckpointPayloadSchema>;
 
+/**
+ * `next` and `previous` carry an optional navigation payload, so they have their own
+ * variants.
+ */
 const payloadFreeActionSchema = z.enum([
-   ...portableDriverVerbSchema.options,
+   ...portableDriverVerbSchema.exclude(['next', 'previous']).options,
    'read',
    'transcript',
 ]);
@@ -313,6 +318,7 @@ const payloadFreeActionSchema = z.enum([
  */
 export const driverActionRequestSchema = z.discriminatedUnion('action', [
    z.object({ action: payloadFreeActionSchema }),
+   ...driverNavigationActionRequestSchemas,
    z.object({ action: z.literal('press'), payload: driverPressPayloadSchema }),
    z.object({ action: z.literal('type'), payload: driverTypePayloadSchema }),
    z.object({ action: z.literal('perform'), payload: driverPerformPayloadSchema }),
