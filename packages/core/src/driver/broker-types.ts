@@ -1,15 +1,21 @@
 import type {
    AccessibilityDriverSession,
+   DriverActionName,
    DriverActionResult,
    DriverCheckpoint,
    SessionRecording,
 } from '@a11ied/contracts';
-import type { createDriverAdapter } from '@a11ied/guidepup';
+import type { DriverAdapter } from '@a11ied/guidepup';
 
+import type { TranscriptRecorder } from './transcript.js';
+
+/** One newline-delimited JSON request to the broker. */
 export interface BrokerRequest {
    command: 'ping' | 'status' | 'stop' | 'action' | 'attach-document';
-   action?: DriverActionResult['action'];
-   payload?: Record<string, unknown>;
+   action?: DriverActionName | undefined;
+   payload?: Record<string, unknown> | undefined;
+   /** Bounds the screen reader command; the client allows the reply a little longer. */
+   timeoutMs?: number | undefined;
 }
 
 export interface BrokerResponse {
@@ -18,16 +24,17 @@ export interface BrokerResponse {
    error?: {
       code: string;
       message: string;
+      details?: Record<string, unknown>;
+      /** Carried across the socket so the client rebuilds the same error class. */
+      exitCode?: number;
    };
 }
 
-export interface ActionContext {
-   adapter: ReturnType<typeof createDriverAdapter>;
-   checkpoints: DriverCheckpoint[];
-}
-
-export interface BrokerHandlerContext extends ActionContext {
+export interface BrokerHandlerContext {
+   adapter: DriverAdapter;
    session: AccessibilityDriverSession;
+   checkpoints: DriverCheckpoint[];
+   transcript: TranscriptRecorder;
    writeMetadata: (session: AccessibilityDriverSession) => Promise<void>;
    finishRecording?: () => Promise<SessionRecording | undefined>;
 }
@@ -38,6 +45,5 @@ export interface HandleResult {
 }
 
 export interface ActionExecutionResult {
-   handled: boolean;
    details?: Record<string, unknown>;
 }

@@ -1,12 +1,13 @@
 import { resolve } from 'node:path';
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanupTempRoots, createTempRoot } from '../../../cli/src/testing/fixtures.js';
+import { afterEach, describe, expect, it } from 'vitest';
+import { cleanupTempRoots, withStateDir } from '../../../cli/src/testing/fixtures.js';
 
 import {
    type CliEnvironmentError,
    cleanupStaleDriverSessions,
-   getDriverSessionMetadataPath,
+   getActiveDriverSession,
+   getActiveSessionFile,
    getDriverSocketPath,
    getDriverSessionStatus,
    runDriverSessionAction,
@@ -22,108 +23,117 @@ const tempRoots: string[] = [];
 
 afterEach(async () => {
    await cleanupTempRoots(tempRoots);
-   vi.unstubAllEnvs();
 });
 
-function expectValidSession(
-   session: { target: string; sessionId: string; metadataFile: string },
-   cwd: string,
-): void {
-   expect(session.target).toBe('virtual');
-   expect(session.sessionId).toMatch(/^drv_/);
-   expect(session.metadataFile).toBe(
-      getDriverSessionMetadataPath(session.sessionId, cwd),
-   );
-}
-
-async function runAndVerifyDriverActions(sessionId: string, cwd: string): Promise<void> {
-   const stepped = await runDriverSessionAction(sessionId, 'next', { cwd });
+async function runAndVerifyDriverActions(): Promise<void> {
+   const stepped = await runDriverSessionAction({ action: 'next' });
    expect(stepped.action).toBe('next');
    expect(stepped.state.logCursor).toBeGreaterThanOrEqual(1);
 
-   const cleared = await runDriverSessionAction(sessionId, 'clear-logs', { cwd });
-   expect(cleared.state.spokenPhraseLog).toEqual([]);
+   const pressed = await runDriverSessionAction({
+      action: 'press',
+      payload: { keys: ['Tab', 'Tab'] },
+   });
+   expect(pressed.details).toEqual({ keys: ['Tab', 'Tab'] });
 
-   const logged = await runDriverSessionAction(sessionId, 'logs', { cwd });
-   expect(logged.state.spokenPhraseLog).toEqual([]);
+   await runDriverSessionAction({ action: 'checkpoint', payload: { label: 'here' } });
+   const transcript = await runDriverSessionAction({ action: 'transcript' });
+   expect(transcript.state.transcript.at(-1)).toMatchObject({ checkpoint: 'here' });
+   expect(transcript.state.transcript[0]).toMatchObject({ index: 0, phrase: 'document' });
 }
 
 describe('driver runtime sessions', () => {
    it(
-      'starts, reports, and stops a virtual session',
-      async () => {
-         const cwd = await createTempRoot(tempRoots);
-         const session = await startDriverSession('virtual', cwd);
-         expectValidSession(session, cwd);
+      'starts, reports, and stops the one active session',
+      () =>
+         withStateDir(tempRoots, async (stateDir) => {
+            const started = await startDriverSession({ target: 'virtual', mode: 'in-process' });
+            expect(started.session.target).toBe('virtual');
+            expect(started.session.sessionId).toMatch(/^drv_/);
+            expect(started.session.metadataFile).toBe(getActiveSessionFile());
+            expect(started.session.metadataFile).toBe(resolve(stateDir, 'session.json'));
+            expect(started.replacedSession).toBeUndefined();
 
-         const status = await getDriverSessionStatus(session.sessionId, cwd);
-         expect(status.action).toBe('status');
-         expect(status.session.sessionId).toBe(session.sessionId);
-         expect(status.state.logCursor).toBeGreaterThan(0);
+            const status = await getDriverSessionStatus();
+            expect(status.action).toBe('status');
+            expect(status.session.sessionId).toBe(started.session.sessionId);
+            expect(status.state.logCursor).toBeGreaterThan(0);
 
-         const stopped = await stopDriverSession(session.sessionId, cwd);
-         expect(stopped.action).toBe('stop');
+            const stopped = await stopDriverSession();
+            expect(stopped.action).toBe('stop');
+            expect(await getActiveDriverSession()).toBeUndefined();
 
-         await expect(
-            getDriverSessionStatus(session.sessionId, cwd),
-         ).rejects.toMatchObject({
-            code: 'session-not-found',
-         } satisfies Partial<CliEnvironmentError>);
-      },
+            await expect(getDriverSessionStatus()).rejects.toMatchObject({
+               code: 'session-not-found',
+            } satisfies Partial<CliEnvironmentError>);
+         }),
       TIMEOUT_MS,
    );
 
-   it('fails cleanly for an unknown session', async () => {
-      const cwd = await createTempRoot(tempRoots);
+   it(
+      'replaces a live session on start and reports the one it stopped',
+      () =>
+         withStateDir(tempRoots, async () => {
+            const first = await startDriverSession({ target: 'virtual', mode: 'in-process' });
+            const second = await startDriverSession({ target: 'virtual', mode: 'in-process' });
 
-      await expect(getDriverSessionStatus('missing-session', cwd)).rejects.toMatchObject({
-         code: 'session-not-found',
-      } satisfies Partial<CliEnvironmentError>);
-   });
+            expect(second.replacedSession?.sessionId).toBe(first.session.sessionId);
+            expect((await getActiveDriverSession())?.sessionId).toBe(second.session.sessionId);
+
+            await stopDriverSession();
+         }),
+      TIMEOUT_MS,
+   );
+
+   it('reports no session cleanly when nothing was started', () =>
+      withStateDir(tempRoots, async () => {
+         expect(await getActiveDriverSession()).toBeUndefined();
+         await expect(getDriverSessionStatus()).rejects.toMatchObject({
+            code: 'session-not-found',
+         } satisfies Partial<CliEnvironmentError>);
+      }));
 });
 
 describe('driver runtime actions', () => {
-   it('keeps unix socket paths short enough for long temp directories', async () => {
-      const cwd = await createTempRoot(tempRoots);
-      const socketPath = getDriverSocketPath(
-         'drv_12345678-1234-1234-1234-123456789abc',
-         resolve(cwd, 'a', 'very', 'long', 'nested', 'directory', 'structure'),
-      );
+   it('keeps unix socket paths short enough for the tmpdir', () => {
+      const socketPath = getDriverSocketPath('drv_123456789abc');
 
       if (process.platform === 'win32') {
          expect(socketPath).toContain(WINDOWS_PIPE_PREFIX);
          return;
       }
 
-      expect(socketPath.startsWith('/tmp/a11ied-')).toBe(true);
+      expect(socketPath.endsWith('/a11ied-drv_123456789abc.sock')).toBe(true);
       expect(socketPath.length).toBeLessThan(UNIX_SOCKET_PATH_MAX);
    });
 
    it(
       'cleans up stale session metadata for dead brokers',
-      async () => {
-         const cwd = await createTempRoot(tempRoots);
-         const session = await startDriverSession('virtual', cwd);
-         const stopped = await stopDriverSession(session.sessionId, cwd);
+      () =>
+         withStateDir(tempRoots, async () => {
+            const started = await startDriverSession({ target: 'virtual', mode: 'in-process' });
+            const stopped = await stopDriverSession();
 
-         expect(stopped.session.sessionId).toBe(session.sessionId);
-         expect(await cleanupStaleDriverSessions(cwd)).toEqual([]);
-      },
+            expect(stopped.session.sessionId).toBe(started.session.sessionId);
+            expect(await cleanupStaleDriverSessions()).toEqual([]);
+         }),
       TIMEOUT_MS,
    );
 
    it(
       'fails fast when persistent recording is unsupported',
-      async () => {
-         const cwd = await createTempRoot(tempRoots);
-         vi.stubEnv('VITEST', 'false');
-
-         await expect(
-            startDriverSession('virtual', cwd, './recordings/session.mov'),
-         ).rejects.toMatchObject({
-            code: 'recording-target-unsupported',
-         } satisfies Partial<CliEnvironmentError>);
-      },
+      () =>
+         withStateDir(tempRoots, async () => {
+            await expect(
+               startDriverSession({
+                  target: 'virtual',
+                  mode: 'in-process',
+                  recordingPath: './recordings/session.mov',
+               }),
+            ).rejects.toMatchObject({
+               code: 'recording-target-unsupported',
+            } satisfies Partial<CliEnvironmentError>);
+         }),
       TIMEOUT_MS,
    );
 });
@@ -131,17 +141,20 @@ describe('driver runtime actions', () => {
 describe('driver runtime execution', () => {
    it(
       'runs persistent and ephemeral driver actions against the virtual target',
-      async () => {
-         const cwd = await createTempRoot(tempRoots);
-         const session = await startDriverSession('virtual', cwd);
-         await runAndVerifyDriverActions(session.sessionId, cwd);
+      () =>
+         withStateDir(tempRoots, async () => {
+            await startDriverSession({ target: 'virtual', mode: 'in-process' });
+            await runAndVerifyDriverActions();
 
-         const ephemeral = await runEphemeralDriverAction('virtual', 'next', { cwd });
-         expect(ephemeral.action).toBe('next');
-         expect(ephemeral.session.sessionId).toMatch(/^ephemeral_/);
+            const ephemeral = await runEphemeralDriverAction({
+               target: 'virtual',
+               request: { action: 'next' },
+            });
+            expect(ephemeral.action).toBe('next');
+            expect(ephemeral.session.sessionId).toMatch(/^ephemeral_/);
 
-         await stopDriverSession(session.sessionId, cwd);
-      },
+            await stopDriverSession();
+         }),
       TIMEOUT_MS,
    );
 });

@@ -34,17 +34,17 @@ function resolvePreferredTarget(): Platform | undefined {
 
 function buildDefaultMessage(target: Platform): string {
    if (target === 'voiceover') {
-      return 'No --target provided; defaulting to VoiceOver (real screen reader) for macOS.';
+      return 'No --sr provided; defaulting to VoiceOver (real screen reader) for macOS.';
    }
    if (target === 'nvda') {
-      return 'No --target provided; defaulting to NVDA (real screen reader) for Windows.';
+      return 'No --sr provided; defaulting to NVDA (real screen reader) for Windows.';
    }
-   return 'No --target provided; this platform does not support VoiceOver or NVDA, falling back to the virtual (simulated) screen reader.';
+   return 'No --sr provided; this platform does not support VoiceOver or NVDA, falling back to the virtual (simulated) screen reader.';
 }
 
 function buildReadinessFallbackMessage(target: Platform, summary: string): string {
    const label = target === 'voiceover' ? 'VoiceOver' : 'NVDA';
-   return `No --target provided; ${label} is not ready for automation (${summary}). Falling back to the virtual (simulated) screen reader.`;
+   return `No --sr provided; ${label} is not ready for automation (${summary}). Falling back to the virtual (simulated) screen reader.`;
 }
 
 const VIRTUAL_FALLBACK_WARNING =

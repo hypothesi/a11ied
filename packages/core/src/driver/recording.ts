@@ -102,6 +102,9 @@ function createStopRecording(
    target: RealRecordingTarget,
    absolutePath: string,
 ): StopRecording {
+   if (target === 'voiceover') {
+      return createMacOSStopRecording(absolutePath);
+   }
    return windowsRecord(absolutePath);
 }
 
@@ -160,10 +163,7 @@ export function startSessionRecording(
    const realTarget = requireRealRecordingTarget(target);
    const validated = validateRecordingRequest(target, recordingPath, cwd);
    const startedAt = new Date().toISOString();
-   let stopNativeRecording = createStopRecording(realTarget, validated.absolutePath);
-   if (realTarget === 'voiceover') {
-      stopNativeRecording = createMacOSStopRecording(validated.absolutePath);
-   }
+   const stopNativeRecording = createStopRecording(realTarget, validated.absolutePath);
 
    const activeRecording = sessionRecordingSchema.parse({
       path: validated.absolutePath,

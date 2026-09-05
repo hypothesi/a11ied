@@ -1,289 +1,253 @@
 import type {
    AccessibilityDriverSession,
+   DriverActionRequest,
    DriverActionResult,
+   DriverMode,
    Platform,
 } from '@a11ied/contracts';
-import { CliEnvironmentError } from '../errors/cli-errors.js';
 
-import { resolveBrokerReadyTimeoutMs, waitForBroker } from './broker-client.js';
-import {
-   attachDocumentViaBroker,
-   getBrokerSessionStatus,
-   runBrokerAction,
-   stopBrokerSession,
-} from './broker-runtime.js';
-import {
-   attachToInMemorySession,
-   getInMemoryStatus,
-   getInMemoryBroker,
-   runEphemeralAction,
-   runInMemoryAction,
-   startInMemorySession,
-   stopInMemorySession,
-} from './runtime-internal.js';
+import { connectToBroker, resolveBrokerReadyTimeoutMs, waitForBroker } from './broker-client.js';
+import { sendSessionRequest } from './broker-runtime.js';
+import { resolveDriverMode } from './environment.js';
 import { validateRecordingRequest } from './recording.js';
+import { runEphemeralAction } from './runtime-ephemeral.js';
+import { hasInProcessSession, startInProcessSession } from './runtime-internal.js';
+import { assertTargetReady, parseBrokerActionResult } from './runtime-support.js';
+import { withSessionStartLock } from './session-lock.js';
 import {
-   ensureStateDirectories,
-   getDriverSessionMetadataPath,
+   createMissingSessionError,
+   createSessionId,
+   ensureStateDirectory,
+   getActiveSessionFile,
    getDriverSocketPath,
-   getSessionsDir,
-   listSessionEntries,
-   processSessionEntry,
-   readSessionMetadata,
-   useInMemoryBroker,
+   isInMemorySession,
+   isProcessRunning,
+   readActiveSessionMetadata,
+   removeSessionArtifacts,
 } from './session-utils.js';
-import {
-   assertTargetReady,
-   buildSessionPaths,
-   getActiveInMemoryIds,
-   spawnPersistentBroker,
-} from './runtime-support.js';
+import { spawnBrokerProcess } from './broker-client.js';
 import { resolveAvailableDefaultTarget } from './default-target.js';
 
-export { getDriverSessionMetadataPath, getDriverSocketPath } from './session-utils.js';
+export { getActiveSessionFile, getDriverSocketPath } from './session-utils.js';
 
-export interface SessionActionOptions {
-   payload?: Record<string, unknown>;
-   cwd?: string;
+/** The broker stops a session nobody has talked to for this long. */
+export const DEFAULT_IDLE_TIMEOUT_MINUTES = 30;
+const MS_PER_MINUTE = 60_000;
+
+export interface DriverRequestOptions {
+   /** Bounds the screen reader command; the broker reply is allowed a few seconds more. */
+   timeoutMs?: number | undefined;
 }
 
-function getPayloadRecordingPath(
-   payload: Record<string, unknown> | undefined,
-): string | undefined {
-   if (typeof payload?.recordingPath === 'string') {
-      return payload.recordingPath;
-   }
+export interface StartDriverSessionOptions {
+   /** Defaults to the platform screen reader, falling back to virtual. */
+   target?: Platform;
+   /** Defaults to `$A11IED_DRIVER_MODE`, which is `broker` unless set to `in-process`. */
+   mode?: DriverMode;
+   recordingPath?: string | undefined;
+   /** The page the session opened; recorded in the session metadata. */
+   url?: string | undefined;
+   /** The app the session opened; a bare focus action refocuses it. */
+   app?: AccessibilityDriverSession['app'] | undefined;
+   /** 0 disables the idle timeout. */
+   idleTimeoutMinutes?: number | undefined;
+   /** Bounds how long to wait for the broker to come up. */
+   timeoutMs?: number | undefined;
+}
 
+export interface DriverSessionStart {
+   session: AccessibilityDriverSession;
+   /** The session that was live before this start and was stopped to make room. */
+   replacedSession?: AccessibilityDriverSession;
+}
+
+async function isSessionLive(session: AccessibilityDriverSession): Promise<boolean> {
+   if (isInMemorySession(session)) {
+      return hasInProcessSession(session.sessionId);
+   }
+   if (!isProcessRunning(session.brokerPid)) {
+      return false;
+   }
+   try {
+      const response = await connectToBroker(session.socketPath, { command: 'ping' });
+      return response.ok;
+   } catch {
+      return false;
+   }
+}
+
+/** Reads the active session, dropping its files when the broker behind it is gone. */
+export async function getActiveDriverSession(): Promise<AccessibilityDriverSession | undefined> {
+   const session = await readActiveSessionMetadata();
+   if (!session) {
+      return undefined;
+   }
+   if (await isSessionLive(session)) {
+      return session;
+   }
+   await removeSessionArtifacts(session);
    return undefined;
 }
 
-/** Removes stale persisted driver sessions whose backing broker is no longer alive. */
-export async function cleanupStaleDriverSessions(cwd = process.cwd()): Promise<string[]> {
-   const entries = await listSessionEntries(cwd);
-   if (!entries) {
+/** Removes the active session file when its broker no longer answers; returns the ids removed. */
+export async function cleanupStaleDriverSessions(): Promise<string[]> {
+   const session = await readActiveSessionMetadata();
+   if (!session || (await isSessionLive(session))) {
       return [];
    }
-   const activeIds = getActiveInMemoryIds();
-   const sessionsDir = getSessionsDir(cwd);
-   const results = await Promise.all(
-      entries.map((entry) => processSessionEntry(entry, sessionsDir, activeIds)),
-   );
-   return results.filter((id): id is string => id !== undefined);
+   await removeSessionArtifacts(session);
+   return [session.sessionId];
 }
 
-function createInMemorySessionStartOptions(args: {
-   target: Platform;
-   sessionId: string;
-   metadataFile: string;
-   cwd: string;
-   recordingPath: string | undefined;
-}): Parameters<typeof startInMemorySession>[0] {
-   const options = {
-      target: args.target,
-      sessionId: args.sessionId,
-      metadataFile: args.metadataFile,
-      cwd: args.cwd,
-   } as Parameters<typeof startInMemorySession>[0];
-
-   if (args.recordingPath) {
-      options.recordingPath = args.recordingPath;
+async function requireActiveSession(): Promise<AccessibilityDriverSession> {
+   const session = await getActiveDriverSession();
+   if (!session) {
+      throw createMissingSessionError();
    }
-
-   return options;
+   return session;
 }
 
-function createPersistentBrokerOptions(args: {
-   target: Platform;
-   sessionId: string;
-   metadataFile: string;
-   socketPath: string;
-   recordingPath: string | undefined;
-}): Parameters<typeof spawnPersistentBroker>[0] {
-   const options = {
-      sessionId: args.sessionId,
-      target: args.target,
-      metadataFile: args.metadataFile,
-      socketPath: args.socketPath,
-   } as Parameters<typeof spawnPersistentBroker>[0];
-
-   if (args.recordingPath) {
-      options.recordingPath = args.recordingPath;
+async function resolveStartTarget(target: Platform | undefined): Promise<Platform> {
+   if (target) {
+      return target;
    }
-
-   return options;
+   const fallback = await resolveAvailableDefaultTarget();
+   return fallback.target;
 }
 
-async function readExistingSession(
-   sessionId: string,
-   cwd: string,
-): Promise<AccessibilityDriverSession | undefined> {
-   try {
-      return await readSessionMetadata(sessionId, cwd);
-   } catch (error) {
-      if (error instanceof CliEnvironmentError && error.code === 'session-not-found') {
-         return undefined;
-      }
-      throw error;
-   }
-}
-
-async function assertTargetIsAvailable(target: Platform, cwd: string): Promise<void> {
-   const entries = await listSessionEntries(cwd);
-   if (!entries) {
-      return;
-   }
-
-   const sessions = await Promise.all(
-      entries
-         .filter((entry) => entry.endsWith('.json'))
-         .map(async (entry) => {
-            const sessionId = entry.replace(/\.json$/u, '');
-            return readExistingSession(sessionId, cwd);
-         }),
-   );
-   const activeSession = sessions.find((session) => session?.target === target);
-   if (activeSession) {
-      throw new CliEnvironmentError(
-         'target-busy',
-         `A ${target} session is already active. Stop it before starting another one.`,
-         {
-            target,
-            activeSessionId: activeSession.sessionId,
-         },
-      );
-   }
-}
-
-async function prepareDriverSessionStart(args: {
-   target: Platform | undefined;
-   cwd: string;
-   recordingPath: string | undefined;
-}): Promise<Platform> {
-   await ensureStateDirectories(args.cwd);
-   await cleanupStaleDriverSessions(args.cwd);
-   const defaultTarget = args.target ? undefined : await resolveAvailableDefaultTarget();
-   const resolvedTarget = args.target ?? defaultTarget?.target ?? 'virtual';
-   if (resolvedTarget !== 'virtual') {
-      await assertTargetIsAvailable(resolvedTarget, args.cwd);
-   }
-   await assertTargetReady(resolvedTarget);
-   if (args.recordingPath) {
-      validateRecordingRequest(resolvedTarget, args.recordingPath, args.cwd);
-   }
-   return resolvedTarget;
-}
-
-/** Starts a persistent driver session for one target and returns its session metadata. */
-export async function startDriverSession(
-   target: Platform | undefined,
-   cwd = process.cwd(),
-   recordingPath?: string,
+async function launchSession(
+   options: StartDriverSessionOptions,
+   target: Platform,
 ): Promise<AccessibilityDriverSession> {
-   const resolvedTarget = await prepareDriverSessionStart({
+   const sessionId = createSessionId(),
+         idleTimeoutMinutes = options.idleTimeoutMinutes ?? DEFAULT_IDLE_TIMEOUT_MINUTES;
+   const shared = {
+      sessionId,
       target,
-      cwd,
-      recordingPath,
-   });
-   const paths = buildSessionPaths(cwd);
-
-   if (useInMemoryBroker()) {
-      return startInMemorySession(
-         createInMemorySessionStartOptions({
-            target: resolvedTarget,
-            sessionId: paths.sessionId,
-            metadataFile: paths.metadataFile,
-            cwd,
-            recordingPath,
-         }),
-      );
-   }
-
-   spawnPersistentBroker(
-      createPersistentBrokerOptions({
-         target: resolvedTarget,
-         sessionId: paths.sessionId,
-         metadataFile: paths.metadataFile,
-         socketPath: paths.socketPath,
-         recordingPath,
-      }),
-   );
-   return waitForBroker({
-      sessionId: paths.sessionId,
-      cwd,
-      readSession: readSessionMetadata,
-      timeoutMs: resolveBrokerReadyTimeoutMs(resolvedTarget),
-   });
-}
-
-/** Reads the latest state for one persistent driver session. */
-export async function getDriverSessionStatus(
-   sessionId: string,
-   cwd = process.cwd(),
-): Promise<DriverActionResult> {
-   if (useInMemoryBroker()) {
-      return getInMemoryStatus(getInMemoryBroker(sessionId));
-   }
-   return getBrokerSessionStatus(sessionId, cwd);
-}
-
-/** Stops a persistent driver session and removes its persisted state. */
-export async function stopDriverSession(
-   sessionId: string,
-   cwd = process.cwd(),
-): Promise<DriverActionResult> {
-   if (useInMemoryBroker()) {
-      return stopInMemorySession(sessionId);
-   }
-   return stopBrokerSession(sessionId, cwd);
-}
-
-/** Attaches resolved HTML content to a driver session when the target supports it. */
-export async function attachDocumentToDriverSession(
-   sessionId: string,
-   document: { html: string; url: string },
-   cwd = process.cwd(),
-): Promise<void> {
-   if (useInMemoryBroker()) {
-      await attachToInMemorySession(sessionId, document);
-      return;
-   }
-   await attachDocumentViaBroker(sessionId, document, cwd);
-}
-
-/** Runs one action against an existing persistent driver session. */
-export async function runDriverSessionAction(
-   sessionId: string,
-   action: DriverActionResult['action'],
-   options?: SessionActionOptions,
-): Promise<DriverActionResult> {
-   if (useInMemoryBroker()) {
-      return runInMemoryAction(sessionId, action, options?.payload);
-   }
-   return runBrokerAction(sessionId, action, options);
-}
-
-/** Runs one action against a short-lived, non-persistent driver session. */
-export async function runEphemeralDriverAction(
-   target: Platform | undefined,
-   action: DriverActionResult['action'],
-   options?: SessionActionOptions,
-): Promise<DriverActionResult> {
-   const defaultTarget = target ? undefined : await resolveAvailableDefaultTarget();
-   const resolvedTarget = target ?? defaultTarget?.target ?? 'virtual';
-   await assertTargetReady(resolvedTarget);
-   const cwd = options?.cwd ?? process.cwd();
-   const actionOptions = {
-      target: resolvedTarget,
-      action,
-      payload: options?.payload,
-      cwd,
+      recordingPath: options.recordingPath,
+      url: options.url,
+      app: options.app,
+      idleTimeoutMinutes,
    };
-   const recordingPath = getPayloadRecordingPath(options?.payload);
-   if (recordingPath) {
-      return await runEphemeralAction({
-         ...actionOptions,
-         recordingPath,
-      });
+   if ((options.mode ?? resolveDriverMode()) === 'in-process') {
+      return startInProcessSession(shared);
    }
-   return await runEphemeralAction(actionOptions);
+   spawnBrokerProcess({
+      ...shared,
+      metadataFile: getActiveSessionFile(),
+      socketPath: getDriverSocketPath(sessionId),
+      idleTimeoutMs: idleTimeoutMinutes * MS_PER_MINUTE,
+   });
+   return waitForBroker({
+      sessionId,
+      readSession: readActiveSessionMetadata,
+      timeoutMs: options.timeoutMs ?? resolveBrokerReadyTimeoutMs(target),
+   });
+}
+
+/**
+ * Starts the one active driver session. A live previous session is stopped first and
+ * returned as `replacedSession`; the start itself runs under an exclusive lock file.
+ */
+export async function startDriverSession(
+   options: StartDriverSessionOptions = {},
+): Promise<DriverSessionStart> {
+   await ensureStateDirectory();
+   const target = await resolveStartTarget(options.target);
+   await assertTargetReady(target);
+   if (options.recordingPath) {
+      validateRecordingRequest(target, options.recordingPath);
+   }
+   return withSessionStartLock(async () => {
+      const previous = await getActiveDriverSession();
+      if (previous) {
+         await stopDriverSession();
+      }
+      const session = await launchSession(options, target);
+      return previous ? { session, replacedSession: previous } : { session };
+   });
+}
+
+/** Reads the active session's metadata and current reader state. */
+export async function getDriverSessionStatus(
+   options: DriverRequestOptions = {},
+): Promise<DriverActionResult> {
+   const session = await requireActiveSession();
+   const response = await sendSessionRequest(session, { command: 'status', ...options });
+   return parseBrokerActionResult({
+      actionErrorMessage: 'Could not read the active driver session.',
+      response,
+   });
+}
+
+/** Stops the active session, finishing any recording, and removes its state files. */
+export async function stopDriverSession(
+   options: DriverRequestOptions = {},
+): Promise<DriverActionResult> {
+   const session = await requireActiveSession();
+   const response = await sendSessionRequest(session, { command: 'stop', ...options });
+   const result = parseBrokerActionResult({
+      actionErrorMessage: 'Could not stop the active driver session.',
+      response,
+   });
+   await removeSessionArtifacts(session);
+   return result;
+}
+
+/**
+ * Points the active session at a page. The virtual target loads the HTML; real targets
+ * only record the URL, because they read whatever window is on screen.
+ */
+export async function attachDocumentToDriverSession(
+   document: { html: string; url: string },
+   options: DriverRequestOptions = {},
+): Promise<DriverActionResult> {
+   const session = await requireActiveSession();
+   const response = await sendSessionRequest(session, {
+      command: 'attach-document',
+      payload: document,
+      ...options,
+   });
+   return parseBrokerActionResult({
+      actionErrorMessage: `Could not open ${document.url} in the active driver session.`,
+      response,
+   });
+}
+
+/** Runs one typed action against the active session. */
+export async function runDriverSessionAction(
+   request: DriverActionRequest,
+   options: DriverRequestOptions = {},
+): Promise<DriverActionResult> {
+   const session = await requireActiveSession();
+   const response = await sendSessionRequest(session, {
+      command: 'action',
+      action: request.action,
+      payload: 'payload' in request ? request.payload : undefined,
+      ...options,
+   });
+   return parseBrokerActionResult({
+      actionErrorMessage: `Could not run driver action "${request.action}".`,
+      response,
+   });
+}
+
+export interface EphemeralDriverActionOptions extends DriverRequestOptions {
+   target?: Platform;
+   request: DriverActionRequest;
+   recordingPath?: string | undefined;
+}
+
+/** Runs one action in a short-lived session that is torn down before returning. */
+export async function runEphemeralDriverAction(
+   options: EphemeralDriverActionOptions,
+): Promise<DriverActionResult> {
+   const target = await resolveStartTarget(options.target);
+   await assertTargetReady(target);
+   return runEphemeralAction({
+      target,
+      request: options.request,
+      recordingPath: options.recordingPath,
+      timeoutMs: options.timeoutMs,
+   });
 }

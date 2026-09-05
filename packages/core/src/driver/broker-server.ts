@@ -14,75 +14,95 @@ function formatErrorMessage(error: unknown): string {
    return String(error);
 }
 
-interface ProcessRequestArgs {
-   connection: net.Socket;
-   rawData: Buffer[];
-   context: BrokerHandlerContext;
-   onStop: () => void;
+function isBrokerRequest(value: unknown): value is BrokerRequest {
+   return typeof value === 'object' && value !== null && 'command' in value;
 }
 
-async function processRequest(args: ProcessRequestArgs): Promise<void> {
-   const raw = Buffer.concat(args.rawData).toString('utf8').trim();
-   const request = JSON.parse(raw) as BrokerRequest;
-   const result = await handleBrokerRequest(args.context, request);
-   args.connection.end(JSON.stringify(result.response));
+function parseRequestLine(line: string): BrokerRequest {
+   const parsed: unknown = JSON.parse(line);
+   if (!isBrokerRequest(parsed)) {
+      throw new Error('Broker requests must be JSON objects with a "command" field.');
+   }
+   return parsed;
+}
+
+function writeResponse(connection: net.Socket, response: BrokerResponse): void {
+   connection.write(`${JSON.stringify(response)}\n`);
+}
+
+interface ServerArgs {
+   context: BrokerHandlerContext;
+   onStop: () => void;
+   onActivity: () => void;
+}
+
+async function processLine(args: ServerArgs, connection: net.Socket, line: string): Promise<void> {
+   args.onActivity();
+   let result;
+   try {
+      result = await handleBrokerRequest(args.context, parseRequestLine(line));
+   } catch (error) {
+      writeResponse(connection, {
+         ok: false,
+         error: { code: 'broker-error', message: formatErrorMessage(error) },
+      });
+      return;
+   }
+   writeResponse(connection, result.response);
    if (result.shouldStop) {
+      connection.end();
       args.onStop();
    }
 }
 
-function toBuffer(chunk: Buffer | string): Buffer {
-   if (Buffer.isBuffer(chunk)) {
-      return chunk;
-   }
-   return Buffer.from(chunk);
-}
-
-interface ConnectionDataArgs {
-   connection: net.Socket;
-   chunks: Buffer[];
-   context: BrokerHandlerContext;
-   onStop: () => void;
-}
-
-function handleConnectionData(args: ConnectionDataArgs, chunk: Buffer | string): void {
-   const buffer = toBuffer(chunk);
-   args.chunks.push(buffer);
-   if (!buffer.includes('\n')) {
-      return;
-   }
-   processRequest({
-      connection: args.connection,
-      rawData: args.chunks,
-      context: args.context,
-      onStop: args.onStop,
-   }).catch((error: unknown) => {
-      const response: BrokerResponse = {
-         ok: false,
-         error: {
-            code: 'broker-error',
-            message: formatErrorMessage(error),
-         },
-      };
-      args.connection.end(JSON.stringify(response));
+/**
+ * Frames requests as newline-delimited JSON: one request per line, several lines per chunk
+ * allowed, and a line split across chunks is buffered until its newline arrives.
+ */
+function attachConnection(args: ServerArgs, connection: net.Socket): void {
+   let buffered = '';
+   let queue: Promise<void> = Promise.resolve();
+   connection.on('data', (chunk: Buffer | string) => {
+      buffered += chunk.toString();
+      const lines = buffered.split('\n');
+      buffered = lines.pop() ?? '';
+      for (const line of lines) {
+         if (line.trim()) {
+            queue = queue.then(() => processLine(args, connection, line));
+         }
+      }
+   });
+   connection.on('error', () => {
+      // The client went away; nothing to answer.
    });
 }
 
-export function createBrokerServer(args: {
-   context: BrokerHandlerContext;
-   onStop: () => void;
-}): net.Server {
+export function createBrokerServer(args: ServerArgs): net.Server {
    return net.createServer((connection) => {
-      const dataArgs: ConnectionDataArgs = {
-         connection,
-         chunks: [],
-         context: args.context,
-         onStop: args.onStop,
-      };
-      connection.on('data', (chunk) => {
-         handleConnectionData(dataArgs, chunk);
-      });
+      attachConnection(args, connection);
    });
+}
+
+/** Stops the session once no request has arrived for `idleTimeoutMs`; 0 disables it. */
+export function createIdleTimer(
+   idleTimeoutMs: number,
+   onIdle: () => void,
+): { touch: () => void; clear: () => void } {
+   let timer: NodeJS.Timeout | undefined = undefined;
+   const clear = (): void => {
+      if (timer) {
+         clearTimeout(timer);
+         timer = undefined;
+      }
+   };
+   const touch = (): void => {
+      clear();
+      if (idleTimeoutMs > 0) {
+         timer = setTimeout(onIdle, idleTimeoutMs);
+      }
+   };
+   touch();
+   return { touch, clear };
 }
 
 export function shutdownServer(server: net.Server, stop: () => Promise<void>): void {
@@ -94,14 +114,5 @@ export function shutdownServer(server: net.Server, stop: () => Promise<void>): v
          .catch(() => {
             process.exitCode = 1;
          });
-   });
-}
-
-export function setupSignalHandlers(server: net.Server, stop: () => Promise<void>): void {
-   process.on('SIGINT', () => {
-      shutdownServer(server, stop);
-   });
-   process.on('SIGTERM', () => {
-      shutdownServer(server, stop);
    });
 }

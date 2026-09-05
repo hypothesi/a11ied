@@ -16,6 +16,8 @@ const VIRTUAL_SOCKET_TIMEOUT_MS = 2000;
 const VIRTUAL_STOP_SOCKET_TIMEOUT_MS = 7000;
 const REAL_TARGET_SOCKET_TIMEOUT_MS = 30_000;
 const REAL_TARGET_STOP_SOCKET_TIMEOUT_MS = 20_000;
+const CALLER_TIMEOUT_MS = 1500;
+const RESPONSE_GRACE_MS = 6000;
 
 const tempRoots: string[] = [];
 
@@ -84,5 +86,14 @@ describe('broker startup timing', () => {
       expect(resolveBrokerSocketTimeoutMs({ command: 'status' }, 'nvda')).toBe(
          REAL_TARGET_SOCKET_TIMEOUT_MS,
       );
+   });
+
+   it('lets a caller timeout override the fixed constants, plus reply grace', () => {
+      expect(
+         resolveBrokerSocketTimeoutMs(
+            { command: 'action', timeoutMs: CALLER_TIMEOUT_MS },
+            'voiceover',
+         ),
+      ).toBe(CALLER_TIMEOUT_MS + RESPONSE_GRACE_MS);
    });
 });

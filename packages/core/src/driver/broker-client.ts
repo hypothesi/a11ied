@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import net from 'node:net';
 import { fileURLToPath } from 'node:url';
 
@@ -17,6 +17,8 @@ const VIRTUAL_STOP_SOCKET_TIMEOUT_MS = 7000;
 const BROKER_POLL_DELAY_MS = 100;
 const DEFAULT_BROKER_READY_TIMEOUT_MS = 5000;
 const REAL_TARGET_BROKER_READY_TIMEOUT_MS = 15_000;
+/** Extra time the reply gets on top of a caller-supplied command timeout. */
+const BROKER_RESPONSE_GRACE_MS = 6000;
 
 function delay(ms: number): Promise<void> {
    return new Promise((resolvePromise) => {
@@ -24,126 +26,126 @@ function delay(ms: number): Promise<void> {
    });
 }
 
+function isBrokerResponse(value: unknown): value is BrokerResponse {
+   return typeof value === 'object' && value !== null && 'ok' in value;
+}
+
+function parseResponseLine(line: string): BrokerResponse {
+   const parsed: unknown = JSON.parse(line);
+   if (!isBrokerResponse(parsed)) {
+      throw new Error('Broker replied with something other than a response object.');
+   }
+   return parsed;
+}
+
+/** Sends one request and resolves with the first newline-terminated response line. */
 export async function connectToBroker(
    socketPath: string,
    request: BrokerRequest,
    timeoutMs = VIRTUAL_SOCKET_TIMEOUT_MS,
 ): Promise<BrokerResponse> {
    return await new Promise<BrokerResponse>((resolvePromise, rejectPromise) => {
-      const chunks: Buffer[] = [];
+      let buffered = '';
+      let settled = false;
       const client = net.createConnection(socketPath);
+      const settle = (run: () => void): void => {
+         if (!settled) {
+            settled = true;
+            run();
+            client.destroy();
+         }
+      };
 
       client.setTimeout(timeoutMs);
-
       client.on('connect', () => {
          client.write(`${JSON.stringify(request)}\n`);
       });
-
-      client.on('data', (chunk) => {
-         if (Buffer.isBuffer(chunk)) {
-            chunks.push(chunk);
-         } else {
-            chunks.push(Buffer.from(chunk));
+      client.on('data', (chunk: Buffer | string) => {
+         buffered += chunk.toString();
+         const newline = buffered.indexOf('\n');
+         if (newline === -1) {
+            return;
          }
+         const line = buffered.slice(0, newline);
+         settle(() => {
+            try {
+               resolvePromise(parseResponseLine(line));
+            } catch (error) {
+               rejectPromise(error);
+            }
+         });
       });
-
       client.on('end', () => {
-         try {
-            const response = JSON.parse(
-               Buffer.concat(chunks).toString('utf8'),
-            ) as BrokerResponse;
-            resolvePromise(response);
-         } catch (error) {
-            rejectPromise(error);
-         }
+         settle(() => rejectPromise(new Error('Broker closed the connection without a reply.')));
       });
-
       client.on('timeout', () => {
-         client.destroy(new Error('Broker connection timed out.'));
+         settle(() => rejectPromise(new Error('Broker connection timed out.')));
       });
-
       client.on('error', (error) => {
-         rejectPromise(error);
+         settle(() => rejectPromise(error));
       });
    });
 }
 
 export function resolveBrokerSocketTimeoutMs(
-   request: Pick<BrokerRequest, 'command'>,
+   request: Pick<BrokerRequest, 'command' | 'timeoutMs'>,
    target?: Platform,
 ): number {
+   if (request.timeoutMs !== undefined) {
+      return request.timeoutMs + BROKER_RESPONSE_GRACE_MS;
+   }
    const isReal = target === 'voiceover' || target === 'nvda';
-
    if (request.command === 'stop') {
-      if (isReal) {
-         return REAL_TARGET_STOP_SOCKET_TIMEOUT_MS;
-      }
-      return VIRTUAL_STOP_SOCKET_TIMEOUT_MS;
+      return isReal ? REAL_TARGET_STOP_SOCKET_TIMEOUT_MS : VIRTUAL_STOP_SOCKET_TIMEOUT_MS;
    }
-
-   if (isReal) {
-      return REAL_TARGET_SOCKET_TIMEOUT_MS;
-   }
-   return VIRTUAL_SOCKET_TIMEOUT_MS;
-}
-
-interface PollBrokerOptions {
-   sessionId: string;
-   cwd: string;
-   startedAt: number;
-   timeoutMs: number;
-   readSession: (sid: string, cwd: string) => Promise<AccessibilityDriverSession>;
-}
-
-async function pollBrokerConnection(
-   options: PollBrokerOptions,
-): Promise<AccessibilityDriverSession> {
-   if (Date.now() - options.startedAt >= options.timeoutMs) {
-      throw new CliEnvironmentError(
-         'driver-broker-timeout',
-         'Timed out waiting for the driver broker to start.',
-         { sessionId: options.sessionId },
-      );
-   }
-   try {
-      const session = await options.readSession(options.sessionId, options.cwd);
-      const response = await connectToBroker(session.socketPath, {
-         command: 'ping',
-      });
-      if (response.ok) {
-         return session;
-      }
-   } catch {
-      await delay(BROKER_POLL_DELAY_MS);
-   }
-   return pollBrokerConnection(options);
+   return isReal ? REAL_TARGET_SOCKET_TIMEOUT_MS : VIRTUAL_SOCKET_TIMEOUT_MS;
 }
 
 export function resolveBrokerReadyTimeoutMs(target: Platform): number {
    if (target === 'virtual') {
       return DEFAULT_BROKER_READY_TIMEOUT_MS;
    }
-
    return REAL_TARGET_BROKER_READY_TIMEOUT_MS;
 }
 
 interface WaitForBrokerOptions {
    sessionId: string;
-   cwd: string;
-   readSession: (sid: string, cwdPath: string) => Promise<AccessibilityDriverSession>;
-   timeoutMs?: number;
+   readSession: () => Promise<AccessibilityDriverSession | undefined>;
+   timeoutMs: number;
 }
 
+async function pingSession(
+   session: AccessibilityDriverSession | undefined,
+): Promise<AccessibilityDriverSession | undefined> {
+   if (!session) {
+      return undefined;
+   }
+   try {
+      const response = await connectToBroker(session.socketPath, { command: 'ping' });
+      return response.ok ? session : undefined;
+   } catch {
+      return undefined;
+   }
+}
+
+/** Polls the session file and the socket until the broker answers a ping or time runs out. */
 export async function waitForBroker(
    options: WaitForBrokerOptions,
 ): Promise<AccessibilityDriverSession> {
-   return pollBrokerConnection({
-      sessionId: options.sessionId,
-      cwd: options.cwd,
-      startedAt: Date.now(),
-      timeoutMs: options.timeoutMs ?? DEFAULT_BROKER_READY_TIMEOUT_MS,
-      readSession: options.readSession,
-   });
+   const startedAt = Date.now();
+   while (Date.now() - startedAt < options.timeoutMs) {
+      const session = await options.readSession();
+      const live = await pingSession(session?.sessionId === options.sessionId ? session : undefined);
+      if (live) {
+         return live;
+      }
+      await delay(BROKER_POLL_DELAY_MS);
+   }
+   throw new CliEnvironmentError(
+      'driver-broker-timeout',
+      'Timed out waiting for the driver broker to start.',
+      { sessionId: options.sessionId },
+   );
 }
 
 function getCurrentModulePath(): string {
@@ -172,7 +174,7 @@ function resolveCorePackageRoot(): string | undefined {
       return undefined;
    }
    const packageDir = dirname(packageEntryPath);
-   if (packageDir.endsWith('/dist')) {
+   if (basename(packageDir) === 'dist') {
       return dirname(packageDir);
    }
    return packageDir;
@@ -192,7 +194,6 @@ function getBrokerEntryFromCurrentModule(): string {
    if (isSourceRuntime()) {
       return resolve(currentDir, 'broker.ts');
    }
-
    return resolve(currentDir, 'driver/broker.js');
 }
 
@@ -204,7 +205,6 @@ function getBrokerEntryPath(): string {
          return packageEntry;
       }
    }
-
    return getBrokerEntryFromCurrentModule();
 }
 
@@ -213,16 +213,18 @@ function getProjectRoot(): string {
    if (packageRoot) {
       return resolve(packageRoot, '../..');
    }
-   const currentFile = getCurrentModulePath();
-   return resolve(dirname(currentFile), '../../..');
+   return resolve(dirname(getCurrentModulePath()), '../../..');
 }
 
-interface BrokerSpawnOptions {
+export interface BrokerSpawnOptions {
    sessionId: string;
-   target: string;
+   target: Platform;
    metadataFile: string;
    socketPath: string;
-   recordingPath?: string;
+   idleTimeoutMs: number;
+   recordingPath?: string | undefined;
+   url?: string | undefined;
+   app?: AccessibilityDriverSession['app'] | undefined;
 }
 
 function getBaseSpawnArgs(entry: string): string[] {
@@ -233,11 +235,8 @@ function getBaseSpawnArgs(entry: string): string[] {
 }
 
 function brokerSpawnArgs(options: BrokerSpawnOptions): string[] {
-   const entry = getBrokerEntryPath();
-   const baseArgs = getBaseSpawnArgs(entry);
-
    const args = [
-      ...baseArgs,
+      ...getBaseSpawnArgs(getBrokerEntryPath()),
       '--session-id',
       options.sessionId,
       '--target',
@@ -246,15 +245,22 @@ function brokerSpawnArgs(options: BrokerSpawnOptions): string[] {
       options.metadataFile,
       '--socket-path',
       options.socketPath,
+      '--idle-timeout-ms',
+      String(options.idleTimeoutMs),
    ];
-
    if (options.recordingPath) {
       args.push('--recording-path', options.recordingPath);
    }
-
+   if (options.url) {
+      args.push('--url', options.url);
+   }
+   if (options.app) {
+      args.push('--app', JSON.stringify(options.app));
+   }
    return args;
 }
 
+/** Spawns the detached broker process that owns the screen reader for one session. */
 export function spawnBrokerProcess(options: BrokerSpawnOptions): void {
    const child = spawn(process.execPath, brokerSpawnArgs(options), {
       cwd: getProjectRoot(),

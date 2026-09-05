@@ -15,12 +15,11 @@ export {
 export {
    attachDocumentToDriverSession,
    cleanupStaleDriverSessions,
-   getDriverSessionMetadataPath,
+   getActiveSessionFile,
    getDriverSocketPath,
    getDriverSessionStatus,
    runDriverSessionAction,
    runEphemeralDriverAction,
-   type SessionActionOptions,
    startDriverSession,
    stopDriverSession,
 } from './driver/runtime.js';
@@ -114,3 +113,31 @@ export {
    showWcagCoverageSummary,
    showWcagTechnique,
 } from './wcag/runtime.js';
+export {
+   DEFAULT_IDLE_TIMEOUT_MINUTES,
+   getActiveDriverSession,
+   type DriverRequestOptions,
+   type DriverSessionStart,
+   type EphemeralDriverActionOptions,
+   type StartDriverSessionOptions,
+} from './driver/runtime.js';
+export {
+   DRIVER_MODE_ENV_VAR,
+   resolveDriverMode,
+   resolveStateRoot,
+   STATE_DIR_ENV_VAR,
+} from './driver/environment.js';
+export {
+   buildDriverTranscript,
+   formatTranscript,
+   resolveRecordingTranscriptPath,
+   resolveTranscriptFormat,
+   selectTranscriptEntries,
+   writeDriverTranscript,
+   type TranscriptSelection,
+} from './driver/transcript.js';
+export {
+   getPortableCommand,
+   portableCommandTable,
+   type PortableCommandEntry,
+} from '@a11ied/guidepup';

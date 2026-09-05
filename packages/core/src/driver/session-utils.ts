@@ -1,59 +1,51 @@
-import { access, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
-import { constants as fsConstants } from 'node:fs';
+import { randomBytes } from 'node:crypto';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 
 import {
    accessibilityDriverSessionSchema,
    type AccessibilityDriverSession,
-   type Platform,
-   type SessionRecording,
 } from '@a11ied/contracts';
-import { createDriverAdapter } from '@a11ied/guidepup';
 
-import { connectToBroker } from './broker-client.js';
+import { resolveStateRoot } from './environment.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
 
 const JSON_INDENT = 2;
-const stateFolder = '.a11ied';
-const UNIX_SOCKET_DIR = '/tmp';
+const SESSION_ID_BYTES = 6;
+const ACTIVE_SESSION_FILE = 'session.json';
+const IN_MEMORY_SOCKET_PREFIX = 'in-memory://';
 
-const { env } = process;
-
-export function useInMemoryBroker(): boolean {
-   return env.VITEST === 'true';
+/** The one metadata file describing the active session for this user. */
+export function getActiveSessionFile(): string {
+   return resolve(resolveStateRoot(), ACTIVE_SESSION_FILE);
 }
 
-function getStateRoot(cwd = process.cwd()): string {
-   return resolve(cwd, stateFolder, 'state');
+/** Creates a short session id; one session is active at a time so it only needs to be unique. */
+export function createSessionId(): string {
+   return `drv_${randomBytes(SESSION_ID_BYTES).toString('hex')}`;
 }
 
-function getSessionsDirectory(cwd = process.cwd()): string {
-   return resolve(getStateRoot(cwd), 'sessions');
-}
-
-function getSocketsDirectory(cwd = process.cwd()): string {
-   return resolve(getStateRoot(cwd), 'broker');
-}
-
-export function getDriverSessionMetadataPath(
-   sessionId: string,
-   cwd = process.cwd(),
-): string {
-   return resolve(getSessionsDirectory(cwd), `${sessionId}.json`);
-}
-
-export function getDriverSocketPath(sessionId: string, _cwd = process.cwd()): string {
+/** Socket path for one session: a named pipe on Windows, a short path under the OS tmpdir elsewhere. */
+export function getDriverSocketPath(sessionId: string): string {
    if (process.platform === 'win32') {
       return `\\\\.\\pipe\\a11ied-${sessionId}`;
    }
-   return resolve(UNIX_SOCKET_DIR, `a11ied-${sessionId}.sock`);
+   return resolve(tmpdir(), `a11ied-${sessionId}.sock`);
 }
 
-export async function ensureStateDirectories(cwd = process.cwd()): Promise<void> {
-   await Promise.all([
-      mkdir(getSessionsDirectory(cwd), { recursive: true }),
-      mkdir(getSocketsDirectory(cwd), { recursive: true }),
-   ]);
+/** Socket path used for sessions that live inside the calling process. */
+export function getInMemorySocketPath(sessionId: string): string {
+   return `${IN_MEMORY_SOCKET_PREFIX}${sessionId}`;
+}
+
+export function isInMemorySession(session: Pick<AccessibilityDriverSession, 'socketPath'>): boolean {
+   return session.socketPath.startsWith(IN_MEMORY_SOCKET_PREFIX);
+}
+
+export async function ensureStateDirectory(): Promise<void> {
+   await mkdir(resolveStateRoot(), { recursive: true });
 }
 
 export async function writeSessionMetadata(
@@ -64,140 +56,52 @@ export async function writeSessionMetadata(
    await writeFile(session.metadataFile, `${json}\n`, 'utf8');
 }
 
-export function buildEphemeralSession(args: {
-   target: Platform;
-   cwd: string;
-   logCursor: number;
-   recording?: SessionRecording;
-}): AccessibilityDriverSession {
-   const sessionId = `ephemeral_${crypto.randomUUID()}`;
-   let targetType: AccessibilityDriverSession['targetType'] = 'real';
-   if (args.target === 'virtual') {
-      targetType = 'simulated';
-   }
-   return accessibilityDriverSessionSchema.parse({
-      sessionId,
-      target: args.target,
-      targetType,
-      startedAt: new Date().toISOString(),
-      capabilities: createDriverAdapter(args.target).capabilities,
-      logCursor: args.logCursor,
-      brokerPid: process.pid,
-      socketPath: `ephemeral://${sessionId}`,
-      metadataFile: getDriverSessionMetadataPath(sessionId, args.cwd),
-      recording: args.recording,
-   });
+export function createMissingSessionError(): CliEnvironmentError {
+   return new CliEnvironmentError(
+      'session-not-found',
+      'No active screen reader session. Start one with "a1 sr start".',
+   );
 }
 
-function isProcessRunning(pid: number): boolean {
+/** Reads the active session file without checking whether its broker is alive. */
+export async function readActiveSessionMetadata(): Promise<
+   AccessibilityDriverSession | undefined
+> {
+   try {
+      const raw = await readFile(getActiveSessionFile(), 'utf8');
+      return accessibilityDriverSessionSchema.parse(JSON.parse(raw));
+   } catch {
+      return undefined;
+   }
+}
+
+export function isProcessRunning(pid: number): boolean {
    try {
       process.kill(pid, 0);
       return true;
    } catch (error) {
       if (error instanceof Error && 'code' in error) {
-         const code = String(error.code);
-         return code === 'EPERM';
+         return String(error.code) === 'EPERM';
       }
       return false;
    }
 }
 
-export async function readSessionMetadata(
-   sessionId: string,
-   cwd = process.cwd(),
-): Promise<AccessibilityDriverSession> {
-   const metadataFile = getDriverSessionMetadataPath(sessionId, cwd);
-   try {
-      const raw = await readFile(metadataFile, 'utf8');
-      return accessibilityDriverSessionSchema.parse(JSON.parse(raw));
-   } catch {
-      throw new CliEnvironmentError(
-         'session-not-found',
-         `Driver session "${sessionId}" was not found.`,
-         { sessionId },
-      );
-   }
-}
-
 export async function removeSessionArtifacts(
-   session: AccessibilityDriverSession,
+   session: Pick<AccessibilityDriverSession, 'metadataFile' | 'socketPath'>,
 ): Promise<void> {
    await rm(session.metadataFile, { force: true });
-   if (process.platform !== 'win32') {
+   if (process.platform !== 'win32' && !isInMemorySession(session)) {
       await rm(session.socketPath, { force: true });
    }
 }
 
-async function processSessionEntryInMemory(
-   session: AccessibilityDriverSession,
-   activeIds: Set<string>,
-): Promise<string | undefined> {
-   if (activeIds.has(session.sessionId)) {
-      return undefined;
+/** Synchronous twin of removeSessionArtifacts for process exit handlers. */
+export function removeSessionArtifactsSync(
+   session: Pick<AccessibilityDriverSession, 'metadataFile' | 'socketPath'>,
+): void {
+   rmSync(session.metadataFile, { force: true });
+   if (process.platform !== 'win32' && !isInMemorySession(session)) {
+      rmSync(session.socketPath, { force: true });
    }
-   await removeSessionArtifacts(session);
-   return session.sessionId;
-}
-
-async function removeAndReturnId(session: AccessibilityDriverSession): Promise<string> {
-   await removeSessionArtifacts(session);
-   return session.sessionId;
-}
-
-async function processSessionEntryLive(
-   session: AccessibilityDriverSession,
-): Promise<string | undefined> {
-   if (!isProcessRunning(session.brokerPid)) {
-      return removeAndReturnId(session);
-   }
-   try {
-      const response = await connectToBroker(session.socketPath, {
-         command: 'ping',
-      });
-      if (!response.ok) {
-         return removeAndReturnId(session);
-      }
-   } catch {
-      return removeAndReturnId(session);
-   }
-   return undefined;
-}
-
-export async function processSessionEntry(
-   entry: string,
-   sessionsDir: string,
-   activeIds: Set<string> | undefined,
-): Promise<string | undefined> {
-   if (!entry.endsWith('.json')) {
-      return undefined;
-   }
-   const metadataFile = resolve(sessionsDir, entry);
-   try {
-      const session = accessibilityDriverSessionSchema.parse(
-         JSON.parse(await readFile(metadataFile, 'utf8')),
-      );
-      if (activeIds) {
-         return processSessionEntryInMemory(session, activeIds);
-      }
-      return processSessionEntryLive(session);
-   } catch {
-      await rm(metadataFile, { force: true });
-      return undefined;
-   }
-}
-
-export async function listSessionEntries(
-   cwd = process.cwd(),
-): Promise<string[] | undefined> {
-   const sessionsDir = getSessionsDirectory(cwd);
-   try {
-      await access(sessionsDir, fsConstants.F_OK);
-   } catch {
-      return undefined;
-   }
-   return await readdir(sessionsDir);
-}
-
-export function getSessionsDir(cwd = process.cwd()): string {
-   return getSessionsDirectory(cwd);
 }
