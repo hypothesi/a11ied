@@ -47,11 +47,11 @@ const toc = [
          <div class="route-list">
             <div class="route-row"><code>--json</code><span>Print one structured object instead of formatted text.</span></div>
             <div class="route-row"><code>--verbose</code><span>Add detail to the text output. No effect with <code>--json</code>.</span></div>
-            <div class="route-row"><code>--version &lt;version&gt;</code><span>WCAG version for <code>wcag</code>, <code>axe</code>, and <code>inspect</code>. Accepts <code>2.1</code> or <code>2.2</code>. Defaults to <code>2.2</code>.</span></div>
+            <div class="route-row"><code>--wcag &lt;version&gt;</code><span>WCAG version for <code>wcag</code>, <code>axe</code>, and <code>inspect</code>. Accepts <code>2.1</code> or <code>2.2</code>. Defaults to <code>2.2</code>.</span></div>
          </div>
          <p>
-            <code>-V</code> at the top level prints the package version. Inside a subcommand,
-            <code>--version</code> means the WCAG version.
+            <code>-V</code> at the top level prints the package version; <code>--wcag</code> inside
+            a subcommand selects the WCAG version, so the two no longer share one flag name.
          </p>
       </div>
       <div class="split-aside">
@@ -169,7 +169,7 @@ a1 sr press "VO+ArrowRight" --json</code></pre>
       </div>
       <pre><code>a1 wcag 1.4.3
 a1 wcag show status-messages --json
-a1 wcag criteria --level AA --version 2.1 --json
+a1 wcag criteria --level AA --wcag 2.1 --json
 a1 wcag criteria --summary
 a1 wcag search "focus order" --limit 3 --json
 a1 wcag rule color-contrast</code></pre>

@@ -14,7 +14,7 @@ export function addVerboseOption(command: Command): Command {
 
 export function addWcagVersionOption(command: Command): Command {
    return command.option(
-      '--version <version>',
+      '--wcag <version>',
       'Use a specific WCAG version. Defaults to 2.2.',
       '2.2',
    );

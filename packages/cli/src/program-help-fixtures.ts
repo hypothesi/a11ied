@@ -78,12 +78,12 @@ export const inspectHelpCases: HelpCase[] = [
       List criteria that look relevant for a target.
 
       Options:
-        --url <url>          Inspect a live URL target.
-        --version <version>  Use a specific WCAG version. Defaults to 2.2. (default:
-                             "2.2")
-        --json               Print JSON instead of human-readable text.
-        --verbose            Print more detail in text output.
-        -h, --help           display help for command
+        --url <url>       Inspect a live URL target.
+        --wcag <version>  Use a specific WCAG version. Defaults to 2.2. (default:
+                          "2.2")
+        --json            Print JSON instead of human-readable text.
+        --verbose         Print more detail in text output.
+        -h, --help        display help for command
       "
     `,
    },

@@ -35,7 +35,7 @@ export function registerAxeCommand(program: Command): void {
          {
             family: 'axe',
             subcommand: 'axe',
-            wcagVersion: options.version,
+            wcagVersion: options.wcag,
             json: options.json,
             verbose: options.verbose,
          },

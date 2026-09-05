@@ -4,7 +4,7 @@ export interface AxeActionOptions {
    json?: boolean;
    verbose?: boolean;
    url?: string;
-   version: string;
+   wcag: string;
    criterion?: string;
    level?: string;
    rule?: string[];
@@ -64,7 +64,7 @@ export async function handleAxeAction(options: AxeActionOptions): Promise<{
    const result = await runAxeForSelection({
       url: resolved.resolvedUrl,
       selection,
-      wcagVersion: options.version,
+      wcagVersion: options.wcag,
    });
 
    return { target: resolved.reportTarget, result };

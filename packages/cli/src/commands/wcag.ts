@@ -7,7 +7,7 @@ import { addJsonOption, addVerboseOption, addWcagVersionOption } from '../lib/op
 interface WcagCommandOptions {
    json?: boolean;
    verbose?: boolean;
-   version: string;
+   wcag: string;
 }
 
 type CoreModule = typeof CoreModuleNamespace;
@@ -41,7 +41,7 @@ async function runWcagCommand(input: {
       {
          family: 'wcag',
          subcommand: input.subcommand,
-         wcagVersion: input.options.version,
+         wcagVersion: input.options.wcag,
          json: input.options.json,
          verbose: input.options.verbose,
       },
@@ -58,7 +58,7 @@ async function showCriterionOrTechnique(
       await runWcagCommand({
          subcommand: 'technique',
          options,
-         buildResult: (core) => core.showWcagTechnique(lookupKey, options.version),
+         buildResult: (core) => core.showWcagTechnique(lookupKey, options.wcag),
          renderText: (renderers) => renderers.renderTechniqueText,
       });
       return;
@@ -66,7 +66,7 @@ async function showCriterionOrTechnique(
    await runWcagCommand({
       subcommand: 'show',
       options,
-      buildResult: (core) => core.showWcagCriterion(lookupKey, options.version),
+      buildResult: (core) => core.showWcagCriterion(lookupKey, options.wcag),
       renderText: (renderers) => renderers.renderShowCriterionText,
    });
 }
@@ -84,7 +84,7 @@ async function runWcagEntry(
       return;
    }
    const { runWcagFinder } = await import('../tui/finder.js');
-   await runWcagFinder({ version: options.version });
+   await runWcagFinder({ version: options.wcag });
 }
 
 function registerCriteriaCommand(wcagCommand: Command): void {
@@ -100,7 +100,7 @@ function registerCriteriaCommand(wcagCommand: Command): void {
             await runWcagCommand({
                subcommand: 'criteria',
                options,
-               buildResult: (core) => core.showWcagCoverageSummary(options.version),
+               buildResult: (core) => core.showWcagCoverageSummary(options.wcag),
                renderText: (renderers) => renderers.renderCoverageSummaryText,
             });
             return;
@@ -108,7 +108,7 @@ function registerCriteriaCommand(wcagCommand: Command): void {
          await runWcagCommand({
             subcommand: 'criteria',
             options,
-            buildResult: (core) => core.listWcagCriteria(options.level, options.version),
+            buildResult: (core) => core.listWcagCriteria(options.level, options.wcag),
             renderText: (renderers) => renderers.renderCriteriaText,
          });
       },
@@ -141,7 +141,7 @@ function registerSearchCommand(wcagCommand: Command): void {
          options,
          buildResult: (core) =>
             core.searchWcagCriteria(query, {
-               version: options.version,
+               version: options.wcag,
                limit: Number.parseInt(options.limit, 10),
             }),
          renderText: (renderers) => renderers.renderSearchText,
@@ -160,7 +160,7 @@ function registerRuleCommand(wcagCommand: Command): void {
       await runWcagCommand({
          subcommand: 'rule',
          options,
-         buildResult: (core) => core.showWcagAxeRule(ruleId, options.version),
+         buildResult: (core) => core.showWcagAxeRule(ruleId, options.wcag),
          renderText: (renderers) => renderers.renderAxeRuleText,
       });
    });

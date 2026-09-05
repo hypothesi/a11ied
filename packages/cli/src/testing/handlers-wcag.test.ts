@@ -44,7 +44,7 @@ async function assertWcagTechniqueShorthand(): Promise<void> {
 }
 
 async function assertWcagCriteria(): Promise<void> {
-   const allResult = await runCli(['wcag', 'criteria', '--version', '2.1', '--json']);
+   const allResult = await runCli(['wcag', 'criteria', '--wcag', '2.1', '--json']);
    const allCriteria = parseJsonOutput(allResult.stdout);
    expect(allResult.status).toBe(EXIT_SUCCESS);
    expect(allCriteria.ok).toBe(true);
@@ -64,7 +64,7 @@ async function assertWcagCriteria(): Promise<void> {
       'criteria',
       '--level',
       'AA',
-      '--version',
+      '--wcag',
       '2.1',
       '--json',
    ]);
@@ -172,7 +172,7 @@ async function assertWcagInvalidVersion(): Promise<void> {
       'criteria',
       '--level',
       'AA',
-      '--version',
+      '--wcag',
       '2.0',
       '--json',
    ]);

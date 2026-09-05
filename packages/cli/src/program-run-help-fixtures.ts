@@ -14,7 +14,7 @@ export const runOptionCases: HelpCase[] = [
         --level <level>          Limit the run to one WCAG level.
         --criterion <criterion>  Limit the run to one WCAG criterion id or slug.
         --rule <ruleId...>       Limit the run to one or more explicit axe rule ids.
-        --version <version>      Use a specific WCAG version. Defaults to 2.2.
+        --wcag <version>         Use a specific WCAG version. Defaults to 2.2.
                                  (default: "2.2")
         --json                   Print JSON instead of human-readable text.
         --verbose                Print more detail in text output.

@@ -4,7 +4,7 @@ import { addJsonOption, addVerboseOption, addWcagVersionOption } from '../lib/op
 interface InspectOptions {
    json?: boolean;
    verbose?: boolean;
-   version: string;
+   wcag: string;
    url?: string;
 }
 
@@ -25,14 +25,14 @@ async function handleApplicableAction(options: InspectOptions): Promise<void> {
       {
          family: 'inspect',
          subcommand: 'applicable',
-         wcagVersion: options.version,
+         wcagVersion: options.wcag,
          json: options.json,
          verbose: options.verbose,
       },
       async () => {
          const targetInput = buildCliTargetInput(options);
          const resolved = await resolveCliTarget(targetInput);
-         const result = await core.inspectApplicableTarget(targetInput, options.version);
+         const result = await core.inspectApplicableTarget(targetInput, options.wcag);
          return {
             target: resolved.reportTarget,
             result: result as unknown as Record<string, unknown>,
@@ -77,7 +77,7 @@ async function handleCriterionAction(
       {
          family: 'inspect',
          subcommand: 'criterion',
-         wcagVersion: options.version,
+         wcagVersion: options.wcag,
          json: options.json,
          verbose: options.verbose,
       },
@@ -87,7 +87,7 @@ async function handleCriterionAction(
          const result = await core.inspectCriterionTarget(
             criterion,
             targetInput,
-            options.version,
+            options.wcag,
          );
          return {
             target: resolved.reportTarget,
