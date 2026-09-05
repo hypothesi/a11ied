@@ -394,7 +394,7 @@ Concrete tasks from the stated use cases, and the primitive each one is missing.
 
 One active session. No ids. Target-independent verbs first, target-specific escape
 hatches second. Every navigation verb prints the phrase it produced and, when known,
-the item it landed on.
+the item it stopped on.
 
 ```txt
 a1 sr start [<target>] [--sr voiceover|nvda|virtual] [--record <path>]
