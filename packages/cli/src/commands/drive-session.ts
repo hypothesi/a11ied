@@ -63,7 +63,8 @@ async function refocusRealTarget(
    return core.runDriverSessionAction({ action: 'focus', payload: app }, { timeoutMs });
 }
 
-async function executeOpenAction(
+/** Points the active session at a page; `sr open` and `sr walk <url>` both run this. */
+export async function executeOpenAction(
    url: string,
    options: DriveActionOptions,
 ): Promise<CommandExecution> {

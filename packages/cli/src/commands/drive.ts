@@ -25,6 +25,7 @@ import {
    registerTitleCommand,
 } from './drive-structure.js';
 import { registerTranscriptCommand } from './drive-transcript.js';
+import { registerWalkCommand } from './drive-walk.js';
 
 /** The sr subcommands in the order `sr --help` lists them. */
 const registrars: ReadonlyArray<(driveCommand: Command) => void> = [
@@ -40,6 +41,7 @@ const registrars: ReadonlyArray<(driveCommand: Command) => void> = [
    registerGotoCommand,
    registerElementsCommand,
    registerReadAllCommand,
+   registerWalkCommand,
    registerPressCommand,
    registerTypeCommand,
    registerDoCommand,

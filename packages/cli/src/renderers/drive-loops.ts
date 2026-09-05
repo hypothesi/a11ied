@@ -2,9 +2,11 @@ import {
    driverActionResultSchema,
    driverLoopItemSchema,
    driverLoopStopSchema,
+   driverTranscriptSchema,
    type CliOutputEnvelope,
    type DriverLoopItem,
 } from '#contracts';
+import { formatTranscript } from '#core';
 import { count, dim, numberedItems, title } from '../lib/format.js';
 import { verdictLines } from './drive.js';
 
@@ -60,7 +62,29 @@ export function renderDriveElementsText(
    ].join('\n');
 }
 
-/** Text for `sr read-all` and `sr walk`: every phrase in order, then why it stopped. */
+/** Text for `sr walk`: the Markdown transcript of the walk, why it stopped, and the file. */
+export function renderDriveWalkText(
+   envelope: CliOutputEnvelope,
+   _options: { verbose: boolean },
+): string {
+   const parsed = driverActionResultSchema.safeParse(envelope.result);
+   const transcript = driverTranscriptSchema.safeParse(envelope.result?.transcript);
+   if (!parsed.success || !parsed.data.details || !transcript.success) {
+      return 'No result.';
+   }
+   const lines = [
+      formatTranscript(transcript.data, 'md').trimEnd(),
+      '',
+      stopLine(parsed.data.details),
+   ];
+   const file = envelope.result?.file;
+   if (typeof file === 'object' && file !== null && 'path' in file) {
+      lines.push(dim(`Written to ${String(file.path)}`));
+   }
+   return lines.join('\n');
+}
+
+/** Text for `sr read-all`: every phrase in order, then why it stopped. */
 export function renderDriveReadAllText(
    envelope: CliOutputEnvelope,
    _options: { verbose: boolean },

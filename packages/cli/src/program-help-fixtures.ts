@@ -150,6 +150,9 @@ export const driveRunHelpCases: HelpCase[] = [
         read-all [options]            Say-all as a transcript: step item by item from
                                       the cursor to the end of the document, bounded
                                       by --max.
+        walk [options] [url]          Read the whole page top to bottom and print the
+                                      transcript. Starts a session when none is
+                                      active; with a URL, opens that page first.
         press [options] <chord...>    Press key chords in order, one chord per
                                       argument.
         type [options] <text>         Type text through the active target.

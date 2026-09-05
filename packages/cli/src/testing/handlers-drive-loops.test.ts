@@ -1,3 +1,6 @@
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -141,7 +144,49 @@ async function assertGoto(): Promise<void> {
    expectFirstErrorMessage({ result: none, match: /Pass --role, --name, or both/ });
 }
 
+async function assertWalk(stateDir: string): Promise<void> {
+   const pageUrl = `${testServer.getBaseUrl()}/structure.html`;
+   const outPath = resolve(stateDir, 'walk.md');
+   try {
+      const walked = await runCli([
+         'sr',
+         'walk',
+         pageUrl,
+         '--sr',
+         'virtual',
+         '--allow-virtual',
+         '--max',
+         '4',
+         '--out',
+         outPath,
+         '--json',
+      ]);
+      expect(walked.status).toBe(EXIT_SUCCESS);
+      const json = parseJsonOutput(walked.stdout);
+      expect((json.warnings as Array<{ code: string }>)[0]?.code).toBe(
+         'session-auto-started',
+      );
+      const transcript = (json.result as { transcript: { entries: unknown[] } })
+         .transcript;
+      expect(transcript.entries).toHaveLength(4);
+      expect(await readFile(outPath, 'utf8')).toContain('link, About us');
+
+      const again = await runCli(['sr', 'walk', '--max', '2']);
+      expect(again.stdout).not.toContain('session-auto-started');
+      expect(again.stdout).toContain('banner');
+      expect(again.stdout).toContain('Stopped at the cap of 2 items');
+   } finally {
+      await runCli(['sr', 'stop', '--json']);
+   }
+}
+
 describe('cli sr bounded loops', () => {
+   it(
+      'walks a page from a cold start and writes the transcript',
+      () => withStateDir(tempRoots, assertWalk),
+      TEST_TIMEOUT_LONG,
+   );
+
    it(
       'lists elements of one kind from the top',
       withSession(assertElements),

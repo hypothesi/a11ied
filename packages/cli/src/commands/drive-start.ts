@@ -12,7 +12,7 @@ import {
 import { parseCountOption, parseTimeoutMs } from './drive-options.js';
 import { assertHttpUrl, delay, REAL_BROWSER_LAUNCH_DELAY_MS } from './drive-session.js';
 
-interface StartActionOptions {
+export interface StartActionOptions {
    json?: boolean;
    verbose?: boolean;
    sr?: string;
@@ -38,7 +38,8 @@ function buildReplacedWarning(
    ];
 }
 
-async function executeStartAction(
+/** Starts the session and opens the page; `sr start` and `sr walk` both run this. */
+export async function executeStartAction(
    url: string | undefined,
    options: StartActionOptions,
 ): Promise<CommandExecution> {
