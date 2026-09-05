@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { browserAutomationPolicySchema } from './browser.js';
-import { driverFocusTargetFieldsSchema, driverFocusTargetSchema } from './driver-focus.js';
+import {
+   driverFocusTargetFieldsSchema,
+   driverFocusTargetSchema,
+} from './driver-focus.js';
 import { platformSchema } from './platform.js';
 
 export { platformSchema, type Platform } from './platform.js';

@@ -59,8 +59,8 @@ export async function createDriverSessionContext(
    options: SessionContextOptions,
 ): Promise<{ adapter: DriverAdapter; context: BrokerHandlerContext }> {
    const adapter = createDriverAdapter(options.target),
-         checkpoints: DriverCheckpoint[] = [],
-         transcript = new TranscriptRecorder();
+      checkpoints: DriverCheckpoint[] = [],
+      transcript = new TranscriptRecorder();
    let recording = options.recording;
    await adapter.start();
    const initialState = await adapter.readState(checkpoints);

@@ -6,8 +6,9 @@ import {
    platformSchema,
    type AccessibilityDriverSession,
    type Platform,
+   type SessionRecording,
 } from '@a11ied/contracts';
-import { createDriverAdapter, type DriverAdapter } from '@a11ied/guidepup';
+import { createDriverAdapter, ignoreError, type DriverAdapter } from '@a11ied/guidepup';
 
 import { createBrokerServer, createIdleTimer, shutdownServer } from './broker-server.js';
 import { startSessionRecording, type ActiveSessionRecording } from './recording.js';
@@ -36,12 +37,12 @@ interface BrokerState {
 
 function collectArgValues(argv: string[]): Map<string, string> {
    const values = new Map<string, string>();
-   argv.forEach((part, index) => {
+   for (const [index, part] of argv.entries()) {
       const value = argv[index + 1];
       if (part.startsWith('--') && value !== undefined) {
          values.set(part, value);
       }
-   });
+   }
    return values;
 }
 
@@ -72,7 +73,7 @@ function parseArgs(argv: string[]): BrokerArgs {
       idleTimeoutMs: Number(requireArg(values, '--idle-timeout-ms')),
    };
    const recordingPath = values.get('--recording-path'),
-         url = values.get('--url');
+      url = values.get('--url');
    if (recordingPath) {
       args.recordingPath = recordingPath;
    }
@@ -119,10 +120,10 @@ async function stopBroker(options: StopBrokerOptions): Promise<void> {
    }
    options.state.stopped = true;
    if (options.state.recording) {
-      await options.state.recording.stop().catch(() => undefined);
+      await options.state.recording.stop().catch(ignoreError);
       options.state.recording = undefined;
    }
-   await options.adapter.stop().catch(() => undefined);
+   await options.adapter.stop().catch(ignoreError);
    removeSessionArtifactsSync(options.args);
 }
 
@@ -131,7 +132,10 @@ async function stopBroker(options: StopBrokerOptions): Promise<void> {
  * idle timeout, SIGINT, SIGTERM, SIGHUP, an uncaught exception, an unhandled rejection,
  * and finally the exit event as a synchronous last resort.
  */
-function installProcessHandlers(args: { stop: () => void; stopOptions: StopBrokerOptions }): void {
+function installProcessHandlers(args: {
+   stop: () => void;
+   stopOptions: StopBrokerOptions;
+}): void {
    for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP'] as const) {
       process.on(signal, args.stop);
    }
@@ -164,7 +168,7 @@ async function main(): Promise<void> {
       persist: true,
       idleTimeoutMinutes: args.idleTimeoutMs / MS_PER_MINUTE,
    });
-   context.finishRecording = async () => {
+   context.finishRecording = async (): Promise<SessionRecording | undefined> => {
       const completed = await state.recording?.stop();
       state.recording = undefined;
       return completed ?? context.session.recording;

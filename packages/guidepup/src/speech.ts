@@ -1,16 +1,11 @@
 import type { ScreenReaderLike } from './readiness.js';
+import { delay } from './sequential.js';
 
 const SPEECH_POLL_INTERVAL_MS = 150;
 const SPEECH_STABLE_THRESHOLD_MS = 300;
 
 /** How long speech stabilization waits before giving up on a quiet reader. */
 export const SPEECH_STABILIZATION_TIMEOUT_MS = 5000;
-
-function delay(ms: number): Promise<void> {
-   return new Promise((resolve) => {
-      setTimeout(resolve, ms);
-   });
-}
 
 interface SpeechPollState {
    startedAt: number;
@@ -48,19 +43,21 @@ function shouldStopPolling(
    return now - state.startedAt >= SPEECH_STABILIZATION_TIMEOUT_MS;
 }
 
-/** Polls the reader until the last spoken phrase stops changing or the timeout passes. */
-export async function waitForSpeechStabilization(reader: ScreenReaderLike): Promise<void> {
-   const startedAt = Date.now();
-   let state: SpeechPollState = { startedAt, lastPhrase: '', stableSince: startedAt };
-
-   for (;;) {
-      const phrase = await reader.lastSpokenPhrase().catch(() => '');
-      const now = Date.now();
-      const { next, isStable } = updateSpeechState(state, phrase, now);
-      if (shouldStopPolling(next, now, isStable)) {
-         return;
-      }
-      state = next;
-      await delay(SPEECH_POLL_INTERVAL_MS);
+async function poll(reader: ScreenReaderLike, state: SpeechPollState): Promise<void> {
+   const phrase = await reader.lastSpokenPhrase().catch(() => '');
+   const now = Date.now();
+   const { next, isStable } = updateSpeechState(state, phrase, now);
+   if (shouldStopPolling(next, now, isStable)) {
+      return;
    }
+   await delay(SPEECH_POLL_INTERVAL_MS);
+   return poll(reader, next);
+}
+
+/** Polls the reader until the last spoken phrase stops changing or the timeout passes. */
+export async function waitForSpeechStabilization(
+   reader: ScreenReaderLike,
+): Promise<void> {
+   const startedAt = Date.now();
+   await poll(reader, { startedAt, lastPhrase: '', stableSince: startedAt });
 }

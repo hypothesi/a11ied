@@ -27,7 +27,12 @@ import {
    type PortableReaderMethod,
    type VirtualPortableStep,
 } from './portable-commands.js';
-import { loadVirtualReader, replaceVirtualDocument, type VirtualReader } from './virtual-dom.js';
+import { ignoreError, repeatUntil, runInOrder } from './sequential.js';
+import {
+   loadVirtualReader,
+   replaceVirtualDocument,
+   type VirtualReader,
+} from './virtual-dom.js';
 
 /**
  * The virtual reader wraps at both ends, so a walk to an edge is bounded by this many
@@ -76,12 +81,15 @@ async function virtualFocus(
 
 async function virtualPress(keys: readonly string[]): Promise<void> {
    const virtual = await loadVirtualReader();
-   for (const chord of keys) {
-      await virtual.press(normalizeDriverKeys(chord, 'virtual'));
-   }
+   await runInOrder(keys, (chord) =>
+      virtual.press(normalizeDriverKeys(chord, 'virtual')),
+   );
 }
 
-async function runMethod(virtual: VirtualReader, method: PortableReaderMethod): Promise<void> {
+async function runMethod(
+   virtual: VirtualReader,
+   method: PortableReaderMethod,
+): Promise<void> {
    const methods: Record<PortableReaderMethod, () => Promise<void>> = {
       next: () => virtual.next(),
       previous: () => virtual.previous(),
@@ -104,7 +112,10 @@ function isTreeRoot(node: Node, container: Node | undefined): boolean {
    return isElementNode(node) && node.getAttribute('aria-modal') === 'true';
 }
 
-async function isAtTreeTop(virtual: VirtualReader, container: Node | undefined): Promise<boolean> {
+async function isAtTreeTop(
+   virtual: VirtualReader,
+   container: Node | undefined,
+): Promise<boolean> {
    const node = virtual.activeNode;
    if (!node) {
       return true;
@@ -117,13 +128,15 @@ async function isAtTreeTop(virtual: VirtualReader, container: Node | undefined):
    return !phrase.startsWith('end of ');
 }
 
-async function walkToTop(virtual: VirtualReader, container: Node | undefined): Promise<void> {
-   for (let step = 0; step < VIRTUAL_WALK_STEP_CAP; step += 1) {
-      if (await isAtTreeTop(virtual, container)) {
-         return;
-      }
-      await virtual.previous();
-   }
+async function walkToTop(
+   virtual: VirtualReader,
+   container: Node | undefined,
+): Promise<void> {
+   await repeatUntil(
+      () => isAtTreeTop(virtual, container),
+      () => virtual.previous(),
+      VIRTUAL_WALK_STEP_CAP,
+   );
 }
 
 async function runVirtualStep(
@@ -170,13 +183,13 @@ export function createVirtualAdapter(): DriverAdapter {
 
    async function stopVirtual(): Promise<void> {
       const virtual = await loadVirtualReader();
-      await virtual.stop().catch(() => undefined);
+      await virtual.stop().catch(ignoreError);
       container = undefined;
    }
 
    async function attachDocument(document: { html: string; url: string }): Promise<void> {
       const virtual = await loadVirtualReader();
-      await virtual.stop().catch(() => undefined);
+      await virtual.stop().catch(ignoreError);
       const window = replaceVirtualDocument(document);
       container = window.document.body;
       await virtual.start({ container: window.document.body, window });
@@ -194,7 +207,10 @@ export function createVirtualAdapter(): DriverAdapter {
       capabilities: driverCapabilities,
       checkReadiness: virtualCheckReadiness,
       start: async () => {
-         await attachDocument({ html: defaultVirtualHtml, url: 'https://a11ied.local/virtual' });
+         await attachDocument({
+            html: defaultVirtualHtml,
+            url: 'https://a11ied.local/virtual',
+         });
       },
       stop: stopVirtual,
       attachDocument,
@@ -202,7 +218,8 @@ export function createVirtualAdapter(): DriverAdapter {
       performPortable,
       press: virtualPress,
       type: async (text: string) => {
-         await (await loadVirtualReader()).type(text);
+         const virtual = await loadVirtualReader();
+         await virtual.type(text);
       },
       performCommand: (command) => virtualPerformCommand(command, performPortable),
       readState: virtualReadState,

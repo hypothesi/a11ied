@@ -11,19 +11,23 @@ import { CliUsageError } from '../errors/cli-errors.js';
 import type { ActionExecutionResult, BrokerHandlerContext } from './broker-types.js';
 
 /** Actions after which the broker waits for the reader to finish speaking. */
-export const SPEECH_TRIGGERING_ACTIONS: ReadonlySet<DriverActionName> = new Set<DriverActionName>([
-   ...portableDriverVerbSchema.options,
-   'press',
-   'type',
-   'perform',
-]);
+export const SPEECH_TRIGGERING_ACTIONS: ReadonlySet<DriverActionName> =
+   new Set<DriverActionName>([
+      ...portableDriverVerbSchema.options,
+      'press',
+      'type',
+      'perform',
+   ]);
 
 /** Validates a raw broker action and payload into the typed request union. */
 export function parseActionRequest(
    action: DriverActionName | undefined,
    payload: Record<string, unknown> | undefined,
 ): DriverActionRequest {
-   const parsed = driverActionRequestSchema.safeParse({ action: action ?? 'read', payload });
+   const parsed = driverActionRequestSchema.safeParse({
+      action: action ?? 'read',
+      payload,
+   });
    if (!parsed.success) {
       throw new CliUsageError(
          'validation-error',
@@ -67,7 +71,10 @@ async function handlePerform(
    }
 }
 
-function recordCheckpoint(context: BrokerHandlerContext, label: string): ActionExecutionResult {
+function recordCheckpoint(
+   context: BrokerHandlerContext,
+   label: string,
+): ActionExecutionResult {
    const createdAt = new Date().toISOString();
    context.checkpoints.push({ label, createdAt });
    context.transcript.addCheckpoint(label, createdAt);
@@ -89,23 +96,30 @@ export async function executeAction(
    options: DriverActionOptions = {},
 ): Promise<ActionExecutionResult> {
    switch (request.action) {
-      case 'press':
+      case 'press': {
          await context.adapter.press(request.payload.keys, options);
          return { details: request.payload };
-      case 'type':
+      }
+      case 'type': {
          await context.adapter.type(request.payload.text, options);
          return { details: request.payload };
-      case 'perform':
+      }
+      case 'perform': {
          return handlePerform(context, request, options);
-      case 'checkpoint':
+      }
+      case 'checkpoint': {
          return recordCheckpoint(context, request.payload.label);
-      case 'focus':
+      }
+      case 'focus': {
          return handleFocus(context, request.payload);
+      }
       case 'read':
-      case 'transcript':
+      case 'transcript': {
          return {};
-      default:
+      }
+      default: {
          await context.adapter.performPortable(request.action, options);
          return {};
+      }
    }
 }

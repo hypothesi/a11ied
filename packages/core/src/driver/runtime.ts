@@ -6,8 +6,14 @@ import type {
    Platform,
 } from '@a11ied/contracts';
 
-import { connectToBroker, resolveBrokerReadyTimeoutMs, waitForBroker } from './broker-client.js';
+import {
+   connectToBroker,
+   resolveBrokerReadyTimeoutMs,
+   spawnBrokerProcess,
+   waitForBroker,
+} from './broker-client.js';
 import { sendSessionRequest } from './broker-runtime.js';
+import { resolveAvailableDefaultTarget } from './default-target.js';
 import { resolveDriverMode } from './environment.js';
 import { validateRecordingRequest } from './recording.js';
 import { runEphemeralAction } from './runtime-ephemeral.js';
@@ -25,8 +31,6 @@ import {
    readActiveSessionMetadata,
    removeSessionArtifacts,
 } from './session-utils.js';
-import { spawnBrokerProcess } from './broker-client.js';
-import { resolveAvailableDefaultTarget } from './default-target.js';
 
 export { getActiveSessionFile, getDriverSocketPath } from './session-utils.js';
 
@@ -77,7 +81,9 @@ async function isSessionLive(session: AccessibilityDriverSession): Promise<boole
 }
 
 /** Reads the active session, dropping its files when the broker behind it is gone. */
-export async function getActiveDriverSession(): Promise<AccessibilityDriverSession | undefined> {
+export async function getActiveDriverSession(): Promise<
+   AccessibilityDriverSession | undefined
+> {
    const session = await readActiveSessionMetadata();
    if (!session) {
       return undefined;
@@ -89,7 +95,10 @@ export async function getActiveDriverSession(): Promise<AccessibilityDriverSessi
    return undefined;
 }
 
-/** Removes the active session file when its broker no longer answers; returns the ids removed. */
+/**
+ * Removes the active session file when its broker no longer answers; returns the ids
+ * removed.
+ */
 export async function cleanupStaleDriverSessions(): Promise<string[]> {
    const session = await readActiveSessionMetadata();
    if (!session || (await isSessionLive(session))) {
@@ -119,8 +128,8 @@ async function launchSession(
    options: StartDriverSessionOptions,
    target: Platform,
 ): Promise<AccessibilityDriverSession> {
-   const sessionId = createSessionId(),
-         idleTimeoutMinutes = options.idleTimeoutMinutes ?? DEFAULT_IDLE_TIMEOUT_MINUTES;
+   const idleTimeoutMinutes = options.idleTimeoutMinutes ?? DEFAULT_IDLE_TIMEOUT_MINUTES,
+      sessionId = createSessionId();
    const shared = {
       sessionId,
       target,
@@ -142,29 +151,6 @@ async function launchSession(
       sessionId,
       readSession: readActiveSessionMetadata,
       timeoutMs: options.timeoutMs ?? resolveBrokerReadyTimeoutMs(target),
-   });
-}
-
-/**
- * Starts the one active driver session. A live previous session is stopped first and
- * returned as `replacedSession`; the start itself runs under an exclusive lock file.
- */
-export async function startDriverSession(
-   options: StartDriverSessionOptions = {},
-): Promise<DriverSessionStart> {
-   await ensureStateDirectory();
-   const target = await resolveStartTarget(options.target);
-   await assertTargetReady(target);
-   if (options.recordingPath) {
-      validateRecordingRequest(target, options.recordingPath);
-   }
-   return withSessionStartLock(async () => {
-      const previous = await getActiveDriverSession();
-      if (previous) {
-         await stopDriverSession();
-      }
-      const session = await launchSession(options, target);
-      return previous ? { session, replacedSession: previous } : { session };
    });
 }
 
@@ -192,6 +178,29 @@ export async function stopDriverSession(
    });
    await removeSessionArtifacts(session);
    return result;
+}
+
+/**
+ * Starts the one active driver session. A live previous session is stopped first and
+ * returned as `replacedSession`; the start itself runs under an exclusive lock file.
+ */
+export async function startDriverSession(
+   options: StartDriverSessionOptions = {},
+): Promise<DriverSessionStart> {
+   await ensureStateDirectory();
+   const target = await resolveStartTarget(options.target);
+   await assertTargetReady(target);
+   if (options.recordingPath) {
+      validateRecordingRequest(target, options.recordingPath);
+   }
+   return withSessionStartLock(async () => {
+      const previous = await getActiveDriverSession();
+      if (previous) {
+         await stopDriverSession();
+      }
+      const session = await launchSession(options, target);
+      return previous ? { session, replacedSession: previous } : { session };
+   });
 }
 
 /**

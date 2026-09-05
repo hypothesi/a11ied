@@ -35,10 +35,13 @@ function formatRecording(recording: AccessibilityDriverSession['recording']): st
 }
 
 function formatUptime(startedAt: string): string {
-   const totalSeconds = Math.max(0, Math.round((Date.now() - Date.parse(startedAt)) / MS_PER_SECOND));
+   const totalSeconds = Math.max(
+      0,
+      Math.round((Date.now() - Date.parse(startedAt)) / MS_PER_SECOND),
+   );
    const hours = Math.floor(totalSeconds / (SECONDS_PER_MINUTE * MINUTES_PER_HOUR)),
-         minutes = Math.floor(totalSeconds / SECONDS_PER_MINUTE) % MINUTES_PER_HOUR,
-         seconds = totalSeconds % SECONDS_PER_MINUTE;
+      minutes = Math.floor(totalSeconds / SECONDS_PER_MINUTE) % MINUTES_PER_HOUR,
+      seconds = totalSeconds % SECONDS_PER_MINUTE;
    if (hours > 0) {
       return `${String(hours)}h ${String(minutes)}m ${String(seconds)}s`;
    }
@@ -58,7 +61,10 @@ function formatIdleTimeout(minutes: number | undefined): string {
    return `${String(minutes)} min`;
 }
 
-function sessionDetailEntries(session: AccessibilityDriverSession, verbose: boolean): Entry[] {
+function sessionDetailEntries(
+   session: AccessibilityDriverSession,
+   verbose: boolean,
+): Entry[] {
    if (!verbose) {
       return [];
    }
@@ -90,12 +96,23 @@ function detailEntries(result: DriverActionResult, verbose: boolean): Entry[] {
    if (!details) {
       return entries;
    }
-   if (typeof details.focus === 'object' && details.focus !== null && 'status' in details.focus) {
+   if (
+      typeof details.focus === 'object' &&
+      details.focus !== null &&
+      'status' in details.focus
+   ) {
       entries.push(['Focus status', String(details.focus.status)]);
    }
-   if (typeof details.command === 'object' && details.command !== null && 'alias' in details.command) {
+   if (
+      typeof details.command === 'object' &&
+      details.command !== null &&
+      'alias' in details.command
+   ) {
       const command = details.command;
-      entries.push(['Command', `${String(command.alias)} ${dim(`(${String('commandSet' in command ? command.commandSet : '')})`)}`]);
+      entries.push([
+         'Command',
+         `${String(command.alias)} ${dim(`(${String('commandSet' in command ? command.commandSet : '')})`)}`,
+      ]);
       if (verbose && 'representation' in command && command.representation) {
          entries.push(['Key sequence', String(command.representation)]);
       }
@@ -129,7 +146,12 @@ export function renderDriveSessionText(
    return [
       chalk.bold.green('Session ready'),
       '',
-      ...indent(fields([...sessionSummaryEntries(session), ...sessionDetailEntries(session, options.verbose)])),
+      ...indent(
+         fields([
+            ...sessionSummaryEntries(session),
+            ...sessionDetailEntries(session, options.verbose),
+         ]),
+      ),
       '',
       dim('Every sr command now uses this session. Stop it with: a1 sr stop'),
    ].join('\n');
@@ -148,11 +170,16 @@ export function renderDriveStatusText(
       return 'No active session.';
    }
    const { session, state } = parsed.data;
-   const phrases = state.transcript.filter((entry) => entry.checkpoint === undefined).length;
+   const phrases = state.transcript.filter(
+      (entry) => entry.checkpoint === undefined,
+   ).length;
    const entries: Entry[] = [
       ...sessionSummaryEntries(session),
       ['Uptime', formatUptime(session.startedAt)],
-      ['Transcript', `${String(phrases)} phrases, ${String(state.checkpoints.length)} checkpoints`],
+      [
+         'Transcript',
+         `${String(phrases)} phrases, ${String(state.checkpoints.length)} checkpoints`,
+      ],
       ...sessionDetailEntries(session, options.verbose),
    ];
    return [title('Session active'), '', ...indent(fields(entries))].join('\n');
@@ -180,7 +207,9 @@ export function renderDriveReadText(
          result.state.checkpoints.map((entry) => entry.label).join(', ') || dim('none'),
       ]);
    }
-   return [actionHeading(result.action, result.session), ...indent(fields(entries))].join('\n');
+   return [actionHeading(result.action, result.session), ...indent(fields(entries))].join(
+      '\n',
+   );
 }
 
 function transcriptFileLines(files: unknown): string[] {
@@ -188,7 +217,10 @@ function transcriptFileLines(files: unknown): string[] {
       return [];
    }
    return files
-      .filter((file): file is { path: string } => typeof file === 'object' && file !== null && 'path' in file)
+      .filter(
+         (file): file is { path: string } =>
+            typeof file === 'object' && file !== null && 'path' in file,
+      )
       .map((file) => `  ${dim('Transcript written to')} ${file.path}`);
 }
 
@@ -205,7 +237,12 @@ export function renderDriveStopText(
    return [
       title('Session stopped'),
       '',
-      ...indent(fields([['Target', target(session.target)], ['Recording', formatRecording(session.recording)]])),
+      ...indent(
+         fields([
+            ['Target', target(session.target)],
+            ['Recording', formatRecording(session.recording)],
+         ]),
+      ),
       ...transcriptFileLines(envelope.result?.transcriptFiles),
    ].join('\n');
 }

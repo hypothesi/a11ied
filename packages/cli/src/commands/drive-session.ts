@@ -2,7 +2,11 @@ import type { Command } from 'commander';
 import type { AccessibilityDriverSession, DriverActionResult } from '#contracts';
 import { CliUsageError } from '#core';
 import type { CommandExecution } from '../lib/helpers.js';
-import { addDriveActionOptions, parseTimeoutMs, type DriveActionOptions } from './drive-options.js';
+import {
+   addDriveActionOptions,
+   parseTimeoutMs,
+   type DriveActionOptions,
+} from './drive-options.js';
 
 export const REAL_BROWSER_LAUNCH_DELAY_MS = 1000;
 
@@ -48,7 +52,10 @@ async function refocusRealTarget(
    const core = await import('#core');
    const opened = await core.openUrlInSystemAutomationBrowser(url);
    await delay(REAL_BROWSER_LAUNCH_DELAY_MS);
-   const recorded = await core.attachDocumentToDriverSession({ html: '', url }, { timeoutMs });
+   const recorded = await core.attachDocumentToDriverSession(
+      { html: '', url },
+      { timeoutMs },
+   );
    const app = opened.focusTarget ?? session.app;
    if (!app) {
       return recorded;
@@ -115,7 +122,9 @@ async function executeStopAction(options: StopActionOptions): Promise<CommandExe
       core.resolveTranscriptFormat(options.out, options.format);
    }
    const core = await import('#core');
-   const result = await core.stopDriverSession({ timeoutMs: parseTimeoutMs(options.timeout) });
+   const result = await core.stopDriverSession({
+      timeoutMs: parseTimeoutMs(options.timeout),
+   });
    const transcriptFiles = await writeStopTranscripts(result, options);
    return {
       target: { kind: 'driver-session', value: session.target },
@@ -123,7 +132,9 @@ async function executeStopAction(options: StopActionOptions): Promise<CommandExe
    };
 }
 
-async function executeStatusAction(options: DriveActionOptions): Promise<CommandExecution> {
+async function executeStatusAction(
+   options: DriveActionOptions,
+): Promise<CommandExecution> {
    const core = await import('#core');
    const session = await core.getActiveDriverSession();
    if (!session) {
@@ -148,7 +159,13 @@ export function registerOpenCommand(driveCommand: Command): void {
          import('../renderers/drive.js'),
       ]);
       await executeCommand(
-         { family: 'sr', subcommand: 'open', wcagVersion: undefined, json: options.json, verbose: options.verbose },
+         {
+            family: 'sr',
+            subcommand: 'open',
+            wcagVersion: undefined,
+            json: options.json,
+            verbose: options.verbose,
+         },
          () => executeOpenAction(url, options),
          renderers.renderDriveReadText,
       );
@@ -163,14 +180,23 @@ export function registerStopCommand(driveCommand: Command): void {
             'Stop the active session. A transcript is written next to any recording; --out writes one as .json or .md.',
          )
          .option('--out <path>', 'Also write the transcript to this path.')
-         .option('--format <format>', 'Transcript format, json or md. Defaults to the --out extension.'),
+         .option(
+            '--format <format>',
+            'Transcript format, json or md. Defaults to the --out extension.',
+         ),
    ).action(async (options: StopActionOptions) => {
       const [{ executeCommand }, renderers] = await Promise.all([
          import('../lib/execute.js'),
          import('../renderers/drive.js'),
       ]);
       await executeCommand(
-         { family: 'sr', subcommand: 'stop', wcagVersion: undefined, json: options.json, verbose: options.verbose },
+         {
+            family: 'sr',
+            subcommand: 'stop',
+            wcagVersion: undefined,
+            json: options.json,
+            verbose: options.verbose,
+         },
          () => executeStopAction(options),
          renderers.renderDriveStopText,
       );
@@ -181,14 +207,22 @@ export function registerStatusCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('status')
-         .description('Show the active session: target, URL, uptime, recording, and transcript counts.'),
+         .description(
+            'Show the active session: target, URL, uptime, recording, and transcript counts.',
+         ),
    ).action(async (options: DriveActionOptions) => {
       const [{ executeCommand }, renderers] = await Promise.all([
          import('../lib/execute.js'),
          import('../renderers/drive.js'),
       ]);
       await executeCommand(
-         { family: 'sr', subcommand: 'status', wcagVersion: undefined, json: options.json, verbose: options.verbose },
+         {
+            family: 'sr',
+            subcommand: 'status',
+            wcagVersion: undefined,
+            json: options.json,
+            verbose: options.verbose,
+         },
          () => executeStatusAction(options),
          renderers.renderDriveStatusText,
       );

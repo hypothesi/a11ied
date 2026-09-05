@@ -17,9 +17,25 @@ const JSON_INDENT = 2;
 const ISO_TIME_START = 11;
 const ISO_TIME_END = 23;
 
+function resolveEntryItemText(args: {
+   items: string[];
+   offset: number;
+   phrases: string[];
+   state: DriverStateSnapshot;
+}): string | undefined {
+   if (args.items.length === args.phrases.length) {
+      return args.items[args.offset] || undefined;
+   }
+   if (args.offset === args.phrases.length - 1) {
+      return args.state.currentItemText ?? undefined;
+   }
+   return undefined;
+}
+
 /**
- * Keeps the timestamped transcript for one session. The broker calls `capture` after every
- * action so each phrase is stamped when it was produced, not when it was read back.
+ * Keeps the timestamped transcript for one session. The broker calls `capture` after
+ * every action so each phrase is stamped when it was produced, not when it was read
+ * back.
  */
 export class TranscriptRecorder {
    readonly entries: DriverTranscriptEntry[] = [];
@@ -30,16 +46,18 @@ export class TranscriptRecorder {
    capture(state: DriverStateSnapshot): void {
       if (state.spokenPhraseLog.length < this.phraseCount) {
          // The reader restarted (the virtual target attaches a new document), so its
-         // logs begin again at zero while the transcript keeps what was already said.
+         // Logs begin again at zero while the transcript keeps what was already said.
          this.phraseCount = 0;
          this.itemCount = 0;
       }
-      const phrases = state.spokenPhraseLog.slice(this.phraseCount),
-            items = state.itemTextLog.slice(this.itemCount),
-            now = new Date().toISOString();
-      phrases.forEach((phrase, offset) => {
-         this.entries.push(this.buildEntry({ phrase, items, offset, phrases, now, state }));
-      });
+      const items = state.itemTextLog.slice(this.itemCount),
+         now = new Date().toISOString(),
+         phrases = state.spokenPhraseLog.slice(this.phraseCount);
+      for (const [offset, phrase] of phrases.entries()) {
+         this.entries.push(
+            this.buildEntry({ phrase, items, offset, phrases, now, state }),
+         );
+      }
       this.phraseCount = state.spokenPhraseLog.length;
       this.itemCount = state.itemTextLog.length;
    }
@@ -57,7 +75,7 @@ export class TranscriptRecorder {
          at: args.now,
          phrase: args.phrase,
       };
-      const itemText = resolveItemText(args);
+      const itemText = resolveEntryItemText(args);
       if (itemText) {
          entry.itemText = itemText;
       }
@@ -65,28 +83,18 @@ export class TranscriptRecorder {
    }
 
    addCheckpoint(label: string, at = new Date().toISOString()): void {
-      this.entries.push({ index: this.entries.length, at, phrase: '', checkpoint: label });
+      this.entries.push({
+         index: this.entries.length,
+         at,
+         phrase: '',
+         checkpoint: label,
+      });
    }
 
    /** Returns the snapshot with the transcript entries attached. */
    attach(state: DriverStateSnapshot): DriverStateSnapshot {
       return { ...state, transcript: [...this.entries] };
    }
-}
-
-function resolveItemText(args: {
-   items: string[];
-   offset: number;
-   phrases: string[];
-   state: DriverStateSnapshot;
-}): string | undefined {
-   if (args.items.length === args.phrases.length) {
-      return args.items[args.offset] || undefined;
-   }
-   if (args.offset === args.phrases.length - 1) {
-      return args.state.currentItemText ?? undefined;
-   }
-   return undefined;
 }
 
 export interface TranscriptSelection {
@@ -111,7 +119,10 @@ function sliceSinceCheckpoint(
    return entries.slice(position + 1);
 }
 
-function sliceTail(entries: DriverTranscriptEntry[], tail: number): DriverTranscriptEntry[] {
+function sliceTail(
+   entries: DriverTranscriptEntry[],
+   tail: number,
+): DriverTranscriptEntry[] {
    let phrases = 0;
    let start = entries.length;
    while (start > 0 && phrases < tail) {
@@ -160,14 +171,22 @@ function formatEntryLine(entry: DriverTranscriptEntry): string {
    if (entry.checkpoint !== undefined) {
       return `\n## ${entry.checkpoint} (${formatClock(entry.at)})\n`;
    }
-   const item = entry.itemText && entry.itemText !== entry.phrase ? ` (${entry.itemText})` : '';
+   const item =
+      entry.itemText && entry.itemText !== entry.phrase ? ` (${entry.itemText})` : '';
    return `${String(entry.index + 1)}. [${formatClock(entry.at)}] ${entry.phrase}${item}`;
 }
 
-/** Renders a transcript as Markdown: a heading, then numbered phrases with checkpoint subheadings. */
+/**
+ * Renders a transcript as Markdown: a heading, then numbered phrases with checkpoint
+ * subheadings.
+ */
 export function formatTranscriptMarkdown(transcript: DriverTranscript): string {
-   const phraseCount = transcript.entries.filter((entry) => entry.checkpoint === undefined).length,
-         title = transcript.url ? `${transcript.target} on ${transcript.url}` : transcript.target;
+   const phraseCount = transcript.entries.filter(
+         (entry) => entry.checkpoint === undefined,
+      ).length,
+      title = transcript.url
+         ? `${transcript.target} on ${transcript.url}`
+         : transcript.target;
    const lines = [
       `# Transcript: ${title}`,
       '',
@@ -197,10 +216,14 @@ export function resolveTranscriptFormat(
    if (format !== undefined) {
       const parsed = driverTranscriptFormatSchema.safeParse(format);
       if (!parsed.success) {
-         throw new CliUsageError('validation-error', 'Transcript format must be json or md.', {
-            field: 'format',
-            value: format,
-         });
+         throw new CliUsageError(
+            'validation-error',
+            'Transcript format must be json or md.',
+            {
+               field: 'format',
+               value: format,
+            },
+         );
       }
       return parsed.data;
    }
@@ -226,7 +249,7 @@ export async function writeDriverTranscript(args: {
    cwd?: string | undefined;
 }): Promise<{ path: string; format: DriverTranscriptFormat }> {
    const format = resolveTranscriptFormat(args.outPath, args.format),
-         path = resolve(args.cwd ?? process.cwd(), args.outPath);
+      path = resolve(args.cwd ?? process.cwd(), args.outPath);
    await mkdir(dirname(path), { recursive: true });
    await writeFile(path, formatTranscript(args.transcript, format), 'utf8');
    return { path, format };

@@ -42,12 +42,27 @@ async function runAndVerifyDriverActions(): Promise<void> {
    expect(transcript.state.transcript[0]).toMatchObject({ index: 0, phrase: 'document' });
 }
 
+function startVirtualSession(): ReturnType<typeof startDriverSession> {
+   return startDriverSession({ target: 'virtual', mode: 'in-process' });
+}
+
+async function assertStartReplacesLiveSession(): Promise<void> {
+   const first = await startVirtualSession();
+   const second = await startVirtualSession();
+
+   expect(second.replacedSession?.sessionId).toBe(first.session.sessionId);
+   const active = await getActiveDriverSession();
+   expect(active?.sessionId).toBe(second.session.sessionId);
+
+   await stopDriverSession();
+}
+
 describe('driver runtime sessions', () => {
    it(
       'starts, reports, and stops the one active session',
       () =>
          withStateDir(tempRoots, async (stateDir) => {
-            const started = await startDriverSession({ target: 'virtual', mode: 'in-process' });
+            const started = await startVirtualSession();
             expect(started.session.target).toBe('virtual');
             expect(started.session.sessionId).toMatch(/^drv_/);
             expect(started.session.metadataFile).toBe(getActiveSessionFile());
@@ -72,16 +87,7 @@ describe('driver runtime sessions', () => {
 
    it(
       'replaces a live session on start and reports the one it stopped',
-      () =>
-         withStateDir(tempRoots, async () => {
-            const first = await startDriverSession({ target: 'virtual', mode: 'in-process' });
-            const second = await startDriverSession({ target: 'virtual', mode: 'in-process' });
-
-            expect(second.replacedSession?.sessionId).toBe(first.session.sessionId);
-            expect((await getActiveDriverSession())?.sessionId).toBe(second.session.sessionId);
-
-            await stopDriverSession();
-         }),
+      () => withStateDir(tempRoots, assertStartReplacesLiveSession),
       TIMEOUT_MS,
    );
 
@@ -111,7 +117,7 @@ describe('driver runtime actions', () => {
       'cleans up stale session metadata for dead brokers',
       () =>
          withStateDir(tempRoots, async () => {
-            const started = await startDriverSession({ target: 'virtual', mode: 'in-process' });
+            const started = await startVirtualSession();
             const stopped = await stopDriverSession();
 
             expect(stopped.session.sessionId).toBe(started.session.sessionId);
@@ -143,7 +149,7 @@ describe('driver runtime execution', () => {
       'runs persistent and ephemeral driver actions against the virtual target',
       () =>
          withStateDir(tempRoots, async () => {
-            await startDriverSession({ target: 'virtual', mode: 'in-process' });
+            await startVirtualSession();
             await runAndVerifyDriverActions();
 
             const ephemeral = await runEphemeralDriverAction({

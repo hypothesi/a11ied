@@ -170,16 +170,22 @@ describe('broker action handling', () => {
    it('routes portable verbs through performPortable and timestamps new phrases', async () => {
       const context = createContext({});
 
-      const result = await handleBrokerRequest(context, { command: 'action', action: 'next' });
+      const result = await handleBrokerRequest(context, {
+         command: 'action',
+         action: 'next',
+      });
 
       expect(context.adapter.performPortable).toHaveBeenCalledWith('next', {});
-      expect(result.response.result?.state.transcript.map((entry) => entry.phrase)).toEqual([
-         'Button',
-         'Link',
-      ]);
-      expect(result.response.result?.state.transcript[1]?.at).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(
+         result.response.result?.state.transcript.map((entry) => entry.phrase),
+      ).toEqual(['Button', 'Link']);
+      expect(result.response.result?.state.transcript[1]?.at).toMatch(
+         /^\d{4}-\d{2}-\d{2}T/,
+      );
    });
+});
 
+describe('broker action input', () => {
    it('presses each chord in order', async () => {
       const context = createContext({});
 
@@ -205,11 +211,16 @@ describe('broker action handling', () => {
       expect(result.response.error?.code).toBe('validation-error');
       expect(context.adapter.press).not.toHaveBeenCalled();
    });
+});
 
+describe('broker action state', () => {
    it('focuses the app the session opened when focus has no payload', async () => {
       const context = createContext({});
 
-      const result = await handleBrokerRequest(context, { command: 'action', action: 'focus' });
+      const result = await handleBrokerRequest(context, {
+         command: 'action',
+         action: 'focus',
+      });
 
       expect(context.adapter.focus).toHaveBeenCalledWith({ appName: 'Google Chrome' });
       expect(result.response.result?.details?.focus).toMatchObject({ status: 'focused' });

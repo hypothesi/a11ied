@@ -1,6 +1,10 @@
 import type { Command } from 'commander';
 import type { Platform } from '#contracts';
-import type { DriverCommandList, DriverCommandSet, ListDriverCommandsOptions } from '#core';
+import type {
+   DriverCommandList,
+   DriverCommandSet,
+   ListDriverCommandsOptions,
+} from '#core';
 import type * as Core from '#core';
 import { addJsonOption, addVerboseOption } from '../lib/options.js';
 import type { CommandExecution } from '../lib/helpers.js';
@@ -102,7 +106,10 @@ export function registerDoCommand(driveCommand: Command): void {
          .option('--command-set <set>', DRIVE_COMMAND_SET_HELP, 'auto')
          .addHelpText('after', buildDoExamples()),
    ).action(
-      async (command: string, options: DriveAutoStartOptions & { commandSet: string }) => {
+      async (
+         command: string,
+         options: DriveAutoStartOptions & { commandSet: string },
+      ) => {
          const [{ executeDriveActionCommand }, renderers] = await Promise.all([
             import('../lib/execute.js'),
             import('../renderers/drive.js'),
@@ -110,7 +117,10 @@ export function registerDoCommand(driveCommand: Command): void {
 
          await executeDriveActionCommand({
             subcommand: 'do',
-            request: { action: 'perform', payload: { command, commandSet: options.commandSet } },
+            request: {
+               action: 'perform',
+               payload: { command, commandSet: options.commandSet },
+            },
             autoStart: true,
             options,
             renderText: renderers.renderDriveReadText,

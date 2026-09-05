@@ -1,8 +1,12 @@
 import type { AccessibilityDriverSession, Platform } from '@a11ied/contracts';
-import type { DriverAdapter } from '@a11ied/guidepup';
+import { ignoreError, type DriverAdapter } from '@a11ied/guidepup';
 
 import { handleBrokerRequest } from './broker-handlers.js';
-import type { BrokerHandlerContext, BrokerRequest, BrokerResponse } from './broker-types.js';
+import type {
+   BrokerHandlerContext,
+   BrokerRequest,
+   BrokerResponse,
+} from './broker-types.js';
 import { startSessionRecording } from './recording.js';
 import { createDriverSessionContext } from './session-context.js';
 import {
@@ -62,7 +66,7 @@ async function teardownInProcessSession(sessionId: string): Promise<void> {
       return;
    }
    inProcessSessions.delete(sessionId);
-   await entry.adapter.stop().catch(() => undefined);
+   await entry.adapter.stop().catch(ignoreError);
    await removeSessionArtifacts(entry.context.session);
 }
 
@@ -75,7 +79,10 @@ export async function requestInProcess(
    if (!entry) {
       return {
          ok: false,
-         error: { code: 'session-not-found', message: `Session "${sessionId}" is not running here.` },
+         error: {
+            code: 'session-not-found',
+            message: `Session "${sessionId}" is not running here.`,
+         },
       };
    }
    const result = await handleBrokerRequest(entry.context, request);

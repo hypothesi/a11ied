@@ -9,6 +9,7 @@ export {
    portableCommandTable,
    type PortableCommandEntry,
 } from './portable-commands.js';
+export { delay, ignoreError, repeatUntil, runInOrder } from './sequential.js';
 export { queryFocusedAxProperties } from './ax-properties-mac.js';
 export {
    DriverCommandError,

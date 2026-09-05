@@ -155,7 +155,10 @@ export function buildDefaultTargetWarnings(
       { code: 'default-target-selected', message: fallback.message },
    ];
    if (fallback.warning) {
-      warnings.push({ code: 'virtual-target-simulation-warning', message: fallback.warning });
+      warnings.push({
+         code: 'virtual-target-simulation-warning',
+         message: fallback.warning,
+      });
    }
    return warnings;
 }
@@ -167,7 +170,10 @@ export async function resolveScreenReaderTarget(options: {
 }): Promise<{ target: Platform; warnings: CliMessage[] }> {
    if (options.sr) {
       return {
-         target: parsePlatform(options.sr, buildVirtualTargetGuardOptions(options.allowVirtual)),
+         target: parsePlatform(
+            options.sr,
+            buildVirtualTargetGuardOptions(options.allowVirtual),
+         ),
          warnings: [],
       };
    }

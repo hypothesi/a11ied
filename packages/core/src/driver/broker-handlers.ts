@@ -41,7 +41,10 @@ function toBrokerError(error: unknown): BrokerError {
    return { code: 'broker-error', message: String(error) };
 }
 
-/** Reads the adapter state, stamps new phrases into the transcript, and persists the session. */
+/**
+ * Reads the adapter state, stamps new phrases into the transcript, and persists the
+ * session.
+ */
 async function buildActionResult(
    context: BrokerHandlerContext,
    action: DriverActionName,
@@ -121,14 +124,19 @@ async function handleActionCommand(
 ): Promise<HandleResult> {
    const actionRequest = parseActionRequest(request.action, request.payload);
    const startTime = Date.now();
-   const options = request.timeoutMs === undefined ? {} : { timeoutMs: request.timeoutMs };
+   const options =
+      request.timeoutMs === undefined ? {} : { timeoutMs: request.timeoutMs };
    const execution: ActionExecutionResult = await executeAction(
       context,
       actionRequest,
       options,
    );
    await stabilizeSpeech(context, actionRequest.action);
-   const result = await buildActionResult(context, actionRequest.action, execution.details);
+   const result = await buildActionResult(
+      context,
+      actionRequest.action,
+      execution.details,
+   );
    result.actionDurationMs = Date.now() - startTime;
    return { response: { ok: true, result }, shouldStop: false };
 }
@@ -138,17 +146,22 @@ async function routeCommand(
    request: BrokerRequest,
 ): Promise<HandleResult> {
    switch (request.command) {
-      case 'ping':
+      case 'ping': {
          return { response: { ok: true }, shouldStop: false };
-      case 'status':
+      }
+      case 'status': {
          return handleStatusCommand(context);
-      case 'stop':
+      }
+      case 'stop': {
          return handleStopCommand(context);
-      case 'attach-document':
+      }
+      case 'attach-document': {
          return handleAttachDocumentCommand(context, request);
-      case 'action':
+      }
+      case 'action': {
          return handleActionCommand(context, request);
-      default:
+      }
+      default: {
          return {
             response: {
                ok: false,
@@ -159,6 +172,7 @@ async function routeCommand(
             },
             shouldStop: false,
          };
+      }
    }
 }
 

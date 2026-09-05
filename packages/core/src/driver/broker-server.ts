@@ -5,6 +5,7 @@ import type {
    BrokerHandlerContext,
    BrokerRequest,
    BrokerResponse,
+   HandleResult,
 } from './broker-types.js';
 
 function formatErrorMessage(error: unknown): string {
@@ -36,18 +37,21 @@ interface ServerArgs {
    onActivity: () => void;
 }
 
-async function processLine(args: ServerArgs, connection: net.Socket, line: string): Promise<void> {
+async function processLine(
+   args: ServerArgs,
+   connection: net.Socket,
+   line: string,
+): Promise<void> {
    args.onActivity();
-   let result;
-   try {
-      result = await handleBrokerRequest(args.context, parseRequestLine(line));
-   } catch (error) {
-      writeResponse(connection, {
-         ok: false,
-         error: { code: 'broker-error', message: formatErrorMessage(error) },
-      });
-      return;
-   }
+   const result = await handleBrokerRequest(args.context, parseRequestLine(line)).catch(
+      (error: unknown): HandleResult => ({
+         response: {
+            ok: false,
+            error: { code: 'broker-error', message: formatErrorMessage(error) },
+         },
+         shouldStop: false,
+      }),
+   );
    writeResponse(connection, result.response);
    if (result.shouldStop) {
       connection.end();
@@ -56,8 +60,8 @@ async function processLine(args: ServerArgs, connection: net.Socket, line: strin
 }
 
 /**
- * Frames requests as newline-delimited JSON: one request per line, several lines per chunk
- * allowed, and a line split across chunks is buffered until its newline arrives.
+ * Frames requests as newline-delimited JSON: one request per line, several lines per
+ * chunk allowed, and a line split across chunks is buffered until its newline arrives.
  */
 function attachConnection(args: ServerArgs, connection: net.Socket): void {
    let buffered = '';

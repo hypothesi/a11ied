@@ -96,7 +96,7 @@ export async function cleanupTempRoots(tempRoots: string[]): Promise<void> {
 
 function restoreEnv(name: string, previous: string | undefined): void {
    if (previous === undefined) {
-      delete processEnv[name];
+      Reflect.deleteProperty(processEnv, name);
       return;
    }
    processEnv[name] = previous;
@@ -112,8 +112,8 @@ export async function withStateDir(
    fn: (stateDir: string) => Promise<void>,
 ): Promise<void> {
    const stateDir = await createTempRoot(tempRoots);
-   const previousStateDir = processEnv[STATE_DIR_ENV_VAR],
-         previousMode = processEnv[DRIVER_MODE_ENV_VAR];
+   const previousMode = processEnv[DRIVER_MODE_ENV_VAR],
+      previousStateDir = processEnv[STATE_DIR_ENV_VAR];
    processEnv[STATE_DIR_ENV_VAR] = stateDir;
    processEnv[DRIVER_MODE_ENV_VAR] = 'in-process';
    try {

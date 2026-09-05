@@ -60,11 +60,6 @@ describe('guidepup virtual driver adapter', () => {
       const bottom = await adapter.readState([]);
       await adapter.performPortable('top');
       const top = await adapter.readState([]);
-      await adapter.performPortable('escape');
-      await adapter.performPortable('activate');
-      await adapter.performPortable('interact');
-      await adapter.performPortable('stop-interacting');
-      await adapter.performPortable('previous');
 
       expect(bottom.lastSpokenPhrase).toBe('end of document');
       expect(top.lastSpokenPhrase).toBe('document');
@@ -72,17 +67,40 @@ describe('guidepup virtual driver adapter', () => {
       await adapter.stop();
    });
 
+   it('accepts the interaction verbs on the virtual target', async () => {
+      const adapter = createDriverAdapter('virtual');
+      await adapter.start();
+
+      await adapter.performPortable('escape');
+      await adapter.performPortable('activate');
+      await adapter.performPortable('interact');
+      await adapter.performPortable('stop-interacting');
+      await adapter.performPortable('previous');
+      const state = await adapter.readState([]);
+
+      expect(state.spokenPhraseLog.length).toBeGreaterThan(0);
+
+      await adapter.stop();
+   });
+});
+
+describe('guidepup virtual driver commands', () => {
    it('resolves portable names through do and rejects real-target command sets', async () => {
       const adapter = createDriverAdapter('virtual');
       await adapter.start();
 
       const performed = await adapter.performCommand({ command: 'next' });
       expect(performed.commandSet).toBe('portable');
-      await expect(adapter.performCommand({ command: 'move-right' })).rejects.toMatchObject({
+      await expect(
+         adapter.performCommand({ command: 'move-right' }),
+      ).rejects.toMatchObject({
          code: 'driver-command-not-found',
       });
       await expect(
-         adapter.performCommand({ command: 'move-right', commandSet: 'voiceover-commander' }),
+         adapter.performCommand({
+            command: 'move-right',
+            commandSet: 'voiceover-commander',
+         }),
       ).rejects.toMatchObject({ code: 'driver-command-target-unsupported' });
 
       await adapter.stop();

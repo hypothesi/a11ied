@@ -76,7 +76,9 @@ export async function connectToBroker(
          });
       });
       client.on('end', () => {
-         settle(() => rejectPromise(new Error('Broker closed the connection without a reply.')));
+         settle(() =>
+            rejectPromise(new Error('Broker closed the connection without a reply.')),
+         );
       });
       client.on('timeout', () => {
          settle(() => rejectPromise(new Error('Broker connection timed out.')));
@@ -128,24 +130,33 @@ async function pingSession(
    }
 }
 
+async function pollForBroker(
+   options: WaitForBrokerOptions,
+   startedAt: number,
+): Promise<AccessibilityDriverSession> {
+   if (Date.now() - startedAt >= options.timeoutMs) {
+      throw new CliEnvironmentError(
+         'driver-broker-timeout',
+         'Timed out waiting for the driver broker to start.',
+         { sessionId: options.sessionId },
+      );
+   }
+   const session = await options.readSession();
+   const live = await pingSession(
+      session?.sessionId === options.sessionId ? session : undefined,
+   );
+   if (live) {
+      return live;
+   }
+   await delay(BROKER_POLL_DELAY_MS);
+   return pollForBroker(options, startedAt);
+}
+
 /** Polls the session file and the socket until the broker answers a ping or time runs out. */
 export async function waitForBroker(
    options: WaitForBrokerOptions,
 ): Promise<AccessibilityDriverSession> {
-   const startedAt = Date.now();
-   while (Date.now() - startedAt < options.timeoutMs) {
-      const session = await options.readSession();
-      const live = await pingSession(session?.sessionId === options.sessionId ? session : undefined);
-      if (live) {
-         return live;
-      }
-      await delay(BROKER_POLL_DELAY_MS);
-   }
-   throw new CliEnvironmentError(
-      'driver-broker-timeout',
-      'Timed out waiting for the driver broker to start.',
-      { sessionId: options.sessionId },
-   );
+   return pollForBroker(options, Date.now());
 }
 
 function getCurrentModulePath(): string {

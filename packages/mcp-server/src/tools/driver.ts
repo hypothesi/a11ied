@@ -184,23 +184,47 @@ function toActionRequest(input: DriverActionInput): DriverActionRequest {
 /*  Registration                                                      */
 /* ------------------------------------------------------------------ */
 
+const DRIVER_SESSION_DESCRIPTION =
+   'Manage the one active accessibility-driver session. ' +
+   'action "start": start a session, stopping any session already running. ' +
+   'action "status": read the session metadata and current reader state. ' +
+   'action "stop": tear the session down. ' +
+   'One session is active at a time, so no action takes a session id. ' +
+   'On macOS the default target is VoiceOver (real); on Windows it is NVDA (real). ' +
+   'If neither is available, the target falls back to "virtual" (SIMULATION). ' +
+   'Only request the virtual target when you explicitly want simulation; set allowVirtual=true to proceed. ' +
+   'The response includes a targetType field ("real" or "simulated"). ' +
+   'For real screen readers: open a browser and navigate to the page BEFORE starting. ' +
+   'For virtual: pass url and a11ied injects HTML automatically.';
+
+const DRIVER_ACTION_DESCRIPTION =
+   'Run one action against the active accessibility-driver session. ' +
+   'Start a session with driver_session first; no session id is needed. ' +
+   'For real screen reader sessions (VoiceOver/NVDA), actions drive the actual assistive technology and return real speech output. ' +
+   'For virtual sessions, actions are simulated in memory. ' +
+   'Check the session targetType to know which mode is active. ' +
+   'The portable verbs work on every target: "next", "previous", "interact", ' +
+   '"stop-interacting", "activate", "top", "bottom", and "escape". ' +
+   'Use "press" with keys (one chord per entry, pressed in order), "type" with text, ' +
+   '"checkpoint" with a label, and "read" or "transcript" to read state back. ' +
+   'Use action "focus" with appName, bundleId, processName, pid, or windowTitle to bring a window to the front. ' +
+   'Use action "perform" with a command name (and optional commandSet) to run a named screen-reader command. ' +
+   'VoiceOver rotor and structural navigation commands: ' +
+   '"find next heading" | "find previous heading" | ' +
+   '"find next landmark" | "find previous landmark" | ' +
+   '"find next field" (form controls) | "find next button" | "find next link" | ' +
+   '"rotor" (open rotor) | "rotate left" | "rotate right" | ' +
+   '"next rotor item" | "previous rotor item". ' +
+   'For VoiceOver sessions the response state includes axFocusedElement with the ' +
+   'AX role, subrole, title, description, value, and enabled state of the system-focused element. ' +
+   'The response state also carries the timestamped transcript of everything spoken so far.';
+
 export function registerDriverTools(server: McpServer): void {
    server.registerTool(
       'driver_session',
       {
          title: 'Driver session',
-         description:
-            'Manage the one active accessibility-driver session. ' +
-            'action "start": start a session, stopping any session already running. ' +
-            'action "status": read the session metadata and current reader state. ' +
-            'action "stop": tear the session down. ' +
-            'One session is active at a time, so no action takes a session id. ' +
-            'On macOS the default target is VoiceOver (real); on Windows it is NVDA (real). ' +
-            'If neither is available, the target falls back to "virtual" (SIMULATION). ' +
-            'Only request the virtual target when you explicitly want simulation; set allowVirtual=true to proceed. ' +
-            'The response includes a targetType field ("real" or "simulated"). ' +
-            'For real screen readers: open a browser and navigate to the page BEFORE starting. ' +
-            'For virtual: pass url and a11ied injects HTML automatically.',
+         description: DRIVER_SESSION_DESCRIPTION,
          inputSchema: driverSessionInputSchema,
          annotations: activeAnnotations,
       },
@@ -211,27 +235,7 @@ export function registerDriverTools(server: McpServer): void {
       'driver_action',
       {
          title: 'Driver action',
-         description:
-            'Run one action against the active accessibility-driver session. ' +
-            'Start a session with driver_session first; no session id is needed. ' +
-            'For real screen reader sessions (VoiceOver/NVDA), actions drive the actual assistive technology and return real speech output. ' +
-            'For virtual sessions, actions are simulated in memory. ' +
-            'Check the session targetType to know which mode is active. ' +
-            'The portable verbs work on every target: "next", "previous", "interact", ' +
-            '"stop-interacting", "activate", "top", "bottom", and "escape". ' +
-            'Use "press" with keys (one chord per entry, pressed in order), "type" with text, ' +
-            '"checkpoint" with a label, and "read" or "transcript" to read state back. ' +
-            'Use action "focus" with appName, bundleId, processName, pid, or windowTitle to bring a window to the front. ' +
-            'Use action "perform" with a command name (and optional commandSet) to run a named screen-reader command. ' +
-            'VoiceOver rotor and structural navigation commands: ' +
-            '"find next heading" | "find previous heading" | ' +
-            '"find next landmark" | "find previous landmark" | ' +
-            '"find next field" (form controls) | "find next button" | "find next link" | ' +
-            '"rotor" (open rotor) | "rotate left" | "rotate right" | ' +
-            '"next rotor item" | "previous rotor item". ' +
-            'For VoiceOver sessions the response state includes axFocusedElement with the ' +
-            'AX role, subrole, title, description, value, and enabled state of the system-focused element. ' +
-            'The response state also carries the timestamped transcript of everything spoken so far.',
+         description: DRIVER_ACTION_DESCRIPTION,
          inputSchema: driverActionInputSchema,
          outputSchema: driverActionResultSchema,
          annotations: activeAnnotations,

@@ -48,10 +48,14 @@ export function parseTimeoutMs(value: string | undefined): number | undefined {
    }
    const parsed = Number(value);
    if (!Number.isInteger(parsed) || parsed <= 0) {
-      throw new CliUsageError('validation-error', '--timeout must be a positive whole number of milliseconds.', {
-         field: 'timeout',
-         value,
-      });
+      throw new CliUsageError(
+         'validation-error',
+         '--timeout must be a positive whole number of milliseconds.',
+         {
+            field: 'timeout',
+            value,
+         },
+      );
    }
    return parsed;
 }

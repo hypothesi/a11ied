@@ -31,7 +31,10 @@ export interface DriverAdapter {
    attachDocument(document: { html: string; url: string }): Promise<void>;
    focus(target: DriverFocusTarget): Promise<DriverFocusResult>;
    /** Runs one portable verb through the shared portable table. */
-   performPortable(verb: PortableDriverVerb, options?: DriverActionOptions): Promise<void>;
+   performPortable(
+      verb: PortableDriverVerb,
+      options?: DriverActionOptions,
+   ): Promise<void>;
    /** Presses each chord in order; one chord per array entry. */
    press(keys: readonly string[], options?: DriverActionOptions): Promise<void>;
    type(text: string, options?: DriverActionOptions): Promise<void>;

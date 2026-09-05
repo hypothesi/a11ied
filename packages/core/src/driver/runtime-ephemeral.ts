@@ -4,6 +4,8 @@ import type {
    Platform,
 } from '@a11ied/contracts';
 
+import { ignoreError } from '@a11ied/guidepup';
+
 import { handleBrokerRequest } from './broker-handlers.js';
 import { startSessionRecording } from './recording.js';
 import { parseBrokerActionResult } from './runtime-support.js';
@@ -17,7 +19,10 @@ export interface EphemeralActionOptions {
    timeoutMs?: number | undefined;
 }
 
-/** Runs one action in a session that never touches the state directory and stops right after. */
+/**
+ * Runs one action in a session that never touches the state directory and stops right
+ * after.
+ */
 export async function runEphemeralAction(
    options: EphemeralActionOptions,
 ): Promise<DriverActionResult> {
@@ -50,6 +55,6 @@ export async function runEphemeralAction(
       }
       return result;
    } finally {
-      await adapter.stop().catch(() => undefined);
+      await adapter.stop().catch(ignoreError);
    }
 }

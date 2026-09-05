@@ -61,7 +61,9 @@ export function normalizeBrokerTransportError(args: {
          { action: args.action },
       );
    }
-   return new CliEnvironmentError('driver-broker-error', message, { action: args.action });
+   return new CliEnvironmentError('driver-broker-error', message, {
+      action: args.action,
+   });
 }
 
 export async function assertTargetReady(target: Platform): Promise<void> {

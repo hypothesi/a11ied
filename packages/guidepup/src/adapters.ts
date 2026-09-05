@@ -41,6 +41,7 @@ import {
    type PortableReaderMethod,
    type VoiceOverPortableStep,
 } from './portable-commands.js';
+import { ignoreError, runInOrder } from './sequential.js';
 import { waitForSpeechStabilization } from './speech.js';
 import { createVirtualAdapter } from './virtual-adapter.js';
 
@@ -92,7 +93,9 @@ class RealScreenReaderAdapter implements DriverAdapter {
    }
 
    async attachDocument(): Promise<void> {
-      // Real screen readers read the live host window; the caller opens the page itself.
+      // Real screen readers read the live host window; the caller opens the page itself,
+      // So the adapter only confirms its reader is still there.
+      await this.reader.lastSpokenPhrase().catch(ignoreError);
    }
 
    async focus(target: DriverFocusTarget): Promise<DriverFocusResult> {
@@ -143,7 +146,9 @@ class RealScreenReaderAdapter implements DriverAdapter {
    }
 
    private async runSharedStep(
-      step: { kind: 'method'; method: PortableReaderMethod } | { kind: 'press'; keys: string },
+      step:
+         | { kind: 'method'; method: PortableReaderMethod }
+         | { kind: 'press'; keys: string },
       options?: DriverActionOptions,
    ): Promise<void> {
       if (step.kind === 'press') {
@@ -163,9 +168,9 @@ class RealScreenReaderAdapter implements DriverAdapter {
 
    async press(keys: readonly string[], options?: DriverActionOptions): Promise<void> {
       const inputOptions = buildCommandOptions(REAL_TARGET_INPUT_TIMEOUT_MS, options);
-      for (const chord of keys) {
-         await this.reader.press(normalizeDriverKeys(chord, this.target), inputOptions);
-      }
+      await runInOrder(keys, (chord) =>
+         this.reader.press(normalizeDriverKeys(chord, this.target), inputOptions),
+      );
    }
 
    async type(text: string, options?: DriverActionOptions): Promise<void> {

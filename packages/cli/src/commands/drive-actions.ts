@@ -1,4 +1,6 @@
 import type { Command } from 'commander';
+import type * as ExecuteModule from '../lib/execute.js';
+import type * as RenderModule from '../renderers/drive.js';
 import { portableDriverVerbSchema, type DriverFocusTarget } from '#contracts';
 import { getPortableCommand } from '#core';
 import { addPhraseOption } from '../lib/options.js';
@@ -20,10 +22,12 @@ interface FocusActionOptions extends DriveActionOptions {
    match?: string;
 }
 
-async function loadDriveRunner(): Promise<{
-   executeDriveActionCommand: (typeof import('../lib/execute.js'))['executeDriveActionCommand'];
-   renderDriveReadText: (typeof import('../renderers/drive.js'))['renderDriveReadText'];
-}> {
+interface DriveRunner {
+   executeDriveActionCommand: typeof ExecuteModule.executeDriveActionCommand;
+   renderDriveReadText: typeof RenderModule.renderDriveReadText;
+}
+
+async function loadDriveRunner(): Promise<DriveRunner> {
    const [{ executeDriveActionCommand }, { renderDriveReadText }] = await Promise.all([
       import('../lib/execute.js'),
       import('../renderers/drive.js'),
@@ -31,13 +35,17 @@ async function loadDriveRunner(): Promise<{
    return { executeDriveActionCommand, renderDriveReadText };
 }
 
-/** Registers next, previous, top, bottom, interact, stop-interacting, activate, and escape. */
+/**
+ * Registers next, previous, top, bottom, interact, stop-interacting, activate, and
+ * escape.
+ */
 export function registerNavigationCommands(driveCommand: Command): void {
    for (const verb of portableDriverVerbSchema.options) {
       addDriveNavigationOptions(
          driveCommand.command(verb).description(getPortableCommand(verb).description),
       ).action(async (options: DriveActionOptions) => {
-         const { executeDriveActionCommand, renderDriveReadText } = await loadDriveRunner();
+         const { executeDriveActionCommand, renderDriveReadText } =
+            await loadDriveRunner();
          await executeDriveActionCommand({
             subcommand: verb,
             request: { action: verb },
@@ -52,7 +60,9 @@ export function registerReadCommand(driveCommand: Command): void {
    addDriveNavigationOptions(
       driveCommand
          .command('read')
-         .description('Read the current item: the last phrase and item text, without moving.'),
+         .description(
+            'Read the current item: the last phrase and item text, without moving.',
+         ),
    ).action(async (options: DriveActionOptions) => {
       const { executeDriveActionCommand, renderDriveReadText } = await loadDriveRunner();
       await executeDriveActionCommand({
@@ -86,7 +96,9 @@ export function registerPressCommand(driveCommand: Command): void {
 
 export function registerTypeCommand(driveCommand: Command): void {
    addDriveAutoStartOptions(
-      driveCommand.command('type <text>').description('Type text through the active target.'),
+      driveCommand
+         .command('type <text>')
+         .description('Type text through the active target.'),
    ).action(async (text: string, options: DriveAutoStartOptions) => {
       const { executeDriveActionCommand, renderDriveReadText } = await loadDriveRunner();
       await executeDriveActionCommand({
@@ -133,7 +145,9 @@ export function registerFocusCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('focus')
-         .description('Bring a window to the front. With no options, refocus the app the session opened.')
+         .description(
+            'Bring a window to the front. With no options, refocus the app the session opened.',
+         )
          .option('--app <name>', 'macOS app name to bring to the front.')
          .option('--bundle-id <id>', 'macOS bundle identifier to focus.')
          .option('--process <name>', 'Windows process name to focus.')

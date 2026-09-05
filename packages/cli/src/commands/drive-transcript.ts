@@ -58,7 +58,10 @@ export function registerTranscriptCommand(driveCommand: Command): void {
          .option('--since <checkpoint>', 'Only entries after the named checkpoint.')
          .option('--tail <count>', 'Only the last N phrases.')
          .option('--out <path>', 'Write the transcript to a .json or .md file.')
-         .option('--format <format>', 'Transcript format, json or md. Defaults to the --out extension.'),
+         .option(
+            '--format <format>',
+            'Transcript format, json or md. Defaults to the --out extension.',
+         ),
    ).action(async (options: TranscriptActionOptions) => {
       const [{ executeCommand }, renderers] = await Promise.all([
          import('../lib/execute.js'),

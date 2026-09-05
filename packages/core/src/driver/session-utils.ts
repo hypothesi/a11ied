@@ -22,12 +22,18 @@ export function getActiveSessionFile(): string {
    return resolve(resolveStateRoot(), ACTIVE_SESSION_FILE);
 }
 
-/** Creates a short session id; one session is active at a time so it only needs to be unique. */
+/**
+ * Creates a short session id; one session is active at a time so it only needs to be
+ * unique.
+ */
 export function createSessionId(): string {
    return `drv_${randomBytes(SESSION_ID_BYTES).toString('hex')}`;
 }
 
-/** Socket path for one session: a named pipe on Windows, a short path under the OS tmpdir elsewhere. */
+/**
+ * Socket path for one session: a named pipe on Windows, a short path under the OS tmpdir
+ * elsewhere.
+ */
 export function getDriverSocketPath(sessionId: string): string {
    if (process.platform === 'win32') {
       return `\\\\.\\pipe\\a11ied-${sessionId}`;
@@ -40,7 +46,9 @@ export function getInMemorySocketPath(sessionId: string): string {
    return `${IN_MEMORY_SOCKET_PREFIX}${sessionId}`;
 }
 
-export function isInMemorySession(session: Pick<AccessibilityDriverSession, 'socketPath'>): boolean {
+export function isInMemorySession(
+   session: Pick<AccessibilityDriverSession, 'socketPath'>,
+): boolean {
    return session.socketPath.startsWith(IN_MEMORY_SOCKET_PREFIX);
 }
 
