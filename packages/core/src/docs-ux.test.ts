@@ -42,6 +42,10 @@ function expectNavSections(nav: string): void {
    expect(nav).toContain("label: 'Test with a screen reader'");
    expect(nav).toContain("label: 'Test from an AI agent'");
    expect(nav).toContain("label: 'Install the agent skill'");
+   expect(nav).toContain("label: 'Understand a violation'");
+   expect(nav).toContain("label: 'Script the CLI'");
+   expect(nav).toContain("label: 'Run in CI'");
+   expect(nav).toContain("label: 'Troubleshooting'");
 }
 
 function expectTaskFirstEntryPoints(homePage: string): void {

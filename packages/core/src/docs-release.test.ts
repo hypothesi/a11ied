@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import {
+   getCoverage,
+   getCoverageSummary,
+   listCriteriaByLevel,
+} from '@a11ied/wcag-engine';
 
 const rootDir = resolve(import.meta.dirname, '../../..');
 const docsPagesDir = resolve(rootDir, 'packages/docs/src/pages');
@@ -14,7 +19,7 @@ const ciWorkflowPath = resolve(rootDir, '.github/workflows/ci.yml');
 const publishWorkflowPath = resolve(rootDir, '.github/workflows/publish.yml');
 const releaseReadinessPath = resolve(
    rootDir,
-   'internal-docs/releases/v0.3.0-readiness.md',
+   'internal-docs/releases/v0.1.0-readiness.md',
 );
 const requiredRuntimePages = [
    'index.astro',
@@ -28,6 +33,10 @@ const requiredRuntimePages = [
    'guides/agents.astro',
    'guides/agent-skill.astro',
    'guides/recording.astro',
+   'guides/violations.astro',
+   'guides/scripting.astro',
+   'guides/ci.astro',
+   'guides/troubleshooting.astro',
    'reference/cli.astro',
    'reference/mcp.astro',
    'reference/api.astro',
@@ -44,6 +53,10 @@ const requiredNavRoutes = [
    '/guides/agents',
    '/guides/agent-skill',
    '/guides/recording',
+   '/guides/violations',
+   '/guides/scripting',
+   '/guides/ci',
+   '/guides/troubleshooting',
    '/reference/cli',
    '/reference/mcp',
    '/reference/api',
@@ -61,6 +74,7 @@ const requiredHomeRoutes = [
 const requiredCiWorkflowSteps = [
    'name: Data validation',
    'name: Standards',
+   'name: Prose',
    'name: Test',
    'name: Pack public workspaces',
 ] as const;
@@ -171,7 +185,7 @@ function expectGuideSurfaceDocs(): void {
    expectSurfaceDoc('guides/recording.astro', '.mp4');
    expectSurfaceDoc('guides/recording.astro', 'sr start --sr voiceover --recording');
    expectSurfaceDoc('guides/recording.astro', 'transcript');
-   expectSurfaceDoc('guides/recording.astro', 'npx playwright install chromium');
+   expectSurfaceDoc('guides/recording.astro', 'Install Chrome, Edge, Brave, or Chromium');
    expectSurfaceDoc('guides/screen-reader.astro', 'a1 sr stop');
    expectSurfaceDoc('install.astro', 'npx -y @guidepup/setup setup');
    expectSurfaceDoc('install.astro', 'npx -y @guidepup/setup install');
@@ -179,6 +193,20 @@ function expectGuideSurfaceDocs(): void {
    expectSurfaceDoc('install.astro', 'a1 doctor --strict');
    expectSurfaceDoc('reference/cli.astro', 'a1 setup');
    expectSurfaceDoc('quickstart.astro', 'a1 sr stop');
+}
+
+function expectNewGuideSurfaceDocs(): void {
+   expectSurfaceDoc('guides/violations.astro', 'critical');
+   expectSurfaceDoc('guides/violations.astro', 'a1 wcag rule');
+   expectSurfaceDoc('guides/violations.astro', 'failureSummary');
+   expectSurfaceDoc('guides/scripting.astro', '"ok": true');
+   expectSurfaceDoc('guides/scripting.astro', 'exit code');
+   expectSurfaceDoc('guides/scripting.astro', '--baseline');
+   expectSurfaceDoc('guides/ci.astro', '--sr virtual --allow-virtual');
+   expectSurfaceDoc('guides/ci.astro', 'npx playwright install chromium');
+   expectSurfaceDoc('guides/ci.astro', 'a1 doctor --strict');
+   expectSurfaceDoc('guides/troubleshooting.astro', 'missing-session');
+   expectSurfaceDoc('guides/troubleshooting.astro', 'browser-unavailable');
 }
 
 function expectTestApiDocs(): void {
@@ -195,13 +223,100 @@ function expectNoStaleAxeExample(): void {
    }
 }
 
+const wcagConformanceLevelsLowToHigh = ['A', 'AA', 'AAA'] as const;
+const expectedCoverageTotals = {
+   automated: 28,
+   hybrid: 10,
+   manual: 48,
+   unknown: 0,
+   criteria: 86,
+};
+const expectedLevelACriteriaCount = 31;
+const expectedLevelAACriteriaCount = 24;
+const expectedLevelAAACriteriaCount = 31;
+const expectedAxeRulesThroughLevelAA = 73;
+
+/**
+ * Union of axeRuleIds across every criterion at or below `level`, as axe --level resolves
+ * it.
+ */
+function countAxeRulesThroughLevel(
+   level: (typeof wcagConformanceLevelsLowToHigh)[number],
+   version: string,
+): number {
+   const highestIndex = wcagConformanceLevelsLowToHigh.indexOf(level);
+   const includedLevels = wcagConformanceLevelsLowToHigh.filter(
+      (entry) => wcagConformanceLevelsLowToHigh.indexOf(entry) <= highestIndex,
+   );
+   const criteria = includedLevels.flatMap(
+      (entry) => listCriteriaByLevel(entry, version).criteria,
+   );
+   const ruleIds = criteria.flatMap(
+      (criterion) => getCoverage(criterion.id, { version }).coverage.axeRuleIds,
+   );
+
+   return new Set(ruleIds).size;
+}
+
+/** Recomputes the coverage totals and the level-AA axe rule count from the pinned data. */
+function expectCoverageNumbersMatchTheData(): void {
+   const summary = getCoverageSummary({ version: '2.2' });
+   const axeRulesThroughAA = countAxeRulesThroughLevel('AA', '2.2');
+
+   expect(summary.totals).toEqual(expectedCoverageTotals);
+   expect(summary.byLevel.A.criteria).toBe(expectedLevelACriteriaCount);
+   expect(summary.byLevel.AA.criteria).toBe(expectedLevelAACriteriaCount);
+   expect(summary.byLevel.AA).toMatchObject({ automated: 8, hybrid: 4, manual: 12 });
+   expect(summary.byLevel.AAA.criteria).toBe(expectedLevelAAACriteriaCount);
+   expect(axeRulesThroughAA).toBe(expectedAxeRulesThroughLevelAA);
+}
+
+/**
+ * Checks the docs state the same numbers {@link expectCoverageNumbersMatchTheData}
+ * verified.
+ */
+function expectDocsStateTheRealNumbers(): void {
+   const summary = getCoverageSummary({ version: '2.2' });
+   const index = readDocsPage('index.astro');
+   const quickstart = readDocsPage('quickstart.astro');
+   const cli = readDocsPage('reference/cli.astro');
+   const coverage = readDocsPage('coverage.astro');
+
+   expect(index).toContain('73 axe rules');
+   expect(quickstart).toContain('73 rules');
+   expect(cli).toContain('73 rules');
+   expect(index).toContain('24 success criteria');
+   expect(coverage).toContain('86 criteria. 28 automated, 10 hybrid, 48 manual.');
+   expect(coverage).toContain(
+      `${String(summary.coverageSources.criteriaWithAxe)} criteria have at least one axe rule`,
+   );
+   expect(coverage).toContain(
+      `${String(summary.coverageSources.criteriaWithAct)} have at least one ACT rule`,
+   );
+   expect(coverage).toContain(
+      `${String(summary.coverageSources.criteriaWithBoth)} have both`,
+   );
+}
+
+/**
+ * Recomputes the coverage totals and the level-AA axe rule count from the pinned data and
+ * checks the docs against the real numbers, so a stale count fails the build instead of
+ * misleading a reader.
+ */
+function expectNumericClaimsMatchTheData(): void {
+   expectCoverageNumbersMatchTheData();
+   expectDocsStateTheRealNumbers();
+}
+
 function expectPublicSurfaceDocs(): void {
    expectCliSurfaceDocs();
    expectConceptSurfaceDocs();
    expectMcpAndApiSurfaceDocs();
    expectGuideSurfaceDocs();
+   expectNewGuideSurfaceDocs();
    expectTestApiDocs();
    expectNoStaleAxeExample();
+   expectNumericClaimsMatchTheData();
    expect(existsSync(resolve(docsPagesDir, 'release-checklist.astro'))).toBe(false);
 }
 
