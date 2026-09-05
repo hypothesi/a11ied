@@ -85,18 +85,18 @@ await using sr = await screenReader({'{'} url: 'http://localhost:3000/checkout' 
          sends input returns the phrase the reader produced.
       </p>
       <div class="route-list">
-         <div class="route-row"><code>next(kind?, options?)</code>, <code>previous(kind?, options?)</code><span>One item, or a jump by <code>heading</code>, <code>link</code>, <code>landmark</code>, <code>control</code>, <code>button</code>, <code>table</code>, <code>list</code>, <code>graphic</code>, <code>region</code>, or <code>form-field</code>. Options: <code>level</code> for headings, <code>times</code>.</span></div>
-         <div class="route-row"><code>top()</code>, <code>bottom()</code>, <code>interact()</code>, <code>stopInteracting()</code>, <code>activate()</code>, <code>escape()</code><span>The portable verbs.</span></div>
-         <div class="route-row"><code>press(...chords)</code>, <code>type(text)</code><span><code>press('Tab', 'Enter')</code> sends two chords in order.</span></div>
+         <div class="route-row"><div class="route-terms"><code>next(kind?, options?)</code>, <code>previous(kind?, options?)</code></div><span>One item, or a jump by <code>heading</code>, <code>link</code>, <code>landmark</code>, <code>control</code>, <code>button</code>, <code>table</code>, <code>list</code>, <code>graphic</code>, <code>region</code>, or <code>form-field</code>. Options: <code>level</code> for headings, <code>times</code>.</span></div>
+         <div class="route-row"><div class="route-terms"><code>top()</code>, <code>bottom()</code>, <code>interact()</code>, <code>stopInteracting()</code>, <code>activate()</code>, <code>escape()</code></div><span>The portable verbs.</span></div>
+         <div class="route-row"><div class="route-terms"><code>press(...chords)</code>, <code>type(text)</code></div><span><code>press('Tab', 'Enter')</code> sends two chords in order.</span></div>
          <div class="route-row"><code>read()</code><span>The item under the cursor: <code>role</code>, <code>name</code>, <code>value</code>, <code>states</code>, <code>level</code>, <code>phrase</code>, and <code>source</code>, which names where each field came from.</span></div>
          <div class="route-row"><code>title()</code><span>The page title, or the window summary on a real reader.</span></div>
-         <div class="route-row"><code>find(text)</code>, <code>goTo({'{'} role, name {'}'})</code><span>Move to the text, or step until the item has the role, the name, or both. Both throw when nothing matches.</span></div>
-         <div class="route-row"><code>elements(kind)</code>, <code>readAll()</code>, <code>walk()</code><span>The rotor, say-all from the cursor, and top plus say-all. Each returns the items announced, capped by <code>max</code>.</span></div>
+         <div class="route-row"><div class="route-terms"><code>find(text)</code>, <code>goTo({'{'} role, name {'}'})</code></div><span>Move to the text, or step until the item has the role, the name, or both. Both throw when nothing matches.</span></div>
+         <div class="route-row"><div class="route-terms"><code>elements(kind)</code>, <code>readAll()</code>, <code>walk()</code></div><span>The rotor, say-all from the cursor, and top plus say-all. Each returns the items announced, capped by <code>max</code>.</span></div>
          <div class="route-row"><code>table(move)</code><span><code>next-cell</code> and the other moves return the phrase. <code>row-header</code> and <code>column-header</code> return the header text.</span></div>
-         <div class="route-row"><code>open(url)</code>, <code>open({'{'} html {'}'})</code><span>Another page in the same session.</span></div>
-         <div class="route-row"><code>checkpoint(label)</code>, <code>transcript({'{'} since, tail {'}'})</code><span>Mark a point, and read the timestamped entries since it.</span></div>
+         <div class="route-row"><div class="route-terms"><code>open(url)</code>, <code>open({'{'} html {'}'})</code></div><span>Another page in the same session.</span></div>
+         <div class="route-row"><div class="route-terms"><code>checkpoint(label)</code>, <code>transcript({'{'} since, tail {'}'})</code></div><span>Mark a point, and read the timestamped entries since it.</span></div>
          <div class="route-row"><code>wait({'{'} for, timeoutMs {'}'})</code><span>Polls the transcript for a phrase spoken after the call and returns it, or throws at the timeout, 5000 ms by default. <code>wait({'{'} ms {'}'})</code> pauses.</span></div>
-         <div class="route-row"><code>perform(command)</code>, <code>screenshot(path)</code>, <code>focus()</code><span>A named command from <code>a1 sr list</code>, a VoiceOver cursor screenshot, and a refocus of the session's window.</span></div>
+         <div class="route-row"><div class="route-terms"><code>perform(command)</code>, <code>screenshot(path)</code>, <code>focus()</code></div><span>A named command from <code>a1 sr list</code>, a VoiceOver cursor screenshot, and a refocus of the session's window.</span></div>
       </div>
    </section>
 
