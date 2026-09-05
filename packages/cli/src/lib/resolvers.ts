@@ -1,4 +1,4 @@
-import { platformSchema, type Platform } from '#contracts';
+import { platformSchema, type Platform, type TargetReference } from '#contracts';
 import {
    CliUsageError,
    describeResolvedTarget,
@@ -145,6 +145,8 @@ export interface ResolvedPageTarget {
    load: DocumentLoad;
    /** Reads the target's raw markup. Only call this when it is actually needed. */
    readHtml: () => Promise<string>;
+   /** The resolved target, typed precisely, for callers that need more than a string kind. */
+   target: TargetReference;
    metadata: Record<string, string>;
    userHints: string[];
    reportTarget: {
@@ -188,6 +190,7 @@ export async function resolvePageTarget(
    return {
       load,
       readHtml: resolved.readHtml,
+      target: resolved.target,
       metadata: resolved.metadata,
       userHints: resolved.userHints,
       reportTarget: {

@@ -1,9 +1,9 @@
 import { Command } from 'commander';
 import { cliExitCodes } from '#contracts';
 import { registerSessionCommands } from './commands/drive.js';
-import { registerInspectCommands } from './commands/inspect.js';
 import { registerAxeCommand } from './commands/axe.js';
 import { registerTreeCommand } from './commands/tree.js';
+import { registerAuditCommand } from './commands/audit.js';
 import { registerSetupCommand } from './commands/setup.js';
 import { registerWcagCommands } from './commands/wcag.js';
 import { CLI_VERSION } from './lib/constants.js';
@@ -85,7 +85,7 @@ function registerAllCommands(program: Command): void {
    registerWcagCommands(program);
    registerAxeCommand(program);
    registerTreeCommand(program);
-   registerInspectCommands(program);
+   registerAuditCommand(program);
    registerMcpCommand(program);
    registerDoctorCommand(program);
    registerSetupCommand(program);

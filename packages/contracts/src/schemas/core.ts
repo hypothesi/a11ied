@@ -76,7 +76,6 @@ export type CliCommand = z.infer<typeof cliCommandSchema>;
 
 export const cliCommandFamilySchema = z.enum([
    'wcag',
-   'inspect',
    'sr',
    'axe',
    'tree',

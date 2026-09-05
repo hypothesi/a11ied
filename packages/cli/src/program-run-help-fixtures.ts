@@ -49,9 +49,10 @@ export const runOptionCases: HelpCase[] = [
 export const helpAllExpectations = [
    'a11ied\n',
    'a11ied wcag\n',
-   'a11ied inspect applicable\n',
    'a11ied sr start\n',
    'a11ied axe [options] [targets...]\n',
+   'a11ied tree [options] [target]\n',
+   'a11ied audit [options] [target]\n',
    'a11ied help-all\n',
    '--recording <path>',
 ];

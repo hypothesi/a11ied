@@ -4,8 +4,8 @@ import { docsLinks } from '../lib/nav';
 
 const toc = [
    { id: 'signals', label: 'Signals' },
-   { id: 'states', label: 'The five states' },
-   { id: 'commands', label: 'Running inspect' },
+   { id: 'states', label: 'The four states' },
+   { id: 'commands', label: 'Reading applicability' },
    { id: 'limits', label: 'What it does not do' },
 ];
 ---
@@ -23,10 +23,11 @@ const toc = [
             <h2>What the analyzer looks for</h2>
          </div>
          <p>
-            <code>inspect</code> fetches the URL and parses the HTML. It does not start a browser.
-            Each signal carries a category, the source it came from, the text that matched, a
-            confidence of high, medium, or low, and up to ten <code>elements</code>: the XPath, tag,
-            and opening tag of the nodes that produced it.
+            <code>a1 audit</code> fetches the target's HTML alongside its axe scan and accessibility
+            tree, then parses that HTML for applicability signals. Each signal carries a category,
+            the source it came from, the text that matched, a confidence of high, medium, or low,
+            and up to ten <code>elements</code>: the XPath, tag, and opening tag of the nodes that
+            produced it.
          </p>
          <pre data-label="OUTPUT"><code>"signals": [
   &#123;
@@ -61,16 +62,12 @@ const toc = [
    <section class="ledger" id="states">
       <div class="panel-head">
          <p class="panel-kicker">States</p>
-         <h2>The five applicability states</h2>
+         <h2>The four applicability states</h2>
       </div>
       <div class="route-list">
          <div class="route-row">
             <code>applicable</code>
-            <span>A high-confidence signal matches the criterion's tags.</span>
-         </div>
-         <div class="route-row">
-            <code>likely-applicable</code>
-            <span>A signal matches, but not strongly enough to call it applicable.</span>
+            <span>A signal matches the criterion's tags, strongly enough to call it applicable.</span>
          </div>
          <div class="route-row">
             <code>not-detected</code>
@@ -90,27 +87,34 @@ const toc = [
    <section class="panel" id="commands">
       <div class="panel-head">
          <p class="panel-kicker">Commands</p>
-         <h2>Running inspect</h2>
+         <h2>Reading applicability</h2>
       </div>
       <p>
-         <code>inspect applicable</code> returns a matrix with one assessment per criterion.
-         <code>inspect criterion</code> narrows it to one.
+         <code>a1 audit</code> returns an <code>applicability</code> section with a matrix holding
+         one assessment per criterion, alongside its axe scan and accessibility tree. The MCP
+         server exposes the same matrix through its <code>applicability</code> tool, which takes an
+         optional <code>criterion</code> to narrow the result to one assessment.
       </p>
-      <pre><code>a1 inspect applicable --url http://localhost:3000/checkout --json
-a1 inspect criterion 2.4.3 --url http://localhost:3000/checkout --json</code></pre>
-      <pre data-label="OUTPUT"><code>"assessment": &#123;
-  "criterionId": "2.4.3",
-  "title": "Focus Order",
-  "state": "likely-applicable",
-  "reasons": [
-    "Detected heading and form signals (heading structure and form controls) and matching criterion tags (structure, forms, controls, and errors)."
-  ],
-  "matchedSignalCategories": ["heading", "form"],
-  "matchedTags": ["structure", "forms", "controls", "errors"],
-  "elements": [
-    &#123; "xpath": "/html/body/main/h1", "tag": "h1", "snippet": "&lt;h1&gt;" &#125;,
-    &#123; "xpath": "/html/body/main/form", "tag": "form", "snippet": "&lt;form action=\"/save\" method=\"post\"&gt;" &#125;
-  ]
+      <pre><code>a1 audit http://localhost:3000/checkout --json</code></pre>
+      <pre data-label="OUTPUT"><code>"applicability": &#123;
+  "matrix": &#123;
+    "assessments": &#123;
+      "2.4.3": &#123;
+        "criterionId": "2.4.3",
+        "title": "Focus Order",
+        "state": "applicable",
+        "reasons": [
+          "Detected heading and form signals (heading structure and form controls) and matching criterion tags (structure, forms, controls, and errors)."
+        ],
+        "matchedSignalCategories": ["heading", "form"],
+        "matchedTags": ["structure", "forms", "controls", "errors"],
+        "elements": [
+          &#123; "xpath": "/html/body/main/h1", "tag": "h1", "snippet": "&lt;h1&gt;" &#125;,
+          &#123; "xpath": "/html/body/main/form", "tag": "form", "snippet": "&lt;form action=\"/save\" method=\"post\"&gt;" &#125;
+        ]
+      &#125;
+    &#125;
+  &#125;
 &#125;</code></pre>
       <p>
          <code>reasons</code> names the signals and the tags that produced the state. Read it before

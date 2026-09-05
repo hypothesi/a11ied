@@ -190,7 +190,6 @@ describe('wcag-engine applicability state classification', () => {
    it('exposes the supported applicability states and signal categories', () => {
       expect(supportedApplicabilityStates).toEqual([
          'applicable',
-         'likely-applicable',
          'not-detected',
          'out-of-scope',
          'unknown',

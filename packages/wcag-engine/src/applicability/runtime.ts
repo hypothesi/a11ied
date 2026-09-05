@@ -66,47 +66,29 @@ function evaluateStatusWithLiveRegion(
    const statusSignals = ctx.signals.filter(
       (signal) => signal.category === 'live-region',
    );
+   if (statusSignals.length === 0) {
+      return undefined;
+   }
+
    const statusTags = getMatchedTags(ctx.criterion, [
       'live-region',
       'form',
       'validation',
    ]);
-
-   if (statusSignals.length > 0) {
-      return {
-         criterionId: ctx.criterion.id,
-         title: ctx.criterion.title,
-         state: 'applicable',
-         reasons: [
-            `Detected live region signals (${formatList(statusSignals.map((signal) => signal.value))}) and matching criterion tags (${formatList(statusTags)}).`,
-         ],
-         matchedSignalCategories: dedupe([
-            ...statusSignals.map((signal) => signal.category),
-            ...ctx.matchedCategories,
-         ]),
-         matchedTags: statusTags,
-         elements: collectSignalElements(statusSignals),
-      };
-   }
-
-   if (
-      ctx.matchedCategories.includes('form') ||
-      ctx.matchedCategories.includes('validation')
-   ) {
-      return {
-         criterionId: ctx.criterion.id,
-         title: ctx.criterion.title,
-         state: 'likely-applicable',
-         reasons: [
-            `Detected form or validation signals (${formatList(ctx.signalValues)}) and matching criterion tags (${formatList(statusTags)}), but no explicit live region or status role signal yet.`,
-         ],
-         matchedSignalCategories: dedupe(ctx.matchedCategories),
-         matchedTags: statusTags,
-         elements: collectSignalElements(ctx.matchedSignals),
-      };
-   }
-
-   return undefined;
+   return {
+      criterionId: ctx.criterion.id,
+      title: ctx.criterion.title,
+      state: 'applicable',
+      reasons: [
+         `Detected live region signals (${formatList(statusSignals.map((signal) => signal.value))}) and matching criterion tags (${formatList(statusTags)}).`,
+      ],
+      matchedSignalCategories: dedupe([
+         ...statusSignals.map((signal) => signal.category),
+         ...ctx.matchedCategories,
+      ]),
+      matchedTags: statusTags,
+      elements: collectSignalElements(statusSignals),
+   };
 }
 
 function evaluateStatusCriterion(ctx: ApplicabilityContext): CriterionApplicability {
@@ -125,9 +107,13 @@ function evaluateDefaultCriterion(ctx: ApplicabilityContext): CriterionApplicabi
    const isStrong = ctx.matchedCategories.some((category) =>
       strongApplicabilityCategories.has(category),
    );
-   let state: 'applicable' | 'likely-applicable' = 'likely-applicable';
-   if (isStrong) {
-      state = 'applicable';
+   if (!isStrong) {
+      return buildNotDetected(
+         ctx.criterion,
+         'No signal-backed applicability match was detected for this criterion. ' +
+            `Weakly matched ${formatList(ctx.signalLabels)} signals do not count on ` +
+            'their own.',
+      );
    }
 
    let tagSuffix = '.';
@@ -138,7 +124,7 @@ function evaluateDefaultCriterion(ctx: ApplicabilityContext): CriterionApplicabi
    return {
       criterionId: ctx.criterion.id,
       title: ctx.criterion.title,
-      state,
+      state: 'applicable',
       reasons: [
          `Detected ${formatList(ctx.signalLabels)} signals (${formatList(ctx.signalValues)})${tagSuffix}`,
       ],

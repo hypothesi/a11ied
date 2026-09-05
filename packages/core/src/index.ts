@@ -64,7 +64,7 @@ export {
    type GuidepupSetupStepResult,
 } from './doctor/setup.js';
 
-// Target resolution for page commands (axe, tree, audit, inspect).
+// Target resolution for page commands (axe, tree, audit).
 export {
    DEFAULT_TARGET_TIMEOUT_MS,
    describeResolvedTarget,
@@ -78,13 +78,21 @@ export {
 } from './axe/verdict.js';
 export { buildAxeSarifLog, type AxeSarifLog } from './axe/sarif.js';
 export type { PageCookie } from './browser/page-setup.js';
-export { getAccessibilityTree, type AccessibilityTree } from './tree/runtime.js';
+export {
+   getAccessibilityTree,
+   getPageTitle,
+   type AccessibilityTree,
+} from './tree/runtime.js';
 export {
    filterAriaTree,
    parseAriaSnapshot,
    serializeAriaTree,
    type AriaTreeNode,
 } from './tree/parse.js';
+export { buildAuditReport, type AuditReport } from './audit/runtime.js';
+export { buildNextCommands } from './audit/next-commands.js';
+export type { AuditCriterionRollup } from './audit/criteria-rollup.js';
+export type { AuditTreeSummary } from './audit/tree-summary.js';
 
 const cliCommands: CliCommand[] = [
    {
@@ -93,14 +101,24 @@ const cliCommands: CliCommand[] = [
       maturity: 'ready',
    },
    {
-      name: 'inspect',
-      summary: 'Explain which WCAG criteria are relevant for a specific target.',
-      maturity: 'ready',
-   },
-   {
       name: 'sr',
       summary:
          'Control VoiceOver, NVDA, or the virtual screen reader through stable screen-reader sessions.',
+      maturity: 'ready',
+   },
+   {
+      name: 'axe',
+      summary: 'Run axe-core accessibility scans.',
+      maturity: 'ready',
+   },
+   {
+      name: 'tree',
+      summary: 'Print the accessibility tree for a target.',
+      maturity: 'ready',
+   },
+   {
+      name: 'audit',
+      summary: 'Run the full audit loop against a target: axe, tree, and applicability.',
       maturity: 'ready',
    },
    {
@@ -111,11 +129,6 @@ const cliCommands: CliCommand[] = [
    {
       name: 'setup',
       summary: 'Run the Guidepup setup steps this host still needs.',
-      maturity: 'ready',
-   },
-   {
-      name: 'axe',
-      summary: 'Run axe-core accessibility scans.',
       maturity: 'ready',
    },
    {

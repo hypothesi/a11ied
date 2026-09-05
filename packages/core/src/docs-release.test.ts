@@ -143,7 +143,7 @@ function expectCliSurfaceDocs(): void {
 }
 
 function expectConceptSurfaceDocs(): void {
-   expectSurfaceDoc('applicability.astro', 'likely-applicable');
+   expectSurfaceDoc('applicability.astro', 'applicable');
    expectSurfaceDoc('applicability.astro', 'not-detected');
    expectSurfaceDoc('applicability.astro', 'out-of-scope');
    expectSurfaceDoc('coverage.astro', 'automated');

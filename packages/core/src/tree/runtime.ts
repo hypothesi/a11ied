@@ -26,3 +26,15 @@ export async function getAccessibilityTree(
    );
    return { yaml, nodes: parseAriaSnapshot(yaml) };
 }
+
+/**
+ * Loads a target and reads its document title. Reuses the shared cached page when the
+ * target was already loaded for a `goto` load with no custom viewport, headers, or
+ * cookies, so this does not navigate a second time.
+ */
+export async function getPageTitle(
+   load: DocumentLoad,
+   options: WithBrowserPageOptions = {},
+): Promise<string> {
+   return withLoadedPage(load, (page) => page.title(), options);
+}

@@ -108,7 +108,6 @@ export type PreferredEvidenceMode = z.infer<typeof preferredEvidenceModeSchema>;
 
 export const applicabilityStateSchema = z.enum([
    'applicable',
-   'likely-applicable',
    'not-detected',
    'out-of-scope',
    'unknown',

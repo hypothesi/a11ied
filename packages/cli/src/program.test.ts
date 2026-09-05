@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import {
    driveRunHelpCases,
    helpAllExpectations,
-   inspectHelpCases,
    type HelpCase,
    runOptionCases,
    topLevelHelpCases,
@@ -46,7 +45,6 @@ function registerHelpCases(suiteName: string, helpCases: HelpCase[]): void {
 }
 
 registerHelpCases('cli top-level grammar', topLevelHelpCases);
-registerHelpCases('cli inspect grammar', inspectHelpCases);
 registerHelpCases('cli sr grammar', driveRunHelpCases);
 registerHelpCases('cli command options grammar', runOptionCases);
 

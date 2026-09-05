@@ -10,7 +10,7 @@ const toc = [
    { id: 'wcag', label: 'a1 wcag' },
    { id: 'axe', label: 'a1 axe' },
    { id: 'tree', label: 'a1 tree' },
-   { id: 'inspect', label: 'a1 inspect' },
+   { id: 'audit', label: 'a1 audit' },
    { id: 'doctor', label: 'a1 doctor and mcp' },
    { id: 'browser', label: 'Browser selection' },
 ];
@@ -32,7 +32,7 @@ const toc = [
          <div class="route-row"><code>a1 wcag</code><span>Look up criteria, techniques, axe rules, search results, and coverage.</span></div>
          <div class="route-row"><code>a1 axe</code><span>Run axe-core against one or more targets.</span></div>
          <div class="route-row"><code>a1 tree</code><span>Print a target's accessibility tree.</span></div>
-         <div class="route-row"><code>a1 inspect</code><span>Explain which criteria apply to a page.</span></div>
+         <div class="route-row"><code>a1 audit</code><span>Run axe, the accessibility tree, and applicability together, with a criterion rollup.</span></div>
          <div class="route-row"><code>a1 mcp</code><span>Start the stdio MCP server.</span></div>
          <div class="route-row"><code>a1 doctor</code><span>Check the host and list the setup steps still needed.</span></div>
          <div class="route-row"><code>a1 setup</code><span>Run the Guidepup setup steps this host needs, then re-check.</span></div>
@@ -49,7 +49,7 @@ const toc = [
          <div class="route-list">
             <div class="route-row"><code>--json</code><span>Print one structured object instead of formatted text.</span></div>
             <div class="route-row"><code>--verbose</code><span>Add detail to the text output. No effect with <code>--json</code>.</span></div>
-            <div class="route-row"><code>--wcag &lt;version&gt;</code><span>WCAG version for <code>wcag</code>, <code>axe</code>, and <code>inspect</code>. Accepts <code>2.1</code> or <code>2.2</code>. Defaults to <code>2.2</code>.</span></div>
+            <div class="route-row"><code>--wcag &lt;version&gt;</code><span>WCAG version for <code>wcag</code>, <code>axe</code>, and <code>audit</code>. Accepts <code>2.1</code> or <code>2.2</code>. Defaults to <code>2.2</code>.</span></div>
          </div>
          <p>
             <code>-V</code> at the top level prints the package version. <code>--wcag</code> inside
@@ -273,28 +273,52 @@ a1 tree http://localhost:3000 --name "Sign in" --json</code></pre>
       <div class="split-aside">
          <div class="tag">No heuristics</div>
          <p class="aside-note">
-            Unlike <code>inspect</code>, <code>tree</code> runs the page in a real browser, so it
-            sees content a client-side framework renders after load.
+            <code>tree</code> runs the page in a real browser, so it sees content a client-side
+            framework renders after load.
          </p>
       </div>
    </section>
 
-   <section class="panel" id="inspect">
-      <div class="panel-head">
-         <p class="panel-kicker">Applicability</p>
-         <h2>a1 inspect</h2>
+   <section class="split panel" id="audit">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Full loop</p>
+            <h2>a1 audit</h2>
+         </div>
+         <div class="route-list">
+            <div class="route-row"><code>&lt;target&gt;</code><span>An http(s) URL, a file path, - for HTML on stdin, or --html.</span></div>
+            <div class="route-row"><code>--fail-on &lt;impact&gt;</code><span>Only count axe violations at or above this impact toward the exit code: minor, moderate, serious, or critical. Defaults to any violation.</span></div>
+            <div class="route-row"><code>--baseline &lt;file&gt;</code><span>JSON file of accepted axe findings that do not count toward the exit code.</span></div>
+            <div class="route-row"><code>--update-baseline</code><span>Write the current axe violations to <code>--baseline</code> instead of asserting against it.</span></div>
+         </div>
+         <pre><code>a1 audit http://localhost:3000 --json
+a1 audit http://localhost:3000 --fail-on critical
+a1 audit --html '&lt;h1&gt;Hi&lt;/h1&gt;'</code></pre>
+         <p>
+            <code>audit</code> runs axe against every rule mapped in the WCAG version, reads the
+            accessibility tree, and derives applicability from the target's HTML, all against one
+            resolved target. The result carries four sections: <code>axe</code> (the full axe run),
+            <code>tree</code> (page title, first heading, and landmark/heading/link/button/form
+            counts), <code>applicability</code> (the signal-backed matrix, see
+            <a href="/applicability">applicability</a> for how the states are decided), and
+            <code>criteria</code>, a per-criterion rollup of axe verdict, applicability state, and
+            coverage state. <code>result.nextCommands</code> lists <code>a1 wcag rule</code> calls
+            for every failing axe rule.
+         </p>
+         <p>
+            <code>audit</code> exits 4 when an axe violation remains after
+            <code>--fail-on</code> and <code>--baseline</code> filtering, and 0 otherwise, the same
+            verdict rules as <code>a1 axe</code>.
+         </p>
       </div>
-      <div class="route-list">
-         <div class="route-row"><code>inspect applicable</code><span>Return an assessment for every criterion in the version.</span></div>
-         <div class="route-row"><code>inspect criterion &lt;criterion&gt;</code><span>Return one criterion's state, matched signals, and reasons.</span></div>
+      <div class="split-aside">
+         <div class="tag">One target, one report</div>
+         <p class="aside-note">
+            <code>audit</code> is the command to reach for first on a new page. Follow up with
+            <code>a1 axe</code>, <code>a1 tree</code>, or <code>a1 wcag show</code> once you know
+            what to look at.
+         </p>
       </div>
-      <pre><code>a1 inspect applicable --url http://localhost:3000 --json
-a1 inspect criterion 3.3.8 --url http://localhost:3000 --json</code></pre>
-      <p>
-         Both take <code>--url</code>. <code>inspect</code> fetches the HTML and parses it directly,
-         so it starts no browser. See <a href="/applicability">applicability</a> for how the states
-         are decided.
-      </p>
    </section>
 
    <section class="panel" id="doctor">

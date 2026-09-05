@@ -28,7 +28,9 @@ export const topLevelHelpCases: HelpCase[] = [
         tree [options] [target]     Print the accessibility tree for a target: an
                                     http(s) URL, a file path, - for HTML on stdin, or
                                     --html.
-        inspect                     Explain criterion applicability for a target.
+        audit [options] [target]    Run the full audit loop against a target: axe, an
+                                    accessibility tree summary, WCAG applicability,
+                                    and a criterion rollup.
         mcp                         Start the MCP stdio server.
         doctor [options]            Check this machine for browser and screen reader
                                     readiness, and list the setup steps still needed.
@@ -68,27 +70,6 @@ export const topLevelHelpCases: HelpCase[] = [
                                     failures, and tags.
         rule [options] <ruleId>     Map one axe-core rule id to its criteria,
                                     techniques, failures, and fix guidance.
-      "
-    `,
-   },
-];
-
-export const inspectHelpCases: HelpCase[] = [
-   {
-      name: 'keeps inspect applicable options stable',
-      args: ['inspect', 'applicable', '--help'],
-      expected: `
-      "Usage: a11ied inspect applicable [options]
-
-      List criteria that look relevant for a target.
-
-      Options:
-        --url <url>       Inspect a live URL target.
-        --wcag <version>  Use a specific WCAG version. Defaults to 2.2. (default:
-                          "2.2")
-        --json            Print JSON instead of human-readable text.
-        --verbose         Print more detail in text output.
-        -h, --help        display help for command
       "
     `,
    },

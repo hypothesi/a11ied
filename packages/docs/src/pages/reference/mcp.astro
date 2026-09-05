@@ -8,7 +8,7 @@ const toc = [
    { id: 'driver', label: 'driver_session and driver_action' },
    { id: 'axe', label: 'run_axe' },
    { id: 'knowledge', label: 'WCAG tools' },
-   { id: 'inspect', label: 'inspect and doctor' },
+   { id: 'applicability', label: 'applicability and doctor' },
    { id: 'resources', label: 'Resources' },
    { id: 'effects', label: 'Side effects' },
 ];
@@ -58,7 +58,7 @@ const toc = [
          <div class="route-row"><code>driver_session</code><span>Start, inspect, or stop a screen reader session.</span></div>
          <div class="route-row"><code>driver_action</code><span>Run one action against an open session.</span></div>
          <div class="route-row"><code>run_axe</code><span>Run axe-core against a URL.</span></div>
-         <div class="route-row"><code>inspect</code><span>Return applicability for a URL, for all criteria or one.</span></div>
+         <div class="route-row"><code>applicability</code><span>Return applicability for a URL, for all criteria or one.</span></div>
          <div class="route-row"><code>wcag_lookup</code><span>Return one criterion, optionally with coverage.</span></div>
          <div class="route-row"><code>wcag_levels</code><span>Return every criterion at one level.</span></div>
          <div class="route-row"><code>wcag_search</code><span>Return ranked criterion matches for a query.</span></div>
@@ -162,15 +162,15 @@ const toc = [
       </p>
    </section>
 
-   <section class="panel" id="inspect">
+   <section class="panel" id="applicability">
       <div class="panel-head">
          <p class="panel-kicker">Applicability</p>
-         <h2>inspect and doctor</h2>
+         <h2>applicability and doctor</h2>
       </div>
       <p>
-         <code>inspect</code> takes <code>url</code> and an optional <code>criterion</code>. Without
-         a criterion it returns the full applicability matrix. With one it returns that criterion's
-         assessment, matched signals, and reasons.
+         <code>applicability</code> takes <code>url</code> and an optional <code>criterion</code>.
+         Without a criterion it returns the full applicability matrix. With one it returns that
+         criterion's assessment, matched signals, and reasons.
       </p>
       <p>
          <code>doctor</code> takes no input. It returns <code>ready</code>, the ordered
@@ -205,7 +205,7 @@ const toc = [
       </div>
       <p>
          <code>wcag_lookup</code>, <code>wcag_levels</code>, and <code>wcag_search</code> read local
-         files. <code>inspect</code> fetches the URL over HTTP and parses the HTML.
+         files. <code>applicability</code> fetches the URL over HTTP and parses the HTML.
          <code>run_axe</code> opens the URL in browser automation. <code>doctor</code> probes the
          host and runs a short recording check on macOS.
       </p>

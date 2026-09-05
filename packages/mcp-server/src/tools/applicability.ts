@@ -12,14 +12,14 @@ import {
    targetInputSchema,
 } from '../lib/shared.js';
 
-export function registerInspectTools(server: McpServer): void {
+export function registerApplicabilityTools(server: McpServer): void {
    server.registerTool(
-      'inspect',
+      'applicability',
       {
-         title: 'Inspect',
+         title: 'Applicability',
          description:
-            'Inspect a URL for WCAG applicability. ' +
-            'Without a criterion, returns all applicable criteria. ' +
+            'Check a URL for WCAG applicability. ' +
+            'Without a criterion, returns every criterion with a signal-backed match. ' +
             'With a criterion, explains that specific criterion against the target.',
          inputSchema: targetInputSchema.extend({
             criterion: criterionLookupKeySchema.optional(),
