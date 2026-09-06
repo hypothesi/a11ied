@@ -175,10 +175,13 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH;
          .route-row { display: grid; grid-template-columns: minmax(11rem, 0.55fr) minmax(0, 1fr); gap: var(--lg); align-items: baseline; padding-block: var(--md); border-bottom: 2px solid var(--ink); }
          .route-row:first-child { border-top: 2px solid var(--ink); }
          .route-row span { color: var(--ink-soft); }
+         .feature-block { display: grid; gap: var(--lg); max-width: none; }
+         .feature-block > h2 { font-size: clamp(2rem, 3.4vw, 3rem); }
          .feature-grid { display: grid; gap: var(--lg); grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
-         .feature-card { align-content: start; gap: var(--md); max-width: none; padding: var(--lg) var(--md); background: var(--paper-light); border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); }
-         .feature-card h2 { font-size: 1.5rem; line-height: 1.05; }
+         .feature-card { display: flex; flex-direction: column; gap: var(--md); max-width: none; padding: var(--lg) var(--md); background: var(--paper-light); border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); }
+         .feature-card :is(h2, h3) { font-size: 1.5rem; line-height: 1.05; }
          .feature-card p { color: var(--ink-soft); font-size: 0.98rem; line-height: 1.6; }
+         .feature-link { margin-top: auto; padding-top: var(--xs); font: 700 0.78rem/1 var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
          .feature-demo { display: grid; gap: 0.28rem; padding: var(--sm) 0.7rem; background: var(--ink); color: var(--paper-light); font-size: 0.82rem; line-height: 1.5; }
          .feature-demo code { padding: 0; background: none; color: var(--yellow); font-weight: 800; }
          .feature-demo samp { display: block; font-family: var(--code); white-space: pre-wrap; overflow-wrap: anywhere; }

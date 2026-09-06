@@ -3,60 +3,105 @@ import DocShell from '../layouts/doc-shell.astro';
 import { docsLinks } from '../lib/nav';
 
 const toc = [
+   { id: 'cli', label: 'The a1 CLI' },
    { id: 'problem', label: 'The gap' },
    { id: 'output', label: 'What a session returns' },
-   { id: 'interfaces', label: 'Ways in' },
    { id: 'next', label: 'Next' },
 ];
 ---
 
 <DocShell
    title="Test accessibility from the terminal"
-   summary="a11ied runs axe against a page and drives VoiceOver, NVDA, or a simulated screen reader, then reports both against WCAG."
+   summary="a11ied is an npm package you install and run on your own machine: a command line tool, an MCP server, and a TypeScript library. All three run axe against a page and drive VoiceOver, NVDA, or a simulated screen reader, then report both against WCAG."
    links={docsLinks}
    toc={toc}
 >
-   <div class="feature-grid">
-      <section class="feature-card">
-         <h2>Scan the page</h2>
-         <div class="feature-demo">
-            <code>a1 audit /checkout</code>
-            <samp>&#10007; 2 problems to fix.</samp>
-            <samp>1.1.1  Non-text Content  [A]</samp>
-            <samp>4.1.2  Name, Role, Value  [A]</samp>
-         </div>
-         <p>
-            axe-core checks the rendered page for the failures a machine can see. Each
-            failure comes back under the WCAG requirement it breaks, with the elements to fix.
-         </p>
-      </section>
+   <div class="feature-block">
+      <div class="feature-grid">
+         <section class="feature-card">
+            <h2>Command line tool</h2>
+            <div class="feature-demo">
+               <code>npm install --global a11ied</code>
+            </div>
+            <p>
+               The <code>a1</code> binary runs scans, screen reader sessions, and WCAG lookups
+               from a terminal or a CI job.
+            </p>
+            <p class="feature-link"><a href="/reference/cli">CLI reference</a></p>
+         </section>
 
-      <section class="feature-card">
-         <h2>Read the page aloud</h2>
-         <div class="feature-demo">
-            <code>a1 sr walk /checkout</code>
-            <samp>button, Pay now</samp>
-            <samp>button</samp>
-         </div>
-         <p>
-            Every phrase, in the order it is announced, from VoiceOver, NVDA, or a simulated
-            reader. The second button has no name, so all anyone hears is "button".
-         </p>
-      </section>
+         <section class="feature-card">
+            <h2>MCP server</h2>
+            <div class="feature-demo">
+               <code>a1 mcp</code>
+            </div>
+            <p>
+               The same checks as MCP tools, so a coding agent can test the page it just
+               changed.
+            </p>
+            <p class="feature-link"><a href="/reference/mcp">MCP tools</a></p>
+         </section>
 
-      <section class="feature-card">
-         <h2>Fail the build</h2>
-         <div class="feature-demo">
-            <code>a1 sr expect "button, Help"</code>
-            <samp>Matched:   nothing</samp>
-            <samp>Result:    fail</samp>
-         </div>
-         <p>
-            The transcript is text, so a test can require a phrase. The command exits 4 when
-            the phrase never appears, which stops a CI run.
-         </p>
-      </section>
+         <section class="feature-card">
+            <h2>TypeScript library</h2>
+            <div class="feature-demo">
+               <code>import {'{'} screenReader {'}'} from 'a11ied/test'</code>
+            </div>
+            <p>
+               Screen reader tests in Vitest or any other runner, with matchers for what the
+               reader announced.
+            </p>
+            <p class="feature-link"><a href="/reference/api">TypeScript API</a></p>
+         </section>
+      </div>
+      <p>All three call the same runtime, so a result means the same thing in each.</p>
    </div>
+
+   <section class="feature-block" id="cli">
+      <h2>What can you do with the a1 CLI?</h2>
+      <div class="feature-grid">
+         <section class="feature-card">
+            <h3>Scan the page</h3>
+            <div class="feature-demo">
+               <code>a1 audit /checkout</code>
+               <samp>&#10007; 2 problems to fix.</samp>
+               <samp>1.1.1  Non-text Content  [A]</samp>
+               <samp>4.1.2  Name, Role, Value  [A]</samp>
+            </div>
+            <p>
+               axe-core checks the rendered page for the failures a machine can see. Each
+               failure comes back under the WCAG requirement it breaks, with the elements to
+               fix.
+            </p>
+         </section>
+
+         <section class="feature-card">
+            <h3>Read the page aloud</h3>
+            <div class="feature-demo">
+               <code>a1 sr walk /checkout</code>
+               <samp>button, Pay now</samp>
+               <samp>button</samp>
+            </div>
+            <p>
+               Every phrase, in the order it is announced, from VoiceOver, NVDA, or a simulated
+               reader. The second button has no name, so all anyone hears is "button".
+            </p>
+         </section>
+
+         <section class="feature-card">
+            <h3>Fail the build</h3>
+            <div class="feature-demo">
+               <code>a1 sr expect "button, Help"</code>
+               <samp>Matched:   nothing</samp>
+               <samp>Result:    fail</samp>
+            </div>
+            <p>
+               The transcript is text, so a test can require a phrase. The command exits 4 when
+               the phrase never appears, which stops a CI run.
+            </p>
+         </section>
+      </div>
+   </section>
 
    <section class="ledger" id="problem">
       <h2>The gap</h2>
@@ -108,31 +153,9 @@ const toc = [
          it is announced as "button" and nobody can tell what it does.
       </p>
       <p>
-         Because it is text, a test can assert on it. <code>a1 sr expect</code> exits 4 when a
-         phrase never appears, which is enough to fail a build.
+         Because it is text, a test can assert on it. The <a href="/guides/testing">testing
+         guide</a> covers writing those assertions.
       </p>
-   </section>
-
-   <section class="ledger" id="interfaces">
-      <h2>Ways in</h2>
-      <div class="route-list">
-         <div class="route-row">
-            <code>a1</code>
-            <span>The command line, for a terminal or a CI job.</span>
-         </div>
-         <div class="route-row">
-            <code>a1 mcp</code>
-            <span>
-               An MCP server, so a coding agent runs the same checks against the page it just
-               changed.
-            </span>
-         </div>
-         <div class="route-row">
-            <code>a11ied/test</code>
-            <span>A TypeScript API, for screen reader tests in Vitest or any other runner.</span>
-         </div>
-      </div>
-      <p>All three call the same runtime, so a result means the same thing in each.</p>
    </section>
 
    <section class="field-note" id="next">
