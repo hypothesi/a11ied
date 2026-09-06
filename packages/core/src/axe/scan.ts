@@ -31,13 +31,16 @@ export function hasCustomScanOptions(options: AxeScanOptions): boolean {
    );
 }
 
+/** Selector steps nest when axe finds the element inside a shadow root. */
+type RawAxeSelector = string | string[];
+
 interface RawAxeNode {
-   target?: string[];
+   target?: RawAxeSelector[];
    html?: string;
    failureSummary?: string;
 }
 
-interface RawAxeRule {
+export interface RawAxeRule {
    id: string;
    impact?: 'minor' | 'moderate' | 'serious' | 'critical' | null;
    description: string;
@@ -69,7 +72,7 @@ export function normalizeRule(rule: RawAxeRule): AxeRuleResult {
       tags: rule.tags ?? [],
       nodes:
          rule.nodes?.map((node) => ({
-            target: node.target ?? [],
+            target: (node.target ?? []).flat(),
             html: node.html ?? '',
             failureSummary: node.failureSummary ?? undefined,
          })) ?? [],
