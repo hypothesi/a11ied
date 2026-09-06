@@ -27,6 +27,11 @@ const toc = [
          <p class="panel-kicker">Map</p>
          <h2>Command families</h2>
       </div>
+      <p>
+         Most commands check a target against axe-core (axe), an open-source rules engine that
+         runs inside the page and flags accessibility problems, or look up the Web Content
+         Accessibility Guidelines (WCAG), the standard most accessibility requirements come from.
+      </p>
       <div class="route-list">
          <div class="route-row"><code>a1 sr</code><span>Control a screen reader through a session.</span></div>
          <div class="route-row"><code>a1 wcag</code><span>Look up criteria, techniques, axe rules, search results, and coverage.</span></div>
@@ -44,7 +49,7 @@ const toc = [
       <div class="stack">
          <div class="panel-head">
             <p class="panel-kicker">Options</p>
-            <h2>Options most commands take</h2>
+            <h2>Shared options</h2>
          </div>
          <div class="route-list">
             <div class="route-row"><code>--json</code><span>Print one structured object instead of formatted text.</span></div>
@@ -59,10 +64,11 @@ const toc = [
       <div class="split-aside">
          <div class="tag">Environment</div>
          <p class="aside-note">
-            <code>A11IED_STATE_DIR</code> holds the active screen reader session. Without it,
-            a11ied uses <code>$XDG_STATE_HOME/a11ied</code>, then
-            <code>~/.a11ied/state</code>. <code>A11IED_DRIVER_MODE=in-process</code> runs the
-            session inside the calling process instead of a separate broker.
+            <code>A11IED_STATE_DIR</code> sets the directory that stores the active session's
+            state file, lock, and broker socket. Without it, a11ied uses
+            <code>$XDG_STATE_HOME/a11ied</code>, then <code>~/.a11ied/state</code>.
+            <code>A11IED_DRIVER_MODE=in-process</code> runs the session inside the calling
+            process instead of a separate broker.
          </p>
       </div>
    </section>
@@ -73,7 +79,9 @@ const toc = [
          <h2>a1 sr</h2>
       </div>
       <p>
-         One session is active at a time. No command takes or prints a session id.
+         One session is active at a time. No command takes or prints a session id. A landmark, in
+         the <code>next</code> and <code>previous</code> kind list below, is a named region such
+         as banner, navigation, or main that a screen reader lets a user jump straight to.
       </p>
       <div class="route-list">
          <div class="route-row"><code>sr start [url]</code><span>Start the session, stopping any active one first. Opens the URL in a browser and waits until its window is in front. Takes <code>--sr</code>, <code>--allow-virtual</code>, <code>--browser &lt;name&gt;</code>, <code>--app &lt;name&gt;</code> for a native app instead of a page, <code>--recording &lt;path&gt;</code>, <code>--idle-timeout &lt;minutes&gt;</code>.</span></div>
@@ -113,13 +121,12 @@ const toc = [
          <div class="route-row"><code>--ephemeral</code><span>Run one action in a temporary session and tear it down.</span></div>
          <div class="route-row"><code>--command-set &lt;set&gt;</code><span><code>auto</code>, <code>portable</code>, <code>voiceover-commander</code>, or <code>voiceover-keycode</code>. Defaults to <code>auto</code>.</span></div>
       </div>
-      <p>
-         Exit codes: 0 when the command ran, 2 for a usage error, including a command the target
-         cannot run or a verb run with no active session, 3 when the browser or the broker process
-         fails to start, and 4 when a check failed: <code>find</code>, <code>goto</code>,
-         <code>wait --for</code>, <code>expect</code>, and a <code>batch</code> with a failed
-         expect.
-      </p>
+      <div class="route-list">
+         <div class="route-row"><code>0</code><span>The command ran.</span></div>
+         <div class="route-row"><code>2</code><span>Usage error: a command the target cannot run, or a verb run with no active session.</span></div>
+         <div class="route-row"><code>3</code><span>The browser or the broker process failed to start.</span></div>
+         <div class="route-row"><code>4</code><span>A check failed: <code>find</code>, <code>goto</code>, <code>wait --for</code>, <code>expect</code>, or a <code>batch</code> with a failed expect.</span></div>
+      </div>
       <p>
          <code>press</code>, <code>type</code>, <code>do</code>, and <code>walk</code> start a
          session when none is active. The other verbs need one and exit 2 without it.
@@ -165,6 +172,11 @@ a1 sr press "VO+ArrowRight" --json</code></pre>
          <p class="panel-kicker">Standards</p>
          <h2>a1 wcag</h2>
       </div>
+      <p>
+         A success criterion is one testable WCAG requirement, identified by a number such as
+         <code>1.4.3</code> and assigned a conformance level of A, AA, or AAA that says how strict
+         it is. This family looks up criteria by that number, by slug, or by technique ID.
+      </p>
       <div class="route-list">
          <div class="route-row"><code>wcag</code><span>With no arguments on a terminal, an interactive finder: fuzzy search on the left, the criterion on the right, <code>t</code>, <code>f</code>, <code>u</code>, and <code>a</code> for testing it, if it fails, the Understanding document, and everything, <code>y</code> to copy the <code>a1 axe --criterion</code> command. Piped output prints the help.</span></div>
          <div class="route-row"><code>wcag &lt;criterion&gt;</code><span>One criterion by ID or slug, or one technique by ID such as <code>G18</code>. Same output as <code>wcag show</code>.</span></div>
@@ -224,10 +236,14 @@ a1 axe http://localhost:3000/a http://localhost:3000/b --json</code></pre>
             With no selector, the run covers every rule mapped in the WCAG version. The result has
             <code>violations</code>, <code>passes</code>, <code>incomplete</code>, and
             <code>inapplicable</code>, plus the resolved rule list under <code>selection</code>.
+         </p>
+         <p>
             A file target loads through <code>file://</code>. axe never fetches a URL target's
-            HTML itself, since Playwright loads the page directly. With more than one target, the
-            JSON result's <code>targets</code> array carries one report per target, and text mode
-            prints one report after another.
+            HTML itself, since Playwright loads the page directly.
+         </p>
+         <p>
+            With more than one target, the JSON result's <code>targets</code> array has one
+            report per target, and text mode prints one report after another.
          </p>
          <p>
             <code>--format sarif</code> writes a SARIF 2.1.0 log with one rule descriptor per
@@ -238,10 +254,12 @@ a1 axe http://localhost:3000/a http://localhost:3000/b --json</code></pre>
          <p>
             axe exits 4 when a violation remains after <code>--fail-on</code> and
             <code>--baseline</code> filtering, and 0 otherwise. The JSON envelope's
-            <code>ok</code> field stays <code>true</code> either way. The exit code carries the
-            verdict, under <code>result.verdict</code> in the envelope. Run with
-            <code>--update-baseline</code> once to accept the current findings, then commit the
-            baseline file so CI only fails on new ones. See
+            <code>ok</code> field stays <code>true</code> either way. The exit code is the
+            verdict, and the envelope repeats it under <code>result.verdict</code>.
+         </p>
+         <p>
+            Run with <code>--update-baseline</code> once to accept the current findings, then
+            commit the baseline file so CI only fails on new ones. See
             <a href="/guides/violations">understand a violation</a> for what impact means and how
             to get from a violation to a fix, and
             <a href="/guides/scripting">script the CLI</a> for the exit codes and the envelope
@@ -274,11 +292,15 @@ a1 tree http://localhost:3000 --name "Sign in" --json</code></pre>
          <p>
             <code>tree</code> reads Playwright's <code>ariaSnapshot()</code> for the target: the
             role and name tree a screen reader sees, including JavaScript-rendered content, with
-            no heuristics. Text output is the YAML Playwright produces. <code>--json</code> parses
-            it into <code>result.nodes</code>, an array of <code>{'{'} role, name, level,
-            children {'}'}</code> objects. <code>--role</code> and <code>--name</code> keep a
-            matching node together with every ancestor needed to reach it, so the tree's shape
-            stays intact.
+            no heuristics. Text output is the YAML Playwright produces.
+         </p>
+         <p>
+            <code>--json</code> parses that YAML into <code>result.nodes</code>, an array of
+            <code>{'{'} role, name, level, children {'}'}</code> objects.
+         </p>
+         <p>
+            <code>--role</code> and <code>--name</code> keep a matching node together with every
+            ancestor needed to reach it, so the tree's shape stays intact.
          </p>
       </div>
       <div class="split-aside">
@@ -308,13 +330,17 @@ a1 audit --html '&lt;h1&gt;Hi&lt;/h1&gt;'</code></pre>
          <p>
             <code>audit</code> runs axe against every rule mapped in the WCAG version, reads the
             accessibility tree, and derives applicability from the target's HTML, all against one
-            resolved target. The result carries four sections: <code>axe</code> (the full axe run),
-            <code>tree</code> (page title, first heading, and landmark/heading/link/button/form
-            counts), <code>applicability</code> (the signal-backed matrix, see
-            <a href="/applicability">applicability</a> for how the states are decided), and
-            <code>criteria</code>, a per-criterion rollup of axe verdict, applicability state, and
-            coverage state. <code>result.nextCommands</code> lists <code>a1 wcag rule</code> calls
-            for every failing axe rule.
+            resolved target. The result has four sections:
+         </p>
+         <div class="route-list">
+            <div class="route-row"><code>axe</code><span>The full axe run.</span></div>
+            <div class="route-row"><code>tree</code><span>Page title, first heading, and landmark, heading, link, button, and form counts.</span></div>
+            <div class="route-row"><code>applicability</code><span>The signal-backed matrix. See <a href="/applicability">applicability</a> for how the states are decided.</span></div>
+            <div class="route-row"><code>criteria</code><span>A per-criterion rollup of axe verdict, applicability state, and coverage state.</span></div>
+         </div>
+         <p>
+            <code>result.nextCommands</code> lists <code>a1 wcag rule</code> calls for every
+            failing axe rule.
          </p>
          <p>
             <code>audit</code> exits 4 when an axe violation remains after
@@ -349,23 +375,30 @@ a1 help-all</code></pre>
          <code>doctor</code> checks this machine and leads with a verdict: <code>✓</code> ready, or
          <code>✗</code> with the number of setup steps still needed. Action items with the exact
          commands come first, then each target with its individual checks, the browser a11ied will
-         automate, and the a11ied, Node, npm, and host versions at the bottom. Targets that only
-         exist on another OS get one dim line instead of instructions. On macOS it also records a
-         few seconds of screen video with <code>screencapture</code> for the current host app, to
-         confirm the permission works. The exit code is 0 unless you pass
-         <code>--strict</code>, which exits with 3 while a required step is missing.
-         <code>--json</code> wraps the report in the standard envelope, under <code>result</code>.
+         automate, and the a11ied, Node, npm, and host versions at the bottom.
+      </p>
+      <p>
+         Targets that only exist on another OS get one dim line instead of instructions. On macOS
+         it also records a few seconds of screen video with <code>screencapture</code> for the
+         current host app, to confirm the permission works.
+      </p>
+      <p>
+         The exit code is 0 unless you pass <code>--strict</code>, which exits with 3 while a
+         required step is missing. <code>--json</code> wraps the report in the standard envelope,
+         under <code>result</code>.
       </p>
       <p>
          <code>setup</code> runs the Guidepup commands for this host in order,
          <code>npx -y @guidepup/setup setup</code> on macOS and then
          <code>npx -y @guidepup/setup install</code> on macOS and Windows, from the directory
          where <code>@guidepup/guidepup</code> resolves. Each command keeps the terminal while it
-         runs. It stops at the first failure, then prints the <code>doctor</code> report and exits
-         with 3 when a required step is still missing. <code>--skip-setup</code> and
-         <code>--skip-install</code> drop one of the two steps. <code>--json</code> replaces the
-         progress lines with an envelope carrying each step's exit code and the closing doctor
-         report under <code>result</code>.
+         runs, and setup stops at the first failure.
+      </p>
+      <p>
+         It then prints the <code>doctor</code> report and exits with 3 when a required step is
+         still missing. <code>--skip-setup</code> and <code>--skip-install</code> drop one of the
+         two steps. <code>--json</code> replaces the progress lines with an envelope that includes
+         each step's exit code and the closing doctor report under <code>result</code>.
       </p>
       <p>
          <code>mcp</code> takes no options and speaks stdio. <code>help-all</code> prints every
@@ -377,7 +410,7 @@ a1 help-all</code></pre>
    <section class="field-note" id="browser">
       <div class="panel-head">
          <p class="panel-kicker">Browsers</p>
-         <h2>How a11ied picks a browser</h2>
+         <h2>Browser selection</h2>
       </div>
       <p>
          The policy is system browser first. <code>a1 axe</code> prefers an installed

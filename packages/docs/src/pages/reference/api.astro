@@ -61,7 +61,7 @@ await sr.expectSpoken(/order placed/iu);</code></pre>
       <div class="route-list">
          <div class="route-row"><code>screenReader(options?)</code><span>Takes <code>sr</code>, <code>url</code> or <code>html</code>, <code>mode</code> (<code>in-process</code> by default, or <code>broker</code>), <code>engine</code>, <code>recordingPath</code>, and <code>timeoutMs</code>. Returns a <code>ScreenReader</code> with the page open.</span></div>
          <div class="route-row"><code>ScreenReader</code><span><code>next</code>, <code>previous</code>, <code>press</code>, <code>type</code>, <code>read</code>, <code>title</code>, <code>find</code>, <code>goTo</code>, <code>elements</code>, <code>readAll</code>, <code>walk</code>, <code>wait</code>, <code>checkpoint</code>, <code>transcript</code>, <code>open</code>, <code>interact</code>, <code>stopInteracting</code>, <code>activate</code>, <code>top</code>, <code>bottom</code>, <code>escape</code>, <code>table</code>, <code>perform</code>, <code>screenshot</code>, <code>focus</code>, <code>expectSpoken</code>, <code>stop</code>, and <code>Symbol.asyncDispose</code>. Navigation methods return the phrase, and <code>read</code> returns a <code>DriverCurrentItem</code>.</span></div>
-         <div class="route-row"><code>ScreenReaderAssertionError</code><span>Thrown by <code>expectSpoken</code>, <code>wait</code>, <code>find</code>, and <code>goTo</code>. Carries <code>expected</code>, <code>phrases</code>, and <code>exitCode: 4</code>.</span></div>
+         <div class="route-row"><code>ScreenReaderAssertionError</code><span>Thrown by <code>expectSpoken</code>, <code>wait</code>, <code>find</code>, and <code>goTo</code>. Has <code>expected</code>, <code>phrases</code>, and <code>exitCode: 4</code>.</span></div>
          <div class="route-row"><code>a11ied/vitest</code><span>Re-exports the above, installs <code>toHaveSpoken</code>, <code>toHaveSpokenInOrder</code>, and <code>toBeOn</code> on <code>expect</code>, and exports a <code>test</code> whose <code>sr</code> fixture is started from <code>srOptions</code> and stopped after each test.</span></div>
          <div class="route-row"><code>a11ied/browser</code><span>For Vitest browser mode: <code>screenReader({'{'} container {'}'})</code> over the mounted component, the same matchers, and the same fixture.</span></div>
       </div>
@@ -101,8 +101,10 @@ try {'{'}
 {'}'}</code></pre>
       <p>
          <code>startDriverSession</code>'s <code>url</code> option only records where the
-         session came from. It does not fetch a page or open a browser for you. For a
-         virtual session, call <code>attachDocumentToDriverSession</code> with the markup,
+         session came from. It does not fetch a page or open a browser for you.
+      </p>
+      <p>
+         For a virtual session, call <code>attachDocumentToDriverSession</code> with the markup,
          as shown above. For a real target, open the page yourself first, since VoiceOver
          and NVDA read whatever is already on screen. <code>a1 sr start</code> and
          <code>screenReader</code> from <code>a11ied/test</code> both do this work for you.
@@ -121,11 +123,14 @@ try {'{'}
          These are the functions the CLI runs. One session is active per user, so no function takes
          a session id, and a session started with <code>mode: 'broker'</code> lives in its own
          process until <code>stopDriverSession</code> or <code>idleTimeoutMinutes</code>, which
-         defaults to 30. A test wants <code>screenReader</code> from <code>a11ied/test</code>
-         instead: it owns the lifecycle and disposes the session with the test.
+         defaults to 30.
       </p>
       <p>
-         Every action result carries <code>session.engine</code> for a virtual session and
+         A test should use <code>screenReader</code> from <code>a11ied/test</code> instead: it
+         owns the lifecycle and disposes the session with the test.
+      </p>
+      <p>
+         Every action result includes <code>session.engine</code> for a virtual session and
          <code>state.transcript</code>: an array of entries with an <code>index</code>, an ISO
          <code>at</code> timestamp, the <code>phrase</code>, the <code>itemText</code> when the
          reader reported one, and a <code>checkpoint</code> label on the entries
@@ -138,6 +143,10 @@ try {'{'}
          <p class="panel-kicker">axe</p>
          <h2>Run axe against a URL</h2>
       </div>
+      <p>
+         <code>runAxe</code> runs axe-core (axe), an open-source rules engine that checks a page
+         against a set of automated accessibility rules, and returns the raw result.
+      </p>
       <pre><code>import {'{'} runAxe {'}'} from 'a11ied';
 
 const result = await runAxe(
@@ -161,9 +170,9 @@ for (const violation of result.violations) {'{'}
          version.
       </p>
       <p>
-         The result carries <code>violations</code>, <code>passes</code>, <code>incomplete</code>,
+         The result has <code>violations</code>, <code>passes</code>, <code>incomplete</code>,
          <code>inapplicable</code>, the resolved <code>ruleIds</code>, and a
-         <code>selection</code> object describing how the rule list was chosen.
+         <code>selection</code> object that says how the rule list was chosen.
       </p>
    </section>
 
@@ -172,6 +181,12 @@ for (const violation of result.violations) {'{'}
          <p class="panel-kicker">Standards</p>
          <h2>Look up criteria and coverage</h2>
       </div>
+      <p>
+         These functions read the Web Content Accessibility Guidelines (WCAG), the standard most
+         accessibility requirements come from, one success criterion at a time. A success
+         criterion is a numbered, testable requirement such as <code>4.1.3</code>, assigned a
+         conformance level of A, AA, or AAA.
+      </p>
       <pre><code>import {'{'}
   listWcagCriteria,
   searchWcagCriteria,
@@ -192,15 +207,16 @@ if (strategy.requiresRealTarget) {'{'}
 const levelAA = listWcagCriteria('AA', '2.2');
 const matches = searchWcagCriteria('focus order', {'{'} version: '2.2', limit: 3 {'}'});</code></pre>
       <p>
-         These functions read data bundled with the package, so they make no network request.
-         <code>showWcagCriterion</code> returns the criterion with its <code>coverage</code> and
-         <code>strategy</code>. <code>listWcagCriteria</code> takes <code>undefined</code> as the
-         level to return every criterion. <code>showWcagTechnique('G18', '2.2')</code> resolves a
-         technique or failure ID to the criteria that list it, and
-         <code>showWcagCoverageSummary('2.2')</code> returns the totals per level.
-         <code>showWcagAxeRule('color-contrast', '2.2')</code> is the one asynchronous lookup: it
-         maps an axe rule ID to its criteria and reads the help text from the installed axe-core.
+         These functions read data bundled with the package, so they make no network request,
+         except <code>showWcagAxeRule</code>, the one asynchronous lookup.
       </p>
+      <div class="route-list">
+         <div class="route-row"><code>showWcagCriterion</code><span>Returns the criterion with its <code>coverage</code> and <code>strategy</code>.</span></div>
+         <div class="route-row"><code>listWcagCriteria</code><span>Takes <code>undefined</code> as the level to return every criterion.</span></div>
+         <div class="route-row"><code>showWcagTechnique('G18', '2.2')</code><span>Resolves a technique or failure ID to the criteria that list it.</span></div>
+         <div class="route-row"><code>showWcagCoverageSummary('2.2')</code><span>Returns the coverage totals per level.</span></div>
+         <div class="route-row"><code>showWcagAxeRule('color-contrast', '2.2')</code><span>Maps an axe rule ID to its criteria, and reads the help text from the installed axe-core.</span></div>
+      </div>
    </section>
 
    <section class="panel" id="inspect">
@@ -218,7 +234,7 @@ console.log(focusOrder.assessment.reasons);</code></pre>
       <p>
          Both fetch the URL and parse the returned HTML. Use
          <code>inspectApplicableTarget</code> and <code>inspectCriterionTarget</code> when you
-         already hold a resolved document target rather than a URL.
+         already have a resolved document target rather than a URL.
       </p>
    </section>
 
@@ -270,7 +286,7 @@ const {'{'} target, targetType, warning {'}'} = await resolveAvailableDefaultTar
    <section class="panel" id="packages">
       <div class="panel-head">
          <p class="panel-kicker">Packages</p>
-         <h2>The scoped packages</h2>
+         <h2>The @a11ied packages</h2>
       </div>
       <p>
          <code>a11ied</code> re-exports the public core helpers and is the package to depend on.

@@ -19,8 +19,15 @@ const toc = [
    <section class="ledger" id="sources">
       <div class="panel-head">
          <p class="panel-kicker">Upstream</p>
-         <h2>Where the data comes from</h2>
+         <h2>Upstream sources</h2>
       </div>
+      <p>
+         The Web Content Accessibility Guidelines (WCAG) are the standard most accessibility
+         requirements come from. WCAG states its rules as success criteria: numbered, testable
+         requirements such as 1.4.3, each assigned a conformance level of A, AA, or AAA that says
+         how strict the requirement is. a11ied pins four upstream sources for WCAG 2.1 and 2.2
+         and merges them into one record per criterion.
+      </p>
       <div class="route-list">
          <div class="route-row">
             <strong>W3C WCAG 2.1 and 2.2</strong>
@@ -28,7 +35,7 @@ const toc = [
          </div>
          <div class="route-row">
             <strong>W3C ACT rule mapping</strong>
-            <span>Machine-readable rule to criterion coverage. 24 criteria in WCAG 2.2 have at least one ACT rule.</span>
+            <span>Machine-readable rule to criterion coverage from the Accessibility Conformance Testing (ACT) rules. 24 criteria in WCAG 2.2 have at least one ACT rule.</span>
          </div>
          <div class="route-row">
             <strong>W3C Quickref tags</strong>
@@ -36,11 +43,13 @@ const toc = [
          </div>
          <div class="route-row">
             <strong>axe-core</strong>
-            <span>Rule IDs, WCAG tags, and ACT rule IDs read from the installed package. 29 criteria in WCAG 2.2 have at least one axe rule.</span>
+            <span>Rule IDs, WCAG tags, and ACT rule IDs read from the installed package. axe-core (axe) is an open-source rules engine, not something this project built. It runs inside the page and checks it against a set of automated accessibility rules. 29 criteria in WCAG 2.2 have at least one axe rule.</span>
          </div>
       </div>
       <p>
-         Coverage joins these four. Each record lists the sources that produced it under
+         Coverage says how much of a criterion a11ied's own checks can resolve without a person,
+         from <code>automated</code> to <code>manual</code>. See <a href="/coverage">coverage</a>
+         for the four states. Each record lists the sources that produced it under
          <code>sourceAttribution</code>, so you can tell an ACT mapping from a heuristic.
       </p>
    </section>
@@ -49,7 +58,7 @@ const toc = [
       <div class="stack">
          <div class="panel-head">
             <p class="panel-kicker">Artifacts</p>
-            <h2>What ships in the package</h2>
+            <h2>Generated artifacts</h2>
          </div>
          <p>
             The sync step fetches the raw upstream payloads into an ignored directory, then
@@ -82,7 +91,7 @@ const toc = [
    <section class="panel" id="criterion">
       <div class="panel-head">
          <p class="panel-kicker">Shape</p>
-         <h2>What a criterion record holds</h2>
+         <h2>A criterion record</h2>
       </div>
       <pre><code>a1 wcag show 1.4.3 --json</code></pre>
       <pre data-label="OUTPUT"><code>"result": &#123;
@@ -104,33 +113,37 @@ const toc = [
   "strategy": &#123; "criterionId": "1.4.3", "preferredEvidenceMode": "automated", "..." : "..." &#125;
 &#125;</code></pre>
       <p>
-         <code>result.criterion</code> also carries <code>normativeText</code> as HTML, a parsed
-         <code>details</code> list for the exceptions, <code>altIds</code> for older slugs, and the
-         resolved <code>techniques</code>, <code>advisoryTechniques</code>, and
-         <code>failures</code>. Each technique has an <code>id</code>, <code>title</code>,
-         <code>technology</code>, and <code>url</code> pointing at its W3C page.
+         <code>result.criterion</code> also includes <code>normativeText</code> as HTML, a parsed
+         <code>details</code> list for the exceptions, <code>altIds</code> for older slugs, and
+         the resolved <code>techniques</code>, <code>advisoryTechniques</code>, and
+         <code>failures</code>. Each technique has an <code>id</code>, a <code>title</code>, a
+         <code>technology</code>, and a <code>url</code> to its W3C page.
+      </p>
+      <p>
          <code>versions</code> says which WCAG releases contain the criterion. See
          <a href="/coverage">coverage</a> for what <code>result.coverage</code> and
-         <code>result.strategy</code> hold.
+         <code>result.strategy</code> include.
       </p>
       <p>
          The Understanding document and the technique body are in the data too, converted from
          HTML to Markdown and stored under <code>understanding.&lt;version&gt;.json</code> and
          <code>technique-bodies.&lt;version&gt;.json</code>. <code>a1 wcag understanding 1.4.3</code>
          prints the full document, and <code>a1 wcag show 1.4.3</code> prints its In Brief or
-         Intent opening with a pointer to the rest.
-         <code>understandingUrl</code> and a technique's <code>url</code> still point at the
+         Intent opening with a link to the rest.
+      </p>
+      <p>
+         <code>understandingUrl</code> and a technique's <code>url</code> still go to the
          original W3C page. The W3C Document License permits this conversion to help
          implementation, and the package ships a <code>NOTICE.md</code> with the required W3C
-         attribution. Every command that prints this material also prints a line naming the
-         source document and its URL.
+         attribution. Every command that prints this material also prints a line that gives the
+         source document's title and URL.
       </p>
    </section>
 
    <section class="field-note" id="refresh">
       <div class="panel-head">
          <p class="panel-kicker">Maintenance</p>
-         <h2>Refreshing the artifacts</h2>
+         <h2>Refreshing the data</h2>
       </div>
       <p>
          From the repository root, <code>npm run wcag:sync</code> pulls the upstream payloads and

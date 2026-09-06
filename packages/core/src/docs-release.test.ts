@@ -165,12 +165,12 @@ function expectConceptSurfaceDocs(): void {
 }
 
 function expectMcpAndApiSurfaceDocs(): void {
-   expectSurfaceDoc('reference/mcp.astro', 'The 13 tools');
+   expectSurfaceDoc('reference/mcp.astro', 'MCP tools');
    expectSurfaceDoc('reference/mcp.astro', 'runs every mapped rule, matching');
    expectSurfaceDoc('reference/mcp.astro', 'sr_session');
    expectSurfaceDoc('reference/mcp.astro', 'sr_action');
    expectSurfaceDoc('reference/mcp.astro', 'npx -y a11ied mcp');
-   expectSurfaceDoc('reference/api.astro', 'The scoped packages');
+   expectSurfaceDoc('reference/api.astro', 'The @a11ied packages');
    expectSurfaceDoc('reference/api.astro', 'Export map');
 }
 

@@ -52,8 +52,15 @@ const toc = [
    <section class="ledger" id="tools">
       <div class="panel-head">
          <p class="panel-kicker">Tools</p>
-         <h2>The 13 tools</h2>
+         <h2>MCP tools</h2>
       </div>
+      <p>
+         The <code>wcag_*</code> tools look up the Web Content Accessibility Guidelines (WCAG),
+         the standard most accessibility requirements come from, by success criterion.
+         <code>run_axe</code> runs axe-core (axe), an open-source rules engine that checks a page
+         against a set of automated accessibility rules. <code>tree</code> and <code>audit</code>
+         read the page too, and the <code>sr_*</code> tools drive a screen reader session.
+      </p>
       <div class="route-list">
          <div class="route-row"><code>doctor</code><span>Return runtime details and the target support matrix. Same as <code>a1 doctor</code>.</span></div>
          <div class="route-row"><code>wcag_show</code><span>Return one criterion with its techniques, failures, coverage, and strategy. Set <code>includeUnderstanding</code> for the full Understanding document text. A technique or failure id also returns its body. Same as <code>a1 wcag show</code> and <code>a1 wcag understanding</code>.</span></div>
@@ -109,16 +116,21 @@ const toc = [
          and <code>--html</code>. <code>run_axe</code> also takes <code>criterion</code>,
          <code>level</code>, or <code>ruleIds</code> to narrow the run, and rejects more than one of
          them. Omit all three, and <code>run_axe</code> runs every mapped rule, matching
-         <code>a1 axe</code> with no filter. <code>tree</code> takes <code>role</code> and
-         <code>name</code> to keep only matching nodes and their ancestors.
+         <code>a1 axe</code> with no filter.
+      </p>
+      <p>
+         <code>tree</code> takes <code>role</code> and <code>name</code> to keep only matching
+         nodes and their ancestors.
       </p>
       <p>
          <code>run_axe</code> and <code>audit</code> each return a <code>verdict</code> object and an
          <code>exitCode</code>. <code>exitCode</code> is 4, the CLI's assertion exit code, when a
          violation at or above <code>failOn</code> (default <code>minor</code>) is not covered by
-         <code>baseline</code>, and 0 otherwise. Pass <code>baseline</code> as
-         <code>{`{ acceptedFindings: [...] }`}</code> to accept known findings, the same list the CLI
-         reads from a <code>--baseline</code> file.
+         <code>baseline</code>, and 0 otherwise.
+      </p>
+      <p>
+         Pass <code>baseline</code> as <code>{`{ acceptedFindings: [...] }`}</code> to accept known
+         findings, the same list the CLI reads from a <code>--baseline</code> file.
       </p>
    </section>
 
@@ -137,8 +149,8 @@ const toc = [
       </div>
       <p>
          One session is active at a time, so no action takes a session id, and <code>start</code>
-         stops any session already active. The start response carries <code>session</code>, which
-         includes <code>sessionId</code>, <code>target</code>, and <code>targetType</code>.
+         stops any session already active. The start response includes <code>session</code>, which
+         has <code>sessionId</code>, <code>target</code>, and <code>targetType</code>.
          <code>targetType</code> is <code>real</code> for VoiceOver and NVDA, and
          <code>simulated</code> for virtual. <code>status</code> returns
          <code>{`{ noSession: true }`}</code> instead of throwing when no session is active.
@@ -149,9 +161,12 @@ const toc = [
          takes, one action per call. The portable verbs need no payload and work on every target:
          <code>next</code>, <code>previous</code>, <code>interact</code>, <code>stop-interacting</code>,
          <code>activate</code>, <code>top</code>, <code>bottom</code>, <code>escape</code>,
-         <code>read</code>, <code>transcript</code>, and <code>title</code>. <code>next</code> and
-         <code>previous</code> take an optional payload to jump by kind: heading, link, landmark,
-         control, button, table, list, graphic, region, or form-field.
+         <code>read</code>, <code>transcript</code>, and <code>title</code>.
+      </p>
+      <p>
+         <code>next</code> and <code>previous</code> take an optional payload to jump by kind:
+         heading, link, landmark (a named region such as banner, navigation, or main), control,
+         button, table, list, graphic, region, or form-field.
       </p>
       <div class="route-list">
          <div class="route-row"><code>press</code><span>Payload <code>{`{ keys }`}</code>, one chord per entry, pressed in order, such as <code>["Tab", "Tab"]</code>.</span></div>
@@ -170,10 +185,13 @@ const toc = [
       <p>
          <code>find</code>, <code>goto</code>, and <code>wait</code> add <code>exitCode</code> to the
          result: 4 when the search or wait did not match, matching <code>a1 sr find</code>,
-         <code>goto</code>, and <code>wait</code>, and 0 otherwise. Every response's
-         <code>state</code> carries the timestamped <code>transcript</code> so far, and a VoiceOver
-         session's state also carries <code>axFocusedElement</code>: the accessibility role, subrole,
-         title, description, value, and enabled state of the element system keyboard focus is on.
+         <code>goto</code>, and <code>wait</code>, and 0 otherwise.
+      </p>
+      <p>
+         Every response's <code>state</code> includes the timestamped <code>transcript</code> so
+         far. A VoiceOver session's state also includes <code>axFocusedElement</code>: the
+         accessibility role, subrole, title, description, value, and enabled state of the element
+         system keyboard focus is on.
       </p>
    </section>
 
@@ -223,15 +241,13 @@ const toc = [
    <section class="field-note" id="effects">
       <div class="panel-head">
          <p class="panel-kicker">Side effects</p>
-         <h2>What each tool touches</h2>
+         <h2>Side effects by tool</h2>
       </div>
-      <p>
-         <code>wcag_show</code>, <code>wcag_criteria</code>, <code>wcag_search</code>, and
-         <code>wcag_rule</code> read local files (<code>wcag_rule</code> also reads the installed
-         axe-core package for help text). <code>run_axe</code>, <code>tree</code>, and
-         <code>audit</code> open the target in browser automation. <code>doctor</code> reads the host
-         settings and installed browsers, and runs a short recording check on macOS.
-      </p>
+      <div class="route-list">
+         <div class="route-row"><div class="route-terms"><code>wcag_show</code>, <code>wcag_criteria</code>, <code>wcag_search</code>, <code>wcag_rule</code></div><span>Read local files. <code>wcag_rule</code> also reads the installed axe-core package for help text.</span></div>
+         <div class="route-row"><div class="route-terms"><code>run_axe</code>, <code>tree</code>, <code>audit</code></div><span>Open the target in browser automation.</span></div>
+         <div class="route-row"><code>doctor</code><span>Reads the host settings and installed browsers, and runs a short recording check on macOS.</span></div>
+      </div>
       <p>
          The <code>sr_*</code> tools change the state of the machine. A real session puts VoiceOver
          or NVDA under automation control until the client calls <code>sr_session</code> with
