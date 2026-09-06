@@ -10,6 +10,7 @@ import {
    addDriveActionOptions,
    addDriveAutoStartOptions,
    addDriveNavigationOptions,
+   DRIVE_GROUPS,
    type DriveActionOptions,
    type DriveAutoStartOptions,
 } from './drive-options.js';
@@ -37,6 +38,16 @@ async function loadDriveRunner(): Promise<DriveRunner> {
 }
 
 /**
+ * The move-through-the-page verbs among interact, stop-interacting, activate, top,
+ * bottom, and escape; the rest belong to "Act on it".
+ */
+const MOVE_VERBS: ReadonlySet<string> = new Set(['top', 'bottom', 'escape']);
+
+function groupForVerb(verb: string): string {
+   return MOVE_VERBS.has(verb) ? DRIVE_GROUPS.move : DRIVE_GROUPS.act;
+}
+
+/**
  * Registers next and previous with their kinds, then top, bottom, interact,
  * stop-interacting, activate, and escape.
  */
@@ -44,8 +55,13 @@ export function registerNavigationCommands(driveCommand: Command): void {
    registerDirectionCommand(driveCommand, 'next');
    registerDirectionCommand(driveCommand, 'previous');
    for (const verb of portableDriverVerbSchema.exclude(['next', 'previous']).options) {
+      const description = getPortableCommand(verb).description;
       addDriveNavigationOptions(
-         driveCommand.command(verb).description(getPortableCommand(verb).description),
+         driveCommand
+            .command(verb)
+            .helpGroup(groupForVerb(verb))
+            .summary(description)
+            .description(description),
       ).action(async (options: DriveActionOptions) => {
          const { executeDriveActionCommand, renderDriveReadText } =
             await loadDriveRunner();
@@ -63,6 +79,8 @@ export function registerReadCommand(driveCommand: Command): void {
    addDriveNavigationOptions(
       driveCommand
          .command('read')
+         .helpGroup(DRIVE_GROUPS.read)
+         .summary('Read the current item without moving.')
          .description(
             'Read the current item without moving: role, name, value, states, and the phrase, with the source of each.',
          ),
@@ -82,6 +100,8 @@ export function registerPressCommand(driveCommand: Command): void {
       addDriveAutoStartOptions(
          driveCommand
             .command('press <chord...>')
+            .helpGroup(DRIVE_GROUPS.act)
+            .summary('Press key chords in order, one chord per argument.')
             .description('Press key chords in order, one chord per argument.')
             .addHelpText('after', () => getDriveKeyHelp()),
       ),
@@ -102,6 +122,8 @@ export function registerTypeCommand(driveCommand: Command): void {
    addDriveAutoStartOptions(
       driveCommand
          .command('type <text>')
+         .helpGroup(DRIVE_GROUPS.act)
+         .summary('Type text through the active target.')
          .description('Type text through the active target.'),
    ).action(async (text: string, options: DriveAutoStartOptions) => {
       const { executeDriveActionCommand, renderDriveReadText } = await loadDriveRunner();
@@ -149,6 +171,8 @@ export function registerFocusCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('focus')
+         .helpGroup(DRIVE_GROUPS.act)
+         .summary('Bring a window to the front.')
          .description(
             'Bring a window to the front. With no options, refocus the app the session opened.',
          )
@@ -173,6 +197,8 @@ export function registerCheckpointCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('checkpoint <label>')
+         .helpGroup(DRIVE_GROUPS.check)
+         .summary('Mark a named point in the transcript for --since.')
          .description('Mark a named point in the transcript for --since.'),
    ).action(async (label: string, options: DriveActionOptions) => {
       const { executeDriveActionCommand, renderDriveReadText } = await loadDriveRunner();

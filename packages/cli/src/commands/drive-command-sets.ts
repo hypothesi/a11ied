@@ -9,7 +9,11 @@ import type * as Core from '#core';
 import { addJsonOption, addVerboseOption } from '../lib/options.js';
 import type { CommandExecution } from '../lib/helpers.js';
 import { getPlatformCommandSets, getPlatformTargets } from './drive-key-help.js';
-import { addDriveAutoStartOptions, type DriveAutoStartOptions } from './drive-options.js';
+import {
+   addDriveAutoStartOptions,
+   DRIVE_GROUPS,
+   type DriveAutoStartOptions,
+} from './drive-options.js';
 
 interface DriveCommandsOptions {
    json?: boolean;
@@ -98,22 +102,24 @@ Examples:
 
 function buildDoExamples(): string {
    const examples = [
-      '  a11ied sr do next',
-      '  a11ied sr do move-right --sr voiceover --ephemeral',
-      '  a11ied sr do move-to-area-bottom --sr voiceover --ephemeral',
+      '  a1 sr do next',
+      '  a1 sr do move-right --sr voiceover --ephemeral',
+      '  a1 sr do move-to-area-bottom --sr voiceover --ephemeral',
    ];
 
    if (process.platform !== 'darwin') {
-      examples.push('  a11ied sr do report-current-focus --sr nvda --ephemeral');
+      examples.push('  a1 sr do report-current-focus --sr nvda --ephemeral');
    }
 
-   return `\nExamples:\n${examples.join('\n')}\n\nUse "a11ied sr list" to see every available command.\n`;
+   return `\nExamples:\n${examples.join('\n')}\n\nUse "a1 sr list" to see every available command.\n`;
 }
 
 export function registerDoCommand(driveCommand: Command): void {
    addDriveAutoStartOptions(
       driveCommand
          .command('do <command>')
+         .helpGroup(DRIVE_GROUPS.act)
+         .summary('Run a named screen reader command.')
          .description(
             'Run a named screen-reader command. Use sr list for all available commands.',
          )
@@ -149,6 +155,8 @@ export function registerListCommand(driveCommand: Command): void {
       addJsonOption(
          driveCommand
             .command('list')
+            .helpGroup(DRIVE_GROUPS.other)
+            .summary('List the named commands sr do accepts.')
             .description(
                'List the named commands sr do accepts, grouped by command set and by what they do. Start with --query; the full list is over 400 lines.',
             )

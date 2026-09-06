@@ -1,4 +1,5 @@
 import type { Command } from 'commander';
+import { TOP_LEVEL_GROUPS } from '../lib/help.js';
 import {
    addHtmlOption,
    addJsonOption,
@@ -14,6 +15,8 @@ function buildTreeCommand(program: Command): Command {
             addJsonOption(
                program
                   .command('tree [target]')
+                  .helpGroup(TOP_LEVEL_GROUPS.fix)
+                  .summary("Print a page's accessibility tree.")
                   .description(
                      'Print the accessibility tree for a target: an http(s) URL, a ' +
                         'file path, - for HTML on stdin, or --html.',

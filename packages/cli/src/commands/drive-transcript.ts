@@ -2,6 +2,7 @@ import type { Command } from 'commander';
 import type { CommandExecution } from '../lib/helpers.js';
 import {
    addDriveActionOptions,
+   DRIVE_GROUPS,
    parseCountOption,
    parseTimeoutMs,
    type DriveActionOptions,
@@ -54,6 +55,8 @@ export function registerTranscriptCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('transcript')
+         .helpGroup(DRIVE_GROUPS.check)
+         .summary('Print what the reader said, with timestamps and checkpoints.')
          .description('Print what the reader said, with timestamps and checkpoints.')
          .option('--since <checkpoint>', 'Only entries after the named checkpoint.')
          .option('--tail <count>', 'Only the last N phrases.')

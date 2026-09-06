@@ -200,11 +200,11 @@ async function assertWcagUnderstanding(): Promise<void> {
 async function assertWcagBareHelp(): Promise<void> {
    const result = await runCli(['wcag']);
    expect(result.status).toBe(EXIT_SUCCESS);
-   expect(result.stdout).toContain('Usage: a11ied wcag [options] [command] [criterion]');
+   expect(result.stdout).toContain('Usage: a1 wcag [options] [command] [criterion]');
 
    const json = await runCli(['wcag', '--json']);
    expect(json.status).toBe(EXIT_SUCCESS);
-   expect(json.stdout).toContain('Usage: a11ied wcag');
+   expect(json.stdout).toContain('Usage: a1 wcag');
 }
 
 async function assertWcagInvalidVersion(): Promise<void> {

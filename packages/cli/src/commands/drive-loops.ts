@@ -15,6 +15,7 @@ import { CliUsageError } from '#core';
 import {
    addDriveActionOptions,
    addDriveNavigationOptions,
+   DRIVE_GROUPS,
    parseCountOption,
    type DriveActionOptions,
 } from './drive-options.js';
@@ -77,6 +78,8 @@ export function registerElementsCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('elements <kind>')
+         .helpGroup(DRIVE_GROUPS.move)
+         .summary('List every element of one kind as the reader announces it.')
          .description(
             `The rotor: move to the top, then list every element of one kind as the reader announces it. Kinds: ${ELEMENT_KINDS}. Needs an active session; run "a1 sr start --sr virtual --allow-virtual" first for the simulated reader instead of the VoiceOver default.`,
          )
@@ -106,6 +109,8 @@ export function registerReadAllCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('read-all')
+         .helpGroup(DRIVE_GROUPS.move)
+         .summary('Read from the cursor to the end and print the transcript.')
          .description(
             'Say-all as a transcript: step item by item from the cursor to the end of the document, bounded by --max. Needs an active session; run "a1 sr start --sr virtual --allow-virtual" first for the simulated reader instead of the VoiceOver default.',
          )
@@ -176,6 +181,8 @@ export function registerGotoCommand(driveCommand: Command): void {
    addDriveNavigationOptions(
       driveCommand
          .command('goto')
+         .helpGroup(DRIVE_GROUPS.move)
+         .summary('Step forward to an item with a given role or name.')
          .description(
             'Step forward until the current item has the given role, name, or both. Exits 4 when nothing matches. Needs an active session; run "a1 sr start --sr virtual --allow-virtual" first for the simulated reader instead of the VoiceOver default.',
          )

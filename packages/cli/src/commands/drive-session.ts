@@ -9,6 +9,7 @@ import { CliUsageError } from '#core';
 import type { CommandExecution } from '../lib/helpers.js';
 import {
    addDriveActionOptions,
+   DRIVE_GROUPS,
    parseTimeoutMs,
    type DriveActionOptions,
 } from './drive-options.js';
@@ -185,6 +186,8 @@ export function registerOpenCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('open <url>')
+         .helpGroup(DRIVE_GROUPS.session)
+         .summary('Open a page in the active session.')
          .description(
             'Navigate the active session to a page. Virtual loads the document; VoiceOver and NVDA open the system browser and refocus it.',
          ),
@@ -211,6 +214,8 @@ export function registerStopCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('stop')
+         .helpGroup(DRIVE_GROUPS.session)
+         .summary('Stop the active session.')
          .description(
             'Stop the active session. A transcript is written next to any recording; --out writes one as .json or .md.',
          )
@@ -242,6 +247,8 @@ export function registerStatusCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('status')
+         .helpGroup(DRIVE_GROUPS.session)
+         .summary("Show the active session's target and state.")
          .description(
             'Show the active session: target, URL, uptime, recording, and transcript counts.',
          ),

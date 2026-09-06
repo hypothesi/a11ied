@@ -6,6 +6,7 @@ import { CliUsageError } from '#core';
 import type { CommandExecution } from '../lib/helpers.js';
 import {
    addDriveActionOptions,
+   DRIVE_GROUPS,
    parseTimeoutMs,
    type DriveActionOptions,
 } from './drive-options.js';
@@ -129,6 +130,8 @@ export function registerBatchCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('batch [file]')
+         .helpGroup(DRIVE_GROUPS.other)
+         .summary('Run JSON lines of actions over one session.')
          .description(
             'Run JSON lines of actions, one per line, over one broker connection in one process. Reads stdin when no file is given. Stops at the first failed expect unless --continue.',
          )

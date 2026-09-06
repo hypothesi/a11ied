@@ -1,11 +1,20 @@
-import chalk from 'chalk';
-import type { Command } from 'commander';
+import type { Argument, Command } from 'commander';
+import { dim, heading } from './format.js';
 import { styleCommandText } from './text.js';
 
 const SEPARATOR_WIDTH = 60;
 
+/** The headings that group the top-level commands in `a1 --help`. */
+export const TOP_LEVEL_GROUPS = {
+   fix: 'Find and fix problems:',
+   drive: 'Drive a screen reader:',
+   lookUp: 'Look things up:',
+   setUp: 'Set up this machine:',
+   other: 'Other:',
+} as const;
+
 function renderSeparator(): string {
-   return chalk.dim('─'.repeat(SEPARATOR_WIDTH));
+   return dim('─'.repeat(SEPARATOR_WIDTH));
 }
 
 function getCommandPath(command: Command): string {
@@ -31,10 +40,27 @@ function isHiddenCommand(command: Command): boolean {
    return Boolean((command as unknown as { _noHelp?: boolean })._noHelp);
 }
 
+/** Renders one argument the way Commander does: `<name>` required, `[name]` optional. */
+function formatArgumentTerm(argument: Argument): string {
+   const rawName = `${argument.name()}${argument.variadic ? '...' : ''}`;
+   return argument.required ? `<${rawName}>` : `[${rawName}]`;
+}
+
+/**
+ * The command term shown in a parent's listing: its name and arguments, never the generic
+ * `[options]` Commander adds by default. That suffix widens the name column for every
+ * command that takes any option, which is nearly all of them.
+ */
+export function subcommandTerm(command: Command): string {
+   const args = command.registeredArguments.map(formatArgumentTerm).join(' ');
+   const alias = command.aliases()[0] ? `|${command.aliases()[0]}` : '';
+   return `${command.name()}${alias}${args ? ` ${args}` : ''}`;
+}
+
 function collectHelpBlocks(command: Command, blocks: string[]): void {
-   const heading = chalk.bold.cyan(getCommandPath(command));
+   const commandHeading = heading(getCommandPath(command));
    const body = styleCommandText(command.helpInformation().trim());
-   blocks.push(`${heading}\n\n${body}`);
+   blocks.push(`${commandHeading}\n\n${body}`);
 
    for (const child of command.commands) {
       if (!isGeneratedHelpCommand(child) && !isHiddenCommand(child)) {

@@ -2,7 +2,15 @@ import type { Command } from 'commander';
 import type { CliOutputEnvelope } from '#contracts';
 import type * as CoreModuleNamespace from '#core';
 import type * as RenderersNamespace from '../renderers/index.js';
+import { TOP_LEVEL_GROUPS } from '../lib/help.js';
 import { addJsonOption, addVerboseOption, addWcagVersionOption } from '../lib/options.js';
+
+const WCAG_EXAMPLES = `
+Examples:
+  a1 wcag 1.1.1
+  a1 wcag rule image-alt
+  a1 wcag search "color contrast"
+`;
 
 interface WcagCommandOptions {
    json?: boolean;
@@ -91,6 +99,7 @@ function registerCriteriaCommand(wcagCommand: Command): void {
    withWcagOptions(
       wcagCommand
          .command('criteria')
+         .summary('List criteria, optionally filtered to one level.')
          .description('List criteria, optionally filtered to one conformance level.')
          .option('--level <level>', 'Filter criteria to one WCAG level: A, AA, or AAA.')
          .option('--summary', 'Print coverage totals per level instead of the list.'),
@@ -119,6 +128,7 @@ function registerShowCommand(wcagCommand: Command): void {
    withWcagOptions(
       wcagCommand
          .command('show <criterion>')
+         .summary('Show one criterion with its techniques and failures.')
          .description(
             'Show one criterion by id or slug with its techniques, failures, and coverage.',
          ),
@@ -131,6 +141,7 @@ function registerUnderstandingCommand(wcagCommand: Command): void {
    withWcagOptions(
       wcagCommand
          .command('understanding <criterion>')
+         .summary('Print the full Understanding document for one criterion.')
          .description('Print the full Understanding document for one criterion.'),
    ).action(async (criterion: string, options: WcagCommandOptions) => {
       await runWcagCommand({
@@ -146,6 +157,7 @@ function registerSearchCommand(wcagCommand: Command): void {
    withWcagOptions(
       wcagCommand
          .command('search <query>')
+         .summary('Search criteria, techniques, failures, and tags.')
          .description(
             'Search criterion titles, summaries, techniques, failures, and tags.',
          )
@@ -168,6 +180,7 @@ function registerRuleCommand(wcagCommand: Command): void {
    withWcagOptions(
       wcagCommand
          .command('rule <ruleId>')
+         .summary('Map one axe-core rule id to its WCAG criteria.')
          .description(
             'Map one axe-core rule id to its criteria, techniques, failures, and fix guidance.',
          ),
@@ -184,11 +197,14 @@ function registerRuleCommand(wcagCommand: Command): void {
 export function registerWcagCommands(program: Command): void {
    const wcagCommand = program
       .command('wcag')
+      .helpGroup(TOP_LEVEL_GROUPS.lookUp)
+      .summary('Criteria, techniques, axe rules, and the W3C guidance.')
       .description('Look up pinned WCAG requirements and coverage data.')
       .argument(
          '[criterion]',
          'Show one criterion by id or slug, or one technique by id such as G18.',
-      );
+      )
+      .addHelpText('after', WCAG_EXAMPLES);
 
    withWcagOptions(wcagCommand).action(
       async (criterion: string | undefined, options: WcagCommandOptions) => {

@@ -10,7 +10,7 @@ import {
    addTimeoutOption,
    addVerboseOption,
 } from '../lib/options.js';
-import { parseCountOption, parseTimeoutMs } from './drive-options.js';
+import { DRIVE_GROUPS, parseCountOption, parseTimeoutMs } from './drive-options.js';
 import { assertHttpUrl, waitForFocusWithWarning } from './drive-session.js';
 
 export interface StartActionOptions {
@@ -128,6 +128,8 @@ export function registerStartCommand(driveCommand: Command): void {
                   addScreenReaderOption(
                      driveCommand
                         .command('start [url]')
+                        .helpGroup(DRIVE_GROUPS.session)
+                        .summary('Start a screen reader session.')
                         .description(
                            'Start the screen reader session, replacing any active one. press, type, and do start one when none is active.',
                         ),

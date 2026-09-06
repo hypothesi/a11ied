@@ -7,7 +7,7 @@ import {
 import type { CommandExecution } from '../lib/helpers.js';
 import { addAllowVirtualOption, addScreenReaderOption } from '../lib/options.js';
 import { parseMaxOption } from './drive-loops.js';
-import { addDriveActionOptions, parseTimeoutMs } from './drive-options.js';
+import { addDriveActionOptions, DRIVE_GROUPS, parseTimeoutMs } from './drive-options.js';
 import { executeOpenAction } from './drive-session.js';
 import { executeStartAction, type StartActionOptions } from './drive-start.js';
 
@@ -89,6 +89,8 @@ export function registerWalkCommand(driveCommand: Command): void {
          addScreenReaderOption(
             driveCommand
                .command('walk [url]')
+               .helpGroup(DRIVE_GROUPS.move)
+               .summary('Read the whole page top to bottom.')
                .description(
                   'Read the whole page top to bottom and print the transcript. Starts a session when none is active, defaulting to VoiceOver; with a URL, opens that page first. Pass --sr virtual --allow-virtual for the simulated reader instead.',
                ),

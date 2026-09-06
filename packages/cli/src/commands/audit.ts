@@ -1,4 +1,5 @@
 import type { Command } from 'commander';
+import { TOP_LEVEL_GROUPS } from '../lib/help.js';
 import {
    addHtmlOption,
    addJsonOption,
@@ -8,6 +9,12 @@ import {
 } from '../lib/options.js';
 import { handleAuditAction, type AuditActionOptions } from './audit-actions.js';
 
+const AUDIT_EXAMPLES = `
+Examples:
+  a1 audit https://example.com
+  a1 audit page.html --fail-on serious
+`;
+
 function buildAuditCommand(program: Command): Command {
    return addTargetTimeoutOption(
       addHtmlOption(
@@ -16,11 +23,14 @@ function buildAuditCommand(program: Command): Command {
                addWcagVersionOption(
                   program
                      .command('audit [target]')
+                     .helpGroup(TOP_LEVEL_GROUPS.fix)
+                     .summary('Scan a page and list what to fix.')
                      .description(
                         'Run the full audit loop against a target: axe, an ' +
                            'accessibility tree summary, WCAG applicability, and a ' +
                            'criterion rollup.',
                      )
+                     .addHelpText('after', AUDIT_EXAMPLES)
                      .option(
                         '--fail-on <impact>',
                         'Only fail on axe violations at or above this impact: ' +

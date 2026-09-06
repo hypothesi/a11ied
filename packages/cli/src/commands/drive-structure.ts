@@ -8,7 +8,11 @@ import {
    type DriverTableMove,
 } from '#contracts';
 import { CliUsageError } from '#core';
-import { addDriveNavigationOptions, type DriveActionOptions } from './drive-options.js';
+import {
+   addDriveNavigationOptions,
+   DRIVE_GROUPS,
+   type DriveActionOptions,
+} from './drive-options.js';
 
 const TABLE_MOVE_LIST = driverTableMoveSchema.options.join(', ');
 
@@ -42,6 +46,8 @@ export function registerTitleCommand(driveCommand: Command): void {
    addDriveNavigationOptions(
       driveCommand
          .command('title')
+         .helpGroup(DRIVE_GROUPS.read)
+         .summary('Read the page title.')
          .description(
             'Read the page title: document.title on virtual, the window summary on VoiceOver, the window title on NVDA.',
          ),
@@ -60,6 +66,8 @@ export function registerFindCommand(driveCommand: Command): void {
    addDriveNavigationOptions(
       driveCommand
          .command('find <text>')
+         .helpGroup(DRIVE_GROUPS.move)
+         .summary('Move the cursor to the next place the text appears.')
          .description(
             `Move the cursor to the next place the text appears. Exits 4 when it is not found. Needs an active session; run "a1 sr start --sr virtual --allow-virtual" first for the simulated reader instead of the VoiceOver default.`,
          ),
@@ -96,6 +104,8 @@ export function registerTableCommand(driveCommand: Command): void {
    addDriveNavigationOptions(
       driveCommand
          .command('table <move>')
+         .helpGroup(DRIVE_GROUPS.move)
+         .summary('Move or read inside the table the cursor is in.')
          .description(
             `Move inside the table the cursor is in, or read a header: ${TABLE_MOVE_LIST}.`,
          )

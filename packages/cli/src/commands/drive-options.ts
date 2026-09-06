@@ -9,6 +9,19 @@ import {
    addVerboseOption,
 } from '../lib/options.js';
 
+/**
+ * The headings that group the sr subcommands in `a1 sr --help`, by what a reader wants to
+ * do.
+ */
+export const DRIVE_GROUPS = {
+   session: 'Start and stop a session:',
+   read: 'Read the current item:',
+   move: 'Move through the page:',
+   act: 'Act on it:',
+   check: 'Check what was said:',
+   other: 'Other:',
+} as const;
+
 /** Options shared by every sr command that talks to the active session. */
 export interface DriveActionOptions {
    json?: boolean;

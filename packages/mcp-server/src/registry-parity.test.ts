@@ -7,7 +7,6 @@ import { withHarness } from './testing/harness.js';
 const CLI_DIST = resolve(import.meta.dirname, '../../cli/dist/cli.js');
 const COMMAND_NAME_PATTERN = /^ {2}([a-z][a-z-]*)/u;
 const SEPARATOR_PATTERN = /\n─+\n/u;
-const COMMANDS_MARKER = '\nCommands:\n';
 /** A sanity floor: the CLI has at least this many command paths across every family. */
 const MIN_EXPECTED_COMMAND_PATHS = 20;
 
@@ -81,17 +80,31 @@ function runCliHelpAll(): string {
    return result.stdout;
 }
 
+/**
+ * Every subcommand list is under its own heading now (`Start and stop a session:`,
+ * `Other:`, ...) instead of one shared `Commands:` marker, so a block counts as a
+ * subcommand list when its heading is anything but `Options:` or `Arguments:`. An option
+ * line never matches COMMAND_NAME_PATTERN (it starts with `-`), so scanning an
+ * option-group heading such as `Choose rules:` by mistake finds nothing either way.
+ */
+const NON_COMMAND_HEADINGS: ReadonlySet<string> = new Set(['Options:', 'Arguments:']);
+const HEADING_LINE_PATTERN = /^[A-Z][A-Za-z0-9 ]*:$/u;
+
 function extractSubcommandNames(commandBlock: string): string[] {
-   const index = commandBlock.indexOf(COMMANDS_MARKER);
-   if (index === -1) {
-      return [];
-   }
-   const lines = commandBlock.slice(index + COMMANDS_MARKER.length).split('\n');
    const names: string[] = [];
-   for (const line of lines) {
-      const match = COMMAND_NAME_PATTERN.exec(line);
-      if (match?.[1]) {
-         names.push(match[1]);
+   for (const block of commandBlock.split('\n\n')) {
+      const [headingLine = '', ...itemLines] = block.split('\n');
+      if (
+         !HEADING_LINE_PATTERN.test(headingLine) ||
+         NON_COMMAND_HEADINGS.has(headingLine)
+      ) {
+         continue;
+      }
+      for (const line of itemLines) {
+         const match = COMMAND_NAME_PATTERN.exec(line);
+         if (match?.[1]) {
+            names.push(match[1]);
+         }
       }
    }
    return names;
@@ -102,11 +115,11 @@ function listCliCommandPaths(): string[] {
    const chunks = runCliHelpAll()
       .split(SEPARATOR_PATTERN)
       .map((chunk) => chunk.trim())
-      .filter((chunk) => chunk.startsWith('a11ied'));
+      .filter((chunk) => chunk.startsWith('a1'));
    const paths: string[] = [];
    for (const chunk of chunks) {
       const [firstLine = ''] = chunk.split('\n'),
-         commandPath = firstLine.slice('a11ied'.length).trim();
+         commandPath = firstLine.slice('a1'.length).trim();
       for (const subcommand of extractSubcommandNames(chunk)) {
          paths.push(commandPath ? `${commandPath} ${subcommand}` : subcommand);
       }

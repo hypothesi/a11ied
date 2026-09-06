@@ -7,6 +7,7 @@ import {
 import { CliUsageError, getNavigationKindEntry } from '#core';
 import {
    addDriveNavigationOptions,
+   DRIVE_GROUPS,
    parseCountOption,
    type DriveActionOptions,
 } from './drive-options.js';
@@ -109,6 +110,8 @@ export function registerDirectionCommand(
    addDriveNavigationOptions(
       driveCommand
          .command(`${direction} [kind]`)
+         .helpGroup(DRIVE_GROUPS.move)
+         .summary(`Move to the ${direction} item, or jump by kind.`)
          .description(`Move to the ${direction} item, or jump by kind: ${KIND_LIST}.`)
          .option('--level <n>', 'With heading: only headings of this level, 1 to 6.')
          .option('--times <n>', 'Repeat the move this many times.')

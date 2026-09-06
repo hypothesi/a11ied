@@ -3,6 +3,7 @@ import { cliExitCodes, type DoctorReport } from '#contracts';
 import type * as Core from '#core';
 import type { GuidepupSetupStep, GuidepupSetupStepResult } from '#core';
 import { code, dim, doctorTextStyle, heading } from '../lib/format.js';
+import { TOP_LEVEL_GROUPS } from '../lib/help.js';
 import type { CommandExecution } from '../lib/helpers.js';
 
 interface SetupOptions {
@@ -112,6 +113,8 @@ async function handleSetupAction(options: SetupOptions): Promise<void> {
 export function registerSetupCommand(program: Command): void {
    program
       .command('setup')
+      .helpGroup(TOP_LEVEL_GROUPS.setUp)
+      .summary('Install what the screen readers need.')
       .description(
          'Run the Guidepup setup and install commands this host needs for real screen reader sessions, then re-check with doctor.',
       )

@@ -11,6 +11,7 @@ import type { CommandExecution } from '../lib/helpers.js';
 import { addJsonOption, addVerboseOption } from '../lib/options.js';
 import {
    addDriveActionOptions,
+   DRIVE_GROUPS,
    parseCountOption,
    parseTimeoutMs,
    type DriveActionOptions,
@@ -60,6 +61,8 @@ export function registerWaitCommand(driveCommand: Command): void {
       addJsonOption(
          driveCommand
             .command('wait')
+            .helpGroup(DRIVE_GROUPS.check)
+            .summary('Pause, or wait until the reader announces a phrase.')
             .description(
                'Pause, or wait until the reader announces a phrase. Polls the transcript, so a phrase that arrives between two commands is not missed. Exits 4 on timeout.',
             )
@@ -131,6 +134,8 @@ export function registerExpectCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('expect <text|/regex/>')
+         .helpGroup(DRIVE_GROUPS.check)
+         .summary('Check that the reader announced a phrase.')
          .description(
             'Check that the reader announced a phrase. Exits 4 when it did not, or with --not when it did.',
          )

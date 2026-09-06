@@ -1,4 +1,5 @@
 import type { Command } from 'commander';
+import { TOP_LEVEL_GROUPS } from '../lib/help.js';
 import {
    addHtmlOption,
    addJsonOption,
@@ -8,14 +9,34 @@ import {
 } from '../lib/options.js';
 import { handleAxeAction, type AxeActionOptions } from './axe-actions.js';
 
-function addAxeScanOptions(command: Command): Command {
+const AXE_GROUPS = {
+   rules: 'Choose rules:',
+   scope: 'Scope the page:',
+   verdict: 'Decide the verdict:',
+   output: 'Output:',
+} as const;
+
+const AXE_EXAMPLES = `
+Examples:
+  a1 axe https://example.com --level AA
+  a1 axe page.html --rule image-alt --json
+`;
+
+function addAxeRuleOptions(command: Command): Command {
    return command
       .option('--level <level>', 'Limit the run to one WCAG level.')
       .option(
          '--criterion <criterion>',
          'Limit the run to one WCAG criterion id or slug.',
       )
-      .option('--rule <ruleId...>', 'Limit the run to one or more explicit axe rule ids.')
+      .option(
+         '--rule <ruleId...>',
+         'Limit the run to one or more explicit axe rule ids.',
+      );
+}
+
+function addAxePageScopeOptions(command: Command): Command {
+   return command
       .option(
          '--selector <css>',
          'Scope the scan to elements matching this CSS selector.',
@@ -65,28 +86,27 @@ function addAxeOutputOptions(command: Command): Command {
 }
 
 function buildAxeCommand(program: Command): Command {
-   return addTargetTimeoutOption(
-      addHtmlOption(
-         addVerboseOption(
-            addJsonOption(
-               addWcagVersionOption(
-                  addAxeOutputOptions(
-                     addAxeVerdictOptions(
-                        addAxeScanOptions(
-                           program
-                              .command('axe [targets...]')
-                              .description(
-                                 'Run axe-core against one or more targets: an http(s) ' +
-                                    'URL, a file path, - for HTML on stdin, or --html.',
-                              ),
-                        ),
-                     ),
-                  ),
-               ),
-            ),
-         ),
-      ),
-   );
+   const axeCommand = program
+      .command('axe [targets...]')
+      .helpGroup(TOP_LEVEL_GROUPS.fix)
+      .summary('Run axe-core against one or more targets.')
+      .description(
+         'Run axe-core against one or more targets: an http(s) URL, a file path, - ' +
+            'for HTML on stdin, or --html.',
+      )
+      .addHelpText('after', AXE_EXAMPLES);
+
+   addAxeRuleOptions(axeCommand.optionsGroup(AXE_GROUPS.rules));
+   addAxePageScopeOptions(axeCommand.optionsGroup(AXE_GROUPS.scope));
+   addHtmlOption(axeCommand);
+   addTargetTimeoutOption(axeCommand);
+   addAxeVerdictOptions(axeCommand.optionsGroup(AXE_GROUPS.verdict));
+   addAxeOutputOptions(axeCommand.optionsGroup(AXE_GROUPS.output));
+   addWcagVersionOption(axeCommand);
+   addJsonOption(axeCommand);
+   addVerboseOption(axeCommand);
+
+   return axeCommand;
 }
 
 interface AxeCommandOptions extends AxeActionOptions {
