@@ -177,7 +177,9 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH;
          .route-row span { color: var(--ink-soft); }
          .feature-block { display: grid; gap: var(--lg); max-width: none; }
          .feature-block > h2 { font-size: clamp(2rem, 3.4vw, 3rem); }
+         .feature-block > p { max-width: 72ch; }
          .feature-grid { display: grid; gap: var(--lg); grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
+         .feature-grid--wide { grid-template-columns: repeat(auto-fit, minmax(26rem, 1fr)); }
          .feature-card { display: flex; flex-direction: column; gap: var(--md); max-width: none; padding: var(--lg) var(--md); background: var(--paper-light); border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); }
          .feature-card :is(h2, h3) { font-size: 1.5rem; line-height: 1.05; }
          .feature-card p { color: var(--ink-soft); font-size: 0.98rem; line-height: 1.6; }
