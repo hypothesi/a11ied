@@ -66,14 +66,14 @@ describe('VoiceOver environment checks', () => {
 
       expect(byId['voiceover-applescript-setting']?.status).toBe('fail');
       expect(byId['voiceover-applescript-setting']?.action).toBe(
-         'npx -y @guidepup/setup setup',
+         'a1 setup',
       );
       expect(byId['voiceover-applescript-system-flag']?.status).toBe('fail');
       expect(byId['voiceover-local-preferences']?.status).toBe('fail');
       expect(byId['voiceover-splash-screen']?.status).toBe('warn');
       expect(byId['voiceover-preferences-bundle']?.status).toBe('fail');
       expect(byId['voiceover-preferences-bundle']?.action).toBe(
-         'cd "/repo" && npx -y @guidepup/setup install',
+         'a1 setup',
       );
    });
 

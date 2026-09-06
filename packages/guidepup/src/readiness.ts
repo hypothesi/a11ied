@@ -5,7 +5,7 @@ import {
    type Platform,
 } from '@a11ied/contracts';
 
-import { GUIDEPUP_INSTALL_COMMAND, GUIDEPUP_SETUP_COMMAND } from './environment.js';
+import { A11IED_SETUP_COMMAND } from './environment.js';
 
 export type ScreenReaderLike = Pick<
    ScreenReader,
@@ -35,7 +35,7 @@ export type ScreenReaderLike = Pick<
    Pick<ScreenReader, 'detect' | 'default'>;
 
 const targetNotes: Record<Platform, string> = {
-   nvda: `Automate the real NVDA screen reader on Windows after \`${GUIDEPUP_INSTALL_COMMAND}\` is complete.`,
+   nvda: `Automate the real NVDA screen reader on Windows after \`${A11IED_SETUP_COMMAND}\` is complete.`,
    virtual: 'Use the virtual screen reader in fast local and CI feedback loops.',
    voiceover:
       'Automate the real VoiceOver screen reader on macOS after local OS permissions are granted.',
@@ -47,12 +47,8 @@ export function describePlatform(platform: Platform): string {
 }
 
 /** Returns the setup command operators should run before attempting a real-device session. */
-export function guidepupSetupCommand(platform?: Platform): string {
-   if (platform === 'nvda') {
-      return GUIDEPUP_INSTALL_COMMAND;
-   }
-
-   return GUIDEPUP_SETUP_COMMAND;
+export function guidepupSetupCommand(): string {
+   return A11IED_SETUP_COMMAND;
 }
 
 function getPlatformLabel(expectedPlatform: string): string {
@@ -87,9 +83,9 @@ export async function checkDetectedReadiness(
          status: 'requires-setup',
          summary: `${target} is not ready for Guidepup automation yet.`,
          details: [
-            `Run \`${GUIDEPUP_SETUP_COMMAND}\` and \`${GUIDEPUP_INSTALL_COMMAND}\` on the host machine before starting a real screen-reader session.`,
+            `Run \`${A11IED_SETUP_COMMAND}\` on this machine before starting a real screen reader session. It downloads what ${target} needs and grants the automation permissions.`,
          ],
-         setupCommand: guidepupSetupCommand(target),
+         setupCommand: guidepupSetupCommand(),
          debug: {
             detected,
             isDefault,
@@ -102,7 +98,7 @@ export async function checkDetectedReadiness(
       status: 'ready',
       summary: `${target} is ready for automation.`,
       details: [getReadinessDetailForDefault(isDefault)],
-      setupCommand: guidepupSetupCommand(target),
+      setupCommand: guidepupSetupCommand(),
       debug: {
          detected,
          isDefault,
@@ -141,6 +137,6 @@ export function createReadinessError(
       status: 'requires-setup',
       summary: `${target} readiness could not be confirmed.`,
       details: [getErrorDetail(error)],
-      setupCommand: guidepupSetupCommand(target),
+      setupCommand: guidepupSetupCommand(),
    });
 }

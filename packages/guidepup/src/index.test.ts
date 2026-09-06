@@ -120,9 +120,8 @@ describe('guidepup virtual driver commands', () => {
 });
 
 describe('guidepup driver setup and keys', () => {
-   it('returns setup commands for real targets', () => {
-      expect(guidepupSetupCommand('voiceover')).toBe('npx -y @guidepup/setup setup');
-      expect(guidepupSetupCommand('nvda')).toBe('npx -y @guidepup/setup install');
+   it('points a reader at a1 setup rather than the Guidepup commands', () => {
+      expect(guidepupSetupCommand()).toBe('a1 setup');
    });
 
    it('normalizes documented driver key aliases before dispatch', () => {

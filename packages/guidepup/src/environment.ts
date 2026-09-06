@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 import { homedir, release } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { z } from 'zod';
-import type { DoctorCheck } from '@a11ied/contracts';
+import type { DoctorCheck, Platform } from '@a11ied/contracts';
 
 /** Configures the OS permissions Guidepup needs to drive a real screen reader. */
 export const GUIDEPUP_SETUP_COMMAND = 'npx -y @guidepup/setup setup';
@@ -141,9 +141,11 @@ export function resolveGuidepupInstallRoot(manifestPath: string): string {
    return installRoot;
 }
 
-function buildInstallAction(manifestPath: string): string {
-   return `cd "${resolveGuidepupInstallRoot(manifestPath)}" && ${GUIDEPUP_INSTALL_COMMAND}`;
-}
+/**
+ * `a1 setup` runs the Guidepup commands from the directory where the manifest resolves,
+ * so a reader never has to cd into a global node_modules tree to install the assets.
+ */
+export const A11IED_SETUP_COMMAND = 'a1 setup';
 
 function buildCheck(args: {
    id: string;
@@ -229,7 +231,7 @@ function buildVoiceOverPreferencesBundleCheck(
       label,
       passed: deps.existsSync(assetPath),
       failDetail: `${assetPath} is missing. VoiceOver sessions mount this bundle on every start.`,
-      action: buildInstallAction(deps.manifestPath),
+      action: A11IED_SETUP_COMMAND,
       actionLabel: 'Install the Guidepup VoiceOver preferences bundle',
    });
 }
@@ -249,7 +251,7 @@ export function checkVoiceOverEnvironment(deps: GuidepupEnvironmentDeps): Doctor
             deps.readDefault(VOICEOVER_DEFAULTS_DOMAIN, VOICEOVER_APPLESCRIPT_KEY) ===
             DEFAULTS_ENABLED_VALUE,
          failDetail: `\`defaults read ${VOICEOVER_DEFAULTS_DOMAIN} ${VOICEOVER_APPLESCRIPT_KEY}\` is not ${DEFAULTS_ENABLED_VALUE}.`,
-         action: GUIDEPUP_SETUP_COMMAND,
+         action: A11IED_SETUP_COMMAND,
          actionLabel: 'Enable AppleScript control for VoiceOver',
       }),
       buildCheck({
@@ -257,7 +259,7 @@ export function checkVoiceOverEnvironment(deps: GuidepupEnvironmentDeps): Doctor
          label: 'AppleScript control confirmed by macOS',
          passed: deps.existsSync(VOICEOVER_APPLESCRIPT_SYSTEM_FLAG),
          failDetail: `${VOICEOVER_APPLESCRIPT_SYSTEM_FLAG} is missing. If setup cannot create it, turn on "Allow VoiceOver to be controlled with AppleScript" in VoiceOver Utility (${GUIDEPUP_MANUAL_VOICEOVER_SETUP_URL}).`,
-         action: GUIDEPUP_SETUP_COMMAND,
+         action: A11IED_SETUP_COMMAND,
          actionLabel: 'Confirm AppleScript control for VoiceOver',
       }),
       buildCheck({
@@ -265,7 +267,7 @@ export function checkVoiceOverEnvironment(deps: GuidepupEnvironmentDeps): Doctor
          label: 'VoiceOver local preferences exist',
          passed: deps.existsSync(localPreferencesPath),
          failDetail: `${localPreferencesPath} is missing. Setup starts VoiceOver once to create it.`,
-         action: GUIDEPUP_SETUP_COMMAND,
+         action: A11IED_SETUP_COMMAND,
          actionLabel: 'Create the VoiceOver local preferences',
       }),
       buildCheck({
@@ -276,7 +278,7 @@ export function checkVoiceOverEnvironment(deps: GuidepupEnvironmentDeps): Doctor
             DEFAULTS_ENABLED_VALUE,
          failStatus: 'warn',
          failDetail: 'VoiceOver may show its welcome dialog when a session starts.',
-         action: GUIDEPUP_SETUP_COMMAND,
+         action: A11IED_SETUP_COMMAND,
          actionLabel: 'Suppress the VoiceOver welcome dialog',
       }),
       buildVoiceOverPreferencesBundleCheck(deps),
@@ -316,8 +318,28 @@ export function checkNvdaEnvironment(deps: GuidepupEnvironmentDeps): DoctorCheck
          label: 'Guidepup NVDA build installed',
          passed: deps.existsSync(nvdaPath),
          failDetail: `${nvdaPath} is missing.`,
-         action: buildInstallAction(deps.manifestPath),
+         action: A11IED_SETUP_COMMAND,
          actionLabel: 'Install the Guidepup NVDA build',
       }),
    ];
+}
+
+const ASSET_CHECK_IDS = new Set(['voiceover-preferences-bundle', 'nvda-installed']);
+
+/**
+ * Whether the files a real screen reader downloads are already in the Guidepup cache.
+ * VoiceOver mounts its preferences bundle on every start and NVDA runs from its own
+ * build, so a session cannot start until they are there.
+ */
+export function hasScreenReaderAssets(
+   deps: GuidepupEnvironmentDeps,
+   target: Extract<Platform, 'voiceover' | 'nvda'>,
+): boolean {
+   const checks =
+      target === 'voiceover'
+         ? [buildVoiceOverPreferencesBundleCheck(deps)]
+         : checkNvdaEnvironment(deps);
+   return checks
+      .filter((check) => ASSET_CHECK_IDS.has(check.id))
+      .every((check) => check.status === 'pass');
 }

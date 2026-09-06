@@ -16,8 +16,7 @@ import {
    checkNvdaEnvironment,
    checkVoiceOverEnvironment,
    createDefaultGuidepupEnvironmentDeps,
-   GUIDEPUP_INSTALL_COMMAND,
-   GUIDEPUP_SETUP_COMMAND,
+   A11IED_SETUP_COMMAND,
    type GuidepupEnvironmentDeps,
 } from '@a11ied/guidepup';
 
@@ -37,7 +36,7 @@ const supportedTargets: Target[] = [
       os: 'macOS',
       status: 'requires-setup',
       notes: [
-         `Run \`${GUIDEPUP_SETUP_COMMAND}\` and \`${GUIDEPUP_INSTALL_COMMAND}\` once per machine before the first real-device session.`,
+         `Run \`${A11IED_SETUP_COMMAND}\` once per machine before the first real session.`,
          'a11ied uses native macOS video capture without requesting microphone input.',
       ],
    },
@@ -47,7 +46,7 @@ const supportedTargets: Target[] = [
       os: 'Windows',
       status: 'requires-setup',
       notes: [
-         `Run \`${GUIDEPUP_INSTALL_COMMAND}\` once per machine to download the Guidepup NVDA build.`,
+         `Run \`${A11IED_SETUP_COMMAND}\` once per machine to download the Guidepup NVDA build.`,
       ],
    },
    {

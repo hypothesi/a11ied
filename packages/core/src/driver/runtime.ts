@@ -19,6 +19,7 @@ import { resolveDriverMode } from './environment.js';
 import { validateRecordingRequest } from './recording.js';
 import { runEphemeralAction } from './runtime-ephemeral.js';
 import { hasInProcessSession, startInProcessSession } from './runtime-internal.js';
+import { ensureScreenReaderAssets } from './assets.js';
 import { assertTargetReady, parseBrokerActionResult } from './runtime-support.js';
 import { withSessionStartLock } from './session-lock.js';
 import {
@@ -197,6 +198,7 @@ export async function startDriverSession(
 ): Promise<DriverSessionStart> {
    await ensureStateDirectory();
    const target = await resolveStartTarget(options.target);
+   await ensureScreenReaderAssets(target);
    await assertTargetReady(target);
    if (options.recordingPath) {
       validateRecordingRequest(target, options.recordingPath);

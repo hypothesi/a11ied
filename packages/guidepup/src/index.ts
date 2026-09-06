@@ -35,8 +35,10 @@ export {
 } from './command-registry.js';
 
 export {
+   A11IED_SETUP_COMMAND,
    checkNvdaEnvironment,
    checkVoiceOverEnvironment,
+   hasScreenReaderAssets,
    createDefaultGuidepupEnvironmentDeps,
    GUIDEPUP_INSTALL_COMMAND,
    GUIDEPUP_SETUP_COMMAND,
