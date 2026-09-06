@@ -3,59 +3,50 @@ import DocShell from '../layouts/doc-shell.astro';
 import { docsLinks } from '../lib/nav';
 
 const toc = [
-   { id: 'requirements', label: 'WCAG requirements' },
-   { id: 'screen-reader', label: 'Screen reader output' },
-   { id: 'axe', label: 'axe runs' },
-   { id: 'coverage', label: 'Coverage' },
-   { id: 'agents', label: 'Agent tools' },
-   { id: 'interfaces', label: 'Interfaces' },
-   { id: 'next', label: 'Start here' },
+   { id: 'problem', label: 'The gap' },
+   { id: 'output', label: 'What a session returns' },
+   { id: 'interfaces', label: 'Ways in' },
+   { id: 'next', label: 'Next' },
 ];
 ---
 
 <DocShell
    title="Overview"
-   summary="A site's accessibility gets measured against a set of published requirements. An automated scan can decide some of them by reading a page's HTML. The rest need someone to listen to the page the way a screen reader user does. a11ied runs both kinds of check from one command line, one MCP server, and one TypeScript API."
+   summary="a11ied tests web accessibility from the command line. It runs axe against a page and drives VoiceOver, NVDA, or a simulated screen reader, then reports both against WCAG."
    links={docsLinks}
    toc={toc}
 >
-   <section class="panel" id="requirements">
-      <div class="panel-head">
-         <p class="panel-kicker">Requirements</p>
-         <h2>WCAG requirements</h2>
-      </div>
+   <section class="ledger" id="problem">
+      <h2>The gap</h2>
       <p>
-         The <a href="https://www.w3.org/WAI/standards-guidelines/wcag/">Web Content
-         Accessibility Guidelines (WCAG)</a> is the standard most accessibility
-         requirements point back to. It groups its rules into numbered, testable success
-         criteria, each at level A, AA, or AAA.
+         Accessibility work is measured against the <a
+            href="https://www.w3.org/WAI/standards-guidelines/wcag/">Web Content Accessibility
+         Guidelines (WCAG)</a>, a published standard of numbered requirements called success
+         criteria.
       </p>
       <p>
-         <a href="https://github.com/dequelabs/axe-core">axe-core (axe)</a> is the
-         open-source rules engine most automated accessibility scans run. It reads a
-         page's rendered HTML and decides the success criteria it can decide on its own.
-         <code>a1 axe</code> runs it against a URL.
+         An automated scan decides some of them. <a
+            href="https://github.com/dequelabs/axe-core">axe-core</a>, the engine behind most
+         accessibility scans, reads the rendered HTML and reports what it finds. Of the 86
+         criteria in WCAG 2.2, it decides 28.
       </p>
       <p>
-         The rest need a person to listen to the page. <a
-         href="https://support.apple.com/guide/voiceover/welcome/mac">VoiceOver</a> on
-         macOS and <a href="https://www.nvaccess.org/about-nvda/">NVDA</a> on Windows are
-         the screen readers people actually use. <code>a1 sr</code> drives either one,
-         plus a simulated screen reader that needs neither installed, and returns what it
-         announced as text.
+         The other 58 need a person. Whether a form announces its error, whether focus lands
+         somewhere sensible, whether a dialog traps the reader: none of that is visible in the
+         HTML. Answering it means opening <a
+            href="https://support.apple.com/guide/voiceover/welcome/mac">VoiceOver</a> or <a
+            href="https://www.nvaccess.org/">NVDA</a> and listening, which is slow enough that
+         most teams skip it.
+      </p>
+      <p>
+         a11ied scripts that half. It starts a screen reader, moves through a page, and returns
+         what was said as text you can read, diff, and assert on.
       </p>
    </section>
 
-   <section class="panel" id="screen-reader">
-      <div class="panel-head">
-         <p class="panel-kicker">Screen reader output</p>
-         <h2>The announcement order for a page</h2>
-      </div>
-      <p>
-         <code>sr walk</code> starts a session, reads the whole page top to bottom, and
-         returns the spoken text as JSON, one entry per item.
-      </p>
-      <pre><code>a1 sr walk --sr virtual --allow-virtual http://localhost:3000/checkout --json</code></pre>
+   <section class="ledger" id="output">
+      <h2>What a session returns</h2>
+      <pre><code>a1 sr walk https://example.com/checkout</code></pre>
       <pre data-label="OUTPUT"><code>"spokenPhraseLog": [
   "document",
   "heading, Checkout, level 1",
@@ -70,143 +61,44 @@ const toc = [
   "end of document"
 ]</code></pre>
       <p>
-         The log is the order a screen reader user moves through. This one shows the required state
-         on the email field, and a tenth entry that announces as <code>button</code> with no name.
+         That is the order a screen reader user hears the page in. The email field announces its
+         required state and the card field does not, and the last button has no name at all, so
+         it is announced as "button" and nobody can tell what it does.
       </p>
       <p>
-         Swap <code>--sr virtual --allow-virtual</code> for <code>--sr voiceover</code> to run the
-         same walk against VoiceOver. See <a href="/screen-readers">screen readers</a> for NVDA and
-         when to use each one.
-      </p>
-   </section>
-
-   <section class="panel" id="axe">
-      <div class="panel-head">
-         <p class="panel-kicker">axe runs</p>
-         <h2>An axe run against a URL</h2>
-      </div>
-      <p>
-         <code>--level AA</code> resolves the 73 axe rules mapped to WCAG 2.2 levels A and AA
-         and runs them against the page.
-      </p>
-      <pre><code>a1 axe http://localhost:3000/checkout --level AA --json</code></pre>
-      <pre data-label="OUTPUT"><code>"verdict": &#123;
-  "totalViolationNodes": 1,
-  "failingFindings": [
-    &#123; "ruleId": "button-name", "impact": "critical", "target": ["button[type=\"button\"]"] &#125;
-  ],
-  "passed": false
-&#125;</code></pre>
-      <p>
-         This page fails: one element trips <code>button-name</code>, the rule that checks a
-         button has text a screen reader can announce. The full result also lists every rule axe
-         ran and passed, so a clean run states exactly what it checked.
-      </p>
-      <p>
-         Scope a run three other ways: <code>--criterion 1.4.3</code> for one success
-         criterion, <code>--rule color-contrast --rule link-name</code> for named rules, or no
-         selector at all for every rule mapped in the WCAG version.
-      </p>
-   </section>
-
-   <section class="split panel" id="coverage">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Coverage</p>
-            <h2>Criteria axe cannot decide</h2>
-         </div>
-         <p>
-            Coverage says whether axe can decide a success criterion on its own, or whether a
-            person has to check it too. a11ied derives coverage from the W3C ACT rule mapping and
-            the axe rule tags, both included as local data, so a lookup makes no network request.
-         </p>
-         <pre><code>a1 wcag 2.4.3 --json</code></pre>
-         <pre data-label="OUTPUT"><code>"coverage": &#123;
-  "coverageState": "hybrid",
-  "axeRuleIds": [],
-  "actRuleIds": [],
-  "notes": ["Focus order depends on interaction flow, not just static structure."]
-&#125;,
-"strategy": &#123;
-  "preferredEvidenceMode": "hybrid",
-  "procedureIds": ["focus_order_probe"],
-  "requiresRealTarget": true
-&#125;</code></pre>
-         <p>
-            No axe rule decides Focus Order on its own. The strategy lists the procedure to
-            run, <code>focus_order_probe</code>, and says the test needs a real target, which a
-            driver session provides. <a href="/test-methods">Test methods</a> explains the four
-            states and where the mapping comes from.
-         </p>
-      </div>
-      <div class="split-aside">
-         <div class="tag">WCAG 2.2, level AA</div>
-         <p class="aside-note">
-            24 success criteria. axe rules decide 8. Four are hybrid. Twelve stay manual.
-         </p>
-      </div>
-   </section>
-
-   <section class="panel" id="agents">
-      <div class="panel-head">
-         <p class="panel-kicker">Agent tools</p>
-         <h2>The same commands for a coding agent</h2>
-      </div>
-      <p>
-         The MCP server runs over stdio and opens no network port. Add it to any MCP client and the
-         agent gets criterion lookup, coverage lookup, axe runs, and screen reader sessions.
-      </p>
-      <pre data-label="CONFIG"><code>{`{
-  "mcpServers": {
-    "a11ied": {
-      "command": "npx",
-      "args": ["-y", "a11ied", "mcp"]
-    }
-  }
-}`}</code></pre>
-      <pre data-label="AI AGENT PROMPT"><code>Test http://localhost:3000/checkout with a11ied.
-Run axe at level AA, then step through the form with the screen reader.
-Report the axe violations and the spoken phrase log separately.</code></pre>
-      <p>
-         The <a href="/guides/agent-skill">agent skill</a> adds the reasoning: check coverage first,
-         pick the right target, and keep automated results apart from transcripts.
+         Because it is text, a test can assert on it. <code>a1 sr expect</code> exits 4 when a
+         phrase never appears, which is enough to fail a build.
       </p>
    </section>
 
    <section class="ledger" id="interfaces">
-      <div class="panel-head">
-         <p class="panel-kicker">Interfaces</p>
-         <h2>Ways to use a11ied</h2>
-      </div>
+      <h2>Ways in</h2>
       <div class="route-list">
          <div class="route-row">
-            <strong><a href="/reference/cli">CLI</a></strong>
-            <span>The <code>a1</code> command. Most subcommands take <code>--json</code> and print one structured object. <code>mcp</code> and <code>help-all</code> print plain text only.</span>
+            <code>a1</code>
+            <span>The command line, for a terminal or a CI job.</span>
          </div>
          <div class="route-row">
-            <strong><a href="/reference/mcp">MCP server</a></strong>
-            <span>13 tools and seven read-only resources over stdio, for coding agents and editors.</span>
+            <code>a1 mcp</code>
+            <span>
+               An MCP server, so a coding agent runs the same checks against the page it just
+               changed.
+            </span>
          </div>
          <div class="route-row">
-            <strong><a href="/reference/api">TypeScript API</a></strong>
-            <span>Import <code>runAxe</code>, <code>startDriverSession</code>, and the WCAG lookups from <code>a11ied</code>.</span>
+            <code>a11ied/test</code>
+            <span>A TypeScript API, for screen reader tests in Vitest or any other runner.</span>
          </div>
       </div>
-      <p>
-         The MCP tools and the CLI commands call the same functions. A result from one matches a
-         result from any other.
-      </p>
+      <p>All three call the same runtime, so a result means the same thing in each.</p>
    </section>
 
    <section class="field-note" id="next">
-      <div class="panel-head">
-         <p class="panel-kicker">Start here</p>
-         <h2>Your first test</h2>
-      </div>
+      <h2>Next</h2>
       <p>
-         The <a href="/quickstart">quickstart</a> installs the package, checks your machine, and
-         takes one local route from an axe run to a screen reader transcript in about five
-         minutes.
+         The <a href="/quickstart">quickstart</a> installs a11ied and takes one page from an axe
+         run to a screen reader transcript. It runs on the simulated screen reader, so it needs
+         nothing else installed.
       </p>
    </section>
 </DocShell>

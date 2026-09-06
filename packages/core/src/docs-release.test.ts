@@ -55,15 +55,11 @@ const requiredNavRoutes = [
    '/reference/api',
    '/reference/wcag-data',
 ] as const;
-const requiredHomeRoutes = [
-   '/quickstart',
-   '/screen-readers',
-   '/test-methods',
-   '/guides/agent-skill',
-   '/reference/cli',
-   '/reference/mcp',
-   '/reference/api',
-] as const;
+/*
+ * The overview sends a reader to one place. Every other page is reachable through the
+ * nav, which `requiredNavRoutes` above covers.
+ */
+const requiredHomeRoutes = ['/quickstart'] as const;
 const requiredCiWorkflowSteps = [
    'name: Data validation',
    'name: Standards',

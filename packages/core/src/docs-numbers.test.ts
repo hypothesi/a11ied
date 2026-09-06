@@ -73,10 +73,14 @@ function expectDocsStateTheRealNumbers(): void {
    const cli = readDocsPage('reference/cli.astro');
    const coverage = readDocsPage('test-methods.astro');
 
-   expect(index).toContain('73 axe rules');
    expect(quickstart).toContain('73 rules');
    expect(cli).toContain('73 rules');
-   expect(index).toContain('24 success criteria');
+   /* Prose wraps across source lines, so match the page with its whitespace collapsed. */
+   const indexProse = index.replaceAll(/\s+/g, ' ');
+   expect(indexProse).toContain(
+      `${String(summary.totals.criteria)} criteria in WCAG 2.2`,
+   );
+   expect(indexProse).toContain(`it decides ${String(summary.totals.automated)}`);
    /*
     * The page prints the real `a1 wcag criteria --summary` table, so assert the totals
     * row rather than a sentence. The wording can change, the numbers cannot.

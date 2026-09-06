@@ -50,12 +50,7 @@ function expectNavSections(nav: string): void {
 
 function expectTaskFirstEntryPoints(homePage: string): void {
    expect(homePage).toContain('/quickstart');
-   expect(homePage).toContain('/test-methods');
-   expect(homePage).toContain('/screen-readers');
-   expect(homePage).toContain('/guides/agent-skill');
-   expect(homePage).toContain('a1 axe http://localhost:3000');
    expect(homePage).toContain('a1 sr walk');
-   expect(homePage).toContain('a1 wcag 2.4.3');
 }
 
 function expectGuidesLinkToConcepts(): void {
