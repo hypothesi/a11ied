@@ -25,7 +25,7 @@ reader target). Fix that first. Every other command depends on it.
 
 `audit <target>` runs axe against every mapped rule, prints an accessibility tree
 summary, checks WCAG applicability, and rolls the result up by criterion. It exits 4 when
-an axe violation was found. Read the `nextCommands` field in its output: it names the
+an axe violation was found. Read the `nextCommands` field in its output: it lists the
 exact `a1 wcag rule <id>` and `a1 sr walk <target>` commands to run next.
 
 Fix what `audit` reported, then rerun the same command. Do not consider the change done
@@ -125,7 +125,7 @@ is using interactively at the time.
 ## Cleanup
 
 Always stop a session before the task ends: `a1 sr stop`, or `sr_session` with `action:
-"stop"` over MCP. A session left open holds the screen reader under automation and, for
+"stop"` over MCP. A session left open keeps the screen reader under automation and, for
 a real target, keeps controlling the machine's speech. `a1 sr status` shows whether one
 is still active. `a1 doctor` also flags a stale session under Action items.
 

@@ -3,52 +3,41 @@ import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
 
 const toc = [
-   { id: 'install', label: 'Install the skill' },
+   { id: 'install', label: 'Install' },
    { id: 'first-run', label: 'First run' },
-   { id: 'behavior', label: 'What it changes' },
-   { id: 'mcp', label: 'Skill and MCP' },
+   { id: 'behavior', label: 'Rules in the skill' },
+   { id: 'mcp', label: 'Skill and MCP server' },
    { id: 'update', label: 'Update' },
 ];
 ---
 
 <DocShell
    title="Install the agent skill"
-   summary="The skill is a set of instructions that teaches a coding agent how to use a11ied: check coverage before testing, pick the target that matches the question, and keep automated results apart from screen reader transcripts."
+   summary="The skill is a set of instructions that teaches a coding agent how to use a11ied: look up a criterion's test method before testing it, pick VoiceOver, NVDA, or the simulated screen reader to match the question, and report automated results and screen reader transcripts separately."
    links={docsLinks}
    toc={toc}
 >
-   <section class="split panel" id="install">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Install</p>
-            <h2>Install it with aix</h2>
-         </div>
-         <p>
-            <a href="http://aix.a1st.dev/">aix</a> finds the coding agents installed on your machine
-            and asks which one gets the skill. Installing at user scope makes it available to that
-            agent in every project.
-         </p>
-         <pre><code>npx -y @a1st/aix install https://github.com/hypothesi/a11ied/blob/master/packages/skills/ai.json --only skills --user</code></pre>
-      </div>
-      <div class="split-aside">
-         <div class="tag">Skip the prompt</div>
-         <p class="aside-note">
-            Add <code>--target claude-code</code>, <code>--target codex</code>, or another supported
-            target to install without being asked.
-         </p>
-      </div>
+   <section class="panel" id="install">
+      <h2>Install</h2>
+      <p>
+         <a href="http://aix.a1st.dev/">aix</a> finds the coding agents installed on your machine
+         and asks which one gets the skill. Installing at user scope makes it available to that
+         agent in every project.
+      </p>
+      <pre><code>npx -y @a1st/aix install https://github.com/hypothesi/a11ied/blob/master/packages/skills/ai.json --only skills --user</code></pre>
+      <p>
+         Add <code>--target claude-code</code>, <code>--target codex</code>, or another supported
+         agent name to install without being asked.
+      </p>
    </section>
 
    <section class="panel" id="first-run">
-      <div class="panel-head">
-         <p class="panel-kicker">First run</p>
-         <h2>Give the agent a route and a job</h2>
-      </div>
+      <h2>First run</h2>
       <ol>
          <li>Install the <code>a1</code> command if it is not already on the machine.</li>
-         <li>Restart the coding agent so it picks up the new skill.</li>
+         <li>Restart the coding agent so it loads the new skill.</li>
          <li>Start the app you want to test.</li>
-         <li>Name the route and the behavior you want checked.</li>
+         <li>Give it the route and the behavior you want checked.</li>
       </ol>
       <pre><code>npm install --global a11ied
 
@@ -59,63 +48,50 @@ error messages with the screen reader. Keep the two results separate.</code></pr
    </section>
 
    <section class="ledger" id="behavior">
-      <div class="panel-head">
-         <p class="panel-kicker">Behavior</p>
-         <h2>What the skill changes</h2>
-      </div>
+      <h2>Rules in the skill</h2>
       <div class="route-list">
          <div class="route-row">
-            <strong>Resolves the criterion first</strong>
-            <span>When the task is framed in WCAG terms, the agent looks up the criterion and its coverage before it runs anything.</span>
+            <strong>Looks up the criterion first</strong>
+            <span>When the task includes a criterion from the Web Content Accessibility Guidelines (WCAG), the agent runs <code>wcag_show</code> and reads the criterion's <a href="/test-methods">test method</a> before it runs anything else.</span>
          </div>
          <div class="route-row">
-            <strong>Checks applicability</strong>
-            <span>The agent inspects the page for relevant signals instead of running all 86 criteria against every route.</span>
+            <strong>Narrows to the relevant criteria</strong>
+            <span>The agent runs <code>audit</code> and reads the list of criteria the page's structure makes <a href="/relevant-criteria">relevant</a>, instead of testing all 86 criteria on every route.</span>
          </div>
          <div class="route-row">
-            <strong>Picks the evidence mode on purpose</strong>
-            <span>Automated when the runtime can decide, hybrid when a person judges part of it, manual when the runtime can only explain the criterion.</span>
+            <strong>Picks the test method</strong>
+            <span>Automated when axe rules decide the criterion, hybrid when a person judges part of the result, manual when a11ied can only explain the criterion.</span>
          </div>
          <div class="route-row">
-            <strong>Escalates from virtual to real</strong>
-            <span>The virtual reader for fast local loops, VoiceOver or NVDA when the real software's behavior is the question.</span>
+            <strong>Moves from simulated to real</strong>
+            <span>The simulated screen reader for fast local runs, VoiceOver or NVDA when the question is how the real software behaves.</span>
          </div>
          <div class="route-row">
-            <strong>Separates evidence from claims</strong>
-            <span>Automated results, transcripts, and human judgment stay distinct. A passing axe run is not reported as conformance.</span>
+            <strong>Reports results separately</strong>
+            <span>Automated results, transcripts, and a person's judgment stay apart in the report. A passing axe run is not reported as meeting WCAG.</span>
          </div>
       </div>
    </section>
 
-   <section class="split panel" id="mcp">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Together</p>
-            <h2>Skill and MCP do different jobs</h2>
-         </div>
-         <p>
-            The skill tells the agent how to reason about a test. The MCP server gives it the tools
-            to run one. They work independently, and they work better together.
-         </p>
-         <p>
-            Follow <a href="/guides/agents">test from an AI agent</a> to connect MCP. Use the
-            <a href="/reference/mcp">MCP reference</a> when you need exact tool inputs.
-         </p>
-      </div>
-      <div class="split-aside">
-         <div class="tag">Source</div>
-         <p class="aside-note">
-            The installed instructions come from <code>packages/skills/a11ied/SKILL.md</code> in the
-            repository.
-         </p>
-      </div>
+   <section class="panel" id="mcp">
+      <h2>Skill and MCP server</h2>
+      <p>
+         The skill tells the agent how to plan a test. The MCP server gives it the tools to run
+         one. Either works without the other. With both, the agent has the tools and the
+         instructions for using them.
+      </p>
+      <p>
+         The installed instructions come from <code>packages/skills/a11ied/SKILL.md</code> in the
+         repository.
+      </p>
+      <p>
+         Follow <a href="/guides/agents">use with an AI agent</a> to connect the MCP server. Use
+         the <a href="/reference/mcp">MCP reference</a> when you need exact tool inputs.
+      </p>
    </section>
 
    <section class="field-note" id="update">
-      <div class="panel-head">
-         <p class="panel-kicker">Update</p>
-         <h2>Run the install command again</h2>
-      </div>
+      <h2>Update</h2>
       <p>
          The same <code>aix install</code> command pulls the current skill from the repository and
          reinstalls it at user scope.

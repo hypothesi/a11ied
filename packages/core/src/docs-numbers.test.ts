@@ -71,18 +71,27 @@ function expectDocsStateTheRealNumbers(): void {
    const index = readDocsPage('index.astro');
    const quickstart = readDocsPage('quickstart.astro');
    const cli = readDocsPage('reference/cli.astro');
-   const coverage = readDocsPage('coverage.astro');
+   const coverage = readDocsPage('test-methods.astro');
 
    expect(index).toContain('73 axe rules');
    expect(quickstart).toContain('73 rules');
    expect(cli).toContain('73 rules');
    expect(index).toContain('24 success criteria');
-   expect(coverage).toContain('86 criteria. 28 automated, 10 hybrid, 48 manual.');
-   expect(coverage).toContain(
-      `${String(summary.coverageSources.criteriaWithAxe)} criteria have at least one axe rule`,
+   /*
+    * The page prints the real `a1 wcag criteria --summary` table, so assert the totals
+    * row rather than a sentence. The wording can change, the numbers cannot.
+    */
+   const { automated, criteria, hybrid, manual } = summary.totals;
+   expect(coverage).toMatch(
+      new RegExp(
+         `All\\s+${String(criteria)}\\s+${String(automated)}\\s+${String(hybrid)}\\s+${String(manual)}`,
+      ),
    );
    expect(coverage).toContain(
-      `${String(summary.coverageSources.criteriaWithAct)} have at least one ACT rule`,
+      `${String(summary.coverageSources.criteriaWithAxe)} criteria have an axe rule`,
+   );
+   expect(coverage).toContain(
+      `${String(summary.coverageSources.criteriaWithAct)} have an ACT rule`,
    );
    expect(coverage).toContain(
       `${String(summary.coverageSources.criteriaWithBoth)} have both`,

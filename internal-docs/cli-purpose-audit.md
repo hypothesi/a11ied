@@ -78,7 +78,7 @@ button-name` happens to rank 4.1.2 first through the failure text, by luck.
 
 `inspect applicable --url https://example.com` reports 0 applicable and 43 likely
 applicable criteria, including all eight 1.2.x media criteria, for a page with one
-heading and two paragraphs. Every one of the 43 carries the same reason: "Detected
+heading and two paragraphs. Every one of the 43 gives the same reason: "Detected
 heading signals (heading structure) and matching criterion tags (content)". The
 `likely-applicable` state is produced by matching signal categories to criterion
 tags, and the `content` tag is on almost every criterion, so the heuristic degrades to
@@ -325,7 +325,7 @@ what Guidepup already exposes, and what `sr` offers today.
 | Screenshot what the cursor is on                                           | caption panel                  |                  | `takeCursorScreenshot`, `capture`                                                                | nothing                                                                                                                    |
 
 The pattern: everything above works on VoiceOver through `sr do`, most of it through a
-command name the user has to discover in a 400-line list, and none of it works on the
+command the user has to find in a 400-line list, and none of it works on the
 virtual target that CI and most first runs will use. The "portable" set that does work
 everywhere is six commands: `next`, `previous`, `interact`, `stop-interacting`,
 `activate`, and its duplicate `click-current-item`.

@@ -4,27 +4,23 @@ import { docsLinks } from '../../lib/nav';
 
 const toc = [
    { id: 'connect', label: 'Connect the server' },
-   { id: 'run', label: 'Ask for an axe run' },
-   { id: 'driver', label: 'Ask for a session' },
-   { id: 'prompts', label: 'Prompts that work' },
-   { id: 'pitfalls', label: 'Two failure modes' },
+   { id: 'run', label: 'The automated checks' },
+   { id: 'driver', label: 'Screen reader sessions' },
+   { id: 'prompts', label: 'Example prompts' },
+   { id: 'pitfalls', label: 'Common mistakes' },
 ];
 ---
 
 <DocShell
-   title="Test from an AI agent"
-   summary="The MCP server gives a coding agent 13 tools: WCAG lookup, search, and axe rule mapping, axe runs, the accessibility tree, the full audit loop, screen reader session control and actions, and host diagnostics. It runs locally over stdio and opens no network port."
+   title="Use with an AI agent"
+   summary="The MCP server is a local process that your editor or coding agent starts. It exposes the a11ied commands as 13 tools, so the agent can run the automated checks, drive a screen reader, and look up criteria from the Web Content Accessibility Guidelines (WCAG) for the page you name. It runs over stdio and opens no network port."
    links={docsLinks}
    toc={toc}
 >
-   <section class="split panel" id="connect">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Step 1</p>
-            <h2>Connect the server</h2>
-         </div>
-         <p>Add a11ied to the MCP configuration your editor or agent reads, then restart it.</p>
-         <pre data-label="CONFIG"><code>{`{
+   <section class="panel" id="connect">
+      <h2>Connect the server</h2>
+      <p>Add a11ied to the MCP configuration your editor or agent reads, then restart it.</p>
+      <pre data-label="CONFIG"><code>{`{
   "mcpServers": {
     "a11ied": {
       "command": "npx",
@@ -32,106 +28,97 @@ const toc = [
     }
   }
 }`}</code></pre>
-         <p>
-            Ask the agent to call <code>doctor</code> as its first action. The result lists the
-            browser a11ied will use and the status of each screen reader target, which tells the
-            agent what it can actually run.
-         </p>
-      </div>
-      <div class="split-aside">
-         <div class="tag">Resources too</div>
-         <p class="aside-note">
-            The server also exposes seven read-only resources, including the criteria index and the
-            coverage table for WCAG 2.1 and 2.2. See the
-            <a href="/reference/mcp">MCP reference</a>.
-         </p>
-      </div>
+      <p>
+         Ask the agent to call <code>doctor</code> first. The result says which browser a11ied
+         uses and whether VoiceOver, NVDA, and the simulated screen reader are ready, so the
+         agent knows which tools it can run on this machine.
+      </p>
+      <p>
+         The server also serves seven read-only resources, including the criteria index and the
+         test method of every criterion in WCAG 2.1 and 2.2. See the
+         <a href="/reference/mcp">MCP reference</a>.
+      </p>
    </section>
 
    <section class="panel" id="run">
-      <div class="panel-head">
-         <p class="panel-kicker">Step 2</p>
-         <h2>Ask for an axe run</h2>
-      </div>
+      <h2>The automated checks</h2>
       <p>
-         Start your development server, then give the agent the exact route and the level you want
-         tested.
+         The automated checks run axe-core, the open-source rule engine most automated
+         accessibility checkers use. a1 injects it into the page and runs it there, so it sees
+         the rendered DOM, not just the HTML a server sent. Start your development server, then
+         give the agent the exact route and the WCAG level you want tested.
       </p>
       <pre data-label="AI AGENT PROMPT"><code>Open http://localhost:3000/account/settings.
 Use a11ied to run axe at WCAG level AA.
 For each violation, give me the selector, the impact, and the failing HTML.</code></pre>
       <p>
-         The agent calls <code>run_axe</code> with <code>target</code> and
+         The agent calls <code>run_axe</code> with <code>target</code> set to the URL and
          <code>level: "AA"</code>. Omitting <code>criterion</code>, <code>level</code>, and
-         <code>ruleIds</code> runs every mapped rule. The response carries a <code>verdict</code>
-         object and <code>exitCode</code> 4 when a violation was found.
+         <code>ruleIds</code> runs every rule mapped to a WCAG criterion. The response has a
+         <code>verdict</code> object and <code>exitCode</code> 4 when a violation was found.
       </p>
    </section>
 
    <section class="panel" id="driver">
-      <div class="panel-head">
-         <p class="panel-kicker">Step 3</p>
-         <h2>Ask for a screen reader session</h2>
-      </div>
+      <h2>Screen reader sessions</h2>
       <p>
-         Use a session for labels, focus order, dialogs, menus, and validation messages. An axe run
-         reports none of those in sequence.
+         Use a session for labels, focus order, dialogs, menus, and validation messages. The
+         automated checks do not test any of those in sequence.
       </p>
       <pre data-label="AI AGENT PROMPT"><code>Use a11ied to walk the checkout form with the screen reader.
-Move through every field in order and collect the spoken phrase log.
+Move through every field in order and collect every announcement.
 Tell me which controls announce without a name and where the order
 does not match the visual order.</code></pre>
       <p>
          The agent calls <code>sr_session</code> with <code>action: "start"</code>, then
-         <code>sr_action</code> for each step, then <code>sr_expect</code> to check what was
-         announced. For VoiceOver or NVDA, open the page in a browser before the agent starts. For
-         the virtual reader, the agent passes <code>url</code> and <code>allowVirtual: true</code>.
+         <code>sr_action</code> for each step, then <code>sr_expect</code> to check that an
+         announcement was made. For VoiceOver or NVDA, open the page in a browser before the agent
+         starts. For the simulated screen reader, the agent passes <code>url</code> and
+         <code>allowVirtual: true</code>.
       </p>
       <p>
          Remind the agent to call <code>sr_session</code> with <code>action: "stop"</code> when
-         it finishes. A session left open holds the screen reader under automation.
+         it finishes. A session left open keeps VoiceOver or NVDA under automation until
+         something stops it.
       </p>
    </section>
 
    <section class="ledger" id="prompts">
-      <div class="panel-head">
-         <p class="panel-kicker">Prompts</p>
-         <h2>Jobs worth handing over</h2>
-      </div>
+      <h2>Example prompts</h2>
       <div class="route-list">
          <div class="route-row">
             <strong>Review a branch</strong>
-            <span>Run axe on the routes the diff touches and compare each violation against the intended behavior.</span>
+            <span>Run <code>run_axe</code> on the routes the diff touches and compare each violation against the intended behavior.</span>
          </div>
          <div class="route-row">
             <strong>Test a dialog</strong>
-            <span>Open it, move focus through it, close it, and report where focus is at each step.</span>
+            <span>Open it, move focus through it, close it, and report which element has focus at each step.</span>
          </div>
          <div class="route-row">
             <strong>Work one criterion</strong>
-            <span>Look up the criterion, read its coverage, inspect the page, then run the test the strategy names.</span>
+            <span>Run <code>wcag_show</code> for the criterion, read its test method, run <code>audit</code> on the page, then run the test the <code>strategy</code> lists.</span>
          </div>
          <div class="route-row">
             <strong>Narrow a bug report</strong>
-            <span>Reproduce the reported step, capture the phrase log around it, and quote the exact announcement.</span>
+            <span>Reproduce the reported step, run <code>sr_transcript</code>, and quote the exact announcement.</span>
          </div>
       </div>
    </section>
 
    <section class="field-note" id="pitfalls">
-      <div class="panel-head">
-         <p class="panel-kicker">Watch for</p>
-         <h2>Two ways an agent gets this wrong</h2>
-      </div>
+      <h2>Common mistakes</h2>
       <p>
-         The first is reporting a clean axe run as conformance. axe rules decide 8 of the 24 level AA
-         criteria. Ask the agent for the coverage state next to every result.
+         Reporting a passing axe run as meeting WCAG level AA. axe rules decide 8 of the 24
+         level AA criteria. Ask the agent to run <code>wcag_criteria</code> with
+         <code>summary: true</code> and report the <a href="/test-methods">test method</a> next
+         to every result.
       </p>
       <p>
-         The second is quoting virtual reader output as VoiceOver behavior. The session response
-         carries <code>targetType</code>, either <code>real</code> or <code>simulated</code>. Ask the
-         agent to include it. The <a href="/guides/agent-skill">agent skill</a> builds both rules
-         into the model's instructions.
+         Quoting the simulated screen reader as VoiceOver. The <code>sr_session</code> start
+         response has <code>targetType</code>: <code>real</code> for VoiceOver and NVDA,
+         <code>simulated</code> for the simulated screen reader. Ask the agent to include it in
+         its report. The <a href="/guides/agent-skill">agent skill</a> puts both rules in the
+         agent's instructions.
       </p>
    </section>
 </DocShell>

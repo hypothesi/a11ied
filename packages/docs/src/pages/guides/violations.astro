@@ -3,31 +3,33 @@ import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
 
 const toc = [
-   { id: 'shape', label: 'What a violation holds' },
+   { id: 'fields', label: 'Violation fields' },
    { id: 'impact', label: 'Impact levels' },
-   { id: 'node', label: 'Reading a failing node' },
-   { id: 'rule', label: 'From a violation to a fix' },
-   { id: 'unmapped', label: 'Violations with no criterion' },
+   { id: 'node', label: 'Failing nodes' },
+   { id: 'rule', label: 'Finding the fix' },
+   { id: 'unmapped', label: 'Rules without a criterion' },
 ];
 ---
 
 <DocShell
-   title="Understand a violation"
-   summary="An axe violation names a rule, an impact, and the elements that failed it. Read the node before you fix it, then map the rule to its WCAG criterion and techniques with a1 wcag rule."
+   title="Fix an axe violation"
+   summary="axe-core is the open-source rule engine most automated accessibility checkers use, and a1 axe runs its rules against a page. A violation has a rule, an impact, and the elements that failed the rule. Read the failing element, then map the rule to the success criterion it fails: one testable pass/fail rule inside the Web Content Accessibility Guidelines (WCAG), the standard most accessibility requirements come from. a1 wcag rule finds the criterion and the techniques that fix it."
    links={docsLinks}
    toc={toc}
 >
-   <section class="panel" id="shape">
-      <div class="panel-head">
-         <p class="panel-kicker">Shape</p>
-         <h2>What a violation holds</h2>
-      </div>
+   <section class="panel" id="fields">
+      <h2>Violation fields</h2>
       <p>
-         <code>a1 axe</code> returns four arrays: <code>violations</code>, <code>passes</code>,
-         <code>incomplete</code> for checks axe could not decide on its own, and
-         <code>inapplicable</code> for rules that do not apply to this page. Each violation
-         carries the axe rule id, its impact, a description, help text and a help URL, the
-         WCAG and other standard tags it maps to, and the <code>nodes</code> that failed.
+         <code>a1 axe</code> injects axe-core into the page and runs its rules there, so it sees
+         the rendered DOM instead of the HTML a server sent. It returns four arrays:
+         <code>violations</code>, <code>passes</code>, <code>incomplete</code> for checks axe
+         could not decide on its own, and <code>inapplicable</code> for rules that do not apply
+         to this page.
+      </p>
+      <p>
+         Each violation has the axe rule id, its impact, a description, help text and a help
+         URL, the WCAG and other standard tags it maps to, and the <code>nodes</code> that
+         failed.
       </p>
       <pre><code>a1 axe http://localhost:3000/checkout --json</code></pre>
       <pre data-label="OUTPUT"><code>"violations": [
@@ -50,10 +52,7 @@ const toc = [
    </section>
 
    <section class="ledger" id="impact">
-      <div class="panel-head">
-         <p class="panel-kicker">Impact</p>
-         <h2>The four impact levels</h2>
-      </div>
+      <h2>Impact levels</h2>
       <p>
          Impact comes from axe-core, one fixed value per rule, not per WCAG criterion. It says
          how badly the rule's kind of failure affects a user, not how many users hit it on this
@@ -90,45 +89,34 @@ const toc = [
       </p>
    </section>
 
-   <section class="split panel" id="node">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Nodes</p>
-            <h2>Reading a failing node</h2>
-         </div>
-         <p>
-            Each entry in <code>nodes</code> is one element that failed the rule.
-            <code>target</code> is a CSS selector array; paste
-            <code>document.querySelector('button[type="button"]')</code> into the browser
-            console to find it. <code>html</code> is the failing markup as axe saw it.
-            <code>failureSummary</code> lists every way to satisfy the rule, not just the one
-            this element is missing, since axe cannot tell which fix you will pick.
-         </p>
-         <p>
-            A rule can have more than one failing node, and <code>axe</code> reports every one
-            it found, not just the first.
-         </p>
-      </div>
-      <div class="split-aside">
-         <div class="tag">Thin pages</div>
-         <p class="aside-note">
-            Fewer than 10 elements and under 50 characters of text adds a warning that a
-            single-page app may not have mounted yet. Load the route in a browser first to
-            confirm it renders before trusting an empty result.
-         </p>
-      </div>
+   <section class="panel" id="node">
+      <h2>Failing nodes</h2>
+      <p>
+         Each entry in <code>nodes</code> is one element that failed the rule.
+         <code>target</code> is a CSS selector array. Paste
+         <code>document.querySelector('button[type="button"]')</code> into the browser
+         console to find the element. <code>html</code> is the failing markup as axe saw it.
+         <code>failureSummary</code> lists every way to satisfy the rule, not just the one
+         this element is missing, since axe cannot tell which fix you will pick.
+      </p>
+      <p>
+         A rule can have more than one failing node, and <code>axe</code> reports every one
+         it found, not just the first.
+      </p>
+      <p>
+         A page with fewer than 10 elements and under 50 characters of text adds a warning
+         that a single-page app may not have mounted. See
+         <a href="/guides/troubleshooting#thin">empty results</a>.
+      </p>
    </section>
 
    <section class="panel" id="rule">
-      <div class="panel-head">
-         <p class="panel-kicker">Fix guidance</p>
-         <h2>From a violation to a fix</h2>
-      </div>
+      <h2>Finding the fix</h2>
       <p>
-         <code>a1 wcag rule &lt;ruleId&gt;</code> maps one axe rule to the criteria it fails,
-         each with its level, techniques, and failures, plus the axe help text and URL.
-         <code>a1 audit</code> already suggests it: every failing rule gets an entry in
-         <code>result.nextCommands</code>.
+         <code>a1 wcag rule &lt;ruleId&gt;</code> maps one axe rule to the criteria it fails, each
+         with its conformance level (A, AA, or AAA), techniques, and failures, plus the axe
+         help text and URL. <code>a1 audit</code> prints the command for you: every failing
+         rule gets an entry in <code>result.nextCommands</code>.
       </p>
       <pre><code>a1 wcag rule button-name --json</code></pre>
       <pre data-label="OUTPUT"><code>"ruleId": "button-name",
@@ -153,24 +141,24 @@ const toc = [
 "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name?application=axeAPI"</code></pre>
       <p>
          For the <code>&lt;button type="button"&gt;&lt;img src="cart.png" alt=""&gt;&lt;/button&gt;</code>
-         node above, <code>H44</code> is the fix that fits: wrap the image in a
-         <code>&lt;label&gt;</code>, or since this is a button rather than a form control, add
-         text or an <code>aria-label</code> per <code>ARIA14</code>.
+         node above, the fix is <code>ARIA14</code>: add an <code>aria-label</code> to the button,
+         or put visible text inside it. <code>H44</code> applies to form controls that take a
+         <code>&lt;label&gt;</code>, not to a button.
       </p>
    </section>
 
    <section class="field-note" id="unmapped">
-      <div class="panel-head">
-         <p class="panel-kicker">Not every rule maps</p>
-         <h2>Best-practice rules carry no criterion</h2>
-      </div>
+      <h2>Rules without a criterion</h2>
       <p>
-         <code>a1 wcag rule heading-order</code> still returns 0, with an empty
-         <code>criteria</code> array. axe tags <code>heading-order</code> best practice rather
-         than a specific success criterion, so no WCAG page decides whether to fix it. It is
-         still worth fixing: axe only runs it when named explicitly with <code>--rule</code>,
-         since a default <code>a1 axe</code> run covers the rules mapped in the WCAG version and
-         skips rules with no criterion behind them.
+         <code>a1 wcag rule heading-order</code> returns 0, with an empty
+         <code>criteria</code> array. axe tags <code>heading-order</code> as a best practice
+         rather than a specific success criterion, so no page in WCAG decides whether to fix it.
+         Fix it anyway.
+      </p>
+      <p>
+         A default <code>a1 axe</code> run covers only the rules mapped to a WCAG criterion, so
+         axe runs a best-practice rule like this one only when you name it with
+         <code>--rule</code>.
       </p>
    </section>
 </DocShell>

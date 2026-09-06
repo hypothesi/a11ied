@@ -3,9 +3,9 @@ import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
 
 const toc = [
-   { id: 'support', label: 'What supports it' },
+   { id: 'support', label: 'Supported screen readers' },
    { id: 'record', label: 'Record a session' },
-   { id: 'permissions', label: 'macOS permissions' },
+   { id: 'permissions', label: 'macOS Screen Recording permission' },
    { id: 'troubleshoot', label: 'Troubleshooting' },
    { id: 'privacy', label: 'Privacy' },
 ];
@@ -13,48 +13,37 @@ const toc = [
 
 <DocShell
    title="Record a session"
-   summary="Capture a real VoiceOver session to a .mov file or a real NVDA session to an .mp4 file. Pair the video with the session transcript when a bug report needs to show what happened, not just what was announced."
+   summary="Capture a VoiceOver session to a .mov file or an NVDA session to an .mp4 file. Attach the video with the transcript when a bug report needs to show what happened on screen as well as what the screen reader announced."
    links={docsLinks}
    toc={toc}
 >
-   <section class="split panel" id="support">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Support</p>
-            <h2>What can be recorded</h2>
+   <section class="panel" id="support">
+      <h2>Supported screen readers</h2>
+      <div class="route-list">
+         <div class="route-row">
+            <code>voiceover</code>
+            <span>macOS. Records to a <code>.mov</code> path through native video capture.</span>
          </div>
-         <div class="route-list">
-            <div class="route-row">
-               <code>voiceover</code>
-               <span>macOS. Records to a <code>.mov</code> path through native video capture.</span>
-            </div>
-            <div class="route-row">
-               <code>nvda</code>
-               <span>Windows. Records to an <code>.mp4</code> path.</span>
-            </div>
-            <div class="route-row">
-               <code>virtual</code>
-               <span>Not supported. The virtual reader runs with no window to capture. It produces transcript data instead.</span>
-            </div>
+         <div class="route-row">
+            <code>nvda</code>
+            <span>Windows. Records to an <code>.mp4</code> path.</span>
+         </div>
+         <div class="route-row">
+            <code>virtual</code>
+            <span>Not supported. The simulated screen reader has no window to capture. It produces a transcript instead.</span>
          </div>
       </div>
-      <div class="split-aside">
-         <div class="tag">No audio</div>
-         <p class="aside-note">
-            On macOS a11ied captures video only. It does not request microphone access, so the file
-            has no audio track.
-         </p>
-      </div>
+      <p>
+         On macOS a11ied captures video only. It does not request microphone access, so the file
+         has no audio track.
+      </p>
    </section>
 
    <section class="panel" id="record">
-      <div class="panel-head">
-         <p class="panel-kicker">Recording</p>
-         <h2>Record a session</h2>
-      </div>
+      <h2>Record a session</h2>
       <p>
          Pass <code>--recording</code> with an output path when you start the session. The file
-         closes when you stop it.
+         closes when you stop the session.
       </p>
       <pre><code>a1 sr start --sr voiceover --recording ./recordings/checkout.mov http://localhost:3000/checkout --json
 a1 sr next --json
@@ -62,22 +51,21 @@ a1 sr checkpoint "submitted the form" --json
 a1 sr transcript --json
 a1 sr stop --json</code></pre>
       <p>
-         Recording covers the whole session, so keep sessions short and scoped to one behavior. Add
-         <code>sr checkpoint</code> calls to mark the moments you want a reviewer to look for.
+         The recording covers the whole session, so keep each session short and limited to one
+         behavior. Add <code>sr checkpoint</code> calls to mark the moments you want a reviewer to
+         look for.
       </p>
       <p>
          Stopping writes the Markdown transcript next to the recording. For
          <code>./recordings/checkout.mov</code> that file is
-         <code>./recordings/checkout.transcript.md</code>, and it carries an ISO timestamp per
-         phrase, so a reviewer can match what the reader said to the point in the video.
+         <code>./recordings/checkout.transcript.md</code>. It has an ISO timestamp per
+         announcement, so a reviewer can match what the screen reader said to the point in the
+         video.
       </p>
    </section>
 
    <section class="panel" id="permissions">
-      <div class="panel-head">
-         <p class="panel-kicker">macOS</p>
-         <h2>Grant Screen Recording to the right app</h2>
-      </div>
+      <h2>macOS Screen Recording permission</h2>
       <p>
          macOS grants screen capture to the application that runs the command, not to a11ied. If you
          run <code>a1</code> from Terminal, Terminal needs the permission. If your editor or agent
@@ -86,17 +74,14 @@ a1 sr stop --json</code></pre>
       <pre><code>a1 doctor</code></pre>
       <p>
          On macOS, <code>doctor</code> records a few seconds of screen video with
-         <code>screencapture</code> for the current host app, to confirm the permission works, and
-         reports the result in the VoiceOver target's notes. Run it from the same app you plan to
+         <code>screencapture</code> for the app that ran it, to confirm the permission works, and
+         reports the result under the VoiceOver checks. Run it from the same app you plan to
          test from.
       </p>
    </section>
 
    <section class="panel" id="troubleshoot">
-      <div class="panel-head">
-         <p class="panel-kicker">Fixes</p>
-         <h2>When recording fails</h2>
-      </div>
+      <h2>Troubleshooting</h2>
       <div class="route-list">
          <div class="route-row">
             <strong>Works in Terminal, fails in your editor</strong>
@@ -104,33 +89,31 @@ a1 sr stop --json</code></pre>
          </div>
          <div class="route-row">
             <strong>The command fails before recording starts</strong>
-            <span>Install Chrome, Edge, Brave, or Chromium. Opening a real target's page runs
-            through the system browser, not Playwright, so it needs one already installed.</span>
+            <span>Install Chrome, Edge, Brave, or Chromium. Opening the page for VoiceOver or NVDA
+            uses the system browser, not Playwright, so one needs to be installed.</span>
          </div>
          <div class="route-row">
-            <strong>The target reports requires-setup</strong>
+            <strong>doctor reports requires-setup for VoiceOver or NVDA</strong>
             <span>Run <code>a1 setup</code>, which runs the Guidepup steps <code>doctor</code> lists under Action items and re-checks afterward.</span>
          </div>
          <div class="route-row">
             <strong>The file is empty</strong>
-            <span>Stop the session with <code>sr stop</code>. The recorder finishes the file at teardown.</span>
+            <span>Stop the session with <code>sr stop</code>. The recorder finishes the file when the session stops.</span>
          </div>
       </div>
    </section>
 
    <section class="field-note" id="privacy">
-      <div class="panel-head">
-         <p class="panel-kicker">Privacy</p>
-         <h2>What ends up in the file</h2>
-      </div>
+      <h2>Privacy</h2>
       <p>
          A recording captures the screen, which includes the page content, the browser window, system
          menus, and anything else visible during the run. Use test data, not real accounts, and check
          the file before attaching it to a ticket.
       </p>
       <p>
-         A recording documents one run against one build. Record the route, the browser, the target,
-         and the artifact path alongside it, or the file loses its meaning within a week.
+         A recording documents one run against one build. Record the route, the browser, the
+         screen reader, and the file path with it, so a reviewer can tell later which build it
+         shows.
       </p>
    </section>
 </DocShell>

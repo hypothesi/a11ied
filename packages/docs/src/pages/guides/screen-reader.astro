@@ -3,103 +3,133 @@ import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
 
 const toc = [
-   { id: 'session', label: 'Open a session' },
+   { id: 'session', label: 'Start a session' },
    { id: 'move', label: 'Move and read' },
-   { id: 'structure', label: 'Jump by structure' },
+   { id: 'structure', label: 'Navigate by heading, link, or landmark' },
    { id: 'page', label: 'Read the whole page' },
-   { id: 'check', label: 'Check what was said' },
-   { id: 'batch', label: 'Script a flow' },
-   { id: 'commands', label: 'Named commands' },
+   { id: 'check', label: 'Transcript assertions' },
+   { id: 'batch', label: 'Run a batch of actions' },
+   { id: 'commands', label: 'Run named screen reader commands' },
    { id: 'transcript', label: 'Checkpoints and transcripts' },
-   { id: 'form', label: 'Worked example' },
-   { id: 'cleanup', label: 'Cleanup' },
+   { id: 'form', label: 'Example: a dialog' },
+   { id: 'cleanup', label: 'Stop the session' },
 ];
 ---
 
 <DocShell
    title="Test with a screen reader"
-   summary="Open a driver session, move through the page the way a screen reader user does, and check what the reader announced. The same commands work against VoiceOver, NVDA, and the virtual reader. Only the screen reader changes."
+   summary="Start a screen reader session, move through the page one element at a time, and check what the screen reader announced. The same commands drive VoiceOver, NVDA, and the simulated screen reader."
    links={docsLinks}
    toc={toc}
 >
-   <section class="split panel" id="session">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Step 1</p>
-            <h2>Open a session</h2>
-         </div>
-         <p>
-            <code>sr start</code> takes the page as a positional argument and the screen reader as
-            <code>--sr</code>. For VoiceOver or NVDA, a11ied opens the URL in a browser, waits until
-            that window is in front, and starts the reader. <code>--browser chrome</code>,
-            <code>edge</code>, <code>brave</code>, <code>chromium</code>, or an app name such as
-            <code>Safari</code> picks the browser. Without it, a11ied uses the system automation
-            browser.
-         </p>
-         <pre><code>a1 sr start --sr voiceover http://localhost:3000/checkout --json
+   <section class="panel" id="session">
+      <h2>Start a session</h2>
+      <p>
+         A session is a running screen reader that later <code>a1 sr</code> commands control.
+         <code>sr start</code> takes the page URL as its argument and the screen reader as
+         <code>--sr</code>: <code>voiceover</code>, <code>nvda</code>, or <code>virtual</code>.
+      </p>
+      <p>
+         For VoiceOver or NVDA, a11ied opens the URL in a browser, waits until that window is in
+         front, and starts the screen reader. <code>--browser chrome</code>, <code>edge</code>,
+         <code>brave</code>, <code>chromium</code>, or an app name such as <code>Safari</code>
+         picks the browser. Without it, a11ied uses the system automation browser.
+      </p>
+      <pre><code>a1 sr start --sr voiceover http://localhost:3000/checkout --json
 a1 sr start --sr voiceover --browser Safari http://localhost:3000/checkout</code></pre>
-         <p>
-            <code>--app &lt;name&gt;</code> reads a native app that is already open instead of a
-            page. The session focuses the app by name and waits for it to come to the front.
-         </p>
-         <pre><code>a1 sr start --sr voiceover --app Calendar</code></pre>
-         <p>
-            For the virtual reader, a11ied loads the URL in a headless Chromium page and runs the
-            reader inside it. See <a href="/targets#virtual">targets</a> for when it falls back to
-            jsdom.
-         </p>
-         <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout --json</code></pre>
-         <p>
-            One session is active at a time. Every later <code>sr</code> command uses it, and no
-            command takes a session id. A second <code>sr start</code> stops the first session and
-            reports it in the warnings. When the window never came to the front, the result carries a
-            <code>window-focus-unconfirmed</code> warning that names what is in front instead.
-         </p>
-      </div>
-      <div class="split-aside">
-         <div class="tag">The virtual reader</div>
-         <p class="aside-note">
-            With the <code>browser</code> engine the page's scripts run, so a live region that a
-            script fills, or a dialog a click opens, is announced. With the <code>jsdom</code>
-            engine, used when no Chromium is installed, only what is in the markup is announced.
-            <code>a1 sr status</code> names the engine.
-         </p>
-      </div>
+      <p>
+         <code>--app &lt;name&gt;</code> reads a native app that is already open instead of a
+         page. The session brings the app to the front by name and waits for it to get there.
+      </p>
+      <pre><code>a1 sr start --sr voiceover --app Calendar</code></pre>
+      <p>
+         <code>--sr virtual</code> starts the simulated screen reader: a screen reader implemented
+         in software that runs inside a headless Chromium page and produces the same kind of
+         announcements as VoiceOver or NVDA, with neither installed. It needs
+         <code>--allow-virtual</code> when VoiceOver or NVDA is available, to confirm you want the
+         simulation.
+      </p>
+      <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/dialog.html</code></pre>
+      <pre data-label="OUTPUT"><code>Session ready
+
+  Target:        virtual
+  Engine:        browser (a headless Chromium page; the page scripts run)
+  URL:           http://localhost:3000/dialog.html
+  Recording:     none
+  Idle timeout:  30 min
+
+Every sr command now uses this session. Stop it with: a1 sr stop</code></pre>
+      <p>
+         <code>Target:</code> is the screen reader that started. <code>Engine:</code> is
+         <code>browser</code> when the page runs in headless Chromium, so a live region, a part
+         of the page marked to announce its own content changes, is heard when a script fills
+         it, and a dialog is heard when a click opens it. When no Chrome, Edge, Brave, or
+         Chromium is installed, the engine is <code>jsdom</code>, an in-memory document where page
+         scripts do not run, and only what is in the markup is announced. See
+         <a href="/screen-readers#virtual">screen readers</a> for the details of both engines.
+      </p>
+      <p>
+         One session is active at a time. Every later <code>sr</code> command uses it, and no
+         command takes a session id. A second <code>sr start</code> stops the first session and
+         reports it in the warnings. When the browser window never came to the front, the result
+         has a <code>window-focus-unconfirmed</code> warning that lists the window in front
+         instead.
+      </p>
    </section>
 
    <section class="panel" id="move">
-      <div class="panel-head">
-         <p class="panel-kicker">Step 2</p>
-         <h2>Move through the page and read the output</h2>
-      </div>
+      <h2>Move and read</h2>
+      <p>
+         A screen reader moves through a page one element at a time: a heading, a link, a button,
+         a form field, a paragraph, a landmark. The element under its cursor is the current
+         element. Each time the cursor moves, the screen reader announces the element it reached.
+         The CLI prints that announcement as <code>Phrase:</code>, and the element's text as
+         <code>Item:</code>.
+      </p>
+      <pre><code>a1 sr next
+a1 sr next heading</code></pre>
+      <pre data-label="OUTPUT"><code>sr next  virtual
+  Phrase:  main
+  Item:    none
+  Role:    main
+
+sr next heading  virtual
+  Phrase:  heading, Dialog demo, level 1
+  Item:    Dialog demo
+  Role:    heading level 1
+  Name:    Dialog demo</code></pre>
+      <p>
+         The first command moved the cursor onto the <code>main</code> landmark, which has no
+         text of its own. The second jumped to the next heading and printed its level and name.
+      </p>
       <div class="route-list">
          <div class="route-row">
             <div class="route-terms"><code>sr next</code>, <code>sr previous</code></div>
-            <span>Move one item and return what the reader said about it.</span>
+            <span>Move the cursor to the next or previous element and print the announcement.</span>
          </div>
          <div class="route-row">
             <div class="route-terms"><code>sr top</code>, <code>sr bottom</code></div>
-            <span>Move to the start or the end of the document or the current area.</span>
+            <span>Move the cursor to the first or last element of the document, or of the group the cursor is inside.</span>
          </div>
          <div class="route-row">
             <div class="route-terms"><code>sr interact</code>, <code>sr stop-interacting</code>, <code>sr activate</code></div>
-            <span>Enter a group or control, leave it, and activate the current item.</span>
+            <span>Enter the group or control under the cursor, leave it, or press the element under the cursor as a click would.</span>
          </div>
          <div class="route-row">
             <code>sr escape</code>
-            <span>Press Escape to dismiss a menu or a dialog.</span>
+            <span>Press Escape, which closes a menu or a dialog.</span>
          </div>
          <div class="route-row">
             <code>sr read</code>
-            <span>The current item without moving: role, name, value, states, the phrase, and where each field came from.</span>
+            <span>Print the current element without moving: role, name, value, states, the announcement, and which of those came from the page and which from the announcement.</span>
          </div>
          <div class="route-row">
             <code>sr title</code>
-            <span>The page title: <code>document.title</code> on virtual, the window summary (VO-F2) on VoiceOver, the window title (NVDA-T) on NVDA.</span>
+            <span>Print the page title: <code>document.title</code> on the simulated screen reader, the window summary (VO-F2) on VoiceOver, the window title (NVDA-T) on NVDA.</span>
          </div>
          <div class="route-row">
             <code>sr find "Learn more"</code>
-            <span>Move the cursor to the next place the text appears. Exits 4 when it is not on the page. Needs an active session.</span>
+            <span>Move the cursor to the next element whose text contains the argument. Exits 4 when no element does. Needs an active session.</span>
          </div>
          <div class="route-row">
             <code>sr press Tab Tab</code>
@@ -107,63 +137,67 @@ a1 sr start --sr voiceover --browser Safari http://localhost:3000/checkout</code
          </div>
          <div class="route-row">
             <code>sr type "test@example.com"</code>
-            <span>Type into the focused control.</span>
+            <span>Type into the focused form field.</span>
          </div>
          <div class="route-row">
             <code>sr open &lt;url&gt;</code>
-            <span>Move the running session to another page.</span>
+            <span>Load another page in the running session.</span>
          </div>
       </div>
-      <p>
-         Every response carries a <code>state</code> object with <code>lastSpokenPhrase</code>,
-         <code>currentItemText</code>, <code>currentItem</code>, the running
-         <code>spokenPhraseLog</code>, and the timestamped <code>transcript</code>.
-         <code>currentItem</code> holds the role, name, value, states, and heading level. On the
-         virtual reader it comes from the DOM node under the cursor. On VoiceOver the role and
-         states are parsed from the <code>name, role</code> phrase and the name is the item text.
-         On NVDA all three are parsed from the phrase. The <code>source</code> field says which.
-      </p>
+      <pre><code>a1 sr read</code></pre>
       <pre data-label="OUTPUT"><code>sr read  virtual
-  Phrase:  checkbox, Accept the terms, not checked
-  Item:    Accept the terms
-  Role:    checkbox
-  Name:    Accept the terms
-  States:  unchecked
+  Phrase:  heading, Dialog demo, level 1
+  Item:    Dialog demo
+  Role:    heading level 1
+  Name:    Dialog demo
   Source:  virtual: role and name from the active node (dom-accessibility-api), states from its attributes</code></pre>
       <p>
-         Add <code>--phrase</code> to print the phrase alone, one line, for shell loops. Add
+         <code>Source:</code> says where the role, name, and states came from. The simulated
+         screen reader reads them from the DOM node under its cursor. VoiceOver reports the
+         element's text and an announcement in the form <code>name, role</code>, so the role and
+         states are parsed from the announcement and the name is the element's text. NVDA reports
+         only the announcement, so all three are parsed from it.
+      </p>
+      <p>
+         With <code>--json</code>, every response has a <code>state</code> object with
+         <code>lastSpokenPhrase</code> (the announcement), <code>currentItemText</code> (the
+         element's text), <code>currentItem</code> (the role, name, value, states, and heading
+         level, plus a <code>source</code> field), the running <code>spokenPhraseLog</code> (every
+         announcement so far), and the timestamped <code>transcript</code>.
+      </p>
+      <p>
+         Add <code>--phrase</code> to print the announcement alone, one line, for shell loops. Add
          <code>--timeout &lt;ms&gt;</code> to bound how long the screen reader command may take.
       </p>
    </section>
 
-   <section class="split panel" id="structure">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Step 3</p>
-            <h2>Jump by structure</h2>
-         </div>
-         <p>
-            Screen reader users do not read pages one item at a time. They jump by heading, link,
-            or landmark. <code>sr next &lt;kind&gt;</code> and <code>sr previous &lt;kind&gt;</code>
-            do the same on every target. The kinds are <code>heading</code>, <code>link</code>,
-            <code>landmark</code>, <code>control</code>, <code>button</code>, <code>table</code>,
-            <code>list</code>, <code>graphic</code>, <code>region</code>, and
-            <code>form-field</code>.
-         </p>
-         <pre><code>a1 sr next heading
+   <section class="panel" id="structure">
+      <h2>Navigate by heading, link, or landmark</h2>
+      <p>
+         Screen reader users do not read pages one element at a time. They jump by heading,
+         link, or landmark: a section of the page marked with a role such as
+         <code>main</code>, <code>navigation</code>, or <code>banner</code>, so a screen reader
+         can skip straight to it. <code>sr next &lt;kind&gt;</code> and
+         <code>sr previous &lt;kind&gt;</code> do the same on every screen reader. The kinds are
+         <code>heading</code>, <code>link</code>, <code>landmark</code>, <code>control</code>,
+         <code>button</code>, <code>table</code>, <code>list</code>, <code>graphic</code>,
+         <code>region</code>, and <code>form-field</code>.
+      </p>
+      <pre><code>a1 sr next heading
 a1 sr next heading --level 2
 a1 sr previous link
 a1 sr next control --times 3</code></pre>
-         <p>
-            <code>sr elements &lt;kind&gt;</code> is the rotor: it moves to the top and lists every
-            element of one kind as the reader announces it. It stops at the end of the page or at
-            <code>--max</code>, which defaults to 200, and says which. <code>elements</code>,
-            <code>read-all</code>, <code>goto</code>, and <code>find</code> need an active
-            session and exit with <code>missing-session</code> without one. Run
-            <code>sr start --sr virtual --allow-virtual &lt;url&gt;</code> first for the simulated
-            reader, since a plain <code>sr start</code> falls back to VoiceOver on macOS.
-         </p>
-         <pre data-label="OUTPUT"><code>sr elements heading  virtual
+      <p>
+         <code>sr elements &lt;kind&gt;</code> works like the VoiceOver rotor or the NVDA elements
+         list: it moves the cursor to the top of the page and prints every element of one kind
+         with its announcement. It stops at the end of the page or at <code>--max</code>, which
+         defaults to 200, and says which. <code>elements</code>, <code>read-all</code>,
+         <code>goto</code>, and <code>find</code> need an active session and exit with
+         <code>missing-session</code> without one. Run
+         <code>sr start --sr virtual --allow-virtual &lt;url&gt;</code> first for the simulated
+         screen reader, since a plain <code>sr start</code> starts VoiceOver on macOS.
+      </p>
+      <pre data-label="OUTPUT"><code>sr elements heading  virtual
 4 heading elements from the top of the page.
 
 1. heading level 1: Structure page  heading, Structure page, level 1
@@ -172,74 +206,100 @@ a1 sr next control --times 3</code></pre>
 4. heading level 2: Sign up  heading, Sign up, level 2
 
 Stopped at the end of the document.</code></pre>
-         <p>
-            <code>sr goto --role link --name "Learn more"</code> steps forward until the current item
-            has that role, that name, or both, and exits 4 when nothing matches before the end.
-         </p>
-         <p>
-            Inside a table, <code>sr table next-cell</code>, <code>previous-cell</code>,
-            <code>next-row</code>, <code>previous-row</code>, <code>next-column</code>, and
-            <code>previous-column</code> move between cells. <code>sr table column-header</code> and
-            <code>row-header</code> read the headers of the current cell. VoiceOver moves with
-            VO-arrows inside an interacted table and reads the column header with VO-C. NVDA moves
-            with Control-Alt-arrows and speaks headers as the cursor enters a cell, so the header
-            reads exit 2 there with that explanation.
-         </p>
-      </div>
-      <div class="split-aside">
-         <div class="tag">One table, three targets</div>
-         <p class="aside-note">
-            Each kind maps to Guidepup's jump method or a VoiceOver Commander phrase, to an NVDA
-            single-letter key, and to a <code>virtual.commands.moveToNext*</code> command. The
-            virtual reader has no command for button, control, table, list, graphic, and
-            form-field, so it walks item by item until the announced role matches, and reports
-            <code>moved: false</code> when the page has none.
-         </p>
-      </div>
+      <p>
+         Each kind maps to Guidepup's jump method or a VoiceOver Commander command, to an NVDA
+         single-letter key, and to a <code>virtual.commands.moveToNext*</code> command. The
+         simulated screen reader has no command for button, control, table, list, graphic, and
+         form-field, so it moves element by element until the announced role matches, and reports
+         <code>moved: false</code> when the page has none.
+      </p>
+      <p>
+         <code>sr goto --role button --name "Open dialog"</code> moves the cursor forward until the
+         current element has that role, that name, or both, and exits 4 when nothing matches
+         before the end of the page.
+      </p>
+      <pre data-label="OUTPUT"><code>sr goto --role button --name Open dialog  virtual
+  Phrase:  button, Open dialog
+  Item:    Open dialog
+  Role:    button
+  Name:    Open dialog
+  Found:   yes</code></pre>
+      <p>
+         Inside a table, <code>sr table next-cell</code>, <code>previous-cell</code>,
+         <code>next-row</code>, <code>previous-row</code>, <code>next-column</code>, and
+         <code>previous-column</code> move between cells. <code>sr table column-header</code> and
+         <code>row-header</code> print the headers of the current cell. VoiceOver moves with
+         VO-arrows inside an interacted table and reads the column header with VO-C. NVDA moves
+         with Control-Alt-arrows and speaks headers as the cursor enters a cell, so the two header
+         commands exit 2 on NVDA with that explanation.
+      </p>
    </section>
 
    <section class="panel" id="page">
-      <div class="panel-head">
-         <p class="panel-kicker">Step 4</p>
-         <h2>Read the whole page</h2>
-      </div>
+      <h2>Read the whole page</h2>
       <p>
-         <code>sr read-all</code> is say-all as a transcript: it steps item by item from the cursor
-         to the end of the document, bounded by <code>--max</code> (default 500), and says whether it
-         stopped at the end or at the cap. <code>sr walk [url]</code> does the whole thing from cold:
-         it starts a session when none is active, opens the URL in the active one otherwise, moves
-         to the top, runs read-all, and prints the transcript of that walk. With no session and no
-         <code>--sr</code>, <code>walk</code> starts VoiceOver on macOS. Pass
-         <code>--sr virtual --allow-virtual</code> for the simulated reader instead.
+         <code>sr read-all</code> moves the cursor element by element from its current position to
+         the end of the document, bounded by <code>--max</code> (default 500), and prints the
+         transcript: every announcement in order, with a timestamp each. It says whether it stopped
+         at the end or at the cap.
       </p>
-      <pre><code>a1 sr walk http://localhost:3000/checkout --sr virtual --allow-virtual
-a1 sr walk --max 40 --out ./evidence/checkout-walk.md</code></pre>
+      <p>
+         <code>sr walk [url]</code> does all of this in one command: it starts a session when
+         none is active, or loads the URL in the active one, moves the cursor to the top, runs
+         <code>read-all</code>, and prints the transcript. With no session and no
+         <code>--sr</code>, <code>walk</code> starts VoiceOver on macOS. Pass
+         <code>--sr virtual --allow-virtual</code> for the simulated screen reader instead.
+      </p>
+      <pre><code>a1 sr walk http://localhost:3000/dialog.html --sr virtual --allow-virtual
+a1 sr walk --max 40 --out ./transcripts/checkout-walk.md</code></pre>
+      <pre data-label="OUTPUT"><code>! No session was active, so one was started.
+# Transcript: virtual on http://localhost:3000/dialog.html
+
+Started 2026-09-06T11:07:17.840Z. Exported 2026-09-06T11:07:18.044Z. 5 phrases.
+
+1. [11:07:18.043] main
+2. [11:07:18.043] heading, Dialog demo, level 1 (Dialog demo)
+3. [11:07:18.043] button, Open dialog (Open dialog)
+4. [11:07:18.043] end of main
+5. [11:07:18.043] end of document
+
+Stopped at the end of the document.</code></pre>
+      <p>
+         Each numbered line is one element the cursor stopped at and what the screen reader said
+         there. The text in parentheses is the element's text, when it has any.
+      </p>
    </section>
 
    <section class="split panel" id="check">
       <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Step 5</p>
-            <h2>Check what the reader said</h2>
-         </div>
+         <h2>Transcript assertions</h2>
          <p>
-            <code>sr expect</code> checks the transcript for a phrase and exits 4 when it is not there.
-            Plain text matches without regard to case. <code>/pattern/flags</code> is a regular
-            expression. <code>--since &lt;checkpoint&gt;</code> only counts phrases after that
-            checkpoint, and <code>--not</code> passes when the phrase was not announced.
+            <code>sr expect</code> searches the transcript for an announcement and exits 4 when
+            none matches. Plain text matches without regard to case.
+            <code>/pattern/flags</code> is a regular expression. <code>--since &lt;checkpoint&gt;</code>
+            searches only the announcements after that checkpoint, and <code>--not</code> passes
+            when nothing matches.
          </p>
-         <pre><code>a1 sr expect "Preferences, dialog" --since "opened the dialog"
+         <pre><code>a1 sr expect "dialog, Preferences" --since opened
 a1 sr expect /error/i --not</code></pre>
+         <pre data-label="OUTPUT"><code>sr expect
+  Expected:  "dialog, Preferences"
+  Checked:   2 phrases since "opened"
+  Matched:   dialog, Preferences, modal
+  Result:    pass</code></pre>
          <p>
-            <code>sr wait --for &lt;text|/regex/&gt;</code> polls the transcript until a phrase spoken
-            after the wait began matches, and exits 4 at <code>--timeout</code> (default 5000 ms).
-            It polls the transcript rather than the last phrase, so an announcement that arrives and
-            is replaced before the next poll is still caught. Use it for a phrase that arrives on its
-            own timeline, such as a live region a network response fills, or the delay before a real
-            screen reader finishes speaking. A phrase the triggering command already returned in its
-            own response happened before the wait began, so <code>expect</code> on that result is
-            the right check instead. Without <code>--for</code>, <code>wait</code> pauses for
-            <code>--ms</code>.
+            <code>sr wait --for &lt;text|/regex/&gt;</code> polls the transcript until an
+            announcement made after the wait began matches, and exits 4 at
+            <code>--timeout</code> (default 5000 ms). It reads the whole transcript rather than
+            the last announcement, so an announcement that arrives and is replaced before the
+            next poll still counts.
+         </p>
+         <p>
+            Use it for an announcement that arrives later than the command that caused it, such
+            as a live region a network response fills, or the delay before VoiceOver finishes
+            speaking. An announcement the triggering command already printed in its own output
+            happened before the wait began, so run <code>expect</code> for that one instead.
+            Without <code>--for</code>, <code>wait</code> pauses for <code>--ms</code>.
          </p>
          <pre><code>a1 sr press Enter
 a1 sr wait --for /saved/i --timeout 3000</code></pre>
@@ -248,24 +308,21 @@ a1 sr wait --for /saved/i --timeout 3000</code></pre>
          <div class="tag">Exit codes</div>
          <p class="aside-note">
             <code>find</code>, <code>goto</code>, <code>wait --for</code>, <code>expect</code>, and a
-            <code>batch</code> with a failed expect exit 4. Usage errors, including a command a
-            target cannot run or a verb run with no active session, exit 2. A browser or broker
-            process that fails to start exits 3.
+            <code>batch</code> with a failed expect exit 4. Usage errors, including a command the
+            screen reader cannot run or a command run with no active session, exit 2. A browser
+            or broker process that fails to start exits 3.
          </p>
       </div>
    </section>
 
    <section class="panel" id="batch">
-      <div class="panel-head">
-         <p class="panel-kicker">Step 6</p>
-         <h2>Script a flow in one process</h2>
-      </div>
+      <h2>Run a batch of actions</h2>
       <p>
-         <code>sr batch [file]</code> reads one action per line, or stdin, and runs them all over
-         one broker connection in one process. Each line is the action request the MCP
-         <code>sr_action</code> tool takes, or an <code>expect</code> line. Blank lines and lines
-         starting with <code>#</code> are skipped. The batch stops at the first failed expect unless
-         <code>--continue</code> is set.
+         <code>sr batch [file]</code> reads one action per line, from the file or from stdin, and
+         runs them all over one connection to the session process. Each line is the JSON request
+         the MCP <code>sr_action</code> tool takes, or an <code>expect</code> line. Blank lines and
+         lines starting with <code>#</code> are skipped. The batch stops at the first failed expect
+         unless <code>--continue</code> is set.
       </p>
       <pre><code>a1 sr batch &lt;&lt;'EOF'
 &#123;"action":"goto","payload":&#123;"role":"button","name":"Open dialog"&#125;&#125;
@@ -286,122 +343,114 @@ EOF</code></pre>
 6 steps passed.</code></pre>
       <p>
          The checkpoint runs before <code>activate</code>, not after, so <code>expect --since</code>
-         sees the dialog's announcement. A phrase already in the triggering action's own response
-         happened before a later checkpoint and would not count.
+         searches the dialog's announcement. An announcement already printed by the triggering
+         action happened before a later checkpoint and would not count.
       </p>
    </section>
 
-   <section class="split panel" id="commands">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Step 7</p>
-            <h2>Run named screen reader commands</h2>
-         </div>
-         <p>
-            <code>sr do</code> runs a command by name. The portable set works on every target and
-            resolves through the same table the subcommands use: <code>next</code>,
-            <code>previous</code>, <code>interact</code>, <code>stop-interacting</code>,
-            <code>activate</code>, <code>top</code>, <code>bottom</code>, <code>escape</code>, and
-            <code>next-&lt;kind&gt;</code> and <code>previous-&lt;kind&gt;</code> for every kind above.
-         </p>
-         <pre><code>a1 sr do interact --json
+   <section class="panel" id="commands">
+      <h2>Run named screen reader commands</h2>
+      <p>
+         <code>sr do</code> runs a command by name. The portable set works on every screen reader
+         and resolves through the same table the subcommands use: <code>next</code>,
+         <code>previous</code>, <code>interact</code>, <code>stop-interacting</code>,
+         <code>activate</code>, <code>top</code>, <code>bottom</code>, <code>escape</code>, and
+         <code>next-&lt;kind&gt;</code> and <code>previous-&lt;kind&gt;</code> for every kind above.
+      </p>
+      <pre><code>a1 sr do interact --json
 a1 sr do next-heading --json
 a1 sr do stop-interacting --json</code></pre>
-         <p>
-            VoiceOver and NVDA add their own sets. <code>sr list</code> prints them grouped by command
-            set and by what the commands do. Start with <code>--query</code>: the full list is over
-            400 lines.
-         </p>
-         <pre><code>a1 sr list --query heading
+      <p>
+         VoiceOver and NVDA add their own sets. <code>sr list</code> prints them grouped by command
+         set and by what the commands do. Start with <code>--query</code>: the full list is over
+         400 lines.
+      </p>
+      <pre><code>a1 sr list --query heading
 a1 sr list --query "VO-Command" --sr voiceover</code></pre>
-      </div>
-      <div class="split-aside">
-         <div class="tag">Command sets</div>
-         <p class="aside-note">
-            When two sets share a name, prefix it with the set:
-            <code>sr do voiceover-keycode:move-to-next</code> or
-            <code>sr do voiceover-commander:move-right</code>. <code>--command-set</code> picks one
-            set for the whole call. The virtual target accepts the portable set only.
-         </p>
-      </div>
+      <p>
+         When two sets share a name, prefix it with the set:
+         <code>sr do voiceover-keycode:move-to-next</code> or
+         <code>sr do voiceover-commander:move-right</code>. <code>--command-set</code> picks one
+         set for the whole call. The simulated screen reader accepts the portable set only.
+      </p>
    </section>
 
    <section class="panel" id="transcript">
-      <div class="panel-head">
-         <p class="panel-kicker">Step 8</p>
-         <h2>Mark the steps and keep the transcript</h2>
-      </div>
+      <h2>Checkpoints and transcripts</h2>
       <p>
-         A checkpoint marks a point in the transcript. <code>sr transcript --since</code> and
-         <code>sr expect --since</code> then look only at what the reader said after it.
+         A checkpoint is a named marker in the transcript. <code>sr transcript --since</code> and
+         <code>sr expect --since</code> then read only the announcements after it.
       </p>
       <pre><code>a1 sr checkpoint "opened the dialog"
 a1 sr next
 a1 sr transcript --since "opened the dialog"</code></pre>
       <p>
-         Each entry carries an index, an ISO timestamp, the phrase, and the item text when the
-         reader reported one. The Markdown view numbers the phrases 1, 2, 3 and renders a checkpoint
-         as a heading between them. <code>--tail &lt;count&gt;</code> keeps the last N phrases.
+         Each transcript entry has an index, an ISO timestamp, the announcement, and the
+         element's text when the screen reader reported one. The Markdown output numbers the
+         announcements 1, 2, 3 and prints a checkpoint as a heading between them.
+         <code>--tail &lt;count&gt;</code> keeps the last N announcements.
          <code>--out &lt;path&gt;</code> writes the transcript to a file, as JSON for a
          <code>.json</code> path and as Markdown for a <code>.md</code> path. Pass
          <code>--format json</code> or <code>--format md</code> to pick the format yourself.
       </p>
-      <pre><code>a1 sr transcript --out ./evidence/checkout.md</code></pre>
+      <pre><code>a1 sr transcript --out ./transcripts/checkout.md</code></pre>
       <p>
-         On VoiceOver, <code>sr screenshot &lt;path&gt;</code> saves a picture of what the cursor is
-         on. NVDA has no cursor screenshot and the virtual reader has no screen, so both exit 2 and
-         say so.
+         On VoiceOver, <code>sr screenshot &lt;path&gt;</code> saves a picture of the element the
+         cursor is on. NVDA has no cursor screenshot and the simulated screen reader has no screen,
+         so both exit 2 and say so.
       </p>
    </section>
 
    <section class="panel" id="form">
-      <div class="panel-head">
-         <p class="panel-kicker">Example</p>
-         <h2>Check a form's announcement order</h2>
-      </div>
+      <h2>Example: a dialog</h2>
       <p>
-         Step through the form field by field and read the transcript as a sequence. Each entry is
-         what the reader said at that position.
+         The page has one heading and a button named Open dialog. The button opens a modal dialog
+         named Preferences and moves focus to its first field. This transcript comes from
+         <code>sr start</code>, <code>sr next</code>, <code>sr next heading</code>,
+         <code>sr goto --role button --name "Open dialog"</code>,
+         <code>sr checkpoint opened</code>, and <code>sr activate</code>, in that order, followed
+         by <code>sr transcript</code>.
       </p>
-      <pre data-label="OUTPUT"><code>"spokenPhraseLog": [
-  "document",
-  "heading, Checkout, level 1",
-  "form",
-  "Email",
-  "textbox, Email, required",
-  "Card number",
-  "textbox, Card number",
-  "button, Pay now",
-  "button",
-  "end of form",
-  "end of document"
-]</code></pre>
+      <pre data-label="OUTPUT"><code># Transcript: virtual on http://localhost:3000/dialog.html
+
+Started 2026-09-06T11:07:38.042Z. Exported 2026-09-06T11:07:44.590Z. 6 phrases.
+
+1. [11:07:38.042] document
+2. [11:07:38.876] main
+3. [11:07:39.749] heading, Dialog demo, level 1 (Dialog demo)
+4. [11:07:41.203] button, Open dialog (Open dialog)
+
+## opened (11:07:41.880)
+
+5. [11:07:42.555] dialog, Preferences, modal (Preferences)
+6. [11:07:42.555] textbox, Nickname (Nickname)</code></pre>
       <p>
-         Three things to check in a log like this. Every control has a name, so
-         <code>"button"</code> on its own is a defect. The order matches the visual order. States
-         that matter are announced, which is why <code>required</code> appears on the email field
-         and not on the card field.
+         Lines 1 to 4 are the elements the cursor stopped at on the way to the button. The
+         <code>opened</code> heading is the checkpoint, placed before <code>activate</code>. Lines
+         5 and 6 are what the screen reader announced when the button was pressed: the dialog,
+         with its name and its <code>modal</code> state, and then the text field that received
+         focus. Three things to check in a transcript like this. Every control has a name, so a
+         line that reads <code>button</code> alone is a defect. The order matches the visual
+         order. The states that matter are announced, which is why <code>modal</code> appears on
+         line 5.
       </p>
       <p>
-         For validation messages, submit the form with <code>sr press Enter</code>, then
-         <code>sr wait --for /error/i</code> to see whether the message was announced. Status
-         Messages is criterion 4.1.3, and <a href="/coverage">its coverage state</a> is hybrid for
-         exactly this reason.
+         For a validation message, submit the form with <code>sr press Enter</code>, then run
+         <code>sr wait --for /error/i</code> to find out whether the message was announced.
+         Status Messages is criterion 4.1.3, and its <a href="/test-methods">test method</a> is
+         hybrid because the announcement is the part a person has to judge.
       </p>
    </section>
 
    <section class="field-note" id="cleanup">
-      <div class="panel-head">
-         <p class="panel-kicker">Cleanup</p>
-         <h2>Stop every session you start</h2>
-      </div>
-      <pre><code>a1 sr stop --out ./evidence/checkout.json</code></pre>
+      <h2>Stop the session</h2>
+      <pre><code>a1 sr stop --out ./transcripts/checkout.json</code></pre>
       <p>
-         Stopping shuts down the driver process, finishes any recording, and deletes the state
-         file. A session left running keeps the screen reader under automation control, so stop
-         each one you start. A session nobody has used for 30 minutes stops itself. Pass
-         <code>--idle-timeout &lt;minutes&gt;</code> on <code>sr start</code> to change that, or
-         <code>--idle-timeout 0</code> to turn it off.
+         Stopping quits the screen reader process, finishes any recording, and deletes the
+         session state file. A session left running keeps VoiceOver or NVDA under automation
+         control, so stop each one you start. A session nobody has used for 30 minutes stops
+         itself. Pass <code>--idle-timeout &lt;minutes&gt;</code> on <code>sr start</code> to
+         change that, or <code>--idle-timeout 0</code> to turn it off.
       </p>
       <p>
          <code>sr stop --out</code> writes the transcript on the way out. When the session recorded
@@ -411,7 +460,7 @@ a1 sr transcript --since "opened the dialog"</code></pre>
       <p>
          For a single action with no session, add <code>--ephemeral</code> to
          <code>press</code>, <code>type</code>, or <code>do</code>. It starts a session, runs the
-         action, and tears it down in one command.
+         action, and stops the session in one command.
       </p>
    </section>
 </DocShell>

@@ -20,9 +20,9 @@ const requiredRuntimePages = [
    'index.astro',
    'install.astro',
    'quickstart.astro',
-   'targets.astro',
-   'coverage.astro',
-   'applicability.astro',
+   'screen-readers.astro',
+   'test-methods.astro',
+   'relevant-criteria.astro',
    'guides/screen-reader.astro',
    'guides/testing.astro',
    'guides/agents.astro',
@@ -40,9 +40,9 @@ const requiredRuntimePages = [
 const requiredNavRoutes = [
    '/install',
    '/quickstart',
-   '/targets',
-   '/coverage',
-   '/applicability',
+   '/screen-readers',
+   '/test-methods',
+   '/relevant-criteria',
    '/guides/screen-reader',
    '/guides/testing',
    '/guides/agents',
@@ -59,8 +59,8 @@ const requiredNavRoutes = [
 ] as const;
 const requiredHomeRoutes = [
    '/quickstart',
-   '/targets',
-   '/coverage',
+   '/screen-readers',
+   '/test-methods',
    '/guides/agent-skill',
    '/reference/cli',
    '/reference/mcp',
@@ -154,14 +154,14 @@ function expectCliSurfaceDocs(): void {
 }
 
 function expectConceptSurfaceDocs(): void {
-   expectSurfaceDoc('applicability.astro', 'applicable');
-   expectSurfaceDoc('applicability.astro', 'not-detected');
-   expectSurfaceDoc('applicability.astro', 'out-of-scope');
-   expectSurfaceDoc('coverage.astro', 'automated');
-   expectSurfaceDoc('coverage.astro', 'hybrid');
-   expectSurfaceDoc('coverage.astro', 'manual');
-   expectSurfaceDoc('targets.astro', '--allow-virtual');
-   expectSurfaceDoc('targets.astro', 'targetType');
+   expectSurfaceDoc('relevant-criteria.astro', 'applicable');
+   expectSurfaceDoc('relevant-criteria.astro', 'not-detected');
+   expectSurfaceDoc('relevant-criteria.astro', 'out-of-scope');
+   expectSurfaceDoc('test-methods.astro', 'automated');
+   expectSurfaceDoc('test-methods.astro', 'hybrid');
+   expectSurfaceDoc('test-methods.astro', 'manual');
+   expectSurfaceDoc('screen-readers.astro', '--allow-virtual');
+   expectSurfaceDoc('screen-readers.astro', 'targetType');
 }
 
 function expectMcpAndApiSurfaceDocs(): void {
@@ -175,7 +175,7 @@ function expectMcpAndApiSurfaceDocs(): void {
 }
 
 function expectGuideSurfaceDocs(): void {
-   expectSurfaceDoc('guides/recording.astro', 'What can be recorded');
+   expectSurfaceDoc('guides/recording.astro', 'Record a session');
    expectSurfaceDoc('guides/recording.astro', '.mov');
    expectSurfaceDoc('guides/recording.astro', '.mp4');
    expectSurfaceDoc('guides/recording.astro', 'sr start --sr voiceover --recording');
@@ -208,7 +208,7 @@ function expectTestApiDocs(): void {
    expectSurfaceDoc('guides/testing.astro', 'await using sr = await screenReader');
    expectSurfaceDoc('guides/testing.astro', 'toHaveSpokenInOrder');
    expectSurfaceDoc('guides/testing.astro', '@vitest/browser-playwright');
-   expectSurfaceDoc('targets.astro', 'jsdom');
+   expectSurfaceDoc('screen-readers.astro', 'jsdom');
    expectSurfaceDoc('reference/api.astro', 'a11ied/test');
 }
 

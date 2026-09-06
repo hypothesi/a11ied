@@ -1,0 +1,155 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+
+const toc = [
+   { id: 'methods', label: 'Automated, hybrid, and manual' },
+   { id: 'numbers', label: 'Criteria per level' },
+   { id: 'strategy', label: 'How to test a hybrid or manual criterion' },
+   { id: 'lookup', label: 'Looking up a criterion' },
+   { id: 'claims', label: 'Reporting results' },
+];
+---
+
+<DocShell
+   title="Test methods"
+   summary="Every success criterion in the Web Content Accessibility Guidelines (WCAG), the standard most accessibility requirements come from, has a test method: automated, hybrid, or manual. It says whether a1 axe decides the criterion, whether a person has to, and what to run in between. a11ied derives it from the W3C ACT rule mapping and the axe-core rule tags."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="ledger" id="methods">
+      <h2>Automated, hybrid, and manual</h2>
+      <p>
+         A WCAG success criterion is one numbered requirement, such as 4.1.2 Name, Role, Value, at
+         level A, AA, or AAA. For each one, a11ied records which of these applies. The JSON output
+         of <code>a1 wcag</code> returns it as the <code>method</code> field of <code>testMethod</code>.
+      </p>
+      <div class="route-list">
+         <div class="route-row">
+            <code>automated</code>
+            <span>
+               One or more axe rules decide the criterion. <code>a1 axe --criterion 1.4.3</code>
+               runs them, and a pass means the criterion is met.
+            </span>
+         </div>
+         <div class="route-row">
+            <code>hybrid</code>
+            <span>
+               Automated checks test part of the criterion and a person tests the rest. WCAG 2.2 has ten
+               criteria with this method, including 2.4.3 Focus Order and 4.1.3 Status Messages.
+            </span>
+         </div>
+         <div class="route-row">
+            <code>manual</code>
+            <span>
+               No axe rule or ACT rule maps to the criterion. <code>a1 wcag</code> prints the
+               requirement, the techniques, and the failures, and a person tests the page.
+            </span>
+         </div>
+         <div class="route-row">
+            <code>unknown</code>
+            <span>
+               The mapping data did not classify the criterion. No criterion in WCAG 2.1 or 2.2 has
+               this value.
+            </span>
+         </div>
+      </div>
+   </section>
+
+   <section class="panel" id="numbers">
+      <h2>Criteria per level</h2>
+      <p>WCAG 2.2 has 86 success criteria. <code>a1 wcag criteria --summary</code> counts them by level and test method:</p>
+      <pre><code>a1 wcag criteria --summary</code></pre>
+      <pre data-label="OUTPUT"><code>WCAG 2.2 test methods  updated 2026-09-05
+  Level      Criteria   Automated  Hybrid     Manual     Unknown
+  A          31         15         3          13         0
+  AA         24         8          4          12         0
+  AAA        31         5          3          23         0
+  All        86         28         10         48         0
+
+  29 criteria have an axe rule, 24 have an ACT rule, 21 have both.</code></pre>
+      <p>
+         Each criterion's record in the JSON output lists where its test method came from under
+         <code>sourceAttribution</code>. The five values are <code>act-mapping</code>,
+         <code>axe-rule-tags</code>, <code>axe-act-id-join</code>,
+         <code>strategy-heuristic</code>, and <code>manual-fallback</code>. See
+         <a href="/reference/wcag-data">WCAG data</a> for the upstream sources.
+      </p>
+   </section>
+
+   <section class="panel" id="strategy">
+      <h2>How to test a hybrid or manual criterion</h2>
+      <p>
+         Each criterion also has a <code>strategy</code> that lists the test procedure and says
+         whether the page has to be open in a browser or screen reader.
+      </p>
+      <pre><code>a1 wcag 4.1.3 --json</code></pre>
+      <pre data-label="OUTPUT"><code>"testMethod": &#123;
+  "method": "hybrid",
+  "axeRuleIds": [],
+  "actRuleIds": [],
+  "sourceAttribution": ["strategy-heuristic"]
+&#125;,
+"strategy": &#123;
+  "preferredEvidenceMode": "hybrid",
+  "procedureIds": ["status_message_probe"],
+  "requiresRealTarget": true,
+  "notes": [
+    "Status messages need announcement evidence from assistive technology without forced focus changes."
+  ]
+&#125;</code></pre>
+      <p>
+         <code>requiresRealTarget: true</code> means reading the HTML is not enough: the test needs
+         the page open in a browser or a screen reader session. For 4.1.3 Status Messages, that is
+         a session in which you trigger the update, then run <code>a1 sr transcript</code> to see
+         whether the screen reader announced it. The text output of <code>a1 wcag 4.1.3</code> says
+         the same thing in its <code>Testing it</code> block, with the command to run.
+      </p>
+      <p>
+         A criterion with <code>"procedureIds": ["axe_scan"]</code> needs only
+         <code>a1 axe</code>. A criterion with <code>["manual_review"]</code> needs a person.
+      </p>
+   </section>
+
+   <section class="panel" id="lookup">
+      <h2>Looking up a criterion</h2>
+      <p>
+         Every lookup reads data bundled with the package. None of them opens a browser or makes a
+         network request.
+      </p>
+      <pre><code>a1 wcag                                  # interactive finder on a terminal
+a1 wcag 4.1.3                            # one criterion: requirement, how to test it, how to fix it
+a1 wcag G18                              # one technique and the criteria that list it
+a1 wcag criteria --level AA --json
+a1 wcag criteria --summary               # criteria per level and test method
+a1 wcag search "focus order" --limit 3 --json
+a1 wcag rule color-contrast              # axe rule to criteria and fix guidance</code></pre>
+      <p>
+         <code>a1 wcag &lt;criterion&gt;</code> takes an ID such as <code>4.1.3</code>, a slug such as
+         <code>status-messages</code>, or a technique ID such as <code>G18</code>. It prints the
+         requirement text, the sufficient and advisory techniques, the failures, the test method,
+         the mapped axe and ACT rules, and the command to run next. Use <code>search</code> when you
+         know the topic but not the number. It ranks matches across titles, summaries, requirement
+         text, techniques, failures, and tags. <code>a1 wcag rule &lt;axe-rule-id&gt;</code> goes
+         the other way: from an axe violation to the criteria it fails and the techniques that fix
+         it.
+      </p>
+      <p>
+         Every <code>wcag</code> command takes <code>--wcag</code>. WCAG 2.1 and 2.2 are both in the
+         package, and 2.2 is the default.
+      </p>
+   </section>
+
+   <section class="field-note" id="claims">
+      <h2>Reporting results</h2>
+      <p>
+         A passing <code>a1 axe --level AA</code> run decides 8 of the 24 level AA criteria and says
+         nothing about the other 16. It does not mean the page meets level AA.
+      </p>
+      <p>
+         Report the test method next to each result: the criteria <code>a1 axe</code> decided, the
+         criteria a screen reader transcript supports, and the criteria still waiting on a person.
+         <code>a1 audit</code> prints that split for one page under <code>Check by hand</code>.
+      </p>
+   </section>
+</DocShell>

@@ -50,8 +50,8 @@ function expectNavSections(nav: string): void {
 
 function expectTaskFirstEntryPoints(homePage: string): void {
    expect(homePage).toContain('/quickstart');
-   expect(homePage).toContain('/coverage');
-   expect(homePage).toContain('/targets');
+   expect(homePage).toContain('/test-methods');
+   expect(homePage).toContain('/screen-readers');
    expect(homePage).toContain('/guides/agent-skill');
    expect(homePage).toContain('a1 doctor');
    expect(homePage).toContain('a1 axe http://localhost:3000');
@@ -60,8 +60,8 @@ function expectTaskFirstEntryPoints(homePage: string): void {
 }
 
 function expectGuidesLinkToConcepts(): void {
-   expect(readDocsPage('quickstart.astro')).toContain('/coverage');
-   expect(readDocsPage('guides/screen-reader.astro')).toContain('/coverage');
+   expect(readDocsPage('quickstart.astro')).toContain('/test-methods');
+   expect(readDocsPage('guides/screen-reader.astro')).toContain('/test-methods');
    expect(readDocsPage('guides/agents.astro')).toContain('/guides/agent-skill');
    expect(readDocsPage('guides/agent-skill.astro')).toContain('/reference/mcp');
    expect(readDocsPage('install.astro')).toContain('/quickstart');

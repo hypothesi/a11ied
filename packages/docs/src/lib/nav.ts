@@ -20,9 +20,9 @@ export const docsLinks: DocSection[] = [
    {
       title: 'Concepts',
       links: [
-         { href: '/targets', label: 'Targets' },
-         { href: '/coverage', label: 'Coverage' },
-         { href: '/applicability', label: 'Applicability' },
+         { href: '/screen-readers', label: 'Screen readers' },
+         { href: '/test-methods', label: 'Test methods' },
+         { href: '/relevant-criteria', label: 'Relevant criteria' },
       ],
    },
    {

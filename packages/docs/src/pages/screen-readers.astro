@@ -1,0 +1,142 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+
+const toc = [
+   { id: 'supported', label: 'Supported screen readers' },
+   { id: 'default', label: 'Which one runs without --sr' },
+   { id: 'virtual', label: 'Using the simulated screen reader' },
+   { id: 'real', label: 'Using VoiceOver or NVDA' },
+   { id: 'choose', label: 'Which one to use' },
+];
+---
+
+<DocShell
+   title="Screen readers"
+   summary="a11ied drives three screen readers: VoiceOver on macOS, NVDA on Windows, and a simulated screen reader that runs on any platform. --sr picks one, and every result says which one ran."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="ledger" id="supported">
+      <h2>Supported screen readers</h2>
+      <div class="route-list">
+         <div class="route-row">
+            <code>voiceover</code>
+            <span>
+               macOS. Drives VoiceOver through Guidepup and returns what it announces. Can record
+               the screen to a <code>.mov</code> file.
+            </span>
+         </div>
+         <div class="route-row">
+            <code>nvda</code>
+            <span>
+               Windows. Drives NVDA through Guidepup and returns what it announces. Can record the
+               screen to an <code>.mp4</code> file.
+            </span>
+         </div>
+         <div class="route-row">
+            <code>virtual</code>
+            <span>
+               Any platform. A screen reader implemented in software that runs inside a headless
+               Chromium page and produces the same kind of announcements as VoiceOver or NVDA, with
+               neither installed. Nothing opens on screen, so it cannot record. When no
+               Chromium-family browser is installed, or the session has no URL, it reads a jsdom
+               document instead, where page scripts do not run.
+            </span>
+         </div>
+      </div>
+      <p>
+         Every result from an <code>a1 sr</code> command says which screen reader ran, in the
+         <code>target</code> field, and says whether it was VoiceOver or NVDA or the simulation in
+         <code>targetType</code>: <code>real</code> or <code>simulated</code>. The simulated screen
+         reader also reports <code>engine</code>: <code>browser</code> for the headless Chromium
+         page, <code>jsdom</code> for the in-memory document.
+      </p>
+   </section>
+
+   <section class="panel" id="default">
+      <h2>Which one runs without --sr</h2>
+      <p>a11ied picks a screen reader from the operating system, then checks that it is set up:</p>
+      <ol>
+         <li>macOS picks <code>voiceover</code>. Windows picks <code>nvda</code>.</li>
+         <li>Linux and every other platform pick <code>virtual</code>.</li>
+         <li>
+            When VoiceOver or NVDA is installed but <code>a1 doctor</code> reports it as
+            <code>requires-setup</code>, the session runs <code>virtual</code> instead and adds a
+            warning to the result that says why.
+         </li>
+      </ol>
+      <p>
+         The warning on that fallback says the screen reader is simulated and its output does not
+         show how VoiceOver or NVDA behaves. <code>a1 doctor</code> prints each screen reader as
+         <code>ready</code> or <code>requires-setup</code>, with the command that fixes it.
+      </p>
+   </section>
+
+   <section class="panel" id="virtual">
+      <h2>Using the simulated screen reader</h2>
+      <p>
+         On macOS and Windows, <code>--sr virtual</code> alone exits 2 with the error
+         <code>virtual-target-disallowed</code>. Add <code>--allow-virtual</code> to confirm you
+         want the simulation instead of VoiceOver or NVDA.
+      </p>
+      <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout --json</code></pre>
+      <p>
+         Pass the URL so the screen reader has a page to read. The session loads the page in a
+         headless Chromium page and runs the screen reader inside it, so the page's own scripts
+         run: a live region a script fills, or a dialog a click opens, is announced.
+         <code>a1 sr status</code> prints the engine, and <code>session.engine</code> has it
+         in every JSON result. An installed Chrome, Edge, Brave, or Chromium is used first, then
+         the Chromium that <code>npx playwright install chromium</code> downloads.
+      </p>
+      <p>
+         Two cases use jsdom, an in-memory document where page scripts do not run: a session
+         started without a URL, which reads a placeholder document until <code>sr open</code>,
+         and a machine with no Chromium-family browser, where the session reports
+         <code>engine: "jsdom"</code>. Inline HTML passed to the test API renders in jsdom too.
+         Because it opens no window, the simulated screen reader runs in CI and in a watch task on
+         a developer machine.
+      </p>
+      <p>
+         MCP clients pass the same two fields: <code>target: "virtual"</code> and
+         <code>allowVirtual: true</code>.
+      </p>
+   </section>
+
+   <section class="panel" id="real">
+      <h2>Using VoiceOver or NVDA</h2>
+      <p>
+         VoiceOver and NVDA read whatever is on screen. Give <code>sr start</code> the URL and it
+         opens the page in the system browser, waits for that window to come to the front, and
+         then starts the screen reader.
+      </p>
+      <pre><code>a1 sr start --sr voiceover http://localhost:3000/checkout --json
+a1 sr next --json</code></pre>
+      <p>
+         <code>sr start</code> records which app it opened. A bare <code>a1 sr focus</code> brings
+         that app back to the front later. <code>sr focus</code> also accepts <code>--app</code> or
+         <code>--bundle-id</code> on macOS, <code>--process</code> or <code>--pid</code> on
+         Windows, and <code>--window-title</code> on either.
+      </p>
+      <p>
+         Run <code>a1 setup</code> once per machine before the first VoiceOver or NVDA session. It
+         runs Guidepup's <code>setup</code> and <code>install</code> commands and then prints the
+         <code>doctor</code> report. See <a href="/install#screen-readers">install</a>.
+      </p>
+   </section>
+
+   <section class="field-note" id="choose">
+      <h2>Which one to use</h2>
+      <p>
+         Use <code>virtual</code> to check the order elements are announced in, and the name,
+         role, and state each one announces with. Its output is the same on every run and it opens
+         no window, so it fits a watch task, a pre-commit hook, and a CI job.
+      </p>
+      <p>
+         Use <code>voiceover</code> or <code>nvda</code> when the question is how that screen
+         reader behaves: its rotor or elements list, its interaction mode inside a group or
+         table, where its cursor lands when a dialog opens or closes, and anything you plan to
+         record or quote in a bug report.
+      </p>
+   </section>
+</DocShell>

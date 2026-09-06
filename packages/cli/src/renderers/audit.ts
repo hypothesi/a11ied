@@ -245,7 +245,7 @@ function renderPageSection(report: AuditReport): string[] {
    const name = report.tree.pageTitle || dim('(no title)');
    return section('The page', [
       `Titled ${name}, opening with ${report.tree.firstHeading ?? dim('no heading')}.`,
-      `It holds ${describeCounts(report.tree)}.`,
+      `It has ${describeCounts(report.tree)}.`,
    ]);
 }
 
