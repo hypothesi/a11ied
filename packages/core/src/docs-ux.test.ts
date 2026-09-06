@@ -53,9 +53,8 @@ function expectTaskFirstEntryPoints(homePage: string): void {
    expect(homePage).toContain('/test-methods');
    expect(homePage).toContain('/screen-readers');
    expect(homePage).toContain('/guides/agent-skill');
-   expect(homePage).toContain('a1 doctor');
    expect(homePage).toContain('a1 axe http://localhost:3000');
-   expect(homePage).toContain('a1 sr start');
+   expect(homePage).toContain('a1 sr walk');
    expect(homePage).toContain('a1 wcag 2.4.3');
 }
 
@@ -64,7 +63,7 @@ function expectGuidesLinkToConcepts(): void {
    expect(readDocsPage('guides/screen-reader.astro')).toContain('/test-methods');
    expect(readDocsPage('guides/agents.astro')).toContain('/guides/agent-skill');
    expect(readDocsPage('guides/agent-skill.astro')).toContain('/reference/mcp');
-   expect(readDocsPage('install.astro')).toContain('/quickstart');
+   expect(readDocsPage('index.astro')).toContain('/quickstart');
 }
 
 function expectDocsFilesFreeOfLegacyCallouts(files: readonly string[]): void {

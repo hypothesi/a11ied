@@ -18,7 +18,6 @@ const releaseReadinessPath = resolve(
 );
 const requiredRuntimePages = [
    'index.astro',
-   'install.astro',
    'quickstart.astro',
    'screen-readers.astro',
    'test-methods.astro',
@@ -38,7 +37,6 @@ const requiredRuntimePages = [
    'reference/wcag-data.astro',
 ] as const;
 const requiredNavRoutes = [
-   '/install',
    '/quickstart',
    '/screen-readers',
    '/test-methods',
@@ -182,10 +180,10 @@ function expectGuideSurfaceDocs(): void {
    expectSurfaceDoc('guides/recording.astro', 'transcript');
    expectSurfaceDoc('guides/recording.astro', 'Install Chrome, Edge, Brave, or Chromium');
    expectSurfaceDoc('guides/screen-reader.astro', 'a1 sr stop');
-   expectSurfaceDoc('install.astro', 'npx -y @guidepup/setup setup');
-   expectSurfaceDoc('install.astro', 'npx -y @guidepup/setup install');
-   expectSurfaceDoc('install.astro', 'a1 setup');
-   expectSurfaceDoc('install.astro', 'a1 doctor --strict');
+   expectSurfaceDoc('screen-readers.astro', 'npx -y @guidepup/setup setup');
+   expectSurfaceDoc('screen-readers.astro', 'npx -y @guidepup/setup install');
+   expectSurfaceDoc('screen-readers.astro', 'a1 setup');
+   expectSurfaceDoc('guides/ci.astro', 'a1 doctor --strict');
    expectSurfaceDoc('reference/cli.astro', 'a1 setup');
    expectSurfaceDoc('quickstart.astro', 'a1 sr stop');
 }

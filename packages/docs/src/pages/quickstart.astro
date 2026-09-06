@@ -3,31 +3,87 @@ import DocShell from '../layouts/doc-shell.astro';
 import { docsLinks } from '../lib/nav';
 
 const toc = [
-   { id: 'run', label: '1. Run axe' },
-   { id: 'coverage', label: '2. Check coverage' },
-   { id: 'session', label: '3. Start a session' },
-   { id: 'read', label: '4. Read the transcript' },
-   { id: 'stop', label: '5. Stop the session' },
+   { id: 'install', label: '1. Install the package' },
+   { id: 'check', label: '2. Check your machine' },
+   { id: 'run', label: '3. Run axe' },
+   { id: 'coverage', label: '4. Check coverage' },
+   { id: 'session', label: '5. Start a session' },
+   { id: 'read', label: '6. Read the transcript' },
+   { id: 'stop', label: '7. Stop the session' },
    { id: 'report', label: 'Claims this run supports' },
 ];
 ---
 
 <DocShell
    title="Quickstart"
-   summary="Take one local route from an axe run to a screen reader transcript. This runs on the virtual target, so it needs nothing beyond the installed package and a running development server."
+   summary="Install the package, confirm your machine is ready, then take one local route from an axe run to a screen reader transcript. It runs on the simulated screen reader, so nothing beyond Node and a running development server is required."
    links={docsLinks}
    toc={toc}
 >
+   <section class="panel" id="install">
+      <div class="panel-head">
+         <p class="panel-kicker">Step 1</p>
+         <h2>Install the package</h2>
+      </div>
+      <pre><code>npm install --global a11ied</code></pre>
+      <p>
+         The package installs two identical binaries, <code>a1</code> and <code>a11ied</code>.
+         Every example on this page uses <code>a1</code>.
+      </p>
+   </section>
+
+   <section class="panel" id="check">
+      <div class="panel-head">
+         <p class="panel-kicker">Step 2</p>
+         <h2>Check your machine</h2>
+      </div>
+      <pre><code>a1 doctor</code></pre>
+      <pre data-label="OUTPUT"><code>✓ Ready for a1 commands on macOS 26.5.2 (arm64)
+
+Targets
+  ✓ macos-voiceover  ready  Ready for real screen reader sessions.
+      ✓ AppleScript control enabled in VoiceOver settings
+      ✓ AppleScript control confirmed by macOS
+      ✓ VoiceOver local preferences exist
+      ✓ VoiceOver welcome dialog suppressed
+      ✓ Guidepup VoiceOver preferences bundle installed
+      ✓ Screen recording available to the current host app
+  - windows-nvda     Only available on Windows.
+  ✓ virtual-dom      ready  No setup needed.
+
+Browser automation
+  ✓ Google Chrome  ready  Used for a1 axe scans.
+      Path    /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+      Launch  system install, opened through the "chrome" browser channel
+      Others  Playwright Chromium
+
+  Policy    system-browser-first: an installed Chrome, Edge, Brave, or Chromium is used before Playwright's Chromium
+  Fallback  npx playwright install chromium
+
+Environment
+  a11ied  0.1.0
+  Node    v24.19.0
+  npm     11.17.0
+  Host    macOS 26.5.2 (arm64) [darwin]</code></pre>
+      <p>
+         The first line is the verdict. <code>✓</code> means every check passed and you can move
+         on. A <code>✗</code> switches to an <strong>Action items</strong> list with the exact
+         command that fixes each step. The virtual target this quickstart uses needs no setup, so
+         the rest of the page works even when VoiceOver or NVDA still needs one.
+      </p>
+   </section>
+
    <section class="split panel" id="run">
       <div class="stack">
          <div class="panel-head">
-            <p class="panel-kicker">Step 1</p>
+            <p class="panel-kicker">Step 3</p>
             <h2>Run axe on the page</h2>
          </div>
          <p>
-            Start your development server, then run axe, the open-source rules engine a11ied
-            uses to scan a page's HTML for accessibility bugs, against the route you are
-            working on.
+            Start your development server, then run axe against the route you are working on.
+            axe runs the page in a browser it finds automatically, an installed Chrome, Edge,
+            Brave, or Chromium, or the Chromium <code>npx playwright install chromium</code>
+            downloads.
          </p>
          <pre><code>a1 axe http://localhost:3000/checkout --level AA --json</code></pre>
          <p>
@@ -62,13 +118,12 @@ const toc = [
 
    <section class="panel" id="coverage">
       <div class="panel-head">
-         <p class="panel-kicker">Step 2</p>
+         <p class="panel-kicker">Step 4</p>
          <h2>Check what the run left out</h2>
       </div>
       <p>
-         A clean axe run covers the criteria, WCAG's testable requirements, that have axe
-         rules. Coverage says whether axe can decide a criterion on its own. Check it before
-         you draw a conclusion.
+         A clean axe run covers the success criteria that have axe rules. Check coverage, whether
+         axe can decide a criterion on its own, before you draw a conclusion.
       </p>
       <pre><code>a1 wcag 2.4.3 --json
 a1 wcag 1.4.3 --json</code></pre>
@@ -76,18 +131,18 @@ a1 wcag 1.4.3 --json</code></pre>
          Focus Order returns <code>"coverageState": "hybrid"</code> with an empty
          <code>axeRuleIds</code> list. Contrast (Minimum) returns
          <code>"coverageState": "automated"</code> with <code>color-contrast</code>. The first needs
-         a screen reader session. The second is already covered by step 1.
+         a screen reader session. The second is already covered by step 3.
       </p>
       <p>
-         <a href="/test-methods">Coverage</a> explains the four states and where the mapping data comes
-         from.
+         <a href="/test-methods">Test methods</a> explains the four states and where the mapping
+         data comes from.
       </p>
    </section>
 
    <section class="split panel" id="session">
       <div class="stack">
          <div class="panel-head">
-            <p class="panel-kicker">Step 3</p>
+            <p class="panel-kicker">Step 5</p>
             <h2>Start a screen reader session</h2>
          </div>
          <p>
@@ -116,7 +171,7 @@ a1 wcag 1.4.3 --json</code></pre>
 
    <section class="panel" id="read">
       <div class="panel-head">
-         <p class="panel-kicker">Step 4</p>
+         <p class="panel-kicker">Step 6</p>
          <h2>Step through the page and read the log</h2>
       </div>
       <p>
@@ -141,13 +196,13 @@ a1 wcag 1.4.3 --json</code></pre>
       <p>
          Read the log as a sequence. The email field announces its required state. The second to
          last entry announces as <code>button</code> with nothing after it, which matches the
-         <code>button-name</code> violation from step 1.
+         <code>button-name</code> violation from step 3.
       </p>
    </section>
 
    <section class="panel" id="stop">
       <div class="panel-head">
-         <p class="panel-kicker">Step 5</p>
+         <p class="panel-kicker">Step 7</p>
          <h2>Stop the session</h2>
       </div>
       <pre><code>a1 sr stop --json</code></pre>
@@ -169,8 +224,8 @@ a1 wcag 1.4.3 --json</code></pre>
       <p>
          It is not a conformance claim. WCAG groups its requirements into three conformance
          levels, and this run leaves 12 of level AA's 24 criteria with no automated coverage.
-         Move to <a href="/guides/screen-reader">VoiceOver or NVDA</a> when the real behavior is
-         what you need to check.
+         Move to <a href="/guides/screen-reader">test with a screen reader</a> when the real
+         behavior of VoiceOver or NVDA is what you need to check.
       </p>
    </section>
 </DocShell>

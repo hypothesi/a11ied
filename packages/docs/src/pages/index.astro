@@ -3,7 +3,7 @@ import DocShell from '../layouts/doc-shell.astro';
 import { docsLinks } from '../lib/nav';
 
 const toc = [
-   { id: 'install', label: 'Install' },
+   { id: 'requirements', label: 'WCAG requirements' },
    { id: 'screen-reader', label: 'Screen reader output' },
    { id: 'axe', label: 'axe runs' },
    { id: 'coverage', label: 'Coverage' },
@@ -14,53 +14,36 @@ const toc = [
 ---
 
 <DocShell
-   title="Test what the screen reader says"
-   summary="a11ied drives VoiceOver, NVDA, and a virtual screen reader from the command line, and it runs axe, an open-source rules engine that scans a page's HTML for accessibility bugs. It reports results against the Web Content Accessibility Guidelines (WCAG), whose testable requirements are called success criteria. One install gives you a CLI, an MCP server, and a TypeScript API over the same runtime."
+   title="Overview"
+   summary="A site's accessibility gets measured against a set of published requirements. An automated scan can decide some of them by reading a page's HTML. The rest need someone to listen to the page the way a screen reader user does. a11ied runs both kinds of check from one command line, one MCP server, and one TypeScript API."
    links={docsLinks}
    toc={toc}
 >
-   <section class="split panel" id="install">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Install</p>
-            <h2>The install command and the doctor check</h2>
-         </div>
-         <pre><code>npm install --global a11ied
-
-a1 doctor</code></pre>
-         <p>
-            <code>doctor</code> checks this machine and leads with the verdict: what still needs
-            to run, then each screen reader target with its checks, then the browser a11ied will
-            automate.
-         </p>
-         <pre data-label="OUTPUT"><code>✗ 1 setup step needed before a1 is fully usable on macOS 26.5.2 (arm64)
-
-Action items
-  1. Install the Guidepup VoiceOver preferences bundle
-     cd "/usr/local/lib/node_modules/a11ied" && npx -y @guidepup/setup install
-
-Targets
-  ✗ macos-voiceover  requires setup  1 setup step is missing.
-      ✓ AppleScript control enabled in VoiceOver settings
-      ✓ AppleScript control confirmed by macOS
-      ✓ VoiceOver local preferences exist
-      ✓ VoiceOver welcome dialog suppressed
-      ✗ Guidepup VoiceOver preferences bundle installed
-      ✓ Screen recording available to the current host app
-  - windows-nvda     Only available on Windows.
-  ✓ virtual-dom      ready  No setup needed.</code></pre>
+   <section class="panel" id="requirements">
+      <div class="panel-head">
+         <p class="panel-kicker">Requirements</p>
+         <h2>WCAG requirements</h2>
       </div>
-      <div class="split-aside">
-         <div class="tag">No setup needed</div>
-         <p class="aside-note">
-            The virtual target is ready as soon as the package installs. VoiceOver and NVDA
-            need <code>a1 setup</code> once per machine. It runs the Guidepup commands
-            <code>doctor</code> lists and re-checks when they finish.
-         </p>
-         <p class="aside-note">
-            Drop <code>--global</code> to install into a project and use the TypeScript API.
-         </p>
-      </div>
+      <p>
+         The <a href="https://www.w3.org/WAI/standards-guidelines/wcag/">Web Content
+         Accessibility Guidelines (WCAG)</a> is the standard most accessibility
+         requirements point back to. It groups its rules into numbered, testable success
+         criteria, each at level A, AA, or AAA.
+      </p>
+      <p>
+         <a href="https://github.com/dequelabs/axe-core">axe-core (axe)</a> is the
+         open-source rules engine most automated accessibility scans run. It reads a
+         page's rendered HTML and decides the success criteria it can decide on its own.
+         <code>a1 axe</code> runs it against a URL.
+      </p>
+      <p>
+         The rest need a person to listen to the page. <a
+         href="https://support.apple.com/guide/voiceover/welcome/mac">VoiceOver</a> on
+         macOS and <a href="https://www.nvaccess.org/about-nvda/">NVDA</a> on Windows are
+         the screen readers people actually use. <code>a1 sr</code> drives either one,
+         plus a simulated screen reader that needs neither installed, and returns what it
+         announced as text.
+      </p>
    </section>
 
    <section class="panel" id="screen-reader">
@@ -69,11 +52,10 @@ Targets
          <h2>The announcement order for a page</h2>
       </div>
       <p>
-         Start a session, then read the whole page top to bottom. <code>sr walk</code> returns
-         the spoken text as JSON, one entry per item.
+         <code>sr walk</code> starts a session, reads the whole page top to bottom, and
+         returns the spoken text as JSON, one entry per item.
       </p>
-      <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout --json
-a1 sr walk --json</code></pre>
+      <pre><code>a1 sr walk --sr virtual --allow-virtual http://localhost:3000/checkout --json</code></pre>
       <pre data-label="OUTPUT"><code>"spokenPhraseLog": [
   "document",
   "heading, Checkout, level 1",
@@ -92,8 +74,9 @@ a1 sr walk --json</code></pre>
          on the email field, and a tenth entry that announces as <code>button</code> with no name.
       </p>
       <p>
-         Swap <code>--sr virtual --allow-virtual</code> for <code>--sr voiceover</code> to
-         run the same walk against the real screen reader.
+         Swap <code>--sr virtual --allow-virtual</code> for <code>--sr voiceover</code> to run the
+         same walk against VoiceOver. See <a href="/screen-readers">screen readers</a> for NVDA and
+         when to use each one.
       </p>
    </section>
 
@@ -107,21 +90,18 @@ a1 sr walk --json</code></pre>
          and runs them against the page.
       </p>
       <pre><code>a1 axe http://localhost:3000/checkout --level AA --json</code></pre>
-      <pre data-label="OUTPUT"><code>"violations": [
-  &#123;
-    "id": "button-name",
-    "impact": "critical",
-    "help": "Buttons must have discernible text",
-    "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/button-name",
-    "nodes": [
-      &#123;
-        "target": ["button[type=\"button\"]"],
-        "html": "&lt;button type=\"button\"&gt;&lt;img src=\"cart.png\" alt=\"\"&gt;&lt;/button&gt;",
-        "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty"
-      &#125;
-    ]
-  &#125;
-]</code></pre>
+      <pre data-label="OUTPUT"><code>"verdict": &#123;
+  "totalViolationNodes": 1,
+  "failingFindings": [
+    &#123; "ruleId": "button-name", "impact": "critical", "target": ["button[type=\"button\"]"] &#125;
+  ],
+  "passed": false
+&#125;</code></pre>
+      <p>
+         This page fails: one element trips <code>button-name</code>, the rule that checks a
+         button has text a screen reader can announce. The full result also lists every rule axe
+         ran and passed, so a clean run states exactly what it checked.
+      </p>
       <p>
          Scope a run three other ways: <code>--criterion 1.4.3</code> for one success
          criterion, <code>--rule color-contrast --rule link-name</code> for named rules, or no
@@ -136,9 +116,9 @@ a1 sr walk --json</code></pre>
             <h2>Criteria axe cannot decide</h2>
          </div>
          <p>
-            Coverage says whether axe can decide a criterion on its own, or whether a person has
-            to check it too. a11ied derives coverage from the W3C ACT rule mapping and the axe
-            rule tags, both included as local data, so a lookup makes no network request.
+            Coverage says whether axe can decide a success criterion on its own, or whether a
+            person has to check it too. a11ied derives coverage from the W3C ACT rule mapping and
+            the axe rule tags, both included as local data, so a lookup makes no network request.
          </p>
          <pre><code>a1 wcag 2.4.3 --json</code></pre>
          <pre data-label="OUTPUT"><code>"coverage": &#123;
@@ -155,17 +135,14 @@ a1 sr walk --json</code></pre>
          <p>
             No axe rule decides Focus Order on its own. The strategy lists the procedure to
             run, <code>focus_order_probe</code>, and says the test needs a real target, which a
-            driver session provides. <a href="/test-methods">Coverage</a> explains the four
-            coverage states and where the mapping comes from.
+            driver session provides. <a href="/test-methods">Test methods</a> explains the four
+            states and where the mapping comes from.
          </p>
       </div>
       <div class="split-aside">
          <div class="tag">WCAG 2.2, level AA</div>
          <p class="aside-note">
             24 success criteria. axe rules decide 8. Four are hybrid. Twelve stay manual.
-         </p>
-         <p class="aside-note">
-            Across all three levels: 86 criteria, 28 automated, 10 hybrid, 48 manual.
          </p>
       </div>
    </section>
@@ -177,7 +154,7 @@ a1 sr walk --json</code></pre>
       </div>
       <p>
          The MCP server runs over stdio and opens no network port. Add it to any MCP client and the
-         agent gets criterion lookup, applicability inspection, axe runs, and driver sessions.
+         agent gets criterion lookup, coverage lookup, axe runs, and screen reader sessions.
       </p>
       <pre data-label="CONFIG"><code>{`{
   "mcpServers": {
@@ -199,7 +176,7 @@ Report the axe violations and the spoken phrase log separately.</code></pre>
    <section class="ledger" id="interfaces">
       <div class="panel-head">
          <p class="panel-kicker">Interfaces</p>
-         <h2>The CLI, the MCP server, and the API</h2>
+         <h2>Ways to use a11ied</h2>
       </div>
       <div class="route-list">
          <div class="route-row">
@@ -208,7 +185,7 @@ Report the axe violations and the spoken phrase log separately.</code></pre>
          </div>
          <div class="route-row">
             <strong><a href="/reference/mcp">MCP server</a></strong>
-            <span>Eight tools and seven read-only resources over stdio, for coding agents and editors.</span>
+            <span>13 tools and seven read-only resources over stdio, for coding agents and editors.</span>
          </div>
          <div class="route-row">
             <strong><a href="/reference/api">TypeScript API</a></strong>
@@ -227,9 +204,9 @@ Report the axe violations and the spoken phrase log separately.</code></pre>
          <h2>Your first test</h2>
       </div>
       <p>
-         The <a href="/quickstart">quickstart</a> takes a local URL from an axe run to a screen
-         reader transcript in about five minutes. Read <a href="/screen-readers">targets</a> first if you
-         want to know when to use VoiceOver instead of the virtual reader.
+         The <a href="/quickstart">quickstart</a> installs the package, checks your machine, and
+         takes one local route from an axe run to a screen reader transcript in about five
+         minutes.
       </p>
    </section>
 </DocShell>

@@ -13,7 +13,6 @@ export const docsLinks: DocSection[] = [
       title: 'Start',
       links: [
          { href: '/', label: 'Overview' },
-         { href: '/install', label: 'Install' },
          { href: '/quickstart', label: 'Quickstart' },
       ],
    },

@@ -118,10 +118,20 @@ a1 sr next --json</code></pre>
          <code>--bundle-id</code> on macOS, <code>--process</code> or <code>--pid</code> on
          Windows, and <code>--window-title</code> on either.
       </p>
+      <pre><code>a1 setup</code></pre>
       <p>
-         Run <code>a1 setup</code> once per machine before the first VoiceOver or NVDA session. It
-         runs Guidepup's <code>setup</code> and <code>install</code> commands and then prints the
-         <code>doctor</code> report. See <a href="/install#screen-readers">install</a>.
+         Run it once per machine before the first VoiceOver or NVDA session. On macOS it runs
+         <code>npx -y @guidepup/setup setup</code>, which turns on VoiceOver's AppleScript
+         control, then <code>npx -y @guidepup/setup install</code>, which downloads the VoiceOver
+         preferences bundle every session mounts. On Windows only the install step runs, and it
+         downloads the NVDA build.
+      </p>
+      <p>
+         <code>a1 setup</code> ends by printing the <code>doctor</code> report, so you can see
+         every check pass. Add <code>--skip-setup</code> or <code>--skip-install</code> to run one
+         step only. Screen recording on macOS needs one more permission: whichever app runs
+         <code>a1</code> needs Screen Recording access in System Settings. See
+         <a href="/guides/recording">record a session</a>.
       </p>
    </section>
 
