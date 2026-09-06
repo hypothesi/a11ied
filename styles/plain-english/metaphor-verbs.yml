@@ -1,0 +1,23 @@
+# Verbs that stand in for the specific relationship. Reported, not blocked, because each
+# has a legitimate use as a noun or in a quotation.
+#
+# "The strategy names the procedure to run" means it says which procedure to run. "Every
+# criterion carries a testing strategy" means it has one. The elevated verb reads as
+# precision and carries none, which is the same failure as a label. Pick the plain verb
+# that says what actually happens: has, lists, says, returns, prints, includes, needs.
+#
+# The patterns match the verb use, so "the name of the file" and "tool names" still pass.
+#
+# Consumed by vale (npm: @vvago/vale) and by hooks/check-prose.mjs, which shells out to it.
+extends: existence
+message: "'%s' stands in for the specific verb. Say what it actually does."
+level: warning
+ignorecase: true
+tokens:
+  - "names? (?:the|a|an|its|each|every|which|what|where|who)\\b"
+  - "carr(?:y|ies|ied) (?:the|a|an|its|no|every)\\b"
+  - "holds? (?:the|a|an|its|every)\\b"
+  - "sits? (?:in|on|at|next to|behind|between)\\b"
+  - "reads? as\\b"
+  - "guards?\\b"
+  - "points? at\\b"
