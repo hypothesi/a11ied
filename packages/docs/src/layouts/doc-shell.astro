@@ -24,6 +24,8 @@ const activeSection = links.find((section) => section.links.some((link) => norma
 const previousLink = activeIndex > 0 ? flatLinks[activeIndex - 1] : undefined;
 const nextLink = activeIndex === -1 ? undefined : flatLinks[activeIndex + 1];
 const pageNumber = Math.max(1, activeIndex + 1);
+const LONG_TITLE_LENGTH = 30;
+const isLongTitle = title.length > LONG_TITLE_LENGTH;
 ---
 
 <html lang="en">
@@ -126,6 +128,7 @@ const pageNumber = Math.max(1, activeIndex + 1);
          .eyebrow { background: var(--red); color: var(--paper-light); }
          .context-chip { background: var(--paper-light); color: var(--ink); }
          h1 { margin: 0; max-width: 13ch; font: 700 clamp(4.3rem, 10vw, 9.5rem)/0.88 var(--display); letter-spacing: -0.065em; text-transform: uppercase; text-wrap: balance; text-shadow: 4px 4px 0 var(--yellow), 7px 7px 0 color-mix(in oklch, var(--red) 62%, transparent); }
+         .title--long { max-width: 22ch; font-size: clamp(2.8rem, 6vw, 5.4rem); }
          .summary { max-width: 60ch; margin: var(--xl) 0 0; padding-top: var(--lg); border-top: 3px solid var(--ink); font-size: clamp(1.12rem, 1.6vw, 1.35rem); font-weight: 500; line-height: 1.58; color: var(--ink-soft); }
 
          article { display: grid; gap: var(--3xl); }
@@ -168,18 +171,21 @@ const pageNumber = Math.max(1, activeIndex + 1);
          .token-variable { color: oklch(85% 0.13 100); font-style: italic; }
          .token-keyword { color: oklch(76% 0.15 330); font-weight: 800; }
          .token-url { color: oklch(82% 0.11 165); text-decoration: underline; text-decoration-thickness: 0.08em; text-underline-offset: 0.15em; }
-         .route-list, .workflow-list { display: grid; }
-         .route-row, .workflow-row { display: grid; grid-template-columns: minmax(11rem, 0.55fr) minmax(0, 1fr); gap: var(--lg); align-items: baseline; padding-block: var(--md); border-bottom: 2px solid var(--ink); }
-         .route-row:first-child, .workflow-row:first-child { border-top: 2px solid var(--ink); }
-         .route-row span, .workflow-row span { color: var(--ink-soft); }
-         .workflow-grid, .mini-grid { display: grid; gap: var(--xl); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
-         .feature-command-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-         .mini-grid > * { align-content: start; }
+         .route-list { display: grid; }
+         .route-row { display: grid; grid-template-columns: minmax(11rem, 0.55fr) minmax(0, 1fr); gap: var(--lg); align-items: baseline; padding-block: var(--md); border-bottom: 2px solid var(--ink); }
+         .route-row:first-child { border-top: 2px solid var(--ink); }
+         .route-row span { color: var(--ink-soft); }
+         .feature-grid { display: grid; gap: var(--lg); grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
+         .feature-card { align-content: start; gap: var(--md); max-width: none; padding: var(--lg) var(--md); background: var(--paper-light); border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); }
+         .feature-card h2 { font-size: 1.5rem; line-height: 1.05; }
+         .feature-card p { color: var(--ink-soft); font-size: 0.98rem; line-height: 1.6; }
+         .feature-demo { display: grid; gap: 0.28rem; padding: var(--sm) 0.7rem; background: var(--ink); color: var(--paper-light); font-size: 0.82rem; line-height: 1.5; }
+         .feature-demo code { padding: 0; background: none; color: var(--yellow); font-weight: 800; }
+         .feature-demo samp { display: block; font-family: var(--code); white-space: pre-wrap; overflow-wrap: anywhere; }
          .stack { display: grid; gap: var(--md); }
          .stack > p, .stack > ul { color: var(--ink-soft); }
          .tag { background: var(--yellow); color: var(--ink); }
-         .command-strip { display: grid; gap: var(--lg); }
-         .command-note, .aside-note, .support-copy { color: var(--ink-soft); }
+         .aside-note { color: var(--ink-soft); }
          .split-aside { display: grid; gap: var(--md); padding: var(--lg); background: var(--yellow); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--red); transform: rotate(1deg); }
          .split-aside .tag { background: var(--red-dark); color: var(--paper-light); }
          .split-aside .aside-note { color: var(--ink); }
@@ -251,8 +257,7 @@ const pageNumber = Math.max(1, activeIndex + 1);
             section.panel, section.ledger, section.field-note, section.split { padding: var(--lg) var(--md); box-shadow: 6px 6px 0 var(--ink); }
             section.split { grid-template-columns: 1fr; }
             section.field-note { margin-inline: 0; }
-            .route-row, .workflow-row { grid-template-columns: 1fr; gap: var(--xs); }
-            .feature-command-grid { grid-template-columns: 1fr; }
+            .route-row { grid-template-columns: 1fr; gap: var(--xs); }
             .split-aside { transform: none; }
             .route-drawer-nav { grid-template-columns: 1fr; }
             .page-nav { grid-template-columns: 1fr; }
@@ -305,7 +310,7 @@ const pageNumber = Math.max(1, activeIndex + 1);
                </div>
                <header data-page={String(Math.max(1, pageNumber)).padStart(2, '0')}>
                   <div class="eyebrow-row"><div class="eyebrow">Accessibility test toolkit</div>{activeSection ? <div class="context-chip">{activeSection.title}</div> : null}</div>
-                  <div><h1>{title}</h1><p class="summary">{summary}</p></div>
+                  <div><h1 class:list={{ 'title--long': isLongTitle }}>{title}</h1><p class="summary">{summary}</p></div>
                </header>
                <article><slot /></article>
                {(previousLink || nextLink) ? (

@@ -11,11 +11,53 @@ const toc = [
 ---
 
 <DocShell
-   title="Overview"
-   summary="a11ied tests web accessibility from the command line. It runs axe against a page and drives VoiceOver, NVDA, or a simulated screen reader, then reports both against WCAG."
+   title="Test accessibility from the terminal"
+   summary="a11ied runs axe against a page and drives VoiceOver, NVDA, or a simulated screen reader, then reports both against WCAG."
    links={docsLinks}
    toc={toc}
 >
+   <div class="feature-grid">
+      <section class="feature-card">
+         <h2>Scan the page</h2>
+         <div class="feature-demo">
+            <code>a1 audit /checkout</code>
+            <samp>&#10007; 2 problems to fix.</samp>
+            <samp>1.1.1  Non-text Content  [A]</samp>
+            <samp>4.1.2  Name, Role, Value  [A]</samp>
+         </div>
+         <p>
+            axe-core checks the rendered page for the failures a machine can see. Each
+            failure comes back under the WCAG requirement it breaks, with the elements to fix.
+         </p>
+      </section>
+
+      <section class="feature-card">
+         <h2>Read the page aloud</h2>
+         <div class="feature-demo">
+            <code>a1 sr walk /checkout</code>
+            <samp>button, Pay now</samp>
+            <samp>button</samp>
+         </div>
+         <p>
+            Every phrase, in the order it is announced, from VoiceOver, NVDA, or a simulated
+            reader. The second button has no name, so all anyone hears is "button".
+         </p>
+      </section>
+
+      <section class="feature-card">
+         <h2>Fail the build</h2>
+         <div class="feature-demo">
+            <code>a1 sr expect "button, Help"</code>
+            <samp>Matched:   nothing</samp>
+            <samp>Result:    fail</samp>
+         </div>
+         <p>
+            The transcript is text, so a test can require a phrase. The command exits 4 when
+            the phrase never appears, which stops a CI run.
+         </p>
+      </section>
+   </div>
+
    <section class="ledger" id="problem">
       <h2>The gap</h2>
       <p>
