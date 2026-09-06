@@ -3,24 +3,24 @@ import DocShell from '../layouts/doc-shell.astro';
 import { docsLinks } from '../lib/nav';
 
 const toc = [
-   { id: 'states', label: 'The four states' },
+   { id: 'states', label: 'Coverage states' },
    { id: 'numbers', label: 'Coverage by level' },
    { id: 'strategy', label: 'Testing strategy' },
-   { id: 'lookup', label: 'Looking a criterion up' },
-   { id: 'claims', label: 'What a run proves' },
+   { id: 'lookup', label: 'Finding a criterion' },
+   { id: 'claims', label: 'Coverage and conformance claims' },
 ];
 ---
 
 <DocShell
    title="Coverage"
-   summary="Coverage says whether automation can decide a success criterion, and what evidence the criterion needs when it cannot. a11ied derives it from the W3C ACT rule mapping and the axe-core rule tags, both included as local data."
+   summary="Coverage says whether automation can decide a WCAG success criterion, one of the Web Content Accessibility Guidelines' testable requirements, and what evidence the criterion needs when it cannot. a11ied derives coverage from the W3C ACT rule mapping and the axe-core rule tags, both included as local data."
    links={docsLinks}
    toc={toc}
 >
    <section class="ledger" id="states">
       <div class="panel-head">
          <p class="panel-kicker">States</p>
-         <h2>The four coverage states</h2>
+         <h2>Coverage states</h2>
       </div>
       <div class="route-list">
          <div class="route-row">
@@ -60,7 +60,10 @@ const toc = [
             <p class="panel-kicker">Numbers</p>
             <h2>Coverage by conformance level</h2>
          </div>
-         <p>WCAG 2.2 has 86 success criteria. The pinned mapping classifies them like this:</p>
+         <p>
+            WCAG 2.2 has 86 success criteria, grouped into three conformance levels, A, AA, and
+            AAA, from least to most strict. The pinned mapping classifies them like this:
+         </p>
          <div class="route-list">
             <div class="route-row">
                <strong>Level A</strong>
@@ -98,10 +101,10 @@ const toc = [
    <section class="panel" id="strategy">
       <div class="panel-head">
          <p class="panel-kicker">Strategy</p>
-         <h2>What the criterion needs</h2>
+         <h2>Each criterion's testing strategy</h2>
       </div>
       <p>
-         Alongside coverage, every criterion carries a testing strategy. It names the procedures to
+         Alongside coverage, every criterion has a testing strategy. It lists the procedures to
          run and says whether the test needs a rendered target.
       </p>
       <pre><code>a1 wcag 4.1.3 --json</code></pre>
@@ -120,7 +123,9 @@ const toc = [
   ]
 &#125;</code></pre>
       <p>
-         <code>requiresRealTarget: true</code> means static markup is not enough. Run the page and
+         <code>preferredEvidenceMode</code> says whether the strategy expects an automated
+         result, a person's judgment, or a mix of both, here <code>hybrid</code>.
+         <code>requiresRealTarget: true</code> means static markup is not enough: run the page and
          move through it. For Status Messages that means triggering the update and reading the
          driver transcript to see whether the reader announced it.
       </p>
@@ -147,14 +152,16 @@ a1 wcag criteria --summary               # coverage totals per level
 a1 wcag search "focus order" --limit 3 --json
 a1 wcag rule color-contrast              # axe rule to criteria and fix guidance</code></pre>
       <p>
-         <code>a1 wcag &lt;criterion&gt;</code> takes an ID such as <code>4.1.3</code>, a slug such as
-         <code>status-messages</code>, or a technique ID such as <code>G18</code>. It prints the
-         normative text, the sufficient and advisory techniques, the failures, the coverage state,
-         the mapped axe and ACT rules, and the command to run next. Use <code>search</code> when you
-         know the concept but not the number. It ranks matches across titles, summaries, normative
-         text, techniques, failures, and tags. <code>a1 wcag rule &lt;axe-rule-id&gt;</code> goes
-         the other way: from an axe violation to the criteria it fails and the techniques that fix
-         it.
+         <code>a1 wcag &lt;criterion&gt;</code> takes an ID such as <code>4.1.3</code>, a slug such
+         as <code>status-messages</code>, or a technique ID such as <code>G18</code>. It prints
+         the normative text, the sufficient and advisory techniques, the failures, the coverage
+         state, the mapped axe and ACT rules, and the command to run next.
+      </p>
+      <p>
+         Use <code>search</code> when you know the concept but not the number. It ranks matches
+         across titles, summaries, normative text, techniques, failures, and tags.
+         <code>a1 wcag rule &lt;axe-rule-id&gt;</code> goes the other way: from an axe violation
+         to the criteria it fails and the techniques that fix it.
       </p>
       <p>
          Every <code>wcag</code> command takes <code>--wcag</code>. WCAG 2.1 and 2.2 both ship
@@ -165,7 +172,7 @@ a1 wcag rule color-contrast              # axe rule to criteria and fix guidance
    <section class="field-note" id="claims">
       <div class="panel-head">
          <p class="panel-kicker">Claims</p>
-         <h2>Read coverage before you report a result</h2>
+         <h2>Coverage and conformance claims</h2>
       </div>
       <p>
          An axe run with no violations covers the 8 automated criteria at level AA. It says nothing
@@ -173,8 +180,8 @@ a1 wcag rule color-contrast              # axe rule to criteria and fix guidance
          mistake this data exists to stop.
       </p>
       <p>
-         Report the coverage state next to the result. Name the criteria a run decided, name the
-         ones a driver transcript supports, and name the ones still waiting on a person.
+         Report the coverage state next to the result. List the criteria a run decided, list the
+         ones a driver transcript supports, and list the ones still waiting on a person.
       </p>
    </section>
 </DocShell>

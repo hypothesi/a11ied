@@ -4,7 +4,7 @@ import { docsLinks } from '../lib/nav';
 
 const toc = [
    { id: 'package', label: 'Install the package' },
-   { id: 'verify', label: 'Verify with doctor' },
+   { id: 'verify', label: 'The doctor check' },
    { id: 'browser', label: 'Browser' },
    { id: 'screen-readers', label: 'VoiceOver and NVDA' },
    { id: 'mcp', label: 'MCP client' },
@@ -44,7 +44,7 @@ const toc = [
    <section class="panel" id="verify">
       <div class="panel-head">
          <p class="panel-kicker">Verify</p>
-         <h2>Check the host with doctor</h2>
+         <h2>The doctor check</h2>
       </div>
       <pre><code>a1 doctor</code></pre>
       <pre data-label="OUTPUT"><code>✓ Ready for a1 commands on macOS 26.5.2 (arm64)
@@ -78,6 +78,8 @@ Environment
          The first line is the verdict. When a check fails, it switches to <code>✗</code> with the
          number of steps left, and an <strong>Action items</strong> list with the exact commands
          appears right below it. Targets that only exist on another OS get one dim line.
+      </p>
+      <p>
          <code>a1 doctor --json</code> wraps the same report in the standard envelope, under
          <code>result</code>, with <code>ready</code>, the ordered <code>actions</code>, and each
          target's <code>checks</code>. <code>a1 doctor --strict</code> exits with code 3 while a
@@ -89,7 +91,7 @@ Environment
       <div class="stack">
          <div class="panel-head">
             <p class="panel-kicker">Browser</p>
-            <h2>Give a11ied a Chromium browser</h2>
+            <h2>The browser a11ied needs</h2>
          </div>
          <p>
             <code>a1 axe</code> loads the page in browser automation. It looks for an installed
@@ -121,12 +123,14 @@ Environment
       <pre><code>a1 setup</code></pre>
       <p>
          On macOS it runs <code>npx -y @guidepup/setup setup</code>, which turns on VoiceOver's
-         AppleScript control and creates the local VoiceOver preferences file, then
+         AppleScript control and creates the local VoiceOver preferences file. It then runs
          <code>npx -y @guidepup/setup install</code>, which downloads the VoiceOver preferences
-         bundle that every session mounts on start. On Windows only the install step runs and it
-         downloads the NVDA build. The assets land in Guidepup's cache
-         (<code>~/Library/Caches/guidepup</code> on macOS,
-         <code>%LOCALAPPDATA%\guidepup</code> on Windows). Each Guidepup command keeps the
+         bundle that every session mounts on start. On Windows only the install step runs, and it
+         downloads the NVDA build.
+      </p>
+      <p>
+         The assets land in Guidepup's cache: <code>~/Library/Caches/guidepup</code> on macOS,
+         <code>%LOCALAPPDATA%\guidepup</code> on Windows. Each Guidepup command keeps the
          terminal while it runs, so accept any permission prompts it shows.
       </p>
       <p>
@@ -175,7 +179,7 @@ Environment
    <section class="field-note">
       <div class="panel-head">
          <p class="panel-kicker">Next</p>
-         <h2>Run a test</h2>
+         <h2>Your first test</h2>
       </div>
       <p>
          The <a href="/quickstart">quickstart</a> uses the virtual target, so it works as soon as the

@@ -4,15 +4,15 @@ import { docsLinks } from '../lib/nav';
 
 const toc = [
    { id: 'signals', label: 'Signals' },
-   { id: 'states', label: 'The four states' },
+   { id: 'states', label: 'Applicability states' },
    { id: 'commands', label: 'Reading applicability' },
-   { id: 'limits', label: 'What it does not do' },
+   { id: 'limits', label: 'Limits of applicability' },
 ];
 ---
 
 <DocShell
    title="Applicability"
-   summary="Applicability answers one question: does this page contain anything a given success criterion is about? a11ied reads the HTML for 15 kinds of signal, matches them against criterion tags, and returns a state for every criterion in the version."
+   summary="Applicability answers one question: does this page contain anything a given WCAG success criterion, one of its testable requirements, is about? a11ied reads the HTML for 15 kinds of signal, matches them against criterion tags, and returns a state for every criterion in the version."
    links={docsLinks}
    toc={toc}
 >
@@ -20,11 +20,11 @@ const toc = [
       <div class="stack">
          <div class="panel-head">
             <p class="panel-kicker">Signals</p>
-            <h2>What the analyzer looks for</h2>
+            <h2>Applicability signals</h2>
          </div>
          <p>
             <code>a1 audit</code> fetches the target's HTML alongside its axe scan and accessibility
-            tree, then parses that HTML for applicability signals. Each signal carries a category,
+            tree, then parses that HTML for applicability signals. Each signal has a category,
             the source it came from, the text that matched, a confidence of high, medium, or low,
             and up to ten <code>elements</code>: the XPath, tag, and opening tag of the nodes that
             produced it.
@@ -49,6 +49,12 @@ const toc = [
             <code>overlay</code>, <code>repeated-form</code>, <code>tablist</code>,
             <code>validation</code>, and <code>widget</code>.
          </p>
+         <p>
+            <code>landmark</code> and <code>live-region</code> come from ARIA. A landmark is a
+            labeled region such as <code>&lt;main&gt;</code> or <code>&lt;nav&gt;</code> that lets
+            assistive tech jump straight to it. A live region is a page area assistive tech
+            watches, so it can announce a change without the user navigating there.
+         </p>
       </div>
       <div class="split-aside">
          <div class="tag">Sources</div>
@@ -62,7 +68,7 @@ const toc = [
    <section class="ledger" id="states">
       <div class="panel-head">
          <p class="panel-kicker">States</p>
-         <h2>The four applicability states</h2>
+         <h2>Applicability states</h2>
       </div>
       <div class="route-list">
          <div class="route-row">
@@ -90,8 +96,8 @@ const toc = [
          <h2>Reading applicability</h2>
       </div>
       <p>
-         <code>a1 audit</code> returns an <code>applicability</code> section with a matrix holding
-         one assessment per criterion, alongside its axe scan and accessibility tree. The MCP
+         <code>a1 audit</code> returns an <code>applicability</code> section with a matrix that
+         has one assessment per criterion, alongside its axe scan and accessibility tree. The MCP
          server exposes the same matrix through its <code>applicability</code> tool, which takes an
          optional <code>criterion</code> to narrow the result to one assessment.
       </p>
@@ -120,9 +126,12 @@ const toc = [
       <p>
          The page opens a hidden <code>Preferences</code> dialog on a button click. Its markup
          still parses, so the dialog signal counts even before the click runs.
-         <code>reasons</code> names the signals and the tags that produced the state. Read it before
-         acting on the state. <code>elements</code> lists the nodes behind it, merged across the
-         matched signals and capped at 20. Paste an XPath into the browser console as
+         <code>reasons</code> lists the signals and the tags that produced the state. Read it
+         before acting on the state.
+      </p>
+      <p>
+         <code>elements</code> lists the nodes behind the assessment, merged across the matched
+         signals and capped at 20. Paste an XPath into the browser console as
          <code>$x('/html/body/main')</code> to jump to the node. The text output shows the
          first few with <code>--verbose</code>.
       </p>
@@ -131,7 +140,7 @@ const toc = [
    <section class="field-note" id="limits">
       <div class="panel-head">
          <p class="panel-kicker">Limits</p>
-         <h2>What applicability does not tell you</h2>
+         <h2>The limits of applicability</h2>
       </div>
       <p>
          An assessment never says pass or fail. It says which criteria are worth testing on this

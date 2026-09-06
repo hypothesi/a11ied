@@ -3,11 +3,11 @@ import DocShell from '../layouts/doc-shell.astro';
 import { docsLinks } from '../lib/nav';
 
 const toc = [
-   { id: 'three', label: 'The three targets' },
-   { id: 'default', label: 'Default selection' },
+   { id: 'three', label: 'The targets' },
+   { id: 'default', label: 'Default target' },
    { id: 'virtual', label: 'Requesting virtual' },
-   { id: 'real', label: 'Running a real target' },
-   { id: 'choose', label: 'Which to use' },
+   { id: 'real', label: 'Opening a real target' },
+   { id: 'choose', label: 'Choosing a target' },
 ];
 ---
 
@@ -20,7 +20,7 @@ const toc = [
    <section class="ledger" id="three">
       <div class="panel-head">
          <p class="panel-kicker">Targets</p>
-         <h2>The three targets</h2>
+         <h2>The targets</h2>
       </div>
       <div class="route-list">
          <div class="route-row">
@@ -49,7 +49,7 @@ const toc = [
          </div>
       </div>
       <p>
-         Every session response carries <code>target</code> and <code>targetType</code>. Read
+         Every session response has <code>target</code> and <code>targetType</code>. Read
          <code>targetType</code> before you use the output as evidence.
       </p>
    </section>
@@ -58,7 +58,7 @@ const toc = [
       <div class="stack">
          <div class="panel-head">
             <p class="panel-kicker">Defaults</p>
-            <h2>What you get without --sr</h2>
+            <h2>The default target without --sr</h2>
          </div>
          <p>a11ied picks a target from the operating system, then checks that it is ready:</p>
          <ol>
@@ -86,7 +86,7 @@ const toc = [
    <section class="panel" id="virtual">
       <div class="panel-head">
          <p class="panel-kicker">Virtual</p>
-         <h2>Ask for the virtual target on purpose</h2>
+         <h2>Requesting the virtual target on purpose</h2>
       </div>
       <p>
          Naming <code>--sr virtual</code> is not enough when a real reader is available. Add
@@ -94,20 +94,27 @@ const toc = [
       </p>
       <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout --json</code></pre>
       <p>
-         Pass the URL so the reader has a page to read. Nothing opens on screen: the session loads
-         the page in a headless Chromium page and injects the virtual reader into it, so the page's
-         own scripts run and a live region a script fills or a dialog a click opens is announced.
+         Pass the URL so the reader has a page to read. Nothing opens on screen. The session loads
+         the page in a headless Chromium page and injects the virtual reader into it, so the
+         page's own scripts run.
+      </p>
+      <p>
+         That means a live region, a page area marked so assistive tech announces changes to it
+         without the user navigating there, gets announced when a script fills it. A dialog that
+         a click opens gets announced too.
+      </p>
+      <p>
          <code>a1 sr status</code> reports the engine, and so does <code>session.engine</code> in
          every JSON result. Chrome, Edge, Brave, or Chromium on the machine is used first, then
          Playwright's Chromium from <code>npx playwright install chromium</code>.
       </p>
       <p>
-         Two cases use jsdom instead, an in-memory document where page scripts do not run: a
-         session started without a URL, which reads a placeholder document until
-         <code>sr open</code>, and a machine with no Chromium-family browser, where the session
-         falls back and reports <code>engine: "jsdom"</code>. Inline HTML passed to the test API
-         renders in jsdom too. Needing no window is what makes this target usable in CI and in
-         fast local loops.
+         Two cases use jsdom instead, an in-memory document where page scripts do not run. The
+         first is a session started without a URL: it reads a placeholder document until
+         <code>sr open</code>. The second is a machine with no Chromium-family browser: the
+         session falls back and reports <code>engine: "jsdom"</code>. Inline HTML passed to the
+         test API renders in jsdom too. Needing no window is what makes this target usable in CI
+         and in fast local loops.
       </p>
       <p>
          MCP clients pass the same two fields: <code>target: "virtual"</code> and
@@ -119,7 +126,7 @@ const toc = [
       <div class="stack">
          <div class="panel-head">
             <p class="panel-kicker">Real targets</p>
-            <h2>Open the page before you start</h2>
+            <h2>Opening the page for a real target</h2>
          </div>
          <p>
             VoiceOver and NVDA read whatever is already on screen. Give <code>sr start</code> the
@@ -129,7 +136,7 @@ const toc = [
          <pre><code>a1 sr start --sr voiceover http://localhost:3000/checkout --json
 a1 sr next --json</code></pre>
          <p>
-            <code>sr start</code> opens the URL in the system browser and focuses that window, and
+            <code>sr start</code> opens the URL in the system browser, focuses that window, and
             records which app it opened. A bare <code>a1 sr focus</code> brings that app back to
             the front later. <code>sr focus</code> also accepts <code>--app</code> or
             <code>--bundle-id</code> on macOS, <code>--process</code> or <code>--pid</code> on
@@ -149,7 +156,7 @@ a1 sr next --json</code></pre>
    <section class="field-note" id="choose">
       <div class="panel-head">
          <p class="panel-kicker">Choosing</p>
-         <h2>Which target answers the question</h2>
+         <h2>Choosing a target</h2>
       </div>
       <p>
          Use <code>virtual</code> to check announcement order, names, roles, and states from the

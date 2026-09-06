@@ -8,7 +8,7 @@ const toc = [
    { id: 'session', label: '3. Start a session' },
    { id: 'read', label: '4. Read the transcript' },
    { id: 'stop', label: '5. Stop the session' },
-   { id: 'report', label: 'What you can claim' },
+   { id: 'report', label: 'Claims this run supports' },
 ];
 ---
 
@@ -24,11 +24,15 @@ const toc = [
             <p class="panel-kicker">Step 1</p>
             <h2>Run axe on the page</h2>
          </div>
-         <p>Start your development server, then run axe against the route you are working on.</p>
+         <p>
+            Start your development server, then run axe, the open-source rules engine a11ied
+            uses to scan a page's HTML for accessibility bugs, against the route you are
+            working on.
+         </p>
          <pre><code>a1 axe http://localhost:3000/checkout --level AA --json</code></pre>
          <p>
             The result has four arrays: <code>violations</code>, <code>passes</code>,
-            <code>incomplete</code>, and <code>inapplicable</code>. Each violation names the axe
+            <code>incomplete</code>, and <code>inapplicable</code>. Each violation lists the axe
             rule, its impact, the failing selector, and the failing HTML. See
             <a href="/guides/violations">understand a violation</a> for what to do with one.
          </p>
@@ -49,7 +53,7 @@ const toc = [
       <div class="split-aside">
          <div class="tag">Empty results</div>
          <p class="aside-note">
-            If a single-page app has not mounted yet, the result carries a <code>warnings</code>
+            If a single-page app has not mounted yet, the result has a <code>warnings</code>
             entry saying the page had too little content to test. Load the route in a browser first
             to confirm it renders.
          </p>
@@ -62,7 +66,8 @@ const toc = [
          <h2>Check what the run left out</h2>
       </div>
       <p>
-         A clean axe run covers the criteria that have axe rules. Ask which criteria those are before
+         A clean axe run covers the criteria, WCAG's testable requirements, that have axe
+         rules. Coverage says whether axe can decide a criterion on its own. Check it before
          you draw a conclusion.
       </p>
       <pre><code>a1 wcag 2.4.3 --json
@@ -155,17 +160,17 @@ a1 wcag 1.4.3 --json</code></pre>
    <section class="field-note" id="report">
       <div class="panel-head">
          <p class="panel-kicker">Result</p>
-         <h2>What this run supports</h2>
+         <h2>The evidence this run supports</h2>
       </div>
       <p>
          You have an axe result for the 73 rules mapped to levels A and AA, and a transcript of
          the announcement order for one route on one target.
       </p>
       <p>
-         It is not a conformance claim. The virtual reader is a simulation, and 12 of the 24 level
-         AA criteria have no automated coverage at all. Move to
-         <a href="/guides/screen-reader">VoiceOver or NVDA</a> when the real behavior is what you
-         need to check.
+         It is not a conformance claim. WCAG groups its requirements into three conformance
+         levels, and this run leaves 12 of level AA's 24 criteria with no automated coverage.
+         Move to <a href="/guides/screen-reader">VoiceOver or NVDA</a> when the real behavior is
+         what you need to check.
       </p>
    </section>
 </DocShell>

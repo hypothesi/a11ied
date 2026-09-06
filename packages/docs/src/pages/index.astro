@@ -15,7 +15,7 @@ const toc = [
 
 <DocShell
    title="Test what the screen reader says"
-   summary="a11ied drives VoiceOver, NVDA, and a virtual screen reader from the command line, runs axe against a URL, and reports which WCAG criteria automation can decide on its own. One install gives you a CLI, an MCP server, and a TypeScript API over the same runtime."
+   summary="a11ied drives VoiceOver, NVDA, and a virtual screen reader from the command line, and it runs axe, an open-source rules engine that scans a page's HTML for accessibility bugs. It reports results against the Web Content Accessibility Guidelines (WCAG), whose testable requirements are called success criteria. One install gives you a CLI, an MCP server, and a TypeScript API over the same runtime."
    links={docsLinks}
    toc={toc}
 >
@@ -23,7 +23,7 @@ const toc = [
       <div class="stack">
          <div class="panel-head">
             <p class="panel-kicker">Install</p>
-            <h2>Two commands to a working setup</h2>
+            <h2>The install command and the doctor check</h2>
          </div>
          <pre><code>npm install --global a11ied
 
@@ -66,7 +66,7 @@ Targets
    <section class="panel" id="screen-reader">
       <div class="panel-head">
          <p class="panel-kicker">Screen reader output</p>
-         <h2>Read the announcement order for a page</h2>
+         <h2>The announcement order for a page</h2>
       </div>
       <p>
          Start a session, then read the whole page top to bottom. <code>sr walk</code> returns
@@ -100,7 +100,7 @@ a1 sr walk --json</code></pre>
    <section class="panel" id="axe">
       <div class="panel-head">
          <p class="panel-kicker">axe runs</p>
-         <h2>Run axe against a URL</h2>
+         <h2>An axe run against a URL</h2>
       </div>
       <p>
          <code>--level AA</code> resolves the 73 axe rules mapped to WCAG 2.2 levels A and AA
@@ -123,9 +123,9 @@ a1 sr walk --json</code></pre>
   &#125;
 ]</code></pre>
       <p>
-         Scope a run three other ways: <code>--criterion 1.4.3</code> for one success criterion,
-         <code>--rule color-contrast --rule link-name</code> for named rules, or no selector at all
-         for every rule mapped in the WCAG version.
+         Scope a run three other ways: <code>--criterion 1.4.3</code> for one success
+         criterion, <code>--rule color-contrast --rule link-name</code> for named rules, or no
+         selector at all for every rule mapped in the WCAG version.
       </p>
    </section>
 
@@ -133,11 +133,12 @@ a1 sr walk --json</code></pre>
       <div class="stack">
          <div class="panel-head">
             <p class="panel-kicker">Coverage</p>
-            <h2>Find out what axe cannot decide</h2>
+            <h2>Criteria axe cannot decide</h2>
          </div>
          <p>
-            Ask what a criterion needs before you test it. a11ied ships the W3C ACT mapping and the
-            axe rule tags as local data, so the lookup runs without a network request.
+            Coverage says whether axe can decide a criterion on its own, or whether a person has
+            to check it too. a11ied derives coverage from the W3C ACT rule mapping and the axe
+            rule tags, both included as local data, so a lookup makes no network request.
          </p>
          <pre><code>a1 wcag 2.4.3 --json</code></pre>
          <pre data-label="OUTPUT"><code>"coverage": &#123;
@@ -152,9 +153,10 @@ a1 sr walk --json</code></pre>
   "requiresRealTarget": true
 &#125;</code></pre>
          <p>
-            No axe rule decides Focus Order. The strategy names the procedure to run and says the
-            test needs a real target, which is what the driver session provides.
-            <a href="/coverage">Coverage</a> explains the four states and the mapping behind them.
+            No axe rule decides Focus Order on its own. The strategy lists the procedure to
+            run, <code>focus_order_probe</code>, and says the test needs a real target, which a
+            driver session provides. <a href="/coverage">Coverage</a> explains the four
+            coverage states and where the mapping comes from.
          </p>
       </div>
       <div class="split-aside">
@@ -171,7 +173,7 @@ a1 sr walk --json</code></pre>
    <section class="panel" id="agents">
       <div class="panel-head">
          <p class="panel-kicker">Agent tools</p>
-         <h2>Give a coding agent the same commands</h2>
+         <h2>The same commands for a coding agent</h2>
       </div>
       <p>
          The MCP server runs over stdio and opens no network port. Add it to any MCP client and the
@@ -197,7 +199,7 @@ Report the axe violations and the spoken phrase log separately.</code></pre>
    <section class="ledger" id="interfaces">
       <div class="panel-head">
          <p class="panel-kicker">Interfaces</p>
-         <h2>One runtime, three ways in</h2>
+         <h2>The CLI, the MCP server, and the API</h2>
       </div>
       <div class="route-list">
          <div class="route-row">
@@ -222,7 +224,7 @@ Report the axe violations and the spoken phrase log separately.</code></pre>
    <section class="field-note" id="next">
       <div class="panel-head">
          <p class="panel-kicker">Start here</p>
-         <h2>Run your first test</h2>
+         <h2>Your first test</h2>
       </div>
       <p>
          The <a href="/quickstart">quickstart</a> takes a local URL from an axe run to a screen
