@@ -238,6 +238,11 @@ Stopped at the end of the document.</code></pre>
    <section class="panel" id="page">
       <h2>Read the whole page</h2>
       <p>
+         Two commands read a page. <code>sr walk</code> reads a whole one and sets up the
+         session for you. <code>sr read-all</code> reads from wherever the cursor already is,
+         in a session you already started.
+      </p>
+      <p>
          <code>sr read-all</code> moves the cursor element by element from its current position to
          the end of the document, bounded by <code>--max</code> (default 500), and prints the
          transcript: every announcement in order, with a timestamp each. It says whether it stopped

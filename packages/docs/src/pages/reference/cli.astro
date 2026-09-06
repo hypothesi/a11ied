@@ -98,7 +98,7 @@ const toc = [
          <div class="route-row"><code>sr table &lt;move&gt;</code><span>Inside a table: <code>next-cell</code>, <code>previous-cell</code>, <code>next-row</code>, <code>previous-row</code>, <code>next-column</code>, <code>previous-column</code>, <code>row-header</code>, <code>column-header</code>.</span></div>
          <div class="route-row"><code>sr goto</code><span>Step forward until the current item matches <code>--role &lt;role&gt;</code>, <code>--name &lt;text&gt;</code>, or both. Takes <code>--max</code>. Exits 4 when nothing matches. Needs an active session.</span></div>
          <div class="route-row"><code>sr elements &lt;kind&gt;</code><span>The rotor: from the top, every element of one kind as the reader announces it. Takes <code>--max</code>, default 200. Needs an active session.</span></div>
-         <div class="route-row"><code>sr read-all</code><span>Step item by item from the cursor to the end of the document, or to <code>--max</code> (default 500), and say which. Needs an active session.</span></div>
+         <div class="route-row"><code>sr read-all</code><span>Read from the cursor to the end of the document, or to <code>--max</code> (default 500), and say which. Needs an active session. Use <code>sr walk</code> to read a whole page instead.</span></div>
          <div class="route-row"><code>sr walk [url]</code><span>Start a session when none is active, move to the top, read the whole page, and print the transcript of the walk. Takes <code>--sr</code>, <code>--allow-virtual</code>, <code>--max</code>, <code>--out</code>, <code>--format</code>. With no <code>--sr</code> and no active session, this starts VoiceOver on macOS.</span></div>
          <div class="route-row"><code>sr press &lt;chord...&gt;</code><span>Press key chords in order, one chord per argument.</span></div>
          <div class="route-row"><code>sr type &lt;text&gt;</code><span>Type text through the active target.</span></div>
@@ -207,7 +207,7 @@ a1 wcag G18</code></pre>
             <div class="route-row"><code>&lt;targets...&gt;</code><span>One or more http(s) URLs or file paths, or <code>-</code> for HTML on stdin. Multiple targets print one report each.</span></div>
             <div class="route-row"><code>--html &lt;markup&gt;</code><span>Load inline HTML instead of the positional target.</span></div>
             <div class="route-row"><code>--timeout &lt;ms&gt;</code><span>Timeout for loading the target, in milliseconds. Defaults to 10000.</span></div>
-            <div class="route-row"><code>--level &lt;level&gt;</code><span>Run the rules mapped to one WCAG level and every level below it. <code>--level AA</code> resolves 73 rules for WCAG 2.2.</span></div>
+            <div class="route-row"><code>--level &lt;level&gt;</code><span>Run the rules mapped to one WCAG level and every level below it.</span></div>
             <div class="route-row"><code>--criterion &lt;criterion&gt;</code><span>Run the rules mapped to one criterion, by ID or slug.</span></div>
             <div class="route-row"><code>--rule &lt;ruleId...&gt;</code><span>Run named axe rules. Repeat the flag for more than one.</span></div>
             <div class="route-row"><code>--selector &lt;css&gt;</code><span>Scope the scan to elements matching this CSS selector.</span></div>

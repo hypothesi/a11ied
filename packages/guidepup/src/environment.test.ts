@@ -65,16 +65,12 @@ describe('VoiceOver environment checks', () => {
       const byId = Object.fromEntries(checks.map((check) => [check.id, check]));
 
       expect(byId['voiceover-applescript-setting']?.status).toBe('fail');
-      expect(byId['voiceover-applescript-setting']?.action).toBe(
-         'a1 setup',
-      );
+      expect(byId['voiceover-applescript-setting']?.action).toBe('a1 setup');
       expect(byId['voiceover-applescript-system-flag']?.status).toBe('fail');
       expect(byId['voiceover-local-preferences']?.status).toBe('fail');
       expect(byId['voiceover-splash-screen']?.status).toBe('warn');
       expect(byId['voiceover-preferences-bundle']?.status).toBe('fail');
-      expect(byId['voiceover-preferences-bundle']?.action).toBe(
-         'a1 setup',
-      );
+      expect(byId['voiceover-preferences-bundle']?.action).toBe('a1 setup');
    });
 
    it('prefers the VoiceOver group container when it exists', () => {

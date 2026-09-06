@@ -110,7 +110,7 @@ export function registerReadAllCommand(driveCommand: Command): void {
       driveCommand
          .command('read-all')
          .helpGroup(DRIVE_GROUPS.move)
-         .summary('Read from the cursor to the end and print the transcript.')
+         .summary('Read from the cursor to the end of the document.')
          .description(
             'Say-all as a transcript: step item by item from the cursor to the end of the document, bounded by --max. Needs an active session; run "a1 sr start --sr virtual --allow-virtual" first for the simulated reader instead of the VoiceOver default.',
          )

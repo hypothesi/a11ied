@@ -112,9 +112,8 @@ export const driveRunHelpCases: HelpCase[] = [
         goto                   Step forward to an item with a given role or name.
         elements <kind>        List every element of one kind as the reader announces
                                it.
-        read-all               Read from the cursor to the end and print the
-                               transcript.
-        walk [url]             Read the whole page top to bottom.
+        read-all               Read from the cursor to the end of the document.
+        walk [url]             Read a whole page, starting the session if needed.
 
       Act on it:
         interact               Enter interaction mode for the current group or
