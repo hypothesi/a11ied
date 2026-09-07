@@ -61,7 +61,7 @@ const toc = [
       <h2>What can you do with the a1 CLI?</h2>
       <div class="feature-grid feature-grid--wide">
          <section class="feature-card">
-            <h3>Scan a page</h3>
+            <h3>Scan for violations</h3>
             <div class="feature-demo">
                <code>a1 audit /checkout</code>
                <samp>&#10007; 2 problems to fix.</samp>
@@ -76,76 +76,76 @@ const toc = [
          </section>
 
          <section class="feature-card">
-            <h3>Print the accessibility tree</h3>
-            <div class="feature-demo">
-               <code>a1 tree /checkout</code>
-               <samp>- main:</samp>
-               <samp>  - heading "Checkout" [level=1]</samp>
-               <samp>  - heading "Order summary" [level=2]</samp>
-            </div>
-            <p>
-               The roles, names, and levels a browser hands to assistive technology, before any
-               screen reader is involved.
-            </p>
-         </section>
-
-         <section class="feature-card">
-            <h3>List the form fields</h3>
+            <h3>Check the error is announced</h3>
             <div class="feature-demo">
                <code>a1 sr elements form-field</code>
                <samp>1. textbox: Email  textbox, Email, required</samp>
                <samp>2. textbox: Card number  textbox, Card number, invalid</samp>
             </div>
             <p>
-               Fields, headings, links, landmarks, or tables, each with the state a screen
-               reader announces for it. The card number here is announced as invalid.
+               The card field announces that it is invalid and never says why. Its error
+               message sits beside it on screen without being linked to it, so a screen reader
+               user hears nothing about it. The scan above says nothing either.
             </p>
          </section>
 
          <section class="feature-card">
-            <h3>Tab through the page</h3>
+            <h3>Walk the keyboard path</h3>
             <div class="feature-demo">
                <code>a1 sr press Tab --phrase</code>
                <samp>textbox, Email, required</samp>
             </div>
             <p>
-               Press the keys a person would press, and get back the one phrase the reader
-               announced. Repeat it and the focus order becomes a list you can read.
+               One phrase per keypress. Run it down the page and the focus order becomes a list
+               you can read: anything that never appears cannot be reached by keyboard.
             </p>
          </section>
 
          <section class="feature-card">
-            <h3>Fail the build</h3>
+            <h3>Check a cell knows its column</h3>
+            <div class="feature-demo">
+               <code>a1 sr table column-header</code>
+               <samp>Phrase:  cell, $42.00</samp>
+               <samp>Header:  Price</samp>
+            </div>
+            <p>
+               Moving across a data table, a reader should hear the column header with each cell.
+               Without it, $42.00 arrives with nothing to attach it to.
+            </p>
+         </section>
+
+         <section class="feature-card">
+            <h3>Stop a regression in CI</h3>
             <div class="feature-demo">
                <code>a1 sr expect "button, Help"</code>
                <samp>Matched:   nothing</samp>
                <samp>Result:    fail</samp>
             </div>
             <p>
-               The transcript is text, so a test can require a phrase. The command exits 4 when
-               the phrase never appears, which stops a CI run.
+               The icon button should announce as button, Help, and it does not. The command
+               exits 4, so a CI run stops here until someone labels it.
             </p>
          </section>
 
          <section class="feature-card">
-            <h3>Look up a requirement</h3>
+            <h3>Look up what a failure means</h3>
             <div class="feature-demo">
                <code>a1 wcag rule button-name</code>
                <samp>Criteria (1)</samp>
                <samp>  4.1.2  Name, Role, Value  [A]</samp>
             </div>
             <p>
-               All of WCAG 2.2 offline. Map an axe rule to what it breaks, search the criteria,
-               or read one in full with the W3C guidance.
+               Map any axe rule to the requirement it breaks, then read that criterion in full
+               with the W3C guidance, without leaving the terminal.
             </p>
          </section>
       </div>
       <p>
-         There is more than this. <code>a1 doctor</code> checks the machine, <code>a1 sr
-         batch</code> runs a scripted flow over one session, <code>a1 sr transcript</code>
-         prints everything said so far, and <code>a1 sr screenshot</code> captures what the
-         VoiceOver cursor is on. The <a href="/reference/cli">CLI reference</a> lists every
-         command, and <code>a1 --help</code> prints them in the terminal.
+         There is more than this. <code>a1 tree</code> prints the accessibility tree,
+         <code>a1 doctor</code> checks the machine, <code>a1 sr batch</code> runs a scripted
+         flow over one session, and <code>a1 sr screenshot</code> captures what the VoiceOver
+         cursor is on. The <a href="/reference/cli">CLI reference</a> lists every command, and
+         <code>a1 --help</code> prints them in the terminal.
       </p>
    </section>
 
