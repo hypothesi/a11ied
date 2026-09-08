@@ -9,12 +9,16 @@ export {
 } from './wcag.js';
 export {
    patternDetailSections,
-   renderPatternCheckText,
    renderPatternFindText,
    renderPatternListText,
    renderPatternLookupText,
    type PatternDetailSection,
 } from './pattern.js';
+export {
+   renderPatternCheckText,
+   renderPatternPendingText,
+   renderPatternRecordText,
+} from './pattern-check.js';
 export {
    renderAxeRuleText,
    renderShowCriterionText,

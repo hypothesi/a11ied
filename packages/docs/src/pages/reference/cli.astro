@@ -208,12 +208,15 @@ a1 wcag G18</code></pre>
          <div class="route-row"><code>pattern role &lt;role&gt;</code><span>The examples the APG example index files under one ARIA role.</span></div>
          <div class="route-row"><code>pattern attribute &lt;attribute&gt;</code><span>The examples the index files under one property or state, such as <code>aria-expanded</code>.</span></div>
          <div class="route-row"><code>pattern check &lt;target&gt;</code><span>Press every key one example declares against a live widget, and check its documented attributes. <code>--pattern</code> and <code>--selector</code> are both required. <code>--table</code> and <code>--setup</code> reach a state the first keyboard table does not cover.</span></div>
+         <div class="route-row"><code>pattern record &lt;target&gt;</code><span>Record what you decided about one row the check could not decide. <code>--pattern</code>, <code>--row</code>, <code>--outcome</code>, and <code>--selector</code> are required. The widget's accessibility tree is hashed with the judgment, so it expires when the component changes.</span></div>
+         <div class="route-row"><code>pattern pending &lt;target&gt;</code><span>The rows of one example with no recorded result for this target yet.</span></div>
       </div>
       <pre><code>a1 pattern combobox
 a1 pattern combobox-select-only --section keyboard
 a1 pattern role combobox
 a1 pattern attribute aria-expanded
-a1 pattern check http://localhost:3000 --pattern combobox-select-only --selector '#fruit'</code></pre>
+a1 pattern check http://localhost:3000 --pattern combobox-select-only --selector '#fruit'
+a1 pattern pending http://localhost:3000 --pattern combobox-select-only</code></pre>
       <p>
          Everything but <code>pattern check</code> reads bundled data. <code>pattern check</code>
          exits 4 on two findings and no others: a key the guide declares that changed nothing,

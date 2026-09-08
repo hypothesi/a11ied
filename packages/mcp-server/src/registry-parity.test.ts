@@ -44,6 +44,8 @@ const TOOL_BY_COMMAND: Readonly<Record<string, readonly string[]>> = {
    'pattern role': ['pattern_find'],
    'pattern attribute': ['pattern_find'],
    'pattern check': ['pattern_check'],
+   'pattern record': ['pattern_record'],
+   'pattern pending': ['pattern_pending'],
    axe: ['run_axe'],
    tree: ['tree'],
    audit: ['audit'],

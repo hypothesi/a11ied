@@ -89,7 +89,12 @@ export async function buildAuditReport(
       axe,
       relevanceStates,
       recordedOutcomes: Object.fromEntries(
-         recorded.map((record) => [record.criterionId, record.outcome]),
+         recorded
+            .filter((record) => record.test.kind === 'criterion')
+            .map((record) => [
+               record.test.kind === 'criterion' ? record.test.criterionId : '',
+               record.outcome,
+            ]),
       ),
    });
 

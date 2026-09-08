@@ -4,7 +4,10 @@ import { registerResources } from './resources/register.js';
 import { registerEvidenceTools } from './tools/evidence.js';
 import { registerExecutionTools } from './tools/execution.js';
 import { registerKnowledgeTools } from './tools/knowledge.js';
-import { registerPatternCheckTool } from './tools/pattern-check.js';
+import {
+   registerPatternCheckTool,
+   registerPatternEvidenceTools,
+} from './tools/pattern-check.js';
 import { registerPatternTools } from './tools/pattern.js';
 import { registerSrActionTool } from './tools/sr-action.js';
 import { registerSrListTool } from './tools/sr-list.js';
@@ -22,6 +25,7 @@ export function createMcpServer(): McpServer {
    registerKnowledgeTools(server);
    registerPatternTools(server);
    registerPatternCheckTool(server);
+   registerPatternEvidenceTools(server);
    registerExecutionTools(server);
    registerEvidenceTools(server);
    registerSrSessionTool(server);

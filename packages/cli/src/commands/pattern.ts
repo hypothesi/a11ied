@@ -5,6 +5,7 @@ import { addLookupOptions } from '../lib/options.js';
 import { runLookupCommand, type LookupCommandInput } from '../lib/run-lookup.js';
 import { addSectionOption, parseSectionOption } from '../lib/sections.js';
 import { registerPatternCheckCommand } from './pattern-check.js';
+import { registerPatternEvidenceCommands } from './pattern-evidence.js';
 import {
    patternDetailSections,
    type PatternDetailSection,
@@ -165,4 +166,5 @@ export function registerPatternCommands(program: Command): void {
    registerRoleCommand(patternCommand);
    registerAttributeCommand(patternCommand);
    registerPatternCheckCommand(patternCommand);
+   registerPatternEvidenceCommands(patternCommand);
 }

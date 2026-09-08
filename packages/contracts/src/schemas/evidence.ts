@@ -27,17 +27,37 @@ export type EvidenceMode = z.infer<typeof evidenceModeSchema>;
 export const EVIDENCE_NOTE_MAX_LENGTH = 2000;
 
 /**
+ * What a recorded result is about.
+ *
+ * A `criterion` result names the WCAG criterion and the procedure performed, drawn from
+ * the `procedureIds` in the WCAG strategy artifact, because a criterion can need more
+ * than one. A `patternRow` result names one row of one ARIA Authoring Practices Guide
+ * example, so a person or an agent can record that a part of a pattern does not apply to
+ * the component under test and have that judgment survive the next run.
+ */
+export const evidenceTestSchema = z.discriminatedUnion('kind', [
+   z.object({
+      kind: z.literal('criterion'),
+      criterionId: z.string().min(1),
+      procedureId: z.string().min(1),
+   }),
+   z.object({
+      kind: z.literal('patternRow'),
+      exampleId: z.string().min(1),
+      rowKey: z.string().min(1),
+   }),
+]);
+export type EvidenceTest = z.infer<typeof evidenceTestSchema>;
+
+/**
  * One recorded result for a check a11ied cannot automate.
  *
  * `subject` is the canonical target string, so the same page recorded from different
- * spellings of its URL resolves to one row. `procedureId` names which check was
- * performed, drawn from the `procedureIds` in the WCAG strategy artifact, and is required
- * because a criterion can need more than one.
+ * spellings of its URL resolves to one row.
  */
 export const evidenceRecordSchema = z.object({
    subject: z.string().min(1),
-   criterionId: z.string().min(1),
-   procedureId: z.string().min(1),
+   test: evidenceTestSchema,
    outcome: evidenceOutcomeSchema,
    mode: evidenceModeSchema,
    pointer: z.string().min(1).optional(),
@@ -53,6 +73,18 @@ export const evidenceRecordSchema = z.object({
    subjectHash: z.string().min(1).optional(),
 });
 export type EvidenceRecord = z.infer<typeof evidenceRecordSchema>;
+
+/**
+ * The line shape written before a result could be about anything but a criterion. The
+ * store reads it and lifts the two fields into `test`, so an existing results file keeps
+ * working.
+ */
+export const legacyEvidenceLineSchema = z
+   .object({
+      criterionId: z.string().min(1),
+      procedureId: z.string().min(1),
+   })
+   .passthrough();
 
 /** One criterion that applies to a target and has no recorded result yet. */
 export const pendingCriterionSchema = z.object({

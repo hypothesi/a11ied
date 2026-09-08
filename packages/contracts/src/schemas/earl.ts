@@ -25,11 +25,15 @@ export type EarlMode = z.infer<typeof earlModeSchema>;
  * The procedure that produced one result. `title` identifies it inside the reporting
  * tool, such as an axe rule id. `criterionSlugs` are WCAG success criterion slugs like
  * `non-text-content`, which the report writes as `WCAG2:non-text-content`.
+ *
+ * `criterionSlugs` is optional because not every test case belongs to a success
+ * criterion. A row of an ARIA Authoring Practices Guide example is a test in its own
+ * right, and the report omits `isPartOf` rather than writing an empty list for one.
  */
 export const earlProcedureSchema = z.object({
    title: z.string().min(1),
    url: z.string().url().optional(),
-   criterionSlugs: z.array(z.string()),
+   criterionSlugs: z.array(z.string()).optional(),
 });
 export type EarlProcedure = z.infer<typeof earlProcedureSchema>;
 
@@ -75,7 +79,8 @@ const earlTestCaseSchema = z.object({
    '@type': z.literal('TestCase'),
    title: z.string().min(1),
    '@id': z.string().url().optional(),
-   isPartOf: z.array(z.string()),
+   /** Omitted for a test case that is not part of a success criterion. */
+   isPartOf: z.array(z.string()).optional(),
 });
 
 const earlResultSchema = z.object({

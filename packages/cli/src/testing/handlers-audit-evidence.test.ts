@@ -15,8 +15,7 @@ import {
 
 interface EvidenceLine {
    subject: string;
-   criterionId: string;
-   procedureId: string;
+   test: { kind: string; criterionId: string; procedureId: string };
    outcome: string;
    mode: string;
    pointer?: string;
@@ -66,7 +65,7 @@ async function assertRecordWritesOneLine(): Promise<void> {
 
    expect(result.status).toBe(EXIT_SUCCESS);
    expect(lines).toHaveLength(1);
-   expect(lines[0]?.criterionId).toBe('2.4.7');
+   expect(lines[0]?.test.criterionId).toBe('2.4.7');
    expect(lines[0]?.outcome).toBe('failed');
    expect(lines[0]?.pointer).toBe('nav > a:nth-child(3)');
    expect(lines[0]?.assertedBy).toBe('claude-code');
@@ -77,7 +76,7 @@ async function assertManualResultNeverUsesAxeProcedure(): Promise<void> {
    await record(results, ['--criterion', '2.4.4', '--outcome', 'passed']);
    const lines = await readLines(results);
 
-   expect(lines[0]?.procedureId).toBe('manual_review');
+   expect(lines[0]?.test.procedureId).toBe('manual_review');
 }
 
 async function assertProcedureComesFromTheCriterion(): Promise<void> {
@@ -85,7 +84,7 @@ async function assertProcedureComesFromTheCriterion(): Promise<void> {
    await record(results, ['--criterion', '2.4.7', '--outcome', 'passed']);
    const lines = await readLines(results);
 
-   expect(lines[0]?.procedureId).toBe('focus_visibility_probe');
+   expect(lines[0]?.test.procedureId).toBe('focus_visibility_probe');
 }
 
 async function assertBadOutcomeIsRejected(): Promise<void> {

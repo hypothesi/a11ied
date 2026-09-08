@@ -116,6 +116,12 @@ export {
 } from './tree/parse.js';
 export { runPatternCheck, type RunPatternCheckInput } from './apg/check-runtime.js';
 export {
+   attachRecordedJudgments,
+   attributeRowOutcome,
+   isSetAside,
+   keyboardRowOutcome,
+} from './apg/outcomes.js';
+export {
    findApgExamples,
    listApgPatternSummaries,
    resolveApgLookup,
@@ -123,6 +129,9 @@ export {
    showApgPattern,
    showApgPatternOrExample,
    searchAll,
+   listApgRowKeys,
+   listPendingApgRows,
+   recordApgJudgment,
 } from './apg/runtime.js';
 export { buildAuditReport, type AuditReport } from './audit/runtime.js';
 export { buildNextCommands } from './audit/next-commands.js';

@@ -6,6 +6,7 @@ import {
    TEST_TIMEOUT_VERY_LONG,
    parseJsonOutput,
    runCli,
+   runCliInProcess,
    useTestServer,
 } from './setup.js';
 
@@ -14,9 +15,11 @@ import {
  * positive in a11ied rather than a bug in the page. These cases hold the check to that, and
  * hold it to still catching the real breaks in aria-widgets.html.
  *
- * Each fixture is checked once in `beforeAll` and the assertions read that one result. A
- * check reloads the page for every key it presses, so running one per assertion starves the
- * shared browser and times the other suites out.
+ * Each fixture is checked once and every assertion about it reads that one result. The
+ * checks also run the CLI in process rather than spawning it, so they share one browser: a
+ * check reloads the page for every key it presses, and a browser per call starves the other
+ * suites that need one. The axe runs still spawn, because axe's own page function does not
+ * survive the test build's transform.
  */
 const tempRoots: string[] = [];
 const testServer = useTestServer(tempRoots);
@@ -46,7 +49,7 @@ async function checkFixture(
    example: string,
    selector: string,
 ): Promise<CheckRun> {
-   const run = await runCli([
+   const run = await runCliInProcess([
       'pattern',
       'check',
       `${testServer.getBaseUrl()}/${path}`,

@@ -1,6 +1,7 @@
 import type { Command } from 'commander';
 
-import { cliExitCodes } from '#contracts';
+import { cliExitCodes, type ApgCheckResult } from '#contracts';
+import { isSetAside } from '#core';
 
 import {
    addHtmlOption,
@@ -18,6 +19,7 @@ export interface PatternCheckOptions {
    selector?: string;
    table?: string;
    setup?: string;
+   results?: string;
 }
 
 function buildCheckCommand(patternCommand: Command): Command {
@@ -49,6 +51,10 @@ function buildCheckCommand(patternCommand: Command): Command {
                   .option(
                      '--setup <keys>',
                      'Comma separated chords to press before probing, to reach the state --table documents.',
+                  )
+                  .option(
+                     '--results <path>',
+                     'Read recorded judgments from this path instead of .a11ied/evidence.jsonl.',
                   ),
             ),
          ),
@@ -58,25 +64,24 @@ function buildCheckCommand(patternCommand: Command): Command {
 
 /**
  * Exits 4 only on the two findings the tool will defend: a key the APG declares that did
- * nothing on either probe, and an attribute that points at an id the document does not
+ * nothing on either attempt, and an attribute that points at an id the document does not
  * have.
  *
  * A `changed` row never fails the run, because the tool saw something happen without
  * deciding whether it was the documented behavior. A plain `absent` row does not fail it
  * either: the APG's own reference combobox leaves `aria-activedescendant` off while the
- * listbox is closed, so absence usually means the widget is in another state rather than
- * that it is broken. Those are reported, and named under "May not apply", for a person to
- * judge.
+ * listbox is closed, so absence usually means the widget is in another state. Those are
+ * reported and listed under "May not apply" for a person to judge.
+ *
+ * A row someone recorded as inapplicable or passed is set aside, until the page changes
+ * under it. Triage once, and the exit code means something afterward.
  */
-function resolveExitCode(result: {
-   keyboardRows: Array<{ status: string }>;
-   attributeRows: Array<{ status: string }>;
-}): number {
+function resolveExitCode(result: ApgCheckResult): number {
    const deadKey = result.keyboardRows.some(
-      (row) => row.status === 'no-observable-effect',
+      (row) => row.status === 'no-observable-effect' && !isSetAside(row),
    );
    const brokenReference = result.attributeRows.some(
-      (row) => row.status === 'broken-reference',
+      (row) => row.status === 'broken-reference' && !isSetAside(row),
    );
    return deadKey || brokenReference ? cliExitCodes.assertion : cliExitCodes.success;
 }
@@ -115,6 +120,7 @@ export function registerPatternCheckCommand(patternCommand: Command): void {
                   selector: options.selector ?? '',
                   tableName: options.table,
                   setupKeys: options.setup,
+                  evidence: { file: options.results },
                });
 
                return {

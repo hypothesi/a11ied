@@ -8,6 +8,9 @@ import { buildEarlReport } from '@a11ied/earl';
 import { getCriterion, WcagEngineNotFoundError } from '@a11ied/wcag-engine';
 
 import { buildA11iedAssertor, listAxeEarlAssertions } from '../axe/earl.js';
+
+/** Where an APG example lives, so a pattern row assertion links to the page it is about. */
+const APG_EXAMPLE_BASE = 'https://www.w3.org/WAI/ARIA/apg/patterns';
 import type { AuditReport } from './runtime.js';
 
 /** EARL writes a success criterion as its slug, and the report stores its number. */
@@ -22,15 +25,35 @@ function listCriterionSlug(criterionId: string, wcagVersion: string): string[] {
    }
 }
 
+/**
+ * Builds the EARL test case for one record.
+ *
+ * A criterion record points at the success criterion it was judged against. A pattern row
+ * record points at the row on the APG page instead, which is a real anchor there, and has
+ * no criterion to be part of.
+ */
+function toProcedure(
+   record: EvidenceRecord,
+   wcagVersion: string,
+): EarlAssertionInput['procedure'] {
+   if (record.test.kind === 'criterion') {
+      return {
+         title: record.test.procedureId,
+         criterionSlugs: listCriterionSlug(record.test.criterionId, wcagVersion),
+      };
+   }
+   return {
+      title: `${record.test.exampleId} ${record.test.rowKey}`,
+      url: `${APG_EXAMPLE_BASE}/${record.test.exampleId}/`,
+   };
+}
+
 function toAssertion(record: EvidenceRecord, wcagVersion: string): EarlAssertionInput {
    const assertion: EarlAssertionInput = {
       subject: record.subject,
       outcome: record.outcome,
       mode: record.mode,
-      procedure: {
-         title: record.procedureId,
-         criterionSlugs: listCriterionSlug(record.criterionId, wcagVersion),
-      },
+      procedure: toProcedure(record, wcagVersion),
    };
 
    if (record.pointer === undefined) {

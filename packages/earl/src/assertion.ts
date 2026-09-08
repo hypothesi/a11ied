@@ -21,7 +21,11 @@ function buildTest(input: EarlAssertionInput): EarlAssertion['test'] {
       '@type': 'TestCase',
       title: procedure.title,
       ...(procedure.url === undefined ? {} : { '@id': procedure.url }),
-      isPartOf: procedure.criterionSlugs.map((slug) => `${WCAG2_PREFIX}${slug}`),
+      ...(procedure.criterionSlugs === undefined
+         ? {}
+         : {
+              isPartOf: procedure.criterionSlugs.map((slug) => `${WCAG2_PREFIX}${slug}`),
+           }),
    };
 }
 

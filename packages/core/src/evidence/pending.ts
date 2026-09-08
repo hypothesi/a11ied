@@ -13,9 +13,20 @@ import { readEvidenceForSubject, type EvidenceStoreOptions } from './store.js';
 
 const LEVELS = ['A', 'AA', 'AAA'] as const;
 
-/** The criterion ids with a recorded result for one target. */
+/**
+ * The criterion ids with a recorded result for one target.
+ *
+ * A pattern row result is skipped, so a judgment about one row of an ARIA example never
+ * counts as coverage of a success criterion.
+ */
 export function listRecordedCriterionIds(records: EvidenceRecord[]): Set<string> {
-   return new Set(records.map((record) => record.criterionId));
+   const ids = new Set<string>();
+   for (const record of records) {
+      if (record.test.kind === 'criterion') {
+         ids.add(record.test.criterionId);
+      }
+   }
+   return ids;
 }
 
 /** A criterion axe cannot decide on its own needs a person or an agent. */

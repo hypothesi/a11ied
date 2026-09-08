@@ -1,10 +1,8 @@
 import {
-   apgCheckResultSchema,
    apgFindResultSchema,
    apgLookupResultSchema,
    apgPatternListResultSchema,
    type ApgAttributeTable,
-   type ApgCheckResult,
    type ApgExample,
    type ApgKeyboardTable,
    type ApgPattern,
@@ -24,10 +22,11 @@ export const patternDetailSections: ReadonlyArray<PatternDetailSection> = [
    'examples',
 ];
 
-const KEY_COLUMN_CAP = 26;
-const USAGE_COLUMN_CAP = 60;
+export const KEY_COLUMN_CAP = 26;
+export const USAGE_COLUMN_CAP = 60;
 
-function apgAttribution(document: W3cDocumentSource): string {
+/** The APG attribution line, with the license the guide is actually published under. */
+export function apgAttribution(document: W3cDocumentSource): string {
    return attributionLine({ ...document, license: W3C_SOFTWARE_AND_DOCUMENT_LICENSE });
 }
 
@@ -184,101 +183,4 @@ export function renderPatternFindText(
       '',
       apgAttribution(result.document),
    ].join('\n');
-}
-
-const CHECK_STATUS_LABELS: Record<string, string> = {
-   absent: 'absent',
-   changed: 'changed',
-   'no-observable-effect': 'NO EFFECT',
-   'not-testable': 'not tested',
-   present: 'present',
-};
-
-const STATUS_COLUMN_CAP = 12;
-
-function checkRowLines(rows: { keyboardRows: ApgCheckResult['keyboardRows'] }): string[] {
-   const body = rows.keyboardRows.flatMap((row) => {
-      const observed =
-         row.observedChanges.length > 0
-            ? row.observedChanges.join(', ')
-            : (row.reason ?? '');
-      const line = [
-         code(row.keys.join(' / ')),
-         CHECK_STATUS_LABELS[row.status] ?? row.status,
-         observed,
-      ];
-      return [line, ['', '', dim(row.description.join(' '))]];
-   });
-
-   return table(['Key', 'Result', 'Observed'], body, [
-      KEY_COLUMN_CAP,
-      STATUS_COLUMN_CAP,
-      USAGE_COLUMN_CAP,
-   ]);
-}
-
-/**
- * Prints one check run. The APG's own description sits under every key, because the tool
- * decides only that a declared key did nothing; whether the right thing happened is a
- * judgment for the person reading it.
- */
-export function renderPatternCheckText(
-   envelope: CliOutputEnvelope,
-   _options: { verbose: boolean },
-): string {
-   const result = apgCheckResultSchema.parse(envelope.result);
-   const lines = [
-      `${result.title} against ${result.selector}`,
-      dim(`example ${result.exampleId}, keyboard table "${result.tableName}"`),
-   ];
-
-   if (result.keyboardRows.length > 0) {
-      lines.push(...section('Keyboard', checkRowLines(result)));
-   }
-
-   if (result.attributeRows.length > 0) {
-      const rows = result.attributeRows.map((row) => [
-         code(row.attribute ?? row.role ?? `<${row.element}>`),
-         CHECK_STATUS_LABELS[row.status] ?? row.status,
-         row.reason ?? row.observedValue ?? '',
-      ]);
-      lines.push(
-         ...section(
-            'Attributes',
-            table(['Role or attribute', 'Result', 'Observed'], rows, [
-               KEY_COLUMN_CAP,
-               STATUS_COLUMN_CAP,
-               USAGE_COLUMN_CAP,
-            ]),
-         ),
-      );
-   }
-
-   if (result.applicabilityHints.length > 0) {
-      lines.push(
-         ...section(
-            'May not apply',
-            result.applicabilityHints.map(
-               (hint) =>
-                  `${code(hint.attribute)} ${dim(`is documented but never set here; rows: ${hint.relatedRowKeys.join(', ') || 'none'}`)}`,
-            ),
-         ),
-         dim('These are hints, not findings. Decide which parts of the pattern apply.'),
-      );
-   }
-
-   if (result.unprobedTables.length > 0) {
-      lines.push(
-         ...section(
-            'Not probed',
-            result.unprobedTables.map(
-               (name) =>
-                  `${name} ${dim(`- run with --table '${name}' and --setup to reach it`)}`,
-            ),
-         ),
-      );
-   }
-
-   lines.push('', dim(result.pageUrl), apgAttribution(result.document));
-   return lines.join('\n');
 }

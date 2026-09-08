@@ -14,14 +14,17 @@ export interface AccessibilityTree {
 /**
  * Loads a target and reads its accessibility tree with Playwright's `ariaSnapshot()`: the
  * role and name tree a screen reader sees, including JavaScript-rendered content.
+ *
+ * `selector` narrows it to one widget, which is what a hash of a judged component needs.
  */
 export async function getAccessibilityTree(
    load: DocumentLoad,
-   options: WithBrowserPageOptions = {},
+   options: WithBrowserPageOptions & { selector?: string } = {},
 ): Promise<AccessibilityTree> {
+   const selector = options.selector ?? 'body';
    const yaml = await withLoadedPage(
       load,
-      (page) => page.locator('body').ariaSnapshot(),
+      (page) => page.locator(selector).ariaSnapshot(),
       options,
    );
    return { yaml, nodes: parseAriaSnapshot(yaml) };

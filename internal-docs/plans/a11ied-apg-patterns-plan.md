@@ -363,38 +363,51 @@ is needed at all and only the site chrome is removed; and the pattern titles com
 APG's pattern index page, because `alertdialog` is "Alert and Message Dialogs" and no
 title-casing of the slug would produce that.
 
+**The tests had to stop spawning a browser per call.** The pattern check reloads the page for
+every key it presses, and every `runCli` starts its own browser, so the new suites starved the
+existing ones and timed a 60-second axe test out about one run in three. Running the CLI in
+process for the checks shares one browser across a file: the fixture suite went from 229
+seconds to 18, the evidence suite from 15 to 4, and three consecutive full runs came back
+clean. The axe assertions still spawn, because axe's own page function does not survive the
+test build's transform.
+
+**Recording a judgment needs the widget's accessibility tree, not the page's.** T-26 said to
+compare `subjectHash`, but nothing captured one at record time, so a judgment would have
+stood forever. `a1 pattern record` now requires `--selector`, hashes that subtree, and stores
+it. `getAccessibilityTree` gained a `selector` option so both sides hash the same thing.
+
 ## Task Grid
 
 | Status | ID   | Task                                  | Priority | Depends On       | Acceptance Criteria                                                   |
 | ------ | ---- | ------------------------------------- | -------- | ---------------- | --------------------------------------------------------------------- |
-| [ ]    | T-01 | Extract `runLookupCommand`            | H        | —                | `a1 wcag` output byte-identical; version option opt-in                |
-| [ ]    | T-02 | Extract the `--section` option helper | M        | T-01             | `a1 wcag show --section` unchanged; helper takes an allowed list      |
-| [ ]    | T-03 | Add `pattern` and `search` families   | H        | —                | `cliCommandFamilySchema` extended; envelope tests pass                |
-| [ ]    | T-04 | APG contracts schemas                 | H        | —                | `apgPatternsArtifactSchema` parses a hand-written sample              |
-| [ ]    | T-05 | APG parser                            | H        | T-04             | Parses 3 committed sample files into expected rows                    |
-| [ ]    | T-06 | APG sync and generation               | H        | T-05             | `npm run wcag:sync` writes `apg-patterns.json` with provenance        |
-| [ ]    | T-07 | APG validation                        | H        | T-06             | `npm run wcag:validate` fails on a corrupted artifact                 |
-| [ ]    | T-08 | Engine lookups                        | H        | T-06             | `getApgExample('combobox-select-only')` returns 2 keyboard tables     |
-| [ ]    | T-09 | Core runtime                          | H        | T-08             | Not-found raises `CliUsageError` with `lookupKey`                     |
-| [ ]    | T-10 | Pattern renderers                     | M        | T-09             | Text output prints the title, URL, and both tables                    |
-| [ ]    | T-11 | `a1 pattern` command                  | H        | T-01, T-03, T-10 | All of FR-3 to FR-8 pass; `help-all` lists them                       |
-| [ ]    | T-12 | Unified `a1 search` and finder        | M        | T-11             | One ranked list, rows labeled by kind; `a1 wcag search` deleted       |
-| [ ]    | T-13 | Role-derived next commands            | M        | T-08             | `a1 audit` on `aria-widgets.html` suggests `a1 pattern role`          |
-| [ ]    | T-14 | APG key text to Playwright keys       | H        | T-04             | One group in, one chord out; `Space or Enter` never joins             |
-| [ ]    | T-15 | Static attribute check                | H        | T-08, T-14       | Reports `present`/`absent` per attribute row                          |
-| [ ]    | T-16 | Dynamic keyboard probe                | H        | T-14, T-15       | Flags a dead key; nudge re-probe clears the boundary false alarm      |
-| [ ]    | T-17 | `a1 pattern check` command            | H        | T-16             | FR-11 to FR-14 pass; `--selector` required; exits 4 on a finding      |
-| [ ]    | T-18 | Vendor 3 APG fixtures                 | M        | T-06             | Byte-identical dirs under `test/fixtures/apg/`, refreshed by the sync |
-| [ ]    | T-19 | False-positive tests                  | H        | T-17, T-18       | axe clean, `pattern check` clean, sr assertions pass                  |
-| [ ]    | T-20 | MCP tools                             | M        | T-09, T-17       | 3 tools registered, listed in `index.test.ts`                         |
-| [ ]    | T-21 | Agent Skill section                   | M        | T-11, T-17       | SKILL.md section added; vale passes                                   |
-| [ ]    | T-22 | Docs, README, NOTICE                  | H        | T-06, T-11       | NOTICE names the APG before data lands; docs pages updated            |
-| [ ]    | T-23 | Generalize the evidence record        | H        | T-17             | Old flat lines still read; both test kinds round-trip                 |
-| [ ]    | T-24 | Row outcomes from the check           | H        | T-23             | Every row gets `failed`/`cantTell`/no record; never `inapplicable`    |
-| [ ]    | T-25 | `a1 pattern record` and `pending`     | H        | T-24             | A row recorded `inapplicable` appears in neither pending list again   |
-| [ ]    | T-26 | Check reads the store                 | H        | T-25             | Recorded rows suppressed; stale hash warns; exit 4 narrowed           |
-| [ ]    | T-27 | EARL export of pattern rows           | M        | T-23             | APG row becomes a `TestCase`; `isPartOf` omitted, not empty           |
-| [ ]    | T-28 | MCP record tool, skill, docs          | M        | T-26             | `pattern_record` registered; SKILL.md states the split                |
+| [x]    | T-01 | Extract `runLookupCommand`            | H        | —                | `a1 wcag` output byte-identical; version option opt-in                |
+| [x]    | T-02 | Extract the `--section` option helper | M        | T-01             | `a1 wcag show --section` unchanged; helper takes an allowed list      |
+| [x]    | T-03 | Add `pattern` and `search` families   | H        | —                | `cliCommandFamilySchema` extended; envelope tests pass                |
+| [x]    | T-04 | APG contracts schemas                 | H        | —                | `apgPatternsArtifactSchema` parses a hand-written sample              |
+| [x]    | T-05 | APG parser                            | H        | T-04             | Parses 3 committed sample files into expected rows                    |
+| [x]    | T-06 | APG sync and generation               | H        | T-05             | `npm run wcag:sync` writes `apg-patterns.json` with provenance        |
+| [x]    | T-07 | APG validation                        | H        | T-06             | `npm run wcag:validate` fails on a corrupted artifact                 |
+| [x]    | T-08 | Engine lookups                        | H        | T-06             | `getApgExample('combobox-select-only')` returns 2 keyboard tables     |
+| [x]    | T-09 | Core runtime                          | H        | T-08             | Not-found raises `CliUsageError` with `lookupKey`                     |
+| [x]    | T-10 | Pattern renderers                     | M        | T-09             | Text output prints the title, URL, and both tables                    |
+| [x]    | T-11 | `a1 pattern` command                  | H        | T-01, T-03, T-10 | All of FR-3 to FR-8 pass; `help-all` lists them                       |
+| [x]    | T-12 | Unified `a1 search` and finder        | M        | T-11             | One ranked list, rows labeled by kind; `a1 wcag search` deleted       |
+| [x]    | T-13 | Role-derived next commands            | M        | T-08             | `a1 audit` on `aria-widgets.html` suggests `a1 pattern role`          |
+| [x]    | T-14 | APG key text to Playwright keys       | H        | T-04             | One group in, one chord out; `Space or Enter` never joins             |
+| [x]    | T-15 | Static attribute check                | H        | T-08, T-14       | Reports `present`/`absent` per attribute row                          |
+| [x]    | T-16 | Dynamic keyboard probe                | H        | T-14, T-15       | Flags a dead key; nudge re-probe clears the boundary false alarm      |
+| [x]    | T-17 | `a1 pattern check` command            | H        | T-16             | FR-11 to FR-14 pass; `--selector` required; exits 4 on a finding      |
+| [x]    | T-18 | Vendor 3 APG fixtures                 | M        | T-06             | Byte-identical dirs under `test/fixtures/apg/`, refreshed by the sync |
+| [x]    | T-19 | False-positive tests                  | H        | T-17, T-18       | axe clean, `pattern check` clean, sr assertions pass                  |
+| [x]    | T-20 | MCP tools                             | M        | T-09, T-17       | 3 tools registered, listed in `index.test.ts`                         |
+| [x]    | T-21 | Agent Skill section                   | M        | T-11, T-17       | SKILL.md section added; vale passes                                   |
+| [x]    | T-22 | Docs, README, NOTICE                  | H        | T-06, T-11       | NOTICE names the APG before data lands; docs pages updated            |
+| [x]    | T-23 | Generalize the evidence record        | H        | T-17             | Old flat lines still read; both test kinds round-trip                 |
+| [x]    | T-24 | Row outcomes from the check           | H        | T-23             | Every row gets `failed`/`cantTell`/no record; never `inapplicable`    |
+| [x]    | T-25 | `a1 pattern record` and `pending`     | H        | T-24             | A row recorded `inapplicable` appears in neither pending list again   |
+| [x]    | T-26 | Check reads the store                 | H        | T-25             | Recorded rows suppressed; stale hash warns; exit 4 narrowed           |
+| [x]    | T-27 | EARL export of pattern rows           | M        | T-23             | APG row becomes a `TestCase`; `isPartOf` omitted, not empty           |
+| [x]    | T-28 | MCP record tool, skill, docs          | M        | T-26             | `pattern_record` registered; SKILL.md states the split                |
 
 ## Task Details
 
@@ -1405,10 +1418,11 @@ Three upstream sample files used as parser test inputs.
       artifact produce 13 distinct chords, and every one is a real modifier combination such as
       `Shift + Tab` or `Alt + Down Arrow`. The data also uses `<br>` as an alternatives
       separator, which the first draft of the parser did not account for.
-- [ ] FR-13 no longer describes what ships. Measurement against the APG's own combobox showed
+- [x] FR-13 no longer describes what ships. Measurement against the APG's own combobox showed
       that failing on a missing attribute fails a correct implementation, so the rule narrowed to
-      a dead key and a broken reference. See "What the implementation changed". Rewrite FR-13 and
-      FR-24 as one rule before the evidence tasks land.
+      a dead key and a broken reference, and again to a dead key and a broken reference that
+      nobody has judged. FR-13 and FR-24 are superseded by the rule in
+      `resolveExitCode`. See "What the implementation changed".
 - [x] Does the applicability work invent a new concept? No. `evidenceOutcomeSchema` already has
       `inapplicable` and `cantTell`, the store is already append-only and safe for concurrent agent
       writes, `hashAccessibilityTree` already detects a changed subject, and `earl:inapplicable` is

@@ -1,4 +1,10 @@
-import type { ApgCheckResult, ApgExample, ApgKeyboardTable } from '@a11ied/contracts';
+import type {
+   ApgAttributeCheckRow,
+   ApgCheckResult,
+   ApgExample,
+   ApgKeyboardCheckRow,
+   ApgKeyboardTable,
+} from '@a11ied/contracts';
 import type { Page } from 'playwright';
 
 import {
@@ -7,13 +13,51 @@ import {
 } from '../browser/shared-browser.js';
 import { CliUsageError } from '../errors/cli-errors.js';
 import type { DocumentLoad } from '../targets/parse.js';
+import { hashAccessibilityTree } from '../evidence/subject.js';
+import { readEvidenceForSubject, type EvidenceStoreOptions } from '../evidence/store.js';
+import { parseAriaSnapshot } from '../tree/parse.js';
 import { checkApgAttributes } from './check-attributes.js';
 import { probeApgKeyboard } from './check-keyboard.js';
 import { toPlaywrightKeys } from './keys.js';
 import { observeWidget } from './observe.js';
+import {
+   attachRecordedJudgments,
+   attributeRowOutcome,
+   keyboardRowOutcome,
+} from './outcomes.js';
 import { showApgExample } from './runtime.js';
 
 const SINGLE_MATCH = 1;
+
+/**
+ * Attaches the judgments already recorded for this page, keyed by the accessibility tree
+ * they were made against, so one made before the component changed is marked stale.
+ */
+async function replayJudgments(
+   result: ApgCheckResult,
+   accessibilityTree: string,
+   evidence: EvidenceStoreOptions | undefined,
+): Promise<ApgCheckResult> {
+   const records = await readEvidenceForSubject(result.subject, evidence ?? {});
+   return attachRecordedJudgments({
+      result,
+      records,
+      subjectHash: hashAccessibilityTree({
+         yaml: accessibilityTree,
+         nodes: parseAriaSnapshot(accessibilityTree),
+      }),
+   });
+}
+
+function withKeyboardOutcome(row: ApgKeyboardCheckRow): ApgKeyboardCheckRow {
+   const outcome = keyboardRowOutcome(row.status);
+   return outcome === undefined ? row : { ...row, outcome };
+}
+
+function withAttributeOutcome(row: ApgAttributeCheckRow): ApgAttributeCheckRow {
+   const outcome = attributeRowOutcome(row.status);
+   return outcome === undefined ? row : { ...row, outcome };
+}
 
 export interface RunPatternCheckInput {
    load: DocumentLoad;
@@ -23,6 +67,8 @@ export interface RunPatternCheckInput {
    tableName?: string | undefined;
    setupKeys?: string | undefined;
    pageOptions?: WithBrowserPageOptions;
+   /** Where recorded judgments are read from. Defaults to the project results file. */
+   evidence?: EvidenceStoreOptions;
 }
 
 /**
@@ -138,7 +184,7 @@ export async function runPatternCheck(
               )
             : [];
 
-         return {
+         const result: ApgCheckResult = {
             document,
             exampleId: example.id,
             patternId: pattern.id,
@@ -147,11 +193,13 @@ export async function runPatternCheck(
             subject: input.subject,
             selector: input.selector,
             tableName: table?.name ?? '',
-            keyboardRows,
-            attributeRows: attributes.rows,
+            keyboardRows: keyboardRows.map((row) => withKeyboardOutcome(row)),
+            attributeRows: attributes.rows.map((row) => withAttributeOutcome(row)),
             applicabilityHints: attributes.hints,
             unprobedTables: unprobed,
          };
+
+         return replayJudgments(result, observation.accessibilityTree, input.evidence);
       },
       input.pageOptions ?? {},
    );

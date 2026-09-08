@@ -36,9 +36,13 @@ export function renderRecordText(
 ): string {
    const result = envelope.result as unknown as RecordResult;
    const { record } = result;
+   const about =
+      record.test.kind === 'criterion'
+         ? { name: record.test.criterionId, detail: record.test.procedureId }
+         : { name: record.test.exampleId, detail: record.test.rowKey };
    const lines = [
-      `${outcomeSymbol(record.outcome)} ${record.criterionId} ${record.outcome}`,
-      dim(`  procedure  ${record.procedureId}`),
+      `${outcomeSymbol(record.outcome)} ${about.name} ${record.outcome}`,
+      dim(`  procedure  ${about.detail}`),
       dim(`  target     ${record.subject}`),
    ];
 

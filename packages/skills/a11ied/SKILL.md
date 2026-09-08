@@ -87,6 +87,21 @@ attribute the example documents that the widget never sets is listed under "May 
 as a hint, not a finding: it usually means the widget is in a different state or is a
 different variant of the pattern.
 
+When you decide a row does not apply, record it, so the next run does not ask again:
+
+```txt
+a1 pattern pending http://localhost:3000 --pattern combobox-select-only
+a1 pattern record http://localhost:3000 --pattern combobox-select-only \
+   --row 'combobox-key-home[5]' --selector '#fruit' \
+   --outcome inapplicable --note 'this combobox filters in place and has no popup'
+```
+
+The division is the point. The check reports what it observed, you decide what applies, and
+`a1 pattern record` keeps that decision. Record `inapplicable` when the component does not
+implement that part of the pattern, and say why in the note; if you have no reason to give,
+record nothing. The record stores a hash of the widget's accessibility tree, so the judgment
+expires the moment the component changes and the row counts again.
+
 The check presses the keys in the first keyboard table only. An example with more than one
 table documents more than one state, such as an open listbox, and the run lists the tables it
 skipped. Use `--table` with `--setup` to reach one of them.

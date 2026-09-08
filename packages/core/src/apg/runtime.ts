@@ -1,4 +1,7 @@
 import type {
+   EvidenceMode,
+   EvidenceOutcome,
+   EvidenceRecord,
    ApgExampleShowResult,
    UnifiedSearchResult,
    UnifiedSearchRow,
@@ -23,6 +26,12 @@ import {
 } from '@a11ied/wcag-engine';
 
 import { CliUsageError } from '../errors/cli-errors.js';
+import {
+   appendEvidence,
+   readEvidenceForSubject,
+   type EvidenceStoreOptions,
+} from '../evidence/store.js';
+import { buildRowKey } from './row-key.js';
 import { normalizeEngineError } from '../errors/engine-errors.js';
 
 const SUGGESTION_LIMIT = 5;
@@ -184,4 +193,103 @@ export function searchAll(
       .slice(0, limit);
 
    return { query, rows };
+}
+
+/** Every row key one example has, keyboard rows first, then attribute rows. */
+export function listApgRowKeys(exampleId: string): string[] {
+   const { example } = showApgExample(exampleId);
+   const keys: string[] = [];
+
+   for (const table of example.keyboardTables) {
+      for (const [index, row] of table.rows.entries()) {
+         keys.push(buildRowKey(row.testId, index));
+      }
+   }
+   for (const table of example.attributeTables) {
+      for (const [index, row] of table.rows.entries()) {
+         keys.push(buildRowKey(row.testId, index));
+      }
+   }
+
+   return keys;
+}
+
+/** The rows of one example with no recorded result for one target. */
+
+function assertRowExists(exampleId: string, rowKey: string): void {
+   const keys = listApgRowKeys(exampleId);
+   if (keys.includes(rowKey)) {
+      return;
+   }
+   throw new CliUsageError(
+      'pattern-row-not-found',
+      `${exampleId} has no row "${rowKey}".`,
+      {
+         rowKey,
+         closestRowKeys: keys
+            .filter((key) => key.startsWith(rowKey.split('[')[0] ?? ''))
+            .slice(0, SUGGESTION_LIMIT),
+      },
+   );
+}
+
+/**
+ * Records one judgment about one row of an APG example.
+ *
+ * The tool never writes `inapplicable`. This is where a person or an agent does, along
+ * with the reason, so the next run sets the row aside instead of asking again.
+ */
+export async function recordApgJudgment(input: {
+   subject: string;
+   exampleId: string;
+   rowKey: string;
+   outcome: EvidenceOutcome;
+   mode?: EvidenceMode | undefined;
+   note?: string | undefined;
+   pointer?: string | undefined;
+   assertedBy?: string | undefined;
+   subjectHash?: string | undefined;
+   evidence?: EvidenceStoreOptions;
+}): Promise<{ record: EvidenceRecord; file: string }> {
+   assertRowExists(input.exampleId, input.rowKey);
+
+   const record: EvidenceRecord = {
+      subject: input.subject,
+      test: { kind: 'patternRow', exampleId: input.exampleId, rowKey: input.rowKey },
+      outcome: input.outcome,
+      mode: input.mode ?? 'manual',
+      recordedAt: new Date().toISOString(),
+      ...(input.note === undefined ? {} : { note: input.note }),
+      ...(input.pointer === undefined ? {} : { pointer: input.pointer }),
+      ...(input.assertedBy === undefined ? {} : { assertedBy: input.assertedBy }),
+      ...(input.subjectHash === undefined ? {} : { subjectHash: input.subjectHash }),
+   };
+
+   return { record, file: await appendEvidence(record, input.evidence ?? {}) };
+}
+
+/** The rows of one example with no recorded result for one target. */
+export async function listPendingApgRows(input: {
+   subject: string;
+   exampleId: string;
+   evidence?: EvidenceStoreOptions;
+}): Promise<{ subject: string; exampleId: string; pending: string[]; count: number }> {
+   const records = await readEvidenceForSubject(input.subject, input.evidence ?? {});
+   const recorded = new Set(
+      records
+         .filter(
+            (record) =>
+               record.test.kind === 'patternRow' &&
+               record.test.exampleId === input.exampleId,
+         )
+         .map((record) => (record.test.kind === 'patternRow' ? record.test.rowKey : '')),
+   );
+   const pending = listApgRowKeys(input.exampleId).filter((key) => !recorded.has(key));
+
+   return {
+      subject: input.subject,
+      exampleId: input.exampleId,
+      pending,
+      count: pending.length,
+   };
 }

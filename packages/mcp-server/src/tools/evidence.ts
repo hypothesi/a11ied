@@ -111,8 +111,11 @@ function registerRecordTool(server: McpServer): void {
          const subject = await resolveSubject(input);
          const record: EvidenceRecord = {
             subject,
-            criterionId: input.criterionId,
-            procedureId: input.procedureId ?? pickProcedureId(input.criterionId),
+            test: {
+               kind: 'criterion',
+               criterionId: input.criterionId,
+               procedureId: input.procedureId ?? pickProcedureId(input.criterionId),
+            },
             outcome: input.outcome,
             mode: input.mode ?? 'semiAutomatic',
             recordedAt: new Date().toISOString(),

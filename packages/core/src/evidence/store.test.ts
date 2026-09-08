@@ -32,8 +32,7 @@ async function createFile(): Promise<string> {
 function buildRecord(overrides: Partial<EvidenceRecord> = {}): EvidenceRecord {
    return {
       subject: 'https://shop.test/cart',
-      criterionId: '2.4.4',
-      procedureId: 'manual_review',
+      test: { kind: 'criterion', criterionId: '2.4.4', procedureId: 'manual_review' },
       outcome: 'failed',
       mode: 'semiAutomatic',
       recordedAt: '2026-09-07T21:14:02.114Z',
@@ -47,7 +46,11 @@ async function assertRoundTrips(): Promise<void> {
    const records = await readEvidence({ file });
 
    expect(records).toHaveLength(1);
-   expect(records[0]?.criterionId).toStrictEqual('2.4.4');
+   expect(records[0]?.test).toEqual({
+      kind: 'criterion',
+      criterionId: '2.4.4',
+      procedureId: 'manual_review',
+   });
    expect(records[0]?.outcome).toStrictEqual('failed');
 }
 
@@ -60,9 +63,15 @@ async function assertMissingFileReadsEmpty(): Promise<void> {
 async function assertOneLinePerRecord(): Promise<void> {
    const file = await createFile();
    await appendEvidence(buildRecord(), { file });
-   await appendEvidence(buildRecord({ criterionId: '1.4.2', outcome: 'passed' }), {
-      file,
-   });
+   await appendEvidence(
+      buildRecord({
+         test: { kind: 'criterion', criterionId: '1.4.2', procedureId: 'manual_review' },
+         outcome: 'passed',
+      }),
+      {
+         file,
+      },
+   );
    const body = await readFile(file, 'utf8');
    const lines = body.split('\n').filter(Boolean);
 
@@ -101,9 +110,17 @@ async function assertConcurrentAppendsDoNotInterleave(): Promise<void> {
    const note = 'x'.repeat(NOTE_UNDER_CAP_LENGTH);
    await Promise.all(
       Array.from({ length: CONCURRENT_APPENDS }, (_unused, index) =>
-         appendEvidence(buildRecord({ criterionId: `1.1.${String(index)}`, note }), {
-            file,
-         }),
+         appendEvidence(
+            buildRecord({
+               test: {
+                  kind: 'criterion',
+                  criterionId: `1.1.${String(index)}`,
+                  procedureId: 'manual_review',
+               },
+               note,
+            }),
+            { file },
+         ),
       ),
    );
 
@@ -177,5 +194,44 @@ describe('stripFragment', () => {
       expect(stripFragment('https://shop.test/cart')).toStrictEqual(
          'https://shop.test/cart',
       );
+   });
+
+   it('reads a line written before a result could be about anything but a criterion', async () => {
+      const file = await createFile();
+      const legacy = {
+         subject: 'https://shop.test/cart',
+         criterionId: '2.4.4',
+         procedureId: 'manual_review',
+         outcome: 'passed',
+         mode: 'manual',
+         recordedAt: '2026-09-07T21:14:02.114Z',
+      };
+      await writeFile(file, `${JSON.stringify(legacy)}\n`, 'utf8');
+
+      const records = await readEvidence({ file });
+
+      expect(records[0]?.test).toEqual({
+         kind: 'criterion',
+         criterionId: '2.4.4',
+         procedureId: 'manual_review',
+      });
+   });
+
+   it('keeps a criterion result and a pattern row result about the same page apart', async () => {
+      const file = await createFile();
+      await appendEvidence(buildRecord(), { file });
+      await appendEvidence(
+         buildRecord({
+            test: {
+               kind: 'patternRow',
+               exampleId: 'combobox-select-only',
+               rowKey: 'combobox-key-home[5]',
+            },
+            outcome: 'inapplicable',
+         }),
+         { file },
+      );
+
+      expect(await readEvidence({ file })).toHaveLength(TWO_RECORDS);
    });
 });

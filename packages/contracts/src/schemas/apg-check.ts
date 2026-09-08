@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { evidenceOutcomeSchema } from './evidence.js';
 import { w3cDocumentSourceSchema } from './wcag.js';
 
 /**
@@ -51,6 +52,22 @@ export type ApgObservedChange = z.infer<typeof apgObservedChangeSchema>;
 export const apgProbeKindSchema = z.enum(['initial', 'nudged']);
 export type ApgProbeKind = z.infer<typeof apgProbeKindSchema>;
 
+/**
+ * A judgment someone already recorded about this row.
+ *
+ * `stale` is true when the page's accessibility tree no longer hashes the same as it did
+ * when the judgment was made, which means the component changed and the judgment needs
+ * making again.
+ */
+export const recordedJudgmentSchema = z.object({
+   outcome: evidenceOutcomeSchema,
+   note: z.string().optional(),
+   assertedBy: z.string().optional(),
+   recordedAt: z.string().min(1),
+   stale: z.boolean(),
+});
+export type RecordedJudgment = z.infer<typeof recordedJudgmentSchema>;
+
 export const apgKeyboardCheckRowSchema = z.object({
    testId: z.string().optional(),
    rowKey: z.string().min(1),
@@ -63,6 +80,16 @@ export const apgKeyboardCheckRowSchema = z.object({
    focusedElement: z.string().optional(),
    observedChanges: z.array(apgObservedChangeSchema),
    decidedBy: apgProbeKindSchema.optional(),
+   /**
+    * What the tool is willing to record about this row. A key that changed nothing is
+    * `failed`; a key that changed something is `cantTell`, because whether it was the
+    * documented behavior is a judgment; a key that cannot be pressed gets nothing at all,
+    * since not recording a result already means untested. Never `inapplicable`: only a
+    * person or an agent decides that.
+    */
+   outcome: evidenceOutcomeSchema.optional(),
+   /** A judgment already recorded for this row, replayed from the evidence store. */
+   recorded: recordedJudgmentSchema.optional(),
 });
 export type ApgKeyboardCheckRow = z.infer<typeof apgKeyboardCheckRowSchema>;
 
@@ -77,6 +104,8 @@ export const apgAttributeCheckRowSchema = z.object({
    reason: z.string().optional(),
    /** The value found on the page, when the attribute is present. */
    observedValue: z.string().optional(),
+   outcome: evidenceOutcomeSchema.optional(),
+   recorded: recordedJudgmentSchema.optional(),
 });
 export type ApgAttributeCheckRow = z.infer<typeof apgAttributeCheckRowSchema>;
 

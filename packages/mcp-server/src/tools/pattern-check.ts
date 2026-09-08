@@ -1,5 +1,17 @@
-import { cliExitCodes, type ApgCheckResult } from '@a11ied/contracts';
-import { runPatternCheck } from '@a11ied/core';
+import {
+   cliExitCodes,
+   evidenceModeSchema,
+   evidenceOutcomeSchema,
+   type ApgCheckResult,
+} from '@a11ied/contracts';
+import {
+   getAccessibilityTree,
+   hashAccessibilityTree,
+   isSetAside,
+   listPendingApgRows,
+   recordApgJudgment,
+   runPatternCheck,
+} from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
@@ -54,8 +66,12 @@ async function handlePatternCheck(
    });
 
    const failed =
-      result.keyboardRows.some((row) => row.status === 'no-observable-effect') ||
-      result.attributeRows.some((row) => row.status === 'broken-reference');
+      result.keyboardRows.some(
+         (row) => row.status === 'no-observable-effect' && !isSetAside(row),
+      ) ||
+      result.attributeRows.some(
+         (row) => row.status === 'broken-reference' && !isSetAside(row),
+      );
 
    return {
       target,
@@ -84,4 +100,93 @@ export function registerPatternCheckTool(server: McpServer): void {
       },
       async (input) => createToolResponse({ ...(await handlePatternCheck(input)) }),
    );
+}
+
+const patternRecordInputSchema = pageTargetInputSchema.extend({
+   pattern: z.string().min(1).describe('The APG example the row belongs to.'),
+   row: z.string().min(1).describe('The row key, such as combobox-key-home[5].'),
+   selector: z
+      .string()
+      .min(1)
+      .describe(
+         'The same widget selector the check used. Its accessibility tree is hashed with the judgment.',
+      ),
+   outcome: evidenceOutcomeSchema,
+   mode: evidenceModeSchema.optional(),
+   note: z.string().optional(),
+   pointer: z.string().optional(),
+   assertedBy: z.string().optional(),
+   resultsFile: z.string().optional(),
+});
+
+function registerPatternRecordTool(server: McpServer): void {
+   server.registerTool(
+      'pattern_record',
+      {
+         title: 'ARIA pattern record',
+         description:
+            'Record what you decided about one row of an APG example that pattern_check could ' +
+            'not decide. Record inapplicable when the component does not implement that part of ' +
+            'the pattern, and say why in the note. If you have no reason to give, record nothing. ' +
+            'The next check sets the row aside until the component changes, at which point the ' +
+            'judgment expires and the row counts again. Matches the CLI pattern record command.',
+         inputSchema: patternRecordInputSchema,
+         annotations: { openWorldHint: true },
+      },
+      async (input) => {
+         const resolved = await resolvePageTarget(input, 'pattern record');
+         const target = describePageReportTarget(resolved);
+         const tree = await getAccessibilityTree(requireLoad(resolved), {
+            selector: input.selector,
+         });
+
+         return createToolResponse(
+            await recordApgJudgment({
+               subject: target.value,
+               exampleId: input.pattern,
+               rowKey: input.row,
+               outcome: input.outcome,
+               mode: input.mode,
+               note: input.note,
+               pointer: input.pointer,
+               assertedBy: input.assertedBy,
+               subjectHash: hashAccessibilityTree(tree),
+               evidence: { file: input.resultsFile },
+            }),
+         );
+      },
+   );
+}
+
+function registerPatternPendingTool(server: McpServer): void {
+   server.registerTool(
+      'pattern_pending',
+      {
+         title: 'ARIA pattern pending',
+         description:
+            'List the rows of one APG example that have no recorded result for this target yet. ' +
+            'Matches the CLI pattern pending command.',
+         inputSchema: pageTargetInputSchema.extend({
+            pattern: z.string().min(1),
+            resultsFile: z.string().optional(),
+         }),
+         annotations: readOnlyAnnotations,
+      },
+      async (input) => {
+         const resolved = await resolvePageTarget(input, 'pattern pending');
+         return createToolResponse(
+            await listPendingApgRows({
+               subject: describePageReportTarget(resolved).value,
+               exampleId: input.pattern,
+               evidence: { file: input.resultsFile },
+            }),
+         );
+      },
+   );
+}
+
+/** Registers the ARIA pattern evidence tools. */
+export function registerPatternEvidenceTools(server: McpServer): void {
+   registerPatternRecordTool(server);
+   registerPatternPendingTool(server);
 }

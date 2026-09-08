@@ -3,6 +3,7 @@ import { dirname } from 'node:path';
 
 import {
    evidenceRecordSchema,
+   legacyEvidenceLineSchema,
    EVIDENCE_NOTE_MAX_LENGTH,
    type EvidenceRecord,
 } from '@a11ied/contracts';
@@ -19,22 +20,19 @@ export interface EvidenceStoreOptions {
    file?: string | undefined;
 }
 
-type EvidenceKeyParts = Pick<
-   EvidenceRecord,
-   'subject' | 'criterionId' | 'procedureId' | 'pointer'
->;
+type EvidenceKeyParts = Pick<EvidenceRecord, 'subject' | 'test' | 'pointer'>;
 
-/**
- * Two records describe the same check when target, criterion, procedure, and element
- * agree.
- */
+/** The one string two records about the same check agree on. */
+function describeTest(test: EvidenceRecord['test']): string {
+   if (test.kind === 'criterion') {
+      return `criterion:${test.criterionId}:${test.procedureId}`;
+   }
+   return `patternRow:${test.exampleId}:${test.rowKey}`;
+}
+
+/** Two records describe the same check when target, test, and element agree. */
 function keyOf(record: EvidenceKeyParts): string {
-   return [
-      record.subject,
-      record.criterionId,
-      record.procedureId,
-      record.pointer ?? '',
-   ].join(' ');
+   return [record.subject, describeTest(record.test), record.pointer ?? ''].join(' ');
 }
 
 function truncateNote(note: string | undefined): string | undefined {
@@ -63,12 +61,29 @@ export async function appendEvidence(
    return file;
 }
 
+/**
+ * A line written before the record could be about anything but a criterion put the
+ * criterion and the procedure at the top level. Those are lifted into the `test` field on
+ * read, so an existing results file keeps working.
+ */
+function liftLegacyLine(value: unknown): unknown {
+   if (typeof value !== 'object' || value === null || 'test' in value) {
+      return value;
+   }
+   const legacy = legacyEvidenceLineSchema.safeParse(value);
+   if (!legacy.success) {
+      return value;
+   }
+   const { criterionId, procedureId, ...rest } = legacy.data;
+   return { ...rest, test: { kind: 'criterion', criterionId, procedureId } };
+}
+
 function parseLine(line: string): EvidenceRecord | undefined {
    if (line.trim() === '') {
       return undefined;
    }
    try {
-      const parsed = evidenceRecordSchema.safeParse(JSON.parse(line));
+      const parsed = evidenceRecordSchema.safeParse(liftLegacyLine(JSON.parse(line)));
       return parsed.success ? parsed.data : undefined;
    } catch {
       return undefined;

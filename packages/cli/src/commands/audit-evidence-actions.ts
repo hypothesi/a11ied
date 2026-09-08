@@ -101,8 +101,11 @@ function buildRecord(input: {
    const { options } = input;
    const record: EvidenceRecord = {
       subject: input.subject,
-      criterionId: input.criterionId,
-      procedureId: input.procedureId,
+      test: {
+         kind: 'criterion',
+         criterionId: input.criterionId,
+         procedureId: input.procedureId,
+      },
       outcome: parseOutcome(options.outcome),
       mode: parseMode(options.mode),
       recordedAt: new Date().toISOString(),
