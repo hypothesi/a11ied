@@ -1,6 +1,6 @@
 # @a11ied/wcag-engine
 
-`@a11ied/wcag-engine` is the lookup, search, coverage, and applicability layer for the a11ied toolkit. It queries the normalized WCAG artifacts from `@a11ied/wcag-data`.
+`@a11ied/wcag-engine` is the lookup, search, test method, and relevance layer for the a11ied toolkit. It queries the normalized WCAG artifacts from `@a11ied/wcag-data`.
 
 ## install
 
@@ -15,8 +15,8 @@ import {
    getCriterion,
    listCriteriaByLevel,
    searchCriteria,
-   getCoverage,
-   getCriterionApplicability,
+   getTestMethod,
+   getCriterionRelevance,
 } from '@a11ied/wcag-engine';
 ```
 
@@ -24,4 +24,4 @@ Most consumers should import through the top-level `a11ied` package, which re-ex
 
 ## data
 
-This package reads pre-generated artifacts from `@a11ied/wcag-data`. Data covers WCAG 2.1 and 2.2, ACT mapping, axe-core rule coverage, and Quickref tagging.
+This package reads pre-generated artifacts from `@a11ied/wcag-data`. Data covers WCAG 2.1 and 2.2, ACT mapping, axe-core rule mapping, and Quickref tagging.

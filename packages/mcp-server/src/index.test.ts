@@ -1,6 +1,6 @@
 import {
    axeRuleLookupResultSchema,
-   coverageLookupResultSchema,
+   testMethodLookupResultSchema,
    criterionSearchResponseSchema,
    type CriterionSearchResult,
 } from '@a11ied/contracts';
@@ -16,7 +16,7 @@ import {
 const CLI_EXIT_ASSERTION = 4;
 
 describe('wcag show tool', () => {
-   it('matches the CLI wcag show command, coverage included', async () => {
+   it('matches the CLI wcag show command, test method included', async () => {
       await withHarness(async (harness) => {
          const result = await harness.client.callTool({
             name: 'wcag_show',
@@ -24,11 +24,11 @@ describe('wcag show tool', () => {
          });
 
          expect(result.isError).toBeFalsy();
-         const payload = coverageLookupResultSchema.parse(result.structuredContent);
+         const payload = testMethodLookupResultSchema.parse(result.structuredContent);
          expect(payload.lookupKey).toBe('4.1.3');
          expect(payload.criterion.id).toBe('4.1.3');
          expect(payload.criterion.slug).toBe('status-messages');
-         expect(payload.coverage).toBeDefined();
+         expect(payload.testMethod).toBeDefined();
          expect(payload.strategy).toBeDefined();
       });
    });
@@ -127,7 +127,7 @@ describe('wcag criteria tool', () => {
       });
    });
 
-   it('returns coverage totals when summary is set, matching a1 wcag criteria --summary', async () => {
+   it('returns the test method counts when summary is set, matching a1 wcag criteria --summary', async () => {
       await withHarness(async (harness) => {
          const result = await harness.client.callTool({
             name: 'wcag_criteria',
@@ -264,7 +264,7 @@ describe('tree tool', () => {
 
 describe('audit tool', () => {
    it(
-      'runs axe, tree, and applicability, and matches the CLI exit meaning',
+      'runs axe, tree, and the relevant criteria scan, and matches the CLI exit meaning',
       async () => {
          await withHarness(async (harness) => {
             const result = await harness.client.callTool({
@@ -302,12 +302,12 @@ describe('resource exposure', () => {
 
          expect(uris).toContain('a11ied://wcag/criteria/2.2');
          expect(uris).toContain('a11ied://wcag/levels/2.2');
-         expect(uris).toContain('a11ied://wcag/coverage/2.2');
+         expect(uris).toContain('a11ied://wcag/test-methods/2.2');
 
-         const readCoverage = await harness.client.readResource({
-            uri: 'a11ied://wcag/coverage/2.2',
+         const readTestMethod = await harness.client.readResource({
+            uri: 'a11ied://wcag/test-methods/2.2',
          });
-         expect(readCoverage.contents[0]?.uri).toBe('a11ied://wcag/coverage/2.2');
+         expect(readTestMethod.contents[0]?.uri).toBe('a11ied://wcag/test-methods/2.2');
       });
    });
 });

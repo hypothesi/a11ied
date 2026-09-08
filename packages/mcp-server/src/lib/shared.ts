@@ -11,7 +11,7 @@ import {
    listWcagCriteria,
    resolveDefaultTarget,
    resolveDocumentTarget,
-   showWcagCoverage,
+   showWcagTestMethod,
    type DocumentLoad,
    type ResolveDocumentTargetInput,
    type ResolvedDocumentTarget,
@@ -112,9 +112,9 @@ interface LevelsResource {
    }>;
 }
 
-interface CoverageResource {
+interface TestMethodResource {
    version: SupportedWcagVersion;
-   coverage: Array<ReturnType<typeof showWcagCoverage>>;
+   testMethods: Array<ReturnType<typeof showWcagTestMethod>>;
 }
 
 function toJsonText(value: unknown): string {
@@ -276,11 +276,13 @@ export function buildLevelsResource(version: SupportedWcagVersion): LevelsResour
    };
 }
 
-export function buildCoverageResource(version: SupportedWcagVersion): CoverageResource {
+export function buildTestMethodResource(
+   version: SupportedWcagVersion,
+): TestMethodResource {
    return {
       version,
-      coverage: listAllCriteria(version).map((criterion: NormalizedCriterion) =>
-         showWcagCoverage(criterion.id, version),
+      testMethods: listAllCriteria(version).map((criterion: NormalizedCriterion) =>
+         showWcagTestMethod(criterion.id, version),
       ),
    };
 }

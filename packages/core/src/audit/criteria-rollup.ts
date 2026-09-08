@@ -1,13 +1,13 @@
 import type { AxeRunResult, WcagVersion } from '@a11ied/contracts';
-import { getCoverage, listCriteriaByLevel } from '@a11ied/wcag-engine';
+import { getTestMethod, listCriteriaByLevel } from '@a11ied/wcag-engine';
 
 export interface AuditCriterionRollup {
    id: string;
    title: string;
    level: string;
    axeVerdict: 'fail' | 'pass' | 'not-covered';
-   applicability: string;
-   coverageState: string;
+   relevance: string;
+   testMethod: string;
    /** `automated`, `hybrid`, or `manual`, from the WCAG strategy artifact. */
    evidenceMode: string;
    /** The checks a person can perform for this criterion. */
@@ -55,20 +55,20 @@ function buildRollupEntry(input: {
    args: {
       version: WcagVersion;
       axe: AxeRunResult;
-      applicabilityStates: Record<string, string>;
+      relevanceStates: Record<string, string>;
    };
    recordedOutcome: string | undefined;
 }): AuditCriterionRollup {
    const { args, criterion, recordedOutcome } = input;
-   const coverage = getCoverage(criterion.id, { version: args.version });
-   const { strategy } = coverage;
+   const lookup = getTestMethod(criterion.id, { version: args.version });
+   const { strategy } = lookup;
    const entry: AuditCriterionRollup = {
       id: criterion.id,
       title: criterion.title,
       level: criterion.level,
-      axeVerdict: resolveAxeVerdict(coverage.coverage.axeRuleIds, args.axe),
-      applicability: args.applicabilityStates[criterion.id] ?? 'not-detected',
-      coverageState: coverage.coverage.coverageState,
+      axeVerdict: resolveAxeVerdict(lookup.testMethod.axeRuleIds, args.axe),
+      relevance: args.relevanceStates[criterion.id] ?? 'not-detected',
+      testMethod: lookup.testMethod.method,
       evidenceMode: strategy.preferredEvidenceMode,
       procedureIds: strategy.procedureIds,
       pending:
@@ -82,8 +82,8 @@ function buildRollupEntry(input: {
 }
 
 /**
- * Rolls up every WCAG criterion's axe verdict, applicability, coverage state, and whether
- * it still needs a person.
+ * Rolls up every WCAG criterion's axe verdict, relevance, test method, and whether it
+ * still needs a person.
  *
  * `recordedOutcomes` maps a criterion id to the outcome someone recorded for this target.
  * Pass an empty record when there are none.
@@ -91,7 +91,7 @@ function buildRollupEntry(input: {
 export function buildCriteriaRollup(args: {
    version: WcagVersion;
    axe: AxeRunResult;
-   applicabilityStates: Record<string, string>;
+   relevanceStates: Record<string, string>;
    recordedOutcomes?: Record<string, string>;
 }): AuditCriterionRollup[] {
    const recorded = args.recordedOutcomes ?? {};

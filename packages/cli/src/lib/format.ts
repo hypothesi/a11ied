@@ -19,7 +19,7 @@ export const symbols = {
 } as const;
 
 const stateColors: Readonly<Record<string, (text: string) => string>> = {
-   applicable: chalk.green,
+   relevant: chalk.green,
    unknown: chalk.magenta,
    'not-detected': chalk.dim,
    'out-of-scope': chalk.dim,

@@ -190,15 +190,15 @@ for (const violation of result.violations) {'{'}
       <pre><code>import {'{'}
   listWcagCriteria,
   searchWcagCriteria,
-  showWcagCoverage,
+  showWcagTestMethod,
   showWcagCriterion,
 {'}'} from 'a11ied';
 
 const status = showWcagCriterion('4.1.3', '2.2');
 
-console.log(status.criterion.title, status.coverage.coverageState);
+console.log(status.criterion.title, status.testMethod.method);
 
-const {'{'} coverage, strategy {'}'} = showWcagCoverage('4.1.3', '2.2');
+const {'{'} testMethod, strategy {'}'} = showWcagTestMethod('4.1.3', '2.2');
 
 if (strategy.requiresRealTarget) {'{'}
   console.log('Needs a driver session:', strategy.procedureIds);
@@ -220,21 +220,18 @@ const matches = searchWcagCriteria('focus order', {'{'} version: '2.2', limit: 3
    </section>
 
    <section class="panel" id="inspect">
-      <div class="panel-head">
-         <p class="panel-kicker">Applicability</p>
-         <h2>Check what applies to a page</h2>
-      </div>
-      <pre><code>import {'{'} inspectApplicableUrl, inspectCriterionUrl {'}'} from 'a11ied';
+      <h2>Relevant criteria</h2>
+      <pre><code>import {'{'} inspectRelevantCriteriaUrl, inspectCriterionUrl {'}'} from 'a11ied';
 
-const matrix = await inspectApplicableUrl('http://localhost:3000', '2.2');
+const matrix = await inspectRelevantCriteriaUrl('http://localhost:3000', '2.2');
 const focusOrder = await inspectCriterionUrl('2.4.3', 'http://localhost:3000', '2.2');
 
 console.log(focusOrder.assessment.state);
 console.log(focusOrder.assessment.reasons);</code></pre>
       <p>
          Both fetch the URL and parse the returned HTML. Use
-         <code>inspectApplicableTarget</code> and <code>inspectCriterionTarget</code> when you
-         already have a resolved document target rather than a URL.
+         <code>inspectRelevantCriteriaTarget</code> and <code>inspectCriterionTarget</code> when
+         you already have a resolved document target rather than a URL.
       </p>
    </section>
 
@@ -269,9 +266,9 @@ const {'{'} target, targetType, warning {'}'} = await resolveAvailableDefaultTar
          <div class="route-row"><strong>Sessions</strong><span><code>startDriverSession</code>, <code>getDriverSessionStatus</code>, <code>runDriverSessionAction</code>, <code>runEphemeralDriverAction</code>, <code>stopDriverSession</code>, <code>attachDocumentToDriverSession</code>, <code>cleanupStaleDriverSessions</code></span></div>
          <div class="route-row"><strong>Commands</strong><span><code>listDriverCommands</code>, <code>resolveDriverCommand</code>, <code>driverCommandSets</code>, <code>isDriverCommandSet</code>, <code>parseDriverCommandSet</code></span></div>
          <div class="route-row"><strong>axe</strong><span><code>runAxe</code></span></div>
-         <div class="route-row"><strong>WCAG</strong><span><code>listWcagCriteria</code>, <code>showWcagCriterion</code>, <code>searchWcagCriteria</code>, <code>showWcagCoverage</code>, <code>showWcagCoverageSummary</code>, <code>showWcagTechnique</code>, <code>showWcagAxeRule</code></span></div>
-         <div class="route-row"><strong>Applicability</strong><span><code>inspectApplicableTarget</code>, <code>inspectApplicableUrl</code>, <code>inspectCriterionTarget</code>, <code>inspectCriterionUrl</code></span></div>
-         <div class="route-row"><strong>Targets</strong><span><code>resolveDocumentTarget</code>, <code>openUrlInSystemAutomationBrowser</code>, <code>resolveDefaultTarget</code>, <code>resolveAvailableDefaultTarget</code>, <code>resolveTargetType</code>, <code>listSupportedTargets</code></span></div>
+         <div class="route-row"><strong>WCAG</strong><span><code>listWcagCriteria</code>, <code>showWcagCriterion</code>, <code>searchWcagCriteria</code>, <code>showWcagTestMethod</code>, <code>showWcagTestMethodSummary</code>, <code>showWcagTechnique</code>, <code>showWcagAxeRule</code></span></div>
+         <div class="route-row"><strong>Relevant criteria</strong><span><code>inspectRelevantCriteriaTarget</code>, <code>inspectRelevantCriteriaUrl</code>, <code>inspectCriterionTarget</code>, <code>inspectCriterionUrl</code></span></div>
+         <div class="route-row"><strong>Page and screen reader selection</strong><span><code>resolveDocumentTarget</code>, <code>openUrlInSystemAutomationBrowser</code>, <code>resolveDefaultTarget</code>, <code>resolveAvailableDefaultTarget</code>, <code>resolveTargetType</code>, <code>listSupportedTargets</code></span></div>
          <div class="route-row"><strong>Diagnostics</strong><span><code>createDoctorReport</code>, <code>renderDoctorText</code>, <code>listCliCommands</code></span></div>
          <div class="route-row"><strong>Errors</strong><span><code>CliUsageError</code>, <code>CliEnvironmentError</code>, <code>DriverCommandError</code></span></div>
       </div>

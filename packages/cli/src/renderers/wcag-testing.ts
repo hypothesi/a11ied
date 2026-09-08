@@ -1,4 +1,8 @@
-import type { ActRuleIndexEntry, CriterionCoverage, EvidenceStrategy } from '#contracts';
+import type {
+   ActRuleIndexEntry,
+   CriterionTestMethod,
+   EvidenceStrategy,
+} from '#contracts';
 import { code, fields, indent, listItems, section, wrap } from '../lib/format.js';
 import {
    actRulesSection,
@@ -15,7 +19,7 @@ interface ProcedureGuidance {
 }
 
 /**
- * A by-hand instruction for each procedure id the coverage strategy can name, with the
+ * A by-hand instruction for each procedure id the testing strategy can name, with the
  * `sr` commands that help where one applies. "Probe" never appears in the wording: each
  * entry says what the check actually does.
  */
@@ -147,13 +151,13 @@ function manualLines(input: { procedureIds: string[]; width: number }): string[]
  */
 export function testingSection(input: {
    criterionId: string;
-   coverage: CriterionCoverage;
+   testMethod: CriterionTestMethod;
    strategy: EvidenceStrategy;
    width: number;
 }): string[] {
    const axeLines = axeScanLines({
       criterionId: input.criterionId,
-      axeRuleIds: input.coverage.axeRuleIds,
+      axeRuleIds: input.testMethod.axeRuleIds,
       hasManualWork: input.strategy.procedureIds.some((id) => id !== 'axe_scan'),
       width: input.width,
    });
@@ -211,26 +215,26 @@ export function failsSection(input: {
 }
 
 /**
- * The raw coverage and strategy values `--verbose` prints: the internal enums, ids, and
- * notes the default view turns into sentences instead of showing directly.
+ * The raw test method and strategy values `--verbose` prints: the internal enums, ids,
+ * and notes the default view turns into sentences instead of showing directly.
  */
-export function verboseCoverageLines(input: {
-   coverage: CriterionCoverage;
+export function verboseTestMethodLines(input: {
+   testMethod: CriterionTestMethod;
    strategy: EvidenceStrategy;
    actRules: readonly ActRuleIndexEntry[];
    width?: number | undefined;
 }): string[] {
-   const notes = [...new Set([...input.coverage.notes, ...input.strategy.notes])];
+   const notes = [...new Set([...input.testMethod.notes, ...input.strategy.notes])];
    const body = fields([
-      ['Coverage state', input.coverage.coverageState],
+      ['Test method', input.testMethod.method],
       ['Evidence mode', input.strategy.preferredEvidenceMode],
       ['Procedure ids', input.strategy.procedureIds.join(', ') || 'none'],
-      ['Source attribution', input.coverage.sourceAttribution.join(', ') || 'none'],
+      ['Source attribution', input.testMethod.sourceAttribution.join(', ') || 'none'],
    ]);
    return [
-      ...section('Raw coverage data', [...body, ...listItems(notes)]),
+      ...section('Raw test method data', [...body, ...listItems(notes)]),
       ...actRulesSection({
-         ruleIds: input.coverage.actRuleIds,
+         ruleIds: input.testMethod.actRuleIds,
          rules: input.actRules,
          width: input.width,
       }),

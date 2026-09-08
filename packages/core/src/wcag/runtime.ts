@@ -1,8 +1,8 @@
 import {
    wcagLevelSchema,
    type AxeRuleLookupResult,
-   type CoverageLookupResult,
-   type CoverageSummaryArtifact,
+   type TestMethodLookupResult,
+   type TestMethodSummaryArtifact,
    type CriterionLookupKey,
    type CriterionShowResult,
    type EvidenceStrategy,
@@ -15,17 +15,17 @@ import {
    WcagEngineNotFoundError,
    WcagEngineValidationError,
    getAxeRule,
-   getCoverage,
-   getCoverageSummary,
-   getCriterionApplicability,
+   getTestMethod,
+   getTestMethodSummary,
+   getCriterionRelevance,
    getTechnique,
    getUnderstanding,
-   listApplicableCriteria,
+   listRelevantCriteria,
    listCriteriaByLevel,
    searchCriteria,
 } from '@a11ied/wcag-engine';
 
-import { deriveApplicabilityInputFromHtml } from '../applicability/html.js';
+import { scanHtmlForPageSignals } from '../relevance/html.js';
 import { CliEnvironmentError, CliUsageError } from '../errors/cli-errors.js';
 import {
    resolveDocumentTarget,
@@ -88,20 +88,20 @@ export function listWcagCriteria(
    }
 }
 
-/** Returns the pinned coverage totals per conformance level for one WCAG version. */
-export function showWcagCoverageSummary(version: string): CoverageSummaryArtifact {
-   return getCoverageSummary({ version: parseWcagVersion(version) });
+/** Returns the pinned test method counts per conformance level for one WCAG version. */
+export function showWcagTestMethodSummary(version: string): TestMethodSummaryArtifact {
+   return getTestMethodSummary({ version: parseWcagVersion(version) });
 }
 
-/** Returns coverage and testing-strategy metadata for one criterion. */
-export function showWcagCoverage(
+/** Returns the test method record and testing strategy for one criterion. */
+export function showWcagTestMethod(
    lookupKey: CriterionLookupKey,
    version: string,
-): CoverageLookupResult {
+): TestMethodLookupResult {
    const parsedVersion = parseWcagVersion(version);
 
    try {
-      return getCoverage(lookupKey, { version: parsedVersion });
+      return getTestMethod(lookupKey, { version: parsedVersion });
    } catch (error) {
       normalizeEngineError(error);
    }
@@ -134,17 +134,17 @@ function findUnderstanding(
 
 /**
  * Resolves one criterion by id or slug for the requested WCAG version, together with its
- * coverage state, testing strategy, and a short excerpt of its Understanding document.
- * Print the full document with `a1 wcag understanding <id>`.
+ * test method, testing strategy, and a short excerpt of its Understanding document. Print
+ * the full document with `a1 wcag understanding <id>`.
  */
 export function showWcagCriterion(
    lookupKey: CriterionLookupKey,
    version: string,
 ): CriterionShowResult {
-   const coverage = showWcagCoverage(lookupKey, version);
-   const understanding = findUnderstanding(lookupKey, coverage.criterion.wcagVersion);
+   const testMethod = showWcagTestMethod(lookupKey, version);
+   const understanding = findUnderstanding(lookupKey, testMethod.criterion.wcagVersion);
    return {
-      ...coverage,
+      ...testMethod,
       understandingExcerpt: understanding.excerpt,
       understandingSource: understanding.source,
    };
@@ -244,38 +244,38 @@ function listStrategies(
    return Object.fromEntries(
       criterionIds.map((criterionId) => [
          criterionId,
-         getCoverage(criterionId, { version }).strategy,
+         getTestMethod(criterionId, { version }).strategy,
       ]),
    );
 }
 
-interface InspectApplicableTargetResult {
+interface InspectRelevantCriteriaTargetResult {
    version: WcagVersion;
    target: { kind: string; value: string };
-   signals: ReturnType<typeof deriveApplicabilityInputFromHtml>['signals'];
-   matrix: ReturnType<typeof listApplicableCriteria>;
+   signals: ReturnType<typeof scanHtmlForPageSignals>['signals'];
+   matrix: ReturnType<typeof listRelevantCriteria>;
    strategies: Record<string, EvidenceStrategy>;
 }
 
 /**
- * Runs applicability analysis for a resolved target input. The result carries the testing
- * strategy of every assessed criterion so renderers can name the next command.
+ * Runs the relevant criteria scan for a resolved target input. The result carries the
+ * testing strategy of every assessed criterion so renderers can name the next command.
  */
-export async function inspectApplicableTarget(
+export async function inspectRelevantCriteriaTarget(
    targetInput: ResolveDocumentTargetInput,
    version: string,
-): Promise<InspectApplicableTargetResult> {
+): Promise<InspectRelevantCriteriaTargetResult> {
    const parsedVersion = parseWcagVersion(version);
    const resolved = await resolveDocumentTarget(targetInput);
    const html = await resolved.readHtml();
-   const input = deriveApplicabilityInputFromHtml(resolved.target.value, html, {
+   const input = scanHtmlForPageSignals(resolved.target.value, html, {
       target: resolved.target,
       metadata: resolved.metadata,
       userHints: resolved.userHints,
    });
 
    try {
-      const matrix = listApplicableCriteria(input, { version: parsedVersion });
+      const matrix = listRelevantCriteria(input, { version: parsedVersion });
       return {
          version: parsedVersion,
          target: input.target,
@@ -288,37 +288,37 @@ export async function inspectApplicableTarget(
    }
 }
 
-/** Runs applicability analysis for one live URL target. */
-export async function inspectApplicableUrl(
+/** Runs the relevant criteria scan for one live URL target. */
+export async function inspectRelevantCriteriaUrl(
    url: string,
    version: string,
-): Promise<InspectApplicableTargetResult> {
-   return inspectApplicableTarget({ url }, version);
+): Promise<InspectRelevantCriteriaTargetResult> {
+   return inspectRelevantCriteriaTarget({ url }, version);
 }
 
-type CriterionApplicabilityResult = ReturnType<typeof getCriterionApplicability> & {
-   signals: ReturnType<typeof deriveApplicabilityInputFromHtml>['signals'];
+type CriterionRelevanceResult = ReturnType<typeof getCriterionRelevance> & {
+   signals: ReturnType<typeof scanHtmlForPageSignals>['signals'];
    strategy: EvidenceStrategy;
 };
 
-/** Explains the applicability state of one criterion for a resolved target. */
+/** Explains the relevance state of one criterion for a resolved target. */
 export async function inspectCriterionTarget(
    lookupKey: CriterionLookupKey,
    targetInput: ResolveDocumentTargetInput,
    version: string,
-): Promise<CriterionApplicabilityResult> {
+): Promise<CriterionRelevanceResult> {
    const parsedVersion = parseWcagVersion(version);
    let strategy: EvidenceStrategy | undefined = undefined;
 
    try {
-      strategy = getCoverage(lookupKey, { version: parsedVersion }).strategy;
+      strategy = getTestMethod(lookupKey, { version: parsedVersion }).strategy;
    } catch (error) {
       normalizeEngineError(error);
    }
 
    const resolved = await resolveDocumentTarget(targetInput);
    const html = await resolved.readHtml();
-   const input = deriveApplicabilityInputFromHtml(resolved.target.value, html, {
+   const input = scanHtmlForPageSignals(resolved.target.value, html, {
       target: resolved.target,
       metadata: resolved.metadata,
       userHints: resolved.userHints,
@@ -326,7 +326,7 @@ export async function inspectCriterionTarget(
 
    try {
       return {
-         ...getCriterionApplicability(lookupKey, input, { version: parsedVersion }),
+         ...getCriterionRelevance(lookupKey, input, { version: parsedVersion }),
          signals: input.signals,
          strategy,
       };
@@ -335,11 +335,11 @@ export async function inspectCriterionTarget(
    }
 }
 
-/** Explains the applicability state of one criterion for a live URL target. */
+/** Explains the relevance state of one criterion for a live URL target. */
 export async function inspectCriterionUrl(
    lookupKey: CriterionLookupKey,
    url: string,
    version: string,
-): Promise<CriterionApplicabilityResult> {
+): Promise<CriterionRelevanceResult> {
    return inspectCriterionTarget(lookupKey, { url }, version);
 }

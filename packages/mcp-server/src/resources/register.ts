@@ -3,7 +3,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import {
    SUPPORTED_WCAG_VERSIONS,
-   buildCoverageResource,
+   buildTestMethodResource,
    buildCriteriaResource,
    buildLevelsResource,
    createJsonResource,
@@ -11,7 +11,7 @@ import {
 } from '../lib/shared.js';
 
 interface VersionedResourceDefinition {
-   key: 'criteria' | 'levels' | 'coverage';
+   key: 'criteria' | 'levels' | 'test-methods';
    title: (version: SupportedWcagVersion) => string;
    description: string;
    buildPayload: (version: SupportedWcagVersion) => unknown;
@@ -31,11 +31,10 @@ const versionedResourceDefinitions: VersionedResourceDefinition[] = [
       buildPayload: buildLevelsResource,
    },
    {
-      key: 'coverage',
-      title: (version) => `WCAG ${version} coverage`,
-      description:
-         'Read-only coverage lookup data for every criterion in a WCAG version.',
-      buildPayload: buildCoverageResource,
+      key: 'test-methods',
+      title: (version) => `WCAG ${version} test methods`,
+      description: 'Read-only test method for every criterion in a WCAG version.',
+      buildPayload: buildTestMethodResource,
    },
 ];
 

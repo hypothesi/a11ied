@@ -17,11 +17,11 @@ a1 doctor                          # check this machine, list missing setup step
 a1 doctor --strict                 # same, exit 3 while a required step is missing
 a1 setup                           # run the Guidepup setup steps, then re-check
 a1 wcag                            # interactive WCAG finder (terminal only)
-a1 wcag 4.1.3 --json               # look up a criterion with techniques, failures, and coverage
+a1 wcag 4.1.3 --json               # look up a criterion with techniques, failures, and test method
 a1 wcag rule color-contrast        # map an axe rule to its criteria and fixes
 a1 axe <url> --json                # run axe-core scan against a URL, file, - for stdin, or --html
 a1 tree <url> --json               # print the accessibility tree for a target
-a1 audit <url> --json              # run axe, tree, and applicability together
+a1 audit <url> --json              # run axe, tree, and the relevant criteria scan together
 a1 sr start <url> --json           # start the screen reader session on a page
 a1 sr next --json                  # move to the next item
 a1 sr read --json                  # read the current item

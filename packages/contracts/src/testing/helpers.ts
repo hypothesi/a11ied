@@ -5,9 +5,9 @@ import { expect } from 'vitest';
 
 import {
    actRuleIndexArtifactSchema,
-   coverageArtifactSchema,
-   coverageLookupResultSchema,
-   coverageSummaryArtifactSchema,
+   testMethodArtifactSchema,
+   testMethodLookupResultSchema,
+   testMethodSummaryArtifactSchema,
    criteriaByLevelArtifactSchema,
    criteriaByLevelResultSchema,
    criterionLookupResultSchema,
@@ -31,9 +31,9 @@ export const EXPECTED_LOG_CURSOR = 2;
 interface VersionArtifacts {
    criteria: ReturnType<typeof normalizedCriteriaArtifactSchema.parse>;
    levels: ReturnType<typeof criteriaByLevelArtifactSchema.parse>;
-   coverage: ReturnType<typeof coverageArtifactSchema.parse>;
+   testMethods: ReturnType<typeof testMethodArtifactSchema.parse>;
    strategy: ReturnType<typeof strategyArtifactSchema.parse>;
-   summary: ReturnType<typeof coverageSummaryArtifactSchema.parse>;
+   summary: ReturnType<typeof testMethodSummaryArtifactSchema.parse>;
 }
 
 async function loadVersionArtifacts(version: '2.2' | '2.1'): Promise<VersionArtifacts> {
@@ -43,26 +43,26 @@ async function loadVersionArtifacts(version: '2.2' | '2.1'): Promise<VersionArti
    const levels = criteriaByLevelArtifactSchema.parse(
       await loadGeneratedJson(`criteria-by-level.${version}.json`),
    );
-   const coverage = coverageArtifactSchema.parse(
-      await loadGeneratedJson(`coverage.${version}.json`),
+   const testMethods = testMethodArtifactSchema.parse(
+      await loadGeneratedJson(`test-methods.${version}.json`),
    );
    const strategy = strategyArtifactSchema.parse(
       await loadGeneratedJson(`strategy.${version}.json`),
    );
-   const summary = coverageSummaryArtifactSchema.parse(
-      await loadGeneratedJson(`coverage-summary.${version}.json`),
+   const summary = testMethodSummaryArtifactSchema.parse(
+      await loadGeneratedJson(`test-method-summary.${version}.json`),
    );
-   return { criteria, levels, coverage, strategy, summary };
+   return { criteria, levels, testMethods, strategy, summary };
 }
 
 function assertVersionFields(version: '2.2' | '2.1', artifacts: VersionArtifacts): void {
    expect(artifacts.criteria.version).toBe(version);
    expect(artifacts.levels.version).toBe(version);
-   expect(artifacts.coverage.version).toBe(version);
+   expect(artifacts.testMethods.version).toBe(version);
    expect(artifacts.strategy.version).toBe(version);
    expect(artifacts.summary.version).toBe(version);
    expect(structuredClone(artifacts.criteria)).toEqual(artifacts.criteria);
-   expect(structuredClone(artifacts.coverage)).toEqual(artifacts.coverage);
+   expect(structuredClone(artifacts.testMethods)).toEqual(artifacts.testMethods);
    expect(structuredClone(artifacts.strategy)).toEqual(artifacts.strategy);
    expect(structuredClone(artifacts.summary)).toEqual(artifacts.summary);
 }
@@ -119,7 +119,7 @@ export function createStatePayload(): TestPayload {
 
 interface EngineTestArtifacts {
    criteriaArtifact: ReturnType<typeof normalizedCriteriaArtifactSchema.parse>;
-   coverageArtifact: ReturnType<typeof coverageArtifactSchema.parse>;
+   testMethodArtifact: ReturnType<typeof testMethodArtifactSchema.parse>;
    strategyArtifact: ReturnType<typeof strategyArtifactSchema.parse>;
    levelsArtifact: ReturnType<typeof criteriaByLevelArtifactSchema.parse>;
    actRuleIndexArtifact: ReturnType<typeof actRuleIndexArtifactSchema.parse>;
@@ -129,8 +129,8 @@ export async function loadEngineTestArtifacts(): Promise<EngineTestArtifacts> {
    const criteriaArtifact = normalizedCriteriaArtifactSchema.parse(
       await loadGeneratedJson('criteria.2.2.json'),
    );
-   const coverageArtifact = coverageArtifactSchema.parse(
-      await loadGeneratedJson('coverage.2.2.json'),
+   const testMethodArtifact = testMethodArtifactSchema.parse(
+      await loadGeneratedJson('test-methods.2.2.json'),
    );
    const strategyArtifact = strategyArtifactSchema.parse(
       await loadGeneratedJson('strategy.2.2.json'),
@@ -143,7 +143,7 @@ export async function loadEngineTestArtifacts(): Promise<EngineTestArtifacts> {
    );
    return {
       criteriaArtifact,
-      coverageArtifact,
+      testMethodArtifact,
       strategyArtifact,
       levelsArtifact,
       actRuleIndexArtifact,
@@ -177,30 +177,30 @@ function assertCriterionAndLevelLookups(artifacts: EngineTestArtifacts): void {
    expect(tagLookup.tags.length).toBeGreaterThan(0);
 }
 
-function assertCoverageLookups(artifacts: EngineTestArtifacts): void {
+function assertTestMethodLookups(artifacts: EngineTestArtifacts): void {
    const criterion = artifacts.criteriaArtifact.criteria['4.1.3'];
-   const coverage = artifacts.coverageArtifact.coverage['4.1.3'];
+   const testMethod = artifacts.testMethodArtifact.testMethods['4.1.3'];
    const strategy = artifacts.strategyArtifact.strategies['4.1.3'];
-   const actRules = (coverage?.actRuleIds ?? []).map(
+   const actRules = (testMethod?.actRuleIds ?? []).map(
       (ruleId) => artifacts.actRuleIndexArtifact.rules[ruleId],
    );
-   const coverageLookup = coverageLookupResultSchema.parse({
+   const testMethodLookup = testMethodLookupResultSchema.parse({
       lookupKey: '4.1.3',
       criterion,
-      coverage,
+      testMethod,
       strategy,
       actRules,
    });
-   expect(coverageLookup.coverage.coverageState).toBe('hybrid');
-   expect(coverageLookup.strategy.procedureIds).toContain('status_message_probe');
-   expect(coverageLookup.actRules.map((rule) => rule.ruleId)).toEqual(
-      coverageLookup.coverage.actRuleIds,
+   expect(testMethodLookup.testMethod.method).toBe('hybrid');
+   expect(testMethodLookup.strategy.procedureIds).toContain('status_message_probe');
+   expect(testMethodLookup.actRules.map((rule) => rule.ruleId)).toEqual(
+      testMethodLookup.testMethod.actRuleIds,
    );
 }
 
 export function assertLookupPayloads(artifacts: EngineTestArtifacts): void {
    assertCriterionAndLevelLookups(artifacts);
-   assertCoverageLookups(artifacts);
+   assertTestMethodLookups(artifacts);
 }
 
 export function createTestCriterionArtifactPayload(): TestPayload {
@@ -256,7 +256,7 @@ export function createSearchResponsePayload(): TestPayload {
    };
 }
 
-export function createApplicabilityInputPayload(): TestPayload {
+export function createPageScanPayload(): TestPayload {
    return {
       target: { kind: 'url', value: 'https://example.test/status' },
       signals: [
@@ -278,7 +278,7 @@ export function createApplicabilityInputPayload(): TestPayload {
    };
 }
 
-export function createApplicabilityMatrixPayload(
+export function createRelevanceMatrixPayload(
    target: Record<string, unknown>,
 ): TestPayload {
    return {
@@ -288,7 +288,7 @@ export function createApplicabilityMatrixPayload(
          '4.1.3': {
             criterionId: '4.1.3',
             title: 'Status Messages',
-            state: 'applicable',
+            state: 'relevant',
             reasons: ['Detected a live region and a status-update signal.'],
             matchedSignalCategories: ['live-region', 'form'],
             matchedTags: ['forms', 'messaging'],

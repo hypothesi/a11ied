@@ -297,7 +297,7 @@ function registerAuditTool(server: McpServer): void {
          title: 'Audit',
          description:
             'Run the full audit loop against a target: an http(s) URL, a local file path (target), or inline HTML (html). ' +
-            'Runs axe against every mapped rule, an accessibility tree summary, WCAG applicability, and a per-criterion rollup. ' +
+            'Runs axe against every mapped rule, an accessibility tree summary, the relevant criteria scan, and a per-criterion rollup. ' +
             'The result carries verdict.passed and nextCommands, and the tool returns exitCode 4 (the CLI assertion exit code) ' +
             'when an axe violation at or above failOn is not covered by baseline, and 0 otherwise. Run this after any component change.',
          inputSchema: auditInputSchema,

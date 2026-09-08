@@ -125,10 +125,10 @@ async function resolveProcedureId(
       return options.procedure;
    }
 
-   const { getCoverage, WcagEngineNotFoundError } = await import('@a11ied/wcag-engine');
+   const { getTestMethod, WcagEngineNotFoundError } = await import('@a11ied/wcag-engine');
    try {
       const lookupOptions = options.wcag === undefined ? {} : { version: options.wcag };
-      const { procedureIds } = getCoverage(criterionId, lookupOptions).strategy;
+      const { procedureIds } = getTestMethod(criterionId, lookupOptions).strategy;
       const performable = procedureIds.find((id) => id !== AUTOMATED_PROCEDURE_ID);
       return performable ?? DEFAULT_PROCEDURE_ID;
    } catch (error) {

@@ -17,19 +17,21 @@ import {
    assertRawAndGeneratedValidation,
    createFetchImpl,
    createTestDirectories,
-   EXPECTED_22_COVERAGE_COUNTS,
+   EXPECTED_22_TEST_METHOD_COUNTS,
    EXPECTED_CRITERIA_COUNTS_BY_VERSION,
-   EXPECTED_COVERAGE_COUNTS_BY_VERSION,
+   EXPECTED_TEST_METHOD_COUNTS_BY_VERSION,
    EXPECTED_GENERATED_ARTIFACT_COUNT,
    SYNC_TIMESTAMP,
 } from './testing/helpers.js';
 
 function assertGeneratedCriteriaCounts(result: {
    criteriaCountByVersion: Record<string, number>;
-   coverageCountsByVersion: Record<string, Record<string, number>>;
+   testMethodCountsByVersion: Record<string, Record<string, number>>;
 }): void {
    expect(result.criteriaCountByVersion).toEqual(EXPECTED_CRITERIA_COUNTS_BY_VERSION);
-   expect(result.coverageCountsByVersion).toEqual(EXPECTED_COVERAGE_COUNTS_BY_VERSION);
+   expect(result.testMethodCountsByVersion).toEqual(
+      EXPECTED_TEST_METHOD_COUNTS_BY_VERSION,
+   );
 }
 
 function assertGeneratedEntriesAreComplete(generatedEntries: string[]): void {
@@ -37,8 +39,8 @@ function assertGeneratedEntriesAreComplete(generatedEntries: string[]): void {
       expect.arrayContaining([
          'criteria.2.2.json',
          'criteria-by-level.2.2.json',
-         'coverage.2.2.json',
-         'coverage-summary.2.2.json',
+         'test-methods.2.2.json',
+         'test-method-summary.2.2.json',
          'strategy.2.2.json',
          'slug-index.2.2.json',
          'technique-index.2.2.json',
@@ -47,8 +49,8 @@ function assertGeneratedEntriesAreComplete(generatedEntries: string[]): void {
          'act-rules.2.2.json',
          'criteria.2.1.json',
          'criteria-by-level.2.1.json',
-         'coverage.2.1.json',
-         'coverage-summary.2.1.json',
+         'test-methods.2.1.json',
+         'test-method-summary.2.1.json',
          'strategy.2.1.json',
          'slug-index.2.1.json',
          'technique-index.2.1.json',
@@ -85,7 +87,7 @@ function assertProvenanceSourceUrls(manifest: {
       'https://www.w3.org/WAI/WCAG22/wcag.json',
    ]);
    expect(
-      manifest.artifacts.find((entry) => entry.fileName === 'coverage.2.2.json')
+      manifest.artifacts.find((entry) => entry.fileName === 'test-methods.2.2.json')
          ?.sourceUrls,
    ).toEqual([
       'https://raw.githubusercontent.com/w3c/wai-wcag-quickref/main/_data/tags-sc.yml',
@@ -148,27 +150,27 @@ async function assertActRuleIndexIsCorrect(
    });
 }
 
-async function assertCoverageArtifactIsCorrect(
+async function assertTestMethodArtifactIsCorrect(
    directories: WcagDataDirectories,
 ): Promise<void> {
-   const coverageArtifact = JSON.parse(
-      await readFile(join(directories.generated, 'coverage.2.2.json'), 'utf8'),
+   const testMethodArtifact = JSON.parse(
+      await readFile(join(directories.generated, 'test-methods.2.2.json'), 'utf8'),
    ) as {
-      coverage: Record<
+      testMethods: Record<
          string,
-         { coverageState: string; actRuleIds: string[]; axeRuleIds: string[] }
+         { method: string; actRuleIds: string[]; axeRuleIds: string[] }
       >;
    };
-   expect(coverageArtifact.coverage['2.5.8']).toMatchObject({
-      coverageState: 'automated',
+   expect(testMethodArtifact.testMethods['2.5.8']).toMatchObject({
+      method: 'automated',
    });
-   expect(coverageArtifact.coverage['2.4.7']).toMatchObject({
-      coverageState: 'hybrid',
+   expect(testMethodArtifact.testMethods['2.4.7']).toMatchObject({
+      method: 'hybrid',
       actRuleIds: ['09f0ab'],
       axeRuleIds: [],
    });
-   expect(coverageArtifact.coverage['3.3.8']).toMatchObject({ coverageState: 'manual' });
-   expect(coverageArtifact.coverage['4.1.3']).toMatchObject({ coverageState: 'hybrid' });
+   expect(testMethodArtifact.testMethods['3.3.8']).toMatchObject({ method: 'manual' });
+   expect(testMethodArtifact.testMethods['4.1.3']).toMatchObject({ method: 'hybrid' });
 }
 
 function assertStrategyEntries(strategyArtifact: {
@@ -198,11 +200,11 @@ function assertSummaryTotals(summaryArtifact: {
 }): void {
    expect(summaryArtifact.totals).toMatchObject({
       criteria:
-         EXPECTED_22_COVERAGE_COUNTS.automated +
-         EXPECTED_22_COVERAGE_COUNTS.hybrid +
-         EXPECTED_22_COVERAGE_COUNTS.manual +
-         EXPECTED_22_COVERAGE_COUNTS.unknown,
-      ...EXPECTED_22_COVERAGE_COUNTS,
+         EXPECTED_22_TEST_METHOD_COUNTS.automated +
+         EXPECTED_22_TEST_METHOD_COUNTS.hybrid +
+         EXPECTED_22_TEST_METHOD_COUNTS.manual +
+         EXPECTED_22_TEST_METHOD_COUNTS.unknown,
+      ...EXPECTED_22_TEST_METHOD_COUNTS,
    });
    expect(summaryArtifact.representativeCriterionIds.hybrid).toEqual([
       '2.4.1',
@@ -227,7 +229,7 @@ async function assertStrategyAndSummaryArtifacts(
       >;
    };
    const summaryArtifact = JSON.parse(
-      await readFile(join(directories.generated, 'coverage-summary.2.2.json'), 'utf8'),
+      await readFile(join(directories.generated, 'test-method-summary.2.2.json'), 'utf8'),
    ) as {
       totals: Record<string, number>;
       representativeCriterionIds: Record<string, string[]>;
@@ -272,7 +274,7 @@ describe('wcag-data normalization / artifact generation', () => {
       assertGeneratedCriteriaCounts(result);
       assertGeneratedEntriesAreComplete(generatedEntries);
       await assertProvenanceManifestIsCorrect(directories);
-      await assertCoverageArtifactIsCorrect(directories);
+      await assertTestMethodArtifactIsCorrect(directories);
       await assertAxeRuleIndexIsCorrect(directories);
       await assertActRuleIndexIsCorrect(directories);
       await assertStrategyAndSummaryArtifacts(directories);

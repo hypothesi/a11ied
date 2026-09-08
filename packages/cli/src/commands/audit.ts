@@ -33,7 +33,7 @@ function buildAuditCommand(program: Command): Command {
                      .summary('Scan a page and list what to fix.')
                      .description(
                         'Run the full audit loop against a target: axe, an ' +
-                           'accessibility tree summary, WCAG applicability, and a ' +
+                           'accessibility tree summary, the relevant criteria scan, and a ' +
                            'criterion rollup.',
                      )
                      .addHelpText('after', AUDIT_EXAMPLES)

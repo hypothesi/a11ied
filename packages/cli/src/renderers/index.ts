@@ -3,7 +3,7 @@ export { renderTreeText } from './tree.js';
 export { renderAuditText } from './audit.js';
 export { renderDoctorEnvelopeText } from './doctor.js';
 export {
-   renderCoverageSummaryText,
+   renderTestMethodSummaryText,
    renderCriteriaText,
    renderSearchText,
 } from './wcag.js';

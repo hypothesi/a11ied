@@ -1,6 +1,6 @@
 ---
 name: a11ied
-description: Use when you need to plan, script, or execute accessibility checks with the a11ied CLI or MCP server. Run the dev loop after a component change, use axe for automated coverage, and use the screen reader for behavior axe cannot see. Keep automated results, screen reader transcripts, and manual judgment separate.
+description: Use when you need to plan, script, or execute accessibility checks with the a11ied CLI or MCP server. Run the dev loop after a component change, use axe for the automated checks, and use the screen reader for behavior axe cannot see. Keep automated results, screen reader transcripts, and manual judgment separate.
 ---
 
 # a11ied
@@ -24,7 +24,7 @@ a1 audit http://localhost:3000/the/route/you/changed
 reader target). Fix that first. Every other command depends on it.
 
 `audit <target>` runs axe against every mapped rule, prints an accessibility tree
-summary, checks WCAG applicability, and rolls the result up by criterion. It exits 4 when
+summary, lists the relevant criteria, and rolls the result up by criterion. It exits 4 when
 an axe violation was found. Read the `nextCommands` field in its output: it lists the
 exact `a1 wcag rule <id>` and `a1 sr walk <target>` commands to run next.
 
@@ -46,22 +46,22 @@ a1 wcag search "focus order"
 a1 wcag rule color-contrast
 ```
 
-`a1 wcag <id-or-slug>` prints the normative text, techniques, failures, and coverage
-state. `a1 wcag search <query>` finds the id when you only have a description. `a1 wcag
+`a1 wcag <id-or-slug>` prints the normative text, techniques, failures, and test
+method. `a1 wcag search <query>` finds the id when you only have a description. `a1 wcag
 rule <axe-rule-id>` maps an axe violation back to the criteria it covers and axe's fix
 text, which is the last command `audit`'s `nextCommands` field names for a violation.
 
-## Evidence modes
+## Test methods
 
-Every criterion's coverage state names how much a tool can decide on its own:
+Every criterion has a test method, which says how much a tool can decide on its own:
 
-- automated: the runtime can render a verdict directly (most axe-mapped criteria)
-- hybrid: the runtime gathers evidence but a person judges part of it (most screen
+- automated: axe rules decide the criterion (most axe-mapped criteria)
+- hybrid: the automated checks run first and a person decides the rest (most screen
   reader checks)
-- manual: the runtime can explain the criterion but cannot finish the call alone
+- manual: the tool prints the requirement and the techniques, and a person tests it
 
-Report which mode produced a result. A passing `a1 audit` run covers the automated
-criteria only. Do not describe it as full WCAG conformance.
+Report the test method next to every result. A passing `a1 audit` run decides the
+automated criteria only. Do not describe it as full WCAG conformance.
 
 ## Screen reader recipe
 
@@ -163,7 +163,7 @@ one copy-pasteable page.
 - Do not claim full WCAG compliance from an automated result alone.
 - Do not confuse raw driver transcripts with WCAG claims. A transcript is what the
   reader said. A criterion pass or fail is a judgment made from it.
-- Do not skip applicability and jump straight from a target to a compliance claim. Run
-  `a1 audit` or check the criterion's coverage state first.
+- Do not skip the relevant criteria scan and jump straight from a target to a compliance
+  claim. Run `a1 audit` or look up the criterion's test method first.
 - Do not leave a screen reader session open. Call `a1 sr stop` before the task ends.
-- State the evidence mode (automated, hybrid, manual) next to every claim.
+- State the test method (automated, hybrid, manual) next to every claim.

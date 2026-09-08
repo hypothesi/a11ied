@@ -1,6 +1,6 @@
-import type { CoverageState, NormalizedCriteriaArtifact } from '@a11ied/contracts';
+import type { TestMethod, NormalizedCriteriaArtifact } from '@a11ied/contracts';
 
-import type { CoverageEntry } from './build.js';
+import type { TestMethodEntry } from './build.js';
 
 const LEVEL_A = 'A' as const;
 
@@ -16,7 +16,7 @@ function emptyBucket(): {
 
 function accumulateBucket(
    bucket: ReturnType<typeof emptyBucket>,
-   state: CoverageState,
+   state: TestMethod,
 ): void {
    bucket.criteria += 1;
    bucket[state] += 1;
@@ -30,12 +30,12 @@ function initByLevel(): Record<string, ReturnType<typeof emptyBucket>> {
    };
 }
 
-function initCriteriaByState(): Record<CoverageState, string[]> {
+function initCriteriaByState(): Record<TestMethod, string[]> {
    return { automated: [], hybrid: [], manual: [], unknown: [] };
 }
 
 function accumulateToolOverlap(
-   entry: CoverageEntry,
+   entry: TestMethodEntry,
    result: { withAxe: number; withAct: number; withBoth: number },
 ): void {
    const hasAxe = entry.axeRuleIds.length > 0;
@@ -53,11 +53,11 @@ function accumulateToolOverlap(
 
 function countToolOverlap(input: {
    criteriaArtifact: NormalizedCriteriaArtifact;
-   coverage: Record<string, CoverageEntry>;
+   testMethods: Record<string, TestMethodEntry>;
 }): { withAxe: number; withAct: number; withBoth: number } {
    const result = { withAxe: 0, withAct: 0, withBoth: 0 };
    for (const criterion of Object.values(input.criteriaArtifact.criteria)) {
-      const entry = input.coverage[criterion.id];
+      const entry = input.testMethods[criterion.id];
       if (entry) {
          accumulateToolOverlap(entry, result);
       }
@@ -65,31 +65,31 @@ function countToolOverlap(input: {
    return result;
 }
 
-function accumulateCriterionCoverage(
+function accumulateCriterionTestMethod(
    criterion: { id: string; level: string },
-   entry: CoverageEntry,
+   entry: TestMethodEntry,
    accumulators: {
       totals: ReturnType<typeof emptyBucket>;
       byLevel: Record<string, ReturnType<typeof emptyBucket>>;
-      criteriaByState: Record<CoverageState, string[]>;
+      criteriaByState: Record<TestMethod, string[]>;
    },
 ): void {
-   accumulateBucket(accumulators.totals, entry.coverageState);
+   accumulateBucket(accumulators.totals, entry.method);
    const levelBucket = accumulators.byLevel[criterion.level];
    if (!levelBucket) {
-      throw new Error(`missing coverage bucket for level ${criterion.level}`);
+      throw new Error(`missing test method bucket for level ${criterion.level}`);
    }
-   accumulateBucket(levelBucket, entry.coverageState);
-   accumulators.criteriaByState[entry.coverageState].push(criterion.id);
+   accumulateBucket(levelBucket, entry.method);
+   accumulators.criteriaByState[entry.method].push(criterion.id);
 }
 
 export function buildSummaryTotals(input: {
    criteriaArtifact: NormalizedCriteriaArtifact;
-   coverage: Record<string, CoverageEntry>;
+   testMethods: Record<string, TestMethodEntry>;
 }): {
    totals: ReturnType<typeof emptyBucket>;
    byLevel: Record<string, ReturnType<typeof emptyBucket>>;
-   criteriaByState: Record<CoverageState, string[]>;
+   criteriaByState: Record<TestMethod, string[]>;
    withAxe: number;
    withAct: number;
    withBoth: number;
@@ -98,11 +98,15 @@ export function buildSummaryTotals(input: {
    const byLevel = initByLevel();
    const criteriaByState = initCriteriaByState();
    for (const criterion of Object.values(input.criteriaArtifact.criteria)) {
-      const entry = input.coverage[criterion.id];
+      const entry = input.testMethods[criterion.id];
       if (!entry) {
-         throw new Error(`missing coverage entry for ${criterion.id}`);
+         throw new Error(`missing test method entry for ${criterion.id}`);
       }
-      accumulateCriterionCoverage(criterion, entry, { totals, byLevel, criteriaByState });
+      accumulateCriterionTestMethod(criterion, entry, {
+         totals,
+         byLevel,
+         criteriaByState,
+      });
    }
    const overlap = countToolOverlap(input);
    return { totals, byLevel, criteriaByState, ...overlap };

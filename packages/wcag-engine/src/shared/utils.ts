@@ -1,13 +1,13 @@
 import type {
-   ApplicabilityElement,
-   ApplicabilitySignal,
-   ApplicabilitySignalCategory,
-   CriterionApplicability,
+   PageElement,
+   PageSignal,
+   PageSignalCategory,
+   CriterionRelevance,
    NormalizedCriterion,
 } from '@a11ied/contracts';
 
 import {
-   applicabilitySignalTagHints,
+   pageSignalTagHints,
    directCriterionCategoryHints,
    interactiveFallbackTags,
 } from './data.js';
@@ -23,11 +23,9 @@ export function dedupe<TValue>(values: TValue[]): TValue[] {
  * Merges the elements behind a set of signals, keeping document order and dropping
  * repeats.
  */
-export function collectSignalElements(
-   signals: ApplicabilitySignal[],
-): ApplicabilityElement[] {
+export function collectSignalElements(signals: PageSignal[]): PageElement[] {
    const seen = new Set<string>();
-   const elements: ApplicabilityElement[] = [];
+   const elements: PageElement[] = [];
 
    for (const element of signals.flatMap((signal) => signal.elements ?? [])) {
       if (seen.has(element.xpath)) {
@@ -60,7 +58,7 @@ export function formatList(values: string[]): string {
 export function buildNotDetected(
    criterion: NormalizedCriterion,
    reason: string,
-): CriterionApplicability {
+): CriterionRelevance {
    return {
       criterionId: criterion.id,
       title: criterion.title,
@@ -74,11 +72,11 @@ export function buildNotDetected(
 
 export function getMatchedCategories(
    criterion: NormalizedCriterion,
-   signals: ApplicabilitySignal[],
-): ApplicabilitySignalCategory[] {
+   signals: PageSignal[],
+): PageSignalCategory[] {
    const categories = dedupe(signals.map((signal) => signal.category));
    const tagDriven = categories.filter((category) =>
-      applicabilitySignalTagHints[category].some((tag) => criterion.tags.includes(tag)),
+      pageSignalTagHints[category].some((tag) => criterion.tags.includes(tag)),
    );
    const direct = (directCriterionCategoryHints[criterion.id] ?? []).filter((category) =>
       categories.includes(category),
@@ -89,13 +87,11 @@ export function getMatchedCategories(
 
 export function getMatchedTags(
    criterion: NormalizedCriterion,
-   matchedCategories: ApplicabilitySignalCategory[],
+   matchedCategories: PageSignalCategory[],
 ): string[] {
    return dedupe(
       matchedCategories.flatMap((category) =>
-         applicabilitySignalTagHints[category].filter((tag) =>
-            criterion.tags.includes(tag),
-         ),
+         pageSignalTagHints[category].filter((tag) => criterion.tags.includes(tag)),
       ),
    );
 }
@@ -103,8 +99,8 @@ export function getMatchedTags(
 export function getInteractiveUnknownAssessment(
    criterion: NormalizedCriterion,
    matchedTags: string[],
-   elements: ApplicabilityElement[],
-): CriterionApplicability | undefined {
+   elements: PageElement[],
+): CriterionRelevance | undefined {
    const criterionLooksInteractive = criterion.tags.some((tag) =>
       interactiveFallbackTags.has(tag),
    );
@@ -118,7 +114,7 @@ export function getInteractiveUnknownAssessment(
       title: criterion.title,
       state: 'unknown',
       reasons: [
-         `Detected a custom widget signal, but no recognized form, dialog, media, menu, or authentication-flow signals. Applicability for this interactive criterion stays unresolved.`,
+         `Detected a custom widget signal, but no recognized form, dialog, media, menu, or authentication-flow signals. Relevance for this interactive criterion stays unresolved.`,
       ],
       matchedSignalCategories: ['widget'],
       matchedTags,

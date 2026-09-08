@@ -2,7 +2,7 @@ export const committedArtifactRegressionFixture = {
    versions: {
       '2.2': {
          criteriaCount: 86,
-         coverageTotals: {
+         testMethodTotals: {
             criteria: 86,
             automated: 28,
             hybrid: 10,
@@ -12,7 +12,7 @@ export const committedArtifactRegressionFixture = {
       },
       '2.1': {
          criteriaCount: 78,
-         coverageTotals: {
+         testMethodTotals: {
             criteria: 78,
             automated: 28,
             hybrid: 6,
@@ -33,7 +33,7 @@ export const committedArtifactRegressionFixture = {
          'https://raw.githubusercontent.com/w3c/wai-wcag-quickref/main/_data/tags-sc.yml',
          'https://www.w3.org/WAI/WCAG22/wcag.json',
       ],
-      coverage22SourceUrls: [
+      testMethods22SourceUrls: [
          'https://raw.githubusercontent.com/w3c/wai-wcag-quickref/main/_data/tags-sc.yml',
          'https://raw.githubusercontent.com/w3c/wcag/main/guidelines/act-mapping.json',
          'https://www.w3.org/WAI/WCAG22/wcag.json',

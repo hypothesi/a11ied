@@ -1,13 +1,13 @@
 import {
-   applicabilityInputSchema,
-   applicabilityMatrixSchema,
-   criterionApplicabilityLookupResultSchema,
-   type ApplicabilityInput,
-   type ApplicabilityMatrix,
-   type ApplicabilitySignal,
-   type ApplicabilitySignalCategory,
-   type CriterionApplicability,
-   type CriterionApplicabilityLookupResult,
+   pageScanSchema,
+   relevanceMatrixSchema,
+   criterionRelevanceLookupResultSchema,
+   type PageScan,
+   type RelevanceMatrix,
+   type PageSignal,
+   type PageSignalCategory,
+   type CriterionRelevance,
+   type CriterionRelevanceLookupResult,
    type CriterionLookupKey,
    type NormalizedCriterion,
 } from '@a11ied/contracts';
@@ -22,21 +22,21 @@ import {
    getMatchedCategories,
    getMatchedTags,
 } from '../shared/utils.js';
-import { categoryReasonLabels, strongApplicabilityCategories } from '../shared/data.js';
+import { categoryReasonLabels, strongPageSignalCategories } from '../shared/data.js';
 
 const MAX_SIGNAL_VALUES = 4;
 
-interface ApplicabilityContext {
+interface RelevanceContext {
    criterion: NormalizedCriterion;
-   signals: ApplicabilitySignal[];
-   matchedSignals: ApplicabilitySignal[];
-   matchedCategories: ApplicabilitySignalCategory[];
+   signals: PageSignal[];
+   matchedSignals: PageSignal[];
+   matchedCategories: PageSignalCategory[];
    matchedTags: string[];
    signalValues: string[];
    signalLabels: string[];
 }
 
-function evaluateAuthCriterion(ctx: ApplicabilityContext): CriterionApplicability {
+function evaluateAuthCriterion(ctx: RelevanceContext): CriterionRelevance {
    const authSignals = ctx.signals.filter((signal) => signal.category === 'auth');
    const authTags = getMatchedTags(ctx.criterion, ['auth']);
 
@@ -44,7 +44,7 @@ function evaluateAuthCriterion(ctx: ApplicabilityContext): CriterionApplicabilit
       return {
          criterionId: ctx.criterion.id,
          title: ctx.criterion.title,
-         state: 'applicable',
+         state: 'relevant',
          reasons: [
             `Detected authentication signals (${formatList(authSignals.map((signal) => signal.value))}) and matching criterion tags (${formatList(authTags)}).`,
          ],
@@ -61,8 +61,8 @@ function evaluateAuthCriterion(ctx: ApplicabilityContext): CriterionApplicabilit
 }
 
 function evaluateStatusWithLiveRegion(
-   ctx: ApplicabilityContext,
-): CriterionApplicability | undefined {
+   ctx: RelevanceContext,
+): CriterionRelevance | undefined {
    const statusSignals = ctx.signals.filter(
       (signal) => signal.category === 'live-region',
    );
@@ -78,7 +78,7 @@ function evaluateStatusWithLiveRegion(
    return {
       criterionId: ctx.criterion.id,
       title: ctx.criterion.title,
-      state: 'applicable',
+      state: 'relevant',
       reasons: [
          `Detected live region signals (${formatList(statusSignals.map((signal) => signal.value))}) and matching criterion tags (${formatList(statusTags)}).`,
       ],
@@ -91,7 +91,7 @@ function evaluateStatusWithLiveRegion(
    };
 }
 
-function evaluateStatusCriterion(ctx: ApplicabilityContext): CriterionApplicability {
+function evaluateStatusCriterion(ctx: RelevanceContext): CriterionRelevance {
    const result = evaluateStatusWithLiveRegion(ctx);
    if (result) {
       return result;
@@ -103,14 +103,14 @@ function evaluateStatusCriterion(ctx: ApplicabilityContext): CriterionApplicabil
    );
 }
 
-function evaluateDefaultCriterion(ctx: ApplicabilityContext): CriterionApplicability {
+function evaluateDefaultCriterion(ctx: RelevanceContext): CriterionRelevance {
    const isStrong = ctx.matchedCategories.some((category) =>
-      strongApplicabilityCategories.has(category),
+      strongPageSignalCategories.has(category),
    );
    if (!isStrong) {
       return buildNotDetected(
          ctx.criterion,
-         'No signal-backed applicability match was detected for this criterion. ' +
+         'No page signal matched this criterion. ' +
             `Weakly matched ${formatList(ctx.signalLabels)} signals do not count on ` +
             'their own.',
       );
@@ -124,7 +124,7 @@ function evaluateDefaultCriterion(ctx: ApplicabilityContext): CriterionApplicabi
    return {
       criterionId: ctx.criterion.id,
       title: ctx.criterion.title,
-      state: 'applicable',
+      state: 'relevant',
       reasons: [
          `Detected ${formatList(ctx.signalLabels)} signals (${formatList(ctx.signalValues)})${tagSuffix}`,
       ],
@@ -134,10 +134,7 @@ function evaluateDefaultCriterion(ctx: ApplicabilityContext): CriterionApplicabi
    };
 }
 
-function buildContext(
-   criterion: NormalizedCriterion,
-   input: ApplicabilityInput,
-): ApplicabilityContext {
+function buildContext(criterion: NormalizedCriterion, input: PageScan): RelevanceContext {
    const { signals } = input;
    const matchedCategories = getMatchedCategories(criterion, signals);
    const matchedSignals = signals.filter((signal) =>
@@ -159,7 +156,7 @@ function buildContext(
    };
 }
 
-function evaluateWidgetOrDefault(ctx: ApplicabilityContext): CriterionApplicability {
+function evaluateWidgetOrDefault(ctx: RelevanceContext): CriterionRelevance {
    const onlyWidgetSignals =
       ctx.signals.length > 0 &&
       ctx.signals.every((signal) => signal.category === 'widget');
@@ -179,16 +176,13 @@ function evaluateWidgetOrDefault(ctx: ApplicabilityContext): CriterionApplicabil
       return evaluateDefaultCriterion(ctx);
    }
 
-   return buildNotDetected(
-      ctx.criterion,
-      'No matching applicability signals were detected for this criterion.',
-   );
+   return buildNotDetected(ctx.criterion, 'No page signal matched this criterion.');
 }
 
-function evaluateCriterionApplicability(
+function evaluateCriterionRelevance(
    criterion: NormalizedCriterion,
-   input: ApplicabilityInput,
-): CriterionApplicability {
+   input: PageScan,
+): CriterionRelevance {
    const ctx = buildContext(criterion, input);
 
    if (criterion.id === '3.3.8') {
@@ -202,18 +196,18 @@ function evaluateCriterionApplicability(
    return evaluateWidgetOrDefault(ctx);
 }
 
-/** Explains how one criterion applies to one applicability input. */
-export function getCriterionApplicability(
+/** Explains how one criterion applies to one relevance input. */
+export function getCriterionRelevance(
    lookupKey: CriterionLookupKey,
-   input: ApplicabilityInput,
+   input: PageScan,
    options?: { version?: string },
-): CriterionApplicabilityLookupResult {
+): CriterionRelevanceLookupResult {
    const version = parseVersion(options?.version);
-   const parsedInput = applicabilityInputSchema.parse(input);
+   const parsedInput = pageScanSchema.parse(input);
    const criterion = resolveCriterion(version, lookupKey);
-   const assessment = evaluateCriterionApplicability(criterion, parsedInput);
+   const assessment = evaluateCriterionRelevance(criterion, parsedInput);
 
-   return criterionApplicabilityLookupResultSchema.parse({
+   return criterionRelevanceLookupResultSchema.parse({
       lookupKey,
       version,
       target: parsedInput.target,
@@ -222,16 +216,16 @@ export function getCriterionApplicability(
    });
 }
 
-/** Computes applicability assessments for the full criterion set. */
-export function listApplicableCriteria(
-   input: ApplicabilityInput,
+/** Computes relevance assessments for the full criterion set. */
+export function listRelevantCriteria(
+   input: PageScan,
    options?: { version?: string },
-): ApplicabilityMatrix {
+): RelevanceMatrix {
    const version = parseVersion(options?.version);
-   const parsedInput = applicabilityInputSchema.parse(input);
+   const parsedInput = pageScanSchema.parse(input);
    const artifacts = getArtifacts(version);
    const relevantAssessments = Object.values(artifacts.criteria)
-      .map((criterion) => evaluateCriterionApplicability(criterion, parsedInput))
+      .map((criterion) => evaluateCriterionRelevance(criterion, parsedInput))
       .filter(
          (assessment) =>
             assessment.state !== 'not-detected' && assessment.state !== 'out-of-scope',
@@ -242,7 +236,7 @@ export function listApplicableCriteria(
          }),
       );
 
-   return applicabilityMatrixSchema.parse({
+   return relevanceMatrixSchema.parse({
       version,
       target: parsedInput.target,
       assessments: Object.fromEntries(

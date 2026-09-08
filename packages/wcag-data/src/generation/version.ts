@@ -1,7 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import type { CoverageState, WcagVersion } from '@a11ied/contracts';
+import type { TestMethod, WcagVersion } from '@a11ied/contracts';
 
 import type {
    ActMappingPayload,
@@ -16,7 +16,7 @@ import type {
 import { sha256, toJsonString } from '../shared/utils.js';
 import { normalizeCriteriaArtifacts } from '../normalization/criteria.js';
 import { loadRawJson } from '../sources/sync.js';
-import { buildCoverageArtifacts } from '../coverage/build.js';
+import { buildTestMethodArtifacts } from '../test-methods/build.js';
 
 const CRITERIA_PREFIXES = [
    'criteria.',
@@ -77,30 +77,30 @@ function buildCriteriaArtifactBodies(input: {
    ];
 }
 
-function buildCoverageArtifactBodies(input: {
+function buildTestMethodArtifactBodies(input: {
    version: WcagVersion;
-   coverageArtifacts: ReturnType<typeof buildCoverageArtifacts>;
+   testMethodArtifacts: ReturnType<typeof buildTestMethodArtifacts>;
 }): Array<{ fileName: string; body: string }> {
    return [
       {
-         fileName: `coverage.${input.version}.json`,
-         body: toJsonString(input.coverageArtifacts.coverageArtifact),
+         fileName: `test-methods.${input.version}.json`,
+         body: toJsonString(input.testMethodArtifacts.testMethodArtifact),
       },
       {
          fileName: `strategy.${input.version}.json`,
-         body: toJsonString(input.coverageArtifacts.strategyArtifact),
+         body: toJsonString(input.testMethodArtifacts.strategyArtifact),
       },
       {
-         fileName: `coverage-summary.${input.version}.json`,
-         body: toJsonString(input.coverageArtifacts.coverageSummaryArtifact),
+         fileName: `test-method-summary.${input.version}.json`,
+         body: toJsonString(input.testMethodArtifacts.testMethodSummaryArtifact),
       },
       {
          fileName: `axe-rules.${input.version}.json`,
-         body: toJsonString(input.coverageArtifacts.axeRuleIndexArtifact),
+         body: toJsonString(input.testMethodArtifacts.axeRuleIndexArtifact),
       },
       {
          fileName: `act-rules.${input.version}.json`,
-         body: toJsonString(input.coverageArtifacts.actRuleIndexArtifact),
+         body: toJsonString(input.testMethodArtifacts.actRuleIndexArtifact),
       },
    ];
 }
@@ -160,28 +160,28 @@ function buildManifestEntries(input: {
 function buildAllArtifactBodies(input: {
    version: WcagVersion;
    artifacts: ReturnType<typeof normalizeCriteriaArtifacts>;
-   covArts: ReturnType<typeof buildCoverageArtifacts>;
+   covArts: ReturnType<typeof buildTestMethodArtifacts>;
 }): Array<{ fileName: string; body: string }> {
    return [
       ...buildCriteriaArtifactBodies({
          version: input.version,
          artifacts: input.artifacts,
       }),
-      ...buildCoverageArtifactBodies({
+      ...buildTestMethodArtifactBodies({
          version: input.version,
-         coverageArtifacts: input.covArts,
+         testMethodArtifacts: input.covArts,
       }),
    ];
 }
 
-function buildCoverageCounts(
-   covArts: ReturnType<typeof buildCoverageArtifacts>,
-): Record<CoverageState, number> {
+function buildTestMethodCounts(
+   covArts: ReturnType<typeof buildTestMethodArtifacts>,
+): Record<TestMethod, number> {
    return {
-      automated: covArts.coverageSummaryArtifact.totals.automated,
-      hybrid: covArts.coverageSummaryArtifact.totals.hybrid,
-      manual: covArts.coverageSummaryArtifact.totals.manual,
-      unknown: covArts.coverageSummaryArtifact.totals.unknown,
+      automated: covArts.testMethodSummaryArtifact.totals.automated,
+      hybrid: covArts.testMethodSummaryArtifact.totals.hybrid,
+      manual: covArts.testMethodSummaryArtifact.totals.manual,
+      unknown: covArts.testMethodSummaryArtifact.totals.unknown,
    };
 }
 
@@ -223,7 +223,7 @@ async function writeArtifacts(
 
 function buildVersionResult(input: {
    artifacts: ReturnType<typeof normalizeCriteriaArtifacts>;
-   covArts: ReturnType<typeof buildCoverageArtifacts>;
+   covArts: ReturnType<typeof buildTestMethodArtifacts>;
    version: WcagVersion;
    rawSources: Array<RawSourceProvenance & { fileName: string }>;
    directories: WcagDataDirectories;
@@ -231,7 +231,7 @@ function buildVersionResult(input: {
    generated: GeneratedArtifactWriteResult[];
    manifest: GeneratedArtifactProvenance[];
    criteriaCount: number;
-   coverageCounts: Record<CoverageState, number>;
+   testMethodCounts: Record<TestMethod, number>;
 }> {
    const { allFileNames, criteriaFileNames } = buildVersionFileNames(input.version);
    const sourceUrls = resolveAllSourceUrls({
@@ -255,7 +255,7 @@ function buildVersionResult(input: {
          sourceUrls,
       }),
       criteriaCount: Object.keys(input.artifacts.criteriaArtifact.criteria).length,
-      coverageCounts: buildCoverageCounts(input.covArts),
+      testMethodCounts: buildTestMethodCounts(input.covArts),
    }));
 }
 
@@ -270,7 +270,7 @@ export async function processVersion(input: {
    generated: GeneratedArtifactWriteResult[];
    manifest: GeneratedArtifactProvenance[];
    criteriaCount: number;
-   coverageCounts: Record<CoverageState, number>;
+   testMethodCounts: Record<TestMethod, number>;
 }> {
    const wcag = await loadRawJson<WcagPayload>(
       input.directories,
@@ -281,7 +281,7 @@ export async function processVersion(input: {
       wcag,
       quickrefTags: input.quickrefTags,
    });
-   const covArts = buildCoverageArtifacts({
+   const covArts = buildTestMethodArtifacts({
       version: input.version,
       criteriaArtifact: artifacts.criteriaArtifact,
       actMapping: input.actMapping,

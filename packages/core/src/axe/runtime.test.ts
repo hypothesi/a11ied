@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { getCoverage } from '@a11ied/wcag-engine';
+import { getTestMethod } from '@a11ied/wcag-engine';
 import {
    createTestServer,
    type TestServerHandle,
@@ -52,7 +52,7 @@ describe('axe runtime', () => {
          expect(result.violations.length).toBeGreaterThan(0);
 
          const mappedRuleIds = new Set(
-            getCoverage('4.1.2', { version: '2.2' }).coverage.axeRuleIds,
+            getTestMethod('4.1.2', { version: '2.2' }).testMethod.axeRuleIds,
          );
          expect(result.violations.every((entry) => mappedRuleIds.has(entry.id))).toBe(
             true,

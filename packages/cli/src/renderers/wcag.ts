@@ -1,5 +1,5 @@
 import {
-   coverageSummaryArtifactSchema,
+   testMethodSummaryArtifactSchema,
    criterionSearchResponseSchema,
    type CliOutputEnvelope,
 } from '#contracts';
@@ -66,11 +66,11 @@ function summaryRow(cells: Array<string | number>): string {
 }
 
 // Fallow-ignore-next-line unused-export
-export function renderCoverageSummaryText(
+export function renderTestMethodSummaryText(
    envelope: CliOutputEnvelope,
    _options: RenderOptions,
 ): string {
-   const summary = coverageSummaryArtifactSchema.parse(envelope.result);
+   const summary = testMethodSummaryArtifactSchema.parse(envelope.result);
    const buckets = [
       ...SUMMARY_LEVELS.map((level) => [level, summary.byLevel[level]] as const),
       ['All', summary.totals] as const,
@@ -88,10 +88,10 @@ export function renderCoverageSummaryText(
          ]),
       ),
    ];
-   const sources = summary.coverageSources;
+   const sources = summary.ruleSources;
 
    return [
-      `${title(`WCAG ${summary.version} coverage`)}  ${dim(`updated ${summary.updatedAt.slice(0, 'YYYY-MM-DD'.length)}`)}`,
+      `${title(`WCAG ${summary.version} test methods`)}  ${dim(`updated ${summary.updatedAt.slice(0, 'YYYY-MM-DD'.length)}`)}`,
       ...indent(table),
       '',
       ...indent([

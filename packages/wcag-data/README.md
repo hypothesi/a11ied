@@ -54,9 +54,9 @@ What to review after a sync:
 - The generated layer currently emits:
    - `criteria.<version>.json`
    - `criteria-by-level.<version>.json`
-   - `coverage.<version>.json`
+   - `test-methods.<version>.json`
    - `strategy.<version>.json`
-   - `coverage-summary.<version>.json`
+   - `test-method-summary.<version>.json`
    - `slug-index.<version>.json`
    - `technique-index.<version>.json`
    - `failure-index.<version>.json`

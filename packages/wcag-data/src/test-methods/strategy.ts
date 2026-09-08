@@ -106,7 +106,7 @@ export function defaultStrategySeed(hasAxe: boolean, hasAct: boolean): StrategyS
          preferredEvidenceMode: preferredEvidenceModeSchema.parse('automated'),
          procedureIds: ['axe_scan'],
          requiresRealTarget: false,
-         notes: ['Direct axe coverage exists for this criterion.'],
+         notes: ['axe rules decide this criterion.'],
       };
    }
    if (hasAct) {

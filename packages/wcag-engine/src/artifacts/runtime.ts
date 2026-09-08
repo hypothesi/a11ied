@@ -1,6 +1,6 @@
 import {
    axeRuleLookupResultSchema,
-   coverageLookupResultSchema,
+   testMethodLookupResultSchema,
    criteriaByLevelResultSchema,
    criterionLookupResultSchema,
    quickrefTagLookupResultSchema,
@@ -10,8 +10,8 @@ import {
    wcagVersionSchema,
    type ActRuleIndexEntry,
    type AxeRuleLookupResult,
-   type CoverageLookupResult,
-   type CoverageSummaryArtifact,
+   type TestMethodLookupResult,
+   type TestMethodSummaryArtifact,
    type CriteriaByLevelResult,
    type CriterionLookupKey,
    type CriterionLookupResult,
@@ -166,35 +166,35 @@ export function listCriteriaByLevel(
    });
 }
 
-/** Returns coverage metadata for one criterion from the generated artifacts. */
-export function getCoverage(
+/** Returns the test method record and testing strategy for one criterion. */
+export function getTestMethod(
    lookupKey: CriterionLookupKey,
    options?: { version?: string },
-): CoverageLookupResult {
+): TestMethodLookupResult {
    const version = parseVersion(options?.version);
    const criterion = resolveCriterion(version, lookupKey);
    const artifacts = getArtifacts(version);
-   const coverage = artifacts.coverage[criterion.id];
+   const testMethod = artifacts.testMethods[criterion.id];
    const strategy = artifacts.strategies[criterion.id];
 
-   if (!coverage || !strategy) {
+   if (!testMethod || !strategy) {
       throw new WcagEngineNotFoundError(lookupKey);
    }
 
-   return coverageLookupResultSchema.parse({
+   return testMethodLookupResultSchema.parse({
       lookupKey,
       criterion,
-      coverage,
+      testMethod,
       strategy,
-      actRules: listActRulesByIds(artifacts, coverage.actRuleIds),
+      actRules: listActRulesByIds(artifacts, testMethod.actRuleIds),
    });
 }
 
-/** Returns the pinned coverage totals per level for one WCAG version. */
-export function getCoverageSummary(options?: {
+/** Returns the pinned test method counts per level for one WCAG version. */
+export function getTestMethodSummary(options?: {
    version?: string;
-}): CoverageSummaryArtifact {
-   return getArtifacts(parseVersion(options?.version)).coverageSummary;
+}): TestMethodSummaryArtifact {
+   return getArtifacts(parseVersion(options?.version)).testMethodSummary;
 }
 
 /** Returns the indexed Quickref tags for one criterion. */

@@ -1,5 +1,5 @@
 import type { AxeRunResult, WcagLevel, WcagVersion } from '@a11ied/contracts';
-import { getCoverage, listCriteriaByLevel } from '@a11ied/wcag-engine';
+import { getTestMethod, listCriteriaByLevel } from '@a11ied/wcag-engine';
 
 import { CliUsageError } from '../errors/cli-errors.js';
 
@@ -39,20 +39,20 @@ function resolveLevelRuleIds(level: WcagLevel, version: WcagVersion): string[] {
 
    return unique(
       criteria.flatMap(
-         (criterion) => getCoverage(criterion.id, { version }).coverage.axeRuleIds,
+         (criterion) => getTestMethod(criterion.id, { version }).testMethod.axeRuleIds,
       ),
    );
 }
 
 function resolveCriterionRuleIds(criterion: string, version: WcagVersion): string[] {
-   return getCoverage(criterion, { version }).coverage.axeRuleIds;
+   return getTestMethod(criterion, { version }).testMethod.axeRuleIds;
 }
 
 function resolveAllRuleIds(version: WcagVersion): string[] {
    return unique(
       (['A', 'AA', 'AAA'] as const).flatMap((level) =>
          listCriteriaByLevel(level, version).criteria.flatMap(
-            (criterion) => getCoverage(criterion.id, { version }).coverage.axeRuleIds,
+            (criterion) => getTestMethod(criterion.id, { version }).testMethod.axeRuleIds,
          ),
       ),
    );

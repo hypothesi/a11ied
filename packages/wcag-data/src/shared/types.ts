@@ -1,9 +1,9 @@
 import type {
    ActRuleIndexArtifact,
    AxeRuleIndexArtifact,
-   CoverageArtifact,
-   CoverageState,
-   CoverageSummaryArtifact,
+   TestMethodArtifact,
+   TestMethod,
+   TestMethodSummaryArtifact,
    PreferredEvidenceMode,
    StrategyArtifact,
    WcagVersion,
@@ -163,7 +163,7 @@ export interface GeneratedArtifactWriteResult {
 export interface NormalizedArtifactsResult {
    generatedArtifacts: GeneratedArtifactWriteResult[];
    criteriaCountByVersion: Record<WcagVersion, number>;
-   coverageCountsByVersion: Record<WcagVersion, Record<CoverageState, number>>;
+   testMethodCountsByVersion: Record<WcagVersion, Record<TestMethod, number>>;
 }
 
 export interface GeneratedArtifactProvenance {
@@ -198,10 +198,10 @@ export interface StrategySeed {
 }
 
 // Fallow-ignore-next-line unused-type
-export interface GeneratedCoverageArtifacts {
-   coverageArtifact: CoverageArtifact;
+export interface GeneratedTestMethodArtifacts {
+   testMethodArtifact: TestMethodArtifact;
    strategyArtifact: StrategyArtifact;
-   coverageSummaryArtifact: CoverageSummaryArtifact;
+   testMethodSummaryArtifact: TestMethodSummaryArtifact;
    axeRuleIndexArtifact: AxeRuleIndexArtifact;
    actRuleIndexArtifact: ActRuleIndexArtifact;
 }

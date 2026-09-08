@@ -4,19 +4,19 @@ import { wcagLevelSchema, wcagVersionSchema } from './core.js';
 import {
    actRuleIndexEntrySchema,
    axeRuleIndexEntrySchema,
-   criterionCoverageSchema,
+   criterionTestMethodSchema,
    criterionIdSchema,
    criterionLookupKeySchema,
    criterionSlugSchema,
    evidenceStrategySchema,
    normalizedCriterionSchema,
-   applicabilityStateSchema,
+   relevanceSchema,
    techniqueBodyEntrySchema,
    techniqueIndexEntrySchema,
    understandingDocumentEntrySchema,
 } from './wcag.js';
 
-export const applicabilitySignalCategorySchema = z.enum([
+export const pageSignalCategorySchema = z.enum([
    'auth',
    'dialog',
    'drag-and-drop',
@@ -33,34 +33,32 @@ export const applicabilitySignalCategorySchema = z.enum([
    'validation',
    'widget',
 ]);
-export type ApplicabilitySignalCategory = z.infer<
-   typeof applicabilitySignalCategorySchema
->;
+export type PageSignalCategory = z.infer<typeof pageSignalCategorySchema>;
 
-export const applicabilitySignalSourceSchema = z.enum([
+export const pageSignalSourceSchema = z.enum([
    'dom',
    'a11y-tree',
    'metadata',
    'quickref-tag',
    'user-hint',
 ]);
-export type ApplicabilitySignalSource = z.infer<typeof applicabilitySignalSourceSchema>;
+export type PageSignalSource = z.infer<typeof pageSignalSourceSchema>;
 
-export const applicabilityElementSchema = z.object({
+export const pageElementSchema = z.object({
    xpath: z.string(),
    tag: z.string(),
    snippet: z.string(),
 });
-export type ApplicabilityElement = z.infer<typeof applicabilityElementSchema>;
+export type PageElement = z.infer<typeof pageElementSchema>;
 
-export const applicabilitySignalSchema = z.object({
-   category: applicabilitySignalCategorySchema,
-   source: applicabilitySignalSourceSchema,
+export const pageSignalSchema = z.object({
+   category: pageSignalCategorySchema,
+   source: pageSignalSourceSchema,
    value: z.string(),
    confidence: z.enum(['high', 'medium', 'low']),
-   elements: z.array(applicabilityElementSchema).optional(),
+   elements: z.array(pageElementSchema).optional(),
 });
-export type ApplicabilitySignal = z.infer<typeof applicabilitySignalSchema>;
+export type PageSignal = z.infer<typeof pageSignalSchema>;
 
 export const documentTargetKindSchema = z.enum(['url', 'file', 'stdin', 'html', 'app']);
 export type DocumentTargetKind = z.infer<typeof documentTargetKindSchema>;
@@ -71,41 +69,41 @@ export const targetReferenceSchema = z.object({
 });
 export type TargetReference = z.infer<typeof targetReferenceSchema>;
 
-export const applicabilityInputSchema = z.object({
+export const pageScanSchema = z.object({
    target: targetReferenceSchema,
-   signals: z.array(applicabilitySignalSchema),
+   signals: z.array(pageSignalSchema),
    metadata: z.record(z.string(), z.string()),
    userHints: z.array(z.string()),
 });
-export type ApplicabilityInput = z.infer<typeof applicabilityInputSchema>;
+export type PageScan = z.infer<typeof pageScanSchema>;
 
-export const criterionApplicabilitySchema = z.object({
+export const criterionRelevanceSchema = z.object({
    criterionId: criterionIdSchema,
    title: z.string(),
-   state: applicabilityStateSchema,
+   state: relevanceSchema,
    reasons: z.array(z.string()),
-   matchedSignalCategories: z.array(applicabilitySignalCategorySchema),
+   matchedSignalCategories: z.array(pageSignalCategorySchema),
    matchedTags: z.array(z.string()),
-   elements: z.array(applicabilityElementSchema),
+   elements: z.array(pageElementSchema),
 });
-export type CriterionApplicability = z.infer<typeof criterionApplicabilitySchema>;
+export type CriterionRelevance = z.infer<typeof criterionRelevanceSchema>;
 
-export const applicabilityMatrixSchema = z.object({
+export const relevanceMatrixSchema = z.object({
    version: wcagVersionSchema,
    target: targetReferenceSchema,
-   assessments: z.record(z.string(), criterionApplicabilitySchema),
+   assessments: z.record(z.string(), criterionRelevanceSchema),
 });
-export type ApplicabilityMatrix = z.infer<typeof applicabilityMatrixSchema>;
+export type RelevanceMatrix = z.infer<typeof relevanceMatrixSchema>;
 
-export const criterionApplicabilityLookupResultSchema = z.object({
+export const criterionRelevanceLookupResultSchema = z.object({
    lookupKey: criterionLookupKeySchema,
    version: wcagVersionSchema,
    target: targetReferenceSchema,
    criterion: normalizedCriterionSchema,
-   assessment: criterionApplicabilitySchema,
+   assessment: criterionRelevanceSchema,
 });
-export type CriterionApplicabilityLookupResult = z.infer<
-   typeof criterionApplicabilityLookupResultSchema
+export type CriterionRelevanceLookupResult = z.infer<
+   typeof criterionRelevanceLookupResultSchema
 >;
 
 export const searchMatchFieldSchema = z.enum([
@@ -165,15 +163,15 @@ export const quickrefTagLookupResultSchema = z.object({
 });
 export type QuickrefTagLookupResult = z.infer<typeof quickrefTagLookupResultSchema>;
 
-export const coverageLookupResultSchema = z.object({
+export const testMethodLookupResultSchema = z.object({
    lookupKey: criterionLookupKeySchema,
    criterion: normalizedCriterionSchema,
-   coverage: criterionCoverageSchema,
+   testMethod: criterionTestMethodSchema,
    strategy: evidenceStrategySchema,
    /** The named form of `coverage.actRuleIds`, in the same order. */
    actRules: z.array(actRuleIndexEntrySchema),
 });
-export type CoverageLookupResult = z.infer<typeof coverageLookupResultSchema>;
+export type TestMethodLookupResult = z.infer<typeof testMethodLookupResultSchema>;
 
 /** The attribution a copied W3C document carries wherever its text is printed. */
 export const w3cDocumentSourceSchema = z.object({
@@ -183,7 +181,7 @@ export const w3cDocumentSourceSchema = z.object({
 });
 export type W3cDocumentSource = z.infer<typeof w3cDocumentSourceSchema>;
 
-export const criterionShowResultSchema = coverageLookupResultSchema.extend({
+export const criterionShowResultSchema = testMethodLookupResultSchema.extend({
    /** The In Brief or Intent opening of the Understanding document, when one was synced. */
    understandingExcerpt: z.string().optional(),
    /**
@@ -198,7 +196,7 @@ export type CriterionShowResult = z.infer<typeof criterionShowResultSchema>;
 export const wcagLookupResultSchema = z.object({
    lookupKey: criterionLookupKeySchema,
    criterion: normalizedCriterionSchema,
-   coverage: criterionCoverageSchema.optional(),
+   testMethod: criterionTestMethodSchema.optional(),
    strategy: evidenceStrategySchema.optional(),
 });
 export type WcagLookupResult = z.infer<typeof wcagLookupResultSchema>;

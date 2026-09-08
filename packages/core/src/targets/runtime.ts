@@ -41,8 +41,8 @@ export interface ResolvedDocumentTarget {
    /**
     * Reads the target's raw markup: a timeout-bounded fetch for a `url` target, a file
     * read for a `file` target, or the already-known content otherwise. Call this only
-    * when the raw markup is actually needed (applicability signal detection) - axe and
-    * tree never need it and must not call it.
+    * when the raw markup is actually needed (page signal detection) - axe and tree never
+    * need it and must not call it.
     */
    readHtml: () => Promise<string>;
 }

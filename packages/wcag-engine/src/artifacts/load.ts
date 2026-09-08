@@ -1,8 +1,8 @@
 import {
    actRuleIndexArtifactSchema,
    axeRuleIndexArtifactSchema,
-   coverageArtifactSchema,
-   coverageSummaryArtifactSchema,
+   testMethodArtifactSchema,
+   testMethodSummaryArtifactSchema,
    criteriaByLevelArtifactSchema,
    documentContentStoreSchema,
    failureIndexArtifactSchema,
@@ -103,7 +103,8 @@ export function loadEngineArtifacts(version: WcagVersion): EngineArtifacts {
          criteriaByLevelArtifactSchema,
          `criteria-by-level.${version}.json`,
       ).levels,
-      coverage: loadArtifact(coverageArtifactSchema, `coverage.${version}.json`).coverage,
+      testMethods: loadArtifact(testMethodArtifactSchema, `test-methods.${version}.json`)
+         .testMethods,
       strategies: loadArtifact(strategyArtifactSchema, `strategy.${version}.json`)
          .strategies,
       slugToId: loadArtifact(slugIndexArtifactSchema, `slug-index.${version}.json`).slugs,
@@ -117,9 +118,9 @@ export function loadEngineArtifacts(version: WcagVersion): EngineArtifacts {
          .rules,
       actRules: loadArtifact(actRuleIndexArtifactSchema, `act-rules.${version}.json`)
          .rules,
-      coverageSummary: loadArtifact(
-         coverageSummaryArtifactSchema,
-         `coverage-summary.${version}.json`,
+      testMethodSummary: loadArtifact(
+         testMethodSummaryArtifactSchema,
+         `test-method-summary.${version}.json`,
       ),
       understanding: loadArtifact(
          understandingArtifactSchema,

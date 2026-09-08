@@ -33,22 +33,22 @@ export const EXPECTED_CRITERIA_COUNTS_BY_VERSION = {
    '2.1': EXPECTED_21_CRITERIA_COUNT,
 };
 
-export const EXPECTED_22_COVERAGE_COUNTS = {
+export const EXPECTED_22_TEST_METHOD_COUNTS = {
    automated: 2,
    hybrid: 3,
    manual: 2,
    unknown: 0,
 };
-const EXPECTED_21_COVERAGE_COUNTS = {
+const EXPECTED_21_TEST_METHOD_COUNTS = {
    automated: 1,
    hybrid: 3,
    manual: 0,
    unknown: 0,
 };
 
-export const EXPECTED_COVERAGE_COUNTS_BY_VERSION = {
-   '2.2': EXPECTED_22_COVERAGE_COUNTS,
-   '2.1': EXPECTED_21_COVERAGE_COUNTS,
+export const EXPECTED_TEST_METHOD_COUNTS_BY_VERSION = {
+   '2.2': EXPECTED_22_TEST_METHOD_COUNTS,
+   '2.1': EXPECTED_21_TEST_METHOD_COUNTS,
 };
 
 export function createTestDirectories(root: string): WcagDataDirectories {
@@ -164,11 +164,13 @@ export function assertEndToEndSyncResult(result: {
    rawArtifacts: unknown[];
    generatedArtifacts: unknown[];
    criteriaCountByVersion: Record<string, number>;
-   coverageCountsByVersion: Record<string, Record<string, number>>;
+   testMethodCountsByVersion: Record<string, Record<string, number>>;
 }): void {
    expect(result.fetchList).toEqual(listApprovedUpstreamSourceUrls());
    expect(result.rawArtifacts).toHaveLength(EXPECTED_RAW_SOURCE_COUNT);
    expect(result.generatedArtifacts).toHaveLength(EXPECTED_GENERATED_ARTIFACT_COUNT);
    expect(result.criteriaCountByVersion).toEqual(EXPECTED_CRITERIA_COUNTS_BY_VERSION);
-   expect(result.coverageCountsByVersion).toEqual(EXPECTED_COVERAGE_COUNTS_BY_VERSION);
+   expect(result.testMethodCountsByVersion).toEqual(
+      EXPECTED_TEST_METHOD_COUNTS_BY_VERSION,
+   );
 }

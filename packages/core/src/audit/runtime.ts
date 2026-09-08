@@ -1,13 +1,13 @@
 import type {
    AxeRunResult,
-   ApplicabilityMatrix,
-   ApplicabilitySignal,
+   RelevanceMatrix,
+   PageSignal,
    EvidenceRecord,
    TargetReference,
 } from '@a11ied/contracts';
-import { listApplicableCriteria } from '@a11ied/wcag-engine';
+import { listRelevantCriteria } from '@a11ied/wcag-engine';
 
-import { deriveApplicabilityInputFromHtml } from '../applicability/html.js';
+import { scanHtmlForPageSignals } from '../relevance/html.js';
 import { runAxe } from '../axe/runtime.js';
 import type { DocumentLoad } from '../targets/parse.js';
 import { getAccessibilityTree, getPageTitle } from '../tree/runtime.js';
@@ -20,9 +20,9 @@ import { summarizeAccessibilityTree, type AuditTreeSummary } from './tree-summar
 export interface AuditReport {
    axe: AxeRunResult;
    tree: AuditTreeSummary;
-   applicability: {
-      signals: ApplicabilitySignal[];
-      matrix: ApplicabilityMatrix;
+   relevance: {
+      signals: PageSignal[];
+      matrix: RelevanceMatrix;
    };
    criteria: AuditCriterionRollup[];
    /** Results a person or an agent recorded for this target, newest per check. */
@@ -45,9 +45,9 @@ export interface BuildAuditReportInput {
 
 /**
  * Builds the full audit report for one target: an axe scan of every mapped rule, an
- * accessibility tree summary, signal-backed WCAG applicability, a per-criterion rollup of
- * axe verdict, applicability, and coverage state, and any result a person or an agent
- * recorded for the checks axe cannot decide.
+ * accessibility tree summary, the relevant criteria scan, a per-criterion rollup of axe
+ * verdict, relevance, and test method, and any result a person or an agent recorded for
+ * the checks axe cannot decide.
  */
 export async function buildAuditReport(
    input: BuildAuditReportInput,
@@ -61,14 +61,14 @@ export async function buildAuditReport(
    const treeSummary = summarizeAccessibilityTree(tree.nodes, pageTitle);
 
    const html = await input.readHtml();
-   const applicabilityInput = deriveApplicabilityInputFromHtml(input.target.value, html, {
+   const pageScan = scanHtmlForPageSignals(input.target.value, html, {
       target: input.target,
       metadata: input.metadata,
       userHints: input.userHints,
    });
-   const matrix = listApplicableCriteria(applicabilityInput, { version: wcagVersion });
+   const matrix = listRelevantCriteria(pageScan, { version: wcagVersion });
 
-   const applicabilityStates = Object.fromEntries(
+   const relevanceStates = Object.fromEntries(
       Object.entries(matrix.assessments).map(([id, assessment]) => [
          id,
          assessment.state,
@@ -87,7 +87,7 @@ export async function buildAuditReport(
    const criteria = buildCriteriaRollup({
       version: wcagVersion,
       axe,
-      applicabilityStates,
+      relevanceStates,
       recordedOutcomes: Object.fromEntries(
          recorded.map((record) => [record.criterionId, record.outcome]),
       ),
@@ -96,7 +96,7 @@ export async function buildAuditReport(
    return {
       axe,
       tree: treeSummary,
-      applicability: { signals: applicabilityInput.signals, matrix },
+      relevance: { signals: pageScan.signals, matrix },
       criteria,
       recorded,
    };

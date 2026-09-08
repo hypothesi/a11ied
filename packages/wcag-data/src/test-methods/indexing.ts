@@ -115,7 +115,7 @@ export function listIdentifiedActRules(
    });
 }
 
-export function buildActCoverageIndex(input: {
+export function buildActRulesByCriterion(input: {
    criteriaArtifact: NormalizedCriteriaArtifact;
    actMapping: ActMappingPayload;
 }): Map<string, string[]> {
@@ -141,10 +141,10 @@ export function buildActCoverageIndex(input: {
 }
 
 export function invertActIndex(
-   actCoverageIndex: Map<string, string[]>,
+   actRulesByCriterion: Map<string, string[]>,
 ): Map<string, Set<string>> {
    const inverted = new Map<string, Set<string>>();
-   for (const [criterionId, actRuleIds] of actCoverageIndex.entries()) {
+   for (const [criterionId, actRuleIds] of actRulesByCriterion.entries()) {
       for (const actRuleId of actRuleIds) {
          const current = inverted.get(actRuleId) ?? new Set<string>();
          current.add(criterionId);
@@ -220,13 +220,13 @@ function addAxeRuleToIndex(input: {
    }
 }
 
-export function buildAxeCoverageIndex(input: {
+export function buildAxeRulesByCriterion(input: {
    criteriaArtifact: NormalizedCriteriaArtifact;
-   actCoverageIndex: Map<string, string[]>;
+   actRulesByCriterion: Map<string, string[]>;
    axeRules: DerivedAxeRule[];
 }): Map<string, { ruleIds: string[]; sourceAttribution: string[] }> {
    const flatMap = criterionIdsByFlatNumber(input.criteriaArtifact);
-   const actRuleToCriteria = invertActIndex(input.actCoverageIndex);
+   const actRuleToCriteria = invertActIndex(input.actRulesByCriterion);
    const index = new Map<
       string,
       { ruleIds: Set<string>; sourceAttribution: Set<string> }

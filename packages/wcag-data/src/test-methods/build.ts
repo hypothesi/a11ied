@@ -1,8 +1,8 @@
 import {
-   coverageArtifactSchema,
-   coverageSummaryArtifactSchema,
+   testMethodArtifactSchema,
+   testMethodSummaryArtifactSchema,
    strategyArtifactSchema,
-   type CoverageState,
+   type TestMethod,
    type NormalizedCriteriaArtifact,
    type WcagVersion,
 } from '@a11ied/contracts';
@@ -10,16 +10,13 @@ import {
 import type {
    ActMappingPayload,
    DerivedAxeRule,
-   GeneratedCoverageArtifacts,
+   GeneratedTestMethodArtifacts,
    StrategySeed,
 } from '../shared/types.js';
 import { buildActRuleIndex } from './act-rules.js';
 import { buildAxeRuleIndex } from './axe-rules.js';
-import { buildActCoverageIndex, buildAxeCoverageIndex } from './indexing.js';
-import {
-   defaultStrategySeed,
-   strategyOverrideForCriterion,
-} from './strategy.js';
+import { buildActRulesByCriterion, buildAxeRulesByCriterion } from './indexing.js';
+import { defaultStrategySeed, strategyOverrideForCriterion } from './strategy.js';
 import { buildSummaryTotals } from './summary.js';
 
 const REPRESENTATIVE_LIMIT = 5;
@@ -58,7 +55,7 @@ function buildSourceAttribution(input: {
    return parts.toSorted((left, right) => left.localeCompare(right));
 }
 
-function buildCoverageNotes(
+function buildTestMethodNotes(
    seed: StrategySeed,
    actIds: string[],
    axeIds: string[],
@@ -73,9 +70,9 @@ function buildCoverageNotes(
    return notes;
 }
 
-export interface CoverageEntry {
+export interface TestMethodEntry {
    criterionId: string;
-   coverageState: CoverageState;
+   method: TestMethod;
    axeRuleIds: string[];
    actRuleIds: string[];
    sourceAttribution: string[];
@@ -96,7 +93,7 @@ function buildSingleEntry(input: {
    actIndex: Map<string, string[]>;
    axeIndex: Map<string, { ruleIds: string[]; sourceAttribution: string[] }>;
    updatedAt: string;
-}): readonly [string, CoverageEntry, StrategyEntry] {
+}): readonly [string, TestMethodEntry, StrategyEntry] {
    const actRuleIds = input.actIndex.get(input.criterionId) ?? [];
    const axeCov = input.axeIndex.get(input.criterionId);
    const axeRuleIds = axeCov?.ruleIds ?? [];
@@ -107,7 +104,7 @@ function buildSingleEntry(input: {
       input.criterionId,
       {
          criterionId: input.criterionId,
-         coverageState: seed.preferredEvidenceMode as CoverageState,
+         method: seed.preferredEvidenceMode as TestMethod,
          axeRuleIds,
          actRuleIds,
          sourceAttribution: buildSourceAttribution({
@@ -116,7 +113,7 @@ function buildSingleEntry(input: {
             override,
             axeRuleIds,
          }),
-         notes: buildCoverageNotes(seed, actRuleIds, axeRuleIds),
+         notes: buildTestMethodNotes(seed, actRuleIds, axeRuleIds),
          updatedAt: input.updatedAt,
       },
       {
@@ -130,12 +127,12 @@ function buildSingleEntry(input: {
 }
 
 function buildSortedMaps(
-   entries: ReadonlyArray<readonly [string, CoverageEntry, StrategyEntry]>,
+   entries: ReadonlyArray<readonly [string, TestMethodEntry, StrategyEntry]>,
 ): {
-   coverage: Record<string, CoverageEntry>;
+   testMethods: Record<string, TestMethodEntry>;
    strategies: Record<string, StrategyEntry>;
 } {
-   const coverage = Object.fromEntries(
+   const testMethods = Object.fromEntries(
       entries
          .map(([id, ce]) => [id, ce] as const)
          .toSorted(([left], [right]) =>
@@ -149,35 +146,35 @@ function buildSortedMaps(
             left.localeCompare(right, undefined, { numeric: true }),
          ),
    );
-   return { coverage, strategies };
+   return { testMethods, strategies };
 }
 
 function parseArtifactSchemas(input: {
    version: WcagVersion;
-   coverage: Record<string, CoverageEntry>;
+   testMethods: Record<string, TestMethodEntry>;
    strategies: Record<string, StrategyEntry>;
    stats: ReturnType<typeof buildSummaryTotals>;
    updatedAt: string;
-   axeRuleIndexArtifact: GeneratedCoverageArtifacts['axeRuleIndexArtifact'];
-   actRuleIndexArtifact: GeneratedCoverageArtifacts['actRuleIndexArtifact'];
-}): GeneratedCoverageArtifacts {
+   axeRuleIndexArtifact: GeneratedTestMethodArtifacts['axeRuleIndexArtifact'];
+   actRuleIndexArtifact: GeneratedTestMethodArtifacts['actRuleIndexArtifact'];
+}): GeneratedTestMethodArtifacts {
    return {
       axeRuleIndexArtifact: input.axeRuleIndexArtifact,
       actRuleIndexArtifact: input.actRuleIndexArtifact,
-      coverageArtifact: coverageArtifactSchema.parse({
+      testMethodArtifact: testMethodArtifactSchema.parse({
          version: input.version,
-         coverage: input.coverage,
+         testMethods: input.testMethods,
       }),
       strategyArtifact: strategyArtifactSchema.parse({
          version: input.version,
          strategies: input.strategies,
       }),
-      coverageSummaryArtifact: coverageSummaryArtifactSchema.parse({
+      testMethodSummaryArtifact: testMethodSummaryArtifactSchema.parse({
          version: input.version,
          updatedAt: input.updatedAt,
          totals: input.stats.totals,
          byLevel: input.stats.byLevel,
-         coverageSources: {
+         ruleSources: {
             criteriaWithAxe: input.stats.withAxe,
             criteriaWithAct: input.stats.withAct,
             criteriaWithBoth: input.stats.withBoth,
@@ -195,20 +192,20 @@ function parseArtifactSchemas(input: {
    };
 }
 
-export function buildCoverageArtifacts(input: {
+export function buildTestMethodArtifacts(input: {
    version: WcagVersion;
    criteriaArtifact: NormalizedCriteriaArtifact;
    actMapping: ActMappingPayload;
    axeRules: DerivedAxeRule[];
    updatedAt: string;
-}): GeneratedCoverageArtifacts {
-   const actIndex = buildActCoverageIndex({
+}): GeneratedTestMethodArtifacts {
+   const actIndex = buildActRulesByCriterion({
       criteriaArtifact: input.criteriaArtifact,
       actMapping: input.actMapping,
    });
-   const axeIndex = buildAxeCoverageIndex({
+   const axeIndex = buildAxeRulesByCriterion({
       criteriaArtifact: input.criteriaArtifact,
-      actCoverageIndex: actIndex,
+      actRulesByCriterion: actIndex,
       axeRules: input.axeRules,
    });
    const entries = Object.values(input.criteriaArtifact.criteria).map((_criterion) =>
@@ -219,21 +216,21 @@ export function buildCoverageArtifacts(input: {
          updatedAt: input.updatedAt,
       }),
    );
-   const { coverage, strategies } = buildSortedMaps(entries);
+   const { testMethods, strategies } = buildSortedMaps(entries);
    const stats = buildSummaryTotals({
       criteriaArtifact: input.criteriaArtifact,
-      coverage,
+      testMethods,
    });
    return parseArtifactSchemas({
       version: input.version,
-      coverage,
+      testMethods,
       strategies,
       stats,
       updatedAt: input.updatedAt,
       axeRuleIndexArtifact: buildAxeRuleIndex({
          version: input.version,
          axeRules: input.axeRules,
-         axeCoverageIndex: axeIndex,
+         axeRulesByCriterion: axeIndex,
       }),
       actRuleIndexArtifact: buildActRuleIndex({
          version: input.version,

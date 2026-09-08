@@ -48,7 +48,7 @@ export const topLevelHelpCases: HelpCase[] = [
       expected: `
       "Usage: a1 wcag [options] [command] [criterion]
 
-      Look up pinned WCAG requirements and coverage data.
+      Look up pinned WCAG requirements and test methods.
 
       Arguments:
         criterion                  Show one criterion by id or slug, or one technique

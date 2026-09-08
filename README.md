@@ -13,7 +13,7 @@ This installs the `a1` CLI command (also available as `a11ied`):
 ```sh
 a1 doctor                    # check this machine and list the setup steps still needed
 a1 setup                     # run the Guidepup setup steps for VoiceOver or NVDA, then re-check
-a1 wcag 4.1.3                # one criterion: techniques, failures, coverage, next command
+a1 wcag 4.1.3                # one criterion: techniques, failures, test method, next command
 a1 wcag rule color-contrast  # an axe rule mapped back to its criteria and fixes
 a1 help-all
 ```

@@ -54,37 +54,25 @@ const toc = [
       </p>
    </section>
 
-   <section class="split panel" id="artifacts">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Artifacts</p>
-            <h2>Generated artifacts</h2>
-         </div>
-         <p>
-            The sync step fetches the raw upstream payloads into an ignored directory, then
-            generates normalized artifacts per version. The generated set is committed and ships
-            in the package, so a build never reaches the network.
-         </p>
-         <div class="route-list">
-            <div class="route-row"><code>criteria</code><span>Full criterion records with techniques and failures.</span></div>
-            <div class="route-row"><code>criteria-by-level</code><span>Criterion IDs grouped by A, AA, and AAA.</span></div>
-            <div class="route-row"><code>coverage</code><span>Coverage state and mapped rule IDs per criterion.</span></div>
-            <div class="route-row"><code>coverage-summary</code><span>Totals per level, source counts, and representative IDs.</span></div>
-            <div class="route-row"><code>strategy</code><span>Evidence mode, procedure IDs, and whether a real target is needed.</span></div>
-            <div class="route-row"><code>slug-index</code><span>Slug to criterion ID. Every lookup by slug reads it.</span></div>
-            <div class="route-row"><div class="route-terms"><code>technique-index</code>, <code>failure-index</code></div><span>Technique or failure ID to its title, W3C page URL, and the criteria that list it. <code>a1 wcag G18</code> reads them.</span></div>
-            <div class="route-row"><code>axe-rules</code><span>axe rule ID to its tags, ACT rule IDs, and the criteria it maps to. <code>a1 wcag rule</code> reads it.</span></div>
-            <div class="route-row"><code>understanding</code><span>Each criterion's Understanding document, converted to Markdown, with its title, URL, and status. <code>a1 wcag understanding</code> reads it.</span></div>
-            <div class="route-row"><code>technique-bodies</code><span>Each technique and failure's page body, converted to Markdown. <code>a1 wcag G18</code> reads it when one was synced.</span></div>
-            <div class="route-row"><code>documents-content</code><span>The converted document bodies, one copy per distinct body, shared by <code>understanding</code> and <code>technique-bodies</code>.</span></div>
-         </div>
-      </div>
-      <div class="split-aside">
-         <div class="tag">Provenance</div>
-         <p class="aside-note">
-            <code>generated-provenance.json</code> records which upstream payload produced each
-            artifact and when.
-         </p>
+   <section class="panel" id="artifacts">
+      <h2>Generated artifacts</h2>
+      <p>
+         The sync step fetches the raw upstream payloads into an ignored directory, then
+         generates normalized artifacts per version. The generated set is committed and ships
+         in the package, so a build never reaches the network.
+      </p>
+      <div class="route-list">
+         <div class="route-row"><code>criteria</code><span>Full criterion records with techniques and failures.</span></div>
+         <div class="route-row"><code>criteria-by-level</code><span>Criterion IDs grouped by A, AA, and AAA.</span></div>
+         <div class="route-row"><code>test-methods</code><span>Test method (<code>method</code>) and mapped rule IDs per criterion.</span></div>
+         <div class="route-row"><code>test-method-summary</code><span>Count of automated, hybrid, and manual criteria per level, source counts, and representative IDs.</span></div>
+         <div class="route-row"><code>strategy</code><span>Preferred test method, procedure IDs, and whether the page must be open in a browser or screen reader (<code>requiresRealTarget</code>).</span></div>
+         <div class="route-row"><code>slug-index</code><span>Slug to criterion ID. Every lookup by slug reads it.</span></div>
+         <div class="route-row"><div class="route-terms"><code>technique-index</code>, <code>failure-index</code></div><span>Technique or failure ID to its title, W3C page URL, and the criteria that list it. <code>a1 wcag G18</code> reads them.</span></div>
+         <div class="route-row"><code>axe-rules</code><span>axe rule ID to its tags, ACT rule IDs, and the criteria it maps to. <code>a1 wcag rule</code> reads it.</span></div>
+         <div class="route-row"><code>understanding</code><span>Each criterion's Understanding document, converted to Markdown, with its title, URL, and status. <code>a1 wcag understanding</code> reads it.</span></div>
+         <div class="route-row"><code>technique-bodies</code><span>Each technique and failure's page body, converted to Markdown. <code>a1 wcag G18</code> reads it when one was synced.</span></div>
+         <div class="route-row"><code>documents-content</code><span>The converted document bodies, one copy per distinct body, shared by <code>understanding</code> and <code>technique-bodies</code>.</span></div>
       </div>
    </section>
 
@@ -109,7 +97,7 @@ const toc = [
     "principle": &#123; "id": "perceivable", "number": "1", "title": "Perceivable" &#125;,
     "guideline": &#123; "id": "distinguishable", "number": "1.4", "title": "Distinguishable" &#125;
   &#125;,
-  "coverage": &#123; "criterionId": "1.4.3", "coverageState": "automated", "..." : "..." &#125;,
+  "testMethod": &#123; "criterionId": "1.4.3", "method": "automated", "..." : "..." &#125;,
   "strategy": &#123; "criterionId": "1.4.3", "preferredEvidenceMode": "automated", "..." : "..." &#125;
 &#125;</code></pre>
       <p>
@@ -121,8 +109,8 @@ const toc = [
       </p>
       <p>
          <code>versions</code> says which WCAG releases contain the criterion. See
-         <a href="/test-methods">coverage</a> for what <code>result.coverage</code> and
-         <code>result.strategy</code> include.
+         <a href="/test-methods">test methods</a> for what <code>result.testMethod</code> and
+         <code>result.strategy</code> hold.
       </p>
       <p>
          The Understanding document and the technique body are in the data too, converted from

@@ -1,4 +1,4 @@
-import { applicabilityInputSchema, type ApplicabilityInput } from '@a11ied/contracts';
+import { pageScanSchema, type PageScan } from '@a11ied/contracts';
 
 const fixtures = {
    'basic-page.html': {
@@ -127,15 +127,12 @@ const fixtures = {
       },
       userHints: [],
    },
-} satisfies Record<string, ApplicabilityInput>;
+} satisfies Record<string, PageScan>;
 
-const applicabilityFixtures = Object.fromEntries(
-   Object.entries(fixtures).map(([name, input]) => [
-      name,
-      applicabilityInputSchema.parse(input),
-   ]),
-) as Record<keyof typeof fixtures, ApplicabilityInput>;
+const relevanceFixtures = Object.fromEntries(
+   Object.entries(fixtures).map(([name, input]) => [name, pageScanSchema.parse(input)]),
+) as Record<keyof typeof fixtures, PageScan>;
 
-export function getApplicabilityFixture(name: keyof typeof fixtures): ApplicabilityInput {
-   return applicabilityFixtures[name];
+export function getRelevanceFixture(name: keyof typeof fixtures): PageScan {
+   return relevanceFixtures[name];
 }

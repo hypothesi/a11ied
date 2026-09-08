@@ -26,5 +26,5 @@ This package defines result shapes for:
 
 - axe-core scan results
 - driver session and action results
-- WCAG criterion, level, and coverage records
-- applicability and query results
+- WCAG criterion, level, and test method records
+- relevance and query results

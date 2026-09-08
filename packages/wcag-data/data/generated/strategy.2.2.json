@@ -6,21 +6,21 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "1.2.1": {
          "criterionId": "1.2.1",
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "1.2.2": {
          "criterionId": "1.2.2",
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "1.2.3": {
          "criterionId": "1.2.3",
@@ -76,7 +76,7 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "1.3.2": {
          "criterionId": "1.3.2",
@@ -97,14 +97,14 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "1.3.5": {
          "criterionId": "1.3.5",
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "1.3.6": {
          "criterionId": "1.3.6",
@@ -118,28 +118,28 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "1.4.2": {
          "criterionId": "1.4.2",
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "1.4.3": {
          "criterionId": "1.4.3",
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "1.4.4": {
          "criterionId": "1.4.4",
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "1.4.5": {
          "criterionId": "1.4.5",
@@ -153,7 +153,7 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "1.4.7": {
          "criterionId": "1.4.7",
@@ -181,7 +181,7 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "1.4.11": {
          "criterionId": "1.4.11",
@@ -195,7 +195,7 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "1.4.13": {
          "criterionId": "1.4.13",
@@ -209,7 +209,7 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "2.1.2": {
          "criterionId": "2.1.2",
@@ -223,7 +223,7 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "2.1.4": {
          "criterionId": "2.1.4",
@@ -237,14 +237,14 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "2.2.2": {
          "criterionId": "2.2.2",
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "2.2.3": {
          "criterionId": "2.2.3",
@@ -258,7 +258,7 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "2.2.5": {
          "criterionId": "2.2.5",
@@ -309,7 +309,7 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "2.4.3": {
          "criterionId": "2.4.3",
@@ -323,7 +323,7 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "2.4.5": {
          "criterionId": "2.4.5",
@@ -360,7 +360,7 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "2.4.10": {
          "criterionId": "2.4.10",
@@ -415,7 +415,7 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "2.5.4": {
          "criterionId": "2.5.4",
@@ -450,21 +450,21 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "3.1.1": {
          "criterionId": "3.1.1",
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "3.1.2": {
          "criterionId": "3.1.2",
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "3.1.3": {
          "criterionId": "3.1.3",
@@ -527,7 +527,7 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "3.2.6": {
          "criterionId": "3.2.6",
@@ -550,7 +550,7 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "3.3.3": {
          "criterionId": "3.3.3",
@@ -610,7 +610,7 @@
          "preferredEvidenceMode": "automated",
          "procedureIds": ["axe_scan"],
          "requiresRealTarget": false,
-         "notes": ["Direct axe coverage exists for this criterion."]
+         "notes": ["axe rules decide this criterion."]
       },
       "4.1.3": {
          "criterionId": "4.1.3",

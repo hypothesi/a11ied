@@ -1,37 +1,37 @@
 {
-   "version": "2.2",
-   "updatedAt": "2026-09-05T21:43:17.757Z",
+   "version": "2.1",
+   "updatedAt": "2026-09-06T11:46:41.468Z",
    "totals": {
       "automated": 28,
-      "hybrid": 10,
-      "manual": 48,
+      "hybrid": 6,
+      "manual": 44,
       "unknown": 0,
-      "criteria": 86
+      "criteria": 78
    },
    "byLevel": {
       "A": {
-         "automated": 15,
-         "hybrid": 3,
-         "manual": 13,
-         "unknown": 0,
-         "criteria": 31
-      },
-      "AA": {
-         "automated": 8,
-         "hybrid": 4,
+         "automated": 16,
+         "hybrid": 2,
          "manual": 12,
          "unknown": 0,
-         "criteria": 24
+         "criteria": 30
+      },
+      "AA": {
+         "automated": 7,
+         "hybrid": 3,
+         "manual": 10,
+         "unknown": 0,
+         "criteria": 20
       },
       "AAA": {
          "automated": 5,
-         "hybrid": 3,
-         "manual": 23,
+         "hybrid": 1,
+         "manual": 22,
          "unknown": 0,
-         "criteria": 31
+         "criteria": 28
       }
    },
-   "coverageSources": {
+   "ruleSources": {
       "criteriaWithAxe": 29,
       "criteriaWithAct": 24,
       "criteriaWithBoth": 21

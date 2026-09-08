@@ -3,13 +3,13 @@ import type { CliCommand } from '../../contracts/src/index.js';
 export {
    CliEnvironmentError,
    CliUsageError,
-   inspectApplicableTarget,
-   inspectApplicableUrl,
+   inspectRelevantCriteriaTarget,
+   inspectRelevantCriteriaUrl,
    inspectCriterionTarget,
    inspectCriterionUrl,
    listWcagCriteria,
    searchWcagCriteria,
-   showWcagCoverage,
+   showWcagTestMethod,
    showWcagCriterion,
 } from './wcag/runtime.js';
 export {
@@ -122,7 +122,7 @@ export type { AuditTreeSummary } from './audit/tree-summary.js';
 const cliCommands: CliCommand[] = [
    {
       name: 'wcag',
-      summary: 'Query pinned WCAG criteria, coverage, and testing strategy data.',
+      summary: 'Query pinned WCAG criteria, test methods, and testing strategy data.',
       maturity: 'ready',
    },
    {
@@ -143,7 +143,8 @@ const cliCommands: CliCommand[] = [
    },
    {
       name: 'audit',
-      summary: 'Run the full audit loop against a target: axe, tree, and applicability.',
+      summary:
+         'Run axe, the accessibility tree, and the relevant criteria scan against a target.',
       maturity: 'ready',
    },
    {
@@ -170,7 +171,7 @@ export function listCliCommands(): CliCommand[] {
 
 export {
    showWcagAxeRule,
-   showWcagCoverageSummary,
+   showWcagTestMethodSummary,
    showWcagTechnique,
    showWcagUnderstanding,
 } from './wcag/runtime.js';

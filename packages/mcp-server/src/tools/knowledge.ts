@@ -15,7 +15,7 @@ import {
    listWcagCriteria,
    searchWcagCriteria,
    showWcagAxeRule,
-   showWcagCoverageSummary,
+   showWcagTestMethodSummary,
    showWcagCriterion,
    showWcagTechnique,
    showWcagUnderstanding,
@@ -76,7 +76,7 @@ function registerWcagShowTool(server: McpServer): void {
          title: 'WCAG show',
          description:
             'Show one WCAG criterion by id (such as "1.4.3") or slug (such as "contrast-minimum"), ' +
-            'with its techniques, failures, coverage state, testing strategy, and a short excerpt of ' +
+            'with its techniques, failures, test method, testing strategy, and a short excerpt of ' +
             'its Understanding document. Set includeUnderstanding to true for the full Understanding ' +
             'document text, the primary source for how to fix a violation. A technique or failure id ' +
             '(such as "G18" or "F65") returns the technique, the criteria that list it, and the ' +
@@ -114,7 +114,7 @@ function registerWcagCriteriaTool(server: McpServer): void {
          title: 'WCAG criteria',
          description:
             'List WCAG criteria. Omit level to list every criterion. Set level to A, AA, or AAA to filter. ' +
-            'Set summary to return coverage totals per level instead of the list. ' +
+            'Set summary to return how many criteria are automated, hybrid, and manual per level instead of the list. ' +
             'Matches the CLI wcag criteria [--level] [--summary] command.',
          inputSchema: z.object({
             level: wcagLevelSchema.optional(),
@@ -125,7 +125,7 @@ function registerWcagCriteriaTool(server: McpServer): void {
       },
       async ({ level, summary, version }) => {
          if (summary) {
-            return createToolResponse(showWcagCoverageSummary(version));
+            return createToolResponse(showWcagTestMethodSummary(version));
          }
          return createToolResponse(listWcagCriteria(level, version));
       },

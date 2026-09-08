@@ -27,14 +27,14 @@ interface AuditResult {
       firstHeading?: string;
       counts: { headings: number; links: number };
    };
-   applicability: {
+   relevance: {
       matrix: { assessments: Record<string, { state: string; reasons: string[] }> };
    };
    criteria: Array<{
       id: string;
       axeVerdict: string;
-      applicability: string;
-      coverageState: string;
+      relevance: string;
+      testMethod: string;
    }>;
    verdict: { passed: boolean };
    nextCommands: string[];
@@ -57,17 +57,17 @@ async function assertAuditFailsOnViolations(baseUrl: string): Promise<void> {
    expect(audit.nextCommands).toContain('a1 wcag rule button-name');
 }
 
-async function assertAuditReportsTreeAndApplicability(baseUrl: string): Promise<void> {
+async function assertAuditReportsTreeAndRelevance(baseUrl: string): Promise<void> {
    const result = await runCli(['audit', `${baseUrl}/status-message.html`, '--json']);
    const json = parseJsonOutput(result.stdout);
    const audit = json.result as unknown as AuditResult;
 
    expect(audit.tree.pageTitle).toBeTruthy();
    expect(audit.tree.counts.headings).toBeGreaterThan(0);
-   expect(audit.applicability.matrix.assessments['4.1.3']?.state).toBe('applicable');
+   expect(audit.relevance.matrix.assessments['4.1.3']?.state).toBe('relevant');
 
    const rollupEntry = audit.criteria.find((entry) => entry.id === '4.1.3');
-   expect(rollupEntry?.applicability).toBe('applicable');
+   expect(rollupEntry?.relevance).toBe('relevant');
 }
 
 async function assertAuditFailOnRespected(baseUrl: string): Promise<void> {
@@ -101,7 +101,7 @@ async function assertAuditVerboseTable(baseUrl: string): Promise<void> {
    expect(verbose.stdout).toMatch(/Criterion\s+Level\s+Automated check\s+Applies here/);
    expect(verbose.stdout).toContain('failed');
    expect(verbose.stdout).not.toContain('axe=fail');
-   expect(verbose.stdout).not.toContain('coverage=automated');
+   expect(verbose.stdout).not.toContain('testMethod=automated');
 }
 
 /**
@@ -116,7 +116,7 @@ async function assertAuditTextStatesFindings(baseUrl: string): Promise<void> {
    expect(failing.stdout).toContain('1 failing element');
    expect(failing.stdout).toContain('a1 wcag rule button-name');
    expect(failing.stdout).not.toContain('axe=fail');
-   expect(failing.stdout).not.toContain('applicability=not-detected');
+   expect(failing.stdout).not.toContain('relevance=not-detected');
 
    const passing = await runCli(['audit', `${baseUrl}/basic-page.html`]);
    expect(passing.stdout).toContain('Nothing failed the automated checks');
@@ -144,9 +144,9 @@ describe('cli audit command', () => {
    );
 
    it(
-      'reports a tree summary and signal-backed applicability',
+      'reports a tree summary and the relevant criteria',
       async () => {
-         await assertAuditReportsTreeAndApplicability(testServer.getBaseUrl());
+         await assertAuditReportsTreeAndRelevance(testServer.getBaseUrl());
       },
       TEST_TIMEOUT_LONG,
    );

@@ -95,8 +95,8 @@ export const axeVerdictSchema = z.object({
 });
 export type AxeVerdict = z.infer<typeof axeVerdictSchema>;
 
-export const coverageStateSchema = z.enum(['automated', 'hybrid', 'manual', 'unknown']);
-export type CoverageState = z.infer<typeof coverageStateSchema>;
+export const testMethodSchema = z.enum(['automated', 'hybrid', 'manual', 'unknown']);
+export type TestMethod = z.infer<typeof testMethodSchema>;
 
 export const preferredEvidenceModeSchema = z.enum([
    'automated',
@@ -106,13 +106,13 @@ export const preferredEvidenceModeSchema = z.enum([
 ]);
 export type PreferredEvidenceMode = z.infer<typeof preferredEvidenceModeSchema>;
 
-export const applicabilityStateSchema = z.enum([
-   'applicable',
+export const relevanceSchema = z.enum([
+   'relevant',
    'not-detected',
    'out-of-scope',
    'unknown',
 ]);
-export type ApplicabilityState = z.infer<typeof applicabilityStateSchema>;
+export type Relevance = z.infer<typeof relevanceSchema>;
 
 export const normalizedTechniqueSchema = techniqueReferenceSchema.extend({
    groupTitle: z.string().optional(),
@@ -231,22 +231,22 @@ export const actRuleIndexArtifactSchema = z.object({
 });
 export type ActRuleIndexArtifact = z.infer<typeof actRuleIndexArtifactSchema>;
 
-export const criterionCoverageSchema = z.object({
+export const criterionTestMethodSchema = z.object({
    criterionId: z.string(),
-   coverageState: coverageStateSchema,
+   method: testMethodSchema,
    axeRuleIds: z.array(z.string()),
    actRuleIds: z.array(z.string()),
    sourceAttribution: z.array(z.string()),
    notes: z.array(z.string()),
    updatedAt: z.string().datetime(),
 });
-export type CriterionCoverage = z.infer<typeof criterionCoverageSchema>;
+export type CriterionTestMethod = z.infer<typeof criterionTestMethodSchema>;
 
-export const coverageArtifactSchema = z.object({
+export const testMethodArtifactSchema = z.object({
    version: wcagVersionSchema,
-   coverage: z.record(z.string(), criterionCoverageSchema),
+   testMethods: z.record(z.string(), criterionTestMethodSchema),
 });
-export type CoverageArtifact = z.infer<typeof coverageArtifactSchema>;
+export type TestMethodArtifact = z.infer<typeof testMethodArtifactSchema>;
 
 export const evidenceStrategySchema = z.object({
    criterionId: z.string(),
@@ -263,20 +263,20 @@ export const strategyArtifactSchema = z.object({
 });
 export type StrategyArtifact = z.infer<typeof strategyArtifactSchema>;
 
-const coverageSummaryBucketSchema = fourWayAutomationCountSchema.extend({
+const testMethodSummaryBucketSchema = fourWayAutomationCountSchema.extend({
    criteria: z.number().int().nonnegative(),
 });
 
-export const coverageSummaryArtifactSchema = z.object({
+export const testMethodSummaryArtifactSchema = z.object({
    version: wcagVersionSchema,
    updatedAt: z.string().datetime(),
-   totals: coverageSummaryBucketSchema,
+   totals: testMethodSummaryBucketSchema,
    byLevel: z.object({
-      [LEVEL_A]: coverageSummaryBucketSchema,
-      AA: coverageSummaryBucketSchema,
-      AAA: coverageSummaryBucketSchema,
+      [LEVEL_A]: testMethodSummaryBucketSchema,
+      AA: testMethodSummaryBucketSchema,
+      AAA: testMethodSummaryBucketSchema,
    }),
-   coverageSources: z.object({
+   ruleSources: z.object({
       criteriaWithAxe: z.number().int().nonnegative(),
       criteriaWithAct: z.number().int().nonnegative(),
       criteriaWithBoth: z.number().int().nonnegative(),
@@ -288,7 +288,7 @@ export const coverageSummaryArtifactSchema = z.object({
       unknown: z.array(z.string()),
    }),
 });
-export type CoverageSummaryArtifact = z.infer<typeof coverageSummaryArtifactSchema>;
+export type TestMethodSummaryArtifact = z.infer<typeof testMethodSummaryArtifactSchema>;
 
 /**
  * Attribution and freshness fields every copied W3C document carries, per the W3C

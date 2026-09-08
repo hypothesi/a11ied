@@ -7,10 +7,10 @@ import {
 import type { DerivedAxeRule } from '../shared/types.js';
 
 function invertCriterionRuleIndex(
-   axeCoverageIndex: Map<string, { ruleIds: string[] }>,
+   axeRulesByCriterion: Map<string, { ruleIds: string[] }>,
 ): Map<string, Set<string>> {
    const criterionIdsByRule = new Map<string, Set<string>>();
-   for (const [criterionId, entry] of axeCoverageIndex.entries()) {
+   for (const [criterionId, entry] of axeRulesByCriterion.entries()) {
       for (const ruleId of entry.ruleIds) {
          const current = criterionIdsByRule.get(ruleId) ?? new Set<string>();
          current.add(criterionId);
@@ -28,9 +28,9 @@ function invertCriterionRuleIndex(
 export function buildAxeRuleIndex(input: {
    version: WcagVersion;
    axeRules: DerivedAxeRule[];
-   axeCoverageIndex: Map<string, { ruleIds: string[] }>;
+   axeRulesByCriterion: Map<string, { ruleIds: string[] }>;
 }): AxeRuleIndexArtifact {
-   const criterionIdsByRule = invertCriterionRuleIndex(input.axeCoverageIndex);
+   const criterionIdsByRule = invertCriterionRuleIndex(input.axeRulesByCriterion);
    const rules = Object.fromEntries(
       input.axeRules.map((rule) => [
          rule.ruleId,

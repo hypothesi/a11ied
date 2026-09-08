@@ -1,14 +1,14 @@
 export { WcagEngineNotFoundError, WcagEngineValidationError } from './errors/index.js';
 
 export {
-   supportedApplicabilityStates,
-   supportedApplicabilitySignalCategories,
+   supportedRelevanceStates,
+   supportedPageSignalCategories,
 } from './shared/data.js';
 
 export {
    getAxeRule,
-   getCoverage,
-   getCoverageSummary,
+   getTestMethod,
+   getTestMethodSummary,
    getCriterion,
    getQuickrefTags,
    getTechnique,
@@ -19,7 +19,4 @@ export {
 
 export { searchCriteria } from './search/runtime.js';
 
-export {
-   getCriterionApplicability,
-   listApplicableCriteria,
-} from './applicability/runtime.js';
+export { getCriterionRelevance, listRelevantCriteria } from './relevance/runtime.js';

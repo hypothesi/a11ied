@@ -1,4 +1,4 @@
-import type { CoverageState, WcagVersion } from '@a11ied/contracts';
+import type { TestMethod, WcagVersion } from '@a11ied/contracts';
 
 import type {
    ActMappingPayload,
@@ -40,7 +40,7 @@ function accumulateVersionResult(
       generatedArtifacts: GeneratedArtifactWriteResult[];
       manifestArtifacts: GeneratedArtifactProvenance[];
       criteriaCountByVersion: Record<WcagVersion, number>;
-      coverageCountsByVersion: Record<WcagVersion, Record<CoverageState, number>>;
+      testMethodCountsByVersion: Record<WcagVersion, Record<TestMethod, number>>;
    },
    version: WcagVersion,
    result: Awaited<ReturnType<typeof processVersion>>,
@@ -48,21 +48,21 @@ function accumulateVersionResult(
    acc.generatedArtifacts.push(...result.generated);
    acc.manifestArtifacts.push(...result.manifest);
    acc.criteriaCountByVersion[version] = result.criteriaCount;
-   acc.coverageCountsByVersion[version] = result.coverageCounts;
+   acc.testMethodCountsByVersion[version] = result.testMethodCounts;
 }
 
 function assembleResults(versionResults: Awaited<ReturnType<typeof processVersion>>[]): {
    generatedArtifacts: GeneratedArtifactWriteResult[];
    manifestArtifacts: GeneratedArtifactProvenance[];
    criteriaCountByVersion: Record<WcagVersion, number>;
-   coverageCountsByVersion: Record<WcagVersion, Record<CoverageState, number>>;
+   testMethodCountsByVersion: Record<WcagVersion, Record<TestMethod, number>>;
 } {
    const generatedArtifacts: GeneratedArtifactWriteResult[] = [];
    const manifestArtifacts: GeneratedArtifactProvenance[] = [];
    const criteriaCountByVersion = {} as Record<WcagVersion, number>;
-   const coverageCountsByVersion = {} as Record<
+   const testMethodCountsByVersion = {} as Record<
       WcagVersion,
-      Record<CoverageState, number>
+      Record<TestMethod, number>
    >;
    for (const [idx, version] of wcagVersions.entries()) {
       const result = versionResults[idx];
@@ -74,7 +74,7 @@ function assembleResults(versionResults: Awaited<ReturnType<typeof processVersio
             generatedArtifacts,
             manifestArtifacts,
             criteriaCountByVersion,
-            coverageCountsByVersion,
+            testMethodCountsByVersion,
          },
          version,
          result,
@@ -84,7 +84,7 @@ function assembleResults(versionResults: Awaited<ReturnType<typeof processVersio
       generatedArtifacts,
       manifestArtifacts,
       criteriaCountByVersion,
-      coverageCountsByVersion,
+      testMethodCountsByVersion,
    };
 }
 
@@ -128,7 +128,7 @@ export async function generateNormalizedArtifacts(
          left.fileName.localeCompare(right.fileName),
       ),
       criteriaCountByVersion: assembled.criteriaCountByVersion,
-      coverageCountsByVersion: assembled.coverageCountsByVersion,
+      testMethodCountsByVersion: assembled.testMethodCountsByVersion,
    };
 }
 
@@ -143,7 +143,7 @@ export async function runWcagDataSync(options?: {
    axeRuleCount: number;
    generatedArtifacts: GeneratedArtifactWriteResult[];
    criteriaCountByVersion: Record<WcagVersion, number>;
-   coverageCountsByVersion: Record<WcagVersion, Record<CoverageState, number>>;
+   testMethodCountsByVersion: Record<WcagVersion, Record<TestMethod, number>>;
 }> {
    const dirs = options?.directories ?? (await ensureWcagDataDirectories());
    const rawSync = await syncRawSources({ ...options, directories: dirs });
@@ -154,6 +154,6 @@ export async function runWcagDataSync(options?: {
       axeRuleCount: rawSync.axeRuleCount,
       generatedArtifacts: normalized.generatedArtifacts,
       criteriaCountByVersion: normalized.criteriaCountByVersion,
-      coverageCountsByVersion: normalized.coverageCountsByVersion,
+      testMethodCountsByVersion: normalized.testMethodCountsByVersion,
    };
 }

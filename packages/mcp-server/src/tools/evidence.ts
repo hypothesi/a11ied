@@ -6,7 +6,7 @@ import {
    listPendingCriteria,
    resolveDocumentTarget,
 } from '@a11ied/core';
-import { getCoverage, WcagEngineNotFoundError } from '@a11ied/wcag-engine';
+import { getTestMethod, WcagEngineNotFoundError } from '@a11ied/wcag-engine';
 import { z } from 'zod';
 
 import {
@@ -81,7 +81,7 @@ async function resolveSubject(input: {
 function pickProcedureId(criterionId: string, wcagVersion?: string): string {
    try {
       const lookup = wcagVersion === undefined ? {} : { version: wcagVersion };
-      const { procedureIds } = getCoverage(criterionId, lookup).strategy;
+      const { procedureIds } = getTestMethod(criterionId, lookup).strategy;
       const performable = procedureIds.find(
          (procedureId: string) => procedureId !== AUTOMATED_PROCEDURE_ID,
       );

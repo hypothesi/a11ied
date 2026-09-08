@@ -1,19 +1,19 @@
 import { JSDOM, VirtualConsole } from 'jsdom';
 import {
-   applicabilityInputSchema,
-   type ApplicabilityElement,
-   type ApplicabilityInput,
-   type ApplicabilitySignal,
+   pageScanSchema,
+   type PageElement,
+   type PageScan,
+   type PageSignal,
 } from '@a11ied/contracts';
 
 const MAX_ELEMENTS_PER_SIGNAL = 10;
 const MAX_SNIPPET_LENGTH = 120;
 
 interface SignalDetector {
-   category: ApplicabilitySignal['category'];
-   source: ApplicabilitySignal['source'];
+   category: PageSignal['category'];
+   source: PageSignal['source'];
    value: string;
-   confidence: ApplicabilitySignal['confidence'];
+   confidence: PageSignal['confidence'];
    selector?: string;
    /** Tested against an element's opening tag plus the text it holds directly. */
    pattern?: RegExp;
@@ -196,10 +196,7 @@ function buildSnippet(openingTag: string): string {
    return `${singleLine.slice(0, MAX_SNIPPET_LENGTH)}...`;
 }
 
-function toApplicabilityElement(
-   element: Element,
-   openingTag: string,
-): ApplicabilityElement {
+function toPageElement(element: Element, openingTag: string): PageElement {
    return {
       xpath: buildXPath(element),
       tag: element.localName,
@@ -218,9 +215,9 @@ function matchesDetector(
    return detector.pattern !== undefined && detector.pattern.test(surface);
 }
 
-function detectDomSignals(html: string): ApplicabilitySignal[] {
+function detectDomSignals(html: string): PageSignal[] {
    const dom = new JSDOM(html, { virtualConsole: new VirtualConsole() });
-   const matches = new Map<SignalDetector, ApplicabilityElement[]>();
+   const matches = new Map<SignalDetector, PageElement[]>();
 
    for (const element of dom.window.document.querySelectorAll('*')) {
       const openingTag = buildOpeningTag(element);
@@ -231,7 +228,7 @@ function detectDomSignals(html: string): ApplicabilitySignal[] {
          }
          const elements = matches.get(detector) ?? [];
          if (elements.length < MAX_ELEMENTS_PER_SIGNAL) {
-            elements.push(toApplicabilityElement(element, openingTag));
+            elements.push(toPageElement(element, openingTag));
          }
          matches.set(detector, elements);
       }
@@ -258,9 +255,9 @@ function resolveHintSource(userHints: string[] | undefined): 'user-hint' | 'meta
 function detectHintBasedSignals(
    hintValues: string,
    userHints: string[] | undefined,
-): ApplicabilitySignal[] {
+): PageSignal[] {
    const source = resolveHintSource(userHints);
-   const signals: ApplicabilitySignal[] = [];
+   const signals: PageSignal[] = [];
 
    if (/\b(auth|login|sign in|sign-in|password|credential)\b/i.test(hintValues)) {
       signals.push({
@@ -302,21 +299,21 @@ function buildHintValues(options?: {
    ].join(' ');
 }
 
-export function deriveApplicabilityInputFromHtml(
+export function scanHtmlForPageSignals(
    url: string,
    html: string,
    options?: {
-      target?: ApplicabilityInput['target'];
+      target?: PageScan['target'];
       metadata?: Record<string, string>;
       userHints?: string[];
    },
-): ApplicabilityInput {
+): PageScan {
    const signals = [
       ...detectDomSignals(html),
       ...detectHintBasedSignals(buildHintValues(options), options?.userHints),
    ];
 
-   return applicabilityInputSchema.parse({
+   return pageScanSchema.parse({
       target: options?.target ?? {
          kind: 'url',
          value: url,

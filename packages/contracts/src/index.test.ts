@@ -5,7 +5,7 @@ import {
    axeRunResultSchema,
    cliExitCodeSchema,
    cliOutputEnvelopeSchema,
-   criterionApplicabilityLookupResultSchema,
+   criterionRelevanceLookupResultSchema,
    criterionLookupKeySchema,
    criterionSearchResponseSchema,
    driverActionResultSchema,
@@ -13,8 +13,8 @@ import {
    driverStateSnapshotSchema,
    engineQueryErrorSchema,
    normalizedCriteriaArtifactSchema,
-   applicabilityInputSchema,
-   applicabilityMatrixSchema,
+   pageScanSchema,
+   relevanceMatrixSchema,
 } from './index.js';
 
 import {
@@ -31,12 +31,12 @@ import {
    assertLookupPayloads,
    createTestCriterionArtifactPayload,
    createSearchResponsePayload,
-   createApplicabilityInputPayload,
-   createApplicabilityMatrixPayload,
+   createPageScanPayload,
+   createRelevanceMatrixPayload,
 } from './testing/helpers.js';
 
 describe('contracts artifact schemas', () => {
-   it('round-trips committed WCAG, coverage, and strategy artifacts for both supported versions', async () => {
+   it('round-trips committed WCAG, test method, and strategy artifacts for both supported versions', async () => {
       await validateVersionArtifacts('2.2');
       await validateVersionArtifacts('2.1');
    });
@@ -154,42 +154,40 @@ describe('contracts axe payloads', () => {
    });
 });
 
-describe('contracts engine payloads - lookup and coverage', () => {
-   it('parses lookup and coverage result payloads built from generated artifacts', async () => {
+describe('contracts engine payloads - lookup and test method', () => {
+   it('parses lookup and test method result payloads built from generated artifacts', async () => {
       const artifacts = await loadEngineTestArtifacts();
       expect(artifacts.criteriaArtifact.criteria['4.1.3']).toBeDefined();
-      expect(artifacts.coverageArtifact.coverage['4.1.3']).toBeDefined();
+      expect(artifacts.testMethodArtifact.testMethods['4.1.3']).toBeDefined();
       expect(artifacts.strategyArtifact.strategies['4.1.3']).toBeDefined();
       assertLookupPayloads(artifacts);
    });
 });
 
-describe('contracts engine payloads - search and applicability', () => {
-   it('round-trips search and applicability payloads', () => {
+describe('contracts engine payloads - search and relevance', () => {
+   it('round-trips search and relevance payloads', () => {
       const criterion = normalizedCriteriaArtifactSchema.parse(
          createTestCriterionArtifactPayload(),
       ).criteria['4.1.3'];
       const searchResponse = criterionSearchResponseSchema.parse(
          createSearchResponsePayload(),
       );
-      const applicabilityInput = applicabilityInputSchema.parse(
-         createApplicabilityInputPayload(),
+      const pageScan = pageScanSchema.parse(createPageScanPayload());
+      const relevanceMatrix = relevanceMatrixSchema.parse(
+         createRelevanceMatrixPayload(pageScan.target),
       );
-      const applicabilityMatrix = applicabilityMatrixSchema.parse(
-         createApplicabilityMatrixPayload(applicabilityInput.target),
-      );
-      const applicabilityLookup = criterionApplicabilityLookupResultSchema.parse({
+      const relevanceLookup = criterionRelevanceLookupResultSchema.parse({
          lookupKey: '4.1.3',
          version: '2.2',
-         target: applicabilityInput.target,
+         target: pageScan.target,
          criterion,
-         assessment: applicabilityMatrix.assessments['4.1.3'],
+         assessment: relevanceMatrix.assessments['4.1.3'],
       });
 
       expect(structuredClone(searchResponse)).toEqual(searchResponse);
-      expect(structuredClone(applicabilityInput)).toEqual(applicabilityInput);
-      expect(structuredClone(applicabilityMatrix)).toEqual(applicabilityMatrix);
-      expect(applicabilityLookup.lookupKey).toBe('4.1.3');
+      expect(structuredClone(pageScan)).toEqual(pageScan);
+      expect(structuredClone(relevanceMatrix)).toEqual(relevanceMatrix);
+      expect(relevanceLookup.lookupKey).toBe('4.1.3');
    });
 });
 

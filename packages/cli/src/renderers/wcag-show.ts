@@ -28,7 +28,7 @@ import {
    techniqueLine,
    type RenderOptions,
 } from './shared.js';
-import { failsSection, testingSection, verboseCoverageLines } from './wcag-testing.js';
+import { failsSection, testingSection, verboseTestMethodLines } from './wcag-testing.js';
 
 export type CriterionDetailSection = 'testing' | 'fails';
 
@@ -105,8 +105,8 @@ function verboseDetailLines(
    const advisoryLine =
       advisory.map((technique) => technique.id ?? technique.title).join(', ') || 'none';
    return [
-      ...verboseCoverageLines({
-         coverage: result.coverage,
+      ...verboseTestMethodLines({
+         testMethod: result.testMethod,
          strategy: result.strategy,
          actRules: result.actRules,
          width: options.width,
@@ -150,7 +150,7 @@ export function renderCriterionDetailLines(
       lines.push(
          ...testingSection({
             criterionId: criterion.id,
-            coverage: result.coverage,
+            testMethod: result.testMethod,
             strategy: result.strategy,
             width: options.width ?? getTerminalWidth(),
          }),

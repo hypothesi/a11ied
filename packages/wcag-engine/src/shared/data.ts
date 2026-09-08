@@ -1,12 +1,12 @@
 import {
-   applicabilitySignalCategorySchema,
-   applicabilityStateSchema,
+   pageSignalCategorySchema,
+   relevanceSchema,
    wcagVersionSchema,
    type ActRuleIndexArtifact,
-   type ApplicabilitySignalCategory,
-   type ApplicabilityState,
+   type PageSignalCategory,
+   type Relevance,
    type AxeRuleIndexArtifact,
-   type CoverageSummaryArtifact,
+   type TestMethodSummaryArtifact,
    type DocumentContentStore,
    type NormalizedCriterion,
    type TechniqueBodyArtifact,
@@ -14,19 +14,19 @@ import {
    type UnderstandingArtifact,
    type WcagLevel,
    type WcagVersion,
-   type coverageArtifactSchema,
+   type testMethodArtifactSchema,
    type strategyArtifactSchema,
 } from '@a11ied/contracts';
 
 export const supportedVersions = wcagVersionSchema.options;
 
-export const supportedApplicabilityStates = [
-   ...applicabilityStateSchema.options,
-] as readonly ApplicabilityState[];
+export const supportedRelevanceStates = [
+   ...relevanceSchema.options,
+] as readonly Relevance[];
 
-export const supportedApplicabilitySignalCategories = [
-   ...applicabilitySignalCategorySchema.options,
-] as readonly ApplicabilitySignalCategory[];
+export const supportedPageSignalCategories = [
+   ...pageSignalCategorySchema.options,
+] as readonly PageSignalCategory[];
 
 export type SearchableField = keyof typeof searchableFieldWeights;
 
@@ -45,14 +45,14 @@ export const searchableFieldWeights = {
 export interface EngineArtifacts {
    criteria: Record<string, NormalizedCriterion>;
    criteriaByLevel: Record<WcagLevel, string[]>;
-   coverage: ReturnType<typeof coverageArtifactSchema.parse>['coverage'];
+   testMethods: ReturnType<typeof testMethodArtifactSchema.parse>['testMethods'];
    strategies: ReturnType<typeof strategyArtifactSchema.parse>['strategies'];
    slugToId: Record<string, string>;
    techniques: TechniqueIndexArtifact['techniques'];
    failures: TechniqueIndexArtifact['techniques'];
    axeRules: AxeRuleIndexArtifact['rules'];
    actRules: ActRuleIndexArtifact['rules'];
-   coverageSummary: CoverageSummaryArtifact;
+   testMethodSummary: TestMethodSummaryArtifact;
    understanding: UnderstandingArtifact['documents'];
    techniqueBodies: TechniqueBodyArtifact['bodies'];
 }
@@ -67,49 +67,48 @@ export const contentStoreCache: { store: DocumentContentStore | undefined } = {
    store: undefined,
 };
 
-export const applicabilitySignalTagHints: Record<ApplicabilitySignalCategory, string[]> =
-   {
-      auth: ['forms', 'logins'],
-      dialog: ['modals', 'focus', 'keyboard', 'structure'],
-      'drag-and-drop': ['controls', 'events', 'interaction', 'keyboard'],
-      form: ['forms', 'controls', 'labels', 'errors', 'auto-complete'],
-      heading: ['headings', 'structure', 'content'],
-      help: ['forms', 'content', 'text'],
-      landmark: ['navigation', 'regions', 'structure', 'layout', 'headings'],
-      'live-region': [
-         'messaging',
-         'errors',
-         'forms',
-         'progress-steps',
-         'visual-cues',
-         'content',
-      ],
-      media: [
-         'audio',
-         'video',
-         'captions',
-         'moving-content',
-         'streaming',
-         'text-alternatives',
-      ],
-      menu: ['menus', 'navigation', 'focus', 'keyboard'],
-      overlay: [
-         'fixed',
-         'sticky',
-         'positioning',
-         'focus',
-         'keyboard',
-         'menus',
-         'navigation',
-         'modals',
-      ],
-      'repeated-form': ['forms', 'progress-steps'],
-      tablist: ['controls', 'focus', 'keyboard', 'structure'],
-      validation: ['errors', 'forms', 'labels', 'messaging'],
-      widget: ['controls', 'focus', 'keyboard', 'structure', 'buttons', 'links'],
-   };
+export const pageSignalTagHints: Record<PageSignalCategory, string[]> = {
+   auth: ['forms', 'logins'],
+   dialog: ['modals', 'focus', 'keyboard', 'structure'],
+   'drag-and-drop': ['controls', 'events', 'interaction', 'keyboard'],
+   form: ['forms', 'controls', 'labels', 'errors', 'auto-complete'],
+   heading: ['headings', 'structure', 'content'],
+   help: ['forms', 'content', 'text'],
+   landmark: ['navigation', 'regions', 'structure', 'layout', 'headings'],
+   'live-region': [
+      'messaging',
+      'errors',
+      'forms',
+      'progress-steps',
+      'visual-cues',
+      'content',
+   ],
+   media: [
+      'audio',
+      'video',
+      'captions',
+      'moving-content',
+      'streaming',
+      'text-alternatives',
+   ],
+   menu: ['menus', 'navigation', 'focus', 'keyboard'],
+   overlay: [
+      'fixed',
+      'sticky',
+      'positioning',
+      'focus',
+      'keyboard',
+      'menus',
+      'navigation',
+      'modals',
+   ],
+   'repeated-form': ['forms', 'progress-steps'],
+   tablist: ['controls', 'focus', 'keyboard', 'structure'],
+   validation: ['errors', 'forms', 'labels', 'messaging'],
+   widget: ['controls', 'focus', 'keyboard', 'structure', 'buttons', 'links'],
+};
 
-export const strongApplicabilityCategories = new Set<ApplicabilitySignalCategory>([
+export const strongPageSignalCategories = new Set<PageSignalCategory>([
    'auth',
    'dialog',
    'drag-and-drop',
@@ -132,24 +131,23 @@ export const interactiveFallbackTags = new Set([
    'tab-order',
 ]);
 
-export const directCriterionCategoryHints: Partial<
-   Record<string, ApplicabilitySignalCategory[]>
-> = {
-   '1.2.1': ['media'],
-   '1.2.2': ['media'],
-   '1.2.3': ['media'],
-   '1.2.5': ['media'],
-   '2.1.1': ['widget', 'dialog', 'drag-and-drop', 'form', 'menu', 'tablist', 'media'],
-   '2.1.2': ['widget', 'dialog', 'drag-and-drop', 'form', 'menu', 'tablist', 'media'],
-   '2.4.3': ['dialog', 'menu', 'tablist', 'overlay', 'form', 'widget'],
-   '2.4.11': ['overlay', 'dialog', 'menu'],
-   '2.4.12': ['overlay', 'dialog', 'menu'],
-   '3.3.8': ['auth'],
-   '4.1.2': ['widget', 'dialog', 'menu', 'form'],
-   '4.1.3': ['live-region', 'validation', 'form'],
-};
+export const directCriterionCategoryHints: Partial<Record<string, PageSignalCategory[]>> =
+   {
+      '1.2.1': ['media'],
+      '1.2.2': ['media'],
+      '1.2.3': ['media'],
+      '1.2.5': ['media'],
+      '2.1.1': ['widget', 'dialog', 'drag-and-drop', 'form', 'menu', 'tablist', 'media'],
+      '2.1.2': ['widget', 'dialog', 'drag-and-drop', 'form', 'menu', 'tablist', 'media'],
+      '2.4.3': ['dialog', 'menu', 'tablist', 'overlay', 'form', 'widget'],
+      '2.4.11': ['overlay', 'dialog', 'menu'],
+      '2.4.12': ['overlay', 'dialog', 'menu'],
+      '3.3.8': ['auth'],
+      '4.1.2': ['widget', 'dialog', 'menu', 'form'],
+      '4.1.3': ['live-region', 'validation', 'form'],
+   };
 
-export const categoryReasonLabels: Record<ApplicabilitySignalCategory, string> = {
+export const categoryReasonLabels: Record<PageSignalCategory, string> = {
    auth: 'authentication-flow',
    dialog: 'dialog structure',
    'drag-and-drop': 'drag-and-drop',

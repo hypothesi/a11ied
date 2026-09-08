@@ -12,7 +12,7 @@ import {
    title,
    wrap,
 } from '../lib/format.js';
-import { applicabilityDefinitionLines, type RenderOptions } from './shared.js';
+import { relevanceDefinitionLines, type RenderOptions } from './shared.js';
 
 const MAX_ELEMENTS_PER_PROBLEM = 3;
 const MAX_MANUAL_CHECKS = 5;
@@ -50,7 +50,7 @@ interface TreeSummary {
    headingLevels: number[];
 }
 
-interface ApplicabilityAssessment {
+interface RelevanceAssessment {
    criterionId: string;
    title: string;
    state: string;
@@ -62,8 +62,8 @@ interface CriterionRollupEntry {
    title: string;
    level: string;
    axeVerdict: string;
-   applicability: string;
-   coverageState: string;
+   relevance: string;
+   testMethod: string;
 }
 
 interface AuditVerdict {
@@ -76,7 +76,7 @@ interface AuditVerdict {
 interface AuditReport {
    axe: AxeSummary;
    tree: TreeSummary;
-   applicability: { assessments: Record<string, ApplicabilityAssessment> };
+   relevance: { assessments: Record<string, RelevanceAssessment> };
    criteria: CriterionRollupEntry[];
    verdict: AuditVerdict;
    nextCommands: string[];
@@ -86,7 +86,7 @@ function parseAuditReport(envelope: CliOutputEnvelope): AuditReport {
    const result = envelope.result as {
       axe: AxeSummary;
       tree: TreeSummary;
-      applicability: { matrix: { assessments: Record<string, ApplicabilityAssessment> } };
+      relevance: { matrix: { assessments: Record<string, RelevanceAssessment> } };
       criteria: CriterionRollupEntry[];
       verdict: AuditVerdict;
       nextCommands: string[];
@@ -94,7 +94,7 @@ function parseAuditReport(envelope: CliOutputEnvelope): AuditReport {
    return {
       axe: result.axe,
       tree: result.tree,
-      applicability: result.applicability.matrix,
+      relevance: result.relevance.matrix,
       criteria: result.criteria,
       verdict: result.verdict,
       nextCommands: result.nextCommands,
@@ -172,8 +172,7 @@ function renderProblemsSection(report: AuditReport): string[] {
 
 function manualCriteria(report: AuditReport): CriterionRollupEntry[] {
    return report.criteria.filter(
-      (entry) =>
-         entry.applicability === 'applicable' && entry.coverageState !== 'automated',
+      (entry) => entry.relevance === 'relevant' && entry.testMethod !== 'automated',
    );
 }
 
@@ -256,7 +255,7 @@ const AXE_VERDICTS: Readonly<Record<string, string>> = {
 };
 
 const APPLIES_HERE: Readonly<Record<string, string>> = {
-   applicable: 'yes',
+   relevant: 'yes',
    'not-detected': dim('not seen'),
    'out-of-scope': dim('n/a'),
    unknown: 'unclear',
@@ -275,8 +274,8 @@ function rollupRow(entry: CriterionRollupEntry): string[] {
       `${code(entry.id)}  ${entry.title}`,
       level(entry.level),
       AXE_VERDICTS[entry.axeVerdict] ?? entry.axeVerdict,
-      APPLIES_HERE[entry.applicability] ?? entry.applicability,
-      HOW_TO_CHECK[entry.coverageState] ?? entry.coverageState,
+      APPLIES_HERE[entry.relevance] ?? entry.relevance,
+      HOW_TO_CHECK[entry.testMethod] ?? entry.testMethod,
    ];
 }
 
@@ -297,7 +296,7 @@ function renderRollupSection(report: AuditReport, options: RenderOptions): strin
    );
    return [
       ...section(`Every criterion (${String(report.criteria.length)})`, rows),
-      ...section('What "applies here" means', applicabilityDefinitionLines()),
+      ...section('What "applies here" means', relevanceDefinitionLines()),
    ];
 }
 

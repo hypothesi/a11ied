@@ -4,7 +4,7 @@ import type {
    PendingCriterion,
 } from '@a11ied/contracts';
 import {
-   getCoverage,
+   getTestMethod,
    listCriteriaByLevel,
    WcagEngineNotFoundError,
 } from '@a11ied/wcag-engine';
@@ -25,7 +25,7 @@ function needsAPerson(evidenceMode: string): boolean {
 
 function readStrategy(criterionId: string): EvidenceStrategy | undefined {
    try {
-      return getCoverage(criterionId).strategy;
+      return getTestMethod(criterionId).strategy;
    } catch (error) {
       if (error instanceof WcagEngineNotFoundError) {
          return undefined;

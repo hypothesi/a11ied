@@ -8,14 +8,14 @@ function dedupe(values: string[]): string[] {
 function needsManualEvidence(criteria: AuditCriterionRollup[]): boolean {
    return criteria.some(
       (criterion) =>
-         criterion.applicability === 'applicable' &&
-         (criterion.coverageState === 'manual' || criterion.coverageState === 'hybrid'),
+         criterion.relevance === 'relevant' &&
+         (criterion.testMethod === 'manual' || criterion.testMethod === 'hybrid'),
    );
 }
 
 /**
  * Lists the commands to run next: `a1 wcag rule <id>` for each failing axe rule, and `a1
- * sr walk <target>` when an applicable criterion still needs manual evidence.
+ * sr walk <target>` when a relevant criterion still needs a person to test it.
  */
 export function buildNextCommands(args: {
    axe: AxeRunResult;

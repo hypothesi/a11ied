@@ -16,15 +16,15 @@ function assertCommittedCriteriaCounts(
    );
 }
 
-function assertCommittedCoverageTotals(
+function assertCommittedTestMethodTotals(
    summary22: { totals: Record<string, number> },
    summary21: { totals: Record<string, number> },
 ): void {
    expect(summary22.totals).toMatchObject(
-      committedArtifactRegressionFixture.versions['2.2'].coverageTotals,
+      committedArtifactRegressionFixture.versions['2.2'].testMethodTotals,
    );
    expect(summary21.totals).toMatchObject(
-      committedArtifactRegressionFixture.versions['2.1'].coverageTotals,
+      committedArtifactRegressionFixture.versions['2.1'].testMethodTotals,
    );
 }
 
@@ -40,9 +40,9 @@ function assertCommittedProvenanceIsCorrect(provenance: {
          ?.sourceUrls,
    ).toEqual(committedArtifactRegressionFixture.provenance.criteria22SourceUrls);
    expect(
-      provenance.artifacts.find((entry) => entry.fileName === 'coverage.2.2.json')
+      provenance.artifacts.find((entry) => entry.fileName === 'test-methods.2.2.json')
          ?.sourceUrls,
-   ).toEqual(committedArtifactRegressionFixture.provenance.coverage22SourceUrls);
+   ).toEqual(committedArtifactRegressionFixture.provenance.testMethods22SourceUrls);
 }
 
 interface CommittedRegressionData {
@@ -65,10 +65,10 @@ async function loadCommittedRegressionData(): Promise<CommittedRegressionData> {
    }>('criteria.2.1.json');
    const summary22 = await readCommittedGeneratedJson<{
       totals: Record<string, number>;
-   }>('coverage-summary.2.2.json');
+   }>('test-method-summary.2.2.json');
    const summary21 = await readCommittedGeneratedJson<{
       totals: Record<string, number>;
-   }>('coverage-summary.2.1.json');
+   }>('test-method-summary.2.1.json');
    const provenance = await readCommittedGeneratedJson<{
       rawSources: Array<{ fileName: string }>;
       artifacts: Array<{ fileName: string; sourceUrls: string[] }>;
@@ -81,7 +81,7 @@ describe('wcag-data committed regression fixtures', () => {
       const data = await loadCommittedRegressionData();
 
       assertCommittedCriteriaCounts(data.criteria22, data.criteria21);
-      assertCommittedCoverageTotals(data.summary22, data.summary21);
+      assertCommittedTestMethodTotals(data.summary22, data.summary21);
       assertCommittedProvenanceIsCorrect(data.provenance);
    });
 

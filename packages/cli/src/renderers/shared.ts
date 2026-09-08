@@ -32,13 +32,13 @@ export interface TechniqueReference {
    technology?: string | undefined;
 }
 
-/** What each applicability state means, in the order the text output lists them. */
-export const applicabilityStateDefinitions: ReadonlyArray<{
+/** What each relevance state means, in the order the text output lists them. */
+export const relevanceDefinitions: ReadonlyArray<{
    state: string;
    definition: string;
 }> = [
    {
-      state: 'applicable',
+      state: 'relevant',
       definition: 'a page signal (a form, a dialog, a live region) matched the criterion',
    },
    {
@@ -53,7 +53,7 @@ export const applicabilityStateDefinitions: ReadonlyArray<{
    {
       state: 'unknown',
       definition:
-         'an interactive widget was found but no recognized pattern, so applicability is unresolved',
+         'an interactive widget was found but no recognized pattern, so relevance is unresolved',
    },
 ];
 
@@ -137,8 +137,8 @@ export function actRulesSection(input: {
    return section('ACT rules', body);
 }
 
-export function applicabilityDefinitionLines(): string[] {
-   return applicabilityStateDefinitions.map(
+export function relevanceDefinitionLines(): string[] {
+   return relevanceDefinitions.map(
       (entry) => `${code(entry.state)}: ${entry.definition}`,
    );
 }

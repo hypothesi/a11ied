@@ -10,21 +10,21 @@ import {
    WcagEngineNotFoundError,
    WcagEngineValidationError,
    getAxeRule,
-   getCoverage,
-   getCoverageSummary,
+   getTestMethod,
+   getTestMethodSummary,
    getCriterion,
-   getCriterionApplicability,
+   getCriterionRelevance,
    getQuickrefTags,
    getTechnique,
    getUnderstanding,
-   listApplicableCriteria,
+   listRelevantCriteria,
    listCriteriaByLevel,
    resetWcagEngineCache,
-   supportedApplicabilitySignalCategories,
-   supportedApplicabilityStates,
+   supportedPageSignalCategories,
+   supportedRelevanceStates,
    searchCriteria,
 } from './index.js';
-import { getApplicabilityFixture } from './applicability/fixtures.js';
+import { getRelevanceFixture } from './relevance/fixtures.js';
 
 describe('wcag-engine lookup', () => {
    it('resolves the same criterion by id and slug', () => {
@@ -87,22 +87,22 @@ describe('wcag-engine search', () => {
    });
 });
 
-describe('wcag-engine coverage and strategy', () => {
-   it('joins coverage data to the canonical criterion model', () => {
-      const result = getCoverage('4.1.2');
+describe('wcag-engine test method and strategy', () => {
+   it('joins test method data to the canonical criterion model', () => {
+      const result = getTestMethod('4.1.2');
 
       expect(result.criterion.id).toBe('4.1.2');
-      expect(result.coverage.coverageState).toBe('automated');
-      expect(result.coverage.axeRuleIds.length).toBeGreaterThan(0);
-      expect(result.coverage.actRuleIds.length).toBeGreaterThan(0);
+      expect(result.testMethod.method).toBe('automated');
+      expect(result.testMethod.axeRuleIds.length).toBeGreaterThan(0);
+      expect(result.testMethod.actRuleIds.length).toBeGreaterThan(0);
       expect(result.strategy.procedureIds).toContain('axe_scan');
    });
 
    it('names and links every ACT rule id it reports for a criterion', () => {
-      const result = getCoverage('4.1.2');
+      const result = getTestMethod('4.1.2');
 
       expect(result.actRules.map((rule) => rule.ruleId)).toEqual(
-         result.coverage.actRuleIds,
+         result.testMethod.actRuleIds,
       );
       expect(result.actRules).toContainEqual({
          ruleId: '5f99a7',
@@ -121,8 +121,8 @@ describe('wcag-engine coverage and strategy', () => {
       expect(result.tags).toContain('forms');
    });
 
-   it('returns the pinned coverage totals per level', () => {
-      const summary = getCoverageSummary({ version: '2.2' });
+   it('returns the pinned test method totals per level', () => {
+      const summary = getTestMethodSummary({ version: '2.2' });
 
       expect(summary.version).toBe('2.2');
       expect(summary.totals.criteria).toBe(
@@ -245,63 +245,61 @@ describe('wcag-engine error handling', () => {
    });
 });
 
-describe('wcag-engine applicability state classification', () => {
-   it('exposes the supported applicability states and signal categories', () => {
-      expect(supportedApplicabilityStates).toEqual([
-         'applicable',
+describe('wcag-engine relevance state classification', () => {
+   it('exposes the supported relevance states and signal categories', () => {
+      expect(supportedRelevanceStates).toEqual([
+         'relevant',
          'not-detected',
          'out-of-scope',
          'unknown',
       ]);
-      expect(supportedApplicabilitySignalCategories).toContain('auth');
-      expect(supportedApplicabilitySignalCategories).toContain('live-region');
-      expect(supportedApplicabilitySignalCategories).toContain('widget');
+      expect(supportedPageSignalCategories).toContain('auth');
+      expect(supportedPageSignalCategories).toContain('live-region');
+      expect(supportedPageSignalCategories).toContain('widget');
    });
 
    it('keeps authentication-only criteria out of scope for a plain content page without overclaiming', () => {
-      const result = getCriterionApplicability(
+      const result = getCriterionRelevance(
          '3.3.8',
-         getApplicabilityFixture('basic-page.html'),
+         getRelevanceFixture('basic-page.html'),
       );
 
       expect(result.assessment.state).toBe('not-detected');
       expect(result.assessment.reasons.join(' ')).toMatch(/authentication-flow signals/i);
    });
 
-   it('marks status messages as applicable when live-region signals are present', () => {
-      const result = getCriterionApplicability(
+   it('marks status messages as relevant when live-region signals are present', () => {
+      const result = getCriterionRelevance(
          '4.1.3',
-         getApplicabilityFixture('status-message.html'),
+         getRelevanceFixture('status-message.html'),
       );
 
-      expect(result.assessment.state).toBe('applicable');
+      expect(result.assessment.state).toBe('relevant');
       expect(result.assessment.reasons.join(' ')).toMatch(/live region/i);
       expect(result.assessment.reasons.join(' ')).toMatch(/role=status|aria-live/i);
    });
 
-   it('marks accessible authentication as applicable for an auth flow', () => {
-      const result = getCriterionApplicability(
+   it('marks accessible authentication as relevant for an auth flow', () => {
+      const result = getCriterionRelevance(
          '3.3.8',
-         getApplicabilityFixture('auth-login.html'),
+         getRelevanceFixture('auth-login.html'),
       );
 
-      expect(result.assessment.state).toBe('applicable');
+      expect(result.assessment.state).toBe('relevant');
       expect(result.assessment.reasons.join(' ')).toMatch(/authentication signals/i);
    });
 });
 
-describe('wcag-engine applicability signal matching', () => {
+describe('wcag-engine relevance signal matching', () => {
    it('returns dialog-related criteria as relevant for dialog structure', () => {
-      const result = listApplicableCriteria(getApplicabilityFixture('dialog.html'));
+      const result = listRelevantCriteria(getRelevanceFixture('dialog.html'));
       const assessments = Object.values(result.assessments);
       const dialogRows = assessments.filter((assessment) =>
          assessment.matchedSignalCategories.includes('dialog'),
       );
 
       expect(dialogRows.length).toBeGreaterThan(0);
-      expect(dialogRows.some((assessment) => assessment.state === 'applicable')).toBe(
-         true,
-      );
+      expect(dialogRows.some((assessment) => assessment.state === 'relevant')).toBe(true);
       expect(
          dialogRows.some((assessment) =>
             assessment.reasons.join(' ').match(/dialog structure/i),
@@ -310,9 +308,9 @@ describe('wcag-engine applicability signal matching', () => {
    });
 
    it('references both target signals and quickref tags in first-pass hints', () => {
-      const result = getCriterionApplicability(
+      const result = getCriterionRelevance(
          '4.1.3',
-         getApplicabilityFixture('status-message.html'),
+         getRelevanceFixture('status-message.html'),
       );
       const joinedReasons = result.assessment.reasons.join(' ');
 
@@ -322,10 +320,8 @@ describe('wcag-engine applicability signal matching', () => {
       expect(joinedReasons).toMatch(/live region/i);
    });
 
-   it('keeps unknown custom widgets unknown instead of pretending they are not applicable', () => {
-      const result = listApplicableCriteria(
-         getApplicabilityFixture('custom-widget.html'),
-      );
+   it('keeps unknown custom widgets unknown instead of pretending they are not relevant', () => {
+      const result = listRelevantCriteria(getRelevanceFixture('custom-widget.html'));
       const unknownRows = Object.values(result.assessments).filter(
          (assessment) => assessment.state === 'unknown',
       );

@@ -65,12 +65,12 @@ const publicApiExpectations: PublicApiExpectation[] = [
          'listWcagCriteria',
          'showWcagCriterion',
          'searchWcagCriteria',
-         'showWcagCoverage',
-         'showWcagCoverageSummary',
+         'showWcagTestMethod',
+         'showWcagTestMethodSummary',
          'showWcagTechnique',
          'showWcagAxeRule',
-         'inspectApplicableTarget',
-         'inspectApplicableUrl',
+         'inspectRelevantCriteriaTarget',
+         'inspectRelevantCriteriaUrl',
          'inspectCriterionTarget',
          'inspectCriterionUrl',
       ],
@@ -179,8 +179,8 @@ const publicApiExpectations: PublicApiExpectation[] = [
          'parseVersion',
          'getCriterion',
          'listCriteriaByLevel',
-         'getCoverage',
-         'getCoverageSummary',
+         'getTestMethod',
+         'getTestMethodSummary',
          'getQuickrefTags',
          'getTechnique',
          'getAxeRule',
@@ -192,7 +192,7 @@ const publicApiExpectations: PublicApiExpectation[] = [
       functions: ['loadEngineArtifacts'],
    },
    {
-      file: 'packages/wcag-data/src/coverage/axe-rules.ts',
+      file: 'packages/wcag-data/src/test-methods/axe-rules.ts',
       functions: ['buildAxeRuleIndex'],
    },
    {
@@ -200,8 +200,8 @@ const publicApiExpectations: PublicApiExpectation[] = [
       functions: ['searchCriteria'],
    },
    {
-      file: 'packages/wcag-engine/src/applicability/runtime.ts',
-      functions: ['getCriterionApplicability', 'listApplicableCriteria'],
+      file: 'packages/wcag-engine/src/relevance/runtime.ts',
+      functions: ['getCriterionRelevance', 'listRelevantCriteria'],
    },
 ];
 
@@ -225,7 +225,7 @@ function expectClassJSDoc(source: string, name: string): void {
    expect(source).toMatch(pattern);
 }
 
-describe('public api documentation coverage', () => {
+describe('public api JSDoc', () => {
    it('keeps JSDoc on public exported functions and classes', () => {
       for (const expectation of publicApiExpectations) {
          const source = readSource(expectation.file);

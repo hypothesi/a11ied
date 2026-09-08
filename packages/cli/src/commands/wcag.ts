@@ -102,15 +102,18 @@ function registerCriteriaCommand(wcagCommand: Command): void {
          .summary('List criteria, optionally filtered to one level.')
          .description('List criteria, optionally filtered to one conformance level.')
          .option('--level <level>', 'Filter criteria to one WCAG level: A, AA, or AAA.')
-         .option('--summary', 'Print coverage totals per level instead of the list.'),
+         .option(
+            '--summary',
+            'Print how many criteria are automated, hybrid, and manual per level instead of the list.',
+         ),
    ).action(
       async (options: WcagCommandOptions & { level?: string; summary?: boolean }) => {
          if (options.summary) {
             await runWcagCommand({
                subcommand: 'criteria',
                options,
-               buildResult: (core) => core.showWcagCoverageSummary(options.wcag),
-               renderText: (renderers) => renderers.renderCoverageSummaryText,
+               buildResult: (core) => core.showWcagTestMethodSummary(options.wcag),
+               renderText: (renderers) => renderers.renderTestMethodSummaryText,
             });
             return;
          }
@@ -130,7 +133,7 @@ function registerShowCommand(wcagCommand: Command): void {
          .command('show <criterion>')
          .summary('Show one criterion with its techniques and failures.')
          .description(
-            'Show one criterion by id or slug with its techniques, failures, and coverage.',
+            'Show one criterion by id or slug with its techniques, failures, and test method.',
          ),
    ).action(async (criterion: string, options: WcagCommandOptions) => {
       await showCriterionOrTechnique(criterion, options);
@@ -199,7 +202,7 @@ export function registerWcagCommands(program: Command): void {
       .command('wcag')
       .helpGroup(TOP_LEVEL_GROUPS.lookUp)
       .summary('Criteria, techniques, axe rules, and the W3C guidance.')
-      .description('Look up pinned WCAG requirements and coverage data.')
+      .description('Look up pinned WCAG requirements and test methods.')
       .argument(
          '[criterion]',
          'Show one criterion by id or slug, or one technique by id such as G18.',

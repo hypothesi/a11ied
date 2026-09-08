@@ -13,7 +13,7 @@ const SHOW_EXCERPT_LINES = 14;
 
 interface CriterionResult {
    criterion: { id: string; normativeText: string; understandingUrl: string };
-   coverage: { coverageState: string; axeRuleIds: string[]; actRuleIds: string[] };
+   testMethod: { method: string; axeRuleIds: string[]; actRuleIds: string[] };
    strategy: { preferredEvidenceMode: string };
 }
 
@@ -23,7 +23,7 @@ async function assertWcagShorthand(): Promise<void> {
    expect(result.status).toBe(EXIT_SUCCESS);
    expect((json.command as { subcommand: string }).subcommand).toBe('show');
    expect((json.result as CriterionResult).criterion.id).toBe('1.4.3');
-   expect((json.result as CriterionResult).coverage.axeRuleIds).toContain(
+   expect((json.result as CriterionResult).testMethod.axeRuleIds).toContain(
       'color-contrast',
    );
 }
@@ -95,7 +95,7 @@ async function assertWcagCriteriaSummary(): Promise<void> {
    expect(summary.totals.automated).toBeGreaterThan(0);
 
    const text = await runCli(['wcag', 'criteria', '--summary']);
-   expect(text.stdout).toContain('WCAG 2.2 coverage');
+   expect(text.stdout).toContain('WCAG 2.2 test methods');
    expect(text.stdout).toMatch(/All\s+\d+\s+\d+/);
 }
 
@@ -107,8 +107,8 @@ async function assertWcagShow(): Promise<void> {
    expect(payload.criterion.id).toBe('4.1.3');
    expect(payload.criterion.normativeText).toBeTruthy();
    expect(payload.criterion.understandingUrl).toBeTruthy();
-   expect(payload.coverage).toMatchObject({
-      coverageState: expect.any(String),
+   expect(payload.testMethod).toMatchObject({
+      method: expect.any(String),
       axeRuleIds: expect.any(Array),
       actRuleIds: expect.any(Array),
    });
@@ -237,7 +237,7 @@ async function assertTextShowSnapshot(): Promise<void> {
    // The old field-label view is gone: no bare headings over a URL or an enum table.
    expect(show.stdout).not.toContain('Normative text');
    expect(show.stdout).not.toContain('Understanding\n');
-   expect(show.stdout).not.toContain('Coverage');
+   expect(show.stdout).not.toContain('Test method');
    expect(show.stdout).toContain('Testing it');
    expect(show.stdout).toContain('a1 sr expect <text>');
    expect(show.stdout).toContain('If it fails');
@@ -258,7 +258,7 @@ async function assertTextSearchSnapshot(): Promise<void> {
 async function assertTextVerboseShow(): Promise<void> {
    const verboseShow = await runCli(['wcag', 'show', 'status-messages', '--verbose']);
    expect(verboseShow.stdout).toMatch(/Slug:\s+status-messages/);
-   expect(verboseShow.stdout).toMatch(/Coverage state:\s+hybrid/);
+   expect(verboseShow.stdout).toMatch(/Test method:\s+hybrid/);
    expect(verboseShow.stdout).toMatch(/Procedure ids:\s+status_message_probe/);
    expect(verboseShow.stdout).not.toContain('ACT rules');
 }
@@ -291,10 +291,10 @@ describe('cli wcag commands', () => {
    it('checks wcag criteria', async () => {
       await assertWcagCriteria();
    });
-   it('prints coverage totals with criteria --summary', async () => {
+   it('prints the test method counts with criteria --summary', async () => {
       await assertWcagCriteriaSummary();
    });
-   it('checks wcag show with coverage folded in', async () => {
+   it('checks wcag show with the test method folded in', async () => {
       await assertWcagShow();
    });
    it('checks wcag search', async () => {
