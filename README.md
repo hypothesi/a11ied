@@ -48,6 +48,7 @@ The repo is split into npm workspaces. `packages/cli` publishes the end-user `a1
 - `packages/wcag-engine`: lookup and search APIs over the WCAG data package (`@a11ied/wcag-engine`)
 - `packages/earl`: builds W3C EARL 1.0 accessibility reports as JSON-LD (`@a11ied/earl`)
 - `packages/cli`: end-user command line entrypoint (published as `a11ied`)
+- `packages/act-conformance`: runs a11ied against the W3C ACT test cases (not published)
 - `packages/docs`: Astro docs site
 - `packages/skills/a11ied`: Agent Skill scaffold
 

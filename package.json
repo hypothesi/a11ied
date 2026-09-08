@@ -9,6 +9,8 @@
    ],
    "type": "module",
    "scripts": {
+      "act:conformance": "npm run conformance --workspace @a11ied/act-conformance",
+      "act:corpus": "npm run corpus --workspace @a11ied/act-conformance",
       "build": "turbo run build",
       "clean": "rimraf .turbo .test-coverage dist apps/*/dist apps/*/.astro packages/*/dist",
       "dev:docs": "turbo run dev --filter=@a11ied/docs",

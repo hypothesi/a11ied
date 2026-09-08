@@ -1,0 +1,22 @@
+{
+   "name": "@a11ied/act-conformance",
+   "version": "0.1.0",
+   "private": true,
+   "description": "Runs a11ied against the W3C ACT test cases and checks for contradictions.",
+   "type": "module",
+   "scripts": {
+      "conformance": "tsx --tsconfig tsconfig.run.json scripts/run.ts",
+      "corpus": "tsx --tsconfig tsconfig.run.json scripts/fetch-corpus.ts",
+      "typecheck": "tsc -p tsconfig.json --noEmit"
+   },
+   "dependencies": {
+      "@a11ied/contracts": "0.1.0",
+      "@a11ied/core": "0.1.0",
+      "@a11ied/earl": "0.1.0",
+      "@a11ied/wcag-engine": "0.1.0",
+      "axe-core": "^4.13.0"
+   },
+   "devDependencies": {
+      "playwright": "^1.62.1"
+   }
+}

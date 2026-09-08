@@ -1,0 +1,57 @@
+name: act-conformance
+
+# Scans the 1,213 W3C ACT test cases and fails on any contradiction that is not already
+# in packages/act-conformance/baseline.json. It runs on its own schedule rather than in
+# ci.yml because it fetches the test case corpus and drives a browser over every case,
+# which takes several minutes.
+
+on:
+   pull_request:
+      paths:
+         - 'packages/act-conformance/**'
+         - 'packages/core/src/axe/**'
+         - 'packages/earl/**'
+         - 'packages/wcag-data/data/generated/axe-rules.*.json'
+         - '.github/workflows/act-conformance.yml'
+   schedule:
+      - cron: '0 6 * * 1'
+   workflow_dispatch:
+
+permissions:
+   contents: read
+
+jobs:
+   conformance:
+      runs-on: ubuntu-latest
+      steps:
+         - name: Check out repo
+           uses: actions/checkout@v4
+
+         - name: Set up Node.js
+           uses: actions/setup-node@v4
+           with:
+              node-version: 24
+              cache: npm
+
+         - name: Install dependencies
+           run: npm ci
+
+         - name: Build
+           run: npm run build
+
+         - name: Cache the ACT test cases
+           uses: actions/cache@v4
+           with:
+              path: packages/act-conformance/.cache
+              key: act-corpus-${{ hashFiles('packages/act-conformance/src/corpus.ts') }}
+
+         - name: Conformance
+           run: npm run act:conformance
+
+         - name: Upload the EARL report
+           if: always()
+           uses: actions/upload-artifact@v4
+           with:
+              name: a11ied-earl-report
+              path: packages/act-conformance/.cache/*/a11ied-earl-report.json
+              if-no-files-found: warn

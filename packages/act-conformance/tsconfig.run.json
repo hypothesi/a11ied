@@ -1,0 +1,14 @@
+{
+   "extends": "./tsconfig.json",
+   "compilerOptions": {
+      /*
+       * Dropping the workspace path aliases makes tsx resolve `@a11ied/*` through
+       * node_modules to the built packages. Left in place, tsx transpiles the mapped
+       * source with esbuild's keepNames, which injects a `__name` helper into the
+       * function `runAxe` hands to `page.evaluate`, and that helper is not defined in
+       * the browser. `tsconfig.json` keeps the aliases so `tsc` still checks against
+       * source, the way every other workspace does.
+       */
+      "paths": {}
+   }
+}
