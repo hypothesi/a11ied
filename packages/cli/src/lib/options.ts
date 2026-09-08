@@ -13,6 +13,11 @@ export function addVerboseOption(command: Command): Command {
    return command.option('--verbose', 'Print more detail in text output.');
 }
 
+/** The two options every lookup command takes, whichever corpus it reads. */
+export function addLookupOptions(command: Command): Command {
+   return addVerboseOption(addJsonOption(command));
+}
+
 export function addWcagVersionOption(command: Command): Command {
    return command.option(
       '--wcag <version>',

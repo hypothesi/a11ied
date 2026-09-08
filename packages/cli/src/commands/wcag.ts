@@ -1,9 +1,7 @@
 import type { Command } from 'commander';
-import type { CliOutputEnvelope } from '#contracts';
-import type * as CoreModuleNamespace from '#core';
-import type * as RenderersNamespace from '../renderers/index.js';
 import { TOP_LEVEL_GROUPS } from '../lib/help.js';
-import { addJsonOption, addVerboseOption, addWcagVersionOption } from '../lib/options.js';
+import { addLookupOptions, addWcagVersionOption } from '../lib/options.js';
+import { runLookupCommand, type LookupCommandInput } from '../lib/run-lookup.js';
 
 const WCAG_EXAMPLES = `
 Examples:
@@ -18,11 +16,6 @@ interface WcagCommandOptions {
    wcag: string;
 }
 
-type CoreModule = typeof CoreModuleNamespace;
-type Renderers = typeof RenderersNamespace;
-type RenderText = (envelope: CliOutputEnvelope, options: { verbose: boolean }) => string;
-type CommandResult = Record<string, unknown> | Promise<Record<string, unknown>>;
-
 const TECHNIQUE_ID_PATTERN = /^[A-Z]+\d+$/;
 
 function isTechniqueId(lookupKey: string): boolean {
@@ -30,32 +23,24 @@ function isTechniqueId(lookupKey: string): boolean {
 }
 
 function withWcagOptions(command: Command): Command {
-   return addVerboseOption(addJsonOption(addWcagVersionOption(command)));
+   return addLookupOptions(addWcagVersionOption(command));
 }
 
 async function runWcagCommand(input: {
    subcommand: string;
    options: WcagCommandOptions;
-   buildResult: (core: CoreModule) => CommandResult;
-   renderText: (renderers: Renderers) => RenderText;
+   buildResult: LookupCommandInput['buildResult'];
+   renderText: LookupCommandInput['renderText'];
 }): Promise<void> {
-   const [{ executeCommand }, renderers, core] = await Promise.all([
-      import('../lib/execute.js'),
-      import('../renderers/index.js'),
-      import('#core'),
-   ]);
-
-   await executeCommand(
-      {
-         family: 'wcag',
-         subcommand: input.subcommand,
-         wcagVersion: input.options.wcag,
-         json: input.options.json,
-         verbose: input.options.verbose,
-      },
-      async () => ({ result: await input.buildResult(core) }),
-      input.renderText(renderers),
-   );
+   await runLookupCommand({
+      family: 'wcag',
+      subcommand: input.subcommand,
+      wcagVersion: input.options.wcag,
+      json: input.options.json,
+      verbose: input.options.verbose,
+      buildResult: input.buildResult,
+      renderText: input.renderText,
+   });
 }
 
 async function showCriterionOrTechnique(
