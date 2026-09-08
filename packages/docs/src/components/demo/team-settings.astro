@@ -1,0 +1,295 @@
+---
+import InviteFields from './invite-fields.astro';
+
+interface Props {
+   /** Render the same page with every accessibility problem repaired. */
+   fixed: boolean;
+}
+
+const { fixed } = Astro.props;
+
+function avatar(initials: string, background: string): string {
+   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="32" fill="${background}"/><text x="32" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="25" font-weight="700" fill="#ffffff">${initials}</text></svg>`;
+
+   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
+const members = [
+   { name: 'Dana Whitfield', email: 'dana@northwind.test', role: 'Admin', status: 'Active', seen: '2 hours ago', avatar: avatar('DW', '#1f5fd0') },
+   { name: 'Marcus Reyes', email: 'marcus@northwind.test', role: 'Editor', status: 'Active', seen: '3 days ago', avatar: avatar('MR', '#2f7d5b') },
+   { name: 'Priya Raman', email: 'priya@northwind.test', role: 'Viewer', status: 'Pending', seen: 'Invited May 4', avatar: avatar('PR', '#8a4b9c') },
+];
+
+const filters = [
+   { key: 'all', label: 'All' },
+   { key: 'active', label: 'Active' },
+   { key: 'pending', label: 'Pending' },
+];
+---
+
+<header class="topbar">
+   <span class="wordmark">Northwind</span>
+   <nav aria-label="Workspace settings">
+      <a href="#general">General</a>
+      <a href="#billing">Billing</a>
+      <a href={fixed ? '/demo/team/fixed' : '/demo/team'} aria-current="page">Team</a>
+   </nav>
+</header>
+
+<main data-team>
+   <h1>Team</h1>
+   <p class="lede">Everyone who can open the Northwind workspace. Removing a member ends their session right away.</p>
+
+   {fixed
+      ? <p class="banner" role="status" data-invite-status></p>
+      : <div data-banner-slot></div>}
+
+   <div class="card">
+      <div class="toolbar">
+         {fixed
+            ? <h2 class="toolbar-heading">Members</h2>
+            : <h3 class="toolbar-heading">Members</h3>}
+
+         <div class="field">
+            {fixed && <label for="member-filter">Filter members</label>}
+            <input
+               id="member-filter"
+               type="search"
+               placeholder="Filter members"
+               data-member-filter
+            />
+         </div>
+
+         {fixed ? (
+            <div class="chips" role="group" aria-label="Filter by status" data-chips>
+               {filters.map((filter, index) => (
+                  <button
+                     type="button"
+                     class:list={['chip', index === 0 && 'chip--on']}
+                     aria-pressed={index === 0 ? 'true' : 'false'}
+                     data-chip={filter.key}
+                  >{filter.label}</button>
+               ))}
+            </div>
+         ) : (
+            <div class="chips" data-chips>
+               {filters.map((filter, index) => (
+                  <div
+                     class:list={['chip', index === 0 && 'chip--on']}
+                     role="button"
+                     data-chip={filter.key}
+                  >{filter.label}</div>
+               ))}
+            </div>
+         )}
+
+         <button type="button" class="button push-end" data-open-invite>Invite member</button>
+      </div>
+
+      <table>
+         <caption>3 members in this workspace</caption>
+         <thead>
+            <tr>
+               <th scope="col">Member</th>
+               <th scope="col">Role</th>
+               <th scope="col">Status</th>
+               <th scope="col">Last active</th>
+               <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+         </thead>
+         <tbody>
+            {members.map((member) => (
+               <tr data-member-row data-status={member.status.toLowerCase()}>
+                  <td>
+                     <span class="member">
+                        {fixed
+                           ? <img src={member.avatar} alt="" width="34" height="34" />
+                           : <img src={member.avatar} width="34" height="34" />}
+                        <span>
+                           <span class="member-name">{member.name}</span><br />
+                           <span class="member-email">{member.email}</span>
+                        </span>
+                     </span>
+                  </td>
+                  <td>{member.role}</td>
+                  <td>
+                     <span
+                        class:list={[
+                           'pill',
+                           member.status === 'Active' && 'pill--active',
+                           member.status === 'Pending' && (fixed ? 'pill--pending-readable' : 'pill--pending'),
+                        ]}
+                     >{member.status}</span>
+                  </td>
+                  <td class={fixed ? 'readable' : 'faint'}>{member.seen}</td>
+                  <td>
+                     <button
+                        type="button"
+                        class="icon-button"
+                        aria-label={fixed ? `Remove ${member.name}` : undefined}
+                     >
+                        <svg viewBox="0 0 24 24" aria-hidden={fixed ? 'true' : undefined} focusable="false">
+                           <path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13" />
+                        </svg>
+                     </button>
+                  </td>
+               </tr>
+            ))}
+         </tbody>
+      </table>
+   </div>
+</main>
+
+{fixed ? (
+   <dialog class="modal" aria-labelledby="invite-title" data-invite-dialog>
+      <InviteFields />
+   </dialog>
+) : (
+   <div class="backdrop" hidden data-invite-backdrop>
+      <div class="modal" role="dialog" aria-modal="true" data-invite-dialog>
+         <InviteFields />
+      </div>
+   </div>
+)}
+
+<style is:global>
+   .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+   }
+</style>
+
+<script>
+   type ElementKind<TElement extends Element> = abstract new (...args: never[]) => TElement;
+
+   function requireElement<TElement extends Element>(
+      root: ParentNode,
+      selector: string,
+      kind: ElementKind<TElement>,
+   ): TElement {
+      const found = root.querySelector(selector);
+
+      if (!(found instanceof kind)) {
+         throw new Error(`The demo page is missing ${selector}.`);
+      }
+      return found;
+   }
+
+   function listElements(root: ParentNode, selector: string): HTMLElement[] {
+      const found: HTMLElement[] = [];
+
+      for (const node of root.querySelectorAll(selector)) {
+         if (node instanceof HTMLElement) {
+            found.push(node);
+         }
+      }
+      return found;
+   }
+
+   const team = requireElement(document, '[data-team]', HTMLElement);
+   const dialog = requireElement(document, '[data-invite-dialog]', HTMLElement);
+   const form = requireElement(dialog, '[data-invite-form]', HTMLFormElement);
+   const filterInput = requireElement(team, '[data-member-filter]', HTMLInputElement);
+   const chipGroup = requireElement(team, '[data-chips]', HTMLElement);
+   const rows = listElements(team, '[data-member-row]');
+   const backdrop = document.querySelector('[data-invite-backdrop]');
+   const liveRegion = team.querySelector('[data-invite-status]');
+   const bannerSlot = team.querySelector('[data-banner-slot]');
+
+   let selectedStatus = 'all';
+
+   function openDialog(): void {
+      /*
+       * The fixed page uses <dialog>, so the browser moves focus in, keeps it there, makes
+       * the rest of the page inert, and returns focus to the trigger on close. The broken
+       * page unhides a div, which does none of that.
+       */
+      if (dialog instanceof HTMLDialogElement) {
+         dialog.showModal();
+         return;
+      }
+      backdrop?.removeAttribute('hidden');
+   }
+
+   function closeDialog(): void {
+      if (dialog instanceof HTMLDialogElement) {
+         dialog.close();
+         return;
+      }
+      backdrop?.setAttribute('hidden', '');
+   }
+
+   function announce(message: string): void {
+      /*
+       * The fixed page writes into a live region that was already rendered. The broken page
+       * builds a plain paragraph, which no screen reader has a reason to read out.
+       */
+      if (liveRegion) {
+         liveRegion.textContent = message;
+         return;
+      }
+      const banner = document.createElement('p');
+
+      banner.className = 'banner';
+      banner.textContent = message;
+      bannerSlot?.replaceChildren(banner);
+   }
+
+   function applyFilters(): void {
+      const query = filterInput.value.trim().toLowerCase();
+
+      for (const row of rows) {
+         const matchesStatus = selectedStatus === 'all' || row.dataset.status === selectedStatus;
+         const matchesQuery = query === '' || (row.textContent ?? '').toLowerCase().includes(query);
+
+         row.hidden = !(matchesStatus && matchesQuery);
+      }
+   }
+
+   function selectChip(chip: HTMLElement): void {
+      selectedStatus = chip.dataset.chip ?? 'all';
+      for (const candidate of chipGroup.querySelectorAll('[data-chip]')) {
+         const isSelected = candidate === chip;
+
+         candidate.classList.toggle('chip--on', isSelected);
+         if (candidate instanceof HTMLButtonElement) {
+            candidate.setAttribute('aria-pressed', String(isSelected));
+         }
+      }
+      applyFilters();
+   }
+
+   requireElement(document, '[data-open-invite]', HTMLButtonElement).addEventListener('click', openDialog);
+   requireElement(dialog, '[data-cancel-invite]', HTMLButtonElement).addEventListener('click', closeDialog);
+   filterInput.addEventListener('input', applyFilters);
+
+   chipGroup.addEventListener('click', (event) => {
+      const target = event.target;
+
+      if (!(target instanceof Element)) {
+         return;
+      }
+      const chip = target.closest('[data-chip]');
+
+      if (chip instanceof HTMLElement) {
+         selectChip(chip);
+      }
+   });
+
+   form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const email = new FormData(form).get('email');
+
+      closeDialog();
+      form.reset();
+      announce(`Invitation sent to ${String(email)}.`);
+   });
+
+   if (globalThis.location.hash === '#invite') {
+      openDialog();
+   }
+</script>

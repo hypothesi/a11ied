@@ -27,6 +27,7 @@ export const docsLinks: DocSection[] = [
    {
       title: 'Guides',
       links: [
+         { href: '/guides/demo', label: 'Practice on a broken page' },
          { href: '/guides/screen-reader', label: 'Test with a screen reader' },
          { href: '/guides/testing', label: 'Write screen reader tests' },
          { href: '/guides/agents', label: 'Test from an AI agent' },

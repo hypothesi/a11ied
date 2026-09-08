@@ -1,0 +1,458 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'page', label: 'The practice page' },
+   { id: 'axe', label: 'Run the audit' },
+   { id: 'rules', label: 'Rules axe skips' },
+   { id: 'tree', label: 'The accessibility tree' },
+   { id: 'keyboard', label: 'Tab order' },
+   { id: 'dialog', label: 'Opening the dialog' },
+   { id: 'status', label: 'The confirmation message' },
+   { id: 'passes', label: 'What axe called a pass' },
+   { id: 'mcp', label: 'The same run from an agent' },
+   { id: 'fixes', label: 'The ten fixes' },
+];
+---
+
+<DocShell
+   title="Practice on a broken page"
+   summary="The docs site serves two copies of one team settings page. /demo/team has ten accessibility problems in it. /demo/team/fixed is the same page with all ten repaired. Run each command below against both URLs and compare the output. Three problems come back from axe-core, the open-source rule engine a1 axe runs inside the page. Two more come back only when you name the rule. The last five need the accessibility tree or a screen reader."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="panel" id="page">
+      <h2>The practice page</h2>
+      <p>
+         Start the docs site, which serves both copies on port 4321.
+      </p>
+      <pre><code>npm run dev:docs</code></pre>
+      <div class="route-list">
+         <div class="route-row">
+            <code>/demo/team</code>
+            <span>The page with the problems. Open <a href="/demo/team">it in a browser</a>.</span>
+         </div>
+         <div class="route-row">
+            <code>/demo/team/fixed</code>
+            <span>The repaired page. Open <a href="/demo/team/fixed">it in a browser</a>.</span>
+         </div>
+      </div>
+      <p>
+         The page is a team settings screen. A table lists three members, each row holding an
+         avatar, a role, a status pill, a last-active date, and an icon-only button that removes
+         the member. Above the table sit a filter field, three status filter chips, and an
+         <strong>Invite member</strong> button that opens a dialog with an email field, a role
+         select, and a submit button. Submitting shows a confirmation above the table.
+      </p>
+      <p>
+         Both URLs render <code>packages/docs/src/components/demo/team-settings.astro</code>,
+         which takes one <code>fixed</code> prop. Every difference between the two pages is one of
+         the ten fixes, so reading that file tells you exactly what changed.
+      </p>
+   </section>
+
+   <section class="panel" id="axe">
+      <h2>Run the audit</h2>
+      <p>
+         <code>a1 audit</code> runs axe, reads the accessibility tree, and works out which WCAG
+         success criteria the page triggers. A success criterion is one testable requirement in
+         the Web Content Accessibility Guidelines, the standard most accessibility requirements
+         come from. Start here on any page you have not checked before.
+      </p>
+      <pre><code>a1 audit http://localhost:4321/demo/team</code></pre>
+      <pre data-label="OUTPUT"><code>audit  http://localhost:4321/demo/team
+
+✗ 10 problems to fix.
+
+Problems
+  1.1.1  Non-text Content  [A]
+      Images must have alternative text  critical
+      3 failing elements:
+        tr[data-status="active"][data-member-row=""]:nth-child(1) > td:nth-child(1) > .member > img
+        ...
+      Fix it:  a1 wcag rule image-alt
+  4.1.2  Name, Role, Value  [A]
+      Buttons must have discernible text  critical
+      3 failing elements:
+        tr[data-status="active"][data-member-row=""]:nth-child(1) > td:nth-child(5) > .icon-button[type="button"]
+        ...
+      Fix it:  a1 wcag rule button-name
+  1.4.3  Contrast (Minimum)  [AA]
+      Elements must meet minimum color contrast ratio thresholds  serious
+      4 failing elements:
+        tr[data-status="active"][data-member-row=""]:nth-child(1) > .faint
+        tr[data-status="active"][data-member-row=""]:nth-child(2) > .faint
+        .pill--pending
+        and 1 more element
+      Fix it:  a1 wcag rule color-contrast</code></pre>
+      <p>
+         Three rules, ten failing elements: the three avatar images have no <code>alt</code>
+         attribute, each of the three remove buttons contains one <code>svg</code> and no text, and the
+         Pending pill plus the three last-active dates are set in <code>#a2aab5</code>, which
+         reaches 2.34:1 on white and 2.16:1 on the pill's <code>#f4f6f8</code> background where
+         4.5:1 is the requirement.
+      </p>
+      <p>
+         The bottom of the same report counts the page: <code>2 headings (level 1, 3)</code>.
+         That is the fourth problem, and no rule in the default run reported it. The next section
+         gets axe to.
+      </p>
+      <pre><code>a1 audit http://localhost:4321/demo/team/fixed</code></pre>
+      <pre data-label="OUTPUT"><code>audit  http://localhost:4321/demo/team/fixed
+
+✓ Nothing failed the automated checks.</code></pre>
+      <p>
+         <code>a1 axe</code> alone gives the same three violations without the criterion rollup.
+         Either command exits 4 on <code>/demo/team</code> and 0 on <code>/demo/team/fixed</code>,
+         which is what makes them usable in a script. See
+         <a href="/guides/scripting">script the CLI</a>.
+      </p>
+   </section>
+
+   <section class="split panel" id="rules">
+      <div class="stack">
+         <h2>Rules axe skips by default</h2>
+         <p>
+            A default run covers only the axe rules that map to a WCAG criterion. Two of the
+            problems on this page belong to rules axe tags as best practice instead, so you have
+            to name them with <code>--rule</code>.
+         </p>
+         <pre><code>a1 axe http://localhost:4321/demo/team --rule heading-order</code></pre>
+         <pre data-label="OUTPUT"><code>  ✗ heading-order  moderate
+      Heading levels should only increase by one
+      1 failing element
+        .toolbar-heading
+          &lt;h3 class="toolbar-heading"&gt;Members&lt;/h3&gt;</code></pre>
+         <p>
+            The second one needs the dialog open. axe reads the rendered page, and the dialog
+            markup is hidden until the Invite member button runs. The demo page opens it for you
+            when the URL ends in <code>#invite</code>.
+         </p>
+         <pre><code>a1 axe 'http://localhost:4321/demo/team#invite' --rule aria-dialog-name</code></pre>
+         <pre data-label="OUTPUT"><code>  ✗ aria-dialog-name  serious
+      ARIA dialog and alertdialog nodes should have an accessible name
+      1 failing element
+        .modal
+          &lt;div class="modal" role="dialog" aria-modal="true" data-invite-dialog=""&gt;
+          Fix any of the following:
+          • aria-label attribute does not exist or is empty
+          • aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+          • Element has no title attribute</code></pre>
+         <p>
+            The fixed page uses a native <code>&lt;dialog&gt;</code> with
+            <code>aria-labelledby="invite-title"</code>. <code>aria-dialog-name</code> only
+            checks elements carrying <code>role="dialog"</code>, so on the fixed page it reports
+            neither a violation nor a pass. The next section confirms the name another way.
+         </p>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Scan what is rendered</div>
+         <p class="aside-note">
+            Anything behind a click is invisible to <code>a1 axe</code>. Give the page a URL that
+            opens the dialog, as this one does with <code>#invite</code>, or open it in a screen
+            reader session and scan from there.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="tree">
+      <h2>The accessibility tree</h2>
+      <p>
+         <code>a1 tree</code> prints the role and accessible name of every node a screen reader can
+         reach, taken from Playwright's <code>ariaSnapshot()</code>. Run it against both dialogs.
+      </p>
+      <pre><code>a1 tree 'http://localhost:4321/demo/team#invite'
+a1 tree 'http://localhost:4321/demo/team/fixed#invite'</code></pre>
+      <pre data-label="OUTPUT"><code>- dialog:
+  - heading "Invite member" [level=2]
+
+- dialog "Invite member":
+  - heading "Invite member" [level=2]</code></pre>
+      <p>
+         The heading is right there in both. Only the fixed dialog puts it in the dialog's name,
+         which is the string a screen reader reads when the dialog opens.
+      </p>
+      <p>
+         <code>--role</code> keeps matching nodes and their ancestors, which is the fastest way to
+         check a set of controls at once.
+      </p>
+      <pre><code>a1 tree http://localhost:4321/demo/team --role button</code></pre>
+      <pre data-label="OUTPUT"><code>- main:
+  - button "All"
+  - button "Active"
+  - button "Pending"
+  - button "Invite member"
+  - table "3 members in this workspace":
+    - rowgroup:
+      - row "Dana Whitfield dana@northwind.test Admin Active 2 hours ago":
+        - cell:
+          - button</code></pre>
+      <p>
+         The remove buttons have no name, matching the <code>button-name</code> violation. The
+         three filter chips come back as buttons, which they are not: they are
+         <code>&lt;div role="button"&gt;</code> with no <code>tabindex</code>. The tree cannot tell
+         you that, because a role is all it reads. The keyboard can.
+      </p>
+   </section>
+
+   <section class="panel" id="keyboard">
+      <h2>Tab order</h2>
+      <p>
+         <code>a1 sr</code> drives a screen reader. <code>--sr virtual</code> runs the simulated
+         reader in headless Chromium, which needs no VoiceOver or NVDA setup and is what to use
+         in a script. See <a href="/screen-readers">screen readers</a> for what the simulated
+         reader does and does not model.
+      </p>
+      <pre><code>a1 sr start http://localhost:4321/demo/team --sr virtual --allow-virtual
+a1 sr press Tab --phrase</code></pre>
+      <p>Eight presses of Tab on each page, one line per press:</p>
+      <pre data-label="OUTPUT"><code>/demo/team                                /demo/team/fixed
+
+link, General                             link, General
+link, Billing                             link, Billing
+link, Team, current page                  link, Team, current page
+searchbox, placeholder Filter members     searchbox, Filter members, placeholder Filter members
+button, Invite member                     button, All, pressed
+button                                    button, Active, not pressed
+button                                    button, Pending, not pressed
+button                                    button, Invite member</code></pre>
+      <p>
+         On the left, Tab goes from the filter field straight to Invite member. The three filter
+         chips are not in the tab order at all, so a keyboard user cannot filter the table. The
+         three unnamed <code>button</code> lines after it are the remove buttons.
+      </p>
+      <p>
+         On the right the chips are <code>&lt;button&gt;</code> elements, so Tab reaches them, and
+         <code>aria-pressed</code> makes the reader say <code>pressed</code> or
+         <code>not pressed</code>.
+      </p>
+      <p>
+         axe has a rule for this, <code>focus-order-semantics</code>, and it reports the page as
+         inapplicable. The rule reads elements that are in the tab order and asks whether their
+         role fits. An element left out of the tab order never reaches it.
+      </p>
+   </section>
+
+   <section class="panel" id="dialog">
+      <h2>Opening the dialog</h2>
+      <p>Move to the Invite member button, activate it, and read where the reader ended up.</p>
+      <pre><code>a1 sr goto --name "Invite member" --role button
+a1 sr activate
+a1 sr read --phrase</code></pre>
+      <pre data-label="OUTPUT"><code>/demo/team          button, Invite member
+/demo/team/fixed    textbox, Email address, required</code></pre>
+      <p>
+         The broken page unhides a <code>div</code> and leaves focus on the button that opened it.
+         A screen reader user hears nothing change. Tab from there walks the table behind the
+         dialog instead of the fields inside it, and Escape does not close anything.
+      </p>
+      <p>
+         The fixed page calls <code>showModal()</code> on a <code>&lt;dialog&gt;</code>. The
+         browser moves focus to the first field, keeps Tab inside the dialog, makes the rest of
+         the page inert, closes on Escape, and returns focus to the Invite member button
+         afterwards. That is five behaviors for one method call, and no axe rule reports any of
+         them.
+      </p>
+      <p>
+         <code>a1 wcag 2.4.3</code> and <code>a1 wcag 2.1.2</code> are the criteria this fails.
+         <code>a1 audit</code> already listed both under <strong>Check by hand</strong>.
+      </p>
+   </section>
+
+   <section class="panel" id="status">
+      <h2>The confirmation message</h2>
+      <p>
+         Fill the form and submit it. <code>a1 sr checkpoint</code> marks the transcript so the
+         check that follows reads only what came after it.
+      </p>
+      <pre><code>a1 sr goto --name "Email address"
+a1 sr type "sam@northwind.test"
+a1 sr checkpoint invite
+a1 sr goto --name "Send invitation" --role button
+a1 sr activate
+a1 sr expect "Invitation sent" --since invite</code></pre>
+      <pre data-label="OUTPUT"><code>/demo/team          Matched: nothing        Result: fail    exit 4
+/demo/team/fixed    Matched: polite: Invitation sent to sam@northwind.test.    Result: pass    exit 0</code></pre>
+      <p>
+         Both pages show the same green confirmation on screen. The broken page builds a plain
+         <code>&lt;p&gt;</code> and appends it, so a screen reader has no reason to read it and a
+         user who never looks away from the form learns nothing. The fixed page renders
+         <code>&lt;p class="banner" role="status"&gt;</code> from the start and sets its text, and
+         the reader announces it without moving focus.
+      </p>
+      <p>
+         The empty live region has to stay in the rendered page for this to work. The fixed page
+         collapses it with <code>.banner:empty {'{'} padding: 0; border: 0; {'}'}</code> rather
+         than <code>display: none</code>, which would take it out of the page and back to the
+         broken behavior.
+      </p>
+      <pre><code>a1 wcag 4.1.3</code></pre>
+      <pre data-label="OUTPUT"><code>4.1.3  Status Messages  [AA]
+
+Testing it
+  This needs a real page. Trigger a status message and confirm a screen reader announces it without moving
+  focus.
+    a1 sr expect &lt;text&gt;
+
+If it fails
+  ARIA22  Using role=status to present status messages  aria</code></pre>
+   </section>
+
+   <section class="field-note" id="passes">
+      <h2>What axe called a pass</h2>
+      <p>
+         The filter field on the broken page is
+         <code>&lt;input type="search" placeholder="Filter members"&gt;</code> and nothing else.
+         axe's <code>label</code> rule accepts a non-empty placeholder as a name, so it passes,
+         and <code>a1 audit --json</code> records criterion 3.3.2 Labels or Instructions with
+         <code>axeVerdict: "pass"</code>.
+      </p>
+      <p>The reader disagrees:</p>
+      <pre data-label="OUTPUT"><code>/demo/team          searchbox, placeholder Filter members
+/demo/team/fixed    searchbox, Filter members, placeholder Filter members</code></pre>
+      <p>
+         The placeholder is gone the moment the user types a character, and it is the only thing
+         naming the field. The fix is a <code>&lt;label for="member-filter"&gt;</code>. Keep the
+         placeholder or drop it, but do not let it be the label.
+      </p>
+      <p>
+         Criterion 4.1.3 goes the other way. <code>a1 audit --json</code> records it as
+         <code>applicability: "not-detected"</code> on the broken page, because a missing live
+         region leaves nothing to detect. A criterion no tool claims is one to check by hand.
+      </p>
+   </section>
+
+   <section class="panel" id="mcp">
+      <h2>The same run from an agent</h2>
+      <p>
+         Every MCP tool calls the same function as the matching command, so an agent gets the same
+         results. Point your client at the server first.
+      </p>
+      <pre data-label="CONFIG"><code>{`{
+  "mcpServers": {
+    "a11ied": {
+      "command": "npx",
+      "args": ["-y", "a11ied", "mcp"]
+    }
+  }
+}`}</code></pre>
+      <pre data-label="AI AGENT PROMPT"><code>Audit http://localhost:4321/demo/team with a11ied. Report every axe violation,
+then check the three things axe cannot: whether Tab reaches the status filter
+chips, whether opening the Invite member dialog moves focus into it, and whether
+submitting the invite form announces a confirmation. Compare each answer against
+http://localhost:4321/demo/team/fixed.</code></pre>
+      <p>The tool calls that answer it:</p>
+      <div class="route-list">
+         <div class="route-row">
+            <code>audit</code>
+            <span><code>target</code> the demo URL. Returns the three violations, the criterion
+            rollup, and the heading levels.</span>
+         </div>
+         <div class="route-row">
+            <code>run_axe</code>
+            <span><code>ruleIds: ["heading-order"]</code>, then
+            <code>ruleIds: ["aria-dialog-name"]</code> against the <code>#invite</code> URL.</span>
+         </div>
+         <div class="route-row">
+            <code>tree</code>
+            <span><code>role: "button"</code> for the control names, or the <code>#invite</code>
+            URL for the dialog's name.</span>
+         </div>
+         <div class="route-row">
+            <code>sr_session</code>
+            <span><code>action: "start"</code>, <code>target: "virtual"</code>,
+            <code>allowVirtual: true</code>, <code>url</code> the demo page.</span>
+         </div>
+         <div class="route-row">
+            <code>sr_action</code>
+            <span><code>action: "press"</code> with <code>keys: ["Tab"]</code> for the tab order,
+            then <code>goto</code>, <code>activate</code>, <code>type</code>, and
+            <code>checkpoint</code> for the dialog and the form.</span>
+         </div>
+         <div class="route-row">
+            <code>sr_expect</code>
+            <span><code>pattern: "Invitation sent"</code>, <code>since: "invite"</code>. Returns
+            <code>exitCode</code> 4 on the broken page and 0 on the fixed one.</span>
+         </div>
+         <div class="route-row">
+            <code>wcag_rule</code>
+            <span><code>ruleId</code> for each failing rule, to get the criteria and the
+            techniques that fix it.</span>
+         </div>
+      </div>
+      <p>
+         An agent that has the <a href="/guides/agent-skill">agent skill</a> installed already
+         knows this order. See <a href="/guides/agents">test from an AI agent</a> for the full
+         set of tools and <a href="/reference/mcp">the MCP reference</a> for their inputs.
+      </p>
+   </section>
+
+   <section class="ledger" id="fixes">
+      <h2>The ten fixes</h2>
+      <p>
+         Each row is one difference between the two pages, and each one is a few characters of
+         markup or one method call.
+      </p>
+      <div class="route-list">
+         <div class="route-row">
+            <code>image-alt</code>
+            <span>Avatar images get <code>alt=""</code>. The name is already in the cell next to
+            them, so an empty alt is the right answer, not a description.</span>
+         </div>
+         <div class="route-row">
+            <code>button-name</code>
+            <span>Each remove button gets <code>aria-label="Remove Dana Whitfield"</code>, and its
+            <code>svg</code> gets <code>aria-hidden="true"</code>.</span>
+         </div>
+         <div class="route-row">
+            <code>color-contrast</code>
+            <span>The last-active dates move from <code>#a2aab5</code> to <code>#414b59</code>,
+            8.84:1 on white. The Pending pill becomes <code>#6b4708</code> on
+            <code>#fdf0d5</code>, 7.35:1.</span>
+         </div>
+         <div class="route-row">
+            <code>heading-order</code>
+            <span>The Members heading becomes an <code>h2</code> under the page's
+            <code>h1</code>.</span>
+         </div>
+         <div class="route-row">
+            <code>aria-dialog-name</code>
+            <span>The dialog gets <code>aria-labelledby="invite-title"</code>, pointing at the
+            heading it already had.</span>
+         </div>
+         <div class="route-row">
+            <code>2.1.1 Keyboard</code>
+            <span>The filter chips become <code>&lt;button type="button"&gt;</code> instead of
+            <code>&lt;div role="button"&gt;</code>, which puts them in the tab order and gives
+            them Enter and Space for free.</span>
+         </div>
+         <div class="route-row">
+            <code>4.1.2 Name, Role, Value</code>
+            <span>The chips get <code>aria-pressed</code>, so a screen reader says which one is
+            selected. Without it, the dark background is the only thing that says so.</span>
+         </div>
+         <div class="route-row">
+            <code>2.4.3 Focus Order</code>
+            <span>The dialog becomes a <code>&lt;dialog&gt;</code> opened with
+            <code>showModal()</code>, which moves focus in, keeps it there, and returns it to the
+            trigger on close.</span>
+         </div>
+         <div class="route-row">
+            <code>3.3.2 Labels or Instructions</code>
+            <span>The filter field gets a visible
+            <code>&lt;label for="member-filter"&gt;Filter members&lt;/label&gt;</code>.</span>
+         </div>
+         <div class="route-row">
+            <code>4.1.3 Status Messages</code>
+            <span>The confirmation moves into a <code>role="status"</code> paragraph that is in
+            the page before the form is submitted.</span>
+         </div>
+      </div>
+      <p>
+         Point the same commands at your own app next. <code>a1 audit</code> first, then
+         <code>a1 tree</code> for the names and roles, then <code>a1 sr</code> for the five
+         things neither of them can report.
+      </p>
+   </section>
+</DocShell>

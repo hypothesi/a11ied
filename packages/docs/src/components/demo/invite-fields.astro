@@ -1,0 +1,23 @@
+---
+/** The body of the invite dialog. Both the broken and the fixed page render this unchanged. */
+---
+
+<h2 id="invite-title">Invite member</h2>
+<form data-invite-form>
+   <div class="field">
+      <label for="invite-email">Email address</label>
+      <input id="invite-email" name="email" type="email" required autocomplete="email" />
+   </div>
+   <div class="field">
+      <label for="invite-role">Role</label>
+      <select id="invite-role" name="role">
+         <option value="viewer">Viewer</option>
+         <option value="editor">Editor</option>
+         <option value="admin">Admin</option>
+      </select>
+   </div>
+   <div class="modal-actions">
+      <button type="button" class="button button--quiet" data-cancel-invite>Cancel</button>
+      <button type="submit" class="button">Send invitation</button>
+   </div>
+</form>
