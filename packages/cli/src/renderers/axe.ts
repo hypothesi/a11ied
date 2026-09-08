@@ -169,7 +169,10 @@ function renderRuleGroup(args: {
    if (!args.noun) {
       return section(
          heading,
-         args.rules.map((rule) => `${args.marker} ${code(rule.id)}  ${dim(rule.help)}`),
+         args.rules.map(
+            (rule) =>
+               `${args.marker} ${code(rule.id)}  ${dim(`${count(rule.nodes.length, 'element')}`)}  ${dim(rule.help)}`,
+         ),
       );
    }
    const noun = args.noun;
@@ -179,15 +182,29 @@ function renderRuleGroup(args: {
    return section(heading, body.slice(0, -1));
 }
 
+function countElements(rules: AxeRule[]): number {
+   return rules.reduce((memo, rule) => memo + rule.nodes.length, 0);
+}
+
+/**
+ * Counts elements, not rules. One rule reports in more than one group when some elements
+ * pass and others fail, so counting rules reads as a contradiction: `heading-order` can
+ * be both a violation and a pass on the same page, once for the `h1` it accepted and once
+ * for the `h3` that skipped a level.
+ */
 function summarizeCounts(result: {
    violations: AxeRule[];
    incomplete: AxeRule[];
    passes: AxeRule[];
 }): string {
    return [
-      count(result.violations.length, 'violation'),
-      count(result.incomplete.length, 'incomplete check'),
-      count(result.passes.length, 'pass', 'passes'),
+      count(countElements(result.violations), 'failing element'),
+      count(
+         countElements(result.incomplete),
+         'element to check by hand',
+         'elements to check by hand',
+      ),
+      count(countElements(result.passes), 'passing element'),
    ].join(', ');
 }
 
@@ -256,6 +273,12 @@ function renderOneAxeReport(result: AxeReport, options: RenderOptions): string[]
          rules: result.passes,
          marker: symbols.pass,
          options,
+         /*
+          * An unfiltered scan passes around 120 rules, so listing every passing element
+          * would bury the violations. `--verbose` names them for the reader who wants to
+          * see which element a rule accepted next to the one it rejected.
+          */
+         ...(options.verbose ? { noun: 'passing element' } : {}),
       }),
    ];
 

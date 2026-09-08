@@ -139,7 +139,7 @@ async function assertAxeTextOutput(baseUrl: string): Promise<void> {
      "axe scan
        URL:        <base>/button-name-failure.html
        Selection:  the rules mapped to criterion 4.1.2
-       Result:     1 violation, 0 incomplete checks, 2 passes
+       Result:     1 failing element, 0 elements to check by hand, 2 passing elements
        Verdict:    ✗ 1 problem to fix
 
      Violations (1)
@@ -162,8 +162,8 @@ async function assertAxeTextOutput(baseUrl: string): Promise<void> {
        none
 
      Passes (2)
-       ✓ aria-hidden-body  aria-hidden="true" must not be present on the document body
-       ✓ nested-interactive  Interactive controls must not be nested
+       ✓ aria-hidden-body  1 element  aria-hidden="true" must not be present on the document body
+       ✓ nested-interactive  1 element  Interactive controls must not be nested
      "
    `);
 }
