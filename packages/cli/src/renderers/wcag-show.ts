@@ -28,11 +28,12 @@ import {
    techniqueLine,
    type RenderOptions,
 } from './shared.js';
+import { mobileSection } from './wcag-mobile.js';
 import { failsSection, testingSection, verboseTestMethodLines } from './wcag-testing.js';
 
-export type CriterionDetailSection = 'testing' | 'fails';
+export type CriterionDetailSection = 'mobile' | 'testing' | 'fails';
 
-const allSections: ReadonlyArray<CriterionDetailSection> = ['testing', 'fails'];
+const allSections: ReadonlyArray<CriterionDetailSection> = ['mobile', 'testing', 'fails'];
 
 function normalizeProse(value: string): string {
    return stripHtml(value)
@@ -125,9 +126,10 @@ function verboseDetailLines(
 
 /**
  * Renders one criterion as an answer to the questions a reader has, in order: what must
- * be true, what that means for the page, how to test it, and what to do when it fails.
- * `sections` limits the output to a subset, which the interactive finder uses for its
- * hotkeys. A section with nothing to say is left out rather than printed empty.
+ * be true, what that means for the page, what changes on a mobile platform, how to test
+ * it, and what to do when it fails. `sections` limits the output to a subset, which the
+ * interactive finder uses for its hotkeys. A section with nothing to say is left out
+ * rather than printed empty.
  */
 export function renderCriterionDetailLines(
    result: CriterionShowResult,
@@ -146,6 +148,9 @@ export function renderCriterionDetailLines(
       options,
    );
 
+   if (sections.includes('mobile')) {
+      lines.push(...mobileSection(result.mobileGuidance, options));
+   }
    if (sections.includes('testing')) {
       lines.push(
          ...testingSection({

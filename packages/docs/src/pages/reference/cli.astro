@@ -181,7 +181,7 @@ a1 sr press "VO+ArrowRight" --json</code></pre>
          <div class="route-row"><code>wcag</code><span>With no arguments on a terminal, an interactive finder: fuzzy search on the left, the criterion on the right, <code>t</code>, <code>f</code>, <code>u</code>, and <code>a</code> for testing it, if it fails, the Understanding document, and everything, <code>y</code> to copy the <code>a1 axe --criterion</code> command. Piped output prints the help.</span></div>
          <div class="route-row"><code>wcag &lt;criterion&gt;</code><span>One criterion by ID or slug, or one technique by ID such as <code>G18</code>. Same output as <code>wcag show</code>.</span></div>
          <div class="route-row"><code>wcag criteria</code><span>List criteria. <code>--level A</code>, <code>AA</code>, or <code>AAA</code> narrows it. <code>--summary</code> prints the count of automated, hybrid, and manual criteria per level instead. See <a href="/test-methods">test methods</a>.</span></div>
-         <div class="route-row"><code>wcag show &lt;criterion&gt;</code><span>The requirement, a plain restatement of what to do, how to test it, and what to do when it fails. <code>--verbose</code> adds the raw <code>testMethod.method</code>, <code>preferredEvidenceMode</code>, and procedure IDs.</span></div>
+         <div class="route-row"><code>wcag show &lt;criterion&gt;</code><span>The requirement, a plain restatement of what to do, what WCAG2Mobile says about it on a mobile platform, how to test it, and what to do when it fails. <code>--verbose</code> adds the raw <code>testMethod.method</code>, <code>preferredEvidenceMode</code>, procedure IDs, and the rest of the mobile guidance.</span></div>
          <div class="route-row"><code>wcag understanding &lt;criterion&gt;</code><span>The full Understanding document for one criterion, converted to Markdown, with the source line the W3C Document License requires.</span></div>
          <div class="route-row"><code>wcag search &lt;query&gt;</code><span>Ranked matches across titles, summaries, normative text, techniques, failures, and tags. <code>--limit</code> defaults to 10.</span></div>
          <div class="route-row"><code>wcag rule &lt;ruleId&gt;</code><span>One axe-core rule: the criteria it maps to, and the axe help text and URL.</span></div>
@@ -195,6 +195,34 @@ a1 wcag search "focus order" --limit 3 --json
 a1 wcag rule color-contrast
 a1 wcag G18</code></pre>
       <p>These read bundled data. No command in this family opens a browser or makes a request.</p>
+   </section>
+
+   <section class="split panel" id="pattern">
+      <h2>pattern</h2>
+      <p>
+         The ARIA Authoring Practices Guide publishes, for each of its 68 examples, a keyboard
+         support table and a role, property, state, and tabindex table. This family reads those
+         tables, and checks a live page against one.
+      </p>
+      <div class="route-list">
+         <div class="route-row"><code>pattern</code><span>Every pattern with its example count. Same as <code>pattern list</code>.</span></div>
+         <div class="route-row"><code>pattern &lt;name&gt;</code><span>One pattern by id such as <code>combobox</code>, with the examples the guide publishes for it, or one example by id such as <code>combobox-select-only</code>, with its keyboard and attribute tables. <code>--section keyboard</code>, <code>attributes</code>, or <code>examples</code> narrows the output.</span></div>
+         <div class="route-row"><code>pattern role &lt;role&gt;</code><span>The examples the APG example index files under one ARIA role.</span></div>
+         <div class="route-row"><code>pattern attribute &lt;attribute&gt;</code><span>The examples the index files under one property or state, such as <code>aria-expanded</code>.</span></div>
+         <div class="route-row"><code>pattern check &lt;target&gt;</code><span>Press every key one example declares against a live widget, and check its documented attributes. <code>--pattern</code> and <code>--selector</code> are both required. <code>--table</code> and <code>--setup</code> reach a state the first keyboard table does not cover.</span></div>
+      </div>
+      <pre><code>a1 pattern combobox
+a1 pattern combobox-select-only --section keyboard
+a1 pattern role combobox
+a1 pattern attribute aria-expanded
+a1 pattern check http://localhost:3000 --pattern combobox-select-only --selector '#fruit'</code></pre>
+      <p>
+         Everything but <code>pattern check</code> reads bundled data. <code>pattern check</code>
+         exits 4 on two findings and no others: a key the guide declares that changed nothing,
+         and an attribute pointing at an id the document does not have. Every other key is
+         printed with what changed next to the guide's own description of what should have
+         changed, because whether the right thing happened is a judgment the tool does not make.
+      </p>
    </section>
 
    <section class="split panel" id="axe">

@@ -8,6 +8,14 @@ export {
    renderSearchText,
 } from './wcag.js';
 export {
+   patternDetailSections,
+   renderPatternCheckText,
+   renderPatternFindText,
+   renderPatternListText,
+   renderPatternLookupText,
+   type PatternDetailSection,
+} from './pattern.js';
+export {
    renderAxeRuleText,
    renderShowCriterionText,
    renderTechniqueText,

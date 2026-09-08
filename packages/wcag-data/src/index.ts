@@ -30,6 +30,22 @@ export {
    type SyncDocumentArtifactsResult,
 } from './generation/documents.js';
 
+export {
+   syncMobileGuidance,
+   type SyncMobileGuidanceResult,
+} from './generation/mobile.js';
+
+export {
+   syncApgPatterns,
+   type ApgFetchFailure,
+   type SyncApgPatternsResult,
+} from './generation/apg.js';
+
 export { validateRawSyncState } from './validation/raw.js';
 export { validateGeneratedArtifacts } from './validation/generated.js';
 export { validateDocumentArtifacts } from './validation/documents.js';
+export { validateMobileGuidanceArtifact } from './validation/mobile.js';
+export {
+   validateApgPatternsArtifact,
+   type ApgValidationResult,
+} from './validation/apg.js';

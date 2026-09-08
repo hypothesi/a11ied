@@ -6,13 +6,17 @@ import {
    criteriaByLevelArtifactSchema,
    documentContentStoreSchema,
    failureIndexArtifactSchema,
+   apgPatternsArtifactSchema,
+   mobileGuidanceArtifactSchema,
    normalizedCriteriaArtifactSchema,
    slugIndexArtifactSchema,
    strategyArtifactSchema,
    techniqueBodyArtifactSchema,
    techniqueIndexArtifactSchema,
    understandingArtifactSchema,
+   type ApgPatternsArtifact,
    type DocumentContentStore,
+   type MobileGuidanceArtifact,
    type WcagVersion,
 } from '@a11ied/contracts';
 
@@ -136,4 +140,14 @@ export function loadEngineArtifacts(version: WcagVersion): EngineArtifacts {
 /** Reads the shared, deduplicated document content store from disk. */
 export function loadDocumentContentStore(): DocumentContentStore {
    return loadArtifact(documentContentStoreSchema, 'documents-content.json');
+}
+
+/** Reads the WCAG2Mobile guidance artifact, which covers every WCAG version at once. */
+export function loadMobileGuidance(): MobileGuidanceArtifact {
+   return loadArtifact(mobileGuidanceArtifactSchema, 'mobile-guidance.json');
+}
+
+/** Reads the APG pattern artifact, which is not scoped to a WCAG version. */
+export function loadApgPatterns(): ApgPatternsArtifact {
+   return loadArtifact(apgPatternsArtifactSchema, 'apg-patterns.json');
 }

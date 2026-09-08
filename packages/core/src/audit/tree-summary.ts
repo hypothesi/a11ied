@@ -13,6 +13,8 @@ export interface AuditTreeSummary {
    firstHeading: string | undefined;
    counts: AuditTreeCounts;
    headingLevels: number[];
+   /** Every distinct role in the tree, sorted, so a caller can look one up in the APG. */
+   roles: string[];
 }
 
 const LANDMARK_ROLES = new Set([
@@ -65,17 +67,22 @@ function tallyNode(counts: AuditTreeCounts, node: AriaTreeNode): void {
    }
 }
 
-/** Summarizes an accessibility tree: landmark, heading, link, button, and control counts. */
+/**
+ * Summarizes an accessibility tree: landmark, heading, link, button, and control counts,
+ * plus every distinct role the page uses.
+ */
 export function summarizeAccessibilityTree(
    nodes: AriaTreeNode[],
    pageTitle: string,
 ): AuditTreeSummary {
    const counts = buildEmptyCounts();
    const headingLevels: number[] = [];
+   const roles = new Set<string>();
    let firstHeading: string | undefined = undefined;
 
    walkNodes(nodes, (node) => {
       tallyNode(counts, node);
+      roles.add(node.role);
       if (node.role === 'heading') {
          if (node.level !== undefined) {
             headingLevels.push(node.level);
@@ -84,5 +91,11 @@ export function summarizeAccessibilityTree(
       }
    });
 
-   return { pageTitle, firstHeading, counts, headingLevels };
+   return {
+      pageTitle,
+      firstHeading,
+      counts,
+      headingLevels,
+      roles: [...roles].toSorted((left, right) => left.localeCompare(right)),
+   };
 }

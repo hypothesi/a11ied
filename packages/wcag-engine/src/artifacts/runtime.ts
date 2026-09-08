@@ -16,6 +16,7 @@ import {
    type CriterionLookupKey,
    type CriterionLookupResult,
    type DocumentContentStore,
+   type MobileGuidanceEntry,
    type NormalizedCriterion,
    type QuickrefTagLookupResult,
    type TechniqueLookupResult,
@@ -26,12 +27,18 @@ import {
 
 import {
    artifactsCache,
+   apgPatternsCache,
    contentStoreCache,
+   mobileGuidanceCache,
    supportedVersions,
    type EngineArtifacts,
 } from '../shared/data.js';
 import { WcagEngineNotFoundError, WcagEngineValidationError } from '../errors/index.js';
-import { loadDocumentContentStore, loadEngineArtifacts } from './load.js';
+import {
+   loadDocumentContentStore,
+   loadEngineArtifacts,
+   loadMobileGuidance,
+} from './load.js';
 
 /** Loads the generated artifact bundle for one supported WCAG version. */
 export function getArtifacts(version: WcagVersion): EngineArtifacts {
@@ -264,6 +271,21 @@ export function getUnderstanding(
    });
 }
 
+/**
+ * Returns what WCAG2Mobile says about one criterion, or `undefined` when the document
+ * does not cover it. The document applies WCAG 2.2 to mobile and covers Level A and AA,
+ * so a Level AAA criterion has no entry, and a criterion the task force has not written
+ * up yet has an entry whose `state` is `placeholder`.
+ */
+export function getMobileGuidance(
+   lookupKey: CriterionLookupKey,
+   options?: { version?: string },
+): MobileGuidanceEntry | undefined {
+   const criterion = resolveCriterion(parseVersion(options?.version), lookupKey);
+   mobileGuidanceCache.artifact ??= loadMobileGuidance();
+   return mobileGuidanceCache.artifact.criteria[criterion.id];
+}
+
 /** Resolves one axe-core rule id to the criteria it maps to in the pinned data. */
 export function getAxeRule(
    ruleId: string,
@@ -288,4 +310,6 @@ export function getAxeRule(
 export function resetWcagEngineCache(): void {
    artifactsCache.clear();
    contentStoreCache.store = undefined;
+   mobileGuidanceCache.artifact = undefined;
+   apgPatternsCache.artifact = undefined;
 }

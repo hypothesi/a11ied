@@ -34,6 +34,29 @@ a1 wcag rule color-contrast
 | `wcag search <query> [--limit n]`                | `wcag_search`   | `query` (required), `limit`, `version` |
 | `wcag rule <axe-rule-id>`                        | `wcag_rule`     | `ruleId` (required), `version`         |
 
+## ARIA pattern lookup and check
+
+```txt
+a1 pattern combobox
+a1 pattern combobox-select-only
+a1 pattern list
+a1 pattern role combobox
+a1 pattern attribute aria-expanded
+a1 pattern check http://localhost:3000 --pattern combobox-select-only --selector '#fruit'
+```
+
+| Command                                       | MCP tool       | Arguments              |
+| --------------------------------------------- | -------------- | ---------------------- |
+| `pattern <pattern-or-example-id>`             | `pattern_show` | `name`                 |
+| `pattern list`                                | `pattern_show` | omit `name`            |
+| `pattern role <role>`                         | `pattern_find` | `role`                 |
+| `pattern attribute <attribute>`               | `pattern_find` | `attribute`            |
+| `pattern check <target> --pattern --selector` | none           | run it through the CLI |
+
+`pattern check` exits 4 on a key the example declares that changed nothing, and on an
+attribute pointing at an id the document does not have. Everything else it prints is an
+observation for you to judge.
+
 ## Page checks
 
 ```txt

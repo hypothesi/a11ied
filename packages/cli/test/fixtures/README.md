@@ -38,6 +38,29 @@ Two ways to load a fixture, and the difference matters:
 | `live-regions.html`    | The same message written three ways: to `role="status"` after a 250 ms delay, to `role="alert"` during the click, and to a `div` with no role. Only the third announces nothing, and the timing difference decides whether `sr wait --for` or `sr expect --since` is the right check.                   |
 | `modal-untrapped.html` | Two dialogs from one page. The first is a `div` with `role="dialog"` that opens without moving focus and has no accessible name. The second is a native `dialog` opened with `showModal()`. Loading it with `#rename` opens the first one, so a scan can reach markup that is otherwise never rendered. |
 
+## APG examples
+
+Copies of ARIA Authoring Practices Guide examples, used as known-good pages. A finding
+against one of these is a false positive in a11ied rather than a bug in the page, which is
+what `src/testing/apg-fixtures.test.ts` holds them to. `npm run wcag:sync` refreshes them, so
+an upstream fix arrives as a reviewable diff instead of going stale.
+
+They keep the upstream directory depth, so each example's own `css/` and `js/` paths resolve
+unchanged. Two things are removed from each page's head: the stylesheet hosted on w3.org, so
+the tests need no network, and the four APG site scripts, which run the guide's own
+documentation chrome rather than the widget. `shared/css/core.css` is vendored because the
+widget's rendering depends on it.
+
+| File | What it is for |
+| --- | --- |
+| `apg/patterns/combobox/examples/combobox-select-only.html` | A correct select-only combobox. Two keyboard tables, so `pattern check` has a second one to name as unprobed. Needs its scripts. |
+| `apg/patterns/disclosure/examples/disclosure-faq.html` | A correct set of disclosure buttons. One keyboard table, and two buttons with no id, which is what a focus comparison has to tell apart. Needs its scripts. |
+| `apg/patterns/landmarks/examples/banner.html` | A landmark example the APG documents with prose and no tables at all. Static. |
+
+An APG example page wraps its widget in the guide's own documentation, and that wrapper has
+small navigation links and AAA contrast shortfalls of its own. Scan the widget, not the page:
+the tests pass `--selector '#ex1'`.
+
 ## The console app
 
 `app/console.html` is a small client-side-routed support console, the fixture the end to

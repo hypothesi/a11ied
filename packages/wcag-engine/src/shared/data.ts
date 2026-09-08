@@ -8,6 +8,8 @@ import {
    type AxeRuleIndexArtifact,
    type TestMethodSummaryArtifact,
    type DocumentContentStore,
+   type ApgPatternsArtifact,
+   type MobileGuidanceArtifact,
    type NormalizedCriterion,
    type TechniqueBodyArtifact,
    type TechniqueIndexArtifact,
@@ -65,6 +67,16 @@ export const artifactsCache = new Map<WcagVersion, EngineArtifacts>();
  */
 export const contentStoreCache: { store: DocumentContentStore | undefined } = {
    store: undefined,
+};
+
+/** WCAG2Mobile guidance is not version-scoped either, so it is cached the same way. */
+export const mobileGuidanceCache: { artifact: MobileGuidanceArtifact | undefined } = {
+   artifact: undefined,
+};
+
+/** APG patterns describe ARIA, not WCAG, so one cached artifact serves every version. */
+export const apgPatternsCache: { artifact: ApgPatternsArtifact | undefined } = {
+   artifact: undefined,
 };
 
 export const pageSignalTagHints: Record<PageSignalCategory, string[]> = {

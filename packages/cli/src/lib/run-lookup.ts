@@ -4,7 +4,10 @@ import type * as RenderersNamespace from '../renderers/index.js';
 
 type CoreModule = typeof CoreModuleNamespace;
 type Renderers = typeof RenderersNamespace;
-type RenderText = (envelope: CliOutputEnvelope, options: { verbose: boolean }) => string;
+export type RenderText = (
+   envelope: CliOutputEnvelope,
+   options: { verbose: boolean },
+) => string;
 type CommandResult = Record<string, unknown> | Promise<Record<string, unknown>>;
 
 export interface LookupCommandInput {

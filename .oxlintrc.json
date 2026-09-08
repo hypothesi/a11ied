@@ -1,6 +1,11 @@
 {
    "$schema": "./node_modules/oxlint/configuration_schema.json",
-   "ignorePatterns": [".aix/**", ".claude/**"],
+   "ignorePatterns": [
+      ".aix/**",
+      ".claude/**",
+      "packages/cli/test/fixtures/apg/**",
+      "packages/wcag-data/test/apg/**"
+   ],
    "plugins": ["typescript", "unicorn", "oxc", "node"],
    "jsPlugins": ["oxlint-plugin-complexity"],
    "categories": {

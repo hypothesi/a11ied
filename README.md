@@ -15,6 +15,7 @@ a1 doctor                    # check this machine and list the setup steps still
 a1 setup                     # run the Guidepup setup steps for VoiceOver or NVDA, then re-check
 a1 wcag 4.1.3                # one criterion: techniques, failures, test method, next command
 a1 wcag rule color-contrast  # an axe rule mapped back to its criteria and fixes
+a1 pattern combobox          # the ARIA pattern: its keyboard and attribute tables
 a1 help-all
 ```
 
@@ -73,7 +74,7 @@ npm test
 
 That flow does four things:
 
-- pulls the approved upstream WCAG, ACT, and Quickref sources into `packages/wcag-data/data/raw/`
+- pulls the approved upstream WCAG, ACT, Quickref, WCAG2Mobile, and ARIA Authoring Practices Guide sources into `packages/wcag-data/data/raw/` and the generated artifacts
 - regenerates the committed normalized artifacts in `packages/wcag-data/data/generated/`
 - checks that lint, typecheck, and builds still pass across the repo
 - runs the full Vitest suite through the dedicated `npm test` entrypoint

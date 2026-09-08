@@ -20,6 +20,20 @@ export function stripHtml(value: string): string {
       .trim();
 }
 
+const MARKDOWN_LINK = /\[([^\]]+)\]\([^)]*\)/gu;
+const MARKDOWN_BOLD = /\*\*([^*]+)\*\*/gu;
+
+/**
+ * Reduces Markdown to what reads well in a terminal: a link becomes its text and bold
+ * markers are dropped. Markup and whitespace are handled the same as `stripHtml`, because
+ * copied W3C prose mixes Markdown and raw HTML in the same paragraph.
+ */
+export function stripMarkdown(value: string): string {
+   return stripHtml(
+      value.replaceAll(MARKDOWN_LINK, '$1').replaceAll(MARKDOWN_BOLD, '$1'),
+   );
+}
+
 function styleHelpLine(line: string): string {
    if (!line) {
       return line;

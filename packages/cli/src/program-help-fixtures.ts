@@ -28,6 +28,7 @@ export const topLevelHelpCases: HelpCase[] = [
 
       Look things up:
         wcag [criterion]  Criteria, techniques, axe rules, and the W3C guidance.
+        pattern [name]    ARIA patterns: keyboard support and required attributes.
 
       Set up this machine:
         doctor            Check the browser and screen reader setup.

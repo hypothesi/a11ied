@@ -3,8 +3,10 @@ import { join } from 'node:path';
 
 import {
    getWcagDataDirectories,
+   validateApgPatternsArtifact,
    validateDocumentArtifacts,
    validateGeneratedArtifacts,
+   validateMobileGuidanceArtifact,
    validateRawSyncState,
 } from '../src/index.js';
 
@@ -21,6 +23,8 @@ const directories = getWcagDataDirectories(),
 
 const generatedArtifacts = await validateGeneratedArtifacts(directories);
 const documentArtifacts = await validateDocumentArtifacts(directories);
+const mobileGuidance = await validateMobileGuidanceArtifact(directories);
+const apgPatterns = await validateApgPatternsArtifact(directories);
 
 log('wcag-data sync validated');
 if (hasRawInputs) {
@@ -31,3 +35,8 @@ if (hasRawInputs) {
 }
 log(`generated artifacts: ${generatedArtifacts.length}`);
 log(`document artifacts: ${documentArtifacts.length}`);
+log(`mobile guidance: ${mobileGuidance.fileName}`);
+log(
+   `APG patterns: ${apgPatterns.fileName}, ${apgPatterns.patternCount} patterns, ` +
+      `${apgPatterns.exampleCount} examples`,
+);

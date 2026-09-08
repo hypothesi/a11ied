@@ -290,19 +290,31 @@ export const testMethodSummaryArtifactSchema = z.object({
 });
 export type TestMethodSummaryArtifact = z.infer<typeof testMethodSummaryArtifactSchema>;
 
+/** The attribution a copied W3C document carries wherever its text is printed. */
+export const w3cDocumentSourceSchema = z.object({
+   title: z.string().min(1),
+   url: z.string().url(),
+   status: z.string().min(1),
+});
+export type W3cDocumentSource = z.infer<typeof w3cDocumentSourceSchema>;
+
+/**
+ * Attribution plus enough provenance to tell when a copied document was last synced and
+ * whether the upstream page has changed since.
+ */
+export const w3cDocumentProvenanceSchema = w3cDocumentSourceSchema.extend({
+   sourceSha256: z.string().min(1),
+   syncedAt: z.string().datetime(),
+   etag: z.string().optional(),
+});
+
 /**
  * Attribution and freshness fields every copied W3C document carries, per the W3C
  * Document License: a link to the original, its status, and enough provenance to tell
  * when it was last synced. `bodyHash` points into the shared, deduplicated content store
  * so identical documents are stored once even when several ids reference them.
  */
-export const w3cDocumentMetaSchema = z.object({
-   title: z.string().min(1),
-   url: z.string().url(),
-   status: z.string().min(1),
-   sourceSha256: z.string().min(1),
-   syncedAt: z.string().datetime(),
-   etag: z.string().optional(),
+export const w3cDocumentMetaSchema = w3cDocumentProvenanceSchema.extend({
    bodyHash: z.string().min(1),
 });
 export type W3cDocumentMeta = z.infer<typeof w3cDocumentMetaSchema>;

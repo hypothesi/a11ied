@@ -14,7 +14,9 @@ import {
    techniqueBodyEntrySchema,
    techniqueIndexEntrySchema,
    understandingDocumentEntrySchema,
+   w3cDocumentSourceSchema,
 } from './wcag.js';
+import { mobileGuidanceEntrySchema } from './mobile.js';
 
 export const pageSignalCategorySchema = z.enum([
    'auth',
@@ -173,14 +175,6 @@ export const testMethodLookupResultSchema = z.object({
 });
 export type TestMethodLookupResult = z.infer<typeof testMethodLookupResultSchema>;
 
-/** The attribution a copied W3C document carries wherever its text is printed. */
-export const w3cDocumentSourceSchema = z.object({
-   title: z.string().min(1),
-   url: z.string().url(),
-   status: z.string().min(1),
-});
-export type W3cDocumentSource = z.infer<typeof w3cDocumentSourceSchema>;
-
 export const criterionShowResultSchema = testMethodLookupResultSchema.extend({
    /** The In Brief or Intent opening of the Understanding document, when one was synced. */
    understandingExcerpt: z.string().optional(),
@@ -190,6 +184,11 @@ export const criterionShowResultSchema = testMethodLookupResultSchema.extend({
     * the excerpt in a terminal is a copy.
     */
    understandingSource: w3cDocumentSourceSchema.optional(),
+   /**
+    * What WCAG2Mobile says about this criterion, when it has published guidance for it.
+    * The entry carries its own title, url, and status for the same attribution reason.
+    */
+   mobileGuidance: mobileGuidanceEntrySchema.optional(),
 });
 export type CriterionShowResult = z.infer<typeof criterionShowResultSchema>;
 

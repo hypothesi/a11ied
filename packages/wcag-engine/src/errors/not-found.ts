@@ -4,7 +4,9 @@ export type LookupKind =
    | 'criterion'
    | 'technique'
    | 'axe rule'
-   | 'understanding document';
+   | 'understanding document'
+   | 'APG pattern'
+   | 'APG example';
 
 /** Raised when a criterion, technique, or axe rule lookup cannot be resolved. */
 export class WcagEngineNotFoundError extends Error {

@@ -73,6 +73,7 @@ const toc = [
          <div class="route-row"><code>understanding</code><span>Each criterion's Understanding document, converted to Markdown, with its title, URL, and status. <code>a1 wcag understanding</code> reads it.</span></div>
          <div class="route-row"><code>technique-bodies</code><span>Each technique and failure's page body, converted to Markdown. <code>a1 wcag G18</code> reads it when one was synced.</span></div>
          <div class="route-row"><code>documents-content</code><span>The converted document bodies, one copy per distinct body, shared by <code>understanding</code> and <code>technique-bodies</code>.</span></div>
+         <div class="route-row"><code>mobile-guidance</code><span>What WCAG2Mobile says about each criterion it covers, with the document's own notes and examples. <code>a1 wcag show</code> reads it. Not version-scoped: one file serves 2.1 and 2.2.</span></div>
       </div>
    </section>
 
@@ -118,6 +119,15 @@ const toc = [
          <code>technique-bodies.&lt;version&gt;.json</code>. <code>a1 wcag understanding 1.4.3</code>
          prints the full document, and <code>a1 wcag show 1.4.3</code> prints its In Brief or
          Intent opening with a link to the rest.
+      </p>
+      <p>
+         <code>result.mobileGuidance</code> holds what WCAG2Mobile, the Mobile Accessibility
+         Task Force's guidance on applying WCAG 2.2 to mobile applications, says about the
+         criterion: whether it applies as written, which web terms mobile substitutes, and the
+         document's notes and examples. It covers Level A and AA, so a Level AAA criterion has
+         no entry, and a criterion the task force has not written up yet has an entry whose
+         <code>state</code> is <code>placeholder</code> with a link to the open issue.
+         WCAG2Mobile is an Editor's Draft: informative guidance, not a W3C Recommendation.
       </p>
       <p>
          <code>understandingUrl</code> and a technique's <code>url</code> still go to the

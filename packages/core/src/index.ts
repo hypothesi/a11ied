@@ -114,6 +114,15 @@ export {
    serializeAriaTree,
    type AriaTreeNode,
 } from './tree/parse.js';
+export { runPatternCheck, type RunPatternCheckInput } from './apg/check-runtime.js';
+export {
+   findApgExamples,
+   listApgPatternSummaries,
+   resolveApgLookup,
+   showApgExample,
+   showApgPattern,
+   showApgPatternOrExample,
+} from './apg/runtime.js';
 export { buildAuditReport, type AuditReport } from './audit/runtime.js';
 export { buildNextCommands } from './audit/next-commands.js';
 export type { AuditCriterionRollup } from './audit/criteria-rollup.js';
@@ -123,6 +132,12 @@ const cliCommands: CliCommand[] = [
    {
       name: 'wcag',
       summary: 'Query pinned WCAG criteria, test methods, and testing strategy data.',
+      maturity: 'ready',
+   },
+   {
+      name: 'pattern',
+      summary:
+         'Query the ARIA Authoring Practices Guide keyboard and attribute tables, and check a page against one.',
       maturity: 'ready',
    },
    {

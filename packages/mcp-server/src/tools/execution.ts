@@ -281,6 +281,7 @@ async function handleAudit(input: AuditInput): Promise<AuditToolResult> {
       axe: report.axe,
       criteria: report.criteria,
       target: target.value,
+      roles: report.tree.roles,
    });
 
    return {

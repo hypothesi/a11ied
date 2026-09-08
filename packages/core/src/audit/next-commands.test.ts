@@ -74,4 +74,27 @@ describe('buildNextCommands', () => {
 
       expect(commands).toEqual([]);
    });
+
+   it('suggests the ARIA pattern for a role the page actually uses', () => {
+      const commands = buildNextCommands({
+         axe: buildAxeResult([]),
+         criteria: [],
+         target: 'https://example.test',
+         roles: ['combobox', 'generic', 'listbox'],
+      });
+
+      expect(commands).toContain('a1 pattern role combobox');
+      expect(commands).not.toContain('a1 pattern role generic');
+   });
+
+   it('suggests nothing about patterns when the page has no roles the APG documents', () => {
+      const commands = buildNextCommands({
+         axe: buildAxeResult([]),
+         criteria: [],
+         target: 'https://example.test',
+         roles: ['generic', 'paragraph'],
+      });
+
+      expect(commands.filter((command) => command.startsWith('a1 pattern'))).toEqual([]);
+   });
 });

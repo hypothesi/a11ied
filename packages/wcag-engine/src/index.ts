@@ -10,12 +10,25 @@ export {
    getTestMethod,
    getTestMethodSummary,
    getCriterion,
+   getMobileGuidance,
    getQuickrefTags,
    getTechnique,
    getUnderstanding,
    listCriteriaByLevel,
    resetWcagEngineCache,
 } from './artifacts/runtime.js';
+
+export {
+   findApgExamplesByAttribute,
+   findApgExamplesByRole,
+   getApgDocument,
+   getApgExample,
+   getApgPattern,
+   listApgExamplesForPattern,
+   listApgIndexKeys,
+   listApgPatterns,
+   resolveApgLookupKey,
+} from './artifacts/apg.js';
 
 export { searchCriteria } from './search/runtime.js';
 

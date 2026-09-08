@@ -4,6 +4,7 @@ import type { CliCommand } from '@a11ied/contracts';
 
 const EXPECTED_READY_COMMANDS = [
    'wcag',
+   'pattern',
    'sr',
    'axe',
    'tree',

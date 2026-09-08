@@ -12,12 +12,11 @@ import {
    type WcagVersion,
 } from '@a11ied/contracts';
 import {
-   WcagEngineNotFoundError,
-   WcagEngineValidationError,
    getAxeRule,
    getTestMethod,
    getTestMethodSummary,
    getCriterionRelevance,
+   getMobileGuidance,
    getTechnique,
    getUnderstanding,
    listRelevantCriteria,
@@ -27,6 +26,7 @@ import {
 
 import { scanHtmlForPageSignals } from '../relevance/html.js';
 import { CliEnvironmentError, CliUsageError } from '../errors/cli-errors.js';
+import { normalizeEngineError } from '../errors/engine-errors.js';
 import {
    resolveDocumentTarget,
    type ResolveDocumentTargetInput,
@@ -35,28 +35,6 @@ import { excerptUnderstanding } from './excerpt.js';
 import { parseWcagLevel, parseWcagVersion } from './parsing.js';
 
 export { CliEnvironmentError, CliUsageError } from '../errors/cli-errors.js';
-
-function normalizeEngineError(error: unknown): never {
-   if (
-      error instanceof WcagEngineValidationError &&
-      error.payload.type === 'validation-error'
-   ) {
-      throw new CliUsageError('validation-error', error.payload.message, {
-         field: error.payload.field,
-         value: error.payload.value,
-         supportedVersions: error.payload.supportedVersions,
-         supportedLevels: error.payload.supportedLevels,
-      });
-   }
-
-   if (error instanceof WcagEngineNotFoundError && error.payload.type === 'not-found') {
-      throw new CliUsageError('criterion-not-found', error.payload.message, {
-         lookupKey: error.payload.lookupKey,
-      });
-   }
-
-   throw error;
-}
 
 type WcagCriteriaListing = Omit<ReturnType<typeof listCriteriaByLevel>, 'level'> & {
    level: WcagLevel | 'all';
@@ -134,19 +112,22 @@ function findUnderstanding(
 
 /**
  * Resolves one criterion by id or slug for the requested WCAG version, together with its
- * test method, testing strategy, and a short excerpt of its Understanding document. Print
- * the full document with `a1 wcag understanding <id>`.
+ * test method, testing strategy, a short excerpt of its Understanding document, and what
+ * WCAG2Mobile says about it. Print the full Understanding document with `a1 wcag
+ * understanding <id>`.
  */
 export function showWcagCriterion(
    lookupKey: CriterionLookupKey,
    version: string,
 ): CriterionShowResult {
    const testMethod = showWcagTestMethod(lookupKey, version);
-   const understanding = findUnderstanding(lookupKey, testMethod.criterion.wcagVersion);
+   const wcagVersion = testMethod.criterion.wcagVersion;
+   const understanding = findUnderstanding(lookupKey, wcagVersion);
    return {
       ...testMethod,
       understandingExcerpt: understanding.excerpt,
       understandingSource: understanding.source,
+      mobileGuidance: getMobileGuidance(lookupKey, { version: wcagVersion }),
    };
 }
 

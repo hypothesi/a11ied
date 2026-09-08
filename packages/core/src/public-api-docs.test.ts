@@ -52,6 +52,21 @@ const publicApiExpectations: PublicApiExpectation[] = [
       functions: ['listCliCommands'],
    },
    {
+      file: 'packages/core/src/apg/check-runtime.ts',
+      functions: ['runPatternCheck'],
+   },
+   {
+      file: 'packages/core/src/apg/runtime.ts',
+      functions: [
+         'findApgExamples',
+         'listApgPatternSummaries',
+         'resolveApgLookup',
+         'showApgExample',
+         'showApgPattern',
+         'showApgPatternOrExample',
+      ],
+   },
+   {
       file: 'packages/core/src/doctor/runtime.ts',
       functions: ['createDoctorReport', 'listSupportedTargets'],
    },

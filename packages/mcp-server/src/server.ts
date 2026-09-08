@@ -4,6 +4,8 @@ import { registerResources } from './resources/register.js';
 import { registerEvidenceTools } from './tools/evidence.js';
 import { registerExecutionTools } from './tools/execution.js';
 import { registerKnowledgeTools } from './tools/knowledge.js';
+import { registerPatternCheckTool } from './tools/pattern-check.js';
+import { registerPatternTools } from './tools/pattern.js';
 import { registerSrActionTool } from './tools/sr-action.js';
 import { registerSrListTool } from './tools/sr-list.js';
 import { registerSrSessionTool } from './tools/sr-session.js';
@@ -18,6 +20,8 @@ export function createMcpServer(): McpServer {
 
    registerResources(server);
    registerKnowledgeTools(server);
+   registerPatternTools(server);
+   registerPatternCheckTool(server);
    registerExecutionTools(server);
    registerEvidenceTools(server);
    registerSrSessionTool(server);

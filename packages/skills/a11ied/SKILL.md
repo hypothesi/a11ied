@@ -46,10 +46,49 @@ a1 wcag search "focus order"
 a1 wcag rule color-contrast
 ```
 
-`a1 wcag <id-or-slug>` prints the normative text, techniques, failures, and test
-method. `a1 wcag search <query>` finds the id when you only have a description. `a1 wcag
+`a1 wcag <id-or-slug>` prints the normative text, techniques, failures, test method,
+and, for a criterion WCAG2Mobile covers, what changes when the target is a mobile app. `a1 wcag search <query>` finds the id when you only have a description. `a1 wcag
 rule <axe-rule-id>` maps an axe violation back to the criteria it covers and axe's fix
 text, which is the last command `audit`'s `nextCommands` field names for a violation.
+
+## Look up the ARIA pattern before writing a widget
+
+Before writing or reviewing a custom widget with a role such as combobox, tabs, menu, or
+slider, read what the ARIA Authoring Practices Guide says about it instead of recalling it:
+
+```txt
+a1 pattern combobox
+a1 pattern combobox-select-only
+a1 pattern role combobox
+a1 pattern attribute aria-expanded
+```
+
+`a1 pattern <id>` prints the pattern and the examples the guide publishes for it. Give it an
+example id instead and it prints that example's keyboard support table and its role,
+property, state, and tabindex table. `a1 pattern role <role>` goes the other way: from a role
+you saw in an accessibility tree to the examples that document it.
+
+Then check a real page against one:
+
+```txt
+a1 pattern check http://localhost:3000 --pattern combobox-select-only --selector '#fruit'
+```
+
+`--selector` is required. It scopes the check to one widget, and there is no default worth
+guessing.
+
+Read what the check decides and what it does not. It presses every key the example declares
+and reports a key that produced no focus change, no ARIA attribute change, and no
+accessibility tree change. That, and an attribute pointing at an id the document does not
+have, are the only two findings it exits 4 on. Every other key is printed with what changed
+next to the guide's own description of what should have changed, for you to judge. An
+attribute the example documents that the widget never sets is listed under "May not apply"
+as a hint, not a finding: it usually means the widget is in a different state or is a
+different variant of the pattern.
+
+The check presses the keys in the first keyboard table only. An example with more than one
+table documents more than one state, such as an open listbox, and the run lists the tables it
+skipped. Use `--table` with `--setup` to reach one of them.
 
 ## Test methods
 

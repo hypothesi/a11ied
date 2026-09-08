@@ -91,6 +91,15 @@
          ]
       },
       {
+         "fileName": "apg-patterns.json",
+         "sha256": "e04eb4352bc9d32f7251432772488e33c010d868cf0b87fe3b537e1226d50a47",
+         "sourceFileNames": [],
+         "sourceUrls": [
+            "https://www.w3.org/WAI/ARIA/apg/example-index/",
+            "https://www.w3.org/WAI/ARIA/apg/patterns/"
+         ]
+      },
+      {
          "fileName": "axe-rules.2.1.json",
          "sha256": "5e2a95360a679a05dcc9cb9c9b2ddf0a87585fd73978b7df092acb4a33650715",
          "wcagVersion": "2.1",

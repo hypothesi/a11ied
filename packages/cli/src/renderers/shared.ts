@@ -143,19 +143,28 @@ export function relevanceDefinitionLines(): string[] {
    );
 }
 
+/** The two W3C licenses the pinned material is used under. */
+export const W3C_DOCUMENT_LICENSE = 'W3C Document License';
+export const W3C_SOFTWARE_AND_DOCUMENT_LICENSE = 'W3C Software and Document License';
+
 /**
- * One dim line naming a copied W3C document and its URL. The W3C Document License
- * requires attribution on every copy, and terminal output that prints the document's text
- * is a copy, so every renderer that prints Understanding or technique prose calls this.
+ * One dim line naming a copied W3C document and its URL. Both W3C licenses require
+ * attribution on every copy, and terminal output that prints the document's text is a
+ * copy, so every renderer that prints Understanding, technique, or APG prose calls this.
+ *
+ * The license is named per document because the APG is not under the same one as WCAG:
+ * the `w3c/aria-practices` repository uses the W3C Software and Document License.
  */
 export function attributionLine(document: {
    title: string;
    url: string;
    status?: string;
+   license?: string;
 }): string {
    const status = document.status ? ` ${document.status}.` : '';
+   const license = document.license ?? W3C_DOCUMENT_LICENSE;
    return dim(
-      `Copyright W3C. From ${document.title}, used under the W3C Document License.${status} ${document.url}`,
+      `Copyright W3C. From ${document.title}, used under the ${license}.${status} ${document.url}`,
    );
 }
 

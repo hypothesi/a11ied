@@ -104,6 +104,7 @@ export async function runAudit(
          axe: report.axe,
          criteria: report.criteria,
          target: resolved.reportTarget.value,
+         roles: report.tree.roles,
       }),
       exitCode: verdict.passed ? cliExitCodes.success : cliExitCodes.assertion,
    };

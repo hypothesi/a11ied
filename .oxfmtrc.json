@@ -6,7 +6,9 @@
       "packages/docs/.astro/**",
       ".aix/**",
       ".claude/**",
-      "styles/**"
+      "styles/**",
+      "packages/wcag-data/test/apg/**",
+      "packages/cli/test/fixtures/**"
    ],
    "printWidth": 90,
    "tabWidth": 3,

@@ -8,7 +8,9 @@ import {
    SyncValidationError,
    getWcagDataDirectories,
    runWcagDataSync,
+   syncApgPatterns,
    syncDocumentArtifacts,
+   syncMobileGuidance,
    type GeneratedProvenanceManifest,
 } from '../src/index.js';
 import { curlFetch } from '../src/shared/curl-fetch.js';
@@ -57,6 +59,8 @@ try {
       directories,
       fetchImpl: curlFetch,
    });
+   const mobileResult = await syncMobileGuidance({ directories, fetchImpl: curlFetch });
+   const apgResult = await syncApgPatterns({ directories, fetchImpl: curlFetch });
    const generatedEntries = await readdir(directories.generated);
 
    if (generatedEntries.length > 0) {
@@ -79,6 +83,30 @@ try {
          `technique bodies: ${documentResult.techniqueBodyCount}, ` +
          `unique bodies stored: ${documentResult.uniqueBodyCount}`,
    );
+   log(
+      `mobile guidance: ${mobileResult.guidanceCount} written, ` +
+         `${mobileResult.placeholderCount} still placeholders, ` +
+         `${mobileResult.requestCount} criteria requested`,
+   );
+   log(
+      `APG patterns: ${apgResult.patternCount}, examples: ${apgResult.exampleCount}, ` +
+         `keyboard rows: ${apgResult.keyboardRowCount}, ` +
+         `attribute rows: ${apgResult.attributeRowCount}, ` +
+         `examples with no tables: ${apgResult.tablelessExampleCount}, ` +
+         `${apgResult.requestCount} requests`,
+   );
+   if (apgResult.failures.length > 0) {
+      log(`APG fetch failures: ${apgResult.failures.length}`);
+      for (const failure of apgResult.failures) {
+         log(`  ${failure.url}: ${failure.message}`);
+      }
+   }
+   if (mobileResult.failures.length > 0) {
+      log(`mobile guidance fetch failures: ${mobileResult.failures.length}`);
+      for (const failure of mobileResult.failures) {
+         log(`  ${failure.url}: ${failure.message}`);
+      }
+   }
    if (documentResult.failures.length > 0) {
       log(`document fetch failures: ${documentResult.failures.length}`);
       for (const failure of documentResult.failures) {

@@ -115,6 +115,29 @@ async function assertWcagShow(): Promise<void> {
    expect(payload.strategy.preferredEvidenceMode).toBeTruthy();
 }
 
+async function assertMobileGuidance(): Promise<void> {
+   const result = await runCli(['wcag', 'show', 'status-messages', '--json']);
+   const payload = parseJsonOutput(result.stdout).result as {
+      mobileGuidance: { criterionId: string; state: string; guidance: string };
+   };
+   expect(payload.mobileGuidance.criterionId).toBe('4.1.3');
+   expect(payload.mobileGuidance.state).toBe('guidance');
+
+   const text = await runCli(['wcag', 'show', 'status-messages']);
+   expect(text.stdout).toContain('Mobile');
+   expect(text.stdout).toContain('This applies directly as written');
+   expect(text.stdout).toContain('https://w3c.github.io/matf/#success-criterion-4-1-3');
+   // Markdown links are reduced to their text rather than printed with their URL.
+   expect(text.stdout).not.toContain('](https://www.w3.org/WAI/WCAG22/Understanding/');
+}
+
+async function assertMobileGuidanceOmitted(): Promise<void> {
+   const text = await runCli(['wcag', 'show', 'contrast-minimum']);
+
+   // 1.4.3 is a placeholder in WCAG2Mobile, so there is nothing to print for it yet.
+   expect(text.stdout).not.toContain('\nMobile\n');
+}
+
 async function assertWcagSearch(): Promise<void> {
    const result = await runCli(['wcag', 'search', 'status message', '--json']);
    const search = parseJsonOutput(result.stdout);
@@ -236,7 +259,7 @@ async function assertTextShowSnapshot(): Promise<void> {
    );
    // The old field-label view is gone: no bare headings over a URL or an enum table.
    expect(show.stdout).not.toContain('Normative text');
-   expect(show.stdout).not.toContain('Understanding\n');
+   expect(show.stdout).not.toMatch(/^Understanding$/mu);
    expect(show.stdout).not.toContain('Test method');
    expect(show.stdout).toContain('Testing it');
    expect(show.stdout).toContain('a1 sr expect <text>');
@@ -296,6 +319,10 @@ describe('cli wcag commands', () => {
    });
    it('checks wcag show with the test method folded in', async () => {
       await assertWcagShow();
+   });
+   it('folds in what WCAG2Mobile says about the criterion', async () => {
+      await assertMobileGuidance();
+      await assertMobileGuidanceOmitted();
    });
    it('checks wcag search', async () => {
       await assertWcagSearch();

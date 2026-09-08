@@ -6,6 +6,7 @@ const toc = [
    { id: 'start', label: 'Starting the server' },
    { id: 'tools', label: 'Tools' },
    { id: 'wcag', label: 'wcag_show, wcag_criteria, wcag_search, wcag_rule' },
+   { id: 'pattern', label: 'pattern_show, pattern_find' },
    { id: 'axe', label: 'run_axe, tree, audit' },
    { id: 'sr', label: 'sr_session and sr_action' },
    { id: 'sr-checks', label: 'sr_list, sr_expect, sr_transcript' },
@@ -67,6 +68,8 @@ const toc = [
          <div class="route-row"><code>wcag_criteria</code><span>List criteria, filtered by level or summarized. Same as <code>a1 wcag criteria</code>.</span></div>
          <div class="route-row"><code>wcag_search</code><span>Return ranked criterion matches for a query. Same as <code>a1 wcag search</code>.</span></div>
          <div class="route-row"><code>wcag_rule</code><span>Map an axe-core rule id to its criteria and fix guidance. Same as <code>a1 wcag rule</code>.</span></div>
+         <div class="route-row"><code>pattern_show</code><span>One ARIA pattern or example from the Authoring Practices Guide, with its keyboard and attribute tables. Omit <code>name</code> to list every pattern. Same as <code>a1 pattern</code>.</span></div>
+         <div class="route-row"><code>pattern_find</code><span>The examples the APG files under one ARIA role or attribute. Same as <code>a1 pattern role</code> and <code>a1 pattern attribute</code>.</span></div>
          <div class="route-row"><code>run_axe</code><span>Run axe-core against a target. Same as <code>a1 axe</code>.</span></div>
          <div class="route-row"><code>tree</code><span>Print the accessibility tree for a target. Same as <code>a1 tree</code>.</span></div>
          <div class="route-row"><code>audit</code><span>Run axe, the tree summary, and applicability together. Same as <code>a1 audit</code>.</span></div>
