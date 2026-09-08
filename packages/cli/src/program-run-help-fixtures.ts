@@ -39,8 +39,8 @@ export const runOptionCases: HelpCase[] = [
                                  asserting against it.
 
       Output:
-        --format <format>        Output format: text, json, or sarif. Defaults to text
-                                 (json with --json).
+        --format <format>        Output format: text, json, sarif, or earl. Defaults
+                                 to text (json with --json).
         --out <file>             Write the report to this file instead of stdout.
         --wcag <version>         Use a specific WCAG version. Defaults to 2.2.
                                  (default: "2.2")
@@ -64,7 +64,10 @@ export const helpAllExpectations = [
    'a1 sr start\n',
    'a1 axe [options] [targets...]\n',
    'a1 tree [options] [target]\n',
-   'a1 audit [options] [target]\n',
+   'a1 audit [options] [command] [target]\n',
+   'a1 audit record [options] [target]\n',
+   'a1 audit pending [options] [target]\n',
+   'a1 audit clear [options] [target]\n',
    'a1 help-all\n',
    '--recording <path>',
 ];

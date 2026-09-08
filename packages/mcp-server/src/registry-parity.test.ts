@@ -27,6 +27,8 @@ const INTENTIONALLY_UNCOVERED: ReadonlySet<string> = new Set([
    'sr batch',
    // Composes sr_session start + sr_action read-all + sr_transcript.
    'sr walk',
+   // Deletes recorded results. An agent records and reads; a person decides what to drop.
+   'audit clear',
 ]);
 
 /** Every remaining CLI command path, mapped to the MCP tool name(s) that cover it. */
@@ -40,6 +42,8 @@ const TOOL_BY_COMMAND: Readonly<Record<string, readonly string[]>> = {
    axe: ['run_axe'],
    tree: ['tree'],
    audit: ['audit'],
+   'audit record': ['record_result'],
+   'audit pending': ['list_pending_results'],
    doctor: ['doctor'],
    sr: ['sr_session', 'sr_action', 'sr_list', 'sr_expect', 'sr_transcript'],
    'sr start': ['sr_session'],

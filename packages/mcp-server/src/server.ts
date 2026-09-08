@@ -1,6 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import { registerResources } from './resources/register.js';
+import { registerEvidenceTools } from './tools/evidence.js';
 import { registerExecutionTools } from './tools/execution.js';
 import { registerKnowledgeTools } from './tools/knowledge.js';
 import { registerSrActionTool } from './tools/sr-action.js';
@@ -18,6 +19,7 @@ export function createMcpServer(): McpServer {
    registerResources(server);
    registerKnowledgeTools(server);
    registerExecutionTools(server);
+   registerEvidenceTools(server);
    registerSrSessionTool(server);
    registerSrActionTool(server);
    registerSrListTool(server);

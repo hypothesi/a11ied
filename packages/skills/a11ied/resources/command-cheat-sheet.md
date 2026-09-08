@@ -56,6 +56,34 @@ a1 audit http://localhost:3000/checkout
 `axe` and `audit` exit 4 on a violation at or above `--fail-on` (default `minor`) not
 covered by `--baseline`. The MCP tools return the matching `verdict` and `exitCode`.
 
+## Checks you have to perform yourself
+
+axe decides 28 of the 86 WCAG 2.2 criteria. The other 58 need a person looking at the
+page, and you can do many of them: read the accessibility tree, drive the screen reader,
+or look at the rendered page. Record what you find so it reaches the same report.
+
+```txt
+a1 audit pending http://localhost:3000/checkout --level AA
+a1 audit record http://localhost:3000/checkout --criterion 2.4.4 --outcome failed \
+   --pointer 'nav > a:nth-child(3)' --note "Four links read 'Learn more'."
+a1 audit http://localhost:3000/checkout --format earl --out report.earl.json
+```
+
+| Command                  | MCP tool               | Arguments                                                                                         |
+| ------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------- |
+| `audit pending <target>` | `list_pending_results` | `target`/`html`, `level`, `wcagVersion`, `resultsFile`                                            |
+| `audit record <target>`  | `record_result`        | `target`/`html`, `criterionId`, `outcome`, `mode`, `procedureId`, `pointer`, `note`, `assertedBy` |
+| `audit clear <target>`   | none                   | `target`/`html`                                                                                   |
+
+Work the loop: call `audit pending` to see what is left, inspect the page for one
+criterion, call `audit record` with what you found, repeat. `--outcome` takes `passed`,
+`failed`, `cantTell`, or `inapplicable`. Use `cantTell` when you looked and still cannot
+decide; it is an honest answer and it never contradicts anything.
+
+Record only what you actually checked. A recorded result carries your name in
+`assertedBy` and lands in the report as evidence, so a guess is worse than leaving the
+criterion pending.
+
 ## Screen reader session
 
 ```txt

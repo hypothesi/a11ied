@@ -2,6 +2,7 @@ import type {
    AxeRunResult,
    ApplicabilityMatrix,
    ApplicabilitySignal,
+   EvidenceRecord,
    TargetReference,
 } from '@a11ied/contracts';
 import { listApplicableCriteria } from '@a11ied/wcag-engine';
@@ -11,6 +12,8 @@ import { runAxe } from '../axe/runtime.js';
 import type { DocumentLoad } from '../targets/parse.js';
 import { getAccessibilityTree, getPageTitle } from '../tree/runtime.js';
 import { parseWcagVersion } from '../wcag/parsing.js';
+import { buildSubjectKey } from '../evidence/subject.js';
+import { readEvidenceForSubject } from '../evidence/store.js';
 import { buildCriteriaRollup, type AuditCriterionRollup } from './criteria-rollup.js';
 import { summarizeAccessibilityTree, type AuditTreeSummary } from './tree-summary.js';
 
@@ -22,6 +25,8 @@ export interface AuditReport {
       matrix: ApplicabilityMatrix;
    };
    criteria: AuditCriterionRollup[];
+   /** Results a person or an agent recorded for this target, newest per check. */
+   recorded: EvidenceRecord[];
 }
 
 export interface BuildAuditReportInput {
@@ -32,12 +37,17 @@ export interface BuildAuditReportInput {
    userHints: string[];
    wcagVersion: string;
    timeoutMs?: number | undefined;
+   /** The canonical key recorded results were stored under. */
+   subject?: string | undefined;
+   /** Where recorded results live. Defaults to `.a11ied/evidence.jsonl`. */
+   evidenceFile?: string | undefined;
 }
 
 /**
  * Builds the full audit report for one target: an axe scan of every mapped rule, an
- * accessibility tree summary, signal-backed WCAG applicability, and a per-criterion
- * rollup of axe verdict, applicability, and coverage state.
+ * accessibility tree summary, signal-backed WCAG applicability, a per-criterion rollup of
+ * axe verdict, applicability, and coverage state, and any result a person or an agent
+ * recorded for the checks axe cannot decide.
  */
 export async function buildAuditReport(
    input: BuildAuditReportInput,
@@ -64,10 +74,23 @@ export async function buildAuditReport(
          assessment.state,
       ]),
    );
+   const subject =
+      input.subject ??
+      buildSubjectKey({
+         target: input.target,
+         load: input.load,
+         metadata: input.metadata,
+         userHints: input.userHints,
+         readHtml: input.readHtml,
+      });
+   const recorded = await readEvidenceForSubject(subject, { file: input.evidenceFile });
    const criteria = buildCriteriaRollup({
       version: wcagVersion,
       axe,
       applicabilityStates,
+      recordedOutcomes: Object.fromEntries(
+         recorded.map((record) => [record.criterionId, record.outcome]),
+      ),
    });
 
    return {
@@ -75,5 +98,6 @@ export async function buildAuditReport(
       tree: treeSummary,
       applicability: { signals: applicabilityInput.signals, matrix },
       criteria,
+      recorded,
    };
 }

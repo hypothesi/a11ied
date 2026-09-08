@@ -77,6 +77,31 @@ export {
    evaluateAxeVerdict,
 } from './axe/verdict.js';
 export { buildAxeSarifLog, type AxeSarifLog } from './axe/sarif.js';
+export {
+   appendEvidence,
+   clearEvidence,
+   readEvidence,
+   readEvidenceForSubject,
+   type EvidenceStoreOptions,
+} from './evidence/store.js';
+export {
+   listPendingCriteria,
+   listRecordedCriterionIds,
+   type ListPendingCriteriaInput,
+} from './evidence/pending.js';
+export { EVIDENCE_FILE_ENV_VAR, resolveEvidenceFile } from './evidence/paths.js';
+export {
+   buildSubjectKey,
+   hashAccessibilityTree,
+   stripFragment,
+} from './evidence/subject.js';
+export {
+   buildA11iedAssertor,
+   buildAxeEarlReport,
+   listAxeEarlAssertions,
+   type AxeEarlReportOptions,
+} from './axe/earl.js';
+export { buildAuditEarlReport, type AuditEarlReportOptions } from './audit/earl.js';
 export type { PageCookie } from './browser/page-setup.js';
 export {
    getAccessibilityTree,

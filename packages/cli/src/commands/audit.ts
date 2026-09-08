@@ -8,6 +8,12 @@ import {
    addWcagVersionOption,
 } from '../lib/options.js';
 import { handleAuditAction, type AuditActionOptions } from './audit-actions.js';
+import { registerAuditEvidenceCommands } from './audit-evidence.js';
+
+interface AuditCommandOptions extends AuditActionOptions {
+   format?: string;
+   out?: string;
+}
 
 const AUDIT_EXAMPLES = `
 Examples:
@@ -46,6 +52,20 @@ function buildAuditCommand(program: Command): Command {
                         '--update-baseline',
                         'Write the current axe violations to --baseline instead ' +
                            'of asserting against it.',
+                     )
+                     .option(
+                        '--results <file>',
+                        'Read recorded manual results from here. Defaults to ' +
+                           '.a11ied/evidence.jsonl, or $A11IED_EVIDENCE.',
+                     )
+                     .option(
+                        '--format <format>',
+                        'Output format: text, json, or earl. Defaults to text ' +
+                           '(json with --json).',
+                     )
+                     .option(
+                        '--out <file>',
+                        'Write the report to this file instead of stdout.',
                      ),
                ),
             ),
@@ -55,8 +75,16 @@ function buildAuditCommand(program: Command): Command {
 }
 
 export function registerAuditCommand(program: Command): void {
-   buildAuditCommand(program).action(
-      async (target: string | undefined, options: AuditActionOptions) => {
+   const auditCommand = buildAuditCommand(program);
+   registerAuditEvidenceCommands(auditCommand);
+   auditCommand.action(
+      async (target: string | undefined, options: AuditCommandOptions) => {
+         if (options.format === 'earl') {
+            const { handleAuditEarlFormat } = await import('./audit-earl-output.js');
+            await handleAuditEarlFormat(target, options);
+            return;
+         }
+
          const [{ executeCommand }, renderers] = await Promise.all([
             import('../lib/execute.js'),
             import('../renderers/index.js'),
@@ -67,7 +95,7 @@ export function registerAuditCommand(program: Command): void {
                family: 'audit',
                subcommand: 'audit',
                wcagVersion: options.wcag,
-               json: options.json,
+               json: options.json || options.format === 'json',
                verbose: options.verbose,
             },
             () => handleAuditAction(target, options),

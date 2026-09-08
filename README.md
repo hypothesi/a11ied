@@ -46,6 +46,7 @@ The repo is split into npm workspaces. `packages/cli` publishes the end-user `a1
 - `packages/mcp-server`: MCP bridge around the core runtime (`@a11ied/mcp-server`)
 - `packages/wcag-data`: normalized WCAG data artifacts (`@a11ied/wcag-data`)
 - `packages/wcag-engine`: lookup and search APIs over the WCAG data package (`@a11ied/wcag-engine`)
+- `packages/earl`: builds W3C EARL 1.0 accessibility reports as JSON-LD (`@a11ied/earl`)
 - `packages/cli`: end-user command line entrypoint (published as `a11ied`)
 - `packages/docs`: Astro docs site
 - `packages/skills/a11ied`: Agent Skill scaffold

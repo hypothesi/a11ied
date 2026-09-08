@@ -80,7 +80,7 @@ function addAxeOutputOptions(command: Command): Command {
    return command
       .option(
          '--format <format>',
-         'Output format: text, json, or sarif. Defaults to text (json with --json).',
+         'Output format: text, json, sarif, or earl. Defaults to text (json with --json).',
       )
       .option('--out <file>', 'Write the report to this file instead of stdout.');
 }
@@ -121,6 +121,12 @@ async function runAxeCommand(
    if (options.format === 'sarif') {
       const { handleAxeSarifFormat } = await import('./axe-sarif-output.js');
       await handleAxeSarifFormat(targets, options);
+      return;
+   }
+
+   if (options.format === 'earl') {
+      const { handleAxeEarlFormat } = await import('./axe-earl-output.js');
+      await handleAxeEarlFormat(targets, options);
       return;
    }
 

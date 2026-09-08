@@ -1,6 +1,7 @@
 {
-   "name": "@a11ied/core",
+   "name": "@a11ied/earl",
    "version": "0.1.0",
+   "description": "Build W3C EARL 1.0 accessibility reports as JSON-LD.",
    "files": [
       "dist"
    ],
@@ -17,18 +18,11 @@
       "access": "public"
    },
    "scripts": {
-      "build": "tsup src/index.ts src/driver/broker.ts --format esm --dts --clean",
+      "build": "tsup src/index.ts --format esm --dts --clean",
       "prepack": "npm run build",
       "typecheck": "tsc -p tsconfig.json --noEmit"
    },
    "dependencies": {
-      "@a11ied/contracts": "0.1.0",
-      "@a11ied/earl": "0.1.0",
-      "@a11ied/guidepup": "0.1.0",
-      "@a11ied/wcag-engine": "0.1.0",
-      "@guidepup/record": "^0.1.0",
-      "axe-core": "^4.13.0",
-      "jsdom": "30.0.1",
-      "playwright": "^1.62.1"
+      "@a11ied/contracts": "0.1.0"
    }
 }

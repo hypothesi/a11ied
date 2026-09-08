@@ -26,6 +26,7 @@
          "#mcp-server": ["packages/cli/src/bridges/mcp-server.ts"],
          "@a11ied/contracts": ["packages/contracts/src/index.ts"],
          "@a11ied/core": ["packages/core/src/index.ts"],
+         "@a11ied/earl": ["packages/earl/src/index.ts"],
          "@a11ied/guidepup": ["packages/guidepup/src/index.ts"],
          "@a11ied/guidepup/browser": ["packages/guidepup/src/browser.ts"],
          "@a11ied/mcp-server": ["packages/mcp-server/src/index.ts"],

@@ -14,7 +14,7 @@
       "dev:docs": "turbo run dev --filter=@a11ied/docs",
       "format": "oxlint --fix && oxfmt",
       "lint": "oxlint && oxfmt --check",
-      "pack:check": "npm pack --json --dry-run --workspace packages/contracts --workspace packages/wcag-data --workspace packages/wcag-engine --workspace packages/guidepup --workspace packages/core --workspace packages/mcp-server --workspace packages/cli",
+      "pack:check": "npm pack --json --dry-run --workspace packages/contracts --workspace packages/earl --workspace packages/wcag-data --workspace packages/wcag-engine --workspace packages/guidepup --workspace packages/core --workspace packages/mcp-server --workspace packages/cli",
       "prose": "vale .",
       "smoke:sr": "node scripts/smoke-screen-reader.mjs",
       "standards": "npm run lint && npm run typecheck && npm run build",

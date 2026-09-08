@@ -34,6 +34,9 @@ function buildCriterion(overrides: Partial<AuditCriterionRollup>): AuditCriterio
       axeVerdict: 'not-covered',
       applicability: 'not-detected',
       coverageState: 'unknown',
+      evidenceMode: 'automated',
+      procedureIds: ['axe_scan'],
+      pending: false,
       ...overrides,
    };
 }

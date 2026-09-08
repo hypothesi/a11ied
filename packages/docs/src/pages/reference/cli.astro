@@ -219,7 +219,7 @@ a1 wcag G18</code></pre>
             <div class="route-row"><code>--fail-on &lt;impact&gt;</code><span>Only count violations at or above this impact toward the exit code: minor, moderate, serious, or critical. Defaults to any violation.</span></div>
             <div class="route-row"><code>--baseline &lt;file&gt;</code><span>JSON file of accepted findings, keyed by rule id and node target, that do not count toward the exit code.</span></div>
             <div class="route-row"><code>--update-baseline</code><span>Write the current violations to <code>--baseline</code> instead of asserting against it.</span></div>
-            <div class="route-row"><code>--format &lt;format&gt;</code><span>text, json, or sarif. Defaults to text, or json with <code>--json</code>.</span></div>
+            <div class="route-row"><code>--format &lt;format&gt;</code><span>text, json, sarif, or earl. Defaults to text, or json with <code>--json</code>.</span></div>
             <div class="route-row"><code>--out &lt;file&gt;</code><span>Write the report to this file instead of stdout.</span></div>
          </div>
          <pre><code>a1 axe http://localhost:3000 --level AA --json
@@ -231,6 +231,7 @@ a1 axe http://localhost:3000 --selector '#app' --exclude '.ads'
 a1 axe http://localhost:3000 --fail-on critical --json
 a1 axe http://localhost:3000 --baseline known-findings.json --update-baseline
 a1 axe http://localhost:3000 --format sarif --out results.sarif
+a1 axe http://localhost:3000 --format earl --out report.earl.json
 a1 axe http://localhost:3000/a http://localhost:3000/b --json</code></pre>
          <p>
             With no selector, the run covers every rule mapped in the WCAG version. The result has
@@ -250,6 +251,17 @@ a1 axe http://localhost:3000/a http://localhost:3000/b --json</code></pre>
             unique axe rule and one result per violating node, merged across every target when
             more than one is given. It bypasses the envelope entirely, so combine it with
             <code>--out</code> to feed a static analysis tool such as GitHub code scanning.
+         </p>
+         <p>
+            <code>--format earl</code> writes an
+            <a href="https://www.w3.org/TR/EARL10-Schema/">EARL 1.0</a> report as JSON-LD, the
+            format the W3C reads. The graph is a flat list of assertions, one per failing
+            element, each naming the axe rule that found it and the success criteria that fail
+            with it. Violations become <code>earl:failed</code>, passes
+            <code>earl:passed</code>, incomplete results <code>earl:cantTell</code>, and a run
+            that matched no rule at all becomes a single <code>earl:untested</code> assertion
+            rather than an empty report. Like SARIF it bypasses the envelope, so pair it with
+            <code>--out</code>.
          </p>
          <p>
             axe exits 4 when a violation remains after <code>--fail-on</code> and
@@ -323,9 +335,13 @@ a1 tree http://localhost:3000 --name "Sign in" --json</code></pre>
             <div class="route-row"><code>--fail-on &lt;impact&gt;</code><span>Only count axe violations at or above this impact toward the exit code: minor, moderate, serious, or critical. Defaults to any violation.</span></div>
             <div class="route-row"><code>--baseline &lt;file&gt;</code><span>JSON file of accepted axe findings that do not count toward the exit code.</span></div>
             <div class="route-row"><code>--update-baseline</code><span>Write the current axe violations to <code>--baseline</code> instead of asserting against it.</span></div>
+            <div class="route-row"><code>--results &lt;file&gt;</code><span>Read recorded manual results from here. Defaults to <code>.a11ied/evidence.jsonl</code>, or <code>$A11IED_EVIDENCE</code>.</span></div>
+            <div class="route-row"><code>--format &lt;format&gt;</code><span>text, json, or earl. Defaults to text, or json with <code>--json</code>.</span></div>
+            <div class="route-row"><code>--out &lt;file&gt;</code><span>Write the report to this file instead of stdout.</span></div>
          </div>
          <pre><code>a1 audit http://localhost:3000 --json
 a1 audit http://localhost:3000 --fail-on critical
+a1 audit http://localhost:3000 --format earl --out report.earl.json
 a1 audit --html '&lt;h1&gt;Hi&lt;/h1&gt;'</code></pre>
          <p>
             <code>audit</code> runs axe against every rule mapped in the WCAG version, reads the
@@ -336,7 +352,8 @@ a1 audit --html '&lt;h1&gt;Hi&lt;/h1&gt;'</code></pre>
             <div class="route-row"><code>axe</code><span>The full axe run.</span></div>
             <div class="route-row"><code>tree</code><span>Page title, first heading, and landmark, heading, link, button, and form counts.</span></div>
             <div class="route-row"><code>applicability</code><span>The signal-backed matrix. See <a href="/relevant-criteria">applicability</a> for how the states are decided.</span></div>
-            <div class="route-row"><code>criteria</code><span>A per-criterion rollup of axe verdict, applicability state, and coverage state.</span></div>
+            <div class="route-row"><code>criteria</code><span>A per-criterion rollup of axe verdict, applicability state, coverage state, evidence mode, and whether the criterion is still <code>pending</code> a person.</span></div>
+            <div class="route-row"><code>recorded</code><span>The results a person or an agent recorded for this target.</span></div>
          </div>
          <p>
             <code>result.nextCommands</code> lists <code>a1 wcag rule</code> calls for every
@@ -346,6 +363,33 @@ a1 audit --html '&lt;h1&gt;Hi&lt;/h1&gt;'</code></pre>
             <code>audit</code> exits 4 when an axe violation remains after
             <code>--fail-on</code> and <code>--baseline</code> filtering, and 0 otherwise, the same
             verdict rules as <code>a1 axe</code>.
+         </p>
+         <h3>Checks a11ied cannot automate</h3>
+         <p>
+            axe decides 28 of the 86 WCAG 2.2 criteria. The other 58 need a person, and a coding
+            agent can perform many of them. Three subcommands let those results reach the same
+            report as the axe results.
+         </p>
+         <div class="route-list">
+            <div class="route-row"><code>a1 audit pending &lt;target&gt;</code><span>List the criteria that apply, that axe cannot decide, and that have no recorded result yet. Reads the WCAG data and the results file; it does not open a browser.</span></div>
+            <div class="route-row"><code>a1 audit record &lt;target&gt;</code><span>Record one outcome. Takes <code>--criterion</code>, <code>--outcome</code>, and optionally <code>--pointer</code>, <code>--note</code>, <code>--procedure</code>, <code>--mode</code>, and <code>--by</code>.</span></div>
+            <div class="route-row"><code>a1 audit clear &lt;target&gt;</code><span>Drop recorded results for one target.</span></div>
+         </div>
+         <pre><code>a1 audit pending http://localhost:3000 --level AA
+a1 audit record http://localhost:3000 --criterion 2.4.4 --outcome failed \
+   --pointer 'nav &gt; a:nth-child(3)' --note "Four links read 'Learn more'."
+a1 audit http://localhost:3000 --format earl --out report.earl.json</code></pre>
+         <p>
+            <code>--outcome</code> takes passed, failed, cantTell, or inapplicable. Results go to
+            <code>.a11ied/evidence.jsonl</code>, one JSON object per line, so several agent calls
+            can record at once. Recording the same criterion twice replaces the earlier result.
+            Recording a result never stores it under the axe procedure, so a person's judgment
+            cannot appear in the report as an automated one.
+         </p>
+         <p>
+            <code>--format earl</code> then writes one report holding both. A recorded result
+            keeps <code>mode: earl:manual</code> or <code>earl:semiAutomatic</code>, so a reader
+            can tell it from an axe result.
          </p>
       </div>
       <div class="split-aside">

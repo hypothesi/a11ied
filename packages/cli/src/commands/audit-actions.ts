@@ -11,6 +11,7 @@ export interface AuditActionOptions {
    failOn?: string;
    baseline?: string;
    updateBaseline?: boolean;
+   results?: string;
 }
 
 function parseTimeoutMs(timeout: string | undefined): number | undefined {
@@ -57,14 +58,22 @@ async function buildVerdict(
    });
 }
 
-export async function handleAuditAction(
+export interface AuditRun {
+   target: { kind: string; value: string };
+   report: AuditReport;
+   verdict: AxeVerdict;
+   nextCommands: string[];
+   exitCode: number;
+}
+
+/**
+ * Runs the audit and returns the typed report. `handleAuditAction` wraps this for the
+ * envelope; `--format earl` needs the `AuditReport` itself.
+ */
+export async function runAudit(
    target: string | undefined,
    options: AuditActionOptions,
-): Promise<{
-   target: { kind: string; value: string };
-   result: Record<string, unknown>;
-   exitCode: number;
-}> {
+): Promise<AuditRun> {
    const [{ resolvePageTarget }, { buildPageTargetInput }, core] = await Promise.all([
       import('../lib/execute.js'),
       import('../lib/target-input.js'),
@@ -82,17 +91,37 @@ export async function handleAuditAction(
       userHints: resolved.userHints,
       wcagVersion: options.wcag,
       timeoutMs: parseTimeoutMs(options.timeout),
+      subject: core.stripFragment(resolved.reportTarget.resolvedUrl),
+      evidenceFile: options.results,
    });
    const verdict = await buildVerdict(core, report, options);
-   const nextCommands = core.buildNextCommands({
-      axe: report.axe,
-      criteria: report.criteria,
-      target: resolved.reportTarget.value,
-   });
 
    return {
       target: resolved.reportTarget,
-      result: { ...report, verdict, nextCommands },
+      report,
+      verdict,
+      nextCommands: core.buildNextCommands({
+         axe: report.axe,
+         criteria: report.criteria,
+         target: resolved.reportTarget.value,
+      }),
       exitCode: verdict.passed ? cliExitCodes.success : cliExitCodes.assertion,
+   };
+}
+
+export async function handleAuditAction(
+   target: string | undefined,
+   options: AuditActionOptions,
+): Promise<{
+   target: { kind: string; value: string };
+   result: Record<string, unknown>;
+   exitCode: number;
+}> {
+   const run = await runAudit(target, options);
+
+   return {
+      target: run.target,
+      result: { ...run.report, verdict: run.verdict, nextCommands: run.nextCommands },
+      exitCode: run.exitCode,
    };
 }

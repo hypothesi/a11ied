@@ -18,6 +18,7 @@ export default defineConfig({
             'packages/contracts/src/index.ts',
          ),
          '@a11ied/core': resolve(import.meta.dirname, 'packages/core/src/index.ts'),
+         '@a11ied/earl': resolve(import.meta.dirname, 'packages/earl/src/index.ts'),
          '@a11ied/guidepup/browser': resolve(
             import.meta.dirname,
             'packages/guidepup/src/browser.ts',
