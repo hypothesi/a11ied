@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <title>Modal comparison</title>
+      <style>
+         .backdrop {
+            position: fixed;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            background: rgb(0 0 0 / 40%);
+         }
+
+         .backdrop[hidden] {
+            display: none;
+         }
+
+         .panel {
+            width: 20rem;
+            padding: 1rem;
+            background: #ffffff;
+            border: 2px solid #16202e;
+         }
+      </style>
+   </head>
+   <body>
+      <main>
+         <h1>Modal comparison</h1>
+         <button type="button" id="open-loose">Rename workspace</button>
+         <button type="button" id="open-managed">Transfer workspace</button>
+         <p><a href="/help">Read the help article</a></p>
+      </main>
+
+      <div class="backdrop" hidden id="loose-backdrop">
+         <div class="panel" role="dialog" aria-modal="true" id="loose-dialog">
+            <h2>Rename workspace</h2>
+            <label for="loose-name">New name</label>
+            <input type="text" id="loose-name" />
+            <button type="button" id="close-loose">Cancel</button>
+         </div>
+      </div>
+
+      <dialog class="panel" aria-labelledby="managed-title" id="managed-dialog">
+         <h2 id="managed-title">Transfer workspace</h2>
+         <label for="managed-owner">New owner</label>
+         <input type="text" id="managed-owner" />
+         <button type="button" id="close-managed">Cancel</button>
+      </dialog>
+
+      <script>
+         const looseBackdrop = document.querySelector('#loose-backdrop');
+         const managedDialog = document.querySelector('#managed-dialog');
+
+         document.querySelector('#open-loose')?.addEventListener('click', () => {
+            looseBackdrop.hidden = false;
+         });
+
+         document.querySelector('#close-loose')?.addEventListener('click', () => {
+            looseBackdrop.hidden = true;
+         });
+
+         document.querySelector('#open-managed')?.addEventListener('click', () => {
+            managedDialog.showModal();
+         });
+
+         document.querySelector('#close-managed')?.addEventListener('click', () => {
+            managedDialog.close();
+         });
+
+         // A deep link so a scan can reach the dialog, which axe only reads once it renders.
+         if (window.location.hash === '#rename') {
+            looseBackdrop.hidden = false;
+         }
+      </script>
+   </body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <title>Sign up form</title>
+   </head>
+   <body>
+      <main>
+         <h1>Create your account</h1>
+         <form id="signup" action="/signup" method="post">
+            <p>
+               <input type="text" name="team" placeholder="Team name" id="team" />
+            </p>
+            <p>
+               <label for="email">Work email</label>
+               <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  required
+                  aria-invalid="true"
+                  aria-describedby="email-error" />
+               <span id="email-error">Enter an address on your company domain.</span>
+            </p>
+            <p id="password-error">Your password needs at least 12 characters.</p>
+            <p>
+               <label for="password">Password</label>
+               <input id="password" type="password" name="password" required />
+            </p>
+            <p>
+               <select name="plan" id="plan">
+                  <option value="starter">Starter</option>
+                  <option value="team">Team</option>
+               </select>
+            </p>
+            <p>
+               <label for="seats">Seats</label>
+               <select id="seats" name="seats">
+                  <option value="1">1</option>
+                  <option value="5">5</option>
+               </select>
+            </p>
+            <div>
+               <p>Billing period</p>
+               <label
+                  ><input type="radio" name="billing" value="monthly" /> Monthly</label
+               >
+               <label><input type="radio" name="billing" value="yearly" /> Yearly</label>
+            </div>
+            <fieldset>
+               <legend>Contact preference</legend>
+               <label><input type="radio" name="contact" value="email" /> Email</label>
+               <label><input type="radio" name="contact" value="phone" /> Phone</label>
+            </fieldset>
+            <button type="submit">Create account</button>
+         </form>
+      </main>
+   </body>
+</html>

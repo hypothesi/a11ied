@@ -7,6 +7,7 @@ import { cleanupTempRoots, createTestServer, type TestServerHandle } from './fix
 export {
    createTestServer,
    cleanupTempRoots,
+   readFixture,
    type TestServerHandle,
    withStateDir,
 } from './fixtures.js';

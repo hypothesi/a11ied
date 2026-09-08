@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <title>Landmark maze</title>
+      <style>
+         /* Only so target-size does not report the nav links. Not part of the fixture. */
+         nav a {
+            display: inline-block;
+            min-height: 24px;
+            padding: 6px 10px;
+         }
+      </style>
+   </head>
+   <body>
+      <header>
+         <p>Northwind operations</p>
+      </header>
+      <nav>
+         <a href="/reports">Reports</a>
+      </nav>
+      <nav>
+         <a href="/settings">Settings</a>
+      </nav>
+      <main>
+         <h1>Dashboard</h1>
+         <section aria-label="Alerts">
+            <p>Two alerts need attention.</p>
+         </section>
+         <section>
+            <p>This section has no accessible name, so it is not a region.</p>
+         </section>
+      </main>
+      <main>
+         <h2>Second main</h2>
+         <p>A page may only have one main landmark.</p>
+      </main>
+      <p>This paragraph sits outside every landmark.</p>
+      <footer>
+         <p>Support hours are 9 to 5.</p>
+      </footer>
+   </body>
+</html>

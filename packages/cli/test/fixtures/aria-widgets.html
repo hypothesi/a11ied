@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <title>ARIA widget gallery</title>
+      <style>
+         /* Only so target-size does not report every widget. Not part of the fixture. */
+         button,
+         [role='button'],
+         [role='checkbox'],
+         [role='tab'] {
+            display: inline-block;
+            min-width: 24px;
+            min-height: 24px;
+            padding: 6px 10px;
+         }
+      </style>
+   </head>
+   <body>
+      <main>
+         <h1>Widget gallery</h1>
+         <p>Each pair puts a broken widget next to the same widget built correctly.</p>
+
+         <h2>Buttons</h2>
+         <button type="button" id="icon-only">
+            <svg viewBox="0 0 16 16" width="16" height="16">
+               <path d="M2 2h12v12H2z" />
+            </svg>
+         </button>
+         <button type="button" id="icon-labelled" aria-label="Delete draft">
+            <svg
+               viewBox="0 0 16 16"
+               width="16"
+               height="16"
+               aria-hidden="true"
+               focusable="false">
+               <path d="M2 2h12v12H2z" />
+            </svg>
+         </button>
+         <div role="button" id="fake-button">Export report</div>
+
+         <h2>Toggles</h2>
+         <button type="button" id="stuck-toggle" aria-pressed="false">Mute alerts</button>
+         <button type="button" id="live-toggle" aria-pressed="false">Email digest</button>
+
+         <h2>Checkboxes</h2>
+         <div role="checkbox" tabindex="0" id="stateless-checkbox">
+            Send release notes
+         </div>
+         <div role="checkbox" tabindex="0" aria-checked="false" id="stateful-checkbox">
+            Send incident reports
+         </div>
+
+         <h2>Tabs</h2>
+         <div role="tablist" aria-label="Report panels">
+            <div role="tab" id="tab-overview" tabindex="0">Overview</div>
+            <div role="tab" id="tab-history" tabindex="0" aria-selected="false">
+               History
+            </div>
+         </div>
+
+         <h2>Names</h2>
+         <input
+            type="text"
+            id="dangling-name"
+            aria-labelledby="label-that-does-not-exist" />
+         <label for="present-name">Report title</label>
+         <input type="text" id="present-name" />
+      </main>
+
+      <script>
+         const liveToggle = document.querySelector('#live-toggle');
+
+         liveToggle?.addEventListener('click', () => {
+            const pressed = liveToggle.getAttribute('aria-pressed') === 'true';
+            liveToggle.setAttribute('aria-pressed', String(!pressed));
+         });
+      </script>
+   </body>
+</html>

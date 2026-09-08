@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <title>Support console</title>
+      <link rel="stylesheet" href="./app.css" />
+   </head>
+   <body>
+      <header class="topbar" id="chrome" hidden>
+         <span>Support console</span>
+         <nav aria-label="Main">
+            <a href="#/queue" id="nav-queue">Queue</a>
+            <a href="#/settings" id="nav-settings">Settings</a>
+         </nav>
+         <button type="button" class="quiet" id="sign-out">Sign out</button>
+      </header>
+
+      <p class="banner" role="status" id="route-status" hidden></p>
+      <main id="view"></main>
+
+      <div class="backdrop" hidden id="escalate-backdrop">
+         <div class="panel" role="dialog" aria-modal="true" id="escalate-dialog">
+            <h2>Escalate ticket</h2>
+            <div class="field">
+               <label for="escalate-reason">Reason</label>
+               <input id="escalate-reason" name="reason" type="text" />
+            </div>
+            <button type="button" id="confirm-escalate">Escalate now</button>
+            <button type="button" class="quiet" id="cancel-escalate">Cancel</button>
+         </div>
+      </div>
+
+      <template id="view-signin">
+         <h1 tabindex="-1">Sign in</h1>
+         <p>Use the address your team gave you.</p>
+         <form id="signin-form" novalidate>
+            <div class="field">
+               <label for="email">Work email</label>
+               <input id="email" name="email" type="email" autocomplete="username" />
+            </div>
+            <div class="field">
+               <label for="password">Password</label>
+               <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autocomplete="current-password" />
+            </div>
+            <p class="error" id="signin-error"></p>
+            <button type="submit">Sign in</button>
+         </form>
+      </template>
+
+      <template id="view-queue">
+         <h1 tabindex="-1">Ticket queue</h1>
+         <form id="filters" role="search">
+            <div class="field">
+               <label for="q">Search tickets</label>
+               <input id="q" name="q" type="search" />
+            </div>
+            <div class="field">
+               <label for="priority">Priority</label>
+               <select id="priority" name="priority">
+                  <option value="all">All priorities</option>
+                  <option value="high">High</option>
+                  <option value="normal">Normal</option>
+               </select>
+            </div>
+            <button type="submit">Apply filters</button>
+         </form>
+         <p id="result-count">3 tickets</p>
+         <table>
+            <caption>
+               Open tickets assigned to you
+            </caption>
+            <thead>
+               <tr>
+                  <th scope="col">Ticket</th>
+                  <th scope="col">Customer</th>
+                  <th scope="col">Priority</th>
+               </tr>
+            </thead>
+            <tbody id="ticket-rows"></tbody>
+         </table>
+      </template>
+
+      <template id="view-ticket">
+         <p><a href="#/queue">Back to the queue</a></p>
+         <h1 tabindex="-1" id="ticket-title"></h1>
+         <p>Opened by <span id="ticket-customer"></span>.</p>
+         <p class="banner" role="status" id="reply-status"></p>
+         <h2>Reply</h2>
+         <form id="reply-form" novalidate>
+            <div class="field">
+               <label for="reply-body">Message</label>
+               <textarea id="reply-body" name="body" rows="4"></textarea>
+            </div>
+            <div class="field">
+               <label for="reply-state">Set status to</label>
+               <select id="reply-state" name="status">
+                  <option value="pending">Waiting on customer</option>
+                  <option value="solved">Solved</option>
+               </select>
+            </div>
+            <button type="submit">Send reply</button>
+            <button type="button" class="quiet" id="open-escalate">Escalate</button>
+         </form>
+      </template>
+
+      <template id="view-settings">
+         <h1 tabindex="-1">Your profile</h1>
+         <p class="banner" role="status" id="profile-status"></p>
+         <form id="profile-form" novalidate>
+            <div class="field">
+               <label for="display-name">Display name</label>
+               <input id="display-name" name="displayName" type="text" required />
+               <p class="error" id="display-name-error" hidden></p>
+            </div>
+            <div class="field">
+               <label for="signature">Reply signature</label>
+               <textarea id="signature" name="signature" rows="3">
+Dana from Northwind</textarea>
+            </div>
+            <button type="submit">Save profile</button>
+         </form>
+      </template>
+
+      <script type="module" src="./console.js"></script>
+   </body>
+</html>

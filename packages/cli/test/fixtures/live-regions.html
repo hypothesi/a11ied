@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <title>Notification demo</title>
+   </head>
+   <body>
+      <main>
+         <h1>Notifications</h1>
+         <p>Each button writes the same kind of message to a different container.</p>
+         <button type="button" id="save-draft">Save draft</button>
+         <button type="button" id="delete-account">Delete account</button>
+         <button type="button" id="archive-report">Archive report</button>
+         <p role="status" id="status-region"></p>
+         <p role="alert" id="alert-region"></p>
+         <div id="silent-region"></div>
+      </main>
+
+      <script>
+         const POLITE_DELAY_MS = 250;
+         const statusRegion = document.querySelector('#status-region');
+         const alertRegion = document.querySelector('#alert-region');
+         const silentRegion = document.querySelector('#silent-region');
+
+         document.querySelector('#save-draft')?.addEventListener('click', () => {
+            window.setTimeout(() => {
+               statusRegion.textContent = 'Draft saved to your workspace.';
+            }, POLITE_DELAY_MS);
+         });
+
+         document.querySelector('#delete-account')?.addEventListener('click', () => {
+            alertRegion.textContent = 'Account deletion could not be started.';
+         });
+
+         document.querySelector('#archive-report')?.addEventListener('click', () => {
+            const line = document.createElement('p');
+
+            line.textContent = 'Report archived.';
+            silentRegion.replaceChildren(line);
+         });
+      </script>
+   </body>
+</html>

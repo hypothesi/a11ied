@@ -83,6 +83,11 @@ export function createTestServer(): TestServerHandle {
    return createStaticServer(fixtureRoot);
 }
 
+/** The markup of one file under `test/fixtures`, for `screenReader({ html })`. */
+export function readFixture(name: string): string {
+   return readFileSync(resolve(fixtureRoot, name), 'utf8');
+}
+
 export async function createTempRoot(tempRoots: string[]): Promise<string> {
    const root = await mkdtemp(resolve(tmpdir(), 'a11ied-cli-'));
    tempRoots.push(root);
