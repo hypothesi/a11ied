@@ -13,6 +13,7 @@ import type {
    GeneratedCoverageArtifacts,
    StrategySeed,
 } from '../shared/types.js';
+import { buildActRuleIndex } from './act-rules.js';
 import { buildAxeRuleIndex } from './axe-rules.js';
 import { buildActCoverageIndex, buildAxeCoverageIndex } from './indexing.js';
 import {
@@ -158,9 +159,11 @@ function parseArtifactSchemas(input: {
    stats: ReturnType<typeof buildSummaryTotals>;
    updatedAt: string;
    axeRuleIndexArtifact: GeneratedCoverageArtifacts['axeRuleIndexArtifact'];
+   actRuleIndexArtifact: GeneratedCoverageArtifacts['actRuleIndexArtifact'];
 }): GeneratedCoverageArtifacts {
    return {
       axeRuleIndexArtifact: input.axeRuleIndexArtifact,
+      actRuleIndexArtifact: input.actRuleIndexArtifact,
       coverageArtifact: coverageArtifactSchema.parse({
          version: input.version,
          coverage: input.coverage,
@@ -231,6 +234,11 @@ export function buildCoverageArtifacts(input: {
          version: input.version,
          axeRules: input.axeRules,
          axeCoverageIndex: axeIndex,
+      }),
+      actRuleIndexArtifact: buildActRuleIndex({
+         version: input.version,
+         actMapping: input.actMapping,
+         actCoverageIndex: actIndex,
       }),
    });
 }

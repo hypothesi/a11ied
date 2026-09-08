@@ -2,6 +2,7 @@ import {
    applicabilitySignalCategorySchema,
    applicabilityStateSchema,
    wcagVersionSchema,
+   type ActRuleIndexArtifact,
    type ApplicabilitySignalCategory,
    type ApplicabilityState,
    type AxeRuleIndexArtifact,
@@ -50,6 +51,7 @@ export interface EngineArtifacts {
    techniques: TechniqueIndexArtifact['techniques'];
    failures: TechniqueIndexArtifact['techniques'];
    axeRules: AxeRuleIndexArtifact['rules'];
+   actRules: ActRuleIndexArtifact['rules'];
    coverageSummary: CoverageSummaryArtifact;
    understanding: UnderstandingArtifact['documents'];
    techniqueBodies: TechniqueBodyArtifact['bodies'];

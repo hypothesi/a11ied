@@ -207,6 +207,30 @@ export const axeRuleIndexArtifactSchema = z.object({
 });
 export type AxeRuleIndexArtifact = z.infer<typeof axeRuleIndexArtifactSchema>;
 
+/**
+ * Where an ACT rule stands in the W3C process. Only a `published` rule states a check the
+ * WCAG mapping treats as current; `proposed` and `deprecated` rules are indexed anyway so
+ * an id printed from anywhere, including an axe rule's `actIds`, still resolves to a
+ * name.
+ */
+export const actRuleStatusSchema = z.enum(['published', 'proposed', 'deprecated']);
+export type ActRuleStatus = z.infer<typeof actRuleStatusSchema>;
+
+export const actRuleIndexEntrySchema = z.object({
+   ruleId: z.string(),
+   title: z.string().min(1),
+   url: z.string().url(),
+   status: actRuleStatusSchema,
+   criterionIds: z.array(z.string()),
+});
+export type ActRuleIndexEntry = z.infer<typeof actRuleIndexEntrySchema>;
+
+export const actRuleIndexArtifactSchema = z.object({
+   version: wcagVersionSchema,
+   rules: z.record(z.string(), actRuleIndexEntrySchema),
+});
+export type ActRuleIndexArtifact = z.infer<typeof actRuleIndexArtifactSchema>;
+
 export const criterionCoverageSchema = z.object({
    criterionId: z.string(),
    coverageState: coverageStateSchema,

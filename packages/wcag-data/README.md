@@ -61,6 +61,7 @@ What to review after a sync:
    - `technique-index.<version>.json`
    - `failure-index.<version>.json`
    - `axe-rules.<version>.json`
+   - `act-rules.<version>.json`
    - `understanding.<version>.json`
    - `technique-bodies.<version>.json`
    - `documents-content.json`

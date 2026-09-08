@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { wcagLevelSchema, wcagVersionSchema } from './core.js';
 import {
+   actRuleIndexEntrySchema,
    axeRuleIndexEntrySchema,
    criterionCoverageSchema,
    criterionIdSchema,
@@ -169,6 +170,8 @@ export const coverageLookupResultSchema = z.object({
    criterion: normalizedCriterionSchema,
    coverage: criterionCoverageSchema,
    strategy: evidenceStrategySchema,
+   /** The named form of `coverage.actRuleIds`, in the same order. */
+   actRules: z.array(actRuleIndexEntrySchema),
 });
 export type CoverageLookupResult = z.infer<typeof coverageLookupResultSchema>;
 
@@ -207,6 +210,8 @@ export const axeRuleLookupResultSchema = z.object({
    help: z.string().optional(),
    helpUrl: z.string().url().optional(),
    criteria: z.array(normalizedCriterionSchema),
+   /** The named form of `rule.actIds`, in the same order. */
+   actRules: z.array(actRuleIndexEntrySchema),
 });
 export type AxeRuleLookupResult = z.infer<typeof axeRuleLookupResultSchema>;
 

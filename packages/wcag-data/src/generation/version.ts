@@ -98,6 +98,10 @@ function buildCoverageArtifactBodies(input: {
          fileName: `axe-rules.${input.version}.json`,
          body: toJsonString(input.coverageArtifacts.axeRuleIndexArtifact),
       },
+      {
+         fileName: `act-rules.${input.version}.json`,
+         body: toJsonString(input.coverageArtifacts.actRuleIndexArtifact),
+      },
    ];
 }
 

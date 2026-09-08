@@ -1,4 +1,4 @@
-import type { NormalizedCriteriaArtifact } from '@a11ied/contracts';
+import type { ActRuleStatus, NormalizedCriteriaArtifact } from '@a11ied/contracts';
 
 import type {
    ActMappingPayload,
@@ -84,6 +84,37 @@ function addRuleToActIndex(
    }
 }
 
+export interface IdentifiedActRule {
+   ruleId: string;
+   status: ActRuleStatus;
+   rule: ActRulePayload;
+}
+
+function actRuleStatus(rule: ActRulePayload): ActRuleStatus {
+   if (rule.deprecated) {
+      return 'deprecated';
+   }
+   return rule.proposed ? 'proposed' : 'published';
+}
+
+/**
+ * Every rule in the ACT mapping paired with the six-character id it is known by, dropping
+ * only an entry whose id can be read from neither its frontmatter nor its permalink.
+ * Proposed and deprecated rules stay in the list: coverage ignores them, but they still
+ * need a title and a URL so an id printed anywhere resolves to a name.
+ */
+export function listIdentifiedActRules(
+   actMapping: ActMappingPayload,
+): IdentifiedActRule[] {
+   return actMapping['act-rules'].flatMap((rule) => {
+      const ruleId = parseActRuleId(rule);
+      if (!ruleId) {
+         return [];
+      }
+      return [{ ruleId, status: actRuleStatus(rule), rule }];
+   });
+}
+
 export function buildActCoverageIndex(input: {
    criteriaArtifact: NormalizedCriteriaArtifact;
    actMapping: ActMappingPayload;
@@ -91,19 +122,15 @@ export function buildActCoverageIndex(input: {
    const criterionIds = new Set(Object.keys(input.criteriaArtifact.criteria));
    const slugToId = criterionIdsBySlug(input.criteriaArtifact);
    const index = new Map<string, Set<string>>();
-   for (const rule of input.actMapping['act-rules']) {
-      if (rule.deprecated || rule.proposed) {
-         // Skip deprecated/proposed rules
-      } else {
-         const actRuleId = parseActRuleId(rule);
-         if (actRuleId) {
-            addRuleToActIndex(
-               actRuleId,
-               mapRuleCriteria({ rule, slugToId, criterionIds }),
-               index,
-            );
-         }
+   for (const identified of listIdentifiedActRules(input.actMapping)) {
+      if (identified.status !== 'published') {
+         continue;
       }
+      addRuleToActIndex(
+         identified.ruleId,
+         mapRuleCriteria({ rule: identified.rule, slugToId, criterionIds }),
+         index,
+      );
    }
    return new Map(
       [...index.entries()].map(([cid, ids]) => [
@@ -113,7 +140,7 @@ export function buildActCoverageIndex(input: {
    );
 }
 
-function invertActIndex(
+export function invertActIndex(
    actCoverageIndex: Map<string, string[]>,
 ): Map<string, Set<string>> {
    const inverted = new Map<string, Set<string>>();

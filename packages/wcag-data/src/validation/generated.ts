@@ -1,4 +1,5 @@
 import {
+   actRuleIndexArtifactSchema,
    axeRuleIndexArtifactSchema,
    coverageArtifactSchema,
    coverageSummaryArtifactSchema,
@@ -47,6 +48,7 @@ const versionSchemas: SchemaEntry[] = [
    },
    { schema: failureIndexArtifactSchema, fileName: (ver) => `failure-index.${ver}.json` },
    { schema: axeRuleIndexArtifactSchema, fileName: (ver) => `axe-rules.${ver}.json` },
+   { schema: actRuleIndexArtifactSchema, fileName: (ver) => `act-rules.${ver}.json` },
 ];
 
 function requiredFilesForVersion(version: string): string[] {

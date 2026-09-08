@@ -260,6 +260,25 @@ async function assertTextVerboseShow(): Promise<void> {
    expect(verboseShow.stdout).toMatch(/Slug:\s+status-messages/);
    expect(verboseShow.stdout).toMatch(/Coverage state:\s+hybrid/);
    expect(verboseShow.stdout).toMatch(/Procedure ids:\s+status_message_probe/);
+   expect(verboseShow.stdout).not.toContain('ACT rules');
+}
+
+const ACT_RULE_LINE = 'afw4f7  Text has minimum contrast',
+   ACT_RULE_URL = 'https://www.w3.org/WAI/standards-guidelines/act/rules/afw4f7/';
+
+/**
+ * Both views that print ACT rule ids name each rule and link its W3C page: the criterion
+ * they cover, and the axe rule that cites them.
+ */
+async function assertTextVerboseActRules(): Promise<void> {
+   const criterion = await runCli(['wcag', 'show', '1.4.3', '--verbose']);
+   const axeRule = await runCli(['wcag', 'rule', 'color-contrast', '--verbose']);
+
+   expect(criterion.stdout).toContain('ACT rules');
+   expect(criterion.stdout).toContain(ACT_RULE_LINE);
+   expect(criterion.stdout).toContain(ACT_RULE_URL);
+   expect(axeRule.stdout).toContain(ACT_RULE_LINE);
+   expect(axeRule.stdout).toContain(ACT_RULE_URL);
 }
 
 describe('cli wcag commands', () => {
@@ -297,5 +316,6 @@ describe('cli wcag commands', () => {
       await assertTextShowSnapshot();
       await assertTextSearchSnapshot();
       await assertTextVerboseShow();
+      await assertTextVerboseActRules();
    });
 });

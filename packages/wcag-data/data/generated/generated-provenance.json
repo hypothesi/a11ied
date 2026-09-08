@@ -57,6 +57,40 @@
    ],
    "artifacts": [
       {
+         "fileName": "act-rules.2.1.json",
+         "sha256": "feb80f583cee2eb999738785a69b9db7b8debc988d08e7361525c3a25bd1f5e3",
+         "wcagVersion": "2.1",
+         "sourceFileNames": [
+            "wcag.2.1.json",
+            "quickref-tags.yml",
+            "act-mapping.json",
+            "axe-rules.json"
+         ],
+         "sourceUrls": [
+            "https://raw.githubusercontent.com/w3c/wai-wcag-quickref/main/_data/tags-sc.yml",
+            "https://raw.githubusercontent.com/w3c/wcag/main/guidelines/act-mapping.json",
+            "https://www.w3.org/WAI/WCAG21/wcag.json",
+            "npm:axe-core"
+         ]
+      },
+      {
+         "fileName": "act-rules.2.2.json",
+         "sha256": "e2e3229bea1d3d12d4e71e79864a68b99177ea0d65b52c476d114fc81a2ed26f",
+         "wcagVersion": "2.2",
+         "sourceFileNames": [
+            "wcag.2.2.json",
+            "quickref-tags.yml",
+            "act-mapping.json",
+            "axe-rules.json"
+         ],
+         "sourceUrls": [
+            "https://raw.githubusercontent.com/w3c/wai-wcag-quickref/main/_data/tags-sc.yml",
+            "https://raw.githubusercontent.com/w3c/wcag/main/guidelines/act-mapping.json",
+            "https://www.w3.org/WAI/WCAG22/wcag.json",
+            "npm:axe-core"
+         ]
+      },
+      {
          "fileName": "axe-rules.2.1.json",
          "sha256": "5e2a95360a679a05dcc9cb9c9b2ddf0a87585fd73978b7df092acb4a33650715",
          "wcagVersion": "2.1",

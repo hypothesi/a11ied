@@ -98,6 +98,21 @@ describe('wcag-engine coverage and strategy', () => {
       expect(result.strategy.procedureIds).toContain('axe_scan');
    });
 
+   it('names and links every ACT rule id it reports for a criterion', () => {
+      const result = getCoverage('4.1.2');
+
+      expect(result.actRules.map((rule) => rule.ruleId)).toEqual(
+         result.coverage.actRuleIds,
+      );
+      expect(result.actRules).toContainEqual({
+         ruleId: '5f99a7',
+         title: 'ARIA attribute is defined in WAI-ARIA',
+         url: 'https://www.w3.org/WAI/standards-guidelines/act/rules/5f99a7/',
+         status: 'published',
+         criterionIds: ['1.3.1', '4.1.2'],
+      });
+   });
+
    it('exposes quickref tags by id or slug', () => {
       const result = getQuickrefTags('status-messages');
 
@@ -141,6 +156,19 @@ describe('wcag-engine technique and axe rule lookup', () => {
       );
       expect(result.criteria[0]?.level).toBe('AA');
       expect(result.rule.tags).toContain('wcag143');
+   });
+
+   it('names the ACT rules an axe rule cites, proposed ones included', () => {
+      const result = getAxeRule('aria-allowed-attr');
+
+      expect(result.rule.actIds).toContain('5c01ea');
+      expect(result.actRules).toContainEqual({
+         ruleId: '5c01ea',
+         title: 'ARIA state or property is permitted',
+         url: 'https://www.w3.org/WAI/standards-guidelines/act/rules/5c01ea/proposed/',
+         status: 'proposed',
+         criterionIds: [],
+      });
    });
 
    it('throws typed not-found errors for unknown techniques and rules', () => {

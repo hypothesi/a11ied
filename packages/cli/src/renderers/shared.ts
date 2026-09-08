@@ -1,4 +1,12 @@
-import { code, count, dim, getTerminalWidth, level, wrap } from '../lib/format.js';
+import {
+   code,
+   count,
+   dim,
+   getTerminalWidth,
+   level,
+   section,
+   wrap,
+} from '../lib/format.js';
 
 export interface RenderOptions {
    verbose: boolean;
@@ -63,19 +71,70 @@ export function techniqueLine(technique: TechniqueReference): string {
    return `${code(technique.id ?? '-')}  ${technique.title}${technology}`;
 }
 
+const ID_GAP = '  ';
+
+/** Prefixes the first wrapped line with an id and hangs every later line under it. */
+function hangingIdLines(id: string, text: string, width: number): string[] {
+   const continuation = ' '.repeat(id.length + ID_GAP.length);
+   return wrap(text, 0, width - continuation.length).map((line, index) =>
+      index === 0 ? `${code(id)}${ID_GAP}${line}` : `${continuation}${line}`,
+   );
+}
+
 /** Like techniqueLine, but wrapped so continuation lines hang under the title. */
 export function hangingTechniqueLines(
    technique: TechniqueReference,
    width = getTerminalWidth(),
 ): string[] {
-   const gap = '  ',
-      id = technique.id ?? '-',
-      technology = technique.technology ? `${gap}${dim(technique.technology)}` : '';
-   const continuation = ' '.repeat(id.length + gap.length);
-   return wrap(`${technique.title}${technology}`, 0, width - continuation.length).map(
-      (line, index) =>
-         index === 0 ? `${code(id)}${gap}${line}` : `${continuation}${line}`,
-   );
+   const technology = technique.technology ? `${ID_GAP}${dim(technique.technology)}` : '';
+   return hangingIdLines(technique.id ?? '-', `${technique.title}${technology}`, width);
+}
+
+export interface ActRuleReference {
+   ruleId: string;
+   title: string;
+   url: string;
+   status: string;
+}
+
+/**
+ * One ACT rule as its id, the check it states, and the W3C page that defines it. A rule
+ * that is not published is marked, because only a published rule states a check the WCAG
+ * mapping counts toward a criterion.
+ */
+function actRuleLines(rule: ActRuleReference, width: number): string[] {
+   const status =
+      rule.status === 'published' ? '' : `${ID_GAP}${dim(`(${rule.status})`)}`;
+   const continuation = ' '.repeat(rule.ruleId.length + ID_GAP.length);
+   return [
+      ...hangingIdLines(rule.ruleId, `${rule.title}${status}`, width),
+      `${continuation}${dim(rule.url)}`,
+   ];
+}
+
+/**
+ * The ACT rules behind a list of rule ids, each named and linked. An id the pinned
+ * mapping cannot resolve is still listed, on its own, so the section accounts for every
+ * id.
+ */
+export function actRulesSection(input: {
+   ruleIds: readonly string[];
+   rules: readonly ActRuleReference[];
+   width?: number | undefined;
+}): string[] {
+   if (input.ruleIds.length === 0) {
+      return [];
+   }
+   const width = input.width ?? getTerminalWidth();
+   const rulesById = new Map(input.rules.map((rule) => [rule.ruleId, rule] as const));
+   const body = input.ruleIds.flatMap((ruleId) => {
+      const rule = rulesById.get(ruleId);
+      if (!rule) {
+         return [code(ruleId)];
+      }
+      return actRuleLines(rule, width);
+   });
+   return section('ACT rules', body);
 }
 
 export function applicabilityDefinitionLines(): string[] {

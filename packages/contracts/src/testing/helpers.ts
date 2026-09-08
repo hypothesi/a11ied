@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { expect } from 'vitest';
 
 import {
+   actRuleIndexArtifactSchema,
    coverageArtifactSchema,
    coverageLookupResultSchema,
    coverageSummaryArtifactSchema,
@@ -121,6 +122,7 @@ interface EngineTestArtifacts {
    coverageArtifact: ReturnType<typeof coverageArtifactSchema.parse>;
    strategyArtifact: ReturnType<typeof strategyArtifactSchema.parse>;
    levelsArtifact: ReturnType<typeof criteriaByLevelArtifactSchema.parse>;
+   actRuleIndexArtifact: ReturnType<typeof actRuleIndexArtifactSchema.parse>;
 }
 
 export async function loadEngineTestArtifacts(): Promise<EngineTestArtifacts> {
@@ -136,7 +138,16 @@ export async function loadEngineTestArtifacts(): Promise<EngineTestArtifacts> {
    const levelsArtifact = criteriaByLevelArtifactSchema.parse(
       await loadGeneratedJson('criteria-by-level.2.2.json'),
    );
-   return { criteriaArtifact, coverageArtifact, strategyArtifact, levelsArtifact };
+   const actRuleIndexArtifact = actRuleIndexArtifactSchema.parse(
+      await loadGeneratedJson('act-rules.2.2.json'),
+   );
+   return {
+      criteriaArtifact,
+      coverageArtifact,
+      strategyArtifact,
+      levelsArtifact,
+      actRuleIndexArtifact,
+   };
 }
 
 function assertCriterionAndLevelLookups(artifacts: EngineTestArtifacts): void {
@@ -170,14 +181,21 @@ function assertCoverageLookups(artifacts: EngineTestArtifacts): void {
    const criterion = artifacts.criteriaArtifact.criteria['4.1.3'];
    const coverage = artifacts.coverageArtifact.coverage['4.1.3'];
    const strategy = artifacts.strategyArtifact.strategies['4.1.3'];
+   const actRules = (coverage?.actRuleIds ?? []).map(
+      (ruleId) => artifacts.actRuleIndexArtifact.rules[ruleId],
+   );
    const coverageLookup = coverageLookupResultSchema.parse({
       lookupKey: '4.1.3',
       criterion,
       coverage,
       strategy,
+      actRules,
    });
    expect(coverageLookup.coverage.coverageState).toBe('hybrid');
    expect(coverageLookup.strategy.procedureIds).toContain('status_message_probe');
+   expect(coverageLookup.actRules.map((rule) => rule.ruleId)).toEqual(
+      coverageLookup.coverage.actRuleIds,
+   );
 }
 
 export function assertLookupPayloads(artifacts: EngineTestArtifacts): void {

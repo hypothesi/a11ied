@@ -58,6 +58,17 @@ export function createActMappingPayload(): unknown {
                accessibility_requirements: { 'wcag20:2.4.7': {} },
             },
          },
+         {
+            title: 'Element marks only accessible content',
+            permalink: '/standards-guidelines/act/rules/8fc3b6/proposed/',
+            successCriteria: ['non-text-content'],
+            deprecated: false,
+            proposed: true,
+            frontmatter: {
+               id: '8fc3b6',
+               accessibility_requirements: { 'wcag20:1.1.1': {} },
+            },
+         },
       ],
    };
 }

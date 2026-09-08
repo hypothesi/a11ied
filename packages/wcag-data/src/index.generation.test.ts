@@ -44,6 +44,7 @@ function assertGeneratedEntriesAreComplete(generatedEntries: string[]): void {
          'technique-index.2.2.json',
          'failure-index.2.2.json',
          'axe-rules.2.2.json',
+         'act-rules.2.2.json',
          'criteria.2.1.json',
          'criteria-by-level.2.1.json',
          'coverage.2.1.json',
@@ -53,6 +54,7 @@ function assertGeneratedEntriesAreComplete(generatedEntries: string[]): void {
          'technique-index.2.1.json',
          'failure-index.2.1.json',
          'axe-rules.2.1.json',
+         'act-rules.2.1.json',
          'generated-provenance.json',
       ]),
    );
@@ -118,6 +120,32 @@ async function assertAxeRuleIndexIsCorrect(
    expect(axeRuleIndex.rules['target-size']?.criterionIds).toEqual(['2.5.8']);
    expect(axeRuleIndex.rules['target-size']?.tags).toContain('wcag258');
    expect(axeRuleIndex.rules.region?.criterionIds).toEqual([]);
+}
+
+async function assertActRuleIndexIsCorrect(
+   directories: WcagDataDirectories,
+): Promise<void> {
+   const actRuleIndex = JSON.parse(
+      await readFile(join(directories.generated, 'act-rules.2.2.json'), 'utf8'),
+   ) as {
+      rules: Record<
+         string,
+         { title: string; url: string; status: string; criterionIds: string[] }
+      >;
+   };
+   expect(actRuleIndex.rules['09f0ab']).toEqual({
+      ruleId: '09f0ab',
+      title: 'Focus indicator is visible',
+      url: 'https://www.w3.org/WAI/standards-guidelines/act/rules/09f0ab/',
+      status: 'published',
+      criterionIds: ['2.4.7'],
+   });
+   expect(actRuleIndex.rules['8fc3b6']).toMatchObject({
+      title: 'Element marks only accessible content',
+      url: 'https://www.w3.org/WAI/standards-guidelines/act/rules/8fc3b6/proposed/',
+      status: 'proposed',
+      criterionIds: [],
+   });
 }
 
 async function assertCoverageArtifactIsCorrect(
@@ -246,6 +274,7 @@ describe('wcag-data normalization / artifact generation', () => {
       await assertProvenanceManifestIsCorrect(directories);
       await assertCoverageArtifactIsCorrect(directories);
       await assertAxeRuleIndexIsCorrect(directories);
+      await assertActRuleIndexIsCorrect(directories);
       await assertStrategyAndSummaryArtifacts(directories);
       await expect(validateGeneratedArtifacts(directories)).resolves.toHaveLength(
          EXPECTED_GENERATED_ARTIFACT_COUNT,

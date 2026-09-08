@@ -43,6 +43,12 @@ across WCAG 2.1 and 2.2 is stored once. The `a1 wcag understanding`, `a1 wcag sh
 `a1 wcag <technique-id>` commands print a line naming the source document and its URL
 whenever they print this material, because terminal output is a copy too.
 
+The `act-rules.<version>.json` files list each ACT rule's identifier, name, page URL, and
+process status, taken from `act-mapping.json`, alongside the criteria the rule maps to.
+Only the name and the link are stored, so a command that prints one of these entries
+prints a pointer to the rule rather than a copy of it. The rule's own text stays on the
+W3C site.
+
 The `axe-rules.<version>.json` files list rule identifiers, tags, and ACT rule identifiers
 read from the installed `axe-core` package (https://github.com/dequelabs/axe-core,
 Mozilla Public License 2.0). No axe-core rule text is copied.

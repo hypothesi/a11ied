@@ -1,0 +1,663 @@
+{
+   "version": "2.2",
+   "rules": {
+      "5f99a7": {
+         "ruleId": "5f99a7",
+         "title": "ARIA attribute is defined in WAI-ARIA",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/5f99a7/",
+         "status": "published",
+         "criterionIds": ["1.3.1", "4.1.2"]
+      },
+      "6a7281": {
+         "ruleId": "6a7281",
+         "title": "ARIA state or property has valid value",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/6a7281/",
+         "status": "published",
+         "criterionIds": ["1.3.1", "4.1.2"]
+      },
+      "73f2c2": {
+         "ruleId": "73f2c2",
+         "title": "Autocomplete attribute has valid value",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/73f2c2/",
+         "status": "published",
+         "criterionIds": ["1.3.5"]
+      },
+      "97a4e1": {
+         "ruleId": "97a4e1",
+         "title": "Button has non-empty accessible name",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/97a4e1/",
+         "status": "published",
+         "criterionIds": ["4.1.2"]
+      },
+      "oj04fd": {
+         "ruleId": "oj04fd",
+         "title": "Element in sequential focus order has visible focus",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/oj04fd/",
+         "status": "published",
+         "criterionIds": ["2.4.7"]
+      },
+      "46ca7f": {
+         "ruleId": "46ca7f",
+         "title": "Element marked as decorative is not exposed",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/46ca7f/",
+         "status": "published",
+         "criterionIds": ["1.1.1"]
+      },
+      "6cfa84": {
+         "ruleId": "6cfa84",
+         "title": "Element with aria-hidden has no content in sequential focus navigation",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/6cfa84/",
+         "status": "published",
+         "criterionIds": ["4.1.2"]
+      },
+      "de46e4": {
+         "ruleId": "de46e4",
+         "title": "Element with lang attribute has valid language tag",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/de46e4/",
+         "status": "published",
+         "criterionIds": ["3.1.2"]
+      },
+      "307n5z": {
+         "ruleId": "307n5z",
+         "title": "Element with presentational children has no focusable content",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/307n5z/",
+         "status": "published",
+         "criterionIds": ["4.1.2"]
+      },
+      "4e8ab6": {
+         "ruleId": "4e8ab6",
+         "title": "Element with role attribute has required states and properties",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/4e8ab6/",
+         "status": "published",
+         "criterionIds": ["1.3.1", "4.1.2"]
+      },
+      "e086e5": {
+         "ruleId": "e086e5",
+         "title": "Form field has non-empty accessible name",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/e086e5/",
+         "status": "published",
+         "criterionIds": ["1.3.1", "2.5.3", "4.1.2"]
+      },
+      "a25f45": {
+         "ruleId": "a25f45",
+         "title": "Headers attribute specified on a cell refers to cells in the same table element",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/a25f45/",
+         "status": "published",
+         "criterionIds": ["1.3.1"]
+      },
+      "0va7u6": {
+         "ruleId": "0va7u6",
+         "title": "HTML images contain no text",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/0va7u6/",
+         "status": "published",
+         "criterionIds": ["1.4.5", "1.4.9"]
+      },
+      "b5c3f8": {
+         "ruleId": "b5c3f8",
+         "title": "HTML page has lang attribute",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/b5c3f8/",
+         "status": "published",
+         "criterionIds": ["3.1.1"]
+      },
+      "2779a5": {
+         "ruleId": "2779a5",
+         "title": "HTML page has non-empty title",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/2779a5/",
+         "status": "published",
+         "criterionIds": ["2.4.2"]
+      },
+      "bf051a": {
+         "ruleId": "bf051a",
+         "title": "HTML page lang attribute has valid language tag",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/bf051a/",
+         "status": "published",
+         "criterionIds": ["3.1.1"]
+      },
+      "c4a8a4": {
+         "ruleId": "c4a8a4",
+         "title": "HTML page title is descriptive",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/c4a8a4/",
+         "status": "published",
+         "criterionIds": ["2.4.2"]
+      },
+      "akn7bn": {
+         "ruleId": "akn7bn",
+         "title": "Iframe with interactive elements is not excluded from tab-order",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/akn7bn/",
+         "status": "published",
+         "criterionIds": ["2.1.1", "2.1.3"]
+      },
+      "qt1vmo": {
+         "ruleId": "qt1vmo",
+         "title": "Image accessible name is descriptive",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/qt1vmo/",
+         "status": "published",
+         "criterionIds": ["1.1.1"]
+      },
+      "59796f": {
+         "ruleId": "59796f",
+         "title": "Image button has non-empty accessible name",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/59796f/",
+         "status": "published",
+         "criterionIds": ["1.1.1", "4.1.2"]
+      },
+      "23a2a8": {
+         "ruleId": "23a2a8",
+         "title": "Image has non-empty accessible name",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/23a2a8/",
+         "status": "published",
+         "criterionIds": ["1.1.1"]
+      },
+      "24afc2": {
+         "ruleId": "24afc2",
+         "title": "Important letter spacing in style attributes is wide enough",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/24afc2/",
+         "status": "published",
+         "criterionIds": ["1.4.12"]
+      },
+      "78fd32": {
+         "ruleId": "78fd32",
+         "title": "Important line height in style attributes is wide enough",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/78fd32/",
+         "status": "published",
+         "criterionIds": ["1.4.12"]
+      },
+      "9e45ec": {
+         "ruleId": "9e45ec",
+         "title": "Important word spacing in style attributes is wide enough",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/9e45ec/",
+         "status": "published",
+         "criterionIds": ["1.4.12"]
+      },
+      "c487ae": {
+         "ruleId": "c487ae",
+         "title": "Link has non-empty accessible name",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/c487ae/",
+         "status": "published",
+         "criterionIds": ["1.1.1", "2.4.4", "2.4.9", "4.1.2"]
+      },
+      "m6b1q3": {
+         "ruleId": "m6b1q3",
+         "title": "Menuitem has non-empty accessible name",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/m6b1q3/",
+         "status": "published",
+         "criterionIds": ["4.1.2"]
+      },
+      "bc659a": {
+         "ruleId": "bc659a",
+         "title": "Meta element has no refresh delay",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/bc659a/",
+         "status": "published",
+         "criterionIds": ["2.2.1", "2.2.4", "3.2.5"]
+      },
+      "bisz58": {
+         "ruleId": "bisz58",
+         "title": "Meta element has no refresh delay (no exception)",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/bisz58/",
+         "status": "published",
+         "criterionIds": ["2.2.1", "2.2.4", "3.2.5"]
+      },
+      "b4f0c3": {
+         "ruleId": "b4f0c3",
+         "title": "Meta viewport allows for zoom",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/b4f0c3/",
+         "status": "published",
+         "criterionIds": ["1.4.4", "1.4.10"]
+      },
+      "8fc3b6": {
+         "ruleId": "8fc3b6",
+         "title": "Object element rendering non-text content has non-empty accessible name",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/8fc3b6/",
+         "status": "published",
+         "criterionIds": ["1.1.1"]
+      },
+      "b33eff": {
+         "ruleId": "b33eff",
+         "title": "Orientation of the page is not restricted using CSS transforms",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/b33eff/",
+         "status": "published",
+         "criterionIds": ["1.3.4"]
+      },
+      "674b10": {
+         "ruleId": "674b10",
+         "title": "Role attribute has valid value",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/674b10/",
+         "status": "published",
+         "criterionIds": ["1.3.1", "4.1.2"]
+      },
+      "0ssw9k": {
+         "ruleId": "0ssw9k",
+         "title": "Scrollable content can be reached with sequential focus navigation",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/0ssw9k/",
+         "status": "published",
+         "criterionIds": ["2.1.1", "2.1.3"]
+      },
+      "2t702h": {
+         "ruleId": "2t702h",
+         "title": "Summary element has non-empty accessible name",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/2t702h/",
+         "status": "published",
+         "criterionIds": ["4.1.2"]
+      },
+      "7d6734": {
+         "ruleId": "7d6734",
+         "title": "SVG element with explicit role has non-empty accessible name",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/7d6734/",
+         "status": "published",
+         "criterionIds": ["1.1.1"]
+      },
+      "09o5cg": {
+         "ruleId": "09o5cg",
+         "title": "Text has enhanced contrast",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/09o5cg/",
+         "status": "published",
+         "criterionIds": ["1.4.3", "1.4.6"]
+      },
+      "afw4f7": {
+         "ruleId": "afw4f7",
+         "title": "Text has minimum contrast",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/afw4f7/",
+         "status": "published",
+         "criterionIds": ["1.4.3", "1.4.6"]
+      },
+      "kb1m8s": {
+         "ruleId": "kb1m8s",
+         "title": "ARIA global properties not used where prohibited",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/kb1m8s/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "ff89c9": {
+         "ruleId": "ff89c9",
+         "title": "ARIA required context role",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/ff89c9/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "in6db8": {
+         "ruleId": "in6db8",
+         "title": "ARIA required ID references exist",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/in6db8/proposed/",
+         "status": "deprecated",
+         "criterionIds": []
+      },
+      "bc4a75": {
+         "ruleId": "bc4a75",
+         "title": "ARIA required owned elements",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/bc4a75/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "5c01ea": {
+         "ruleId": "5c01ea",
+         "title": "ARIA state or property is permitted",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/5c01ea/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "e6952f": {
+         "ruleId": "e6952f",
+         "title": "Attribute is not duplicated",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/e6952f/proposed/",
+         "status": "deprecated",
+         "criterionIds": []
+      },
+      "1a02b0": {
+         "ruleId": "1a02b0",
+         "title": "Audio and visuals of video element have transcript",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/1a02b0/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "e7aa44": {
+         "ruleId": "e7aa44",
+         "title": "Audio element content has text alternative",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/e7aa44/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "2eb176": {
+         "ruleId": "2eb176",
+         "title": "Audio element content has transcript",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/2eb176/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "afb423": {
+         "ruleId": "afb423",
+         "title": "Audio element content is media alternative for text",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/afb423/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "80f0bf": {
+         "ruleId": "80f0bf",
+         "title": "Audio or video element avoids automatically playing audio",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/80f0bf/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "4c31df": {
+         "ruleId": "4c31df",
+         "title": "Audio or video element that plays automatically has a control mechanism",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/4c31df/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "aaa1bf": {
+         "ruleId": "aaa1bf",
+         "title": "Audio or video element that plays automatically has no audio that lasts more than 3 seconds",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/aaa1bf/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "3e12e1": {
+         "ruleId": "3e12e1",
+         "title": "Block of repeated content is collapsible",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/3e12e1/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "cf77f2": {
+         "ruleId": "cf77f2",
+         "title": "Bypass Blocks of Repeated Content",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/cf77f2/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "9bd38c": {
+         "ruleId": "9bd38c",
+         "title": "Content has alternative for visual reference",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/9bd38c/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "7677a9": {
+         "ruleId": "7677a9",
+         "title": "Device motion based changes to the content can also be created from the user interface",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/7677a9/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "c249d5": {
+         "ruleId": "c249d5",
+         "title": "Device motion based changes to the content can be disabled",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/c249d5/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "b40fd1": {
+         "ruleId": "b40fd1",
+         "title": "Document has a landmark with non-repeated content",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/b40fd1/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "ye5d6e": {
+         "ruleId": "ye5d6e",
+         "title": "Document has an instrument to move focus to non-repeated content",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/ye5d6e/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "047fe0": {
+         "ruleId": "047fe0",
+         "title": "Document has heading for non-repeated content",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/047fe0/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "36b590": {
+         "ruleId": "36b590",
+         "title": "Error message describes invalid form field value",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/36b590/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "80af7b": {
+         "ruleId": "80af7b",
+         "title": "Focusable element has no keyboard trap",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/80af7b/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "ebe86a": {
+         "ruleId": "ebe86a",
+         "title": "Focusable element has no keyboard trap via non-standard navigation",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/ebe86a/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "a1b64e": {
+         "ruleId": "a1b64e",
+         "title": "Focusable element has no keyboard trap via standard navigation",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/a1b64e/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "cc0f0a": {
+         "ruleId": "cc0f0a",
+         "title": "Form field label is descriptive",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/cc0f0a/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "ffd0e9": {
+         "ruleId": "ffd0e9",
+         "title": "Heading has non-empty accessible name",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/ffd0e9/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "b49b2e": {
+         "ruleId": "b49b2e",
+         "title": "Heading is descriptive",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/b49b2e/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "off6ek": {
+         "ruleId": "off6ek",
+         "title": "HTML element language subtag matches language",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/off6ek/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "5b7ae0": {
+         "ruleId": "5b7ae0",
+         "title": "HTML page lang and xml:lang attributes have matching values",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/5b7ae0/proposed/",
+         "status": "deprecated",
+         "criterionIds": []
+      },
+      "ucwvc8": {
+         "ruleId": "ucwvc8",
+         "title": "HTML page language subtag matches default language",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/ucwvc8/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "3ea0c8": {
+         "ruleId": "3ea0c8",
+         "title": "Id attribute value is unique",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/3ea0c8/proposed/",
+         "status": "deprecated",
+         "criterionIds": []
+      },
+      "cae760": {
+         "ruleId": "cae760",
+         "title": "Iframe element has non-empty accessible name",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/cae760/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "4b1c6c": {
+         "ruleId": "4b1c6c",
+         "title": "Iframe elements with identical accessible names have equivalent purpose",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/4b1c6c/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "9eb3f6": {
+         "ruleId": "9eb3f6",
+         "title": "Image filename is accessible name for image",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/9eb3f6/proposed/",
+         "status": "deprecated",
+         "criterionIds": []
+      },
+      "e88epe": {
+         "ruleId": "e88epe",
+         "title": "Image not in the accessibility tree is decorative",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/e88epe/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "5effbb": {
+         "ruleId": "5effbb",
+         "title": "Link in context is descriptive",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/5effbb/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "aizyf1": {
+         "ruleId": "aizyf1",
+         "title": "Link is descriptive",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/aizyf1/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "fd3a94": {
+         "ruleId": "fd3a94",
+         "title": "Links with identical accessible names and same context serve equivalent purpose",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/fd3a94/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "b20e66": {
+         "ruleId": "b20e66",
+         "title": "Links with identical accessible names have equivalent purpose",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/b20e66/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "ffbc54": {
+         "ruleId": "ffbc54",
+         "title": "No keyboard shortcut uses only printable characters",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/ffbc54/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "d0f69e": {
+         "ruleId": "d0f69e",
+         "title": "Table header cell has assigned cells",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/d0f69e/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "efbfc7": {
+         "ruleId": "efbfc7",
+         "title": "Text content that changes automatically can be paused, stopped or hidden",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/efbfc7/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "eac66b": {
+         "ruleId": "eac66b",
+         "title": "Video element auditory content has accessible alternative",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/eac66b/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "f51b46": {
+         "ruleId": "f51b46",
+         "title": "Video element auditory content has captions",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/f51b46/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "ab4d13": {
+         "ruleId": "ab4d13",
+         "title": "Video element content is media alternative for text",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/ab4d13/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "c5a4ea": {
+         "ruleId": "c5a4ea",
+         "title": "Video element visual content has accessible alternative",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/c5a4ea/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "1ea59c": {
+         "ruleId": "1ea59c",
+         "title": "Video element visual content has audio description",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/1ea59c/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "f196ce": {
+         "ruleId": "f196ce",
+         "title": "Video element visual content has description track",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/f196ce/proposed/",
+         "status": "deprecated",
+         "criterionIds": []
+      },
+      "1ec09b": {
+         "ruleId": "1ec09b",
+         "title": "Video element visual content has strict accessible alternative",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/1ec09b/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "c3232f": {
+         "ruleId": "c3232f",
+         "title": "Video element visual-only content has accessible alternative",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/c3232f/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "d7ba54": {
+         "ruleId": "d7ba54",
+         "title": "Video element visual-only content has audio track alternative",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/d7ba54/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "ac7dc6": {
+         "ruleId": "ac7dc6",
+         "title": "Video element visual-only content has description track",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/ac7dc6/proposed/",
+         "status": "deprecated",
+         "criterionIds": []
+      },
+      "ee13b5": {
+         "ruleId": "ee13b5",
+         "title": "Video element visual-only content has transcript",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/ee13b5/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "fd26cf": {
+         "ruleId": "fd26cf",
+         "title": "Video element visual-only content is media alternative for text",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/fd26cf/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "2ee8b8": {
+         "ruleId": "2ee8b8",
+         "title": "Visible label is part of accessible name",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/2ee8b8/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      },
+      "59br37": {
+         "ruleId": "59br37",
+         "title": "Zoomed text node is not clipped with CSS overflow",
+         "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/59br37/proposed/",
+         "status": "proposed",
+         "criterionIds": []
+      }
+   }
+}

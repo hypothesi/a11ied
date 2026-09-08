@@ -8,6 +8,7 @@ import {
    understandingLookupResultSchema,
    wcagLevelSchema,
    wcagVersionSchema,
+   type ActRuleIndexEntry,
    type AxeRuleLookupResult,
    type CoverageLookupResult,
    type CoverageSummaryArtifact,
@@ -103,6 +104,24 @@ export function resolveCriterion(
    throw new WcagEngineNotFoundError(lookupKey);
 }
 
+/**
+ * Resolves ACT rule ids to their names and W3C pages, keeping the caller's order. An id
+ * the pinned mapping does not carry is skipped, so callers that print names alongside the
+ * raw ids stay in step with what the index can actually resolve.
+ */
+function listActRulesByIds(
+   artifacts: EngineArtifacts,
+   ruleIds: string[],
+): ActRuleIndexEntry[] {
+   return ruleIds.flatMap((ruleId) => {
+      const rule = artifacts.actRules[ruleId];
+      if (!rule) {
+         return [];
+      }
+      return [rule];
+   });
+}
+
 function listCriteriaByIds(
    artifacts: EngineArtifacts,
    criterionIds: string[],
@@ -167,6 +186,7 @@ export function getCoverage(
       criterion,
       coverage,
       strategy,
+      actRules: listActRulesByIds(artifacts, coverage.actRuleIds),
    });
 }
 
@@ -260,6 +280,7 @@ export function getAxeRule(
       ruleId,
       rule,
       criteria: listCriteriaByIds(artifacts, rule.criterionIds),
+      actRules: listActRulesByIds(artifacts, rule.actIds),
    });
 }
 

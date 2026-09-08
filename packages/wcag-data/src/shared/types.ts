@@ -1,4 +1,5 @@
 import type {
+   ActRuleIndexArtifact,
    AxeRuleIndexArtifact,
    CoverageArtifact,
    CoverageState,
@@ -202,6 +203,7 @@ export interface GeneratedCoverageArtifacts {
    strategyArtifact: StrategyArtifact;
    coverageSummaryArtifact: CoverageSummaryArtifact;
    axeRuleIndexArtifact: AxeRuleIndexArtifact;
+   actRuleIndexArtifact: ActRuleIndexArtifact;
 }
 
 const SYNC_ERROR_EXIT_CODE = 3;

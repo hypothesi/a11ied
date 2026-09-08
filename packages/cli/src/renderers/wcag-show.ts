@@ -22,6 +22,7 @@ import {
 } from '../lib/format.js';
 import { stripHtml } from '../lib/text.js';
 import {
+   actRulesSection,
    attributionLine,
    criterionLine,
    techniqueLine,
@@ -96,12 +97,20 @@ function headerLines(
    ];
 }
 
-function verboseDetailLines(result: CriterionShowResult): string[] {
+function verboseDetailLines(
+   result: CriterionShowResult,
+   options: RenderOptions,
+): string[] {
    const advisory = dedupeTechniques(result.criterion.advisoryTechniques);
    const advisoryLine =
       advisory.map((technique) => technique.id ?? technique.title).join(', ') || 'none';
    return [
-      ...verboseCoverageLines({ coverage: result.coverage, strategy: result.strategy }),
+      ...verboseCoverageLines({
+         coverage: result.coverage,
+         strategy: result.strategy,
+         actRules: result.actRules,
+         width: options.width,
+      }),
       ...section(
          'Details',
          fields([
@@ -158,7 +167,7 @@ export function renderCriterionDetailLines(
       );
    }
    if (options.verbose) {
-      lines.push(...verboseDetailLines(result));
+      lines.push(...verboseDetailLines(result, options));
    }
    return lines;
 }
@@ -191,14 +200,18 @@ function fixSection(result: AxeRuleLookupResult, options: RenderOptions): string
    return section('Fix', body);
 }
 
-function axeRuleVerboseLines(result: AxeRuleLookupResult): string[] {
-   return section(
-      'Details',
-      fields([
-         ['Tags', result.rule.tags.join(', ') || 'none'],
-         ['ACT rules', result.rule.actIds.join(', ') || 'none'],
-      ]),
-   );
+function axeRuleVerboseLines(
+   result: AxeRuleLookupResult,
+   options: RenderOptions,
+): string[] {
+   return [
+      ...section('Details', fields([['Tags', result.rule.tags.join(', ') || 'none']])),
+      ...actRulesSection({
+         ruleIds: result.rule.actIds,
+         rules: result.actRules,
+         width: options.width,
+      }),
+   ];
 }
 
 // Fallow-ignore-next-line unused-export
@@ -213,7 +226,7 @@ export function renderAxeRuleText(
       ...fixSection(result, options),
    ];
    if (options.verbose) {
-      lines.push(...axeRuleVerboseLines(result));
+      lines.push(...axeRuleVerboseLines(result, options));
    }
    return lines.join('\n');
 }

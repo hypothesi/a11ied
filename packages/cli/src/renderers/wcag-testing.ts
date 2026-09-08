@@ -1,6 +1,10 @@
-import type { CriterionCoverage, EvidenceStrategy } from '#contracts';
+import type { ActRuleIndexEntry, CriterionCoverage, EvidenceStrategy } from '#contracts';
 import { code, fields, indent, listItems, section, wrap } from '../lib/format.js';
-import { hangingTechniqueLines, type TechniqueReference } from './shared.js';
+import {
+   actRulesSection,
+   hangingTechniqueLines,
+   type TechniqueReference,
+} from './shared.js';
 
 const FAILS_DISPLAY_LIMIT = 2;
 const PAIR_LENGTH = 2;
@@ -213,14 +217,22 @@ export function failsSection(input: {
 export function verboseCoverageLines(input: {
    coverage: CriterionCoverage;
    strategy: EvidenceStrategy;
+   actRules: readonly ActRuleIndexEntry[];
+   width?: number | undefined;
 }): string[] {
    const notes = [...new Set([...input.coverage.notes, ...input.strategy.notes])];
    const body = fields([
       ['Coverage state', input.coverage.coverageState],
       ['Evidence mode', input.strategy.preferredEvidenceMode],
       ['Procedure ids', input.strategy.procedureIds.join(', ') || 'none'],
-      ['ACT rules', input.coverage.actRuleIds.join(', ') || 'none'],
       ['Source attribution', input.coverage.sourceAttribution.join(', ') || 'none'],
    ]);
-   return section('Raw coverage data', [...body, ...listItems(notes)]);
+   return [
+      ...section('Raw coverage data', [...body, ...listItems(notes)]),
+      ...actRulesSection({
+         ruleIds: input.coverage.actRuleIds,
+         rules: input.actRules,
+         width: input.width,
+      }),
+   ];
 }

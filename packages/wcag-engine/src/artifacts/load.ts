@@ -1,4 +1,5 @@
 import {
+   actRuleIndexArtifactSchema,
    axeRuleIndexArtifactSchema,
    coverageArtifactSchema,
    coverageSummaryArtifactSchema,
@@ -113,6 +114,8 @@ export function loadEngineArtifacts(version: WcagVersion): EngineArtifacts {
       failures: loadArtifact(failureIndexArtifactSchema, `failure-index.${version}.json`)
          .failures,
       axeRules: loadArtifact(axeRuleIndexArtifactSchema, `axe-rules.${version}.json`)
+         .rules,
+      actRules: loadArtifact(actRuleIndexArtifactSchema, `act-rules.${version}.json`)
          .rules,
       coverageSummary: loadArtifact(
          coverageSummaryArtifactSchema,
