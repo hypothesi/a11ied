@@ -29,6 +29,7 @@ export const topLevelHelpCases: HelpCase[] = [
       Look things up:
         wcag [criterion]  Criteria, techniques, axe rules, and the W3C guidance.
         pattern [name]    ARIA patterns: keyboard support and required attributes.
+        search <query>    Search WCAG criteria and ARIA patterns together.
 
       Set up this machine:
         doctor            Check the browser and screen reader setup.
@@ -68,13 +69,11 @@ export const topLevelHelpCases: HelpCase[] = [
                                    failures.
         understanding <criterion>  Print the full Understanding document for one
                                    criterion.
-        search <query>             Search criteria, techniques, failures, and tags.
         rule <ruleId>              Map one axe-core rule id to its WCAG criteria.
 
       Examples:
         a1 wcag 1.1.1
         a1 wcag rule image-alt
-        a1 wcag search "color contrast"
       "
     `,
    },

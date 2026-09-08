@@ -61,6 +61,7 @@ const publicApiExpectations: PublicApiExpectation[] = [
          'findApgExamples',
          'listApgPatternSummaries',
          'resolveApgLookup',
+         'searchAll',
          'showApgExample',
          'showApgPattern',
          'showApgPatternOrExample',

@@ -33,11 +33,11 @@ const INTENTIONALLY_UNCOVERED: ReadonlySet<string> = new Set([
 
 /** Every remaining CLI command path, mapped to the MCP tool name(s) that cover it. */
 const TOOL_BY_COMMAND: Readonly<Record<string, readonly string[]>> = {
-   wcag: ['wcag_show', 'wcag_criteria', 'wcag_search', 'wcag_rule'],
+   wcag: ['wcag_show', 'wcag_criteria', 'wcag_rule'],
+   search: ['search'],
    'wcag criteria': ['wcag_criteria'],
    'wcag show': ['wcag_show'],
    'wcag understanding': ['wcag_show'],
-   'wcag search': ['wcag_search'],
    'wcag rule': ['wcag_rule'],
    pattern: ['pattern_show', 'pattern_find'],
    'pattern list': ['pattern_show'],

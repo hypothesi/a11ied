@@ -132,7 +132,7 @@ function readAttributeRow(row: HTMLElement): ApgAttributeRow | undefined {
 }
 
 /**
- * Names a table from the heading it points at. A table labelled by both a section heading
+ * Names a table from the heading it points at. A table labeled by both a section heading
  * and a sub-heading takes the sub-heading, such as "Closed Combobox". A table labelled
  * only by the section heading has no name of its own, which is how a one-table example
  * reads.

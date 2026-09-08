@@ -5,7 +5,7 @@ export { renderDoctorEnvelopeText } from './doctor.js';
 export {
    renderTestMethodSummaryText,
    renderCriteriaText,
-   renderSearchText,
+   renderUnifiedSearchText,
 } from './wcag.js';
 export {
    patternDetailSections,

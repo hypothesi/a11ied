@@ -1,17 +1,22 @@
 import {
    testMethodSummaryArtifactSchema,
-   criterionSearchResponseSchema,
+   unifiedSearchResultSchema,
    type CliOutputEnvelope,
 } from '#contracts';
-import { count, dim, indent, section, title } from '../lib/format.js';
+import {
+   count,
+   dim,
+   indent,
+   section,
+   table as renderTable,
+   title,
+} from '../lib/format.js';
 import {
    criterionLine,
    showCriterionHintLine,
    type CriterionSummary,
    type RenderOptions,
 } from './shared.js';
-
-const MATCH_DEPTH = 2;
 const SUMMARY_COLUMN_WIDTH = 11;
 const SUMMARY_LEVELS = ['A', 'AA', 'AAA'] as const;
 
@@ -100,33 +105,47 @@ export function renderTestMethodSummaryText(
    ].join('\n');
 }
 
-// Fallow-ignore-next-line unused-export
-export function renderSearchText(
+/**
+ * One ranked list across both corpora, with the kind as the first column so a reader can
+ * tell a criterion from an ARIA pattern at a glance.
+ */
+export function renderUnifiedSearchText(
    envelope: CliOutputEnvelope,
    options: RenderOptions,
 ): string {
-   const result = criterionSearchResponseSchema.parse(envelope.result);
+   const result = unifiedSearchResultSchema.parse(envelope.result);
+
+   if (result.rows.length === 0) {
+      return [
+         `${title(`Search results for "${result.query}"`)}  ${dim('no matches')}`,
+         '',
+         ...indent([dim('Nothing in the WCAG or ARIA pattern data matched.')]),
+      ].join('\n');
+   }
+
+   const rows = result.rows.map((row) => [
+      dim(row.kind),
+      row.id,
+      row.title,
+      row.context ?? '',
+   ]);
+
    const lines = [
-      `${title(`Search results for "${result.query}"`)}  ${dim(count(result.results.length, 'match', 'matches'))}`,
+      `${title(`Search results for "${result.query}"`)}  ${dim(count(result.rows.length, 'match', 'matches'))}`,
       '',
+      ...indent(renderTable(['Kind', 'Id', 'Title', 'Where'], rows)),
    ];
 
-   for (const entry of result.results) {
-      const summary = { id: entry.criterionId, title: entry.title, level: entry.level };
-      lines.push(...indent([criterionLine(summary)]));
-      if (options.verbose && entry.matches.length > 0) {
-         const matchLines = entry.matches.map(
-            (match) => `${dim(`${match.field}:`)} ${match.text}`,
-         );
-         lines.push(...indent(matchLines, MATCH_DEPTH));
-      }
+   if (options.verbose) {
+      const matched = result.rows
+         .filter((row) => row.matchedOn !== undefined)
+         .map((row) => `${dim(`${row.id}:`)} ${row.matchedOn ?? ''}`);
+      lines.push('', ...indent(matched));
    }
 
-   if (result.results.length === 0) {
-      lines.push(...indent([dim('No criteria matched.')]));
-   } else {
-      lines.push('', showCriterionHintLine());
-   }
-
+   lines.push(
+      '',
+      `${dim('Run')} a1 wcag <id> ${dim('or')} a1 pattern <id> ${dim('for one row')}`,
+   );
    return lines.join('\n');
 }

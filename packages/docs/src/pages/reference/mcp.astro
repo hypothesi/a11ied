@@ -5,7 +5,7 @@ import { docsLinks } from '../../lib/nav';
 const toc = [
    { id: 'start', label: 'Starting the server' },
    { id: 'tools', label: 'Tools' },
-   { id: 'wcag', label: 'wcag_show, wcag_criteria, wcag_search, wcag_rule' },
+   { id: 'wcag', label: 'wcag_show, wcag_criteria, wcag_rule, search' },
    { id: 'pattern', label: 'pattern_show, pattern_find' },
    { id: 'axe', label: 'run_axe, tree, audit' },
    { id: 'sr', label: 'sr_session and sr_action' },
@@ -66,7 +66,7 @@ const toc = [
          <div class="route-row"><code>doctor</code><span>Return the a11ied, Node, and browser details and the setup state of each screen reader. Same as <code>a1 doctor</code>.</span></div>
          <div class="route-row"><code>wcag_show</code><span>Return one criterion with its techniques, failures, <a href="/test-methods">test method</a> (the <code>testMethod</code> object), and strategy. Set <code>includeUnderstanding</code> for the full Understanding document text. A technique or failure id also returns its body. Same as <code>a1 wcag show</code> and <code>a1 wcag understanding</code>.</span></div>
          <div class="route-row"><code>wcag_criteria</code><span>List criteria, filtered by level or summarized. Same as <code>a1 wcag criteria</code>.</span></div>
-         <div class="route-row"><code>wcag_search</code><span>Return ranked criterion matches for a query. Same as <code>a1 wcag search</code>.</span></div>
+         <div class="route-row"><code>search</code><span>Search the WCAG corpus and the ARIA Authoring Practices Guide together, ranked, each row labeled by <code>kind</code>. Same as <code>a1 search</code>.</span></div>
          <div class="route-row"><code>wcag_rule</code><span>Map an axe-core rule id to its criteria and fix guidance. Same as <code>a1 wcag rule</code>.</span></div>
          <div class="route-row"><code>pattern_show</code><span>One ARIA pattern or example from the Authoring Practices Guide, with its keyboard and attribute tables. Omit <code>name</code> to list every pattern. Same as <code>a1 pattern</code>.</span></div>
          <div class="route-row"><code>pattern_find</code><span>The examples the APG files under one ARIA role or attribute. Same as <code>a1 pattern role</code> and <code>a1 pattern attribute</code>.</span></div>
@@ -91,12 +91,12 @@ const toc = [
    <section class="panel" id="wcag">
       <div class="panel-head">
          <p class="panel-kicker">Standards</p>
-         <h2>wcag_show, wcag_criteria, wcag_search, wcag_rule</h2>
+         <h2>wcag_show, wcag_criteria, wcag_rule, search</h2>
       </div>
       <div class="route-list">
          <div class="route-row"><code>wcag_show</code><span><code>criterion</code> required, an id such as <code>1.4.3</code>, a slug such as <code>contrast-minimum</code>, or a technique id such as <code>G18</code>. Always returns the <code>testMethod</code> and <code>strategy</code> objects alongside the criterion. Set <code>includeUnderstanding: true</code> for the full Understanding document text and its source, the primary reference for fixing a violation.</span></div>
          <div class="route-row"><code>wcag_criteria</code><span><code>level</code> optional: <code>A</code>, <code>AA</code>, or <code>AAA</code>. Omit it to list every criterion. Set <code>summary: true</code> for the count of automated, hybrid, and manual criteria per level instead of the list.</span></div>
-         <div class="route-row"><code>wcag_search</code><span><code>query</code> required. <code>limit</code> defaults to 10 and caps at 50.</span></div>
+         <div class="route-row"><code>search</code><span><code>query</code> required. <code>kind</code> scopes it to one corpus. <code>limit</code> defaults to 10 and caps at 50.</span></div>
          <div class="route-row"><code>wcag_rule</code><span><code>ruleId</code> required, an axe-core rule id such as <code>color-contrast</code>. Returns the criteria it covers and axe's help text and help URL.</span></div>
       </div>
       <p>
@@ -247,7 +247,7 @@ const toc = [
          <h2>Side effects by tool</h2>
       </div>
       <div class="route-list">
-         <div class="route-row"><div class="route-terms"><code>wcag_show</code>, <code>wcag_criteria</code>, <code>wcag_search</code>, <code>wcag_rule</code></div><span>Read local files. <code>wcag_rule</code> also reads the installed axe-core package for help text.</span></div>
+         <div class="route-row"><div class="route-terms"><code>wcag_show</code>, <code>wcag_criteria</code>, <code>wcag_rule</code>, <code>search</code>, <code>pattern_show</code>, <code>pattern_find</code></div><span>Read local files. <code>wcag_rule</code> also reads the installed axe-core package for help text.</span></div>
          <div class="route-row"><div class="route-terms"><code>run_axe</code>, <code>tree</code>, <code>audit</code></div><span>Open the target in browser automation.</span></div>
          <div class="route-row"><code>doctor</code><span>Reads the host settings and installed browsers, and runs a short recording check on macOS.</span></div>
       </div>

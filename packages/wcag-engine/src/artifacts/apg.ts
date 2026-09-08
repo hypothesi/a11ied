@@ -11,18 +11,19 @@ import { WcagEngineNotFoundError } from '../errors/index.js';
 import { apgPatternsCache } from '../shared/data.js';
 import { loadApgPatterns } from './load.js';
 
-function getArtifact(): ApgPatternsArtifact {
+/** The loaded APG artifact, read once and cached. */
+export function getApgArtifact(): ApgPatternsArtifact {
    apgPatternsCache.artifact ??= loadApgPatterns();
    return apgPatternsCache.artifact;
 }
 
 /** The APG's own attribution block, printed wherever a command prints APG material. */
 export function getApgDocument(): W3cDocumentSource {
-   return getArtifact().document;
+   return getApgArtifact().document;
 }
 
 export function getApgPattern(patternId: string): ApgPattern {
-   const pattern = getArtifact().patterns[patternId];
+   const pattern = getApgArtifact().patterns[patternId];
    if (!pattern) {
       throw new WcagEngineNotFoundError(patternId, 'APG pattern');
    }
@@ -30,7 +31,7 @@ export function getApgPattern(patternId: string): ApgPattern {
 }
 
 export function getApgExample(exampleId: string): ApgExample {
-   const example = getArtifact().examples[exampleId];
+   const example = getApgArtifact().examples[exampleId];
    if (!example) {
       throw new WcagEngineNotFoundError(exampleId, 'APG example');
    }
@@ -38,7 +39,7 @@ export function getApgExample(exampleId: string): ApgExample {
 }
 
 export function listApgPatterns(): ApgPatternSummary[] {
-   return Object.values(getArtifact().patterns).map((pattern) => ({
+   return Object.values(getApgArtifact().patterns).map((pattern) => ({
       id: pattern.id,
       title: pattern.title,
       pageUrl: pattern.pageUrl,
@@ -47,7 +48,7 @@ export function listApgPatterns(): ApgPatternSummary[] {
 }
 
 function findIndexed(index: Record<string, string[]>, key: string): ApgExample[] {
-   const artifact = getArtifact();
+   const artifact = getApgArtifact();
    const wanted = key.trim().toLowerCase();
    const matched = Object.entries(index).find(
       ([indexKey]) => indexKey.toLowerCase() === wanted,
@@ -62,16 +63,16 @@ function findIndexed(index: Record<string, string[]>, key: string): ApgExample[]
  * case-insensitively, so `Combobox` and `combobox` both resolve.
  */
 export function findApgExamplesByRole(role: string): ApgExample[] {
-   return findIndexed(getArtifact().roleIndex, role);
+   return findIndexed(getApgArtifact().roleIndex, role);
 }
 
 /** The examples the APG's example index files under one property or state. */
 export function findApgExamplesByAttribute(attribute: string): ApgExample[] {
-   return findIndexed(getArtifact().attributeIndex, attribute);
+   return findIndexed(getApgArtifact().attributeIndex, attribute);
 }
 
 export function listApgExamplesForPattern(patternId: string): ApgExample[] {
-   const artifact = getArtifact();
+   const artifact = getApgArtifact();
    return getApgPattern(patternId)
       .exampleIds.map((exampleId) => artifact.examples[exampleId])
       .filter((example) => example !== undefined);
@@ -86,7 +87,7 @@ export function listApgExamplesForPattern(patternId: string): ApgExample[] {
  * anyway.
  */
 export function resolveApgLookupKey(key: string): ApgLookupKey | undefined {
-   const artifact = getArtifact(),
+   const artifact = getApgArtifact(),
       trimmed = key.trim();
 
    if (artifact.patterns[trimmed]) {
@@ -100,7 +101,7 @@ export function resolveApgLookupKey(key: string): ApgLookupKey | undefined {
 
 /** Every role and attribute the example index files something under. */
 export function listApgIndexKeys(): { roles: string[]; attributes: string[] } {
-   const artifact = getArtifact();
+   const artifact = getApgArtifact();
    return {
       roles: Object.keys(artifact.roleIndex),
       attributes: Object.keys(artifact.attributeIndex),

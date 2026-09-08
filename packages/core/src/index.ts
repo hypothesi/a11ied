@@ -122,6 +122,7 @@ export {
    showApgExample,
    showApgPattern,
    showApgPatternOrExample,
+   searchAll,
 } from './apg/runtime.js';
 export { buildAuditReport, type AuditReport } from './audit/runtime.js';
 export { buildNextCommands } from './audit/next-commands.js';

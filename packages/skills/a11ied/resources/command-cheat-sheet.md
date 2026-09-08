@@ -23,16 +23,16 @@ a1 wcag 1.4.3
 a1 wcag contrast-minimum
 a1 wcag criteria --level AA
 a1 wcag criteria --summary
-a1 wcag search "focus order"
+a1 search "focus order"
 a1 wcag rule color-contrast
 ```
 
-| Command                                          | MCP tool        | Arguments                              |
-| ------------------------------------------------ | --------------- | -------------------------------------- |
-| `wcag <id-or-slug>` / `wcag show <id-or-slug>`   | `wcag_show`     | `criterion` (required), `version`      |
-| `wcag criteria [--level A\|AA\|AAA] [--summary]` | `wcag_criteria` | `level`, `summary`, `version`          |
-| `wcag search <query> [--limit n]`                | `wcag_search`   | `query` (required), `limit`, `version` |
-| `wcag rule <axe-rule-id>`                        | `wcag_rule`     | `ruleId` (required), `version`         |
+| Command                                          | MCP tool        | Arguments                                      |
+| ------------------------------------------------ | --------------- | ---------------------------------------------- |
+| `wcag <id-or-slug>` / `wcag show <id-or-slug>`   | `wcag_show`     | `criterion` (required), `version`              |
+| `wcag criteria [--level A\|AA\|AAA] [--summary]` | `wcag_criteria` | `level`, `summary`, `version`                  |
+| `search <query> [--kind k] [--limit n]`          | `search`        | `query` (required), `kind`, `limit`, `version` |
+| `wcag rule <axe-rule-id>`                        | `wcag_rule`     | `ruleId` (required), `version`                 |
 
 ## ARIA pattern lookup and check
 

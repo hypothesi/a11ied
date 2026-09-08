@@ -42,12 +42,13 @@ If the task is framed in WCAG terms, resolve the criterion or target level befor
 ```txt
 a1 wcag 1.4.3
 a1 wcag contrast-minimum
-a1 wcag search "focus order"
+a1 search "focus order"
 a1 wcag rule color-contrast
 ```
 
 `a1 wcag <id-or-slug>` prints the normative text, techniques, failures, test method,
-and, for a criterion WCAG2Mobile covers, what changes when the target is a mobile app. `a1 wcag search <query>` finds the id when you only have a description. `a1 wcag
+and, for a criterion WCAG2Mobile covers, what changes when the target is a mobile app. `a1 search <query>` finds the id when you only have a description, across both the WCAG
+data and the ARIA patterns. `a1 wcag
 rule <axe-rule-id>` maps an axe violation back to the criteria it covers and axe's fix
 text, which is the last command `audit`'s `nextCommands` field names for a violation.
 
@@ -177,7 +178,7 @@ the CLI name in the description above to find the tool:
 | ---------------------------------------------------------------------------- | --------------- |
 | `a1 wcag show`                                                               | `wcag_show`     |
 | `a1 wcag criteria`                                                           | `wcag_criteria` |
-| `a1 wcag search`                                                             | `wcag_search`   |
+| `a1 search`                                                                  | `search`        |
 | `a1 wcag rule`                                                               | `wcag_rule`     |
 | `a1 axe`                                                                     | `run_axe`       |
 | `a1 tree`                                                                    | `tree`          |

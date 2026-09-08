@@ -7,7 +7,6 @@ const WCAG_EXAMPLES = `
 Examples:
   a1 wcag 1.1.1
   a1 wcag rule image-alt
-  a1 wcag search "color contrast"
 `;
 
 interface WcagCommandOptions {
@@ -141,29 +140,6 @@ function registerUnderstandingCommand(wcagCommand: Command): void {
    });
 }
 
-function registerSearchCommand(wcagCommand: Command): void {
-   withWcagOptions(
-      wcagCommand
-         .command('search <query>')
-         .summary('Search criteria, techniques, failures, and tags.')
-         .description(
-            'Search criterion titles, summaries, techniques, failures, and tags.',
-         )
-         .option('--limit <count>', 'Limit the number of returned rows.', '10'),
-   ).action(async (query: string, options: WcagCommandOptions & { limit: string }) => {
-      await runWcagCommand({
-         subcommand: 'search',
-         options,
-         buildResult: (core) =>
-            core.searchWcagCriteria(query, {
-               version: options.wcag,
-               limit: Number.parseInt(options.limit, 10),
-            }),
-         renderText: (renderers) => renderers.renderSearchText,
-      });
-   });
-}
-
 function registerRuleCommand(wcagCommand: Command): void {
    withWcagOptions(
       wcagCommand
@@ -207,6 +183,5 @@ export function registerWcagCommands(program: Command): void {
    registerCriteriaCommand(wcagCommand);
    registerShowCommand(wcagCommand);
    registerUnderstandingCommand(wcagCommand);
-   registerSearchCommand(wcagCommand);
    registerRuleCommand(wcagCommand);
 }

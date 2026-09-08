@@ -8,39 +8,10 @@ import {
 
 import { getArtifacts, parseVersion } from '../artifacts/runtime.js';
 import { searchableFieldWeights, type SearchableField } from '../shared/data.js';
+import { normalizeText, tokenize } from './text.js';
 
-const SUFFIX_IES_LENGTH = 3;
-const SUFFIX_ES_LENGTH = 2;
 const PHRASE_BONUS = 0.5;
 const TOFIX_PRECISION = 4;
-
-function normalizeText(value: string): string {
-   return value
-      .toLowerCase()
-      .replaceAll(/[^a-z0-9]+/g, ' ')
-      .trim();
-}
-
-function normalizeToken(value: string): string {
-   const normalized = normalizeText(value);
-   if (normalized.endsWith('ies') && normalized.length > SUFFIX_IES_LENGTH) {
-      return `${normalized.slice(0, -SUFFIX_IES_LENGTH)}y`;
-   }
-   if (normalized.endsWith('es') && normalized.length > SUFFIX_IES_LENGTH) {
-      return normalized.slice(0, -SUFFIX_ES_LENGTH);
-   }
-   if (normalized.endsWith('s') && normalized.length > SUFFIX_ES_LENGTH) {
-      return normalized.slice(0, -1);
-   }
-   return normalized;
-}
-
-function tokenize(value: string): string[] {
-   return normalizeText(value)
-      .split(/\s+/)
-      .map((token) => normalizeToken(token))
-      .filter((token) => token.length > 0);
-}
 
 interface FieldMatchInput {
    field: SearchableField;

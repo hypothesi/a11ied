@@ -31,5 +31,6 @@ export {
 } from './artifacts/apg.js';
 
 export { searchCriteria } from './search/runtime.js';
+export { searchApgEntries } from './search/apg.js';
 
 export { getCriterionRelevance, listRelevantCriteria } from './relevance/runtime.js';

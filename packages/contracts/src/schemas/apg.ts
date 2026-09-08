@@ -107,6 +107,38 @@ export const apgPatternsArtifactSchema = z.object({
 });
 export type ApgPatternsArtifact = z.infer<typeof apgPatternsArtifactSchema>;
 
+/**
+ * One row of a unified search. `kind` says which corpus it came from, so a caller can
+ * print a mixed list without inspecting the shape of each row.
+ */
+export const searchResultKindSchema = z.enum([
+   'criterion',
+   'technique',
+   'failure',
+   'axe-rule',
+   'pattern',
+   'example',
+]);
+export type SearchResultKind = z.infer<typeof searchResultKindSchema>;
+
+export const unifiedSearchRowSchema = z.object({
+   kind: searchResultKindSchema,
+   id: z.string().min(1),
+   title: z.string().min(1),
+   score: z.number(),
+   /** Where the match was found, such as a criterion level or a pattern id. */
+   context: z.string().optional(),
+   /** The text that matched, so a reader can see why the row is here. */
+   matchedOn: z.string().optional(),
+});
+export type UnifiedSearchRow = z.infer<typeof unifiedSearchRowSchema>;
+
+export const unifiedSearchResultSchema = z.object({
+   query: z.string(),
+   rows: z.array(unifiedSearchRowSchema),
+});
+export type UnifiedSearchResult = z.infer<typeof unifiedSearchResultSchema>;
+
 /** Which corpus a lookup key resolved to. */
 export const apgLookupKindSchema = z.enum(['pattern', 'example']);
 export type ApgLookupKind = z.infer<typeof apgLookupKindSchema>;

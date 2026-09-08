@@ -1,5 +1,7 @@
 import type {
    ApgExampleShowResult,
+   UnifiedSearchResult,
+   UnifiedSearchRow,
    ApgLookupResult,
    ApgFindResult,
    ApgLookupKey,
@@ -7,6 +9,8 @@ import type {
    ApgPatternShowResult,
 } from '@a11ied/contracts';
 import {
+   searchApgEntries,
+   searchCriteria,
    findApgExamplesByAttribute,
    findApgExamplesByRole,
    getApgDocument,
@@ -22,6 +26,7 @@ import { CliUsageError } from '../errors/cli-errors.js';
 import { normalizeEngineError } from '../errors/engine-errors.js';
 
 const SUGGESTION_LIMIT = 5;
+const DEFAULT_SEARCH_LIMIT = 10;
 
 function listSuggestions(key: string): string[] {
    const wanted = key.trim().toLowerCase();
@@ -137,4 +142,46 @@ export function findApgExamples(input: {
          pageUrl: example.pageUrl,
       })),
    };
+}
+
+/**
+ * Searches the WCAG corpus and the APG corpus and merges them into one ranked list.
+ *
+ * A person searching for "combobox" wants the ARIA pattern, the criteria it bears on, and
+ * the axe rule in one place, so there is one search command rather than one per corpus.
+ * `kind` filters to a single corpus.
+ */
+export function searchAll(
+   query: string,
+   options?: { version?: string; limit?: number; kind?: UnifiedSearchRow['kind'] },
+): UnifiedSearchResult {
+   const limit = options?.limit ?? DEFAULT_SEARCH_LIMIT;
+
+   const criterionRows: UnifiedSearchRow[] = [];
+   const found = searchCriteria(query, {
+      ...(options?.version === undefined ? {} : { version: options.version }),
+      limit,
+   });
+
+   for (const result of found.results) {
+      const row: UnifiedSearchRow = {
+         kind: 'criterion',
+         id: result.criterionId,
+         title: result.title,
+         score: result.score,
+         context: `Level ${result.level}`,
+      };
+      const first = result.matches[0];
+      if (first) {
+         row.matchedOn = first.text;
+      }
+      criterionRows.push(row);
+   }
+
+   const rows = [...criterionRows, ...searchApgEntries(query, limit)]
+      .filter((row) => options?.kind === undefined || row.kind === options.kind)
+      .toSorted((left, right) => right.score - left.score)
+      .slice(0, limit);
+
+   return { query, rows };
 }

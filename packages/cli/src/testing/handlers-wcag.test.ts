@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-   runCli,
-   parseJsonOutput,
-   EXIT_SUCCESS,
-   EXIT_USAGE,
-   SEARCH_EXCERPT_LINES,
-} from './setup.js';
+import { runCli, parseJsonOutput, EXIT_SUCCESS, EXIT_USAGE } from './setup.js';
 import { expectFirstErrorMessage } from './helpers.js';
 
 const SHOW_EXCERPT_LINES = 14;
@@ -138,17 +132,22 @@ async function assertMobileGuidanceOmitted(): Promise<void> {
    expect(text.stdout).not.toContain('\nMobile\n');
 }
 
-async function assertWcagSearch(): Promise<void> {
-   const result = await runCli(['wcag', 'search', 'status message', '--json']);
+async function assertSearch(): Promise<void> {
+   const result = await runCli(['search', 'status message', '--json']);
    const search = parseJsonOutput(result.stdout);
+   const rows = (search.result as { rows: Array<{ id: string; kind: string }> }).rows;
+
    expect(search.ok).toBe(true);
-   expect(
-      (
-         search.result as { results: Array<{ criterionId: string; matches: unknown[] }> }
-      ).results.some(
-         (entry) => entry.criterionId === '4.1.3' && entry.matches.length > 0,
-      ),
-   ).toBe(true);
+   expect(rows.some((row) => row.id === '4.1.3' && row.kind === 'criterion')).toBe(true);
+}
+
+async function assertSearchSpansBothCorpora(): Promise<void> {
+   const result = await runCli(['search', 'combobox', '--json']);
+   const rows = (
+      parseJsonOutput(result.stdout).result as { rows: Array<{ kind: string }> }
+   ).rows;
+
+   expect(new Set(rows.map((row) => row.kind)).has('pattern')).toBe(true);
 }
 
 async function assertWcagRule(): Promise<void> {
@@ -269,13 +268,12 @@ async function assertTextShowSnapshot(): Promise<void> {
 }
 
 async function assertTextSearchSnapshot(): Promise<void> {
-   const search = await runCli(['wcag', 'search', 'status message']);
-   const excerpt = search.stdout.split('\n').slice(0, SEARCH_EXCERPT_LINES).join('\n');
+   const search = await runCli(['search', 'status message', '--kind', 'criterion']);
 
-   expect(excerpt).toContain('Search results for "status message"  2 matches');
-   expect(excerpt).toContain('4.1.3  Status Messages  [AA]');
-   expect(excerpt).not.toContain('score');
-   expect(search.stdout).toContain('Run a1 wcag x.y.z for details');
+   expect(search.stdout).toContain('Search results for "status message"');
+   expect(search.stdout).toContain('4.1.3');
+   expect(search.stdout).toContain('Status Messages');
+   expect(search.stdout).not.toContain('score');
 }
 
 async function assertTextVerboseShow(): Promise<void> {
@@ -324,8 +322,9 @@ describe('cli wcag commands', () => {
       await assertMobileGuidance();
       await assertMobileGuidanceOmitted();
    });
-   it('checks wcag search', async () => {
-      await assertWcagSearch();
+   it('searches both corpora from one command', async () => {
+      await assertSearch();
+      await assertSearchSpansBothCorpora();
    });
    it('maps an axe rule to criteria with wcag rule', async () => {
       await assertWcagRule();

@@ -80,7 +80,7 @@ function readIndexTable(
 ): Record<string, string[]> {
    const table = doc.querySelector(`table[aria-labelledby="${labelId}"]`);
    if (!table) {
-      throw new ApgParseError(fileName, `no table labelled by ${labelId}`);
+      throw new ApgParseError(fileName, `no table labeled by ${labelId}`);
    }
 
    const index: Record<string, string[]> = {};

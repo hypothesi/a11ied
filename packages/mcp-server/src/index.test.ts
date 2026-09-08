@@ -1,8 +1,7 @@
 import {
    axeRuleLookupResultSchema,
    testMethodLookupResultSchema,
-   criterionSearchResponseSchema,
-   type CriterionSearchResult,
+   unifiedSearchResultSchema,
 } from '@a11ied/contracts';
 import { describe, expect, it } from 'vitest';
 
@@ -158,22 +157,34 @@ describe('wcag rule tool', () => {
    });
 });
 
-describe('wcag search tool', () => {
-   it('returns ranked criteria with match metadata', async () => {
+describe('search tool', () => {
+   it('returns ranked rows from both corpora, each labelled by kind', async () => {
       await withHarness(async (harness) => {
          const result = await harness.client.callTool({
-            name: 'wcag_search',
-            arguments: { query: 'status message', version: '2.2', limit: 5 },
+            name: 'search',
+            arguments: { query: 'combobox', version: '2.2', limit: 10 },
          });
 
          expect(result.isError).toBeFalsy();
-         const payload = criterionSearchResponseSchema.parse(result.structuredContent);
-         expect(
-            payload.results.some(
-               (entry: CriterionSearchResult) => entry.criterionId === '4.1.3',
-            ),
-         ).toBe(true);
-         expect(payload.results[0]?.matches.length).toBeGreaterThan(0);
+         const payload = unifiedSearchResultSchema.parse(result.structuredContent);
+         const kinds = new Set(payload.rows.map((row) => row.kind));
+
+         expect(kinds.has('pattern')).toBe(true);
+         expect(payload.rows.some((row) => row.id === 'combobox-select-only')).toBe(true);
+      });
+   });
+
+   it('scopes the search to one corpus when kind is given', async () => {
+      await withHarness(async (harness) => {
+         const result = await harness.client.callTool({
+            name: 'search',
+            arguments: { query: 'status message', version: '2.2', kind: 'criterion' },
+         });
+
+         const payload = unifiedSearchResultSchema.parse(result.structuredContent);
+
+         expect(payload.rows.every((row) => row.kind === 'criterion')).toBe(true);
+         expect(payload.rows.some((row) => row.id === '4.1.3')).toBe(true);
       });
    });
 });

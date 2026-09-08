@@ -1,7 +1,8 @@
 import {
    axeRuleLookupResultSchema,
-   criterionSearchResponseSchema,
    criterionShowResultSchema,
+   searchResultKindSchema,
+   unifiedSearchResultSchema,
    doctorReportSchema,
    techniqueLookupResultSchema,
    wcagLevelSchema,
@@ -13,7 +14,7 @@ import {
 import {
    createDoctorReport,
    listWcagCriteria,
-   searchWcagCriteria,
+   searchAll,
    showWcagAxeRule,
    showWcagTestMethodSummary,
    showWcagCriterion,
@@ -132,15 +133,21 @@ function registerWcagCriteriaTool(server: McpServer): void {
    );
 }
 
-function registerWcagSearchTool(server: McpServer): void {
+function registerSearchTool(server: McpServer): void {
    server.registerTool(
-      'wcag_search',
+      'search',
       {
-         title: 'WCAG search',
-         description: 'Search the local WCAG corpus and return ranked criterion matches.',
+         title: 'Search',
+         description:
+            'Search the pinned WCAG corpus and the ARIA Authoring Practices Guide together and ' +
+            'return one ranked list. Each row says which corpus it came from in kind: criterion, ' +
+            'technique, failure, axe-rule, pattern, or example. Use kind to scope the search to ' +
+            'one of those. Use this when you have a description rather than an id. Matches the ' +
+            'CLI search command.',
          inputSchema: z.object({
             query: z.string().min(1),
             version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
+            kind: searchResultKindSchema.optional(),
             limit: z
                .number()
                .int()
@@ -148,13 +155,17 @@ function registerWcagSearchTool(server: McpServer): void {
                .max(MAX_SEARCH_RESULTS)
                .default(DEFAULT_SEARCH_RESULTS),
          }),
-         outputSchema: criterionSearchResponseSchema,
+         outputSchema: unifiedSearchResultSchema,
          annotations: readOnlyAnnotations,
       },
-      async ({ query, version, limit }) =>
+      async ({ query, version, kind, limit }) =>
          createToolResponse(
-            criterionSearchResponseSchema.parse(
-               searchWcagCriteria(query, { version, limit }),
+            unifiedSearchResultSchema.parse(
+               searchAll(query, {
+                  version,
+                  limit,
+                  ...(kind === undefined ? {} : { kind }),
+               }),
             ),
          ),
    );
@@ -187,6 +198,6 @@ export function registerKnowledgeTools(server: McpServer): void {
    registerDoctorTool(server);
    registerWcagShowTool(server);
    registerWcagCriteriaTool(server);
-   registerWcagSearchTool(server);
+   registerSearchTool(server);
    registerWcagRuleTool(server);
 }
