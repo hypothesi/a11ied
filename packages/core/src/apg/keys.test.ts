@@ -10,6 +10,11 @@ describe('toPlaywrightKeys', () => {
       expect(toPlaywrightKeys(['Right arrow'])).toEqual({ chord: 'ArrowRight' });
    });
 
+   it('accepts the arrow key names sr press documents, for --setup', () => {
+      expect(toPlaywrightKeys(['ArrowDown'])).toEqual({ chord: 'ArrowDown' });
+      expect(toPlaywrightKeys(['Shift', 'ArrowUp'])).toEqual({ chord: 'Shift+ArrowUp' });
+   });
+
    it('folds the case and spacing the APG is inconsistent about', () => {
       expect(toPlaywrightKeys(['TAB'])).toEqual({ chord: 'Tab' });
       expect(toPlaywrightKeys(['ESC'])).toEqual({ chord: 'Escape' });

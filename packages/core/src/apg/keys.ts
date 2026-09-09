@@ -6,10 +6,15 @@ const SINGLE_CHARACTER = 1;
  *
  * Every entry is taken from the pinned artifact rather than guessed: the guide writes
  * both `Page Up` and `PageUp`, and both `Tab` and `TAB`, so lookups fold case and
- * spacing.
+ * spacing. The arrow keys are also listed under the names `sr press` documents, because
+ * `--setup` takes the same spellings.
  */
 const KEY_NAMES: Record<string, string> = {
    alt: 'Alt',
+   arrowdown: 'ArrowDown',
+   arrowleft: 'ArrowLeft',
+   arrowright: 'ArrowRight',
+   arrowup: 'ArrowUp',
    backspace: 'Backspace',
    command: 'Meta',
    control: 'Control',
