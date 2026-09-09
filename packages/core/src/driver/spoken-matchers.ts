@@ -3,7 +3,10 @@ import type { DriverCurrentItem, DriverTranscriptEntry } from '@a11ied/contracts
 import { matchesItem, type WantedItem } from './broker-loops.js';
 import { describeExpectationFailure, evaluateExpectation } from './expectation.js';
 import { describeMatcher, matchesText, type TextMatcher } from './matcher.js';
-import { listCheckedPhrases } from './screen-reader-errors.js';
+import {
+   listCheckedPhrases,
+   ScreenReaderAssertionError,
+} from './screen-reader-errors.js';
 import { selectTranscriptEntries } from './transcript-recorder.js';
 
 /** What `expectSpoken` and the matchers compare against: text without case, or a pattern. */
@@ -46,7 +49,7 @@ export function transcriptPhrases(entries: readonly DriverTranscriptEntry[]): st
 }
 
 /**
- * Whether the transcript holds a phrase matching `match`, within `since` and `not`. An
+ * Whether the transcript has a phrase matching `match`, within `since` and `not`. An
  * unknown `since` label throws, the same as `sr expect --since`.
  */
 export function checkSpoken(
@@ -95,8 +98,8 @@ function findInOrder(
 }
 
 /**
- * Whether the transcript holds phrases matching each of `matches`, in that order, with
- * any number of other phrases between them.
+ * Whether the transcript has phrases matching each of `matches`, in that order, with any
+ * number of other phrases between them.
  */
 export function checkSpokenInOrder(
    entries: DriverTranscriptEntry[],
@@ -152,4 +155,15 @@ export function checkCurrentItem(
       negatedFailure: `Expected the cursor not to be on ${want}, but it is on ${actual}.`,
       phrases: item?.phrase === undefined ? [] : [item.phrase],
    };
+}
+
+/** Throws the assertion error for a failed check. `expected` is what the caller asked for. */
+export function assertCheckPassed(check: SpokenCheck, expected: string): void {
+   if (check.pass) {
+      return;
+   }
+   throw new ScreenReaderAssertionError(check.failure, {
+      expected,
+      phrases: check.phrases,
+   });
 }

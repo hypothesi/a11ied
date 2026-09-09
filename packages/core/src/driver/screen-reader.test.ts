@@ -113,6 +113,31 @@ async function assertExpectSpokenFailure(): Promise<void> {
    expect(failure.phrases).toContain('heading, Sign up, level 1');
 }
 
+async function assertCursorAndOrderChecks(): Promise<void> {
+   await using sr = await screenReader({ html: SIGN_UP_HTML });
+   await sr.next('heading');
+   await sr.next('button');
+
+   await sr.expectOn({ role: 'button', name: 'Create account' });
+   await sr.expectSpokenInOrder(['Sign up', 'Create account']);
+   const onFailure = await sr.expectOn({ role: 'link' }).catch((error: unknown) => error),
+      orderFailure = await sr
+         .expectSpokenInOrder(['Create account', 'Sign up'])
+         .catch((error: unknown) => error);
+
+   expect(onFailure).toBeInstanceOf(ScreenReaderAssertionError);
+   expect(onFailure).toMatchObject({
+      expected: 'link',
+      message: expect.stringContaining('role "link"'),
+   });
+   expect(orderFailure).toBeInstanceOf(ScreenReaderAssertionError);
+   expect(orderFailure).toMatchObject({
+      expected: '"Create account", then "Sign up"',
+      message: expect.stringContaining('was not announced after'),
+      phrases: expect.arrayContaining(['button, Create account']),
+   });
+}
+
 async function assertDisposalStopsInProcess(): Promise<void> {
    const sr = await screenReader({ html: SIGN_UP_HTML });
    await sr.next();
@@ -163,6 +188,12 @@ describe('screenReader in process', () => {
    it(
       'names what was expected, how many phrases were checked, and what was said',
       () => withStateDir(tempRoots, assertExpectSpokenFailure),
+      TIMEOUT_MS,
+   );
+
+   it(
+      'checks the cursor and the order of announcements',
+      () => withStateDir(tempRoots, assertCursorAndOrderChecks),
       TIMEOUT_MS,
    );
 

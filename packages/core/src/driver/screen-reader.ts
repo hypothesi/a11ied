@@ -32,7 +32,14 @@ import type {
    ScreenReaderStep,
    ScreenReaderTransport,
 } from './screen-reader-transport.js';
-import { checkSpoken, type SpokenMatch, type SpokenOptions } from './spoken-matchers.js';
+import {
+   assertCheckPassed,
+   checkCurrentItem,
+   checkSpoken,
+   checkSpokenInOrder,
+   type SpokenMatch,
+   type SpokenOptions,
+} from './spoken-matchers.js';
 import {
    selectTranscriptEntries,
    type TranscriptSelection,
@@ -47,7 +54,7 @@ export type {
 /**
  * One screen reader session as a test drives it. Every navigation method returns the
  * phrase it produced, `read` returns the item under the cursor, and the checks throw a
- * `ScreenReaderAssertionError` that names what was expected and what was said instead.
+ * `ScreenReaderAssertionError` that says what was expected and what was said instead.
  * `await using` disposes it. Runners without explicit resource management call `stop`.
  */
 export class ScreenReader implements AsyncDisposable {
@@ -293,17 +300,39 @@ export class ScreenReader implements AsyncDisposable {
    }
 
    /**
-    * Checks the transcript for a phrase and throws when the check fails. The error names
+    * Checks the transcript for a phrase and throws when the check fails. The error says
     * what was expected, how many phrases were checked, and what the reader said.
     */
    async expectSpoken(match: SpokenMatch, options: SpokenOptions = {}): Promise<void> {
       const check = checkSpoken(await this.transcript(), match, options);
-      if (!check.pass) {
-         throw new ScreenReaderAssertionError(check.failure, {
-            expected: describeMatch(match),
-            phrases: check.phrases,
-         });
-      }
+      assertCheckPassed(check, describeMatch(match));
+   }
+
+   /**
+    * Checks that the item under the cursor has the role, the name, or both, and throws
+    * when it does not. The error says which item the cursor is on.
+    */
+   async expectOn(wanted: WantedItem): Promise<void> {
+      assertCheckPassed(
+         checkCurrentItem(await this.read(), wanted),
+         describeWanted(wanted),
+      );
+   }
+
+   /**
+    * Checks that each match was announced after the previous one, with any phrases
+    * between, and throws when one is missing. The error says which match it did not
+    * find.
+    */
+   async expectSpokenInOrder(
+      matches: readonly SpokenMatch[],
+      options: Pick<SpokenOptions, 'since'> = {},
+   ): Promise<void> {
+      const check = checkSpokenInOrder(await this.transcript(), matches, options);
+      assertCheckPassed(
+         check,
+         matches.map((match) => describeMatch(match)).join(', then '),
+      );
    }
 
    /** Stops the reader and releases its browser or broker. Safe to call twice. */
