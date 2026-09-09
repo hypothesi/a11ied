@@ -1,0 +1,10 @@
+# The progress demo on the Reka UI docs: a progress bar whose value advances on its own.
+# Run over an open session: a1 sr batch examples/reka-progress/progress.batch.jsonl
+{"action":"goto","payload":{"role":"progressbar"}}
+{"action":"expect","payload":{"match":"/^progressbar, \\d+%, max value 100, min value 0, current value \\d+%$/"}}
+# The bar re-renders as its value moves, so the reader finds it again from the top.
+{"action":"checkpoint","payload":{"label":"later"}}
+{"action":"wait","payload":{"ms":3000}}
+{"action":"top"}
+{"action":"goto","payload":{"role":"progressbar"}}
+{"action":"expect","payload":{"match":"/current value (40|70|100)%/","since":"later"}}

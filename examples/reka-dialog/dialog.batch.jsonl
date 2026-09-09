@@ -1,0 +1,24 @@
+# The keyboard rows of the APG modal dialog example, pressed on the Reka UI dialog demo.
+# Run over an open session: a1 sr batch examples/reka-dialog/dialog.batch.jsonl
+{"action":"goto","payload":{"role":"button","name":"Edit profile"}}
+{"action":"expect","payload":{"match":"button, Edit profile, not expanded, has popup dialog"}}
+# Enter opens the dialog, which is named by its title, and focus moves inside it.
+{"action":"checkpoint","payload":{"label":"open"}}
+{"action":"press","payload":{"keys":["Enter"]}}
+{"action":"expect","payload":{"match":"/^dialog, Edit profile, Make changes to your profile here/","since":"open"}}
+{"action":"expect","payload":{"match":"/^textbox, Name/","since":"open"}}
+# Tab stays inside the dialog and wraps from the last control to the first (key-tab).
+{"action":"checkpoint","payload":{"label":"tab"}}
+{"action":"press","payload":{"keys":["Tab","Tab","Tab"]}}
+{"action":"expect","payload":{"match":"/^button, Close/","since":"tab"}}
+{"action":"checkpoint","payload":{"label":"wrap"}}
+{"action":"press","payload":{"keys":["Tab"]}}
+{"action":"expect","payload":{"match":"/^textbox, Name/","since":"wrap"}}
+# Shift+Tab wraps from the first control to the last (key-shift-tab).
+{"action":"checkpoint","payload":{"label":"shift-tab"}}
+{"action":"press","payload":{"keys":["Shift+Tab"]}}
+{"action":"expect","payload":{"match":"/^button, Close/","since":"shift-tab"}}
+# Escape closes the dialog and returns focus to the button that opened it (key-escape).
+{"action":"checkpoint","payload":{"label":"escape"}}
+{"action":"press","payload":{"keys":["Escape"]}}
+{"action":"expect","payload":{"match":"button, Edit profile, not expanded, has popup dialog","since":"escape"}}

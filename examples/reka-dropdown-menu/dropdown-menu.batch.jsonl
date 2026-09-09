@@ -1,0 +1,39 @@
+# The keyboard rows of the APG actions menu button example, pressed on the Reka UI
+# dropdown menu demo.
+# Run over an open session: a1 sr batch examples/reka-dropdown-menu/dropdown-menu.batch.jsonl
+{"action":"goto","payload":{"role":"button","name":"Customise options"}}
+{"action":"expect","payload":{"match":"button, Customise options, not expanded, has popup menu"}}
+# Enter opens the menu and moves focus to the first item (menu-button-key-open).
+{"action":"checkpoint","payload":{"label":"open"}}
+{"action":"press","payload":{"keys":["Enter"]}}
+{"action":"expect","payload":{"match":"/^menuitem, New Tab .*, position 1, set size 5$/","since":"open"}}
+# Down Arrow and Up Arrow move between items (menu-key-down-arrow, menu-key-up-arrow).
+{"action":"checkpoint","payload":{"label":"down"}}
+{"action":"press","payload":{"keys":["ArrowDown"]}}
+{"action":"expect","payload":{"match":"/^menuitem, More Tools, not expanded, has popup menu, position 2/","since":"down"}}
+{"action":"checkpoint","payload":{"label":"up"}}
+{"action":"press","payload":{"keys":["ArrowUp"]}}
+{"action":"expect","payload":{"match":"/^menuitem, New Tab .*, position 1/","since":"up"}}
+# End and Home move to the last and first items (menu-key-end, menu-key-home).
+{"action":"checkpoint","payload":{"label":"end"}}
+{"action":"press","payload":{"keys":["End"]}}
+{"action":"expect","payload":{"match":"/^menuitemradio, Colm Tuite, not checked/","since":"end"}}
+{"action":"checkpoint","payload":{"label":"home"}}
+{"action":"press","payload":{"keys":["Home"]}}
+{"action":"expect","payload":{"match":"/^menuitem, New Tab .*, position 1/","since":"home"}}
+# A letter moves to the next item that starts with it (menu-key-character).
+{"action":"checkpoint","payload":{"label":"letter"}}
+{"action":"press","payload":{"keys":["n"]}}
+{"action":"expect","payload":{"match":"/^menuitem, New Window .*, position 3/","since":"letter"}}
+# Escape closes the menu and returns focus to the button (menu-key-escape).
+{"action":"checkpoint","payload":{"label":"escape"}}
+{"action":"press","payload":{"keys":["Escape"]}}
+{"action":"expect","payload":{"match":"button, Customise options, not expanded, has popup menu","since":"escape"}}
+# Down Arrow on the button opens the menu too (menu-button-key-open).
+{"action":"checkpoint","payload":{"label":"arrow-open"}}
+{"action":"press","payload":{"keys":["ArrowDown"]}}
+{"action":"expect","payload":{"match":"/^menuitem, New Tab .*, position 1/","since":"arrow-open"}}
+# Enter on an item with a submenu opens the submenu (menu-key-enter).
+{"action":"checkpoint","payload":{"label":"submenu"}}
+{"action":"press","payload":{"keys":["ArrowDown","Enter"]}}
+{"action":"expect","payload":{"match":"/^menuitem, Save Page As.*, position 1, set size 4$/","since":"submenu"}}

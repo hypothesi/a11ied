@@ -1,0 +1,19 @@
+# The tags input demo on the Reka UI docs: two tags, Apple and Banana, and a text field.
+# Run over an open session: a1 sr batch examples/reka-tags-input/tags-input.batch.jsonl
+{"action":"goto","payload":{"role":"switch","name":"View code"}}
+{"action":"press","payload":{"keys":["Tab"]}}
+{"action":"expect","payload":{"match":"/^textbox/"}}
+# Typing a value and pressing Enter adds a tag after the last one.
+{"action":"checkpoint","payload":{"label":"add"}}
+{"action":"type","payload":{"text":"Cherry"}}
+{"action":"press","payload":{"keys":["Enter"]}}
+# Left Arrow marks the last tag as current, which the reader finds just before the field.
+{"action":"press","payload":{"keys":["ArrowLeft"]}}
+{"action":"previous"}
+{"action":"expect","payload":{"match":"/^end, Cherry, current item$/","since":"add"}}
+# Delete removes the highlighted tag, and the one before it becomes current.
+{"action":"next"}
+{"action":"checkpoint","payload":{"label":"delete"}}
+{"action":"press","payload":{"keys":["Delete"]}}
+{"action":"previous"}
+{"action":"expect","payload":{"match":"/^end, Banana, current item$/","since":"delete"}}

@@ -1,0 +1,21 @@
+# The keyboard rows of the APG accordion example, pressed on the Reka UI accordion demo.
+# Run over an open session: a1 sr batch examples/reka-accordion/accordion.batch.jsonl
+{"action":"goto","payload":{"role":"button","name":"Is it unstyled?"}}
+{"action":"expect","payload":{"match":"/^button, Is it unstyled\\?.*, not expanded$/"}}
+# Enter on a collapsed header expands it (key-enter-or-space).
+{"action":"checkpoint","payload":{"label":"enter"}}
+{"action":"press","payload":{"keys":["Enter"]}}
+{"action":"expect","payload":{"match":"/^button, Is it unstyled\\?.*, expanded$/","since":"enter"}}
+{"action":"expect","payload":{"match":"not expanded","since":"enter","not":true}}
+# Tab moves focus to the next header (key-tab).
+{"action":"checkpoint","payload":{"label":"tab"}}
+{"action":"press","payload":{"keys":["Tab"]}}
+{"action":"expect","payload":{"match":"/^button, Can it be animated\\?/","since":"tab"}}
+# Space on a collapsed header expands it (key-enter-or-space).
+{"action":"checkpoint","payload":{"label":"space"}}
+{"action":"press","payload":{"keys":["Space"]}}
+{"action":"expect","payload":{"match":"/^button, Can it be animated\\?.*, expanded$/","since":"space"}}
+# Shift+Tab moves focus to the previous header (key-shift-tab).
+{"action":"checkpoint","payload":{"label":"shift-tab"}}
+{"action":"press","payload":{"keys":["Shift+Tab"]}}
+{"action":"expect","payload":{"match":"/^button, Is it unstyled\\?/","since":"shift-tab"}}

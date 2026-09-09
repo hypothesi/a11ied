@@ -1,0 +1,22 @@
+# The toast demo on the Reka UI docs: a button that queues a notification.
+# Run over an open session: a1 sr batch examples/reka-toast/toast.batch.jsonl
+{"action":"goto","payload":{"role":"button","name":"Add to calendar"}}
+{"action":"checkpoint","payload":{"label":"add"}}
+{"action":"press","payload":{"keys":["Enter"]}}
+# The toast mounts a moment after the press, and the hotkey acts on the toasts present.
+{"action":"wait","payload":{"ms":500}}
+# F8 moves focus to the notifications, and Tab reaches the toast and its Undo button.
+{"action":"checkpoint","payload":{"label":"hotkey"}}
+{"action":"press","payload":{"keys":["F8"]}}
+{"action":"expect","payload":{"match":"/^list$/","since":"hotkey"}}
+{"action":"press","payload":{"keys":["Tab"]}}
+{"action":"expect","payload":{"match":"/^listitem/","since":"hotkey"}}
+{"action":"press","payload":{"keys":["Tab"]}}
+{"action":"expect","payload":{"match":"button, Undo","since":"hotkey"}}
+# Escape closes the toast, so F8 lands on an empty list.
+{"action":"checkpoint","payload":{"label":"escape"}}
+{"action":"press","payload":{"keys":["Escape"]}}
+{"action":"wait","payload":{"ms":500}}
+{"action":"press","payload":{"keys":["F8"]}}
+{"action":"next"}
+{"action":"expect","payload":{"match":"/^listitem/","since":"escape","not":true}}

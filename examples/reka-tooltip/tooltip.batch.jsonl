@@ -1,0 +1,12 @@
+# The tooltip demo on the Reka UI docs: focus opens it, Escape dismisses it.
+# Run over an open session: a1 sr batch examples/reka-tooltip/tooltip.batch.jsonl
+{"action":"goto","payload":{"role":"switch","name":"View code"}}
+# Tab moves focus to the trigger, which opens the tooltip; its text is read with the button.
+{"action":"checkpoint","payload":{"label":"tab"}}
+{"action":"press","payload":{"keys":["Tab"]}}
+{"action":"expect","payload":{"match":"button, Add to library","since":"tab"}}
+# Escape dismisses the tooltip and leaves focus on the trigger.
+{"action":"checkpoint","payload":{"label":"escape"}}
+{"action":"press","payload":{"keys":["Escape"]}}
+{"action":"expect","payload":{"match":"/^button$/","since":"escape"}}
+{"action":"expect","payload":{"match":"Add to library","since":"escape","not":true}}

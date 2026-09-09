@@ -1,0 +1,9 @@
+{
+   "extends": "../tsconfig.base.json",
+   "compilerOptions": {
+      "noEmit": true,
+      "paths": {},
+      "resolvePackageJsonExports": true
+   },
+   "include": ["**/*.ts"]
+}
