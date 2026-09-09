@@ -134,6 +134,17 @@ describe('a1 pattern listings', () => {
       expect(result.status).toBe(EXIT_SUCCESS);
       expect(payload.patterns.length).toBeGreaterThanOrEqual(MIN_PATTERN_COUNT);
    });
+
+   it('lists a pattern the guide publishes no example for, and says so', async () => {
+      const listed = await runCli(['pattern', 'list', '--json']);
+      const payload = parseJsonOutput(listed.stdout).result as PatternListResult;
+      const shown = await runCli(['pattern', 'tooltip']);
+
+      expect(payload.patterns.find((pattern) => pattern.id === 'tooltip')).toMatchObject({
+         id: 'tooltip',
+         title: 'Tooltip',
+         exampleCount: 0,
+      });
       expect(shown.status).toBe(EXIT_SUCCESS);
       expect(shown.stdout).toContain('The APG publishes no example for this pattern.');
       expect(shown.stdout).toContain(

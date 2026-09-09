@@ -111,6 +111,23 @@ function exampleLines(
    ];
 }
 
+/** The example table, or a note that the guide publishes none for this pattern. */
+function patternExampleLines(examples: ApgExample[]): string[] {
+   if (examples.length === 0) {
+      return [
+         '',
+         dim('The APG publishes no example for this pattern. Its page describes the'),
+         dim('keyboard support and the roles, states, and properties in prose.'),
+      ];
+   }
+   const rows = examples.map((example) => [example.id, example.title]);
+   return [
+      ...section(count(examples.length, 'example'), table(['Id', 'Title'], rows)),
+      '',
+      `${dim('Run')} a1 pattern <example_id> ${dim('with one of the IDs above to view an example for this pattern')}`,
+   ];
+}
+
 function patternLines(
    result: { pattern: ApgPattern; examples: ApgExample[]; document: W3cDocumentSource },
    sections: ReadonlyArray<PatternDetailSection>,
@@ -118,15 +135,7 @@ function patternLines(
    const lines = [result.pattern.title, dim(`pattern id ${result.pattern.id}`)];
 
    if (sections.includes('examples')) {
-      const rows = result.examples.map((example) => [example.id, example.title]);
-      lines.push(
-         ...section(
-            count(result.examples.length, 'example'),
-            table(['Id', 'Title'], rows),
-         ),
-         '',
-         `${dim('Run')} a1 pattern ${result.examples[0]?.id ?? '<example-id>'} ${dim('for its keyboard and attribute tables')}`,
-      );
+      lines.push(...patternExampleLines(result.examples));
    }
 
    lines.push(

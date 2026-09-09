@@ -198,6 +198,12 @@
          "pageUrl": "https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/",
          "exampleIds": ["toolbar"]
       },
+      "tooltip": {
+         "id": "tooltip",
+         "title": "Tooltip",
+         "pageUrl": "https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/",
+         "exampleIds": []
+      },
       "treegrid": {
          "id": "treegrid",
          "title": "Treegrid",
@@ -209,6 +215,12 @@
          "title": "Tree View",
          "pageUrl": "https://www.w3.org/WAI/ARIA/apg/patterns/treeview/",
          "exampleIds": ["treeview-1a", "treeview-1b", "treeview-navigation"]
+      },
+      "windowsplitter": {
+         "id": "windowsplitter",
+         "title": "Window Splitter",
+         "pageUrl": "https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/",
+         "exampleIds": []
       }
    },
    "examples": {

@@ -132,23 +132,22 @@ function buildPatterns(
       byPattern.set(example.patternId, ids);
    }
 
-   const entries: Array<[string, ApgPattern]> = [...byPattern.entries()].map(
-      ([id, exampleIds]) => {
-         const listed = titles.get(id);
-         return [
+   /* Tooltip and Window Splitter are patterns with no example, and they still count. */
+   const ids = new Set([...titles.keys(), ...byPattern.keys()]);
+   const entries: Array<[string, ApgPattern]> = [...ids].map((id) => {
+      const listed = titles.get(id);
+      return [
+         id,
+         {
             id,
-            {
-               id,
-               title: listed?.title ?? id,
-               pageUrl:
-                  listed?.pageUrl ?? `https://www.w3.org/WAI/ARIA/apg/patterns/${id}/`,
-               exampleIds: exampleIds.toSorted((left, right) =>
-                  left.localeCompare(right),
-               ),
-            },
-         ];
-      },
-   );
+            title: listed?.title ?? id,
+            pageUrl: listed?.pageUrl ?? `https://www.w3.org/WAI/ARIA/apg/patterns/${id}/`,
+            exampleIds: (byPattern.get(id) ?? []).toSorted((left, right) =>
+               left.localeCompare(right),
+            ),
+         },
+      ];
+   });
    return sortById(entries);
 }
 

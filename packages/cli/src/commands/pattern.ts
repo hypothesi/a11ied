@@ -81,7 +81,7 @@ async function showPatternOrExample(
 
 /**
  * Bare `a1 pattern` lists the patterns. Unlike `a1 wcag` there is no interactive finder
- * yet, and a list of 28 ids fits on a screen, so the list is the more useful default.
+ * yet, and a list of 30 ids fits on a screen, so the list is the more useful default.
  */
 async function runPatternEntry(options: PatternCommandOptions): Promise<void> {
    await runPatternCommand({
