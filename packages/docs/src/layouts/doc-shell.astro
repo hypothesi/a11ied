@@ -87,6 +87,9 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH;
          a { color: var(--red-dark); font-weight: 700; text-decoration-thickness: 0.11em; text-underline-offset: 0.16em; }
          a:hover { color: var(--red); }
          a:focus-visible, summary:focus-visible, button:focus-visible { outline: 3px solid var(--blue); outline-offset: 4px; }
+         abbr[title] { text-decoration: underline dotted 0.13em; text-underline-offset: 0.2em; cursor: help; }
+         abbr[title]:hover { text-decoration-color: var(--red); }
+         a > abbr[title], abbr[title] > a { text-decoration: underline dotted 0.13em; text-underline-offset: 0.2em; }
 
          .shell { width: min(100%, 106rem); margin: 0 auto; display: grid; grid-template-columns: 18.5rem minmax(0, 1fr); align-items: start; }
          .desktop-rail {
@@ -130,6 +133,8 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH;
          h1 { margin: 0; max-width: 13ch; font: 700 clamp(4.3rem, 10vw, 9.5rem)/0.88 var(--display); letter-spacing: -0.065em; text-transform: uppercase; text-wrap: balance; text-shadow: 4px 4px 0 var(--yellow), 7px 7px 0 color-mix(in oklch, var(--red) 62%, transparent); }
          .title--long { max-width: 22ch; font-size: clamp(2.8rem, 6vw, 5.4rem); }
          .summary { max-width: 60ch; margin: var(--xl) 0 0; padding-top: var(--lg); border-top: 3px solid var(--ink); font-size: clamp(1.12rem, 1.6vw, 1.35rem); font-weight: 500; line-height: 1.58; color: var(--ink-soft); }
+         .summary > p { margin: 0; font-size: inherit; line-height: inherit; }
+         .summary > p + p { margin-top: var(--md); }
 
          article { display: grid; gap: var(--3xl); }
          section { display: grid; gap: var(--lg); max-width: 72ch; }
@@ -315,7 +320,7 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH;
                </div>
                <header data-page={String(Math.max(1, pageNumber)).padStart(2, '0')}>
                   <div class="eyebrow-row"><div class="eyebrow">Accessibility test toolkit</div>{activeSection ? <div class="context-chip">{activeSection.title}</div> : null}</div>
-                  <div><h1 class:list={{ 'title--long': isLongTitle }}>{title}</h1><p class="summary">{summary}</p></div>
+                  <div><h1 class:list={{ 'title--long': isLongTitle }}>{title}</h1><div class="summary" set:html={summary} /></div>
                </header>
                <article><slot /></article>
                {(previousLink || nextLink) ? (

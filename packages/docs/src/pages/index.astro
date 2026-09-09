@@ -3,212 +3,190 @@ import DocShell from '../layouts/doc-shell.astro';
 import { docsLinks } from '../lib/nav';
 
 const toc = [
-   { id: 'cli', label: 'The a1 CLI' },
-   { id: 'problem', label: 'The gap' },
-   { id: 'output', label: 'What a session returns' },
-   { id: 'next', label: 'Next' },
+   { id: 'components', label: 'Component testing' },
+   { id: 'audits', label: 'WCAG audits' },
+   { id: 'agents', label: 'AI agent automation' },
+   { id: 'targets', label: 'Execution targets' },
+   { id: 'next', label: 'Where to start' },
 ];
 ---
 
 <DocShell
-   title="Test accessibility from the terminal"
-   summary="a11ied is a command line tool, an MCP server, and a TypeScript library for accessibility testing. All three run axe against a page and drive VoiceOver, NVDA, or a simulated screen reader, then report both against WCAG."
+   title="Automated WCAG and screen reader testing"
+   summary="<p><strong>a11ied</strong> scripts <abbr title='Apple&apos;s built-in screen reader for macOS'><a href='https://support.apple.com/guide/voiceover/welcome/mac' target='_blank' rel='noreferrer'>VoiceOver</a></abbr>, <abbr title='NonVisual Desktop Access: the open-source screen reader for Windows'><a href='https://www.nvaccess.org/' target='_blank' rel='noreferrer'>NVDA</a></abbr>, and a fast simulated <abbr title='Assistive technology software that speaks on-screen text and UI controls to blind and low-vision users'>screen reader</abbr>. It runs <abbr title='Open-source automated accessibility testing engine for HTML and DOM structure from Deque Systems'><a href='https://github.com/dequelabs/axe-core' target='_blank' rel='noreferrer'>axe-core</a></abbr> scans and reports each failure with the <abbr title='Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility'><a href='https://www.w3.org/WAI/standards-guidelines/wcag/' target='_blank' rel='noreferrer'>WCAG</a></abbr> success criterion it violates.</p><p>Test components during development, audit routes in CI, and let AI coding agents check what a screen reader actually announces. Drive it from the <code>a1</code> CLI, your Vitest suite, or an MCP server.</p>"
    links={docsLinks}
    toc={toc}
 >
-   <div class="feature-block">
+   <section class="panel" id="components">
+      <div class="panel-head">
+         <p class="panel-kicker">Development</p>
+         <h2>Test components as you build</h2>
+      </div>
+      <p>
+         Static HTML linters check syntax, but cannot verify interactive behavior. When you
+         develop a combobox, modal, or form, <code>a11ied</code> lets you write standard test
+         assertions for keyboard focus, <abbr title="Accessible Rich Internet Applications: W3C specification of attributes that define accessible UI roles, states, and properties"><a href="https://www.w3.org/TR/wai-aria/" target="_blank" rel="noreferrer">ARIA</a></abbr> state,
+         and spoken announcements.
+      </p>
+      <pre><code>import {'{'} describe, it {'}'} from 'vitest';
+import {'{'} screenReader {'}'} from 'a11ied/test';
+
+describe('combobox component', () => {'{'}
+   it('announces active option and expanded state', async () => {'{'}
+      await using sr = await screenReader({'{'} url: 'http://localhost:3000/components/combobox' {'}'});
+
+      await sr.press('Tab');
+      await sr.expectSpoken('combobox, Select country, collapsed');
+
+      await sr.press('ArrowDown');
+      await sr.expectSpoken('combobox, Select country, expanded');
+      await sr.expectSpoken('option, Canada, 1 of 3');
+   {'}'});
+{'}'});</code></pre>
+      <p>
+         This verifies <strong><abbr title="WCAG 4.1.2: Name, Role, Value requires that UI components have accessible names, roles, and states"><a href="https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html" target="_blank" rel="noreferrer">WCAG 4.1.2 (Name, Role, Value)</a></abbr></strong> and <strong><abbr title="WCAG 2.4.3: Focus Order requires that interactive components receive focus in an order that preserves meaning and operability"><a href="https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html" target="_blank" rel="noreferrer">2.4.3 (Focus Order)</a></abbr></strong> in your normal Vitest or Jest suite. In-process tests
+         run against the simulated virtual screen reader in milliseconds, requiring zero extra
+         system setup.
+      </p>
+      <p>
+         Need to check expected keyboard chords or attributes for a custom widget? The CLI includes
+         built-in reference data from the <abbr title="W3C ARIA Authoring Practices Guide: official design patterns and keyboard interaction standards for custom web widgets"><a href="https://www.w3.org/WAI/ARIA/apg/" target="_blank" rel="noreferrer">W3C ARIA Authoring Practices Guide (APG)</a></abbr>:
+      </p>
+      <pre><code>a1 pattern combobox</code></pre>
+   </section>
+
+   <section class="panel" id="audits">
+      <div class="panel-head">
+         <p class="panel-kicker">Auditing</p>
+         <h2>Perform full-page WCAG audits</h2>
+      </div>
+      <p>
+         Run accessibility audits against rendered pages from your terminal or CI
+         pipeline. <code>a1 audit</code> executes <abbr title="Open-source automated accessibility testing engine for HTML and DOM structure from Deque Systems"><a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noreferrer">axe-core</a></abbr> against
+         the live DOM, maps every finding to numbered <abbr title="Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility"><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG</a></abbr> success
+         criteria, and prints actionable remediation guidance.
+      </p>
+      <pre><code>a1 audit http://localhost:3000/checkout --level AA</code></pre>
+      <pre data-label="OUTPUT"><code>&#10007; 2 problems to fix.
+
+1.1.1  Non-text Content  [A]
+  button[type="button"] > img
+  Fix: Provide an alt attribute or aria-label for the icon button.
+
+3.3.1  Error Identification  [A]
+  input#card-number
+  Fix: Reference the error message element using aria-describedby.</code></pre>
+      <p>
+         To understand which criteria apply to a given interface, run <code>a1 inspect</code>
+         (see <a href="/relevant-criteria">relevant criteria</a>). To inspect full criterion details,
+         techniques, and <a href="/test-methods">test methods</a> without leaving the terminal:
+      </p>
+      <pre><code>a1 wcag 3.3.1</code></pre>
+   </section>
+
+   <section class="field-note" id="agents">
+      <div class="panel-head">
+         <p class="panel-kicker">AI Agents</p>
+         <h2>Real screen reader automation for AI agents</h2>
+      </div>
+      <p>
+         Coding agents can write frontend markup, but they cannot wear headphones or listen to
+         screen reader speech. Without a feedback loop, agents introduce accessibility
+         regressions in dynamic components.
+      </p>
+      <p>
+         <code>a11ied</code> provides a local <abbr title="Model Context Protocol: open standard for connecting AI coding assistants to external tools"><a href="https://modelcontextprotocol.io/" target="_blank" rel="noreferrer">Model Context Protocol (MCP)</a></abbr> server
+         that gives Claude, Cursor, Windsurf, and other agents native tools to inspect accessibility
+         trees, drive <abbr title="Apple's built-in screen reader for macOS"><a href="https://support.apple.com/guide/voiceover/welcome/mac" target="_blank" rel="noreferrer">VoiceOver</a></abbr> or <abbr title="NonVisual Desktop Access: the open-source screen reader for Windows"><a href="https://www.nvaccess.org/" target="_blank" rel="noreferrer">NVDA</a></abbr>,
+         and verify fixes against <abbr title="Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility"><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG</a></abbr>.
+      </p>
+      <pre data-label="CONFIG"><code>{`{
+  "mcpServers": {
+    "a11ied": {
+      "command": "npx",
+      "args": ["-y", "a11ied", "mcp"]
+    }
+  }
+}`}</code></pre>
+      <p>
+         Once connected, an agent can verify interactive workflows autonomously:
+      </p>
+      <pre data-label="AI AGENT PROMPT"><code>Review the checkout dialog on http://localhost:3000/checkout.
+Start a screen reader session, open the modal, and verify:
+1. Focus moves to the first field inside the dialog.
+2. VoiceOver announces the dialog title and modal role upon opening.
+3. Pressing Escape closes the dialog and restores focus to the trigger.</code></pre>
+      <p>
+         The agent drives the screen reader, inspects the spoken phrase log, verifies WCAG
+         compliance, and adjusts the component before opening a pull request.
+      </p>
+   </section>
+
+   <section class="split panel" id="targets">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Architecture</p>
+            <h2>Execution targets: simulation vs. real OS</h2>
+         </div>
+         <p>
+            <code>a11ied</code> supports two target modes to balance testing speed with real-world
+            fidelity:
+         </p>
+         <div class="route-list">
+            <div class="route-row">
+               <strong>Virtual screen reader</strong>
+               <span>
+                  A fast, headless JavaScript implementation of screen reader navigation and ARIA
+                  computation. Runs in milliseconds in Node.js or Linux CI containers with zero
+                  system permissions. Ideal for unit tests, component tests, and pull request checks.
+               </span>
+            </div>
+            <div class="route-row">
+               <strong>VoiceOver & NVDA</strong>
+               <span>
+                  Real operating system assistive technologies driven via <abbr title="Open-source library for driving VoiceOver and NVDA with code"><a href="https://guidepup.dev/" target="_blank" rel="noreferrer">Guidepup</a></abbr>.
+                  Automates AppleScript control on macOS and accessibility APIs on Windows.
+                  Ideal for end-to-end integration tests, reproducing platform-specific quirks,
+                  and release verification. See the <a href="/screen-readers">screen readers guide</a>.
+               </span>
+            </div>
+         </div>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Environment check</div>
+         <p class="aside-note">
+            Run <code>a1 doctor</code> to check which browsers and screen readers are configured
+            and ready on your current machine.
+         </p>
+      </div>
+   </section>
+
+   <section class="feature-block" id="next">
+      <h2>Where to start</h2>
       <div class="feature-grid">
          <section class="feature-card">
-            <h2>Command line tool</h2>
-            <div class="feature-demo">
-               <code>npm install --global a11ied</code>
-            </div>
-            <p>
-               The <code>a1</code> binary runs scans, screen reader sessions, and WCAG lookups
-               from a terminal or a CI job.
-            </p>
-            <p class="feature-link"><a href="/reference/cli">CLI reference</a></p>
+            <h3>Quickstart</h3>
+            <p>Install the package, check your machine, and run your first virtual session in 2 minutes.</p>
+            <p class="feature-link"><a href="/quickstart">Get started</a></p>
          </section>
 
          <section class="feature-card">
-            <h2>MCP server</h2>
-            <div class="feature-demo">
-               <code>a1 mcp</code>
-            </div>
-            <p>
-               The same checks as MCP tools, so a coding agent can test the page it just
-               changed.
-            </p>
-            <p class="feature-link"><a href="/reference/mcp">MCP tools</a></p>
+            <h3>Component testing</h3>
+            <p>Learn how to write screen reader assertions in Vitest or Jest using <code>a11ied/test</code>.</p>
+            <p class="feature-link"><a href="/guides/testing">Testing guide</a></p>
          </section>
 
          <section class="feature-card">
-            <h2>TypeScript library</h2>
-            <div class="feature-demo">
-               <code>import {'{'} screenReader {'}'} from 'a11ied/test'</code>
-            </div>
-            <p>
-               Screen reader tests in Vitest or any other runner, with matchers for what the
-               reader announced.
-            </p>
-            <p class="feature-link"><a href="/reference/api">TypeScript API</a></p>
+            <h3>AI agent setup</h3>
+            <p>Connect the MCP server to Cursor, Claude, or Windsurf and start testing autonomously.</p>
+            <p class="feature-link"><a href="/guides/agents">Agent guide</a></p>
+         </section>
+
+         <section class="feature-card">
+            <h3>Interactive demo</h3>
+            <p>Practice auditing and fixing real accessibility violations on a sample team settings page.</p>
+            <p class="feature-link"><a href="/guides/demo">Practice on demo</a></p>
          </section>
       </div>
-      <p>All three call the same runtime, so a result means the same thing in each.</p>
-   </div>
-
-   <section class="feature-block" id="cli">
-      <h2>What can you do with the a1 CLI?</h2>
-      <div class="feature-grid feature-grid--wide">
-         <section class="feature-card">
-            <h3>Scan for violations</h3>
-            <div class="feature-demo">
-               <code>a1 audit /checkout</code>
-               <samp>&#10007; 2 problems to fix.</samp>
-               <samp>1.1.1  Non-text Content  [A]</samp>
-               <samp>4.1.2  Name, Role, Value  [A]</samp>
-            </div>
-            <p>
-               axe-core checks the rendered page for the failures a machine can see. Each
-               failure comes back under the WCAG requirement it breaks, with the elements to
-               fix.
-            </p>
-         </section>
-
-         <section class="feature-card">
-            <h3>Check the error is announced</h3>
-            <div class="feature-demo">
-               <code>a1 sr elements form-field</code>
-               <samp>1. textbox: Email  textbox, Email, required</samp>
-               <samp>2. textbox: Card number  textbox, Card number, invalid</samp>
-            </div>
-            <p>
-               The card field announces that it is invalid and never says why. Its error
-               message sits beside it on screen without being linked to it, so a screen reader
-               user hears nothing about it. The scan above says nothing either.
-            </p>
-         </section>
-
-         <section class="feature-card">
-            <h3>Walk the keyboard path</h3>
-            <div class="feature-demo">
-               <code>a1 sr press Tab --phrase</code>
-               <samp>textbox, Email, required</samp>
-            </div>
-            <p>
-               One phrase per keypress. Run it down the page and the focus order becomes a list
-               you can read: anything that never appears cannot be reached by keyboard.
-            </p>
-         </section>
-
-         <section class="feature-card">
-            <h3>Check a cell knows its column</h3>
-            <div class="feature-demo">
-               <code>a1 sr table column-header</code>
-               <samp>Phrase:  cell, $42.00</samp>
-               <samp>Header:  Price</samp>
-            </div>
-            <p>
-               Moving across a data table, a reader should hear the column header with each cell.
-               Without it, $42.00 arrives with nothing to attach it to.
-            </p>
-         </section>
-
-         <section class="feature-card">
-            <h3>Stop a regression in CI</h3>
-            <div class="feature-demo">
-               <code>a1 sr expect "button, Help"</code>
-               <samp>Matched:   nothing</samp>
-               <samp>Result:    fail</samp>
-            </div>
-            <p>
-               The icon button should announce as button, Help, and it does not. The command
-               exits 4, so a CI run stops here until someone labels it.
-            </p>
-         </section>
-
-         <section class="feature-card">
-            <h3>Look up what a failure means</h3>
-            <div class="feature-demo">
-               <code>a1 wcag rule button-name</code>
-               <samp>Criteria (1)</samp>
-               <samp>  4.1.2  Name, Role, Value  [A]</samp>
-            </div>
-            <p>
-               Map any axe rule to the requirement it breaks, then read that criterion in full
-               with the W3C guidance, without leaving the terminal.
-            </p>
-         </section>
-      </div>
-      <p>
-         There is more than this. <code>a1 tree</code> prints the accessibility tree,
-         <code>a1 doctor</code> checks the machine, <code>a1 sr batch</code> runs a scripted
-         flow over one session, and <code>a1 sr screenshot</code> captures what the VoiceOver
-         cursor is on. The <a href="/reference/cli">CLI reference</a> lists every command, and
-         <code>a1 --help</code> prints them in the terminal.
-      </p>
-   </section>
-
-   <section class="ledger" id="problem">
-      <h2>The gap</h2>
-      <p>
-         Accessibility work is measured against the <a
-            href="https://www.w3.org/WAI/standards-guidelines/wcag/">Web Content Accessibility
-         Guidelines (WCAG)</a>, a published standard of numbered requirements called success
-         criteria.
-      </p>
-      <p>
-         <a href="https://github.com/dequelabs/axe-core">axe-core</a>, the engine behind most
-         accessibility scans, reads the rendered HTML and reports what it finds there. That
-         settles part of the standard.
-      </p>
-      <p>
-         The rest need a person. Whether a form announces its error, whether focus lands
-         somewhere sensible, whether a dialog traps the reader: none of that is visible in the
-         HTML. Answering it means opening <a
-            href="https://support.apple.com/guide/voiceover/welcome/mac">VoiceOver</a> or <a
-            href="https://www.nvaccess.org/">NVDA</a> and listening, which is slow enough that
-         most teams skip it.
-      </p>
-      <p>
-         a11ied scripts that half. It starts a screen reader, moves through a page, and returns
-         what was said as text you can read, diff, and assert on.
-      </p>
-   </section>
-
-   <section class="ledger" id="output">
-      <h2>What a session returns</h2>
-      <pre><code>a1 sr walk https://example.com/checkout</code></pre>
-      <pre data-label="OUTPUT"><code>"spokenPhraseLog": [
-  "document",
-  "heading, Checkout, level 1",
-  "form",
-  "Email",
-  "textbox, Email, required",
-  "Card number",
-  "textbox, Card number",
-  "button, Pay now",
-  "button",
-  "end of form",
-  "end of document"
-]</code></pre>
-      <p>
-         That is the order a screen reader user hears the page in. The email field announces its
-         required state and the card field does not, and the last button has no name at all, so
-         it is announced as "button" and nobody can tell what it does.
-      </p>
-      <p>
-         Because it is text, a test can assert on it. The <a href="/guides/testing">testing
-         guide</a> covers writing those assertions.
-      </p>
-   </section>
-
-   <section class="field-note" id="next">
-      <h2>Next</h2>
-      <p>
-         The <a href="/quickstart">quickstart</a> installs a11ied and takes one page from an axe
-         run to a screen reader transcript. It runs on the simulated screen reader, so it needs
-         nothing else installed.
-      </p>
    </section>
 </DocShell>
