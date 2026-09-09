@@ -26,7 +26,7 @@ declare module 'vitest' {
          options?: Pick<SpokenOptions, 'since'>,
       ): T;
       /** Passes when the item under the cursor has the role, the name, or both. */
-      toBeOn(wanted: WantedItem): T;
+      toHaveCursorOn(wanted: WantedItem): T;
    }
 }
 

@@ -26,16 +26,19 @@ import { listWcagCriteria, runAxe, startDriverSession } from 'a11ied';
 ```
 
 Drive a screen reader from a test. `a11ied/test` works under any runner, and `a11ied/vitest`
-adds `toHaveSpoken`, `toHaveSpokenInOrder`, and `toBeOn` matchers plus a `test` whose `sr`
-fixture is a queued screen reader, so a test writes no `await` until it needs a value:
+adds `toHaveSpoken`, `toHaveSpokenInOrder`, and `toHaveCursorOn` matchers plus a `test`
+whose `sr` fixture is a queued screen reader, so a test writes no `await` until it needs a
+value. Commands and checks chain, and a check waits up to five seconds for its phrase:
 
 ```js
 import { queuedScreenReader } from 'a11ied/test';
 
 await using sr = await queuedScreenReader({ url: 'http://localhost:3000/checkout' });
 
-sr.goTo({ role: 'button', name: 'Pay' });
-sr.expectSpoken('button, Pay');
+sr.goTo({ role: 'button', name: 'Pay' })
+   .press('Enter')
+   .expect.spoken('dialog, Confirm payment')
+   .and.cursorOn({ role: 'button', name: 'Confirm' });
 ```
 
 ## workspaces

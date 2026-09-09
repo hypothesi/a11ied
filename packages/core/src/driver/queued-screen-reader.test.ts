@@ -40,7 +40,7 @@ const PUBLIC_METHODS = [
    'checkpoint',
    'elements',
    'escape',
-   'expectOn',
+   'expectCursorOn',
    'expectSpoken',
    'expectSpokenInOrder',
    'find',
@@ -89,7 +89,7 @@ describe('queuedScreenReader', () => {
          sr.checkpoint('after heading');
          sr.next('button');
          sr.expectSpoken('Pay now', { since: 'after heading' });
-         sr.expectOn({ role: 'button', name: 'Pay now' });
+         sr.expectCursorOn({ role: 'button', name: 'Pay now' });
          sr.expectSpokenInOrder(['Checkout', 'Pay now']);
 
          expect(await sr.read()).toMatchObject({ role: 'button', name: 'Pay now' });
@@ -205,6 +205,41 @@ describe('queueScreenReader', () => {
          await sr.stop();
 
          await expect(settled[0]).rejects.toBeInstanceOf(ScreenReaderAssertionError);
+      },
+      TIMEOUT_MS,
+   );
+});
+
+describe('queuedScreenReader chains', () => {
+   it(
+      'queues each command and check in the chain behind the one before it',
+      async () => {
+         await using sr = await queuedScreenReader({ html: CHECKOUT_HTML });
+
+         sr.next('heading')
+            .expect.spoken('Checkout')
+            .and.cursorOn({ role: 'heading', name: 'Checkout' })
+            .next('button')
+            .expect.cursorOn({ role: 'button', name: 'Pay now' });
+         const phrase = await sr.top().next('heading');
+
+         expect(phrase).toBe('heading, Checkout, level 1');
+         expect(sr.expect).toBe(sr.next('heading').expect);
+      },
+      TIMEOUT_MS,
+   );
+
+   it(
+      'rejects the await on a failed check in the chain',
+      async () => {
+         await using sr = await queuedScreenReader({ html: CHECKOUT_HTML });
+
+         const failure = await failureOf(
+            sr.next('heading').expect.cursorOn({ role: 'button' }, { timeoutMs: 0 }),
+         );
+
+         expect(failure).toBeInstanceOf(ScreenReaderAssertionError);
+         expect(await sr.next('button')).toBe('button, Pay now');
       },
       TIMEOUT_MS,
    );

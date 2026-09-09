@@ -69,9 +69,9 @@ Feature: Queued screen reader commands in tests
     When it calls sr.next without await
     Then the command runs against the mounted page
 
-  Scenario: expectOn checks the item under the cursor
+  Scenario: expectCursorOn checks the item under the cursor
     Given the cursor is on a button named "Create account"
-    When the test calls expectOn with role "link"
+    When the test calls expectCursorOn with role "link"
     Then a ScreenReaderAssertionError is thrown
     And its expected value is "link"
 
@@ -84,5 +84,22 @@ Feature: Queued screen reader commands in tests
   Scenario: The docs describe the queued style
     Given a reader opens the testing guide, the API reference, or the README
     When they look for how to write a test without await
-    Then they find queuedScreenReader, the queued sr fixture, expectOn, and expectSpokenInOrder
+    Then they find queuedScreenReader, the queued sr fixture, expectCursorOn, and expectSpokenInOrder
     And the Vitest 4 requirement
+
+  Scenario: Commands and checks chain
+    Given a queued reader on the checkout page
+    When the test writes sr.next('heading').expect.spoken('Checkout').and.cursorOn({ role: 'heading' }).next('button')
+    Then each command and check runs in that order, behind the one before it
+    And awaiting the chain gives the last command's value
+
+  Scenario: A check waits for its phrase
+    Given a check for a phrase the reader has not said
+    When the reader says it before the check's timeoutMs runs out
+    Then the check passes
+    And a check with not, or with timeoutMs 0, reads the transcript once
+
+  Scenario: A failed check says how long it waited
+    Given a check for a phrase the reader never says, with timeoutMs 300
+    When the time runs out
+    Then a ScreenReaderAssertionError is thrown whose message ends with "Waited 300 ms."

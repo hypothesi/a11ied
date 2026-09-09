@@ -12,6 +12,7 @@ import {
 } from '@a11ied/contracts';
 
 import type { BrokerRequest, BrokerResponse } from './broker-types.js';
+import { delay } from './delay.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
 
 const VIRTUAL_SOCKET_TIMEOUT_MS = 2000;
@@ -27,12 +28,6 @@ const DEFAULT_BROKER_READY_TIMEOUT_MS = 15_000;
 const REAL_TARGET_BROKER_READY_TIMEOUT_MS = 15_000;
 /** Extra time the reply gets on top of a caller-supplied command timeout. */
 const BROKER_RESPONSE_GRACE_MS = 6000;
-
-function delay(ms: number): Promise<void> {
-   return new Promise((resolvePromise) => {
-      setTimeout(resolvePromise, ms);
-   });
-}
 
 function isBrokerResponse(value: unknown): value is BrokerResponse {
    return typeof value === 'object' && value !== null && 'ok' in value;

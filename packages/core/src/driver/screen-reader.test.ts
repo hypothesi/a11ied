@@ -118,9 +118,11 @@ async function assertCursorAndOrderChecks(): Promise<void> {
    await sr.next('heading');
    await sr.next('button');
 
-   await sr.expectOn({ role: 'button', name: 'Create account' });
+   await sr.expectCursorOn({ role: 'button', name: 'Create account' });
    await sr.expectSpokenInOrder(['Sign up', 'Create account']);
-   const onFailure = await sr.expectOn({ role: 'link' }).catch((error: unknown) => error),
+   const onFailure = await sr
+         .expectCursorOn({ role: 'link' })
+         .catch((error: unknown) => error),
       orderFailure = await sr
          .expectSpokenInOrder(['Create account', 'Sign up'])
          .catch((error: unknown) => error);
@@ -222,6 +224,54 @@ describe('screenReader with the broker', () => {
    it(
       'stops the session on disposal and leaves no broker process behind',
       () => withStateDir(tempRoots, assertBrokerDisposalLeavesNoProcess),
+      TIMEOUT_MS,
+   );
+});
+
+describe('checks that wait', () => {
+   const SHORT_TIMEOUT_MS = 300;
+   const LONG_ENOUGH_MS = 2000;
+
+   it(
+      'passes when the announcement lands while the check is waiting',
+      async () => {
+         await using sr = await screenReader({ html: SIGN_UP_HTML });
+
+         const waiting = sr.expectSpoken('Create account');
+         await sr.next('button');
+
+         await expect(waiting).resolves.toBeUndefined();
+      },
+      TIMEOUT_MS,
+   );
+
+   it(
+      'says how long it waited when the phrase never lands',
+      async () => {
+         await using sr = await screenReader({ html: SIGN_UP_HTML });
+         const started = Date.now();
+
+         await expect(
+            sr.expectSpoken('Refund', { timeoutMs: SHORT_TIMEOUT_MS }),
+         ).rejects.toThrow(`Waited ${String(SHORT_TIMEOUT_MS)} ms.`);
+         expect(Date.now() - started).toBeGreaterThanOrEqual(SHORT_TIMEOUT_MS);
+      },
+      TIMEOUT_MS,
+   );
+
+   it(
+      'does not wait for a phrase that must be absent, or when told to check once',
+      async () => {
+         await using sr = await screenReader({ html: SIGN_UP_HTML });
+         const started = Date.now();
+
+         await sr.expectSpoken('Refund', { not: true });
+         await expect(sr.expectSpoken('Refund', { timeoutMs: 0 })).rejects.toThrow(
+            ScreenReaderAssertionError,
+         );
+
+         expect(Date.now() - started).toBeLessThan(LONG_ENOUGH_MS);
+      },
       TIMEOUT_MS,
    );
 });

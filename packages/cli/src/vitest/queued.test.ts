@@ -79,7 +79,7 @@ describe('the queued sr fixture', () => {
          sr.next('heading');
          sr.expectSpoken('Checkout');
          sr.next('button');
-         sr.expectOn({ role: 'button', name: 'Pay now' });
+         sr.expectCursorOn({ role: 'button', name: 'Pay now' });
          sr.expectSpokenInOrder(['Checkout', 'Pay now']);
       },
       TEST_TIMEOUT_MEDIUM,
@@ -103,7 +103,7 @@ describe('the queued sr fixture', () => {
          await sr.next('heading');
 
          await expect(sr).toHaveSpoken('Checkout');
-         await expect(sr).toBeOn({ role: 'heading', name: 'Checkout' });
+         await expect(sr).toHaveCursorOn({ role: 'heading', name: 'Checkout' });
          expect(sr.session.engine).toBe('jsdom');
       },
       TEST_TIMEOUT_MEDIUM,

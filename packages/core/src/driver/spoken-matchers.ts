@@ -12,10 +12,19 @@ import { selectTranscriptEntries } from './transcript-recorder.js';
 /** What `expectSpoken` and the matchers compare against: text without case, or a pattern. */
 export type SpokenMatch = string | RegExp;
 
-export interface SpokenOptions {
+/** How long a check keeps looking before it fails. */
+export interface RetryOptions {
+   /**
+    * How long the check keeps reading the reader again, in milliseconds, before it fails.
+    * Defaults to 5000. Pass 0 to check once.
+    */
+   timeoutMs?: number | undefined;
+}
+
+export interface SpokenOptions extends RetryOptions {
    /** Only phrases after the last checkpoint with this label count. */
    since?: string | undefined;
-   /** Pass when nothing matches instead of when something does. */
+   /** Pass when nothing matches instead of when something does. A `not` check never waits. */
    not?: boolean | undefined;
 }
 

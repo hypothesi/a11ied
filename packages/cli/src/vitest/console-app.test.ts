@@ -107,7 +107,7 @@ describe('signing in to the console', () => {
             'heading, Ticket queue, level 1',
             'polite: Ticket queue view',
          ]);
-         await expect(sr).toBeOn({ name: 'Ticket queue view' });
+         await expect(sr).toHaveCursorOn({ name: 'Ticket queue view' });
       },
       TIMEOUT_MS,
    );
@@ -181,7 +181,7 @@ describe('replying to a ticket', () => {
          await sr.checkpoint('escalate');
          await sr.activate();
 
-         await expect(sr).toBeOn({ role: 'button', name: 'Escalate' });
+         await expect(sr).toHaveCursorOn({ role: 'button', name: 'Escalate' });
          await expect(sr).not.toHaveSpoken(/escalate ticket/iu, { since: 'escalate' });
       },
       TIMEOUT_MS,
@@ -219,7 +219,7 @@ describe('saving the profile', () => {
 
          await sr.goTo({ role: 'button', name: 'Save profile' });
          await sr.activate();
-         await expect(sr).toBeOn({ role: 'textbox', name: 'Display name' });
+         await expect(sr).toHaveCursorOn({ role: 'textbox', name: 'Display name' });
          expect(await sr.read()).toMatchObject({ states: ['required', 'invalid'] });
 
          await sr.type('Dana Whitfield');

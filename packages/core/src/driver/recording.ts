@@ -1,5 +1,6 @@
 import { access } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
+import { delay } from './delay.js';
 
 import {
    sessionRecordingSchema,
@@ -106,12 +107,6 @@ function createStopRecording(
       return createMacOSStopRecording(absolutePath);
    }
    return windowsRecord(absolutePath);
-}
-
-function delay(ms: number): Promise<void> {
-   return new Promise((resolvePromise) => {
-      setTimeout(resolvePromise, ms);
-   });
 }
 
 async function fileExists(path: string): Promise<boolean> {

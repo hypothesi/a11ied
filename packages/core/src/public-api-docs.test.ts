@@ -123,6 +123,14 @@ const publicApiExpectations: PublicApiExpectation[] = [
       functions: ['queueScreenReader'],
    },
    {
+      file: 'packages/core/src/driver/retry-check.ts',
+      functions: ['checkUntil', 'assertSpoken', 'assertSpokenInOrder', 'assertCursorOn'],
+   },
+   {
+      file: 'packages/core/src/driver/delay.ts',
+      functions: ['delay'],
+   },
+   {
       file: 'packages/core/src/driver/screen-reader.ts',
       classes: ['ScreenReader'],
    },

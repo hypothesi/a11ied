@@ -10,6 +10,7 @@ import type {
 } from '@a11ied/contracts';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
 import type { WantedItem } from './broker-loops.js';
+import { assertCursorOn, assertSpoken, assertSpokenInOrder } from './retry-check.js';
 import { ScreenReaderAssertionError } from './screen-reader-errors.js';
 import {
    buildWaitPayload,
@@ -32,14 +33,7 @@ import type {
    ScreenReaderStep,
    ScreenReaderTransport,
 } from './screen-reader-transport.js';
-import {
-   assertCheckPassed,
-   checkCurrentItem,
-   checkSpoken,
-   checkSpokenInOrder,
-   type SpokenMatch,
-   type SpokenOptions,
-} from './spoken-matchers.js';
+import type { RetryOptions, SpokenMatch, SpokenOptions } from './spoken-matchers.js';
 import {
    selectTranscriptEntries,
    type TranscriptSelection,
@@ -300,39 +294,30 @@ export class ScreenReader implements AsyncDisposable {
    }
 
    /**
-    * Checks the transcript for a phrase and throws when the check fails. The error says
-    * what was expected, how many phrases were checked, and what the reader said.
+    * Checks the transcript for a phrase, reading again until it passes or `timeoutMs`
+    * runs out, and throws when it fails: what was expected, and what the reader said.
     */
    async expectSpoken(match: SpokenMatch, options: SpokenOptions = {}): Promise<void> {
-      const check = checkSpoken(await this.transcript(), match, options);
-      assertCheckPassed(check, describeMatch(match));
+      await assertSpoken(() => this.transcript(), match, options);
    }
 
    /**
-    * Checks that the item under the cursor has the role, the name, or both, and throws
-    * when it does not. The error says which item the cursor is on.
+    * Checks that the item under the cursor has the role, the name, or both, reading again
+    * until it does or `timeoutMs` runs out. The error says which item the cursor is on.
     */
-   async expectOn(wanted: WantedItem): Promise<void> {
-      assertCheckPassed(
-         checkCurrentItem(await this.read(), wanted),
-         describeWanted(wanted),
-      );
+   async expectCursorOn(wanted: WantedItem, options: RetryOptions = {}): Promise<void> {
+      await assertCursorOn(() => this.read(), wanted, options);
    }
 
    /**
-    * Checks that each match was announced after the previous one, with any phrases
-    * between, and throws when one is missing. The error says which match it did not
-    * find.
+    * Checks that each match was announced after the previous one, reading again until
+    * they were or `timeoutMs` runs out. The error says which match it did not find.
     */
    async expectSpokenInOrder(
       matches: readonly SpokenMatch[],
-      options: Pick<SpokenOptions, 'since'> = {},
+      options: Pick<SpokenOptions, 'since' | 'timeoutMs'> = {},
    ): Promise<void> {
-      const check = checkSpokenInOrder(await this.transcript(), matches, options);
-      assertCheckPassed(
-         check,
-         matches.map((match) => describeMatch(match)).join(', then '),
-      );
+      await assertSpokenInOrder(() => this.transcript(), matches, options);
    }
 
    /** Stops the reader and releases its browser or broker. Safe to call twice. */

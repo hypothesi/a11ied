@@ -283,6 +283,10 @@ export {
 } from './driver/command-queue.js';
 export {
    queueScreenReader,
+   type QueuedAssertion,
+   type QueuedChain,
+   type QueuedCommands,
+   type QueuedExpectations,
    type QueuedScreenReader,
 } from './driver/queued-screen-reader.js';
 export {
@@ -307,6 +311,7 @@ export {
    checkSpokenInOrder,
    type SpokenCheck,
    type SpokenMatch,
+   type RetryOptions,
    type SpokenOptions,
 } from './driver/spoken-matchers.js';
 export { matchesItem, type WantedItem } from './driver/broker-loops.js';

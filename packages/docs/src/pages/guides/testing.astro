@@ -121,7 +121,7 @@ const item = await sr.read();</code></pre>
 await sr.activate();
 await sr.expectSpoken('dialog, Preferences', {'{'} since: 'opened' {'}'});
 await sr.expectSpoken(/error/iu, {'{'} not: true {'}'});
-await sr.expectOn({'{'} role: 'textbox', name: 'Nickname' {'}'});
+await sr.expectCursorOn({'{'} role: 'textbox', name: 'Nickname' {'}'});
 await sr.expectSpokenInOrder(['dialog, Preferences', 'textbox, Nickname'], {'{'} since: 'opened' {'}'});</code></pre>
       <p>
          <code>expectSpoken</code> takes text, matched without regard to case, or a
@@ -141,12 +141,18 @@ The reader said:
          <code>process.exitCode</code> from it.
       </p>
       <p>
-         <code>expectOn({'{'} role, name {'}'})</code> throws when the element under the cursor does not have
+         <code>expectCursorOn({'{'} role, name {'}'})</code> throws when the element under the cursor does not have
          the role or the name given. The message says which element the cursor is on, the same
-         text the <code>toBeOn</code> matcher prints. <code>expectSpokenInOrder([a, b, c], {'{'} since {'}'})</code>
+         text the <code>toHaveCursorOn</code> matcher prints. <code>expectSpokenInOrder([a, b, c], {'{'} since {'}'})</code>
          throws when a match is not found after the previous one, with the same text the
          <code>toHaveSpokenInOrder</code> matcher prints. Both throw
          <code>ScreenReaderAssertionError</code>.
+      </p>
+      <p>
+         Each check waits. It reads the reader again every 100 ms until it passes or
+         <code>timeoutMs</code> runs out, 5000 ms by default, so an announcement that lands a
+         moment after the key that caused it still counts. Pass <code>timeoutMs: 0</code> to
+         check once. A check with <code>not</code> never waits.
       </p>
    </section>
 

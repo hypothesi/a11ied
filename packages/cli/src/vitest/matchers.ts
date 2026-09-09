@@ -21,7 +21,7 @@ export type SpokenReceived =
    | readonly DriverTranscriptEntry[]
    | readonly string[];
 
-/** What `toBeOn` accepts: a reader, or an item `sr.read()` returned. */
+/** What `toHaveCursorOn` accepts: a reader, or an item `sr.read()` returned. */
 export type ItemReceived = AnyScreenReader | DriverCurrentItem;
 
 /** The shape Vitest's `expect.extend` takes back from a matcher. */
@@ -77,8 +77,8 @@ function toOutcome(check: SpokenCheck): MatcherOutcome {
 
 /**
  * The matchers `expect.extend` installs: `toHaveSpoken`, `toHaveSpokenInOrder`, and
- * `toBeOn`. Given a reader they read its transcript first, so they return a promise and
- * must be awaited; given entries, phrases, or an item they answer at once.
+ * `toHaveCursorOn`. Given a reader they read its transcript first, so they return a
+ * promise and must be awaited; given entries, phrases, or an item they answer at once.
  */
 export const screenReaderMatchers = {
    toHaveSpoken(
@@ -105,7 +105,7 @@ export const screenReaderMatchers = {
       }
       return toOutcome(checkSpokenInOrder(toEntries(received), matches, options));
    },
-   toBeOn(
+   toHaveCursorOn(
       received: ItemReceived,
       wanted: WantedItem,
    ): MatcherOutcome | Promise<MatcherOutcome> {

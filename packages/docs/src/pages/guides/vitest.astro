@@ -71,6 +71,25 @@ const checkout = test.extend({'{'}
          it, then that call, and gives its value.
       </p>
       <p>
+         Each call returns a chain with every method on it, so commands and checks may follow
+         one another with dots. <code>expect</code> starts a check, and <code>and</code> adds
+         another. The chain checks what <code>expectSpoken</code>,
+         <code>expectSpokenInOrder</code>, and <code>expectCursorOn</code> check, under the
+         names <code>spoken</code>, <code>spokenInOrder</code>, and <code>cursorOn</code>.
+      </p>
+      <pre><code>sr.goTo({'{'} role: 'button', name: 'Is it unstyled?' {'}'})
+   .checkpoint('enter')
+   .press('Enter')
+   .expect.spoken(/expanded$/u, {'{'} since: 'enter' {'}'})
+   .and.cursorOn({'{'} role: 'button', name: 'Is it unstyled?' {'}'});</code></pre>
+      <p>
+         A check waits. It reads the reader again every 100 ms until it passes or
+         <code>timeoutMs</code> runs out, 5000 ms by default, so an announcement or a focus move
+         that lands a moment after the key that caused it still counts, and a test needs no pause
+         before it. Pass <code>timeoutMs: 0</code> to check once. A check with <code>not</code>
+         never waits: absence now is its answer. A failure after waiting says how long it waited.
+      </p>
+      <p>
          Await a call the test expects to fail, such as
          <code>await expect(sr.expectSpoken('Refund')).rejects.toThrow('Refund');</code>. The
          rejection goes to that await and the queue runs the next command.
@@ -128,15 +147,16 @@ The reader said:
       <div class="route-list">
          <div class="route-row"><code>toHaveSpoken(match, {'{'} since, not {'}'})</code><span>An announcement matches. The failure message is the one <code>expectSpoken</code> throws.</span></div>
          <div class="route-row"><code>toHaveSpokenInOrder([a, b, c])</code><span>Each match is found after the previous one, with any announcements between. The failure says which match it did not find and which announcement it looked for after.</span></div>
-         <div class="route-row"><code>toBeOn({'{'} role, name {'}'})</code><span>The element under the cursor has the role, the name, or both. The failure says which element the cursor is on.</span></div>
+         <div class="route-row"><code>toHaveCursorOn({'{'} role, name {'}'})</code><span>The element under the cursor has the role, the name, or both. The failure says which element the cursor is on.</span></div>
       </div>
       <p>
          Given a <code>ScreenReader</code> or a <code>QueuedScreenReader</code>, each matcher
          reads the transcript first, so it returns a promise: await it. Given an array of
          announcements, transcript entries, or the element <code>read()</code> returned, it
-         answers at once. The reader methods <code>expectSpoken</code>, <code>expectOn</code>,
-         and <code>expectSpokenInOrder</code> check the same things without an
-         <code>await</code>.
+         answers at once. The matchers check once. The reader methods
+         <code>expectSpoken</code>, <code>expectCursorOn</code>, and
+         <code>expectSpokenInOrder</code> check the same things without an <code>await</code>,
+         and wait for them.
       </p>
       <p>
          For an announcement the page makes later, pass the transcript to
@@ -213,7 +233,7 @@ test('announces the price', ({'{'} sr {'}'}) => {'{'}
    render(&lt;PayButton amount="12.00" /&gt;);
 
    sr.next('button');
-   sr.expectOn({'{'} role: 'button', name: 'Pay 12.00' {'}'});
+   sr.expectCursorOn({'{'} role: 'button', name: 'Pay 12.00' {'}'});
 {'}'});</code></pre>
       <p>
          The exported <code>test</code> provides an <code>sr</code> fixture over the document

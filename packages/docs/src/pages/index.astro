@@ -37,12 +37,11 @@ const combobox = test.extend({'{'}
 
 describe('combobox component', () => {'{'}
    combobox('announces active option and expanded state', ({'{'} sr {'}'}) => {'{'}
-      sr.press('Tab');
-      sr.expectSpoken('combobox, Select country, collapsed');
-
-      sr.press('ArrowDown');
-      sr.expectSpoken('combobox, Select country, expanded');
-      sr.expectSpoken('option, Canada, 1 of 3');
+      sr.press('Tab')
+         .expect.spoken('combobox, Select country, collapsed')
+         .press('ArrowDown')
+         .expect.spoken('combobox, Select country, expanded')
+         .and.spoken('option, Canada, 1 of 3');
    {'}'});
 {'}'});</code></pre>
       <p>

@@ -71,7 +71,7 @@ describe('a document whose heading outline skips levels', () => {
          await sr.goTo({ role: 'heading', name: 'Version 4.1' });
          expect(await sr.next('heading')).toBe('heading, level 3');
          expect(await sr.read()).toMatchObject({ role: 'heading', level: 3 });
-         expect(await sr.read()).toBeOn({ role: 'heading' });
+         expect(await sr.read()).toHaveCursorOn({ role: 'heading' });
       },
       TIMEOUT_MS,
    );
@@ -184,8 +184,8 @@ describe('ARIA widgets built with and without their state attributes', () => {
          ).toEqual(['textbox', 'textbox, Report title']);
 
          await sr.goTo({ role: 'textbox', name: 'Report title' });
-         await expect(sr).toBeOn({ role: 'textbox', name: 'Report title' });
-         await expect(sr).not.toBeOn({ role: 'button' });
+         await expect(sr).toHaveCursorOn({ role: 'textbox', name: 'Report title' });
+         await expect(sr).not.toHaveCursorOn({ role: 'button' });
       },
       TIMEOUT_MS,
    );

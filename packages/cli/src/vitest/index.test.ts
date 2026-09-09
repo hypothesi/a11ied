@@ -100,21 +100,21 @@ describe('toHaveSpokenInOrder', () => {
    );
 });
 
-describe('toBeOn', () => {
+describe('toHaveCursorOn', () => {
    checkout(
       'checks the item under the cursor',
       async ({ sr }) => {
          await sr.goTo({ role: 'button', name: 'Pay now' });
 
-         await expect(sr).toBeOn({ role: 'button', name: 'Pay now' });
-         await expect(sr).toBeOn({ role: 'button' });
-         await expect(sr).not.toBeOn({ role: 'heading' });
+         await expect(sr).toHaveCursorOn({ role: 'button', name: 'Pay now' });
+         await expect(sr).toHaveCursorOn({ role: 'button' });
+         await expect(sr).not.toHaveCursorOn({ role: 'heading' });
          await expect(
-            expect(sr).toBeOn({ role: 'link', name: 'Pay now' }),
+            expect(sr).toHaveCursorOn({ role: 'link', name: 'Pay now' }),
          ).rejects.toThrow(
             'Expected the cursor to be on role "link" and name "Pay now", but it is on button named "Pay now" (phrase: "button, Pay now").',
          );
-         expect(await sr.read()).toBeOn({ name: 'pay now' });
+         expect(await sr.read()).toHaveCursorOn({ name: 'pay now' });
       },
       TIMEOUT_MS,
    );

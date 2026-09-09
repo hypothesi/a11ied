@@ -93,7 +93,7 @@ describe('two dialogs opened from the same page', () => {
          await sr.goTo({ role: 'button', name: 'Rename workspace' });
          await sr.activate();
 
-         await expect(sr).toBeOn({ role: 'button', name: 'Rename workspace' });
+         await expect(sr).toHaveCursorOn({ role: 'button', name: 'Rename workspace' });
          expect(await sr.press('Tab')).toBe('button, Transfer workspace');
       },
       TIMEOUT_MS,
@@ -107,7 +107,7 @@ describe('two dialogs opened from the same page', () => {
          await sr.goTo({ role: 'button', name: 'Transfer workspace' });
          await sr.activate();
 
-         await expect(sr).toBeOn({ role: 'textbox', name: 'New owner' });
+         await expect(sr).toHaveCursorOn({ role: 'textbox', name: 'New owner' });
          expect(await sr.press('Tab')).toBe('button, Cancel');
       },
       TIMEOUT_MS,

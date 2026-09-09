@@ -85,7 +85,7 @@ function createPageHost(options: BrowserScreenReaderOptions): VirtualHost {
  * @example
  *    await using sr = await screenReader({ container: screen.container });
  *    await sr.next('button');
- *    await expect(sr).toBeOn({ role: 'button', name: 'Pay' });
+ *    await expect(sr).toHaveCursorOn({ role: 'button', name: 'Pay' });
  */
 export async function screenReader(
    options: BrowserScreenReaderOptions = {},

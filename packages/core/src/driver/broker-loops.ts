@@ -180,7 +180,7 @@ function normalizeWords(value: string): string {
       .trim();
 }
 
-/** What goto and the toBeOn matcher look for: a role, a name, or both. */
+/** What goto and the toHaveCursorOn matcher look for: a role, a name, or both. */
 export interface WantedItem {
    role?: string | undefined;
    name?: string | undefined;

@@ -43,7 +43,7 @@ export interface ScreenReaderFixtures {
  *    test('the pay button is announced', ({ sr }) => {
  *       sr.open('http://localhost:3000/checkout');
  *       sr.goTo({ role: 'button', name: 'Pay' });
- *       sr.expectOn({ role: 'button', name: 'Pay' });
+ *       sr.expectCursorOn({ role: 'button', name: 'Pay' });
  *    });
  */
 export const test = base.extend<ScreenReaderFixtures>({

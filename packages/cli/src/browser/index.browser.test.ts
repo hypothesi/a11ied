@@ -36,7 +36,7 @@ describe('screenReader in the browser', () => {
       await sr.activate();
 
       await expect(sr).toHaveSpoken('Payment sent', { since: 'paying' });
-      await expect(sr).toBeOn({ role: 'button', name: 'Pay now' });
+      await expect(sr).toHaveCursorOn({ role: 'button', name: 'Pay now' });
    });
 
    it('refuses open() because the page is the test page', async () => {
