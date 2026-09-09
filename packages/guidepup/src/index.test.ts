@@ -134,4 +134,10 @@ describe('guidepup driver setup and keys', () => {
       expect(normalizeDriverKeys('NVDA+N', 'nvda')).toBe('Insert+N');
       expect(normalizeDriverKeys('Nvda+NumPad5', 'nvda')).toBe('Insert+NumPad5');
    });
+
+   it('sends the space bar to the virtual reader as the character it types', () => {
+      expect(normalizeDriverKeys('Space', 'virtual')).toBe(' ');
+      expect(normalizeDriverKeys('Shift+Spacebar', 'virtual')).toBe('Shift+ ');
+      expect(normalizeDriverKeys('Space', 'voiceover')).toBe('Space');
+   });
 });

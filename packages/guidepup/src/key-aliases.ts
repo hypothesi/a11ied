@@ -7,7 +7,21 @@ const commonKeyAliases: Record<string, string[]> = {
    UpArrow: ['ArrowUp'],
 };
 
+/**
+ * The virtual reader presses keys through user-event, which knows the space bar only by
+ * the character it types. `Space` and `Spacebar` are what the key help documents.
+ */
+function expandVirtualAlias(token: string): string[] | undefined {
+   if (token === 'Space' || token === 'Spacebar') {
+      return [' '];
+   }
+   return undefined;
+}
+
 function expandDriverAlias(token: string, target: Platform): string[] | undefined {
+   if (target === 'virtual') {
+      return expandVirtualAlias(token);
+   }
    if (target === 'voiceover' && token === 'VO') {
       return ['Control', 'Option'];
    }
