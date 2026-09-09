@@ -2,6 +2,13 @@ import type { Page } from 'playwright';
 
 import { CliUsageError } from '../errors/cli-errors.js';
 
+/**
+ * How long a clicked widget gets to finish opening. A menu that opens on pointerdown
+ * attaches its Escape handler a moment after its content mounts, and a key pressed before
+ * that is dropped.
+ */
+const CLICK_SETTLE_MS = 250;
+
 export interface PageCookie {
    name: string;
    value: string;
@@ -55,6 +62,7 @@ export async function clickAfterLoad(
       );
    }
    await locator.click();
+   await page.waitForTimeout(CLICK_SETTLE_MS);
 }
 
 /** Applies viewport, extra headers, and cookies to a page before it navigates. */
