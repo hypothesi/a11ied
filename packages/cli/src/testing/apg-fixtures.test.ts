@@ -108,6 +108,12 @@ const FIXTURES = {
       example: 'checkbox',
       selector: '#dangling-name',
    },
+   /* The disclosure example is the shortest one that documents `aria-controls`. */
+   emptyControls: {
+      path: 'aria-widgets.html',
+      example: 'disclosure-faq',
+      selector: '#empty-controls',
+   },
 } as const;
 
 function checkOnce(key: keyof typeof FIXTURES): Promise<CheckRun> {
@@ -226,6 +232,23 @@ describe('the pattern check against a broken widget', () => {
 
          expect(broken?.reason).toMatch(/points at an id that is not in the document/u);
          expect(danglingName.status).toBe(EXIT_ASSERTION);
+      },
+      TEST_TIMEOUT_VERY_LONG,
+   );
+});
+
+describe('the pattern check on an id reference', () => {
+   it(
+      'reports a reference set to an empty string as absent, not as present',
+      async () => {
+         const emptyControls = await checkOnce('emptyControls');
+
+         const controls = emptyControls.result.attributeRows.find((row) =>
+            row.rowKey.startsWith('button-aria-controls'),
+         );
+
+         expect(controls?.status).toBe('absent');
+         expect(controls?.reason).toBe('set to an empty value on 1 element');
       },
       TEST_TIMEOUT_VERY_LONG,
    );

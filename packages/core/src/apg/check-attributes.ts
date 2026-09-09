@@ -12,6 +12,8 @@ import { buildRowKey } from './row-key.js';
 interface AttributeReading {
    present: boolean;
    values: string[];
+   /** How many elements set the attribute to nothing, or to whitespace only. */
+   blankCount: number;
    danglingIdRefs: string[];
 }
 
@@ -20,6 +22,9 @@ type AttributeReadings = Record<string, AttributeReading>;
 /**
  * Reads, for each attribute the example documents, whether the widget sets it anywhere,
  * the values it holds, and any value that points at an id the document does not have.
+ *
+ * An attribute set to the empty string does not count as set. `aria-controls=""` refers
+ * to no panel, so reporting it as present would pass a reference that is not there.
  */
 async function readAttributes(
    page: Page,
@@ -39,13 +44,19 @@ async function readAttributes(
          ];
          const readings: Record<
             string,
-            { present: boolean; values: string[]; danglingIdRefs: string[] }
+            {
+               present: boolean;
+               values: string[];
+               blankCount: number;
+               danglingIdRefs: string[];
+            }
          > = {};
 
          for (const name of attributeNames) {
-            const values = elements
+            const found = elements
                .map((element) => element.getAttribute(name))
                .filter((value) => value !== null);
+            const values = found.filter((value) => value.trim() !== '');
             const isIdRefAttribute = idRefSuffixes.some((suffix) =>
                name.endsWith(suffix),
             );
@@ -56,7 +67,12 @@ async function readAttributes(
                     .filter((id) => !globalThis.document.querySelector(`[id="${id}"]`))
                : [];
 
-            readings[name] = { present: values.length > 0, values, danglingIdRefs };
+            readings[name] = {
+               present: values.length > 0,
+               values,
+               blankCount: found.length - values.length,
+               danglingIdRefs,
+            };
          }
 
          return readings;
@@ -77,6 +93,15 @@ function buildRowBase(
       element: row.element,
       usage: row.usage,
    };
+}
+
+/** Says, on an absent row, that the attribute is there but holds nothing. */
+function describeBlankValues(reading: AttributeReading | undefined): { reason?: string } {
+   if (reading === undefined || reading.blankCount === 0) {
+      return {};
+   }
+   const noun = reading.blankCount === 1 ? 'element' : 'elements';
+   return { reason: `set to an empty value on ${String(reading.blankCount)} ${noun}` };
 }
 
 /**
@@ -111,7 +136,7 @@ function checkOneRow(input: {
 
    const reading = input.readings[row.attribute.name];
    if (!reading?.present) {
-      return { ...base, status: 'absent' };
+      return { ...base, status: 'absent', ...describeBlankValues(reading) };
    }
 
    const observedValue = reading.values.join(', ');

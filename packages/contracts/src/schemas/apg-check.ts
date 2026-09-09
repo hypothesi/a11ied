@@ -23,7 +23,8 @@ export type ApgCheckRowStatus = z.infer<typeof apgCheckRowStatusSchema>;
  *
  * `absent` is an observation, not a finding. Measurement against the APG's own reference
  * combobox showed `aria-activedescendant` absent while the listbox is closed, which is
- * correct behavior, so a plain absence is reported and hinted rather than failed.
+ * correct behavior, so a plain absence is reported and hinted rather than failed. An
+ * attribute set to the empty string is `absent` too, with a `reason` that says so.
  * `broken-reference` is the unambiguous case: the attribute is set and points at an id
  * the document does not have.
  */

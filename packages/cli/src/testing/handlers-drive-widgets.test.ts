@@ -125,6 +125,8 @@ async function assertWidgetStates(): Promise<void> {
       'button, Export report',
       'button, Mute alerts, not pressed',
       'button, Email digest, not pressed',
+      'button, Show shipping details, not expanded',
+      'button, Show billing details, 1 control, not expanded',
    ]);
    expect(await elementPhrases('form-field')).toEqual([
       'textbox',

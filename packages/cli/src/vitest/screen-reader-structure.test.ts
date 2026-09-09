@@ -152,6 +152,8 @@ describe('ARIA widgets built with and without their state attributes', () => {
             'button, Export report',
             'button, Mute alerts, not pressed',
             'button, Email digest, not pressed',
+            'button, Show shipping details, not expanded',
+            'button, Show billing details, 1 control, not expanded',
          ]);
       },
       TIMEOUT_MS,
