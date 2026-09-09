@@ -4,10 +4,11 @@ import { basename, dirname, resolve } from 'node:path';
 import net from 'node:net';
 import { fileURLToPath } from 'node:url';
 
-import type {
-   AccessibilityDriverSession,
-   Platform,
-   VirtualEngine,
+import {
+   DEFAULT_WAIT_TIMEOUT_MS,
+   type AccessibilityDriverSession,
+   type Platform,
+   type VirtualEngine,
 } from '@a11ied/contracts';
 
 import type { BrokerRequest, BrokerResponse } from './broker-types.js';
@@ -108,6 +109,20 @@ function readPayloadMax(
    return typeof max === 'number' ? max : undefined;
 }
 
+/**
+ * How long a `wait` action may take before it answers: its fixed pause, or the time it
+ * polls for a phrase. A batch step sends the payload as written, so a missing phrase
+ * timeout means the broker's default.
+ */
+function readWaitBudget(payload: Record<string, unknown> | undefined): number {
+   const ms = payload?.ms,
+      timeoutMs = payload?.timeoutMs;
+   if (typeof ms === 'number') {
+      return ms;
+   }
+   return typeof timeoutMs === 'number' ? timeoutMs : DEFAULT_WAIT_TIMEOUT_MS;
+}
+
 export function resolveBrokerSocketTimeoutMs(
    request: Pick<BrokerRequest, 'command' | 'action' | 'payload' | 'timeoutMs'>,
    target?: Platform,
@@ -123,6 +138,9 @@ export function resolveBrokerSocketTimeoutMs(
       return ATTACH_DOCUMENT_SOCKET_TIMEOUT_MS;
    }
    const base = isReal ? REAL_TARGET_SOCKET_TIMEOUT_MS : VIRTUAL_SOCKET_TIMEOUT_MS;
+   if (request.action === 'wait') {
+      return base + readWaitBudget(request.payload);
+   }
    const max = readPayloadMax(request.payload);
    if (
       request.action !== undefined &&

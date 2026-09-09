@@ -98,3 +98,28 @@ describe('broker startup timing', () => {
       ).toBe(CALLER_TIMEOUT_MS + RESPONSE_GRACE_MS);
    });
 });
+
+describe('resolveBrokerSocketTimeoutMs for a wait action', () => {
+   const WAIT_PAUSE_MS = 3000;
+   const DEFAULT_PHRASE_TIMEOUT_MS = 5000;
+
+   it('adds the fixed pause to the base timeout', () => {
+      expect(
+         resolveBrokerSocketTimeoutMs({
+            command: 'action',
+            action: 'wait',
+            payload: { ms: WAIT_PAUSE_MS },
+         }),
+      ).toBe(VIRTUAL_SOCKET_TIMEOUT_MS + WAIT_PAUSE_MS);
+   });
+
+   it('adds the default phrase timeout when the step names none', () => {
+      expect(
+         resolveBrokerSocketTimeoutMs({
+            command: 'action',
+            action: 'wait',
+            payload: { for: 'saved' },
+         }),
+      ).toBe(VIRTUAL_SOCKET_TIMEOUT_MS + DEFAULT_PHRASE_TIMEOUT_MS);
+   });
+});
