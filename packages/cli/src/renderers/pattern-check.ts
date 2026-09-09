@@ -5,7 +5,7 @@ import {
 } from '#contracts';
 
 import { code, count, dim, section, table } from '../lib/format.js';
-import { apgAttribution, KEY_COLUMN_CAP, USAGE_COLUMN_CAP } from './pattern.js';
+import { apgAttribution, KEY_COLUMN_CAP, seeMoreLine } from './pattern.js';
 
 const CHECK_STATUS_LABELS: Record<string, string> = {
    absent: 'absent',
@@ -31,11 +31,7 @@ function checkRowLines(rows: { keyboardRows: ApgCheckResult['keyboardRows'] }): 
       return [line, ['', '', dim(row.description.join(' '))]];
    });
 
-   return table(['Key', 'Result', 'Observed'], body, [
-      KEY_COLUMN_CAP,
-      STATUS_COLUMN_CAP,
-      USAGE_COLUMN_CAP,
-   ]);
+   return table(['Key', 'Result', 'Observed'], body, [KEY_COLUMN_CAP, STATUS_COLUMN_CAP]);
 }
 
 function judgedLines(result: ApgCheckResult): string[] {
@@ -105,7 +101,6 @@ function attributeLines(result: ApgCheckResult): string[] {
       table(['Role or attribute', 'Result', 'Observed'], rows, [
          KEY_COLUMN_CAP,
          STATUS_COLUMN_CAP,
-         USAGE_COLUMN_CAP,
       ]),
    );
 }
@@ -137,7 +132,7 @@ export function renderPatternCheckText(
 
    lines.push(...unprobedLines(result));
 
-   lines.push('', dim(result.pageUrl), apgAttribution(result.document));
+   lines.push('', seeMoreLine(result.pageUrl), '', apgAttribution(result.document));
    return lines.join('\n');
 }
 

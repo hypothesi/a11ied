@@ -8,7 +8,6 @@ const MAX_WIDTH = 110;
 const INDENT = '  ';
 const LABEL_GAP = 2;
 const COLUMN_GAP = 2;
-const ELLIPSIS = '…';
 
 export const symbols = {
    pass: chalk.green('✓'),
@@ -92,21 +91,6 @@ export function count(total: number, singular: string, plural = `${singular}s`):
    return `${total} ${plural}`;
 }
 
-/** Truncates to a printed width, counting what the terminal shows, not escape codes. */
-function clip(text: string, width: number): string {
-   if (stringWidth(text) <= width) {
-      return text;
-   }
-   let out = '';
-   for (const character of text) {
-      if (stringWidth(out + character) > width - 1) {
-         break;
-      }
-      out += character;
-   }
-   return `${out}${ELLIPSIS}`;
-}
-
 function padCell(text: string, width: number): string {
    return `${text}${' '.repeat(Math.max(0, width - stringWidth(text)))}`;
 }
@@ -122,28 +106,63 @@ function columnWidths(headers: string[], rows: string[][], caps: number[]): numb
    });
 }
 
+/** The least room the last column keeps on a narrow terminal. */
+const MIN_LAST_COLUMN = 24;
+
+/** Breaks one cell into lines no wider than its column, cutting a long token if it must. */
+function wrapCell(text: string, width: number): string[] {
+   if (width <= 0 || stringWidth(text) <= width) {
+      return [text];
+   }
+   return wrapAnsi(text, width, { hard: true, trim: true }).split('\n');
+}
+
+/** Shrinks the last column so the whole table fits the terminal, indented once. */
+function fitToTerminal(widths: number[]): number[] {
+   const last = widths.length - 1;
+   let taken = INDENT.length + COLUMN_GAP * last;
+   for (const width of widths.slice(0, last)) {
+      taken += width;
+   }
+   const room = Math.max(MIN_LAST_COLUMN, getTerminalWidth() - taken);
+   return widths.map((width, index) => (index === last ? Math.min(width, room) : width));
+}
+
 /**
  * Renders a column-aligned table with a dim header row. Cells may carry color, because
  * widths count printed characters rather than escape codes. `caps` limits a column's
- * width, and anything longer is clipped.
+ * width, and the last column shrinks to fit the terminal. A cell longer than its column
+ * wraps onto further lines under that column, so nothing is cut short.
  */
 export function table(
    headers: string[],
    rows: string[][],
    caps: number[] = [],
 ): string[] {
-   const widths = columnWidths(headers, rows, caps);
+   const widths = fitToTerminal(columnWidths(headers, rows, caps));
+   const gap = ' '.repeat(COLUMN_GAP);
 
-   function line(cells: string[]): string {
-      return cells
-         .map((cell, index) =>
-            padCell(clip(cell, widths[index] ?? 0), widths[index] ?? 0),
-         )
-         .join(' '.repeat(COLUMN_GAP))
-         .trimEnd();
+   function lines(cells: string[]): string[] {
+      const wrapped = cells.map((cell, index) => wrapCell(cell, widths[index] ?? 0));
+      const height = Math.max(...wrapped.map((cellLines) => cellLines.length));
+      const out: string[] = [];
+      for (let lineIndex = 0; lineIndex < height; lineIndex += 1) {
+         out.push(
+            wrapped
+               .map((cellLines, index) =>
+                  padCell(cellLines[lineIndex] ?? '', widths[index] ?? 0),
+               )
+               .join(gap)
+               .trimEnd(),
+         );
+      }
+      return out;
    }
 
-   return [dim(line(headers)), ...rows.map((row) => line(row))];
+   return [
+      ...lines(headers).map((line) => dim(line)),
+      ...rows.flatMap((row) => lines(row)),
+   ];
 }
 
 /** Renders aligned "Label: value" rows with a shared label column. */

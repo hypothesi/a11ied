@@ -100,6 +100,22 @@ describe('a1 pattern output', () => {
       });
    });
 
+   it('wraps a long usage cell under its column instead of cutting it short', async () => {
+      const result = await runCli(['pattern', 'dialog', '--section', 'attributes']);
+
+      expect(result.stdout).not.toContain('\u2026');
+      expect(result.stdout).toMatch(/Set on\s+Usage/u);
+      expect(result.stdout).toContain('Tells assistive technologies that the windows');
+   });
+
+   it('labels the link to the example page and sets it apart from the attribution', async () => {
+      const result = await runCli(['pattern', 'dialog']);
+
+      expect(result.stdout).toContain(
+         'See more: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/examples/dialog/\n\n',
+      );
+   });
+
    it('prints the APG attribution and its own license wherever it prints APG prose', async () => {
       const result = await runCli(['pattern', 'disclosure-faq']);
 
@@ -117,6 +133,12 @@ describe('a1 pattern listings', () => {
 
       expect(result.status).toBe(EXIT_SUCCESS);
       expect(payload.patterns.length).toBeGreaterThanOrEqual(MIN_PATTERN_COUNT);
+   });
+      expect(shown.status).toBe(EXIT_SUCCESS);
+      expect(shown.stdout).toContain('The APG publishes no example for this pattern.');
+      expect(shown.stdout).toContain(
+         'See more: https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/',
+      );
    });
 
    it('lists the examples the APG files under one role', async () => {

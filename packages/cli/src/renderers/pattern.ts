@@ -23,7 +23,11 @@ export const patternDetailSections: ReadonlyArray<PatternDetailSection> = [
 ];
 
 export const KEY_COLUMN_CAP = 26;
-export const USAGE_COLUMN_CAP = 60;
+
+/** The example or pattern page, labelled so it stands apart from the attribution. */
+export function seeMoreLine(url: string): string {
+   return `${dim('See more:')} ${url}`;
+}
 
 /** The APG attribution line, with the license the guide is actually published under. */
 export function apgAttribution(document: W3cDocumentSource): string {
@@ -40,7 +44,7 @@ function keyboardTableLines(keyboardTable: ApgKeyboardTable): string[] {
       code(formatKeys(row.keyGroups)),
       row.description.join(' '),
    ]);
-   const body = table(['Key', 'Function'], rows, [KEY_COLUMN_CAP, USAGE_COLUMN_CAP]);
+   const body = table(['Key', 'Function'], rows, [KEY_COLUMN_CAP]);
    if (keyboardTable.name.length === 0) {
       return body;
    }
@@ -48,15 +52,15 @@ function keyboardTableLines(keyboardTable: ApgKeyboardTable): string[] {
 }
 
 function attributeTableLines(attributeTable: ApgAttributeTable): string[] {
+   /* The APG's Element column is the HTML element the role or attribute is set on. */
    const rows = attributeTable.rows.map((row) => [
       code(row.attribute?.raw ?? row.role ?? ''),
-      row.element,
+      code(`<${row.element}>`),
       row.usage,
    ]);
-   const body = table(['Role or attribute', 'Element', 'Usage'], rows, [
+   const body = table(['Role or attribute', 'Set on', 'Usage'], rows, [
       KEY_COLUMN_CAP,
       KEY_COLUMN_CAP,
-      USAGE_COLUMN_CAP,
    ]);
    if (attributeTable.name.length === 0) {
       return body;
@@ -101,7 +105,8 @@ function exampleLines(
       ...(example.experimental ? [dim('Listed under Experimental Examples.')] : []),
       ...exampleTablesLines(example, sections),
       '',
-      dim(example.pageUrl),
+      seeMoreLine(example.pageUrl),
+      '',
       apgAttribution(result.document),
    ];
 }
@@ -124,7 +129,12 @@ function patternLines(
       );
    }
 
-   lines.push('', dim(result.pattern.pageUrl), apgAttribution(result.document));
+   lines.push(
+      '',
+      seeMoreLine(result.pattern.pageUrl),
+      '',
+      apgAttribution(result.document),
+   );
    return lines;
 }
 
@@ -161,6 +171,7 @@ export function renderPatternListText(
       ...table(['Id', 'Title', 'Examples'], rows),
       '',
       `${dim('Run')} a1 pattern <id> ${dim('for one pattern')}`,
+      '',
       apgAttribution(result.document),
    ].join('\n');
 }

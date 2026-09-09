@@ -47,6 +47,7 @@ export function mobileSection(
       ...guidanceParagraphs(guidance.guidance, options.verbose),
       ...guidance.notes.map((note) => stripMarkdown(note)),
       ...guidance.examples.map((example) => stripMarkdown(example)),
+      '',
       attributionLine(guidance),
    ];
    return section('Mobile', paragraphLines(paragraphs, options.width));
