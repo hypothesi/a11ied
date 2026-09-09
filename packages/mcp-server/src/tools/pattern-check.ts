@@ -42,6 +42,13 @@ const patternCheckInputSchema = pageTargetInputSchema.extend({
       .string()
       .optional()
       .describe('Comma separated chords to press before checking.'),
+   click: z
+      .string()
+      .min(1)
+      .optional()
+      .describe(
+         'A selector for the one element to click after the page loads, to open a widget the page renders only after a click.',
+      ),
 });
 type PatternCheckInput = z.infer<typeof patternCheckInputSchema>;
 
@@ -63,6 +70,7 @@ async function handlePatternCheck(
       selector: input.selector,
       tableName: input.table,
       setupKeys: input.setup,
+      pageOptions: input.click === undefined ? {} : { click: input.click },
    });
 
    const failed =
@@ -111,6 +119,11 @@ const patternRecordInputSchema = pageTargetInputSchema.extend({
       .describe(
          'The same widget selector the check used. Its accessibility tree is hashed with the judgment.',
       ),
+   click: z
+      .string()
+      .min(1)
+      .optional()
+      .describe('The same click the check used, so the same widget is hashed.'),
    outcome: evidenceOutcomeSchema,
    mode: evidenceModeSchema.optional(),
    note: z.string().optional(),
@@ -138,6 +151,7 @@ function registerPatternRecordTool(server: McpServer): void {
          const target = describePageReportTarget(resolved);
          const tree = await getAccessibilityTree(requireLoad(resolved), {
             selector: input.selector,
+            click: input.click,
          });
 
          return createToolResponse(

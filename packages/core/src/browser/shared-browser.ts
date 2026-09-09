@@ -4,7 +4,12 @@ import type { Browser, Page } from 'playwright';
 import type { DocumentLoad } from '../targets/parse.js';
 import { deriveFocusTarget } from './helper.js';
 import { loadDocumentIntoPage } from './load.js';
-import { applyPageSetup, hasPageSetup, type PageSetupOptions } from './page-setup.js';
+import {
+   applyPageSetup,
+   clickAfterLoad,
+   hasPageSetup,
+   type PageSetupOptions,
+} from './page-setup.js';
 import { launchAutomationBrowser } from './policy.js';
 
 const SHARED_BROWSER_IDLE_MS = 250;
@@ -176,8 +181,8 @@ export async function withBrowserPage<TResult>(
 }
 
 /**
- * A fresh, uncached page: used for html loads and any custom viewport, headers, or
- * cookies.
+ * A fresh, uncached page: used for html loads and any custom viewport, headers, cookies,
+ * or click.
  */
 async function withCustomPage<TResult>(
    load: DocumentLoad,
@@ -192,6 +197,7 @@ async function withCustomPage<TResult>(
       try {
          await applyPageSetup(page, options);
          await loadDocumentIntoPage(page, load, options);
+         await clickAfterLoad(page, options);
          return await callback(page);
       } finally {
          await page.close();
@@ -203,9 +209,9 @@ async function withCustomPage<TResult>(
 
 /**
  * Runs `callback` against a loaded page for one resolved document target. A `goto` load
- * with no custom viewport, headers, or cookies reuses the shared cached page when the URL
- * matches. Everything else, including any `html` load (stdin or `--html`), gets a fresh
- * page, since there is no stable cache key or the page must not carry over prior
+ * with no custom viewport, headers, cookies, or click reuses the shared cached page when
+ * the URL matches. Everything else, including any `html` load (stdin or `--html`), gets a
+ * fresh page, since there is no stable cache key or the page must not carry over prior
  * settings.
  */
 export async function withLoadedPage<TResult>(

@@ -14,6 +14,8 @@ export interface AxeScanOptions {
    selector?: string | undefined;
    exclude?: string | undefined;
    waitFor?: string | undefined;
+   /** A selector for the one element to click after the page loads and before the scan. */
+   click?: string | undefined;
    viewport?: { width: number; height: number } | undefined;
    extraHeaders?: Record<string, string> | undefined;
    cookies?: PageCookie[] | undefined;
@@ -25,6 +27,7 @@ export function hasCustomScanOptions(options: AxeScanOptions): boolean {
       Boolean(options.selector) ||
       Boolean(options.exclude) ||
       Boolean(options.waitFor) ||
+      Boolean(options.click) ||
       Boolean(options.viewport) ||
       Boolean(options.extraHeaders) ||
       (options.cookies?.length ?? 0) > 0

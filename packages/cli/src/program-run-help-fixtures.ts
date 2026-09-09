@@ -22,6 +22,8 @@ export const runOptionCases: HelpCase[] = [
                                  scan.
         --wait-for <css>         Wait for an element matching this CSS selector before
                                  scanning.
+        --click <selector>       Click the one element this selector matches after the
+                                 page loads, before the scan.
         --viewport <WxH>         Set the browser viewport, for example 1280x800.
         --header <header...>     Repeatable. Add a request header, as 'Name: value'.
         --cookie <cookie...>     Repeatable. Add a cookie, as 'name=value'.

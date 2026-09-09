@@ -11,6 +11,7 @@ import {
    runCli,
    parseJsonOutput,
    EXIT_SUCCESS,
+   EXIT_USAGE,
    TEST_TIMEOUT_LONG,
 } from './setup.js';
 
@@ -117,7 +118,45 @@ async function assertSarifFormatWritesToOut(baseUrl: string): Promise<void> {
    expect(result.stdout).toBe('');
 }
 
+/** The dialog is not on the page until its button is clicked, so `--click` opens it. */
+async function assertClickOpensTheWidget(baseUrl: string): Promise<void> {
+   const opened = await runCli([
+      'axe',
+      `${baseUrl}/dialog.html`,
+      '--click',
+      '#open-dialog',
+      '--selector',
+      '[role="dialog"]',
+      '--json',
+   ]);
+   const json = parseJsonOutput(opened.stdout);
+   const result = json.result as { violations: unknown[]; passes: Array<{ id: string }> };
+
+   expect(opened.status).toBe(EXIT_SUCCESS);
+   expect(result.violations).toEqual([]);
+   expect(result.passes.map((rule) => rule.id)).toContain('label');
+
+   const missing = await runCli([
+      'axe',
+      `${baseUrl}/dialog.html`,
+      '--click',
+      '#no-such-button',
+      '--json',
+   ]);
+
+   expect(missing.status).toBe(EXIT_USAGE);
+   expect(missing.stdout).toContain('click-target-not-found');
+}
+
 describe('cli run axe / scan scoping', () => {
+   it(
+      '--click opens a widget the page renders only after a click',
+      async () => {
+         await assertClickOpensTheWidget(testServer.getBaseUrl());
+      },
+      TEST_TIMEOUT_LONG,
+   );
+
    it(
       '--selector scopes the scan to matching elements',
       async () => {

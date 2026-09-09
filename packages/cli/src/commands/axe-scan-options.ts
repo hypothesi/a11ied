@@ -4,6 +4,7 @@ export interface AxeScanCliOptions {
    selector?: string;
    exclude?: string;
    waitFor?: string;
+   click?: string;
    viewport?: string;
    header?: string[];
    cookie?: string[];

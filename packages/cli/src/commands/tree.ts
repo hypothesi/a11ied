@@ -1,6 +1,7 @@
 import type { Command } from 'commander';
 import { TOP_LEVEL_GROUPS } from '../lib/help.js';
 import {
+   addClickOption,
    addHtmlOption,
    addJsonOption,
    addTargetTimeoutOption,
@@ -9,27 +10,29 @@ import {
 import { handleTreeAction, type TreeActionOptions } from './tree-actions.js';
 
 function buildTreeCommand(program: Command): Command {
-   return addTargetTimeoutOption(
-      addHtmlOption(
-         addVerboseOption(
-            addJsonOption(
-               program
-                  .command('tree [target]')
-                  .helpGroup(TOP_LEVEL_GROUPS.fix)
-                  .summary("Print a page's accessibility tree.")
-                  .description(
-                     'Print the accessibility tree for a target: an http(s) URL, a ' +
-                        'file path, - for HTML on stdin, or --html.',
-                  )
-                  .option(
-                     '--role <role>',
-                     'Keep only nodes with this role, and their ancestors.',
-                  )
-                  .option(
-                     '--name <text>',
-                     'Keep only nodes whose accessible name contains this text, ' +
-                        'and their ancestors.',
-                  ),
+   return addClickOption(
+      addTargetTimeoutOption(
+         addHtmlOption(
+            addVerboseOption(
+               addJsonOption(
+                  program
+                     .command('tree [target]')
+                     .helpGroup(TOP_LEVEL_GROUPS.fix)
+                     .summary("Print a page's accessibility tree.")
+                     .description(
+                        'Print the accessibility tree for a target: an http(s) URL, a ' +
+                           'file path, - for HTML on stdin, or --html.',
+                     )
+                     .option(
+                        '--role <role>',
+                        'Keep only nodes with this role, and their ancestors.',
+                     )
+                     .option(
+                        '--name <text>',
+                        'Keep only nodes whose accessible name contains this text, ' +
+                           'and their ancestors.',
+                     ),
+               ),
             ),
          ),
       ),

@@ -49,6 +49,10 @@ function addAxePageScopeOptions(command: Command): Command {
          '--wait-for <css>',
          'Wait for an element matching this CSS selector before scanning.',
       )
+      .option(
+         '--click <selector>',
+         'Click the one element this selector matches after the page loads, before the scan.',
+      )
       .option('--viewport <WxH>', 'Set the browser viewport, for example 1280x800.')
       .option(
          '--header <header...>',

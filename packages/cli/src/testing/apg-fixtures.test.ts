@@ -44,19 +44,24 @@ interface AxeResult {
    violations: Array<{ id: string }>;
 }
 
-async function checkFixture(
-   path: string,
-   example: string,
-   selector: string,
-): Promise<CheckRun> {
+interface FixtureSpec {
+   path: string;
+   example: string;
+   selector: string;
+   /** A selector to click after the page loads, for a widget that is not there until then. */
+   click?: string;
+}
+
+async function checkFixture(spec: FixtureSpec): Promise<CheckRun> {
    const run = await runCliInProcess([
       'pattern',
       'check',
-      `${testServer.getBaseUrl()}/${path}`,
+      `${testServer.getBaseUrl()}/${spec.path}`,
       '--pattern',
-      example,
+      spec.example,
       '--selector',
-      selector,
+      spec.selector,
+      ...(spec.click === undefined ? [] : ['--click', spec.click]),
       '--json',
    ]);
 
@@ -108,6 +113,13 @@ const FIXTURES = {
       example: 'checkbox',
       selector: '#dangling-name',
    },
+   /* The dialog is not on the page until its button is clicked. */
+   dialog: {
+      path: 'dialog.html',
+      example: 'dialog',
+      selector: '[role="dialog"]',
+      click: '#open-dialog',
+   },
    /* The disclosure example is the shortest one that documents `aria-controls`. */
    emptyControls: {
       path: 'aria-widgets.html',
@@ -117,9 +129,7 @@ const FIXTURES = {
 } as const;
 
 function checkOnce(key: keyof typeof FIXTURES): Promise<CheckRun> {
-   const spec = FIXTURES[key];
-   const started =
-      startedChecks.get(key) ?? checkFixture(spec.path, spec.example, spec.selector);
+   const started = startedChecks.get(key) ?? checkFixture(FIXTURES[key]);
    startedChecks.set(key, started);
    return started;
 }
@@ -220,7 +230,43 @@ describe('the pattern check against a broken widget', () => {
       },
       TEST_TIMEOUT_VERY_LONG,
    );
+});
 
+describe('the pattern check behind a click', () => {
+   it(
+      'opens the dialog before every probe, so its keys and attributes are checked',
+      async () => {
+         const dialog = await checkOnce('dialog');
+         const byKey = new Map(
+            dialog.result.attributeRows.map((row) => [row.rowKey, row.status]),
+         );
+
+         expect(deadKeysIn(dialog)).toEqual([]);
+         expect(byKey.get('dialog-role[0]')).toBe('present');
+         expect(byKey.get('aria-modal[3]')).toBe('present');
+         expect(dialog.status).toBe(EXIT_SUCCESS);
+      },
+      TEST_TIMEOUT_VERY_LONG,
+   );
+
+   /* The fixture keeps the closed dialog in the DOM, hidden, so its keys reach nothing. */
+   it(
+      'finds every key dead when nothing opens the dialog first',
+      async () => {
+         const closed = await checkFixture({
+            path: 'dialog.html',
+            example: 'dialog',
+            selector: '[role="dialog"]',
+         });
+
+         expect(deadKeysIn(closed)).not.toEqual([]);
+         expect(closed.status).toBe(EXIT_ASSERTION);
+      },
+      TEST_TIMEOUT_VERY_LONG,
+   );
+});
+
+describe('the pattern check on an id reference', () => {
    it(
       'fails a reference that points at an id the document does not have',
       async () => {
@@ -235,9 +281,7 @@ describe('the pattern check against a broken widget', () => {
       },
       TEST_TIMEOUT_VERY_LONG,
    );
-});
 
-describe('the pattern check on an id reference', () => {
    it(
       'reports a reference set to an empty string as absent, not as present',
       async () => {

@@ -69,6 +69,13 @@ const runAxeInputSchema = pageTargetInputSchema
          .min(1)
          .optional()
          .describe('Wait for an element matching this CSS selector before scanning.'),
+      click: z
+         .string()
+         .min(1)
+         .optional()
+         .describe(
+            'A selector for the one element to click after the page loads, before the scan.',
+         ),
       viewport: z
          .object({
             width: z.number().int().positive(),
@@ -119,7 +126,7 @@ function exitCodeForVerdict(passed: boolean): number {
 
 type AxeScanOptions = Pick<
    RunAxeInput,
-   'timeoutMs' | 'selector' | 'exclude' | 'waitFor' | 'viewport'
+   'timeoutMs' | 'selector' | 'exclude' | 'waitFor' | 'click' | 'viewport'
 > & { extraHeaders: RunAxeInput['headers']; cookies: RunAxeInput['cookies'] };
 
 /** Runs the selected axe scan: one criterion, one level, explicit rule ids, or all rules. */
@@ -149,6 +156,7 @@ async function runAxeForInput(input: RunAxeInput): Promise<AxeToolResult> {
       selector: input.selector,
       exclude: input.exclude,
       waitFor: input.waitFor,
+      click: input.click,
       viewport: input.viewport,
       extraHeaders: input.headers,
       cookies: input.cookies,
@@ -190,6 +198,13 @@ const treeInputSchema = pageTargetInputSchema.extend({
       .min(1)
       .optional()
       .describe('Keep only nodes whose accessible name contains this text.'),
+   click: z
+      .string()
+      .min(1)
+      .optional()
+      .describe(
+         'A selector for the one element to click after the page loads, before reading the tree.',
+      ),
 });
 type TreeInput = z.infer<typeof treeInputSchema>;
 
@@ -214,7 +229,10 @@ async function handleTree(input: TreeInput): Promise<{
 }> {
    const resolved = await resolvePageTarget(input, 'tree');
    const load = requireLoad(resolved);
-   const tree = await getAccessibilityTree(load, { timeoutMs: input.timeoutMs });
+   const tree = await getAccessibilityTree(load, {
+      timeoutMs: input.timeoutMs,
+      click: input.click,
+   });
    const filter = buildTreeFilter(input),
       target = describePageReportTarget(resolved);
 

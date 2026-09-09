@@ -7,6 +7,7 @@ import type {
 } from '@a11ied/contracts';
 import type { Page } from 'playwright';
 
+import { clickAfterLoad } from '../browser/page-setup.js';
 import {
    withLoadedPage,
    type WithBrowserPageOptions,
@@ -69,6 +70,30 @@ export interface RunPatternCheckInput {
    pageOptions?: WithBrowserPageOptions;
    /** Where recorded judgments are read from. Defaults to the project results file. */
    evidence?: EvidenceStoreOptions;
+}
+
+/**
+ * After a `--click`, the widget may render a moment later than the click returns, so the
+ * check waits for it before counting matches. Without a click there is nothing to wait
+ * for: the page has loaded and the widget is there or it is not.
+ */
+async function waitForClickedWidget(
+   page: Page,
+   selector: string,
+   pageOptions: WithBrowserPageOptions,
+): Promise<void> {
+   if (pageOptions.click === undefined) {
+      return;
+   }
+   await page
+      .locator(selector)
+      .first()
+      .waitFor({
+         state: 'attached',
+         ...(pageOptions.timeoutMs === undefined
+            ? {}
+            : { timeout: pageOptions.timeoutMs }),
+      });
 }
 
 /**
@@ -160,9 +185,12 @@ export async function runPatternCheck(
    const { table, unprobed } = pickTable(example, input.tableName);
    const setupKeys = parseSetupKeys(input.setupKeys);
 
+   const pageOptions = input.pageOptions ?? {};
+
    return withLoadedPage(
       input.load,
       async (page) => {
+         await waitForClickedWidget(page, input.selector, pageOptions);
          await requireOneWidget(page, input.selector);
 
          const observation = await observeWidget(page, input.selector);
@@ -176,6 +204,8 @@ export async function runPatternCheck(
 
          const reset = async (): Promise<void> => {
             await page.reload({ waitUntil: 'load' });
+            await clickAfterLoad(page, pageOptions);
+            await waitForClickedWidget(page, input.selector, pageOptions);
          };
          const keyboardRows = table
             ? await probeApgKeyboard(
@@ -201,6 +231,6 @@ export async function runPatternCheck(
 
          return replayJudgments(result, observation.accessibilityTree, input.evidence);
       },
-      input.pageOptions ?? {},
+      pageOptions,
    );
 }

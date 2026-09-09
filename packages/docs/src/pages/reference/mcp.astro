@@ -123,7 +123,9 @@ const toc = [
       </p>
       <p>
          <code>tree</code> takes <code>role</code> and <code>name</code> to keep only matching
-         nodes and their ancestors.
+         nodes and their ancestors. <code>run_axe</code> and <code>tree</code> take
+         <code>click</code>, a selector for the one element to click after the page loads,
+         which reaches a dialog or a menu the page renders only after a click.
       </p>
       <p>
          <code>run_axe</code> and <code>audit</code> each return a <code>verdict</code> object and an

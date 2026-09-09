@@ -72,7 +72,40 @@ async function assertTreeInlineHtml(): Promise<void> {
    ).toMatchObject({ role: 'button', name: 'Send' });
 }
 
+async function assertTreeClicksBeforeReading(baseUrl: string): Promise<void> {
+   const closed = await runCli([
+      'tree',
+      `${baseUrl}/dialog.html`,
+      '--role',
+      'dialog',
+      '--json',
+   ]);
+   const opened = await runCli([
+      'tree',
+      `${baseUrl}/dialog.html`,
+      '--click',
+      '#open-dialog',
+      '--role',
+      'dialog',
+      '--json',
+   ]);
+   const rolesOf = (run: { stdout: string }): string[] =>
+      collectRoles((parseJsonOutput(run.stdout).result as { nodes: RoleNode[] }).nodes);
+
+   expect(rolesOf(closed)).not.toContain('dialog');
+   expect(opened.status).toBe(EXIT_SUCCESS);
+   expect(rolesOf(opened)).toContain('dialog');
+}
+
 describe('cli tree command', () => {
+   it(
+      '--click opens a widget before reading the tree',
+      async () => {
+         await assertTreeClicksBeforeReading(testServer.getBaseUrl());
+      },
+      TEST_TIMEOUT_LONG,
+   );
+
    it(
       'prints the accessibility tree as YAML',
       async () => {

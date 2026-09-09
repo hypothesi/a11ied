@@ -7,6 +7,7 @@ export interface TreeActionOptions {
    timeout?: string;
    role?: string;
    name?: string;
+   click?: string;
 }
 
 function parseTimeoutMs(timeout: string | undefined): number | undefined {
@@ -51,6 +52,7 @@ export async function handleTreeAction(
    );
    const tree = await core.getAccessibilityTree(resolved.load, {
       timeoutMs: parseTimeoutMs(options.timeout),
+      click: options.click,
    });
 
    const filter = buildTreeFilter(options);

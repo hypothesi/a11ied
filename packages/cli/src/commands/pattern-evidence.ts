@@ -15,6 +15,7 @@ interface PatternRecordOptions {
    pointer?: string;
    by?: string;
    selector?: string;
+   click?: string;
    results?: string;
 }
 
@@ -50,7 +51,11 @@ async function resolveSubject(target: string | undefined): Promise<string> {
  * This is what lets a later run tell that the component changed since somebody decided a
  * row did not apply, so a recorded judgment expires instead of standing forever.
  */
-async function hashWidget(target: string, selector: string): Promise<string> {
+async function hashWidget(
+   target: string,
+   selector: string,
+   click: string | undefined,
+): Promise<string> {
    const [{ resolvePageTarget }, { buildPageTargetInput }, core] = await Promise.all([
       import('../lib/execute.js'),
       import('../lib/target-input.js'),
@@ -59,7 +64,7 @@ async function hashWidget(target: string, selector: string): Promise<string> {
    const resolved = await resolvePageTarget(
       buildPageTargetInput(target, {}, 'pattern record'),
    );
-   const tree = await core.getAccessibilityTree(resolved.load, { selector });
+   const tree = await core.getAccessibilityTree(resolved.load, { selector, click });
    return core.hashAccessibilityTree(tree);
 }
 
@@ -96,6 +101,10 @@ function buildRecordCommand(patternCommand: Command): Command {
                   '--mode <mode>',
                   `One of: ${evidenceModeSchema.options.join(', ')}.`,
                )
+               .option(
+                  '--click <selector>',
+                  'The same --click the check used, so the same widget is hashed.',
+               )
                .option('--pointer <selector>', 'CSS selector for the element judged.')
                .option('--note <text>', 'Why the result is what it is.')
                .option('--by <name>', 'Who or what recorded the result.'),
@@ -127,7 +136,11 @@ function registerRecordCommand(patternCommand: Command): void {
                   exampleId: options.pattern ?? '',
                   rowKey: options.row ?? '',
                   outcome: evidenceOutcomeSchema.parse(options.outcome),
-                  subjectHash: await hashWidget(target, options.selector ?? 'body'),
+                  subjectHash: await hashWidget(
+                     target,
+                     options.selector ?? 'body',
+                     options.click,
+                  ),
                   mode:
                      options.mode === undefined
                         ? undefined

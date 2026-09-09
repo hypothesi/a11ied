@@ -51,6 +51,7 @@ function buildScanOptions(
    selector: string | undefined;
    exclude: string | undefined;
    waitFor: string | undefined;
+   click: string | undefined;
    viewport: { width: number; height: number } | undefined;
    extraHeaders: Record<string, string> | undefined;
    cookies: Array<{ name: string; value: string; url: string }> | undefined;
@@ -61,6 +62,7 @@ function buildScanOptions(
       selector: options.selector,
       exclude: options.exclude,
       waitFor: options.waitFor,
+      click: options.click,
       viewport: parseViewport(core.CliUsageError, options.viewport),
       extraHeaders: parseHeaders(core.CliUsageError, options.header),
       cookies: parseCookies(core.CliUsageError, options.cookie, url),

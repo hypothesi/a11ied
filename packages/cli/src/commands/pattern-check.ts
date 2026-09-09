@@ -4,6 +4,7 @@ import { cliExitCodes, type ApgCheckResult } from '#contracts';
 import { isSetAside } from '#core';
 
 import {
+   addClickOption,
    addHtmlOption,
    addJsonOption,
    addTargetTimeoutOption,
@@ -20,42 +21,45 @@ export interface PatternCheckOptions {
    table?: string;
    setup?: string;
    results?: string;
+   click?: string;
 }
 
 function buildCheckCommand(patternCommand: Command): Command {
-   return addTargetTimeoutOption(
-      addHtmlOption(
-         addVerboseOption(
-            addJsonOption(
-               patternCommand
-                  .command('check [target]')
-                  .summary('Check a page against one ARIA pattern example.')
-                  .description(
-                     'Press every key the APG example declares and check its documented ' +
-                        'attributes against the page. Reports a declared key that does ' +
-                        'nothing and an attribute that is missing; prints every other key ' +
-                        "next to the guide's own description for a person to judge.",
-                  )
-                  .requiredOption(
-                     '--pattern <exampleId>',
-                     'The APG example to check against, such as combobox-select-only.',
-                  )
-                  .requiredOption(
-                     '--selector <css>',
-                     'CSS selector for the one widget to check. Required: there is no default worth guessing.',
-                  )
-                  .option(
-                     '--table <name>',
-                     'Probe a later keyboard table, such as "Listbox Popup", instead of the first.',
-                  )
-                  .option(
-                     '--setup <keys>',
-                     'Comma separated chords to press before probing, to reach the state --table documents.',
-                  )
-                  .option(
-                     '--results <path>',
-                     'Read recorded judgments from this path instead of .a11ied/evidence.jsonl.',
-                  ),
+   return addClickOption(
+      addTargetTimeoutOption(
+         addHtmlOption(
+            addVerboseOption(
+               addJsonOption(
+                  patternCommand
+                     .command('check [target]')
+                     .summary('Check a page against one ARIA pattern example.')
+                     .description(
+                        'Press every key the APG example declares and check its documented ' +
+                           'attributes against the page. Reports a declared key that does ' +
+                           'nothing and an attribute that is missing; prints every other key ' +
+                           "next to the guide's own description for a person to judge.",
+                     )
+                     .requiredOption(
+                        '--pattern <exampleId>',
+                        'The APG example to check against, such as combobox-select-only.',
+                     )
+                     .requiredOption(
+                        '--selector <css>',
+                        'CSS selector for the one widget to check. Required: there is no default worth guessing.',
+                     )
+                     .option(
+                        '--table <name>',
+                        'Probe a later keyboard table, such as "Listbox Popup", instead of the first.',
+                     )
+                     .option(
+                        '--setup <keys>',
+                        'Comma separated chords to press before probing, to reach the state --table documents.',
+                     )
+                     .option(
+                        '--results <path>',
+                        'Read recorded judgments from this path instead of .a11ied/evidence.jsonl.',
+                     ),
+               ),
             ),
          ),
       ),
@@ -120,6 +124,8 @@ export function registerPatternCheckCommand(patternCommand: Command): void {
                   selector: options.selector ?? '',
                   tableName: options.table,
                   setupKeys: options.setup,
+                  pageOptions:
+                     options.click === undefined ? {} : { click: options.click },
                   evidence: { file: options.results },
                });
 

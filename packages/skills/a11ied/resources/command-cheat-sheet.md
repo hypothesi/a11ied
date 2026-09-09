@@ -45,15 +45,15 @@ a1 pattern attribute aria-expanded
 a1 pattern check http://localhost:3000 --pattern combobox-select-only --selector '#fruit'
 ```
 
-| Command                                                        | MCP tool          | Arguments                                                |
-| -------------------------------------------------------------- | ----------------- | -------------------------------------------------------- |
-| `pattern <pattern-or-example-id>`                              | `pattern_show`    | `name`                                                   |
-| `pattern list`                                                 | `pattern_show`    | omit `name`                                              |
-| `pattern role <role>`                                          | `pattern_find`    | `role`                                                   |
-| `pattern attribute <attribute>`                                | `pattern_find`    | `attribute`                                              |
-| `pattern check <target> --pattern --selector`                  | `pattern_check`   | `target`/`html`, `pattern`, `selector`, `table`, `setup` |
-| `pattern record <target> --pattern --row --selector --outcome` | `pattern_record`  | plus `note`, `mode`, `pointer`, `assertedBy`             |
-| `pattern pending <target> --pattern`                           | `pattern_pending` | `target`/`html`, `pattern`                               |
+| Command                                                        | MCP tool          | Arguments                                                         |
+| -------------------------------------------------------------- | ----------------- | ----------------------------------------------------------------- |
+| `pattern <pattern-or-example-id>`                              | `pattern_show`    | `name`                                                            |
+| `pattern list`                                                 | `pattern_show`    | omit `name`                                                       |
+| `pattern role <role>`                                          | `pattern_find`    | `role`                                                            |
+| `pattern attribute <attribute>`                                | `pattern_find`    | `attribute`                                                       |
+| `pattern check <target> --pattern --selector`                  | `pattern_check`   | `target`/`html`, `pattern`, `selector`, `click`, `table`, `setup` |
+| `pattern record <target> --pattern --row --selector --outcome` | `pattern_record`  | plus `click`, `note`, `mode`, `pointer`, `assertedBy`             |
+| `pattern pending <target> --pattern`                           | `pattern_pending` | `target`/`html`, `pattern`                                        |
 
 `pattern check` exits 4 on a key the example declares that changed nothing, and on an
 attribute pointing at an id the document does not have. Everything else it prints is an
@@ -72,11 +72,11 @@ a1 audit http://localhost:3000/checkout
 `<target>` is an http(s) URL, a local file path, `-` for HTML on stdin, or `--html
 '<markup>'`, on `axe`, `tree`, and `audit` alike.
 
-| Command          | MCP tool  | Arguments                                                                                                                                                         |
-| ---------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `axe <target>`   | `run_axe` | `target`/`html`, `criterion`/`level`/`ruleIds` (at most one), `selector`, `exclude`, `waitFor`, `viewport`, `headers`, `cookies`, `failOn`, `baseline`, `version` |
-| `tree <target>`  | `tree`    | `target`/`html`, `role`, `name`                                                                                                                                   |
-| `audit <target>` | `audit`   | `target`/`html`, `failOn`, `baseline`, `version`                                                                                                                  |
+| Command          | MCP tool  | Arguments                                                                                                                                                                  |
+| ---------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `axe <target>`   | `run_axe` | `target`/`html`, `criterion`/`level`/`ruleIds` (at most one), `selector`, `exclude`, `waitFor`, `click`, `viewport`, `headers`, `cookies`, `failOn`, `baseline`, `version` |
+| `tree <target>`  | `tree`    | `target`/`html`, `role`, `name`, `click`                                                                                                                                   |
+| `audit <target>` | `audit`   | `target`/`html`, `failOn`, `baseline`, `version`                                                                                                                           |
 
 `axe` and `audit` exit 4 on a violation at or above `--fail-on` (default `minor`) not
 covered by `--baseline`. The MCP tools return the matching `verdict` and `exitCode`.

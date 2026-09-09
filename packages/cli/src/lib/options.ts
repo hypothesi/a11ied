@@ -68,6 +68,14 @@ export function addHtmlOption(command: Command): Command {
    );
 }
 
+export function addClickOption(command: Command): Command {
+   return command.option(
+      '--click <selector>',
+      'Click the one element this selector matches after the page loads, before anything ' +
+         'else runs. Reaches a widget the page renders only after a click, such as a dialog.',
+   );
+}
+
 export function addTargetTimeoutOption(command: Command): Command {
    return command.option(
       '--timeout <ms>',
