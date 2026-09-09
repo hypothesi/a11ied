@@ -13,6 +13,8 @@ import {
 import { CliUsageError } from '../errors/cli-errors.js';
 import { resolveDocumentTarget } from '../targets/runtime.js';
 import { openUrlInBrowser } from './browser-launch.js';
+import type { CommandQueueOptions } from './command-queue.js';
+import { queueScreenReader, type QueuedScreenReader } from './queued-screen-reader.js';
 import { runContextAction } from './context-action.js';
 import { startSessionRecording, validateRecordingRequest } from './recording.js';
 import {
@@ -240,4 +242,23 @@ export async function screenReader(
       throw error;
    }
    return reader;
+}
+
+/**
+ * Starts a screen reader and wraps it in a command queue, so a test calls its methods
+ * without `await` and awaits only a call whose value it needs. `await using` runs every
+ * queued command and then stops the reader.
+ *
+ * @example
+ *    await using sr = await queuedScreenReader({
+ *       url: 'http://localhost:3000/checkout',
+ *    });
+ *    sr.goTo({ role: 'button', name: 'Pay' });
+ *    sr.expectSpoken('button, Pay');
+ */
+export async function queuedScreenReader(
+   options: ScreenReaderOptions = {},
+   queue: CommandQueueOptions = {},
+): Promise<QueuedScreenReader> {
+   return queueScreenReader(await screenReader(options), queue);
 }

@@ -112,7 +112,15 @@ const publicApiExpectations: PublicApiExpectation[] = [
    },
    {
       file: 'packages/core/src/driver/screen-reader-node.ts',
-      functions: ['screenReader'],
+      functions: ['screenReader', 'queuedScreenReader'],
+   },
+   {
+      file: 'packages/core/src/driver/command-queue.ts',
+      classes: ['CommandQueue'],
+   },
+   {
+      file: 'packages/core/src/driver/queued-screen-reader.ts',
+      functions: ['queueScreenReader'],
    },
    {
       file: 'packages/core/src/driver/screen-reader.ts',

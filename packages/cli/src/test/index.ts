@@ -5,15 +5,21 @@
 export {
    CliEnvironmentError,
    CliUsageError,
+   CommandQueue,
    DriverCommandError,
+   queuedScreenReader,
+   queueScreenReader,
    screenReader,
    ScreenReader,
    ScreenReaderAssertionError,
 } from '@a11ied/core';
 
 export type {
+   CommandQueueOptions,
    LoopOptions,
    NavigateOptions,
+   Queued,
+   QueuedScreenReader,
    ScreenReaderDocument,
    ScreenReaderOptions,
    ScreenReaderRunOptions,

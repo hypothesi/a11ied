@@ -276,7 +276,20 @@ export {
    ScreenReaderAssertionError,
    type SpokenFailureDetails,
 } from './driver/screen-reader-errors.js';
-export { screenReader, type ScreenReaderOptions } from './driver/screen-reader-node.js';
+export {
+   CommandQueue,
+   type CommandQueueOptions,
+   type Queued,
+} from './driver/command-queue.js';
+export {
+   queueScreenReader,
+   type QueuedScreenReader,
+} from './driver/queued-screen-reader.js';
+export {
+   queuedScreenReader,
+   screenReader,
+   type ScreenReaderOptions,
+} from './driver/screen-reader-node.js';
 export {
    createContextTransport,
    type ContextTransportOptions,
