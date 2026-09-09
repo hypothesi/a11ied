@@ -6,14 +6,14 @@
          "title": "ARIA attribute is defined in WAI-ARIA",
          "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/5f99a7/",
          "status": "published",
-         "criterionIds": ["1.3.1", "4.1.2"]
+         "criterionIds": []
       },
       "6a7281": {
          "ruleId": "6a7281",
          "title": "ARIA state or property has valid value",
          "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/6a7281/",
          "status": "published",
-         "criterionIds": ["1.3.1", "4.1.2"]
+         "criterionIds": []
       },
       "73f2c2": {
          "ruleId": "73f2c2",
@@ -41,7 +41,7 @@
          "title": "Element marked as decorative is not exposed",
          "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/46ca7f/",
          "status": "published",
-         "criterionIds": ["1.1.1"]
+         "criterionIds": []
       },
       "6cfa84": {
          "ruleId": "6cfa84",
@@ -69,14 +69,14 @@
          "title": "Element with role attribute has required states and properties",
          "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/4e8ab6/",
          "status": "published",
-         "criterionIds": ["1.3.1", "4.1.2"]
+         "criterionIds": []
       },
       "e086e5": {
          "ruleId": "e086e5",
          "title": "Form field has non-empty accessible name",
          "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/e086e5/",
          "status": "published",
-         "criterionIds": ["1.3.1", "2.5.3", "4.1.2"]
+         "criterionIds": ["4.1.2"]
       },
       "a25f45": {
          "ruleId": "a25f45",
@@ -90,7 +90,7 @@
          "title": "HTML images contain no text",
          "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/0va7u6/",
          "status": "published",
-         "criterionIds": ["1.4.5", "1.4.9"]
+         "criterionIds": ["1.4.5"]
       },
       "b5c3f8": {
          "ruleId": "b5c3f8",
@@ -174,7 +174,7 @@
          "title": "Link has non-empty accessible name",
          "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/c487ae/",
          "status": "published",
-         "criterionIds": ["1.1.1", "2.4.4", "2.4.9", "4.1.2"]
+         "criterionIds": ["2.4.4", "2.4.9", "4.1.2"]
       },
       "m6b1q3": {
          "ruleId": "m6b1q3",
@@ -188,21 +188,21 @@
          "title": "Meta element has no refresh delay",
          "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/bc659a/",
          "status": "published",
-         "criterionIds": ["2.2.1", "2.2.4", "3.2.5"]
+         "criterionIds": ["2.2.1"]
       },
       "bisz58": {
          "ruleId": "bisz58",
          "title": "Meta element has no refresh delay (no exception)",
          "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/bisz58/",
          "status": "published",
-         "criterionIds": ["2.2.1", "2.2.4", "3.2.5"]
+         "criterionIds": ["2.2.4", "3.2.5"]
       },
       "b4f0c3": {
          "ruleId": "b4f0c3",
          "title": "Meta viewport allows for zoom",
          "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/b4f0c3/",
          "status": "published",
-         "criterionIds": ["1.4.4", "1.4.10"]
+         "criterionIds": ["1.4.4"]
       },
       "8fc3b6": {
          "ruleId": "8fc3b6",
@@ -223,7 +223,7 @@
          "title": "Role attribute has valid value",
          "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/674b10/",
          "status": "published",
-         "criterionIds": ["1.3.1", "4.1.2"]
+         "criterionIds": []
       },
       "0ssw9k": {
          "ruleId": "0ssw9k",
@@ -251,14 +251,14 @@
          "title": "Text has enhanced contrast",
          "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/09o5cg/",
          "status": "published",
-         "criterionIds": ["1.4.3", "1.4.6"]
+         "criterionIds": ["1.4.6"]
       },
       "afw4f7": {
          "ruleId": "afw4f7",
          "title": "Text has minimum contrast",
          "url": "https://www.w3.org/WAI/standards-guidelines/act/rules/afw4f7/",
          "status": "published",
-         "criterionIds": ["1.4.3", "1.4.6"]
+         "criterionIds": ["1.4.3"]
       },
       "kb1m8s": {
          "ruleId": "kb1m8s",

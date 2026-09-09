@@ -59,6 +59,20 @@ export function createActMappingPayload(): unknown {
             },
          },
          {
+            title: 'Target has enough size',
+            permalink: '/standards-guidelines/act/rules/sec111/',
+            successCriteria: ['target-size', 'focus-visible'],
+            deprecated: false,
+            proposed: false,
+            frontmatter: {
+               id: 'sec111',
+               accessibility_requirements: {
+                  'wcag20:2.5.8': {},
+                  'wcag20:2.4.7': { secondary: 'Less strict than this rule.' },
+               },
+            },
+         },
+         {
             title: 'Element marks only accessible content',
             permalink: '/standards-guidelines/act/rules/8fc3b6/proposed/',
             successCriteria: ['non-text-content'],

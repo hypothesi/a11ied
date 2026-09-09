@@ -49,15 +49,38 @@ function requirementKeyToCriterionId(
    return undefined;
 }
 
+/**
+ * The criteria a rule lists as secondary. The rule does not decide those: "Text has
+ * enhanced contrast" names 1.4.3 as secondary because its failures may still satisfy the
+ * lower AA threshold. The mapping's `successCriteria` list includes them anyway, so they
+ * are read from the frontmatter and dropped from both sources.
+ */
+function listSecondaryCriterionIds(input: {
+   rule: ActRulePayload;
+   criterionIds: Set<string>;
+}): Set<string> {
+   const secondary = new Set<string>();
+   for (const [key, requirement] of Object.entries(
+      input.rule.frontmatter?.accessibility_requirements ?? {},
+   )) {
+      const cid = requirementKeyToCriterionId(key, input.criterionIds);
+      if (cid && requirement.secondary !== undefined) {
+         secondary.add(cid);
+      }
+   }
+   return secondary;
+}
+
 function mapRuleCriteria(input: {
    rule: ActRulePayload;
    slugToId: Map<string, string>;
    criterionIds: Set<string>;
 }): Set<string> {
+   const secondary = listSecondaryCriterionIds(input);
    const mapped = new Set<string>();
    for (const slug of input.rule.successCriteria ?? []) {
       const cid = input.slugToId.get(slug);
-      if (cid) {
+      if (cid && !secondary.has(cid)) {
          mapped.add(cid);
       }
    }
@@ -65,7 +88,7 @@ function mapRuleCriteria(input: {
       input.rule.frontmatter?.accessibility_requirements ?? {},
    )) {
       const cid = requirementKeyToCriterionId(rk, input.criterionIds);
-      if (cid) {
+      if (cid && !secondary.has(cid)) {
          mapped.add(cid);
       }
    }

@@ -105,11 +105,11 @@ describe('wcag-engine test method and strategy', () => {
          result.testMethod.actRuleIds,
       );
       expect(result.actRules).toContainEqual({
-         ruleId: '5f99a7',
-         title: 'ARIA attribute is defined in WAI-ARIA',
-         url: 'https://www.w3.org/WAI/standards-guidelines/act/rules/5f99a7/',
+         ruleId: 'e086e5',
+         title: 'Form field has non-empty accessible name',
+         url: 'https://www.w3.org/WAI/standards-guidelines/act/rules/e086e5/',
          status: 'published',
-         criterionIds: ['1.3.1', '4.1.2'],
+         criterionIds: ['4.1.2'],
       });
    });
 

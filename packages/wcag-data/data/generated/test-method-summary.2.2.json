@@ -1,10 +1,10 @@
 {
    "version": "2.2",
-   "updatedAt": "2026-09-06T11:46:41.468Z",
+   "updatedAt": "2026-09-05T21:43:17.757Z",
    "totals": {
-      "automated": 28,
-      "hybrid": 10,
-      "manual": 48,
+      "automated": 27,
+      "hybrid": 9,
+      "manual": 50,
       "unknown": 0,
       "criteria": 86
    },
@@ -17,28 +17,28 @@
          "criteria": 31
       },
       "AA": {
-         "automated": 8,
+         "automated": 7,
          "hybrid": 4,
-         "manual": 12,
+         "manual": 13,
          "unknown": 0,
          "criteria": 24
       },
       "AAA": {
          "automated": 5,
-         "hybrid": 3,
-         "manual": 23,
+         "hybrid": 2,
+         "manual": 24,
          "unknown": 0,
          "criteria": 31
       }
    },
    "ruleSources": {
-      "criteriaWithAxe": 29,
-      "criteriaWithAct": 24,
-      "criteriaWithBoth": 21
+      "criteriaWithAxe": 28,
+      "criteriaWithAct": 21,
+      "criteriaWithBoth": 19
    },
    "representativeCriterionIds": {
       "automated": ["1.1.1", "1.2.1", "1.2.2", "1.3.1", "1.3.4"],
-      "hybrid": ["1.4.5", "1.4.9", "2.4.1", "2.4.3", "2.4.7"],
+      "hybrid": ["1.4.5", "2.4.1", "2.4.3", "2.4.7", "2.4.11"],
       "manual": ["1.2.3", "1.2.4", "1.2.5", "1.2.6", "1.2.7"],
       "unknown": []
    }

@@ -171,17 +171,17 @@
       },
       "1.4.9": {
          "criterionId": "1.4.9",
-         "preferredEvidenceMode": "hybrid",
+         "preferredEvidenceMode": "manual",
          "procedureIds": ["manual_review"],
          "requiresRealTarget": true,
-         "notes": ["ACT mappings exist, but there is no built-in ACT executor in v0.3.0."]
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
       },
       "1.4.10": {
          "criterionId": "1.4.10",
-         "preferredEvidenceMode": "automated",
-         "procedureIds": ["axe_scan"],
-         "requiresRealTarget": false,
-         "notes": ["axe rules decide this criterion."]
+         "preferredEvidenceMode": "manual",
+         "procedureIds": ["manual_review"],
+         "requiresRealTarget": true,
+         "notes": ["No direct axe or ACT mapping was found for this criterion."]
       },
       "1.4.11": {
          "criterionId": "1.4.11",

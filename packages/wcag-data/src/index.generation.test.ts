@@ -142,6 +142,8 @@ async function assertActRuleIndexIsCorrect(
       status: 'published',
       criterionIds: ['2.4.7'],
    });
+   /* The mapping lists 2.4.7 for this rule too, as a secondary criterion it does not decide. */
+   expect(actRuleIndex.rules.sec111?.criterionIds).toEqual(['2.5.8']);
    expect(actRuleIndex.rules['8fc3b6']).toMatchObject({
       title: 'Element marks only accessible content',
       url: 'https://www.w3.org/WAI/standards-guidelines/act/rules/8fc3b6/proposed/',

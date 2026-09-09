@@ -83,7 +83,7 @@ covered by `--baseline`. The MCP tools return the matching `verdict` and `exitCo
 
 ## Checks you have to perform yourself
 
-axe decides 28 of the 86 WCAG 2.2 criteria. The other 58 need a person looking at the
+axe decides 27 of the 86 WCAG 2.2 criteria. The other 59 need a person looking at the
 page, and you can do many of them: read the accessibility tree, drive the screen reader,
 or look at the rendered page. Record what you find so it reaches the same report.
 
