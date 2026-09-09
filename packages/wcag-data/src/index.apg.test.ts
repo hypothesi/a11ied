@@ -194,3 +194,20 @@ describe('parseApgExample attribute tables', () => {
       expect(parsed.attributeTables).toEqual([]);
    });
 });
+
+describe('parseApgExample attribute values', () => {
+   it('reads a value the guide writes without quotes', async () => {
+      const parsed = parseApgExample(await readSample('dialog'));
+
+      const modal = parsed.attributeTables[0]?.rows.find(
+         (row) => row.attribute?.name === 'aria-modal',
+      );
+
+      expect(modal?.attribute).toEqual({
+         raw: 'aria-modal=true',
+         name: 'aria-modal',
+         value: 'true',
+         isIdRef: false,
+      });
+   });
+});

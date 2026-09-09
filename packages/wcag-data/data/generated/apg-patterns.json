@@ -323,7 +323,8 @@
                      "testId": "test-not-required",
                      "attribute": {
                         "raw": "aria-live=assertive",
-                        "name": "aria-live=assertive",
+                        "name": "aria-live",
+                        "value": "assertive",
                         "isIdRef": false
                      },
                      "element": "Implicit on div",
@@ -333,7 +334,8 @@
                      "testId": "test-not-required",
                      "attribute": {
                         "raw": "aria-atomic=true",
-                        "name": "aria-atomic=true",
+                        "name": "aria-atomic",
+                        "value": "true",
                         "isIdRef": false
                      },
                      "element": "Implicit on div",
@@ -478,7 +480,8 @@
                      "testId": "aria-label",
                      "attribute": {
                         "raw": "aria-label=Breadcrumb",
-                        "name": "aria-label=Breadcrumb",
+                        "name": "aria-label",
+                        "value": "Breadcrumb",
                         "isIdRef": false
                      },
                      "element": "nav",
@@ -488,7 +491,8 @@
                      "testId": "aria-current",
                      "attribute": {
                         "raw": "aria-current=page",
-                        "name": "aria-current=page",
+                        "name": "aria-current",
+                        "value": "page",
                         "isIdRef": false
                      },
                      "element": "a",
@@ -3479,7 +3483,8 @@
                      "testId": "aria-labelledby",
                      "attribute": {
                         "raw": "aria-labelledby=IDREF",
-                        "name": "aria-labelledby=IDREF",
+                        "name": "aria-labelledby",
+                        "value": "IDREF",
                         "isIdRef": false
                      },
                      "element": "div",
@@ -3489,7 +3494,8 @@
                      "testId": "aria-describedby",
                      "attribute": {
                         "raw": "aria-describedby=IDREF",
-                        "name": "aria-describedby=IDREF",
+                        "name": "aria-describedby",
+                        "value": "IDREF",
                         "isIdRef": false
                      },
                      "element": "div",
@@ -3499,7 +3505,8 @@
                      "testId": "aria-modal",
                      "attribute": {
                         "raw": "aria-modal=true",
-                        "name": "aria-modal=true",
+                        "name": "aria-modal",
+                        "value": "true",
                         "isIdRef": false
                      },
                      "element": "div",
@@ -7626,7 +7633,8 @@
                      "testId": "tabindex",
                      "attribute": {
                         "raw": "tabindex=0",
-                        "name": "tabindex=0",
+                        "name": "tabindex",
+                        "value": "0",
                         "isIdRef": false
                      },
                      "element": "g",
@@ -7636,7 +7644,8 @@
                      "testId": "aria-valuemax",
                      "attribute": {
                         "raw": "aria-valuemax=NUMBER",
-                        "name": "aria-valuemax=NUMBER",
+                        "name": "aria-valuemax",
+                        "value": "NUMBER",
                         "isIdRef": false
                      },
                      "element": "g",
@@ -7646,7 +7655,8 @@
                      "testId": "aria-valuemin",
                      "attribute": {
                         "raw": "aria-valuemin=NUMBER",
-                        "name": "aria-valuemin=NUMBER",
+                        "name": "aria-valuemin",
+                        "value": "NUMBER",
                         "isIdRef": false
                      },
                      "element": "g",
@@ -7656,7 +7666,8 @@
                      "testId": "aria-valuenow",
                      "attribute": {
                         "raw": "aria-valuenow=NUMBER",
-                        "name": "aria-valuenow=NUMBER",
+                        "name": "aria-valuenow",
+                        "value": "NUMBER",
                         "isIdRef": false
                      },
                      "element": "g",
@@ -7666,7 +7677,8 @@
                      "testId": "aria-label",
                      "attribute": {
                         "raw": "aria-label=text",
-                        "name": "aria-label=text",
+                        "name": "aria-label",
+                        "value": "text",
                         "isIdRef": false
                      },
                      "element": "g",
@@ -7676,7 +7688,8 @@
                      "testId": "aria-hidden-g",
                      "attribute": {
                         "raw": "aria-hidden=true",
-                        "name": "aria-hidden=true",
+                        "name": "aria-hidden",
+                        "value": "true",
                         "isIdRef": false
                      },
                      "element": "g",
@@ -9243,7 +9256,8 @@
                      "testId": "toolbar-button-aria-pressed",
                      "attribute": {
                         "raw": "aria-pressed=false",
-                        "name": "aria-pressed=false",
+                        "name": "aria-pressed",
+                        "value": "false",
                         "isIdRef": false
                      },
                      "element": "button",

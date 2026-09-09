@@ -8,7 +8,12 @@ import type {
 
 import { collapseWhitespace, findById, parseDocument } from './shared.js';
 
-const ATTRIBUTE_CELL_PATTERN = /^(?<name>[a-zA-Z-]+)(?:="(?<value>[^"]*)")?$/u;
+/**
+ * `aria-expanded="true"` in most examples, but the modal dialog writes `aria-modal=true`
+ * and `aria-labelledby=IDREF` with no quotes, so the value may be bare.
+ */
+const ATTRIBUTE_CELL_PATTERN =
+   /^(?<name>[a-zA-Z-]+)(?:=(?:"(?<quoted>[^"]*)"|(?<bare>[^\s"]+)))?$/u;
 const CHORD_SEPARATOR = '+';
 const ID_REF_PREFIX = '#IDREF';
 const KEYBOARD_TABLE_LABEL = 'kbd_label';
@@ -104,7 +109,7 @@ function parseAttributeCell(cell: Element | undefined): ApgAttributeValue | unde
    if (!groups?.name) {
       return { raw, name: raw, isIdRef: false };
    }
-   const value = groups.value;
+   const value = groups.quoted ?? groups.bare;
    return {
       raw,
       name: groups.name,
