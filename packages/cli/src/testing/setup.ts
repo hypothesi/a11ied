@@ -106,10 +106,17 @@ function getChildEnv(): NodeJS.ProcessEnv {
    return { ...inherited, FORCE_COLOR: '0' };
 }
 
-/** Runs the built CLI; `input`, when given, is written to its stdin. */
-export async function runCli(args: string[], input?: string): Promise<CliResult> {
+/**
+ * Runs a script with the test process's Node, without the Vitest and driver variables set
+ * in this process. `input`, when given, is written to its stdin.
+ */
+export async function runNode(
+   scriptPath: string,
+   args: string[],
+   input?: string,
+): Promise<CliResult> {
    return new Promise((resolveResult, reject) => {
-      const child = spawn(process.execPath, [getBuiltCliPath(), ...args], {
+      const child = spawn(process.execPath, [scriptPath, ...args], {
          cwd: process.cwd(),
          env: getChildEnv(),
          stdio: ['pipe', 'pipe', 'pipe'],
@@ -136,6 +143,11 @@ export async function runCli(args: string[], input?: string): Promise<CliResult>
          });
       });
    });
+}
+
+/** Runs the built CLI; `input`, when given, is written to its stdin. */
+export function runCli(args: string[], input?: string): Promise<CliResult> {
+   return runNode(getBuiltCliPath(), args, input);
 }
 
 export async function runCliInProcess(args: string[]): Promise<CliResult> {

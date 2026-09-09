@@ -8,14 +8,25 @@ import { virtual } from '@guidepup/virtual-screen-reader';
 import { test as base } from 'vitest';
 
 import type { ActionContext } from '../../../core/src/driver/broker-types.js';
+import {
+   queueScreenReader,
+   type QueuedScreenReader,
+} from '../../../core/src/driver/queued-screen-reader.js';
 import { ScreenReader } from '../../../core/src/driver/screen-reader.js';
 import { createContextTransport } from '../../../core/src/driver/screen-reader-context.js';
 import { ScreenReaderAssertionError } from '../../../core/src/driver/screen-reader-errors.js';
 import { TranscriptRecorder } from '../../../core/src/driver/transcript-recorder.js';
 import { CliUsageError } from '../../../core/src/errors/cli-errors.js';
 import '../vitest/extend.js';
+import { createScreenReaderFixture } from '../vitest/fixture.js';
 
-export { ScreenReader, ScreenReaderAssertionError };
+export { queueScreenReader, ScreenReader, ScreenReaderAssertionError };
+import type {
+   CommandQueueOptions,
+   Queued,
+} from '../../../core/src/driver/command-queue.js';
+export type { CommandQueueOptions, Queued };
+export type { QueuedScreenReader };
 export {
    isScreenReader,
    screenReaderMatchers,
@@ -102,27 +113,34 @@ export async function screenReader(
    return new ScreenReader(transport);
 }
 
+/**
+ * Starts the virtual screen reader on the page and wraps it in a command queue, so the
+ * test calls its methods without `await`. `await using` runs every queued command and
+ * then stops the reader.
+ */
+export async function queuedScreenReader(
+   options: BrowserScreenReaderOptions = {},
+   queue: CommandQueueOptions = {},
+): Promise<QueuedScreenReader> {
+   return queueScreenReader(await screenReader(options), queue);
+}
+
 /** The fixtures `test` provides: a reader over the document body. */
 export interface BrowserScreenReaderFixtures {
-   sr: ScreenReader;
+   /** A queued reader over the page. Call its methods without `await`. */
+   sr: QueuedScreenReader;
    /** Override with `test.extend({ srOptions: { container } })` to bound the reader. */
    srOptions: BrowserScreenReaderOptions;
 }
 
 /**
  * Vitest's `test` with an `sr` fixture for browser mode: the virtual reader is started on
- * the page before each test and stopped after it.
+ * the page before each test and stopped after it. Its methods queue, so the test needs no
+ * `await` unless it reads a value.
  */
 export const test = base.extend<BrowserScreenReaderFixtures>({
    srOptions: {},
-   sr: async ({ srOptions }, use) => {
-      const sr = await screenReader(srOptions);
-      try {
-         await use(sr);
-      } finally {
-         await sr.stop();
-      }
-   },
+   sr: createScreenReaderFixture(screenReader),
 });
 
 export { test as it };

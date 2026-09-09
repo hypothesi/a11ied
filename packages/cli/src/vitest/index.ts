@@ -1,8 +1,13 @@
 import { test as base } from 'vitest';
 
-import { screenReader, type ScreenReader, type ScreenReaderOptions } from '@a11ied/core';
+import {
+   screenReader,
+   type QueuedScreenReader,
+   type ScreenReaderOptions,
+} from '@a11ied/core';
 
 import './extend.js';
+import { createScreenReaderFixture } from './fixture.js';
 
 export {
    isScreenReader,
@@ -15,8 +20,11 @@ export * from '../test/index.js';
 
 /** The fixtures `test` provides: the reader, and the options it is started with. */
 export interface ScreenReaderFixtures {
-   /** A reader started before the test and stopped after it. */
-   sr: ScreenReader;
+   /**
+    * A reader started before the test and stopped after it. Its methods queue: call them
+    * without `await`, and await only a call whose value the test needs.
+    */
+   sr: QueuedScreenReader;
    /**
     * Options for that reader. Override them for a file or a block with `test.extend({
     * srOptions: { url } })` or `test.scoped({ srOptions: { url } })`.
@@ -26,28 +34,21 @@ export interface ScreenReaderFixtures {
 
 /**
  * Vitest's `test` with an `sr` fixture: a screen reader started before each test from
- * `srOptions` and stopped after it, whether the test passed or failed.
+ * `srOptions` and stopped after it, whether the test passed or failed. The reader's
+ * methods queue, so the test needs no `await` unless it reads a value.
  *
  * @example
- *    import { expect } from 'vitest';
  *    import { test } from 'a11ied/vitest';
  *
- *    test('the pay button is announced', async ({ sr }) => {
- *       await sr.open('http://localhost:3000/checkout');
- *       await sr.goTo({ role: 'button', name: 'Pay' });
- *       await expect(sr).toBeOn({ role: 'button', name: 'Pay' });
+ *    test('the pay button is announced', ({ sr }) => {
+ *       sr.open('http://localhost:3000/checkout');
+ *       sr.goTo({ role: 'button', name: 'Pay' });
+ *       sr.expectOn({ role: 'button', name: 'Pay' });
  *    });
  */
 export const test = base.extend<ScreenReaderFixtures>({
    srOptions: {},
-   sr: async ({ srOptions }, use) => {
-      const sr = await screenReader(srOptions);
-      try {
-         await use(sr);
-      } finally {
-         await sr.stop();
-      }
-   },
+   sr: createScreenReaderFixture(screenReader),
 });
 
 export { test as it };

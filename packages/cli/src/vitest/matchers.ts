@@ -1,6 +1,7 @@
 import type { DriverCurrentItem, DriverTranscriptEntry } from '@a11ied/contracts';
 
 import type { WantedItem } from '../../../core/src/driver/broker-loops.js';
+import type { QueuedScreenReader } from '../../../core/src/driver/queued-screen-reader.js';
 import type { ScreenReader } from '../../../core/src/driver/screen-reader.js';
 import {
    checkCurrentItem,
@@ -11,14 +12,17 @@ import {
    type SpokenOptions,
 } from '../../../core/src/driver/spoken-matchers.js';
 
+/** A reader of either kind. The matchers only call `transcript` and `read` on it. */
+type AnyScreenReader = ScreenReader | QueuedScreenReader;
+
 /** What the spoken matchers accept: a reader, its transcript entries, or bare phrases. */
 export type SpokenReceived =
-   | ScreenReader
+   | AnyScreenReader
    | readonly DriverTranscriptEntry[]
    | readonly string[];
 
 /** What `toBeOn` accepts: a reader, or an item `sr.read()` returned. */
-export type ItemReceived = ScreenReader | DriverCurrentItem;
+export type ItemReceived = AnyScreenReader | DriverCurrentItem;
 
 /** The shape Vitest's `expect.extend` takes back from a matcher. */
 export interface MatcherOutcome {
@@ -28,9 +32,9 @@ export interface MatcherOutcome {
 
 /**
  * A structural check rather than `instanceof`, because the class can be bundled twice:
- * once in `a11ied/vitest` and once in `a11ied/test`.
+ * once in `a11ied/vitest` and once in `a11ied/test`. A queued reader passes it too.
  */
-export function isScreenReader(value: unknown): value is ScreenReader {
+export function isScreenReader(value: unknown): value is AnyScreenReader {
    return (
       typeof value === 'object' &&
       value !== null &&
@@ -59,7 +63,9 @@ function toEntries(
 async function resolveEntries(
    received: SpokenReceived,
 ): Promise<DriverTranscriptEntry[]> {
-   return isScreenReader(received) ? received.transcript() : toEntries(received);
+   return isScreenReader(received)
+      ? Promise.resolve(received.transcript())
+      : toEntries(received);
 }
 
 function toOutcome(check: SpokenCheck): MatcherOutcome {
@@ -81,9 +87,9 @@ export const screenReaderMatchers = {
       options: SpokenOptions = {},
    ): MatcherOutcome | Promise<MatcherOutcome> {
       if (isScreenReader(received)) {
-         return received
-            .transcript()
-            .then((entries) => toOutcome(checkSpoken(entries, match, options)));
+         return Promise.resolve(received.transcript()).then((entries) =>
+            toOutcome(checkSpoken(entries, match, options)),
+         );
       }
       return toOutcome(checkSpoken(toEntries(received), match, options));
    },
@@ -104,7 +110,9 @@ export const screenReaderMatchers = {
       wanted: WantedItem,
    ): MatcherOutcome | Promise<MatcherOutcome> {
       if (isScreenReader(received)) {
-         return received.read().then((item) => toOutcome(checkCurrentItem(item, wanted)));
+         return Promise.resolve(received.read()).then((item) =>
+            toOutcome(checkCurrentItem(item, wanted)),
+         );
       }
       return toOutcome(checkCurrentItem(received, wanted));
    },
