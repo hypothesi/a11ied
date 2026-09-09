@@ -62,6 +62,19 @@ export function diffObservations(
 }
 
 /**
+ * A key can remove the widget from the page: Escape closes a dialog that unmounts. The
+ * snapshot would wait for the element to come back and time out, so an absent widget
+ * reads as an empty tree, which the diff reports as a change.
+ */
+async function readWidgetTree(page: Page, selector: string): Promise<string> {
+   const widget = page.locator(selector);
+   if ((await widget.count()) === 0) {
+      return '';
+   }
+   return widget.ariaSnapshot();
+}
+
+/**
  * Reads the widget's focused element, the state attributes across its subtree, and its
  * accessibility tree.
  *
@@ -117,7 +130,7 @@ export async function observeWidget(
       },
    );
 
-   return { ...dom, accessibilityTree: await page.locator(selector).ariaSnapshot() };
+   return { ...dom, accessibilityTree: await readWidgetTree(page, selector) };
 }
 
 /**
