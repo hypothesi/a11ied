@@ -23,9 +23,14 @@ import {
    type ParsedApgExampleLink,
    type ParsedApgPatternLink,
 } from '../sources/apg/index-pages.js';
+import type { ParsedApgPatternPage } from '../sources/apg/pattern-page.js';
 import { ensureWcagDataDirectories } from '../sources/definitions.js';
 import { mapWithConcurrency } from '../sources/documents/pool.js';
+import { fetchPatternPages } from './apg-pages.js';
+import { errorMessage, fetchText, type ApgFetchFailure } from './apg-shared.js';
 import { writeGeneratedArtifact } from './version.js';
+
+export type { ApgFetchFailure } from './apg-shared.js';
 
 const DEFAULT_CONCURRENCY = 4;
 const APG_PATTERNS_FILE_NAME = 'apg-patterns.json';
@@ -50,12 +55,6 @@ const APG_DOCUMENT = {
    status: 'W3C WAI resource, informative guidance that is not a W3C Recommendation',
 } as const;
 
-export interface ApgFetchFailure {
-   exampleId: string;
-   url: string;
-   message: string;
-}
-
 export interface SyncApgPatternsResult {
    generated: GeneratedArtifactWriteResult;
    requestCount: number;
@@ -71,18 +70,6 @@ export interface SyncApgPatternsResult {
 type ExampleOutcome =
    | { kind: 'example'; example: ApgExample }
    | { kind: 'failure'; failure: ApgFetchFailure };
-
-function errorMessage(error: unknown): string {
-   return error instanceof Error ? error.message : String(error);
-}
-
-async function fetchText(url: string, fetchImpl: FetchLike): Promise<string> {
-   const response = await fetchImpl(url);
-   if (!response.ok) {
-      throw new Error(`HTTP ${response.status} ${response.statusText} for ${url}`);
-   }
-   return response.text();
-}
 
 async function fetchExample(
    link: ParsedApgExampleLink,
@@ -124,6 +111,7 @@ function sortById<TValue>(entries: Array<[string, TValue]>): Record<string, TVal
 function buildPatterns(
    examples: ApgExample[],
    titles: Map<string, { title: string; pageUrl: string }>,
+   pages: Map<string, ParsedApgPatternPage>,
 ): Record<string, ApgPattern> {
    const byPattern = new Map<string, string[]>();
    for (const example of examples) {
@@ -142,6 +130,7 @@ function buildPatterns(
             id,
             title: listed?.title ?? id,
             pageUrl: listed?.pageUrl ?? `https://www.w3.org/WAI/ARIA/apg/patterns/${id}/`,
+            sections: pages.get(id)?.sections ?? [],
             exampleIds: (byPattern.get(id) ?? []).toSorted((left, right) =>
                left.localeCompare(right),
             ),
@@ -251,6 +240,7 @@ function buildArtifact(input: {
    examples: ApgExample[];
    index: ParsedApgExampleIndex;
    patternLinks: ParsedApgPatternLink[];
+   pages: Map<string, ParsedApgPatternPage>;
 }): ApgPatternsArtifact {
    const known = new Set(input.examples.map((example) => example.id));
    const titles = new Map(
@@ -262,7 +252,7 @@ function buildArtifact(input: {
 
    return apgPatternsArtifactSchema.parse({
       document: APG_DOCUMENT,
-      patterns: buildPatterns(input.examples, titles),
+      patterns: buildPatterns(input.examples, titles, input.pages),
       examples: sortById(input.examples.map((example) => [example.id, example])),
       roleIndex: pruneIndex(input.index.roleIndex, known),
       attributeIndex: pruneIndex(input.index.attributeIndex, known),
@@ -300,7 +290,14 @@ export async function syncApgPatterns(options?: {
       { concurrency },
    );
    const { examples, failures } = splitOutcomes(outcomes);
-   const artifact = buildArtifact({ examples, index, patternLinks });
+   const fetched = await fetchPatternPages(patternLinks, { fetchImpl, concurrency });
+   failures.push(...fetched.failures);
+   const artifact = buildArtifact({
+      examples,
+      index,
+      patternLinks,
+      pages: fetched.pages,
+   });
    const body = toJsonString(artifact);
    const generated = await writeGeneratedArtifact(
       directories,
@@ -311,7 +308,7 @@ export async function syncApgPatterns(options?: {
 
    return {
       generated,
-      requestCount: index.examples.length + INDEX_REQUEST_COUNT,
+      requestCount: index.examples.length + patternLinks.length + INDEX_REQUEST_COUNT,
       patternCount: Object.keys(artifact.patterns).length,
       exampleCount: examples.length,
       keyboardRowCount: countRows(examples, 'keyboard'),

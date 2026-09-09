@@ -20,7 +20,9 @@ function registerPatternShowTool(server: McpServer): void {
          title: 'ARIA pattern show',
          description:
             'Show one ARIA Authoring Practices Guide pattern by id (such as "combobox") with the ' +
-            'examples the guide publishes for it, or one example by id (such as ' +
+            "guide's own text for it, in sections: About This Pattern, Keyboard Interaction, and " +
+            'WAI-ARIA Roles, States, and Properties, plus the examples the guide publishes for it. ' +
+            'Or show one example by id (such as ' +
             '"combobox-select-only") with its keyboard support table and its role, property, state, ' +
             'and tabindex table. Read this before writing or reviewing a custom widget rather than ' +
             'recalling the pattern. Omit name to list every pattern. Matches the CLI pattern ' +

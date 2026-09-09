@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { parseApgExample } from './sources/apg/example.js';
+import { parseApgPatternPage } from './sources/apg/pattern-page.js';
 import { parseExampleIndex, parsePatternIndex } from './sources/apg/index-pages.js';
 import { ApgParseError } from './sources/apg/shared.js';
 import { getWcagDataDirectories } from './sources/definitions.js';
@@ -209,5 +210,56 @@ describe('parseApgExample attribute values', () => {
          value: 'true',
          isIdRef: false,
       });
+   });
+});
+
+describe('parseApgPatternPage', () => {
+   const PAGE_URL = 'https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/';
+
+   it('reads every titled section of the page in order, as Markdown', async () => {
+      const page = parseApgPatternPage(
+         await readSample('windowsplitter-pattern'),
+         PAGE_URL,
+      );
+
+      expect(page.sections.map((entry) => [entry.id, entry.title])).toEqual([
+         ['about', 'About This Pattern'],
+         ['example', 'Example'],
+         ['keyboard_interaction', 'Keyboard Interaction'],
+         ['roles_states_properties', 'WAI-ARIA Roles, States, and Properties'],
+      ]);
+      const keyboard = page.sections.find((entry) => entry.id === 'keyboard_interaction');
+
+      expect(keyboard?.markdown).toContain(
+         '-   Left Arrow: Moves a vertical splitter to the left.',
+      );
+   });
+
+   it('turns a link to an anchor on the same page into its text', async () => {
+      const page = parseApgPatternPage(
+         await readSample('windowsplitter-pattern'),
+         PAGE_URL,
+      );
+      const roles = page.sections.find((entry) => entry.id === 'roles_states_properties');
+
+      expect(roles?.markdown).toContain('has role separator.');
+      expect(roles?.markdown).not.toContain('](#');
+   });
+
+   it('keeps the subsection headings of a long keyboard section', async () => {
+      const page = parseApgPatternPage(
+         await readSample('combobox-pattern'),
+         'https://www.w3.org/WAI/ARIA/apg/patterns/combobox/',
+      );
+      const keyboard = page.sections.find((entry) => entry.id === 'keyboard_interaction');
+
+      expect(keyboard?.markdown).toContain('### Combobox Keyboard Interaction');
+      expect(keyboard?.markdown).toContain('### Listbox Popup Keyboard Interaction');
+   });
+
+   it('fails when the page has no main element', () => {
+      expect(() => parseApgPatternPage('<html><body></body></html>', PAGE_URL)).toThrow(
+         ApgParseError,
+      );
    });
 });

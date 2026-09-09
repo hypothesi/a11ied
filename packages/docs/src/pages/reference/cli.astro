@@ -204,7 +204,7 @@ a1 wcag G18</code></pre>
       </p>
       <div class="route-list">
          <div class="route-row"><code>pattern</code><span>Every pattern with its example count. Same as <code>pattern list</code>.</span></div>
-         <div class="route-row"><code>pattern &lt;name&gt;</code><span>One pattern by id such as <code>combobox</code>, with the examples the guide publishes for it, or one example by id such as <code>combobox-select-only</code>, with its keyboard and attribute tables. <code>--section keyboard</code>, <code>attributes</code>, or <code>examples</code> narrows the output.</span></div>
+         <div class="route-row"><code>pattern &lt;name&gt;</code><span>One pattern by id such as <code>combobox</code>, with the guide's own text for it, section by section, and the examples the guide publishes for it. Or one example by id such as <code>combobox-select-only</code>, with its keyboard and attribute tables. <code>--section about</code>, <code>keyboard</code>, <code>attributes</code>, or <code>examples</code> narrows the output.</span></div>
          <div class="route-row"><code>pattern role &lt;role&gt;</code><span>The examples the APG example index files under one ARIA role.</span></div>
          <div class="route-row"><code>pattern attribute &lt;attribute&gt;</code><span>The examples the index files under one property or state, such as <code>aria-expanded</code>.</span></div>
          <div class="route-row"><code>pattern check &lt;target&gt;</code><span>Press every key one example declares against a live widget, and check its documented attributes. <code>--pattern</code> and <code>--selector</code> are both required. <code>--click</code> opens a widget the page renders only after a click, such as a dialog behind its trigger. <code>--table</code> and <code>--setup</code> reach a state the first keyboard table does not cover.</span></div>
@@ -213,6 +213,7 @@ a1 wcag G18</code></pre>
       </div>
       <pre><code>a1 pattern combobox
 a1 pattern combobox-select-only --section keyboard
+a1 pattern windowsplitter --section keyboard
 a1 pattern role combobox
 a1 pattern attribute aria-expanded
 a1 pattern check http://localhost:3000 --pattern combobox-select-only --selector '#fruit'

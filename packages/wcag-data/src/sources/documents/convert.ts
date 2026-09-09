@@ -41,7 +41,7 @@ function removeFurniture(main: Element): void {
  * once the text is read in a terminal, so each one becomes an absolute URL against the
  * page it was copied from.
  */
-function absolutizeLinks(main: Element, documentUrl: string): void {
+export function absolutizeLinks(main: Element, documentUrl: string): void {
    for (const anchor of main.querySelectorAll('a[href]')) {
       const href = anchor.getAttribute('href') ?? '';
       if (href.startsWith('#') || href === '') {
@@ -67,6 +67,11 @@ function keepCoreSections(main: Element): void {
          section.remove();
       }
    }
+}
+
+/** Converts a fragment of W3C page HTML to Markdown with the same settings as a document. */
+export function htmlToMarkdown(html: string): string {
+   return turndown.turndown(html).trim();
 }
 
 /**

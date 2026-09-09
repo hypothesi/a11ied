@@ -8,7 +8,7 @@ const MIN_PATTERN_COUNT = 20;
 
 interface PatternLookupResult {
    kind: string;
-   pattern: { id: string; title: string };
+   pattern: { id: string; title: string; sections: Array<{ id: string }> };
    examples?: Array<{ id: string }>;
    example?: {
       id: string;
@@ -37,6 +37,12 @@ describe('a1 pattern lookups', () => {
       expect(result.status).toBe(EXIT_SUCCESS);
       expect(payload.kind).toBe('pattern');
       expect(payload.pattern.title).toBe('Combobox');
+      expect(payload.pattern.sections.map((entry) => entry.id)).toEqual([
+         'about',
+         'examples',
+         'keyboard_interaction',
+         'roles_states_properties',
+      ]);
       expect(payload.examples).toHaveLength(COMBOBOX_EXAMPLE_COUNT);
    });
 
@@ -77,6 +83,19 @@ describe('a1 pattern output', () => {
       expect(result.status).toBe(EXIT_SUCCESS);
       expect(result.stdout).toContain('Role, property, state, and tabindex');
       expect(result.stdout).not.toContain('Keyboard support');
+   });
+});
+
+describe('a1 pattern page text', () => {
+   it("prints the guide's own text for a pattern, section by section", async () => {
+      const result = await runCli(['pattern', 'windowsplitter', '--section', 'keyboard']);
+
+      expect(result.status).toBe(EXIT_SUCCESS);
+      expect(result.stdout).toContain('Keyboard Interaction');
+      expect(result.stdout).toContain(
+         'Left Arrow: Moves a vertical splitter to the left.',
+      );
+      expect(result.stdout).not.toContain('About This Pattern');
    });
 
    it('rejects a section name the family does not have', async () => {

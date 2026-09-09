@@ -85,10 +85,25 @@ export const apgExampleSchema = z.object({
 });
 export type ApgExample = z.infer<typeof apgExampleSchema>;
 
+/**
+ * One section of a pattern page, such as About This Pattern or Keyboard Interaction, as
+ * Markdown. The guide's own prose is what a person or an agent reads before testing a
+ * widget by hand, so it is stored whole rather than reduced to the example tables.
+ */
+export const apgPatternSectionSchema = z.object({
+   /** The section's id on the page, such as `keyboard_interaction`. */
+   id: z.string().min(1),
+   title: z.string().min(1),
+   markdown: z.string(),
+});
+export type ApgPatternSection = z.infer<typeof apgPatternSectionSchema>;
+
 export const apgPatternSchema = z.object({
    id: z.string().min(1),
    title: z.string().min(1),
    pageUrl: z.string().url(),
+   /** The page's own text, in page order. Empty when the page could not be read. */
+   sections: z.array(apgPatternSectionSchema),
    exampleIds: z.array(z.string().min(1)),
 });
 export type ApgPattern = z.infer<typeof apgPatternSchema>;

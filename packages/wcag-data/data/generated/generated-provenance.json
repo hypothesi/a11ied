@@ -92,7 +92,7 @@
       },
       {
          "fileName": "apg-patterns.json",
-         "sha256": "29479cbbf6caab23e2440b0ace5433fb892e565c9de78c96cfdda7b7fcce60de",
+         "sha256": "4af4581c0d86dce1433891d82ebf7ea514b0b77a67615669eee40d7d01bc3532",
          "sourceFileNames": [],
          "sourceUrls": [
             "https://www.w3.org/WAI/ARIA/apg/example-index/",

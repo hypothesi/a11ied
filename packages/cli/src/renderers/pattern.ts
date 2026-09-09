@@ -10,17 +10,27 @@ import {
    type W3cDocumentSource,
 } from '#contracts';
 
-import { code, count, dim, section, table } from '../lib/format.js';
+import { code, count, dim, markdownLines, section, table } from '../lib/format.js';
 import { attributionLine, W3C_SOFTWARE_AND_DOCUMENT_LICENSE } from './shared.js';
 
-/** Which blocks of an example view to print. */
-export type PatternDetailSection = 'keyboard' | 'attributes' | 'examples';
+/** Which blocks of a pattern or example view to print. */
+export type PatternDetailSection = 'about' | 'keyboard' | 'attributes' | 'examples';
 
 export const patternDetailSections: ReadonlyArray<PatternDetailSection> = [
+   'about',
    'keyboard',
    'attributes',
    'examples',
 ];
+
+/** The `--section` name each pattern page section answers to, by the id the page gives it. */
+const PAGE_SECTION_NAMES: Record<string, PatternDetailSection> = {
+   about: 'about',
+   example: 'examples',
+   examples: 'examples',
+   keyboard_interaction: 'keyboard',
+   roles_states_properties: 'attributes',
+};
 
 export const KEY_COLUMN_CAP = 26;
 
@@ -111,6 +121,16 @@ function exampleLines(
    ];
 }
 
+/** The pattern page's own text, section by section, for the sections asked for. */
+function pageSectionLines(
+   pattern: ApgPattern,
+   sections: ReadonlyArray<PatternDetailSection>,
+): string[] {
+   return pattern.sections
+      .filter((entry) => sections.includes(PAGE_SECTION_NAMES[entry.id] ?? 'about'))
+      .flatMap((entry) => section(entry.title, markdownLines(entry.markdown)));
+}
+
 /** The example table, or a note that the guide publishes none for this pattern. */
 function patternExampleLines(examples: ApgExample[]): string[] {
    if (examples.length === 0) {
@@ -132,7 +152,11 @@ function patternLines(
    result: { pattern: ApgPattern; examples: ApgExample[]; document: W3cDocumentSource },
    sections: ReadonlyArray<PatternDetailSection>,
 ): string[] {
-   const lines = [result.pattern.title, dim(`pattern id ${result.pattern.id}`)];
+   const lines = [
+      result.pattern.title,
+      dim(`pattern id ${result.pattern.id}`),
+      ...pageSectionLines(result.pattern, sections),
+   ];
 
    if (sections.includes('examples')) {
       lines.push(...patternExampleLines(result.examples));

@@ -224,3 +224,75 @@ export const doctorTextStyle: DoctorTextStyle = {
    dim,
    command: code,
 };
+
+const LIST_ITEM = /^(?<indent>\s*)(?<marker>[-*]|\d+\.)\s+(?<text>.*)$/u;
+const MARKDOWN_HEADING = /^#{1,6}\s+(?<text>.*)$/u;
+/** Turndown indents a nested list item by four spaces. */
+const NESTED_LIST_INDENT = 4;
+
+interface ListItem {
+   level: number;
+   /** A bullet, or the number the Markdown gave the item. */
+   marker: string;
+   text: string;
+}
+
+/** One item, wrapped to the terminal, with its continuation lines hanging under the text. */
+function itemLines(item: ListItem, depth: number): string[] {
+   const lead = INDENT.repeat(depth),
+      prefix = `${item.marker} `;
+   return wrap(item.text, depth + 1).map((line, index) => {
+      const hang = index === 0 ? prefix : ' '.repeat(prefix.length);
+      return `${lead}${hang}${line.trimStart()}`;
+   });
+}
+
+function listLines(block: string, depth: number): string[] {
+   const items: ListItem[] = [];
+   for (const line of block.split('\n')) {
+      const match = LIST_ITEM.exec(line);
+      const last = items.at(-1);
+      if (match?.groups) {
+         const marker = match.groups.marker ?? '';
+         items.push({
+            level: Math.floor((match.groups.indent ?? '').length / NESTED_LIST_INDENT),
+            marker: marker.endsWith('.') ? marker : symbols.bullet,
+            text: match.groups.text ?? '',
+         });
+      } else if (last) {
+         last.text = `${last.text} ${line.trim()}`;
+      }
+   }
+   return items.flatMap((item) => itemLines(item, depth + item.level));
+}
+
+function markdownBlockLines(block: string, depth: number): string[] {
+   const headingMatch = MARKDOWN_HEADING.exec(block);
+   if (headingMatch?.groups) {
+      return indent([heading(headingMatch.groups.text ?? '')], depth);
+   }
+   if (LIST_ITEM.test(block.split('\n')[0] ?? '')) {
+      return listLines(block, depth);
+   }
+   return wrap(block.replaceAll(/\s*\n\s*/gu, ' '), depth);
+}
+
+/**
+ * Prints Markdown the way the rest of the output reads: headings in the heading color,
+ * list items as wrapped bullets, and paragraphs wrapped to the terminal. Links stay as
+ * written, so a reader can follow them.
+ */
+export function markdownLines(markdown: string, depth = 0): string[] {
+   const blocks = markdown
+      .split(/\n\s*\n/u)
+      .map((block) => block.trim())
+      .filter((block) => block.length > 0);
+   const lines: string[] = [];
+   for (const [index, block] of blocks.entries()) {
+      if (index > 0) {
+         lines.push('');
+      }
+      lines.push(...markdownBlockLines(block, depth));
+   }
+   return lines;
+}

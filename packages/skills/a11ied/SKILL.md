@@ -64,7 +64,9 @@ a1 pattern role combobox
 a1 pattern attribute aria-expanded
 ```
 
-`a1 pattern <id>` prints the pattern and the examples the guide publishes for it. Give it an
+`a1 pattern <id>` prints the guide's own text for the pattern, section by section: About
+This Pattern, Keyboard Interaction, and WAI-ARIA Roles, States, and Properties, then the
+examples the guide publishes for it. Read it before testing a widget by hand. Give it an
 example id instead and it prints that example's keyboard support table and its role,
 property, state, and tabindex table. `a1 pattern role <role>` goes the other way: from a role
 you saw in an accessibility tree to the examples that document it.
