@@ -41,3 +41,5 @@ export async function getPageTitle(
 ): Promise<string> {
    return withLoadedPage(load, (page) => page.title(), options);
 }
+
+export { getPageHtml } from '../browser/shared-browser.js';

@@ -13,6 +13,7 @@ const { env: processEnv, platform: processPlatform } = process;
 type BrowserPathLookup = readonly string[];
 
 export interface BrowserLaunchOptions {
+   args?: string[];
    channel?: 'chrome' | 'msedge';
    executablePath?: string;
    headless: boolean;

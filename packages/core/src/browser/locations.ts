@@ -151,6 +151,8 @@ function resolvePlaywrightChromiumLocation(deps: BrowserPolicyDeps): string | un
    return path;
 }
 
+const AUTOMATION_CONTROLLED_ARG = '--disable-blink-features=AutomationControlled';
+
 export const browserDefinitions: readonly BrowserLaunchCandidateDefinition[] = [
    {
       id: 'chrome',
@@ -159,6 +161,7 @@ export const browserDefinitions: readonly BrowserLaunchCandidateDefinition[] = [
       source: 'system',
       resolveLocation: resolveChromeLocation,
       toLaunchOptions: () => ({
+         args: [AUTOMATION_CONTROLLED_ARG],
          channel: 'chrome',
          headless: true,
       }),
@@ -170,6 +173,7 @@ export const browserDefinitions: readonly BrowserLaunchCandidateDefinition[] = [
       source: 'system',
       resolveLocation: resolveEdgeLocation,
       toLaunchOptions: () => ({
+         args: [AUTOMATION_CONTROLLED_ARG],
          channel: 'msedge',
          headless: true,
       }),
@@ -183,11 +187,13 @@ export const browserDefinitions: readonly BrowserLaunchCandidateDefinition[] = [
       toLaunchOptions: (location) => {
          if (location) {
             return {
+               args: [AUTOMATION_CONTROLLED_ARG],
                executablePath: location,
                headless: true,
             };
          }
          return {
+            args: [AUTOMATION_CONTROLLED_ARG],
             headless: true,
          };
       },
@@ -201,11 +207,13 @@ export const browserDefinitions: readonly BrowserLaunchCandidateDefinition[] = [
       toLaunchOptions: (location) => {
          if (location) {
             return {
+               args: [AUTOMATION_CONTROLLED_ARG],
                executablePath: location,
                headless: true,
             };
          }
          return {
+            args: [AUTOMATION_CONTROLLED_ARG],
             headless: true,
          };
       },
@@ -217,6 +225,7 @@ export const browserDefinitions: readonly BrowserLaunchCandidateDefinition[] = [
       source: 'playwright',
       resolveLocation: resolvePlaywrightChromiumLocation,
       toLaunchOptions: () => ({
+         args: [AUTOMATION_CONTROLLED_ARG],
          headless: true,
       }),
    },

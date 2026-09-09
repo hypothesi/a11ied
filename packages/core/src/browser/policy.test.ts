@@ -112,10 +112,12 @@ it('launches the first working candidate in order', async () => {
    expect(result.candidate.id).toBe('chromium');
    expect(launchCalls).toEqual([
       {
+         args: ['--disable-blink-features=AutomationControlled'],
          channel: 'chrome',
          headless: true,
       },
       {
+         args: ['--disable-blink-features=AutomationControlled'],
          executablePath: chromiumPath,
          headless: true,
       },

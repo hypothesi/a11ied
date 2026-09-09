@@ -10,7 +10,7 @@ import { listRelevantCriteria } from '@a11ied/wcag-engine';
 import { scanHtmlForPageSignals } from '../relevance/html.js';
 import { runAxe } from '../axe/runtime.js';
 import type { DocumentLoad } from '../targets/parse.js';
-import { getAccessibilityTree, getPageTitle } from '../tree/runtime.js';
+import { getAccessibilityTree, getPageHtml, getPageTitle } from '../tree/runtime.js';
 import { parseWcagVersion } from '../wcag/parsing.js';
 import { buildSubjectKey } from '../evidence/subject.js';
 import { readEvidenceForSubject } from '../evidence/store.js';
@@ -60,7 +60,7 @@ export async function buildAuditReport(
    const pageTitle = await getPageTitle(input.load, pageOptions);
    const treeSummary = summarizeAccessibilityTree(tree.nodes, pageTitle);
 
-   const html = await input.readHtml();
+   const html = await getPageHtml(input.load, pageOptions).catch(() => input.readHtml());
    const pageScan = scanHtmlForPageSignals(input.target.value, html, {
       target: input.target,
       metadata: input.metadata,

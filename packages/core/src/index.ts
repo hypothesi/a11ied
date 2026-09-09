@@ -105,6 +105,7 @@ export { buildAuditEarlReport, type AuditEarlReportOptions } from './audit/earl.
 export type { PageCookie } from './browser/page-setup.js';
 export {
    getAccessibilityTree,
+   getPageHtml,
    getPageTitle,
    type AccessibilityTree,
 } from './tree/runtime.js';

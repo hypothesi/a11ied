@@ -47,10 +47,18 @@ export interface ResolvedDocumentTarget {
    readHtml: () => Promise<string>;
 }
 
+const BROWSER_USER_AGENT =
+   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36';
+
 async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
    try {
       return await fetch(url, {
-         headers: { 'user-agent': 'a11ied/0.1.0' },
+         headers: {
+            accept:
+               'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'accept-language': 'en-US,en;q=0.9',
+            'user-agent': BROWSER_USER_AGENT,
+         },
          signal: AbortSignal.timeout(timeoutMs),
       });
    } catch (error) {

@@ -12,13 +12,13 @@ export interface LoadDocumentOptions {
  * target, or sets the page content directly for inline HTML (stdin or `--html`).
  */
 function buildLoadOptions(timeoutMs: number | undefined): {
-   waitUntil: 'networkidle';
+   waitUntil: 'load';
    timeout?: number;
 } {
    if (timeoutMs === undefined) {
-      return { waitUntil: 'networkidle' };
+      return { waitUntil: 'load' };
    }
-   return { waitUntil: 'networkidle', timeout: timeoutMs };
+   return { waitUntil: 'load', timeout: timeoutMs };
 }
 
 export async function loadDocumentIntoPage(

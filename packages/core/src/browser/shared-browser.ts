@@ -24,6 +24,25 @@ let sharedPage: Page | undefined = globalThis.undefined;
 let sharedPageUrl: string | undefined = globalThis.undefined;
 let sharedPageUsers = 0;
 let sharedBrowserFocusTarget: DriverFocusTarget | undefined = globalThis.undefined;
+let sharedCleanUserAgent: string | undefined = globalThis.undefined;
+
+export function sanitizeHeadlessUserAgent(userAgent: string): string {
+   return userAgent.replace('HeadlessChrome/', 'Chrome/');
+}
+
+async function resolveCleanUserAgent(browser: Browser): Promise<string> {
+   if (sharedCleanUserAgent !== undefined) {
+      return sharedCleanUserAgent;
+   }
+   const page = await browser.newPage();
+   try {
+      const rawUserAgent = await page.evaluate(() => navigator.userAgent);
+      sharedCleanUserAgent = sanitizeHeadlessUserAgent(rawUserAgent);
+      return sharedCleanUserAgent;
+   } finally {
+      await page.close().catch(() => globalThis.undefined);
+   }
+}
 
 async function closeSharedBrowser(): Promise<void> {
    if (!sharedBrowser || sharedBrowserUsers > 0) {
@@ -31,6 +50,7 @@ async function closeSharedBrowser(): Promise<void> {
    }
    const browser = sharedBrowser;
    sharedBrowser = globalThis.undefined;
+   sharedCleanUserAgent = globalThis.undefined;
    sharedPage = globalThis.undefined;
    sharedPageUrl = globalThis.undefined;
    sharedPageUsers = 0;
@@ -107,7 +127,8 @@ async function createNewPage(
    url: string,
    timeoutMs?: number,
 ): Promise<Page> {
-   const page = await browser.newPage();
+   const userAgent = await resolveCleanUserAgent(browser);
+   const page = await browser.newPage({ userAgent });
    await loadDocumentIntoPage(page, { kind: 'goto', url }, { timeoutMs });
    return page;
 }
@@ -193,7 +214,9 @@ async function withCustomPage<TResult>(
    sharedBrowserUsers += 1;
 
    try {
-      const page = await browser.newPage();
+      const userAgent =
+         options.extraHeaders?.['user-agent'] ?? (await resolveCleanUserAgent(browser));
+      const page = await browser.newPage({ userAgent });
       try {
          await applyPageSetup(page, options);
          await loadDocumentIntoPage(page, load, options);
@@ -225,6 +248,18 @@ export async function withLoadedPage<TResult>(
    return await withBrowserPage(load.url, callback, options);
 }
 
+/**
+ * Loads a target and returns its rendered HTML content. Reuses the shared cached page
+ * when the target was already loaded for a `goto` load with no custom viewport, headers,
+ * cookies, or click.
+ */
+export async function getPageHtml(
+   load: DocumentLoad,
+   options: WithBrowserPageOptions = {},
+): Promise<string> {
+   return withLoadedPage(load, (page) => page.content(), options);
+}
+
 export async function withInteractiveBrowserPage<TResult>(
    url: string,
    callback: (page: Page) => Promise<TResult>,
@@ -234,7 +269,7 @@ export async function withInteractiveBrowserPage<TResult>(
    const page = await launch.browser.newPage();
 
    try {
-      await page.goto(url, { waitUntil: 'networkidle' });
+      await page.goto(url, { waitUntil: 'load' });
       await page.bringToFront();
       await page.waitForTimeout(INTERACTIVE_BROWSER_READY_MS);
       return await callback(page);
