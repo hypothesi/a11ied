@@ -242,7 +242,8 @@ function itemLines(item: ListItem, depth: number): string[] {
    const lead = INDENT.repeat(depth),
       prefix = `${item.marker} `;
    return wrap(item.text, depth + 1).map((line, index) => {
-      const hang = index === 0 ? prefix : ' '.repeat(prefix.length);
+      /* Printed width, because a colored bullet is longer than the one column it takes. */
+      const hang = index === 0 ? prefix : ' '.repeat(stringWidth(prefix));
       return `${lead}${hang}${line.trimStart()}`;
    });
 }
