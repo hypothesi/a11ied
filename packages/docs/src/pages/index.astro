@@ -28,19 +28,21 @@ const toc = [
          assertions for keyboard focus, <abbr title="Accessible Rich Internet Applications: W3C specification of attributes that define accessible UI roles, states, and properties"><a href="https://www.w3.org/TR/wai-aria/" target="_blank" rel="noreferrer">ARIA</a></abbr> state,
          and spoken announcements.
       </p>
-      <pre><code>import {'{'} describe, it {'}'} from 'vitest';
-import {'{'} screenReader {'}'} from 'a11ied/test';
+      <pre><code>import {'{'} describe {'}'} from 'vitest';
+import {'{'} test {'}'} from 'a11ied/vitest';
+
+const combobox = test.extend({'{'}
+   srOptions: {'{'} url: 'http://localhost:3000/components/combobox' {'}'},
+{'}'});
 
 describe('combobox component', () => {'{'}
-   it('announces active option and expanded state', async () => {'{'}
-      await using sr = await screenReader({'{'} url: 'http://localhost:3000/components/combobox' {'}'});
+   combobox('announces active option and expanded state', ({'{'} sr {'}'}) => {'{'}
+      sr.press('Tab');
+      sr.expectSpoken('combobox, Select country, collapsed');
 
-      await sr.press('Tab');
-      await sr.expectSpoken('combobox, Select country, collapsed');
-
-      await sr.press('ArrowDown');
-      await sr.expectSpoken('combobox, Select country, expanded');
-      await sr.expectSpoken('option, Canada, 1 of 3');
+      sr.press('ArrowDown');
+      sr.expectSpoken('combobox, Select country, expanded');
+      sr.expectSpoken('option, Canada, 1 of 3');
    {'}'});
 {'}'});</code></pre>
       <p>
@@ -172,8 +174,8 @@ Start a screen reader session, open the modal, and verify:
 
          <section class="feature-card">
             <h3>Component testing</h3>
-            <p>Learn how to write screen reader assertions in Vitest or Jest using <code>a11ied/test</code>.</p>
-            <p class="feature-link"><a href="/guides/testing">Testing guide</a></p>
+            <p>Write screen reader assertions with the <code>a11ied/vitest</code> fixture, or with <code>a11ied/test</code> under Jest or another runner.</p>
+            <p class="feature-link"><a href="/guides/vitest">Vitest guide</a></p>
          </section>
 
          <section class="feature-card">

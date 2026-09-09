@@ -17,7 +17,7 @@ const toc = [
 
 <DocShell
    title="TypeScript API"
-   summary="Import the screen reader test API from a11ied/test, the Vitest matchers from a11ied/vitest, and driver sessions, axe runs, WCAG lookups, applicability, and host diagnostics from the a11ied package. These are the same functions the CLI commands and the MCP tools call."
+   summary="Import the screen reader test API from a11ied/test, the Vitest matchers and the queued sr fixture from a11ied/vitest, and driver sessions, axe runs, WCAG lookups, applicability, and host diagnostics from the a11ied package. These are the same functions the CLI commands and the MCP tools call."
    links={docsLinks}
    toc={toc}
 >
@@ -51,24 +51,28 @@ const toc = [
          <p class="panel-kicker">Tests</p>
          <h2>Drive a screen reader from a test</h2>
       </div>
-      <pre><code>import {'{'} screenReader {'}'} from 'a11ied/test';
+      <pre><code>import {'{'} queuedScreenReader {'}'} from 'a11ied/test';
 
-await using sr = await screenReader({'{'} url: 'http://localhost:3000/checkout' {'}'});
+await using sr = await queuedScreenReader({'{'} url: 'http://localhost:3000/checkout' {'}'});
 
-await sr.goTo({'{'} role: 'button', name: 'Pay' {'}'});
-await sr.activate();
-await sr.expectSpoken(/order placed/iu);</code></pre>
+sr.goTo({'{'} role: 'button', name: 'Pay' {'}'});
+sr.activate();
+sr.expectSpoken(/order placed/iu);</code></pre>
       <div class="route-list">
-         <div class="route-row"><code>screenReader(options?)</code><span>Takes <code>sr</code>, <code>url</code> or <code>html</code>, <code>mode</code> (<code>in-process</code> by default, or <code>broker</code>), <code>engine</code>, <code>recordingPath</code>, and <code>timeoutMs</code>. Returns a <code>ScreenReader</code> with the page open.</span></div>
-         <div class="route-row"><code>ScreenReader</code><span><code>next</code>, <code>previous</code>, <code>press</code>, <code>type</code>, <code>read</code>, <code>title</code>, <code>find</code>, <code>goTo</code>, <code>elements</code>, <code>readAll</code>, <code>walk</code>, <code>wait</code>, <code>checkpoint</code>, <code>transcript</code>, <code>open</code>, <code>interact</code>, <code>stopInteracting</code>, <code>activate</code>, <code>top</code>, <code>bottom</code>, <code>escape</code>, <code>table</code>, <code>perform</code>, <code>screenshot</code>, <code>focus</code>, <code>expectSpoken</code>, <code>stop</code>, and <code>Symbol.asyncDispose</code>. Navigation methods return the phrase, and <code>read</code> returns a <code>DriverCurrentItem</code>.</span></div>
-         <div class="route-row"><code>ScreenReaderAssertionError</code><span>Thrown by <code>expectSpoken</code>, <code>wait</code>, <code>find</code>, and <code>goTo</code>. Has <code>expected</code>, <code>phrases</code>, and <code>exitCode: 4</code>.</span></div>
-         <div class="route-row"><code>a11ied/vitest</code><span>Re-exports the above, installs <code>toHaveSpoken</code>, <code>toHaveSpokenInOrder</code>, and <code>toBeOn</code> on <code>expect</code>, and exports a <code>test</code> whose <code>sr</code> fixture is started from <code>srOptions</code> and stopped after each test.</span></div>
-         <div class="route-row"><code>a11ied/browser</code><span>For Vitest browser mode: <code>screenReader({'{'} container {'}'})</code> over the mounted component, the same matchers, and the same fixture.</span></div>
+         <div class="route-row"><code>screenReader(options?)</code><span>Takes <code>sr</code>, <code>url</code> or <code>html</code>, <code>mode</code> (<code>in-process</code> by default, or <code>broker</code>), <code>engine</code>, <code>recordingPath</code>, <code>idleTimeoutMinutes</code>, and <code>timeoutMs</code>. Returns a <code>ScreenReader</code> with the page open. Every method returns a promise.</span></div>
+         <div class="route-row"><div class="route-terms"><code>queuedScreenReader(options?, queue?)</code>, <code>queueScreenReader(reader, queue?)</code></div><span>The same options, and a <code>QueuedScreenReader</code> instead. <code>queueScreenReader</code> wraps a <code>ScreenReader</code> that is already started.</span></div>
+         <div class="route-row"><code>QueuedScreenReader</code><span>Every <code>ScreenReader</code> method except <code>stop</code>, with the same parameters, returning a <code>Queued&lt;T&gt;</code> thenable instead of a <code>Promise&lt;T&gt;</code>. A call queues a command and returns at once, and the queued commands run one at a time in the order they were queued. Awaiting a call runs the commands queued before it, then that one, and gives its value. <code>session</code> is a plain property, <code>reader</code> is the underlying <code>ScreenReader</code>, <code>drain()</code> waits for every queued command, and <code>stop()</code> drains, stops the reader even when the drain failed, then rethrows that error. <code>await using</code> calls <code>stop()</code>.</span></div>
+         <div class="route-row"><code>CommandQueueOptions</code><span>The second argument to both. <code>track(settled)</code> receives one promise per command, which rejects only when the command failed and nothing awaited it. <code>signal</code>, an <code>AbortSignal</code>, skips every command not yet started once it aborts. The <code>a11ied/vitest</code> fixture passes both, and a test needs neither.</span></div>
+         <div class="route-row"><code>ScreenReader</code><span><code>next</code>, <code>previous</code>, <code>press</code>, <code>type</code>, <code>read</code>, <code>title</code>, <code>find</code>, <code>goTo</code>, <code>elements</code>, <code>readAll</code>, <code>walk</code>, <code>wait</code>, <code>checkpoint</code>, <code>transcript</code>, <code>open</code>, <code>interact</code>, <code>stopInteracting</code>, <code>activate</code>, <code>top</code>, <code>bottom</code>, <code>escape</code>, <code>table</code>, <code>perform</code>, <code>screenshot</code>, <code>focus</code>, <code>expectSpoken</code>, <code>expectOn</code>, <code>expectSpokenInOrder</code>, <code>stop</code>, and <code>Symbol.asyncDispose</code>. Navigation methods return the phrase, and <code>read</code> returns a <code>DriverCurrentItem</code>.</span></div>
+         <div class="route-row"><code>ScreenReaderAssertionError</code><span>Thrown by <code>expectSpoken</code>, <code>expectOn</code>, <code>expectSpokenInOrder</code>, <code>wait</code>, <code>find</code>, and <code>goTo</code>. Has <code>expected</code>, <code>phrases</code>, and <code>exitCode: 4</code>.</span></div>
+         <div class="route-row"><code>a11ied/vitest</code><span>Re-exports the above, installs <code>toHaveSpoken</code>, <code>toHaveSpokenInOrder</code>, and <code>toBeOn</code> on <code>expect</code>, and exports a <code>test</code> whose <code>sr</code> fixture is a <code>QueuedScreenReader</code>, started from <code>srOptions</code> and stopped after each test. It needs Vitest 4.0.0 or later.</span></div>
+         <div class="route-row"><code>a11ied/browser</code><span>For Vitest browser mode: <code>screenReader({'{'} container {'}'})</code> and <code>queuedScreenReader({'{'} container {'}'})</code> over the mounted component, the same matchers, and the same queued <code>sr</code> fixture.</span></div>
       </div>
       <p>
          <code>await using</code> stops the reader when the block ends, so no <code>try</code> and
-         <code>finally</code> is needed. The <a href="/guides/testing">testing guide</a> has a test
-         file to copy and the browser mode configuration.
+         <code>finally</code> is needed. On a queued reader it also runs the commands still in the
+         queue. The <a href="/guides/vitest">Vitest guide</a> has a test file to copy and the
+         browser mode configuration.
       </p>
    </section>
 
@@ -262,7 +266,7 @@ const {'{'} target, targetType, warning {'}'} = await resolveAvailableDefaultTar
          <h2>Export map</h2>
       </div>
       <div class="route-list">
-         <div class="route-row"><strong>Tests</strong><span><code>a11ied/test</code>: <code>screenReader</code>, <code>ScreenReader</code>, <code>ScreenReaderAssertionError</code>. <code>a11ied/vitest</code> and <code>a11ied/browser</code>: <code>test</code>, <code>it</code>, <code>screenReaderMatchers</code></span></div>
+         <div class="route-row"><strong>Tests</strong><span><code>a11ied/test</code>: <code>screenReader</code>, <code>queuedScreenReader</code>, <code>queueScreenReader</code>, <code>ScreenReader</code>, <code>ScreenReaderAssertionError</code>. <code>a11ied/vitest</code> and <code>a11ied/browser</code>: <code>test</code>, <code>it</code>, <code>screenReaderMatchers</code></span></div>
          <div class="route-row"><strong>Sessions</strong><span><code>startDriverSession</code>, <code>getDriverSessionStatus</code>, <code>runDriverSessionAction</code>, <code>runEphemeralDriverAction</code>, <code>stopDriverSession</code>, <code>attachDocumentToDriverSession</code>, <code>cleanupStaleDriverSessions</code></span></div>
          <div class="route-row"><strong>Commands</strong><span><code>listDriverCommands</code>, <code>resolveDriverCommand</code>, <code>driverCommandSets</code>, <code>isDriverCommandSet</code>, <code>parseDriverCommandSet</code></span></div>
          <div class="route-row"><strong>axe</strong><span><code>runAxe</code></span></div>
@@ -275,6 +279,7 @@ const {'{'} target, targetType, warning {'}'} = await resolveAvailableDefaultTar
       <p>
          The package also exports the option and result types, including
          <code>AxeRunOptions</code>, <code>ScreenReaderOptions</code>,
+         <code>QueuedScreenReader</code>, <code>CommandQueueOptions</code>,
          <code>StartDriverSessionOptions</code>, <code>DriverCommandList</code>, and
          <code>TargetType</code>.
       </p>

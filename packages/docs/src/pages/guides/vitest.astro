@@ -1,0 +1,246 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'install', label: 'Install' },
+   { id: 'fixture', label: 'The sr fixture' },
+   { id: 'queue', label: 'The command queue' },
+   { id: 'timeouts', label: 'Timeouts' },
+   { id: 'matchers', label: 'Matchers' },
+   { id: 'example', label: 'Example test file' },
+   { id: 'browser', label: 'Vitest browser mode' },
+   { id: 'other-runners', label: 'Other runners' },
+];
+---
+
+<DocShell
+   title="Test with Vitest"
+   summary="a11ied/vitest gives Vitest a test whose sr fixture is a queued screen reader, so a test writes no await until it needs a value. It needs Vitest 4.0.0 or later."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="panel" id="install">
+      <h2>Install</h2>
+      <pre><code>npm install --save-dev a11ied vitest</code></pre>
+      <p>
+         Vitest is an optional peer dependency of <code>a11ied</code>, range
+         <code>&gt;=4.0.0</code>, so the package installs and runs without it.
+         <code>a11ied/vitest</code> exports <code>test</code> and <code>it</code> with the
+         <code>sr</code> fixture, the three <code>expect</code> matchers, and everything
+         <code>a11ied/test</code> exports.
+      </p>
+   </section>
+
+   <section class="panel" id="fixture">
+      <h2>The sr fixture</h2>
+      <p>
+         The exported <code>test</code> provides <code>sr</code>, a
+         <code>QueuedScreenReader</code>. The fixture starts it from the <code>srOptions</code>
+         fixture before each test and stops it after the test, whether the test passed or
+         failed. Override the options for a file with
+         <code>test.extend({'{'} srOptions: {'{'} url {'}'} {'}'})</code>, or for a block with
+         <code>test.scoped</code>.
+      </p>
+      <pre><code>import {'{'} test {'}'} from 'a11ied/vitest';
+
+const checkout = test.extend({'{'}
+   srOptions: {'{'} url: 'http://localhost:3000/checkout' {'}'},
+{'}'});</code></pre>
+      <p>
+         <code>srOptions</code> takes the <code>ScreenReaderOptions</code> fields:
+         <code>sr</code> (<code>virtual</code> by default, <code>voiceover</code>, or
+         <code>nvda</code>), a <code>url</code> or inline <code>html</code>, <code>mode</code>,
+         <code>engine</code>, <code>recordingPath</code>, <code>timeoutMs</code>, and
+         <code>idleTimeoutMinutes</code>. The default mode, <code>in-process</code>, runs the
+         screen reader inside the test process, so tests in parallel workers do not compete for
+         the one active <code>a1 sr</code> session.
+      </p>
+   </section>
+
+   <section class="panel" id="queue">
+      <h2>The command queue</h2>
+      <p>
+         A method call queues a command and returns at once. The queued commands run one at a
+         time in the order they were queued. A test calls the methods with no
+         <code>await</code>.
+      </p>
+      <p>
+         Await a call when the test needs its value, such as
+         <code>const item = await sr.read();</code>. That await runs every command queued before
+         it, then that call, and gives its value.
+      </p>
+      <p>
+         Await a call the test expects to fail, such as
+         <code>await expect(sr.expectSpoken('Refund')).rejects.toThrow('Refund');</code>. The
+         rejection goes to that await and the queue runs the next command.
+      </p>
+      <p>
+         When a command throws and nothing awaited it, every command queued after it is skipped
+         and rejects with the same error, and the test fails. The fixture records each queued
+         command on the test task. After the test function returns, Vitest awaits those and
+         reports each rejection as an error of the test, with the message and a code frame at
+         the line that queued the command. The error keeps its class,
+         <code>ScreenReaderAssertionError</code> for a failed check, its <code>message</code>,
+         and its <code>expected</code>, <code>phrases</code>, and <code>exitCode</code> fields.
+      </p>
+      <p>
+         A failed check in a test over a native <code>&lt;select&gt;</code> labeled Select country,
+         run with the simulated screen reader, prints:
+      </p>
+      <pre data-label="OUTPUT"><code>FAIL  combobox.test.ts > combobox component > announces active option and expanded state
+ScreenReaderAssertionError: "option, Canada, 1 of 3" was not announced in the transcript (5 phrases checked).
+The reader said:
+  "document"
+  "main"
+  "Select country"
+  "combobox, Select country, Australia, has popup listbox, not expanded"
+  "option, Australia, not selected, position 1, set size 3"
+ > combobox.test.ts:23:10
+     21|       sr.expectSpoken('combobox, Select country');
+     22|       sr.next();
+     23|       sr.expectSpoken('option, Canada, 1 of 3');
+       |          ^</code></pre>
+   </section>
+
+   <section class="panel" id="timeouts">
+      <h2>Timeouts</h2>
+      <p>
+         Queued commands run inside Vitest's <code>testTimeout</code>, 5000 ms by default, and
+         before <code>afterEach</code>. A test that queues a long sequence needs a longer
+         <code>testTimeout</code>. Pass it as the third argument to one test, or set it in
+         <code>vitest.config.ts</code> for the run. <code>timeoutMs</code> in
+         <code>srOptions</code> bounds each single command.
+      </p>
+      <p>
+         When the test times out or the run is canceled, Vitest aborts the test's signal and the
+         queue skips every command not yet started. The command already running finishes on its
+         own.
+      </p>
+   </section>
+
+   <section class="panel" id="matchers">
+      <h2>Matchers</h2>
+      <p>
+         Importing <code>a11ied/vitest</code> installs three matchers on <code>expect</code> and
+         adds their types.
+      </p>
+      <div class="route-list">
+         <div class="route-row"><code>toHaveSpoken(match, {'{'} since, not {'}'})</code><span>An announcement matches. The failure message is the one <code>expectSpoken</code> throws.</span></div>
+         <div class="route-row"><code>toHaveSpokenInOrder([a, b, c])</code><span>Each match is found after the previous one, with any announcements between. The failure says which match it did not find and which announcement it looked for after.</span></div>
+         <div class="route-row"><code>toBeOn({'{'} role, name {'}'})</code><span>The element under the cursor has the role, the name, or both. The failure says which element the cursor is on.</span></div>
+      </div>
+      <p>
+         Given a <code>ScreenReader</code> or a <code>QueuedScreenReader</code>, each matcher
+         reads the transcript first, so it returns a promise: await it. Given an array of
+         announcements, transcript entries, or the element <code>read()</code> returned, it
+         answers at once. The reader methods <code>expectSpoken</code>, <code>expectOn</code>,
+         and <code>expectSpokenInOrder</code> check the same things without an
+         <code>await</code>.
+      </p>
+      <p>
+         For an announcement the page makes later, pass the transcript to
+         <code>expect.poll</code>. It retries the matcher until Vitest's poll timeout, 1000 ms by
+         default, and takes the <code>timeout</code> and <code>interval</code> options.
+         <code>sr.wait({'{'} for {'}'})</code> does the same from the reader.
+      </p>
+      <pre><code>await expect.poll(() => sr.transcript()).toHaveSpoken('Draft saved');</code></pre>
+   </section>
+
+   <section class="panel" id="example">
+      <h2>Example test file</h2>
+      <p>
+         The page is a combobox labeled Select country with three options, Canada first. Arrow
+         Down from the collapsed combobox expands it and moves to the first option. The dev
+         server runs on port 3000.
+      </p>
+      <pre><code>// combobox.test.ts
+import {'{'} describe, expect {'}'} from 'vitest';
+import {'{'} test {'}'} from 'a11ied/vitest';
+
+const combobox = test.extend({'{'}
+   srOptions: {'{'} url: 'http://localhost:3000/components/combobox' {'}'},
+{'}'});
+
+describe('combobox component', () => {'{'}
+   combobox('announces active option and expanded state', ({'{'} sr {'}'}) => {'{'}
+      sr.press('Tab');
+      sr.expectSpoken('combobox, Select country, collapsed');
+
+      sr.press('ArrowDown');
+      sr.expectSpoken('combobox, Select country, expanded');
+      sr.expectSpoken('option, Canada, 1 of 3');
+   {'}'});
+
+   combobox('reports the option under the cursor', async ({'{'} sr {'}'}) => {'{'}
+      sr.press('Tab');
+      sr.press('ArrowDown');
+
+      const item = await sr.read();
+
+      expect(item).toMatchObject({'{'} role: 'option', name: 'Canada' {'}'});
+   {'}'});
+{'}'});</code></pre>
+   </section>
+
+   <section class="panel" id="browser">
+      <h2>Vitest browser mode</h2>
+      <p>
+         In Vitest browser mode the test already runs in a real browser, so
+         <code>a11ied/browser</code> starts the simulated screen reader on that page. There is no
+         separate process, no second page load, and no <code>open()</code>: mount the component, then read it.
+         The reader covers the document body, or <code>container</code>.
+      </p>
+      <pre><code>// vitest.config.ts
+import {'{'} playwright {'}'} from '@vitest/browser-playwright';
+import {'{'} defineConfig {'}'} from 'vitest/config';
+
+export default defineConfig({'{'}
+   test: {'{'}
+      browser: {'{'}
+         enabled: true,
+         provider: playwright(),
+         instances: [{'{'} browser: 'chromium' {'}'}],
+      {'}'},
+   {'}'},
+{'}'});</code></pre>
+      <pre><code>// pay-button.browser.test.ts
+import {'{'} test {'}'} from 'a11ied/browser';
+import {'{'} render {'}'} from 'vitest-browser-react';
+import {'{'} PayButton {'}'} from './pay-button';
+
+test('announces the price', ({'{'} sr {'}'}) => {'{'}
+   render(&lt;PayButton amount="12.00" /&gt;);
+
+   sr.next('button');
+   sr.expectOn({'{'} role: 'button', name: 'Pay 12.00' {'}'});
+{'}'});</code></pre>
+      <p>
+         The exported <code>test</code> provides an <code>sr</code> fixture over the document
+         body, a <code>QueuedScreenReader</code> like the one in <code>a11ied/vitest</code>, and
+         <code>a11ied/browser</code> installs the same three matchers. A test that starts its own
+         reader over one mounted component calls
+         <code>queuedScreenReader({'{'} container {'}'})</code>, or <code>screenReader({'{'} container {'}'})</code>
+         for the unqueued <code>ScreenReader</code>.
+         <code>@vitest/browser-playwright</code> needs a Chromium that
+         <code>npx playwright install chromium</code> provides.
+      </p>
+      <p>
+         Two methods are not available in browser mode. <code>open()</code> throws, because the
+         page is the test's own. <code>perform()</code> throws too, because the command registry
+         that resolves names loads Guidepup's Node-only tables. Every typed method is available.
+      </p>
+   </section>
+
+   <section class="field-note" id="other-runners">
+      <h2>Other runners</h2>
+      <p>
+         Under Jest, Mocha, Playwright Test, or a script, <code>a11ied/test</code> exports
+         <code>queuedScreenReader</code> and <code>screenReader</code> and depends on no test
+         runner. The queue rules above are the same there. <code>await using</code>, or
+         <code>await sr.stop()</code> in the cleanup hook, runs every queued command, stops the
+         reader, and rethrows a failure nobody awaited. See the
+         <a href="/guides/testing">testing guide</a>.
+      </p>
+   </section>
+</DocShell>

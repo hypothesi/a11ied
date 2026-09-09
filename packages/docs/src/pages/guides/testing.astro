@@ -7,16 +7,14 @@ const toc = [
    { id: 'session', label: 'Start a screen reader' },
    { id: 'methods', label: 'Move, type, and read' },
    { id: 'checks', label: 'Assertions' },
-   { id: 'vitest', label: 'Vitest matchers and fixture' },
    { id: 'example', label: 'Example test file' },
-   { id: 'browser', label: 'Vitest browser mode' },
    { id: 'real', label: 'VoiceOver and NVDA' },
 ];
 ---
 
 <DocShell
    title="Write screen reader tests"
-   summary="Start a screen reader from a test, move through the page one element at a time, and assert on what the screen reader announced. a11ied/test works under any test runner. a11ied/vitest adds matchers and a fixture. a11ied/browser reads a component already mounted in Vitest browser mode."
+   summary="Start a screen reader from a test, move through the page one element at a time, and assert on what the screen reader announced. a11ied/test depends on no test runner and works under Vitest, Jest, Mocha, Playwright Test, or a script. a11ied/vitest and a11ied/browser have their own guide."
    links={docsLinks}
    toc={toc}
 >
@@ -24,9 +22,9 @@ const toc = [
       <h2>Install</h2>
       <pre><code>npm install --save-dev a11ied</code></pre>
       <div class="route-list">
-         <div class="route-row"><code>a11ied/test</code><span><code>screenReader()</code> and the <code>ScreenReader</code> class. It depends on no test runner and works under Vitest, Jest, Mocha, Playwright Test, or a script.</span></div>
-         <div class="route-row"><code>a11ied/vitest</code><span>The same, plus <code>expect</code> matchers and a <code>test</code> with an <code>sr</code> fixture. Vitest is a peer dependency, so the package installs and runs without it.</span></div>
-         <div class="route-row"><code>a11ied/browser</code><span>For Vitest browser mode: the simulated screen reader reads the component the test mounted, with no separate process and no second page load.</span></div>
+         <div class="route-row"><code>a11ied/test</code><span><code>screenReader()</code>, <code>queuedScreenReader()</code>, and the <code>ScreenReader</code> class. It depends on no test runner and works under Vitest, Jest, Mocha, Playwright Test, or a script.</span></div>
+         <div class="route-row"><code>a11ied/vitest</code><span>The same, plus <code>expect</code> matchers and a <code>test</code> whose <code>sr</code> fixture is a queued screen reader. See <a href="/guides/vitest">Test with Vitest</a>.</span></div>
+         <div class="route-row"><code>a11ied/browser</code><span>The same again, for a component the test mounted in Vitest browser mode. See <a href="/guides/vitest">Test with Vitest</a>.</span></div>
       </div>
       <p>
          A test that opens a URL runs the simulated screen reader inside a headless Chromium page,
@@ -62,6 +60,29 @@ await using sr = await screenReader({'{'} url: 'http://localhost:3000/checkout' 
          <code>browser</code> for a Playwright page and <code>jsdom</code> for inline HTML or a
          machine with no Chromium.
       </p>
+      <p>
+         <code>queuedScreenReader</code> takes the same options and returns a
+         <code>QueuedScreenReader</code>. One <code>await</code> starts it. After that a method
+         call queues a command and returns at once, and the queued commands run one at a time in
+         the order they were queued. Await a call only when the test needs its value.
+      </p>
+      <pre><code>import {'{'} queuedScreenReader {'}'} from 'a11ied/test';
+
+await using sr = await queuedScreenReader({'{'} url: 'http://localhost:3000/checkout' {'}'});
+
+sr.goTo({'{'} role: 'button', name: 'Pay' {'}'});
+sr.activate();
+sr.expectSpoken(/order placed/iu);
+
+const item = await sr.read();</code></pre>
+      <p>
+         <code>await using</code> calls <code>sr.stop()</code>, which runs every queued command,
+         stops the reader even when one of them threw, and then rethrows that error.
+         <code>sr.drain()</code> waits for the queued commands without stopping the reader.
+         <code>sr.session</code> is a plain property on a queued reader and needs no
+         <code>await</code>. <code>sr.reader</code> is the underlying <code>ScreenReader</code>,
+         for a call that has to run before the queue empties.
+      </p>
    </section>
 
    <section class="panel" id="methods">
@@ -87,6 +108,11 @@ await using sr = await screenReader({'{'} url: 'http://localhost:3000/checkout' 
          <div class="route-row"><code>wait({'{'} for, timeoutMs {'}'})</code><span>Polls the transcript for an announcement made after the call and returns it, or throws at the timeout, 5000 ms by default. <code>wait({'{'} ms {'}'})</code> pauses.</span></div>
          <div class="route-row"><div class="route-terms"><code>perform(command)</code>, <code>screenshot(path)</code>, <code>focus()</code></div><span>A named command from <code>a1 sr list</code>, a VoiceOver cursor screenshot, and a refocus of the session's window.</span></div>
       </div>
+      <p>
+         A <code>QueuedScreenReader</code> has every one of these methods, with the same
+         parameters. Each returns a thenable instead of a promise, and the command runs after
+         the ones queued before it.
+      </p>
    </section>
 
    <section class="panel" id="checks">
@@ -94,7 +120,9 @@ await using sr = await screenReader({'{'} url: 'http://localhost:3000/checkout' 
       <pre><code>await sr.checkpoint('opened');
 await sr.activate();
 await sr.expectSpoken('dialog, Preferences', {'{'} since: 'opened' {'}'});
-await sr.expectSpoken(/error/iu, {'{'} not: true {'}'});</code></pre>
+await sr.expectSpoken(/error/iu, {'{'} not: true {'}'});
+await sr.expectOn({'{'} role: 'textbox', name: 'Nickname' {'}'});
+await sr.expectSpokenInOrder(['dialog, Preferences', 'textbox, Nickname'], {'{'} since: 'opened' {'}'});</code></pre>
       <p>
          <code>expectSpoken</code> takes text, matched without regard to case, or a
          <code>RegExp</code>. <code>since</code> searches only the announcements after that
@@ -112,135 +140,41 @@ The reader said:
          <code>expected</code> and <code>phrases</code>. A script can set
          <code>process.exitCode</code> from it.
       </p>
-   </section>
-
-   <section class="panel" id="vitest">
-      <h2>Vitest matchers and fixture</h2>
       <p>
-         Importing <code>a11ied/vitest</code> installs three matchers on <code>expect</code> and
-         adds their types. Given a <code>ScreenReader</code>, each matcher reads the transcript first,
-         so it returns a promise: await it. Given an array of announcements, transcript entries,
-         or the element <code>read()</code> returned, it answers at once.
-      </p>
-      <div class="route-list">
-         <div class="route-row"><code>toHaveSpoken(match, {'{'} since, not {'}'})</code><span>An announcement matches. The failure message is the one <code>expectSpoken</code> throws.</span></div>
-         <div class="route-row"><code>toHaveSpokenInOrder([a, b, c])</code><span>Each match is found after the previous one, with any announcements between. The failure says which match it did not find and which announcement it looked for after.</span></div>
-         <div class="route-row"><code>toBeOn({'{'} role, name {'}'})</code><span>The element under the cursor has the role, the name, or both. The failure says which element the cursor is on.</span></div>
-      </div>
-      <p>
-         The exported <code>test</code> provides <code>sr</code>, started from the
-         <code>srOptions</code> fixture before each test and stopped after it. Override the options
-         for a file with <code>test.extend({'{'} srOptions: {'{'} url {'}'} {'}'})</code>, or for a block with
-         <code>test.scoped</code>.
+         <code>expectOn({'{'} role, name {'}'})</code> throws when the element under the cursor does not have
+         the role or the name given. The message says which element the cursor is on, the same
+         text the <code>toBeOn</code> matcher prints. <code>expectSpokenInOrder([a, b, c], {'{'} since {'}'})</code>
+         throws when a match is not found after the previous one, with the same text the
+         <code>toHaveSpokenInOrder</code> matcher prints. Both throw
+         <code>ScreenReaderAssertionError</code>.
       </p>
    </section>
 
    <section class="panel" id="example">
       <h2>Example test file</h2>
       <p>
-         The page is the dialog fixture from this repository: a button that opens a modal
-         <code>dialog</code> named Preferences and moves focus into it, and an Escape handler that
-         closes it and returns focus to the button. The dev server runs on port 3000.
+         The page is a combobox labeled Select country with three options, Canada first. Arrow
+         Down from the collapsed combobox expands it and moves to the first option. The dev
+         server runs on port 3000.
       </p>
-      <pre><code>// checkout-dialog.test.ts
-import {'{'} describe, expect {'}'} from 'vitest';
-import {'{'} test {'}'} from 'a11ied/vitest';
+      <pre><code>import {'{'} queuedScreenReader {'}'} from 'a11ied/test';
 
-const page = test.extend({'{'}
-   srOptions: {'{'} url: 'http://localhost:3000/dialog.html' {'}'},
-{'}'});
-
-describe('the preferences dialog', () => {'{'}
-   page('lists the page structure', async ({'{'} sr {'}'}) => {'{'}
-      const headings = await sr.elements('heading');
-
-      expect(headings.map((item) => item.name)).toEqual(['Dialog demo']);
-      await expect(sr).toHaveSpokenInOrder(['document', 'Dialog demo']);
+it('announces active option and expanded state', async () => {'{'}
+   await using sr = await queuedScreenReader({'{'}
+      url: 'http://localhost:3000/components/combobox',
    {'}'});
 
-   page('announces the dialog and returns focus on Escape', async ({'{'} sr {'}'}) => {'{'}
-      await sr.goTo({'{'} role: 'button', name: 'Open dialog' {'}'});
-      await sr.checkpoint('opened');
-      await sr.activate();
+   sr.press('Tab');
+   sr.expectSpoken('combobox, Select country, collapsed');
 
-      await expect(sr).toHaveSpoken('dialog, Preferences', {'{'} since: 'opened' {'}'});
-      await expect(sr).toBeOn({'{'} role: 'textbox', name: 'Nickname' {'}'});
-
-      await sr.escape();
-
-      await expect(sr).toBeOn({'{'} role: 'button', name: 'Open dialog' {'}'});
-   {'}'});
-
-   page('reads a status message the page script writes', async ({'{'} sr {'}'}) => {'{'}
-      await sr.open('http://localhost:3000/status-message.html');
-      await sr.goTo({'{'} role: 'button', name: 'Save' {'}'});
-      await sr.checkpoint('saving');
-      await sr.activate();
-
-      await expect(sr).toHaveSpoken(/profile saved/iu, {'{'} since: 'saving' {'}'});
-   {'}'});
+   sr.press('ArrowDown');
+   sr.expectSpoken('combobox, Select country, expanded');
+   sr.expectSpoken('option, Canada, 1 of 3');
 {'}'});</code></pre>
       <p>
-         Without the fixture, the same test reads the same way with <code>await using</code>:
-      </p>
-      <pre><code>import {'{'} expect, it {'}'} from 'vitest';
-import {'{'} screenReader {'}'} from 'a11ied/test';
-
-it('announces the dialog', async () => {'{'}
-   await using sr = await screenReader({'{'} url: 'http://localhost:3000/dialog.html' {'}'});
-   await sr.goTo({'{'} role: 'button', name: 'Open dialog' {'}'});
-   await sr.activate();
-
-   await sr.expectSpoken('dialog, Preferences');
-   expect(await sr.read()).toMatchObject({'{'} role: 'textbox', name: 'Nickname' {'}'});
-{'}'});</code></pre>
-   </section>
-
-   <section class="panel" id="browser">
-      <h2>Vitest browser mode</h2>
-      <p>
-         In Vitest browser mode the test already runs in a real browser, so
-         <code>a11ied/browser</code> starts the simulated screen reader on that page. There is no
-         separate process, no second page load, and no <code>open()</code>: mount the component, then call
-         <code>screenReader()</code>. It reads the document body, or <code>container</code>.
-      </p>
-      <pre><code>// vitest.config.ts
-import {'{'} playwright {'}'} from '@vitest/browser-playwright';
-import {'{'} defineConfig {'}'} from 'vitest/config';
-
-export default defineConfig({'{'}
-   test: {'{'}
-      browser: {'{'}
-         enabled: true,
-         provider: playwright(),
-         instances: [{'{'} browser: 'chromium' {'}'}],
-      {'}'},
-   {'}'},
-{'}'});</code></pre>
-      <pre><code>// pay-button.browser.test.ts
-import {'{'} expect {'}'} from 'vitest';
-import {'{'} screenReader, test {'}'} from 'a11ied/browser';
-import {'{'} render {'}'} from 'vitest-browser-react';
-import {'{'} PayButton {'}'} from './pay-button';
-
-test('announces the price', async () => {'{'}
-   const screen = render(&lt;PayButton amount="12.00" /&gt;);
-   await using sr = await screenReader({'{'} container: screen.container {'}'});
-
-   await sr.next('button');
-
-   await expect(sr).toBeOn({'{'} role: 'button', name: 'Pay 12.00' {'}'});
-{'}'});</code></pre>
-      <p>
-         The exported <code>test</code> provides an <code>sr</code> fixture over the document
-         body, and <code>a11ied/browser</code> installs the same three matchers.
-         <code>@vitest/browser-playwright</code> needs a Chromium that
-         <code>npx playwright install chromium</code> provides.
-      </p>
-      <p>
-         Two methods are not available in browser mode. <code>open()</code> throws, because the
-         page is the test's own. <code>perform()</code> throws too, because the command registry
-         that resolves names loads Guidepup's Node-only tables. Every typed method is available.
+         Under Vitest the same test drops <code>queuedScreenReader</code> and
+         <code>await using</code> for the <code>sr</code> fixture. See
+         <a href="/guides/vitest">Test with Vitest</a>.
       </p>
    </section>
 
