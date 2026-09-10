@@ -49,6 +49,7 @@ jobs:
                 packages/contracts
                 packages/wcag-data
                 packages/wcag-engine
+                packages/earl
                 packages/guidepup
                 packages/core
                 packages/mcp-server

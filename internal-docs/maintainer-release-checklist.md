@@ -29,12 +29,13 @@ The current release record lives in `internal-docs/releases/v0.1.0-readiness.md`
 1. Publish `@a11ied/contracts`.
 2. Publish `@a11ied/wcag-data`.
 3. Publish `@a11ied/wcag-engine`.
-4. Publish `@a11ied/guidepup`.
-5. Publish `@a11ied/core`.
-6. Publish `@a11ied/mcp-server`.
-7. Publish `a11ied`.
-8. Publish docs from `packages/docs/dist/`.
-9. Ship `packages/skills/a11ied/` only after the skill text matches the released CLI and MCP behavior.
+4. Publish `@a11ied/earl`.
+5. Publish `@a11ied/guidepup`.
+6. Publish `@a11ied/core`.
+7. Publish `@a11ied/mcp-server`.
+8. Publish `a11ied`.
+9. Publish docs from `packages/docs/dist/`.
+10.   Ship `packages/skills/a11ied/` only after the skill text matches the released CLI and MCP behavior.
 
 Use the `publish-packages` GitHub Actions workflow for package publication after `npm run standards`, `npm test`, and `npm run pack:check` pass.
 
