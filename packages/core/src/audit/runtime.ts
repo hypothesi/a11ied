@@ -37,6 +37,8 @@ export interface BuildAuditReportInput {
    userHints: string[];
    wcagVersion: string;
    timeoutMs?: number | undefined;
+   waitFor?: string | undefined;
+   click?: string | undefined;
    /** The canonical key recorded results were stored under. */
    subject?: string | undefined;
    /** Where recorded results live. Defaults to `.a11ied/evidence.jsonl`. */
@@ -49,13 +51,33 @@ export interface BuildAuditReportInput {
  * verdict, relevance, and test method, and any result a person or an agent recorded for
  * the checks axe cannot decide.
  */
+function buildRollupOutcomeMap(recorded: EvidenceRecord[]): Record<string, string> {
+   return Object.fromEntries(
+      recorded
+         .filter((record) => record.test.kind === 'criterion')
+         .map((record) => [
+            record.test.kind === 'criterion' ? record.test.criterionId : '',
+            record.outcome,
+         ]),
+   );
+}
+
 export async function buildAuditReport(
    input: BuildAuditReportInput,
 ): Promise<AuditReport> {
    const wcagVersion = parseWcagVersion(input.wcagVersion);
-   const pageOptions = { timeoutMs: input.timeoutMs };
+   const pageOptions = {
+      timeoutMs: input.timeoutMs,
+      waitFor: input.waitFor,
+      click: input.click,
+   };
 
-   const axe = await runAxe(input.load, { wcagVersion });
+   const axe = await runAxe(input.load, {
+      wcagVersion,
+      timeoutMs: input.timeoutMs,
+      waitFor: input.waitFor,
+      click: input.click,
+   });
    const tree = await getAccessibilityTree(input.load, pageOptions);
    const pageTitle = await getPageTitle(input.load, pageOptions);
    const treeSummary = summarizeAccessibilityTree(tree.nodes, pageTitle);
@@ -88,14 +110,7 @@ export async function buildAuditReport(
       version: wcagVersion,
       axe,
       relevanceStates,
-      recordedOutcomes: Object.fromEntries(
-         recorded
-            .filter((record) => record.test.kind === 'criterion')
-            .map((record) => [
-               record.test.kind === 'criterion' ? record.test.criterionId : '',
-               record.outcome,
-            ]),
-      ),
+      recordedOutcomes: buildRollupOutcomeMap(recorded),
    });
 
    return {

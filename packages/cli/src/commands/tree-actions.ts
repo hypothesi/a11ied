@@ -5,6 +5,7 @@ export interface TreeActionOptions {
    verbose?: boolean;
    html?: string;
    timeout?: string;
+   waitFor?: string;
    role?: string;
    name?: string;
    click?: string;
@@ -52,6 +53,7 @@ export async function handleTreeAction(
    );
    const tree = await core.getAccessibilityTree(resolved.load, {
       timeoutMs: parseTimeoutMs(options.timeout),
+      waitFor: options.waitFor,
       click: options.click,
    });
 

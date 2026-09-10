@@ -7,6 +7,8 @@ export interface AuditActionOptions {
    verbose?: boolean;
    html?: string;
    timeout?: string;
+   waitFor?: string;
+   click?: string;
    wcag: string;
    failOn?: string;
    baseline?: string;
@@ -91,6 +93,8 @@ export async function runAudit(
       userHints: resolved.userHints,
       wcagVersion: options.wcag,
       timeoutMs: parseTimeoutMs(options.timeout),
+      waitFor: options.waitFor,
+      click: options.click,
       subject: core.stripFragment(resolved.reportTarget.resolvedUrl),
       evidenceFile: options.results,
    });

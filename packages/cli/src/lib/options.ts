@@ -76,6 +76,13 @@ export function addClickOption(command: Command): Command {
    );
 }
 
+export function addWaitForOption(command: Command): Command {
+   return command.option(
+      '--wait-for <css>',
+      'Wait for an element matching this CSS selector before scanning or reading.',
+   );
+}
+
 export function addTargetTimeoutOption(command: Command): Command {
    return command.option(
       '--timeout <ms>',

@@ -8,6 +8,7 @@ import { CliUsageError } from '../errors/cli-errors.js';
  * that is dropped.
  */
 const CLICK_SETTLE_MS = 250;
+const DEFAULT_WAIT_TIMEOUT_MS = 5000;
 
 export interface PageCookie {
    name: string;
@@ -19,12 +20,16 @@ export interface PageSetupOptions {
    viewport?: { width: number; height: number } | undefined;
    extraHeaders?: Record<string, string> | undefined;
    cookies?: PageCookie[] | undefined;
+   /** An optional CSS selector to wait for before performing actions or scans on the page. */
+   waitFor?: string | undefined;
    /**
     * A selector for the one element to click after the page loads, before anything reads
     * it. This is how a command reaches a widget the page renders only after a click, such
     * as a dialog behind its trigger.
     */
    click?: string | undefined;
+   /** Timeout in milliseconds for waiting on selectors. */
+   timeoutMs?: number | undefined;
 }
 
 /** True when any option here would require a fresh, uncached page. */
@@ -33,27 +38,52 @@ export function hasPageSetup(options: PageSetupOptions): boolean {
       options.viewport ??
       options.extraHeaders ??
       options.cookies?.length ??
+      options.waitFor ??
       options.click,
    );
 }
 
-/** Clicks the element `click` names, once the page has loaded. Exactly one must match. */
+async function waitForClickTarget(
+   page: Page,
+   selector: string,
+   timeoutMs: number | undefined,
+): Promise<ReturnType<Page['locator']>> {
+   const locator = page.locator(selector);
+   try {
+      await locator.first().waitFor({
+         state: 'attached',
+         timeout: timeoutMs ?? DEFAULT_WAIT_TIMEOUT_MS,
+      });
+   } catch {
+      throw new CliUsageError(
+         'click-target-not-found',
+         `No element matches --click "${selector}".`,
+         { click: selector },
+      );
+   }
+   return locator;
+}
+
+/**
+ * Resolves --wait-for if specified, then clicks the element `click` names once the page
+ * has loaded. Exactly one element must match the click selector.
+ */
 export async function clickAfterLoad(
    page: Page,
    options: PageSetupOptions,
 ): Promise<void> {
+   if (options.waitFor) {
+      const waitOptions: { state: 'attached'; timeout?: number } = { state: 'attached' };
+      if (options.timeoutMs) {
+         waitOptions.timeout = options.timeoutMs;
+      }
+      await page.waitForSelector(options.waitFor, waitOptions);
+   }
    if (options.click === undefined) {
       return;
    }
-   const locator = page.locator(options.click),
-      matches = await locator.count();
-   if (matches === 0) {
-      throw new CliUsageError(
-         'click-target-not-found',
-         `No element matches --click "${options.click}".`,
-         { click: options.click },
-      );
-   }
+   const locator = await waitForClickTarget(page, options.click, options.timeoutMs);
+   const matches = await locator.count();
    if (matches > 1) {
       throw new CliUsageError(
          'click-target-not-unique',
