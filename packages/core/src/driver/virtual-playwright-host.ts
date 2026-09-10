@@ -6,6 +6,7 @@ import {
 } from '@a11ied/guidepup';
 import type { Page } from 'playwright';
 
+import { waitForDocumentSettled } from '../browser/load.js';
 import { launchAutomationBrowser } from '../browser/policy.js';
 
 type HostMethod = (...args: never[]) => Promise<unknown>;
@@ -45,9 +46,11 @@ async function loadDocument(
 ): Promise<void> {
    if (isPageUrl(document.url)) {
       await page.goto(document.url, { waitUntil: 'load' });
+      await waitForDocumentSettled(page);
       return;
    }
    await page.setContent(document.html, { waitUntil: 'load' });
+   await waitForDocumentSettled(page);
 }
 
 /**
@@ -59,6 +62,140 @@ async function ensureRuntime(page: Page, pageScript: string): Promise<void> {
    if (!present) {
       await page.addScriptTag({ content: pageScript });
    }
+}
+
+function isNavigationError(error: unknown): boolean {
+   if (!(error instanceof Error)) {
+      return false;
+   }
+   const message = error.message.toLowerCase();
+   return (
+      message.includes('execution context was destroyed') ||
+      message.includes('navigation') ||
+      message.includes('cannot find context')
+   );
+}
+
+interface NavigationRecoveryContext {
+   page: Page;
+   pageScript: string;
+}
+
+const DEFAULT_NAVIGATED_SPEECH = {
+   lastSpokenPhrase: '',
+   itemText: '',
+   spokenPhraseLog: [],
+   itemTextLog: [],
+};
+
+const DEFAULT_NAVIGATED_ITEM = {
+   item: { role: 'document', name: '', states: [], source: 'tag' },
+   position: 'document',
+   atEnd: false,
+};
+
+async function recoverNavigation<ResultType>(
+   context: NavigationRecoveryContext,
+   action: () => Promise<ResultType>,
+   defaultNavigatedResult?: ResultType,
+): Promise<ResultType | undefined> {
+   try {
+      return await action();
+   } catch (error) {
+      if (isNavigationError(error)) {
+         await context.page.waitForLoadState('load').catch(ignoreError);
+         await waitForDocumentSettled(context.page);
+         await ensureRuntime(context.page, context.pageScript);
+         await context.page
+            .evaluate(() => globalThis.a11iedVirtualRuntime.start())
+            .catch(ignoreError);
+         return defaultNavigatedResult;
+      }
+      throw error;
+   }
+}
+
+function buildHostNavigationMethods(
+   recovery: NavigationRecoveryContext,
+): Pick<VirtualHost, 'runPortable' | 'navigate' | 'press' | 'type'> {
+   return {
+      runPortable: async (verb) => {
+         const result = await recoverNavigation(
+            recovery,
+            () =>
+               recovery.page.evaluate(
+                  (wanted) => globalThis.a11iedVirtualRuntime.runPortable(wanted),
+                  verb,
+               ),
+            { moved: true },
+         );
+         return result ?? { moved: true };
+      },
+      navigate: async (request) => {
+         const result = await recoverNavigation(
+            recovery,
+            () =>
+               recovery.page.evaluate(
+                  (move) => globalThis.a11iedVirtualRuntime.navigate(move),
+                  request,
+               ),
+            { moved: true },
+         );
+         return result ?? { moved: true };
+      },
+      press: async (keys) => {
+         await recoverNavigation(recovery, () =>
+            recovery.page.evaluate(
+               (chords) => globalThis.a11iedVirtualRuntime.press(chords),
+               [...keys],
+            ),
+         );
+      },
+      type: async (text) => {
+         await recoverNavigation(recovery, () =>
+            recovery.page.evaluate(
+               (typed) => globalThis.a11iedVirtualRuntime.type(typed),
+               text,
+            ),
+         );
+      },
+   };
+}
+
+function buildVirtualHostMethods(
+   page: Page,
+   pageScript: string,
+): Omit<VirtualHost, 'engine' | 'attachDocument' | 'dispose'> {
+   const recovery: NavigationRecoveryContext = { page, pageScript };
+   return {
+      start: () => page.evaluate(() => globalThis.a11iedVirtualRuntime.start()),
+      stop: () => page.evaluate(() => globalThis.a11iedVirtualRuntime.stop()),
+      readSpeech: async () => {
+         const result = await recoverNavigation(
+            recovery,
+            () => page.evaluate(() => globalThis.a11iedVirtualRuntime.readSpeech()),
+            DEFAULT_NAVIGATED_SPEECH,
+         );
+         return result ?? DEFAULT_NAVIGATED_SPEECH;
+      },
+      readCurrentItem: async () => {
+         const result = await recoverNavigation(
+            recovery,
+            () => page.evaluate(() => globalThis.a11iedVirtualRuntime.readCurrentItem()),
+            DEFAULT_NAVIGATED_ITEM,
+         );
+         return result ?? DEFAULT_NAVIGATED_ITEM;
+      },
+      ...buildHostNavigationMethods(recovery),
+      readTitle: () => page.evaluate(() => globalThis.a11iedVirtualRuntime.readTitle()),
+      findText: (text) =>
+         page.evaluate(
+            (wanted) => globalThis.a11iedVirtualRuntime.findText(wanted),
+            text,
+         ),
+      moveInTable: (move) =>
+         page.evaluate((step) => globalThis.a11iedVirtualRuntime.moveInTable(step), move),
+   };
 }
 
 /**
@@ -87,32 +224,6 @@ export async function createPlaywrightVirtualHost(): Promise<VirtualHost> {
             .catch(ignoreError);
          await launch.browser.close();
       },
-      start: () => page.evaluate(() => globalThis.a11iedVirtualRuntime.start()),
-      stop: () => page.evaluate(() => globalThis.a11iedVirtualRuntime.stop()),
-      readSpeech: () => page.evaluate(() => globalThis.a11iedVirtualRuntime.readSpeech()),
-      readCurrentItem: () =>
-         page.evaluate(() => globalThis.a11iedVirtualRuntime.readCurrentItem()),
-      runPortable: (verb) =>
-         page.evaluate(
-            (wanted) => globalThis.a11iedVirtualRuntime.runPortable(wanted),
-            verb,
-         ),
-      navigate: (request) =>
-         page.evaluate((move) => globalThis.a11iedVirtualRuntime.navigate(move), request),
-      press: (keys) =>
-         page.evaluate(
-            (chords) => globalThis.a11iedVirtualRuntime.press(chords),
-            [...keys],
-         ),
-      type: (text) =>
-         page.evaluate((typed) => globalThis.a11iedVirtualRuntime.type(typed), text),
-      readTitle: () => page.evaluate(() => globalThis.a11iedVirtualRuntime.readTitle()),
-      findText: (text) =>
-         page.evaluate(
-            (wanted) => globalThis.a11iedVirtualRuntime.findText(wanted),
-            text,
-         ),
-      moveInTable: (move) =>
-         page.evaluate((step) => globalThis.a11iedVirtualRuntime.moveInTable(step), move),
+      ...buildVirtualHostMethods(page, pageScript),
    });
 }

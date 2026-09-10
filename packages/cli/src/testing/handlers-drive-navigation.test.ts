@@ -185,6 +185,33 @@ async function assertReadDescribesTheItem(): Promise<void> {
    await assertReadShowsStates();
 }
 
+async function assertActivateFollowsLink(): Promise<void> {
+   await withStateDir(tempRoots, async () => {
+      const pageUrl = `${testServer.getBaseUrl()}/link-navigation.html`;
+      const started = await runCli(['sr', 'start', pageUrl, ...startArgs, '--json']);
+      expect(started.status).toBe(EXIT_SUCCESS);
+      try {
+         const moved = await runSrJson([
+            'goto',
+            '--role',
+            'link',
+            '--name',
+            'Go to basic page',
+         ]);
+         expect(moved.status).toBe(EXIT_SUCCESS);
+
+         const activated = await runSrJson(['activate']);
+         expect(activated.status).toBe(EXIT_SUCCESS);
+
+         const title = await runSrJson(['title']);
+         expect(title.status).toBe(EXIT_SUCCESS);
+         expect((title.result.details as { title?: string })?.title).toBe('Basic page');
+      } finally {
+         await runCli(['sr', 'stop', '--json']);
+      }
+   });
+}
+
 describe('cli sr structural navigation', () => {
    it(
       'reads the current item as role, name, states, and source',
@@ -207,6 +234,12 @@ describe('cli sr structural navigation', () => {
    it(
       'rejects unknown kinds and level on other kinds, and exposes the kinds to sr do',
       withSession(assertUsageErrorsAndDo),
+      TEST_TIMEOUT_LONG,
+   );
+
+   it(
+      'activate follows a link to a new page without rejecting on navigation',
+      assertActivateFollowsLink,
       TEST_TIMEOUT_LONG,
    );
 });
