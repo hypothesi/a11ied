@@ -75,7 +75,7 @@ describe('reaching the toast', () => {
 describe('dismissing', () => {
    // WCAG 2.1.1 Keyboard: Escape closes the toast, so F8 lands on an empty list.
    toast('Escape closes the toast', ({ sr }) => {
-      addToCalendar(sr).
+      addToCalendar(sr)
          .press('F8', 'Tab')
          .checkpoint('escape')
          .press('Escape')
