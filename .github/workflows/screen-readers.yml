@@ -35,8 +35,14 @@ jobs:
          - name: Build workspaces
            run: npm run build
 
+         - name: Install Chromium for browser automation
+           run: npx playwright install chromium
+
          - name: Set up VoiceOver
            uses: guidepup/setup-action@0.21.0
+
+         - name: Install Guidepup VoiceOver assets
+           run: node packages/cli/dist/cli.js setup --skip-setup
 
          - name: Screen reader smoke test
            run: npm run smoke:sr
@@ -61,8 +67,14 @@ jobs:
          - name: Build workspaces
            run: npm run build
 
+         - name: Install Chromium for browser automation
+           run: npx playwright install chromium
+
          - name: Set up NVDA
            uses: guidepup/setup-action@0.21.0
+
+         - name: Install Guidepup NVDA assets
+           run: node packages/cli/dist/cli.js setup
 
          - name: Screen reader smoke test
            run: npm run smoke:sr
