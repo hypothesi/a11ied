@@ -2,7 +2,7 @@ import {
    NVDAKeyCodeCommands,
    VoiceOverCommanderCommands,
    voiceOverKeyCodeCommands,
-} from '@guidepup/guidepup';
+} from './upstream.js';
 import type {
    DriverNavigateRequest,
    Platform,

@@ -1,4 +1,4 @@
-import { nvda, voiceOver } from '@guidepup/guidepup';
+import { nvda, voiceOver } from './upstream.js';
 import {
    driverStateSnapshotSchema,
    type DriverCheckpoint,

@@ -1,5 +1,5 @@
 import type { PortableDriverVerb } from '@a11ied/contracts';
-import { NVDAKeyCodeCommands, voiceOverKeyCodeCommands } from '@guidepup/guidepup';
+import { NVDAKeyCodeCommands, voiceOverKeyCodeCommands } from './upstream.js';
 
 import { virtualPortableSteps } from './portable-commands-virtual.js';
 import {

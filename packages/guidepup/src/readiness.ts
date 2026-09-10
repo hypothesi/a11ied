@@ -1,4 +1,4 @@
-import type { ScreenReader } from '@guidepup/guidepup';
+import type { ScreenReader } from './upstream.js';
 import {
    driverReadinessSchema,
    type DriverReadiness,

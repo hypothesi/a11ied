@@ -2,7 +2,7 @@ import type {
    NVDAKeyCodeCommands,
    VoiceOverCommanderCommands,
    voiceOverKeyCodeCommands,
-} from '@guidepup/guidepup';
+} from './upstream.js';
 import type { Virtual } from '@guidepup/virtual-screen-reader';
 
 /** Guidepup screen reader methods a portable verb can map onto directly. */

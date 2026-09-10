@@ -3,7 +3,7 @@ import type {
    DriverNavigationKind,
    Platform,
 } from '@a11ied/contracts';
-import { VoiceOverCommanderCommands } from '@guidepup/guidepup';
+import { VoiceOverCommanderCommands } from './upstream.js';
 
 import {
    headingLevelCommandName,
