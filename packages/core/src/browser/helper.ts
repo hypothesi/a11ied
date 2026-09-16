@@ -53,12 +53,20 @@ function waitForChildExit(
 ): Promise<void> {
    return new Promise((resolve, reject) => {
       let settled = false;
+      let stderr = '';
+      if (child.stderr) {
+         child.stderr.on('data', (chunk) => {
+            stderr += String(chunk);
+         });
+      }
       const timeout = setTimeout(() => {
          if (settled) {
             return;
          }
          settled = true;
-         reject(new Error(`Browser open command timed out after ${timeoutMs}ms.`));
+         reject(
+            new Error(`Browser open command timed out after ${String(timeoutMs)}ms.`),
+         );
       }, timeoutMs);
 
       child.once('error', (error) => {
@@ -80,13 +88,26 @@ function waitForChildExit(
             resolve();
             return;
          }
-         reject(new Error(`Browser open command exited with code ${String(code)}.`));
+         const detail = stderr.trim() ? `: ${stderr.trim()}` : '';
+         reject(
+            new Error(`Browser open command exited with code ${String(code)}${detail}.`),
+         );
       });
    });
 }
 
 function escapeAppleScriptString(value: string): string {
    return value.replaceAll('\\', String.raw`\\`).replaceAll('"', String.raw`\"`);
+}
+
+function resolveAppPath(candidate: BrowserAutomationCandidate): string | undefined {
+   if (candidate.location) {
+      const match = candidate.location.match(/^(.+?\.app)(\/.*)?$/);
+      if (match?.[1]) {
+         return match[1];
+      }
+   }
+   return undefined;
 }
 
 async function openUrlOnMac(
@@ -105,22 +126,46 @@ async function openUrlOnMac(
       'osascript',
       script.flatMap((line) => ['-e', line]),
       {
-         stdio: 'ignore',
+         stdio: ['ignore', 'ignore', 'pipe'],
       },
    );
    try {
       await waitForChildExit(child, BROWSER_OPEN_TIMEOUT_MS);
+      return;
    } catch {
-      const fallback = spawn('open', ['-a', appName, url], {
-         stdio: 'ignore',
-      });
-      await waitForChildExit(fallback, BROWSER_OPEN_TIMEOUT_MS);
+      // Osascript may fail in headless CI without AppleEvents authorization.
    }
+
+   const bundleId = resolveBundleId(candidate);
+   const appPath = resolveAppPath(candidate);
+   const fallbackArgs = bundleId
+      ? ['-b', bundleId, url]
+      : ['-a', appPath ?? appName, url];
+   const fallback = spawn('open', fallbackArgs, {
+      stdio: ['ignore', 'ignore', 'pipe'],
+   });
+   try {
+      await waitForChildExit(fallback, BROWSER_OPEN_TIMEOUT_MS);
+      return;
+   } catch {
+      // Fall back to opening the URL with the system's default browser.
+   }
+
+   const systemDefault = spawn('open', [url], {
+      stdio: ['ignore', 'ignore', 'pipe'],
+   });
+   await waitForChildExit(systemDefault, BROWSER_OPEN_TIMEOUT_MS);
 }
 
-async function openUrlOnWindows(url: string): Promise<void> {
-   const child = spawn('cmd', ['/c', 'start', '', url], {
-      stdio: 'ignore',
+async function openUrlOnWindows(
+   candidate: BrowserAutomationCandidate,
+   url: string,
+): Promise<void> {
+   const args = candidate.location
+      ? ['/c', 'start', '', candidate.location, url]
+      : ['/c', 'start', '', url];
+   const child = spawn('cmd', args, {
+      stdio: ['ignore', 'ignore', 'pipe'],
       windowsHide: true,
    });
    await waitForChildExit(child, BROWSER_OPEN_TIMEOUT_MS);
@@ -141,7 +186,7 @@ export async function openUrlInSystemAutomationBrowser(url: string): Promise<{
    if (process.platform === 'darwin') {
       await openUrlOnMac(candidate, url);
    } else if (process.platform === 'win32') {
-      await openUrlOnWindows(url);
+      await openUrlOnWindows(candidate, url);
    } else {
       const child = spawn('xdg-open', [url], {
          stdio: 'ignore',

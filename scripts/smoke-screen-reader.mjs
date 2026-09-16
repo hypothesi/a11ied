@@ -134,6 +134,9 @@ async function runSmoke(screenReader, url) {
    const doctorArgs = screenReader === 'virtual' ? ['doctor'] : ['doctor', '--strict'];
    await runCliOrFail(doctorArgs);
    await runCliOrFail(['sr', 'start', ...startOptions(screenReader), url]);
+   if (screenReader !== 'virtual') {
+      await runCliOrFail(['sr', 'wait', '--ms', '2000']);
+   }
    await navigate(NAVIGATION_STEPS);
    await runCliOrFail(['sr', 'read']);
    const transcript = await runCliOrFail(['sr', 'transcript', '--json']);
