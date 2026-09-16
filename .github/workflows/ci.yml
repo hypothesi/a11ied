@@ -23,7 +23,7 @@ jobs:
               cache: npm
 
          - name: Install dependencies
-           run: npm ci
+           run: npm ci --ignore-scripts
 
          - name: Data validation
            run: npm run wcag:validate
@@ -47,7 +47,7 @@ jobs:
               cache: npm
 
          - name: Install dependencies
-           run: npm ci
+           run: npm ci --ignore-scripts
 
          - name: Test
            run: npm test
@@ -68,7 +68,7 @@ jobs:
               cache: npm
 
          - name: Install dependencies
-           run: npm ci
+           run: npm ci --ignore-scripts
 
          - name: Pack public workspaces
            run: npm run pack:check
