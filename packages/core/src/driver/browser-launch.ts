@@ -99,15 +99,21 @@ function spawnOpen(choice: BrowserChoice, url: string): ReturnType<typeof spawn>
       return spawn('open', ['-a', choice.appName, url], { stdio: 'ignore' });
    }
    if (process.platform === 'win32') {
+      const args = [
+         '--no-first-run',
+         '--no-default-browser-check',
+         '--disable-search-engine-choice-screen',
+         url,
+      ];
       if (choice.location) {
-         const child = spawn(choice.location, [url], {
+         const child = spawn(choice.location, args, {
             detached: true,
             stdio: 'ignore',
          });
          child.unref();
          return child;
       }
-      return spawn('cmd', ['/c', 'start', '', choice.appName, url], {
+      return spawn('cmd', ['/c', 'start', '', choice.appName, ...args], {
          stdio: 'ignore',
       });
    }

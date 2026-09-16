@@ -57,20 +57,69 @@ function resolveWindowsFocusInputs(target: DriverFocusTarget): {
    };
 }
 
-function buildWindowsFocusLines(args: {
+const WIN32_FOCUS_CSHARP_SOURCE = [
+   'using System;',
+   'using System.Text;',
+   'using System.Runtime.InteropServices;',
+   'public class A11iedFocus {',
+   '  public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);',
+   '  [DllImport("user32.dll")] public static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);',
+   '  [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);',
+   '  [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hWnd);',
+   '  [DllImport("user32.dll")] public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);',
+   '  [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();',
+   '  [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);',
+   '  [DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();',
+   '  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);',
+   '  [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);',
+   '  [DllImport("user32.dll")] public static extern bool BringWindowToTop(IntPtr hWnd);',
+   '  public static bool ForceForeground(IntPtr hWnd) {',
+   '    if (hWnd == IntPtr.Zero) return false;',
+   '    IntPtr fgWnd = GetForegroundWindow();',
+   '    uint fgPid = 0;',
+   '    uint fgThread = GetWindowThreadProcessId(fgWnd, out fgPid);',
+   '    uint curThread = GetCurrentThreadId();',
+   '    if (fgThread != curThread && fgThread != 0) {',
+   '      AttachThreadInput(curThread, fgThread, true);',
+   '    }',
+   '    ShowWindow(hWnd, 9);',
+   '    BringWindowToTop(hWnd);',
+   '    bool res = SetForegroundWindow(hWnd);',
+   '    if (fgThread != curThread && fgThread != 0) {',
+   '      AttachThreadInput(curThread, fgThread, false);',
+   '    }',
+   '    return res;',
+   '  }',
+   '  public static IntPtr FindWindowByPids(int[] pids) {',
+   '    IntPtr found = IntPtr.Zero;',
+   '    EnumWindows(delegate(IntPtr hWnd, IntPtr lParam) {',
+   '      if (!IsWindowVisible(hWnd)) return true;',
+   '      uint pid;',
+   '      GetWindowThreadProcessId(hWnd, out pid);',
+   '      foreach (int targetPid in pids) {',
+   '        if (pid == (uint)targetPid) {',
+   '          StringBuilder sb = new StringBuilder(256);',
+   '          GetWindowText(hWnd, sb, 256);',
+   '          if (sb.Length > 0) {',
+   '            found = hWnd;',
+   '            return false;',
+   '          }',
+   '        }',
+   '      }',
+   '      return true;',
+   '    }, IntPtr.Zero);',
+   '    return found;',
+   '  }',
+   '}',
+].join('\n');
+
+function buildTargetResolutionLines(args: {
    pidExpression: string;
    processName: string;
    windowTitle: string;
    matchMode: string;
 }): string[] {
    return [
-      'Add-Type @"',
-      'using System; using System.Runtime.InteropServices;',
-      'public class A11iedFocus {',
-      '  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);',
-      '  [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);',
-      '}',
-      '"@ -ErrorAction SilentlyContinue',
       `$pid = ${args.pidExpression}`,
       `$processName = '${escapePowerShellString(args.processName)}'`,
       `$windowTitle = '${escapePowerShellString(args.windowTitle)}'`,
@@ -93,25 +142,49 @@ function buildWindowsFocusLines(args: {
       '  }',
       '  if ($proc) { $targetId = $proc.Id }',
       '}',
+   ];
+}
+
+function buildForegroundLines(): string[] {
+   return [
       'if (-not $targetId) {',
       '  Write-Output "not-found"',
       '  exit 0',
       '}',
-      'if ($targetId -is [int] -and -not $proc) {',
-      '  $proc = Get-Process -Id $targetId -ErrorAction SilentlyContinue | Select-Object -First 1',
+      '$pids = @()',
+      'if ($targetId -is [int]) { $pids += [int]$targetId }',
+      'if ($processName) {',
+      '  $pids += @(Get-Process -Name $processName -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id)',
       '}',
-      'if ($proc -and $proc.MainWindowHandle -ne 0) {',
-      '  [void][A11iedFocus]::ShowWindow($proc.MainWindowHandle, 9)',
-      '  [void][A11iedFocus]::SetForegroundWindow($proc.MainWindowHandle)',
+      '$targetWnd = [IntPtr]::Zero',
+      'if ($pids.Length -gt 0) {',
+      '  $targetWnd = [A11iedFocus]::FindWindowByPids($pids)',
+      '}',
+      'if ($targetWnd -eq [IntPtr]::Zero -and $proc -and $proc.MainWindowHandle -ne 0) {',
+      '  $targetWnd = $proc.MainWindowHandle',
+      '}',
+      'if ($targetWnd -ne [IntPtr]::Zero) {',
+      '  [void][A11iedFocus]::ForceForeground($targetWnd)',
       '}',
       '$activated = (New-Object -ComObject WScript.Shell).AppActivate($targetId)',
-      'if ($activated) {',
-      '  Write-Output "focused"',
-      '} elseif ($proc -and $proc.MainWindowHandle -ne 0) {',
+      'if ($activated -or $targetWnd -ne [IntPtr]::Zero) {',
       '  Write-Output "focused"',
       '} else {',
       '  Write-Output "not-found"',
       '}',
+   ];
+}
+
+function buildWindowsFocusLines(args: {
+   pidExpression: string;
+   processName: string;
+   windowTitle: string;
+   matchMode: string;
+}): string[] {
+   return [
+      `Add-Type @"\n${WIN32_FOCUS_CSHARP_SOURCE}\n"@ -ErrorAction SilentlyContinue`,
+      ...buildTargetResolutionLines(args),
+      ...buildForegroundLines(),
    ];
 }
 

@@ -48,6 +48,9 @@ jobs:
               plutil -create xml1 "$HOME/Library/Preferences/com.apple.VoiceOver4.local.plist" 2>/dev/null || true
               node packages/cli/dist/cli.js setup --skip-setup
 
+         - name: Remove quarantine from Google Chrome
+           run: sudo xattr -dr com.apple.quarantine "/Applications/Google Chrome.app" 2>/dev/null || true
+
          - name: Screen reader smoke test
            run: npm run smoke:sr
 

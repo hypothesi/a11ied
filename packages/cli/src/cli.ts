@@ -10,4 +10,3 @@ if (!shouldSkipStartupMaintenance(process.argv)) {
    });
 }
 await buildCli().parseAsync(process.argv);
-process.exit(process.exitCode ?? 0);

@@ -117,11 +117,19 @@ function resolveAppPath(candidate: BrowserAutomationCandidate): string | undefin
    return undefined;
 }
 
-async function openUrlOnMac(
-   candidate: BrowserAutomationCandidate,
-   url: string,
-): Promise<void> {
-   const appName = candidate.label || basename(candidate.location ?? '');
+function removeAppQuarantine(candidate: BrowserAutomationCandidate): void {
+   const appPath = resolveAppPath(candidate) ?? '/Applications/Google Chrome.app';
+   try {
+      const quarantineChild = spawn('xattr', ['-dr', 'com.apple.quarantine', appPath], {
+         stdio: 'ignore',
+      });
+      quarantineChild.unref();
+   } catch {
+      // Best-effort quarantine removal.
+   }
+}
+
+async function openWithAppleScript(appName: string, url: string): Promise<boolean> {
    const script = [
       `tell application "${escapeAppleScriptString(appName)}"`,
       'activate',
@@ -138,13 +146,24 @@ async function openUrlOnMac(
    );
    try {
       await waitForChildExit(child, BROWSER_OPEN_TIMEOUT_MS);
-      return;
+      return true;
    } catch {
-      // Osascript may fail in headless CI without AppleEvents authorization.
+      return false;
+   }
+}
+
+async function openUrlOnMac(
+   candidate: BrowserAutomationCandidate,
+   url: string,
+): Promise<void> {
+   removeAppQuarantine(candidate);
+   const appName = candidate.label || basename(candidate.location ?? '');
+   if (await openWithAppleScript(appName, url)) {
+      return;
    }
 
-   const bundleId = resolveBundleId(candidate);
    const appPath = resolveAppPath(candidate);
+   const bundleId = resolveBundleId(candidate);
    const fallbackArgs = bundleId
       ? ['-b', bundleId, url]
       : ['-a', appPath ?? appName, url];
@@ -168,8 +187,14 @@ async function openUrlOnWindows(
    candidate: BrowserAutomationCandidate,
    url: string,
 ): Promise<void> {
+   const args = [
+      '--no-first-run',
+      '--no-default-browser-check',
+      '--disable-search-engine-choice-screen',
+      url,
+   ];
    if (candidate.location) {
-      const child = spawn(candidate.location, [url], {
+      const child = spawn(candidate.location, args, {
          detached: true,
          stdio: 'ignore',
       });
