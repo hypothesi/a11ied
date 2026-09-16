@@ -25,7 +25,7 @@ const ATTACH_DOCUMENT_SOCKET_TIMEOUT_MS = 30_000;
 const BROKER_POLL_DELAY_MS = 100;
 /** Covers a Chromium launch for the browser engine on a loaded machine. */
 const DEFAULT_BROKER_READY_TIMEOUT_MS = 15_000;
-const REAL_TARGET_BROKER_READY_TIMEOUT_MS = 15_000;
+const REAL_TARGET_BROKER_READY_TIMEOUT_MS = 120_000;
 /** Extra time the reply gets on top of a caller-supplied command timeout. */
 const BROKER_RESPONSE_GRACE_MS = 6000;
 

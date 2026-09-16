@@ -136,43 +136,43 @@ function resolvePressPlatformKeys(): string {
 
 function resolvePressHelpExpected(): string {
    return `
-   "Usage: a1 sr press [options] <chord...>
+      "Usage: a1 sr press [options] <chord...>
 
-   Press key chords in order, one chord per argument.
+      Press key chords in order, one chord per argument.
 
-   Options:
+      Options:
 ${resolvePressSrOption()}
-     --allow-virtual  Allow the virtual (simulated) screen reader when a real
-                      target is available.
-     --ephemeral      Run one action in a temporary session and tear it down
-                      immediately.
-     --timeout <ms>   Bound the screen reader command in milliseconds instead of
-                      using the built-in limits.
-     --json           Print JSON instead of human-readable text.
-     --verbose        Print more detail in text output.
-     --phrase         Print only the last spoken phrase, one line, for shell loops.
-     -h, --help       display help for command
+        --allow-virtual  Allow the virtual (simulated) screen reader when a real
+                         target is available.
+        --ephemeral      Run one action in a temporary session and tear it down
+                         immediately.
+        --timeout <ms>   Bound the screen reader command in milliseconds instead of
+                         using the built-in limits.
+        --json           Print JSON instead of human-readable text.
+        --verbose        Print more detail in text output.
+        --phrase         Print only the last spoken phrase, one line, for shell loops.
+        -h, --help       display help for command
 
-   Supported key tokens:
-     Chord syntax: join tokens with "+", for example Tab, Shift+Tab, Control+F,
-     VO+ArrowRight, or NVDA+N.
+      Supported key tokens:
+        Chord syntax: join tokens with "+", for example Tab, Shift+Tab, Control+F,
+        VO+ArrowRight, or NVDA+N.
 
-     Common:
-       Modifiers: Shift, Control, Alt
-       Letters: a-z, A-Z, KeyA-KeyZ
-       Digits: 0-9, Digit0-Digit9
-       Arrows: ArrowUp, ArrowDown, ArrowLeft, ArrowRight
-       Arrow aliases: Up, Down, Left, Right, UpArrow, DownArrow, LeftArrow, RightArrow
-       Navigation/editing: Backspace, Tab, Enter, Escape, Space, Spacebar, Delete,
-         ForwardDelete, Home, End, PageUp, PageDown, Insert, Help, Clear, CapsLock
-       Functions: F1-F20
-       Punctuation: Backquote, Backtick, Minus, Dash, Equal, Equals, Backslash,
-         LeftSquareBracket, RightSquareBracket, SingleQuote, Comma, Period, FullStop,
-         Tilde, Plus
+        Common:
+          Modifiers: Shift, Control, Alt
+          Letters: a-z, A-Z, KeyA-KeyZ
+          Digits: 0-9, Digit0-Digit9
+          Arrows: ArrowUp, ArrowDown, ArrowLeft, ArrowRight
+          Arrow aliases: Up, Down, Left, Right, UpArrow, DownArrow, LeftArrow, RightArrow
+          Navigation/editing: Backspace, Tab, Enter, Escape, Space, Spacebar, Delete,
+            ForwardDelete, Home, End, PageUp, PageDown, Insert, Help, Clear, CapsLock
+          Functions: F1-F20
+          Punctuation: Backquote, Backtick, Minus, Dash, Equal, Equals, Backslash,
+            LeftSquareBracket, RightSquareBracket, SingleQuote, Comma, Period, FullStop,
+            Tilde, Plus
 
 ${resolvePressPlatformKeys()}
-   "
- `;
+      "
+   `;
 }
 
 export const driveRunHelpCases: HelpCase[] = [

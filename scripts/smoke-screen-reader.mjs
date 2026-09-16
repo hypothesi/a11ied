@@ -18,6 +18,8 @@ const LOCAL_HOST = '127.0.0.1';
 const EPHEMERAL_PORT = 0;
 const HTTP_OK = 200;
 const FAILURE_EXIT_CODE = 1;
+const EXIT_DRAIN_DELAY_MS = 250;
+const SMOKE_BROKER_TIMEOUT_MS = 180_000;
 const FIXTURE_HTML = [
    '<!doctype html>',
    '<html lang="en">',
@@ -77,23 +79,39 @@ function runCli(args) {
    return new Promise((resolveRun) => {
       const child = spawn(execPath, [CLI_PATH, ...args], {
          env: { ...processEnv, FORCE_COLOR: '0' },
+         stdio: ['ignore', 'pipe', 'pipe'],
       });
       let stdout = '';
       let stderr = '';
+      let settled = false;
+
+      function finish(status) {
+         if (!settled) {
+            settled = true;
+            resolveRun({ status: status ?? 0, stdout, stderr });
+         }
+      }
+
       child.stdout.on('data', (data) => {
-         stdout += data;
+         const text = data.toString();
+         stdout += text;
+         process.stdout.write(text);
       });
       child.stderr.on('data', (data) => {
-         stderr += data;
+         const text = data.toString();
+         stderr += text;
+         process.stderr.write(text);
+      });
+      child.on('error', (error) => {
+         stderr += error.message;
+         finish(1);
+      });
+      child.on('exit', (status) => {
+         // Allow a brief delay for any pending stdout/stderr data events before resolving.
+         setTimeout(() => finish(status), EXIT_DRAIN_DELAY_MS);
       });
       child.on('close', (status) => {
-         if (stdout) {
-            log(stdout.trimEnd());
-         }
-         if (stderr) {
-            log(stderr.trimEnd());
-         }
-         resolveRun({ status, stdout, stderr });
+         finish(status);
       });
    });
 }
@@ -127,7 +145,7 @@ function startOptions(screenReader) {
    if (screenReader === 'virtual') {
       return ['--sr', 'virtual', '--allow-virtual'];
    }
-   return ['--sr', screenReader];
+   return ['--sr', screenReader, '--timeout', String(SMOKE_BROKER_TIMEOUT_MS)];
 }
 
 async function runSmoke(screenReader, url) {
