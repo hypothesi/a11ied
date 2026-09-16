@@ -20,6 +20,7 @@ export {
    getDriverSessionStatus,
    runDriverSessionAction,
    runEphemeralDriverAction,
+   setVoiceOverLivenessCheckerForTesting,
    startDriverSession,
    stopDriverSession,
 } from './driver/runtime.js';

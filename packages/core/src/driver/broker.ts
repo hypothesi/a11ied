@@ -10,15 +10,21 @@ import {
    type SessionRecording,
    type VirtualEngine,
 } from '@a11ied/contracts';
-import { createDriverAdapter, ignoreError, type DriverAdapter } from '@a11ied/guidepup';
+import {
+   createDriverAdapter,
+   ignoreError,
+   isVoiceOverRunning,
+   type DriverAdapter,
+} from '@a11ied/guidepup';
 
 import { createBrokerServer, createIdleTimer, shutdownServer } from './broker-server.js';
 import { startSessionRecording, type ActiveSessionRecording } from './recording.js';
 import { createDriverSessionContext } from './session-context.js';
 import { removeSessionArtifactsSync, writeSessionMetadata } from './session-utils.js';
 
-const FIRST_USER_ARG = 2;
-const MS_PER_MINUTE = 60_000;
+const FIRST_USER_ARG = 2,
+   MS_PER_MINUTE = 60_000,
+   VOICE_OVER_POLL_INTERVAL_MS = 1000;
 
 interface BrokerArgs {
    sessionId: string;
@@ -161,6 +167,23 @@ function installProcessHandlers(args: {
    });
 }
 
+function createVoiceOverMonitor(
+   target: Platform,
+   onStop: () => void,
+): NodeJS.Timeout | undefined {
+   if (target !== 'voiceover') {
+      return undefined;
+   }
+   const timer = setInterval(async () => {
+      const running = await isVoiceOverRunning().catch(() => false);
+      if (!running) {
+         onStop();
+      }
+   }, VOICE_OVER_POLL_INTERVAL_MS);
+   timer.unref();
+   return timer;
+}
+
 async function main(): Promise<void> {
    const args = parseArgs(process.argv.slice(FIRST_USER_ARG));
    await assertTargetReady(args.target);
@@ -184,6 +207,7 @@ async function main(): Promise<void> {
    const stopOptions: StopBrokerOptions = { adapter, args, state };
    const controller = { stop: (): void => undefined };
    const idleTimer = createIdleTimer(args.idleTimeoutMs, () => controller.stop());
+   let monitorTimer = createVoiceOverMonitor(args.target, () => controller.stop());
    const server = createBrokerServer({
       context,
       onStop: () => controller.stop(),
@@ -192,6 +216,10 @@ async function main(): Promise<void> {
    controller.stop = (): void => {
       if (!state.stopping) {
          state.stopping = true;
+         if (monitorTimer) {
+            clearInterval(monitorTimer);
+            monitorTimer = undefined;
+         }
          idleTimer.clear();
          shutdownServer(server, () => stopBroker(stopOptions));
       }

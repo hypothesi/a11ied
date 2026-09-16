@@ -7,6 +7,8 @@ import type {
    VirtualEngine,
 } from '@a11ied/contracts';
 
+import { isVoiceOverRunning } from '@a11ied/guidepup';
+
 import {
    connectToBroker,
    resolveBrokerReadyTimeoutMs,
@@ -73,13 +75,49 @@ export interface DriverSessionStart {
    replacedSession?: AccessibilityDriverSession;
 }
 
+let checkVoiceOverRunning = isVoiceOverRunning;
+
+/** Allows tests to mock VoiceOver process detection. */
+export function setVoiceOverLivenessCheckerForTesting(
+   checker: typeof isVoiceOverRunning,
+): void {
+   checkVoiceOverRunning = checker;
+}
+
+function terminateDeadBrokerProcess(session: AccessibilityDriverSession): void {
+   if (
+      session.brokerPid !== process.pid &&
+      !isInMemorySession(session) &&
+      isProcessRunning(session.brokerPid)
+   ) {
+      try {
+         process.kill(session.brokerPid, 'SIGTERM');
+      } catch {
+         // Process may have already exited
+      }
+   }
+}
+
 async function isSessionLive(session: AccessibilityDriverSession): Promise<boolean> {
    if (isInMemorySession(session)) {
-      return hasInProcessSession(session.sessionId);
-   }
-   if (!isProcessRunning(session.brokerPid)) {
+      if (!hasInProcessSession(session.sessionId)) {
+         return false;
+      }
+   } else if (!isProcessRunning(session.brokerPid)) {
       return false;
    }
+
+   if (session.target === 'voiceover') {
+      const running = await checkVoiceOverRunning().catch(() => false);
+      if (!running) {
+         return false;
+      }
+   }
+
+   if (isInMemorySession(session)) {
+      return true;
+   }
+
    try {
       const response = await connectToBroker(session.socketPath, { command: 'ping' });
       return response.ok;
@@ -96,9 +134,12 @@ export async function getActiveDriverSession(): Promise<
    if (!session) {
       return undefined;
    }
+
    if (await isSessionLive(session)) {
       return session;
    }
+
+   terminateDeadBrokerProcess(session);
    await removeSessionArtifacts(session);
    return undefined;
 }
@@ -112,6 +153,8 @@ export async function cleanupStaleDriverSessions(): Promise<string[]> {
    if (!session || (await isSessionLive(session))) {
       return [];
    }
+
+   terminateDeadBrokerProcess(session);
    await removeSessionArtifacts(session);
    return [session.sessionId];
 }

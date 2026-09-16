@@ -1,6 +1,7 @@
 import { resolve } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
+import { driverCapabilities, isVoiceOverRunning } from '@a11ied/guidepup';
 import { cleanupTempRoots, withStateDir } from '../../../cli/src/testing/fixtures.js';
 
 import {
@@ -12,16 +13,19 @@ import {
    getDriverSessionStatus,
    runDriverSessionAction,
    runEphemeralDriverAction,
+   setVoiceOverLivenessCheckerForTesting,
    startDriverSession,
    stopDriverSession,
 } from '../index.js';
+import { readActiveSessionMetadata, writeSessionMetadata } from './session-utils.js';
 
-const TIMEOUT_MS = 15_000;
-const UNIX_SOCKET_PATH_MAX = 104;
+const TIMEOUT_MS = 15_000,
+   UNIX_SOCKET_PATH_MAX = 104;
 const WINDOWS_PIPE_PREFIX = String.raw`\\.\pipe\a11ied-`;
 const tempRoots: string[] = [];
 
 afterEach(async () => {
+   setVoiceOverLivenessCheckerForTesting(isVoiceOverRunning);
    await cleanupTempRoots(tempRoots);
 });
 
@@ -139,6 +143,39 @@ describe('driver runtime actions', () => {
             ).rejects.toMatchObject({
                code: 'recording-target-unsupported',
             } satisfies Partial<CliEnvironmentError>);
+         }),
+      TIMEOUT_MS,
+   );
+});
+
+describe('driver runtime voiceover liveness', () => {
+   it(
+      'detects when VoiceOver is manually stopped and clears the active session',
+      () =>
+         withStateDir(tempRoots, async (stateDir) => {
+            const sessionFile = resolve(stateDir, 'session.json'),
+               sessionId = 'drv_vo_manual_stop_test';
+            const mockSession = {
+               sessionId,
+               target: 'voiceover' as const,
+               targetType: 'real' as const,
+               startedAt: new Date().toISOString(),
+               capabilities: driverCapabilities,
+               logCursor: 0,
+               metadataFile: sessionFile,
+               socketPath: getDriverSocketPath(sessionId),
+               brokerPid: process.pid,
+            };
+
+            await writeSessionMetadata(mockSession);
+
+            expect(await readActiveSessionMetadata()).toBeDefined();
+
+            setVoiceOverLivenessCheckerForTesting(async () => false);
+            const active = await getActiveDriverSession();
+
+            expect(active).toBeUndefined();
+            expect(await readActiveSessionMetadata()).toBeUndefined();
          }),
       TIMEOUT_MS,
    );

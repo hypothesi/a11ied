@@ -3,7 +3,7 @@ import type {
    Platform,
    VirtualEngine,
 } from '@a11ied/contracts';
-import { ignoreError, type DriverAdapter } from '@a11ied/guidepup';
+import { ignoreError, isVoiceOverRunning, type DriverAdapter } from '@a11ied/guidepup';
 
 import { handleBrokerRequest } from './broker-handlers.js';
 import type {
@@ -20,9 +20,12 @@ import {
    writeSessionMetadata,
 } from './session-utils.js';
 
+const VOICE_OVER_POLL_INTERVAL_MS = 1000;
+
 interface InProcessSession {
    adapter: DriverAdapter;
    context: BrokerHandlerContext;
+   monitorTimer?: NodeJS.Timeout | undefined;
 }
 
 /** Sessions that live inside this process, keyed by session id. */
@@ -36,6 +39,36 @@ export interface InProcessStartOptions {
    app?: AccessibilityDriverSession['app'] | undefined;
    idleTimeoutMinutes?: number | undefined;
    engine?: VirtualEngine | undefined;
+}
+
+async function teardownInProcessSession(sessionId: string): Promise<void> {
+   const entry = inProcessSessions.get(sessionId);
+   if (!entry) {
+      return;
+   }
+   if (entry.monitorTimer) {
+      clearInterval(entry.monitorTimer);
+   }
+   inProcessSessions.delete(sessionId);
+   await entry.adapter.stop().catch(ignoreError);
+   await removeSessionArtifacts(entry.context.session);
+}
+
+function createVoiceOverInProcessMonitor(
+   target: Platform,
+   sessionId: string,
+): NodeJS.Timeout | undefined {
+   if (target !== 'voiceover') {
+      return undefined;
+   }
+   const timer = setInterval(async () => {
+      const running = await isVoiceOverRunning().catch(() => false);
+      if (!running) {
+         await teardownInProcessSession(sessionId);
+      }
+   }, VOICE_OVER_POLL_INTERVAL_MS);
+   timer.unref();
+   return timer;
 }
 
 /** Starts a session whose adapter and transcript live in the calling process. */
@@ -52,7 +85,11 @@ export async function startInProcessSession(
       recording,
       persist: true,
    });
-   inProcessSessions.set(options.sessionId, { adapter, context });
+   const monitorTimer = createVoiceOverInProcessMonitor(
+      options.target,
+      options.sessionId,
+   );
+   inProcessSessions.set(options.sessionId, { adapter, context, monitorTimer });
    await writeSessionMetadata(context.session);
    return context.session;
 }
@@ -63,16 +100,6 @@ export function hasInProcessSession(sessionId: string): boolean {
 
 export function listInProcessSessionIds(): string[] {
    return [...inProcessSessions.keys()];
-}
-
-async function teardownInProcessSession(sessionId: string): Promise<void> {
-   const entry = inProcessSessions.get(sessionId);
-   if (!entry) {
-      return;
-   }
-   inProcessSessions.delete(sessionId);
-   await entry.adapter.stop().catch(ignoreError);
-   await removeSessionArtifacts(entry.context.session);
 }
 
 /** Routes one request through the same handlers the broker process uses. */

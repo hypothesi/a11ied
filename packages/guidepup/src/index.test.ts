@@ -4,6 +4,7 @@ import {
    createDriverAdapter,
    driverCapabilities,
    guidepupSetupCommand,
+   isVoiceOverRunning,
 } from './index.js';
 import { normalizeDriverKeys } from './key-aliases.js';
 
@@ -139,5 +140,23 @@ describe('guidepup driver setup and keys', () => {
       expect(normalizeDriverKeys('Space', 'virtual')).toBe(' ');
       expect(normalizeDriverKeys('Shift+Spacebar', 'virtual')).toBe('Shift+ ');
       expect(normalizeDriverKeys('Space', 'voiceover')).toBe('Space');
+   });
+});
+
+describe('voiceover process liveness', () => {
+   it('supports a custom liveness check', async () => {
+      const running = await isVoiceOverRunning(async () => true);
+
+      expect(running).toBe(true);
+
+      const stopped = await isVoiceOverRunning(async () => false);
+
+      expect(stopped).toBe(false);
+   });
+
+   it('returns false on non-darwin platforms by default', async () => {
+      if (process.platform !== 'darwin') {
+         expect(await isVoiceOverRunning()).toBe(false);
+      }
    });
 });

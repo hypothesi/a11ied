@@ -77,3 +77,4 @@ export {
    decodeDriverCommandError,
    encodeDriverCommandError,
 } from './driver-command-wire.js';
+export { isVoiceOverRunning, type VoiceOverLivenessCheck } from './voiceover-status.js';
