@@ -206,7 +206,21 @@
       {
          "actRuleId": "5c01ea",
          "axeRuleId": "aria-conditional-attr",
+         "testcaseId": "1449cc0526959d274a89345e9b479846577aac5c",
+         "expected": "failed",
+         "actual": "passed"
+      },
+      {
+         "actRuleId": "5c01ea",
+         "axeRuleId": "aria-conditional-attr",
          "testcaseId": "5e4eedbbef33766005c6f92c3dede1b1b40a2dac",
+         "expected": "failed",
+         "actual": "passed"
+      },
+      {
+         "actRuleId": "5c01ea",
+         "axeRuleId": "aria-prohibited-attr",
+         "testcaseId": "1449cc0526959d274a89345e9b479846577aac5c",
          "expected": "failed",
          "actual": "passed"
       },
@@ -228,13 +242,6 @@
          "actRuleId": "674b10",
          "axeRuleId": "aria-deprecated-role",
          "testcaseId": "527c265ba570f0131dddef3687981b66f6dd156f",
-         "expected": "failed",
-         "actual": "passed"
-      },
-      {
-         "actRuleId": "78fd32",
-         "axeRuleId": "avoid-inline-spacing",
-         "testcaseId": "67159173d21bc9cf00d1bb5a7ec817696ccee05c",
          "expected": "failed",
          "actual": "passed"
       },

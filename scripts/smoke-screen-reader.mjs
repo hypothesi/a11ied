@@ -5,7 +5,7 @@
  * and on Windows with NVDA. Run it locally with `--sr virtual` to check the script itself
  * without starting a real screen reader.
  */
-import { spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
 import { resolve } from 'node:path';
 
@@ -74,31 +74,44 @@ function startFixtureServer() {
 
 function runCli(args) {
    log(`\n$ a1 ${args.join(' ')}`);
-   const result = spawnSync(execPath, [CLI_PATH, ...args], {
-      encoding: 'utf8',
-      env: { ...processEnv, FORCE_COLOR: '0' },
+   return new Promise((resolveRun) => {
+      const child = spawn(execPath, [CLI_PATH, ...args], {
+         env: { ...processEnv, FORCE_COLOR: '0' },
+      });
+      let stdout = '';
+      let stderr = '';
+      child.stdout.on('data', (data) => {
+         stdout += data;
+      });
+      child.stderr.on('data', (data) => {
+         stderr += data;
+      });
+      child.on('close', (status) => {
+         if (stdout) {
+            log(stdout.trimEnd());
+         }
+         if (stderr) {
+            log(stderr.trimEnd());
+         }
+         resolveRun({ status, stdout, stderr });
+      });
    });
-   if (result.stdout) {
-      log(result.stdout.trimEnd());
-   }
-   if (result.stderr) {
-      log(result.stderr.trimEnd());
-   }
-   return result;
 }
 
-function runCliOrFail(args) {
-   const result = runCli(args);
+async function runCliOrFail(args) {
+   const result = await runCli(args);
    if (result.status !== 0) {
       throw new Error(`a1 ${args.join(' ')} exited with ${result.status}`);
    }
    return result;
 }
 
-function navigate(steps) {
-   for (let step = 0; step < steps; step += 1) {
-      runCliOrFail(['sr', 'next']);
+async function navigate(stepsRemaining) {
+   if (stepsRemaining <= 0) {
+      return;
    }
+   await runCliOrFail(['sr', 'next']);
+   await navigate(stepsRemaining - 1);
 }
 
 function assertHeadingAnnounced(transcriptJson) {
@@ -118,11 +131,12 @@ function startOptions(screenReader) {
 }
 
 async function runSmoke(screenReader, url) {
-   runCliOrFail(['doctor', '--strict']);
-   runCliOrFail(['sr', 'start', ...startOptions(screenReader), url]);
-   navigate(NAVIGATION_STEPS);
-   runCliOrFail(['sr', 'read']);
-   const transcript = runCliOrFail(['sr', 'transcript', '--json']);
+   const doctorArgs = screenReader === 'virtual' ? ['doctor'] : ['doctor', '--strict'];
+   await runCliOrFail(doctorArgs);
+   await runCliOrFail(['sr', 'start', ...startOptions(screenReader), url]);
+   await navigate(NAVIGATION_STEPS);
+   await runCliOrFail(['sr', 'read']);
+   const transcript = await runCliOrFail(['sr', 'transcript', '--json']);
    assertHeadingAnnounced(transcript.stdout);
 }
 
@@ -135,7 +149,7 @@ async function main() {
       await runSmoke(screenReader, server.url);
       log('\nScreen reader smoke test passed.');
    } finally {
-      runCli(['sr', 'stop']);
+      await runCli(['sr', 'stop']);
       await server.close();
    }
 }

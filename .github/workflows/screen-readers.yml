@@ -42,7 +42,11 @@ jobs:
            uses: guidepup/setup-action@0.21.0
 
          - name: Install Guidepup VoiceOver assets
-           run: node packages/cli/dist/cli.js setup --skip-setup
+           run: |
+              mkdir -p "$HOME/Library/Group Containers/group.com.apple.VoiceOver/Library/Preferences" "$HOME/Library/Preferences"
+              plutil -create xml1 "$HOME/Library/Group Containers/group.com.apple.VoiceOver/Library/Preferences/com.apple.VoiceOver4.local.plist" 2>/dev/null || true
+              plutil -create xml1 "$HOME/Library/Preferences/com.apple.VoiceOver4.local.plist" 2>/dev/null || true
+              node packages/cli/dist/cli.js setup --skip-setup
 
          - name: Screen reader smoke test
            run: npm run smoke:sr
