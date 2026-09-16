@@ -14,23 +14,13 @@ import {
 import { driverCapabilities, type DriverAdapter } from './adapter-shared.js';
 import type { SerializableDriverCommand } from './command-registry.js';
 import { DriverCommandError } from './driver-command-error.js';
+import { loadPackageScript } from './focus-shared.js';
 import { createScreenshotUnsupportedError } from './screenshot-unsupported.js';
 import type { VirtualHost } from './virtual-host.js';
 
 /** The document a virtual session reads before a page is attached. */
 export const defaultVirtualDocument = {
-   html: `
-<!doctype html>
-<html lang="en">
-  <body>
-    <main>
-      <h1>a11ied virtual target</h1>
-      <p>No live page is attached to this driver session yet.</p>
-      <button type="button">Continue</button>
-    </main>
-  </body>
-</html>
-`,
+   html: loadPackageScript('scripts/default-virtual-document.html', import.meta.url),
    url: 'about:a11ied-virtual',
 };
 

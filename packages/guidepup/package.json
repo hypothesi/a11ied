@@ -2,7 +2,8 @@
    "name": "@a11ied/guidepup",
    "version": "0.1.0",
    "files": [
-      "dist"
+      "dist",
+      "scripts"
    ],
    "type": "module",
    "main": "./dist/index.js",
@@ -16,7 +17,8 @@
          "types": "./dist/browser.d.ts",
          "import": "./dist/browser.js"
       },
-      "./virtual-page.js": "./dist/virtual-page.js"
+      "./virtual-page.js": "./dist/virtual-page.js",
+      "./scripts/*": "./scripts/*"
    },
    "publishConfig": {
       "access": "public"

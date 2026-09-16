@@ -6,6 +6,7 @@
  * without starting a real screen reader.
  */
 import { spawn } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { resolve } from 'node:path';
 
@@ -20,19 +21,10 @@ const HTTP_OK = 200;
 const FAILURE_EXIT_CODE = 1;
 const EXIT_DRAIN_DELAY_MS = 250;
 const SMOKE_BROKER_TIMEOUT_MS = 180_000;
-const FIXTURE_HTML = [
-   '<!doctype html>',
-   '<html lang="en">',
-   '<head><meta charset="utf-8"><title>a11ied smoke</title></head>',
-   '<body>',
-   '<a href="#main-heading" id="start" autofocus>start</a>',
-   '<main>',
-   `<h1><a href="#main-heading" id="main-heading">${HEADING_TEXT}</a></h1>`,
-   '<p>Screen reader smoke fixture.</p>',
-   '<button type="button">a11ied smoke button</button>',
-   '</main>',
-   '</body></html>',
-].join('\n');
+const FIXTURE_HTML = readFileSync(
+   resolve(import.meta.dirname, 'smoke-fixture.html'),
+   'utf8',
+);
 
 function log(message) {
    process.stdout.write(`${message}\n`);

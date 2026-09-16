@@ -3,6 +3,8 @@ import { promisify } from 'node:util';
 
 import type { AxFocusedElement } from '@a11ied/contracts';
 
+import { loadPackageScript } from './focus-shared.js';
+
 const execFileAsync = promisify(execFile);
 const AX_QUERY_TIMEOUT_MS = 2000;
 
@@ -10,46 +12,9 @@ const AX_QUERY_TIMEOUT_MS = 2000;
 const FIELD_SEPARATOR = '\u001E';
 const EXPECTED_FIELD_COUNT = 6;
 
-// Sequoia-compatible (avoids error -2741 from `focused UI element` syntax on macOS 15+).
-const SCRIPT = [
-   'try',
-   `  set delim to (ASCII character 30)`,
-   '  tell application "System Events"',
-   '    set fe to value of attribute "AXFocusedUIElement" of (first application process whose frontmost is true)',
-   '    set r to ""',
-   '    set s to ""',
-   '    set t to ""',
-   '    set d to ""',
-   '    set v to ""',
-   '    set e to ""',
-   '    try',
-   '      set r to role of fe as text',
-   '    end try',
-   '    try',
-   '      set s to value of attribute "AXSubrole" of fe as text',
-   '    end try',
-   '    try',
-   '      set t to title of fe as text',
-   '    end try',
-   '    try',
-   '      set d to description of fe as text',
-   '    end try',
-   '    try',
-   '      set v to value of fe as text',
-   '    end try',
-   '    try',
-   '      if enabled of fe then',
-   '        set e to "true"',
-   '      else',
-   '        set e to "false"',
-   '      end if',
-   '    end try',
-   '    return r & delim & s & delim & t & delim & d & delim & v & delim & e',
-   '  end tell',
-   'on error',
-   '  return ""',
-   'end try',
-].join('\n');
+function loadAxPropertiesScript(): string {
+   return loadPackageScript('scripts/ax-properties.applescript', import.meta.url);
+}
 
 type AxFields = [string, string, string, string, string, string];
 
@@ -92,9 +57,13 @@ function parseAxOutput(raw: string): AxFocusedElement | undefined {
  */
 export async function queryFocusedAxProperties(): Promise<AxFocusedElement | undefined> {
    try {
-      const { stdout } = await execFileAsync('osascript', ['-e', SCRIPT], {
-         timeout: AX_QUERY_TIMEOUT_MS,
-      });
+      const { stdout } = await execFileAsync(
+         'osascript',
+         ['-e', loadAxPropertiesScript()],
+         {
+            timeout: AX_QUERY_TIMEOUT_MS,
+         },
+      );
       return parseAxOutput(stdout);
    } catch {
       return undefined;

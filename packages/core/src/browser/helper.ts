@@ -1,5 +1,7 @@
 import { spawn } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
 import { basename } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import type { BrowserAutomationCandidate, DriverFocusTarget } from '@a11ied/contracts';
 
@@ -129,14 +131,45 @@ function removeAppQuarantine(candidate: BrowserAutomationCandidate): void {
    }
 }
 
-async function openWithAppleScript(appName: string, url: string): Promise<boolean> {
-   const script = [
-      `tell application "${escapeAppleScriptString(appName)}"`,
-      'activate',
-      'set targetWindow to make new window',
-      `set URL of active tab of targetWindow to "${escapeAppleScriptString(url)}"`,
-      'end tell',
+const scriptCache = new Map<string, string>();
+
+function loadPackageScript(relativePath: string, baseUrl: string): string {
+   const cached = scriptCache.get(relativePath);
+   if (cached !== undefined) {
+      return cached;
+   }
+   const candidates = [
+      new URL(`../${relativePath}`, baseUrl),
+      new URL(`../../${relativePath}`, baseUrl),
    ];
+   try {
+      const packageEntry = import.meta.resolve('@a11ied/core');
+      candidates.push(new URL(`../${relativePath}`, packageEntry));
+   } catch {
+      // Best-effort resolution via package entry.
+   }
+   for (const candidate of candidates) {
+      const filePath = fileURLToPath(candidate);
+      if (existsSync(filePath)) {
+         const content = readFileSync(filePath, 'utf8');
+         scriptCache.set(relativePath, content);
+         return content;
+      }
+   }
+   throw new Error(`Unable to locate script "${relativePath}" from base "${baseUrl}".`);
+}
+
+async function openWithAppleScript(appName: string, url: string): Promise<boolean> {
+   const scriptTemplate = loadPackageScript(
+      'scripts/open-browser.applescript',
+      import.meta.url,
+   );
+   const script = scriptTemplate
+      .replaceAll('__APP_NAME__', escapeAppleScriptString(appName))
+      .replaceAll('__URL__', escapeAppleScriptString(url))
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
    const child = spawn(
       'osascript',
       script.flatMap((line) => ['-e', line]),

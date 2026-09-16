@@ -1,12 +1,16 @@
 import type { DriverFocusTarget } from '@a11ied/contracts';
 
-import { FOCUS_COMMAND_TIMEOUT_MS, focusExecFile } from './focus-shared.js';
+import {
+   FOCUS_COMMAND_TIMEOUT_MS,
+   focusExecFile,
+   loadPackageScript,
+} from './focus-shared.js';
 import { delay } from './sequential.js';
 
 const FOCUS_POLL_INTERVAL_MS = 100;
 /** How long `sr start` and `sr open` wait for the window to come to the front. */
 export const WINDOW_FOCUS_TIMEOUT_MS = 5000;
-const FIELD_SEPARATOR = '';
+const FIELD_SEPARATOR = ' ';
 
 /** What the operating system says is in front right now. */
 export interface FrontmostWindow {
@@ -23,44 +27,20 @@ export interface WindowFocusResult {
    waitedMs: number;
 }
 
-const MAC_FRONTMOST_SCRIPT = [
-   'set delim to (ASCII character 30)',
-   'tell application "System Events"',
-   '  set p to first application process whose frontmost is true',
-   '  set n to name of p as text',
-   '  set b to ""',
-   '  set t to ""',
-   '  try',
-   '    set b to bundle identifier of p as text',
-   '  end try',
-   '  try',
-   '    set t to name of front window of p as text',
-   '  end try',
-   '  return n & delim & b & delim & (unix id of p as text) & delim & t',
-   'end tell',
-].join('\n');
+function loadMacFrontmostScript(): string {
+   return loadPackageScript('scripts/mac-frontmost.applescript', import.meta.url);
+}
 
-const WINDOWS_FRONTMOST_SCRIPT = [
-   'Add-Type @"',
-   'using System; using System.Runtime.InteropServices;',
-   'public class A11iedFront {',
-   '  [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();',
-   '  [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);',
-   '}',
-   '"@',
-   '$h = [A11iedFront]::GetForegroundWindow()',
-   '$procId = 0',
-   '[void][A11iedFront]::GetWindowThreadProcessId($h, [ref]$procId)',
-   '$p = Get-Process -Id $procId -ErrorAction SilentlyContinue',
-   `Write-Output ("{0}${FIELD_SEPARATOR}{1}${FIELD_SEPARATOR}{2}" -f $p.ProcessName, $procId, $p.MainWindowTitle)`,
-].join('\n');
+function loadWindowsFrontmostScript(): string {
+   return loadPackageScript('scripts/windows-frontmost.ps1', import.meta.url);
+}
 
 function stripSuffix(name: string): string {
    return name.replace(/\.(app|exe)$/iu, '').toLowerCase();
 }
 
 async function readMacFrontmost(): Promise<FrontmostWindow> {
-   const { stdout } = await focusExecFile('osascript', ['-e', MAC_FRONTMOST_SCRIPT], {
+   const { stdout } = await focusExecFile('osascript', ['-e', loadMacFrontmostScript()], {
       timeout: FOCUS_COMMAND_TIMEOUT_MS,
    });
    const [appName = '', bundleId = '', pid = '', windowTitle = ''] = String(stdout)
@@ -77,7 +57,7 @@ async function readMacFrontmost(): Promise<FrontmostWindow> {
 async function readWindowsFrontmost(): Promise<FrontmostWindow> {
    const { stdout } = await focusExecFile(
       'powershell',
-      ['-NoProfile', '-NonInteractive', '-Command', WINDOWS_FRONTMOST_SCRIPT],
+      ['-NoProfile', '-NonInteractive', '-Command', loadWindowsFrontmostScript()],
       { timeout: FOCUS_COMMAND_TIMEOUT_MS },
    );
    const [processName = '', pid = '', windowTitle = ''] = String(stdout)
