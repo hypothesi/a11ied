@@ -10,6 +10,7 @@ const toc = [
    { id: 'check', label: 'Transcript assertions' },
    { id: 'batch', label: 'Run a batch of actions' },
    { id: 'commands', label: 'Run named screen reader commands' },
+   { id: 'voiceover-commands', label: 'VoiceOver Commander vs. Keycodes' },
    { id: 'transcript', label: 'Checkpoints and transcripts' },
    { id: 'form', label: 'Example: a dialog' },
    { id: 'cleanup', label: 'Stop the session' },
@@ -375,6 +376,120 @@ a1 sr list --query "VO-Command" --sr voiceover</code></pre>
          <code>sr do voiceover-keycode:move-to-next</code> or
          <code>sr do voiceover-commander:move-right</code>. <code>--command-set</code> picks one
          set for the whole call. The simulated screen reader accepts the portable set only.
+      </p>
+   </section>
+
+   <section class="panel" id="voiceover-commands">
+      <div class="panel-head">
+         <p class="panel-kicker">macOS VoiceOver</p>
+         <h2>VoiceOver Commander vs. Keycodes</h2>
+      </div>
+      <p>
+         When driving VoiceOver on macOS, <code>a11ied</code> supports two distinct command sets for controlling the screen reader:
+         <strong>VoiceOver Commander</strong> (<code>voiceover-commander</code>) and <strong>VoiceOver Keycodes</strong> (<code>voiceover-keycode</code>).
+         Understanding how each mechanism operates under the hood helps you choose the right approach for your testing needs.
+      </p>
+
+      <h3>What is VoiceOver Commander?</h3>
+      <p>
+         <strong>VoiceOver Commander</strong> is an internal, semantic automation interface built directly into macOS VoiceOver.
+         Instead of simulating physical keys, <code>a11ied</code> communicates directly with VoiceOver via Apple Events (AppleScript):
+      </p>
+      <pre><code>tell application "VoiceOver"
+   tell commander to perform command "move down"
+end tell</code></pre>
+      <p>
+         Because Commander interacts directly with VoiceOver's internal automation dictionary:
+      </p>
+      <ul>
+         <li>
+            <strong>Layout-independent:</strong> It is completely immune to physical or virtual keyboard layout differences (e.g., QWERTY, Dvorak, AZERTY, or international input sources).
+         </li>
+         <li>
+            <strong>Modifier-independent:</strong> It does not require synthesizing or holding the VoiceOver modifier keys (<code>Control+Option</code> or Caps Lock) and is unaffected by the VO-Lock state (<code>VO-;</code>).
+         </li>
+         <li>
+            <strong>Fast and deterministic:</strong> Commands execute as direct AppleScript transactions without waiting for OS keyboard event queues, key-repeat delays, or modifier release transitions.
+         </li>
+         <li>
+            <strong>Default choice:</strong> In <code>a11ied</code>, <code>--command-set auto</code> resolves to <code>voiceover-commander</code> for all VoiceOver actions because it provides maximum reliability.
+         </li>
+      </ul>
+
+      <h3>What are VoiceOver Keycodes?</h3>
+      <p>
+         <strong>VoiceOver Keycodes</strong> control VoiceOver by simulating literal hardware key events through the macOS <code>System Events</code> API (or native CoreGraphics accessibility event taps).
+         When you issue a keycode command like <code>move-to-next</code>, <code>a11ied</code> instructs macOS to simulate pressing the physical VoiceOver chord:
+      </p>
+      <pre><code>tell application "System Events"
+   key code 124 using &#123;control down, option down&#125; -- Right Arrow with VO keys
+end tell</code></pre>
+      <p>
+         Keycodes replicate the physical user experience of pressing keys on an Apple keyboard:
+      </p>
+      <ul>
+         <li>
+            <strong>Physical fidelity:</strong> Simulates physical key-down, modifier hold, and key-up event cycles, identical to a human pressing <code>Control+Option+ArrowRight</code>.
+         </li>
+         <li>
+            <strong>Keyboard layout dependent:</strong> Keycodes correspond to physical key positions (scan codes). Mismatches between hardware layouts or active OS input sources can affect command interpretation.
+         </li>
+         <li>
+            <strong>Focus sensitive:</strong> Requires the target application window to be frontmost and actively receiving input focus. If focus shifts during key dispatch, keystrokes may be lost or misrouted.
+         </li>
+         <li>
+            <strong>Timing considerations:</strong> Subject to OS event loop dispatch latency and modifier state synchronization.
+         </li>
+      </ul>
+
+      <h3>Comparison & Contrast</h3>
+      <p>
+         The following matrix highlights the operational differences and trade-offs between both command sets:
+      </p>
+      <div class="route-list">
+         <div class="route-row">
+            <strong>Execution path</strong>
+            <span><strong>Commander</strong> sends semantic AppleScript IPC straight to <code>VoiceOver.app</code>; <strong>Keycodes</strong> send synthetic key events to macOS <code>System Events</code>.</span>
+         </div>
+         <div class="route-row">
+            <strong>VO modifier keys</strong>
+            <span><strong>Commander</strong> requires no modifier keys or VO-lock; <strong>Keycodes</strong> explicitly simulate holding <code>Control+Option</code>.</span>
+         </div>
+         <div class="route-row">
+            <strong>Keyboard layout</strong>
+            <span><strong>Commander</strong> is 100% layout-independent; <strong>Keycodes</strong> depend on macOS keyboard mapping and physical scan codes.</span>
+         </div>
+         <div class="route-row">
+            <strong>Speed & determinism</strong>
+            <span><strong>Commander</strong> executes instantaneously in synchronous transactions; <strong>Keycodes</strong> require event-queue dispatch and key stabilization.</span>
+         </div>
+         <div class="route-row">
+            <strong>Window focus requirement</strong>
+            <span><strong>Commander</strong> commands the VoiceOver cursor directly; <strong>Keycodes</strong> require the target window to be active and frontmost to receive input.</span>
+         </div>
+         <div class="route-row">
+            <strong>Recommended for</strong>
+            <span><strong>Commander</strong> is best for fast, robust, headless CI and automated test suites; <strong>Keycodes</strong> are best for validating literal keyboard shortcuts and custom user chord mappings.</span>
+         </div>
+      </div>
+
+      <h3>Using both in the CLI</h3>
+      <p>
+         By default, <code>a1 sr do</code> runs Commander commands on macOS. To run a keycode command, either qualify the command name or set <code>--command-set voiceover-keycode</code>:
+      </p>
+      <pre><code># Run via VoiceOver Commander (default)
+a1 sr do move-right
+
+# Run explicitly via VoiceOver Keycodes
+a1 sr do voiceover-keycode:move-to-next
+
+# Select the keycode command set for the invocation
+a1 sr do move-to-next --command-set voiceover-keycode
+
+# Press literal key chords directly
+a1 sr press "VO+ArrowRight"</code></pre>
+      <p>
+         Use <code>a1 sr list --sr voiceover</code> to explore the complete catalog of available commands across both sets.
       </p>
    </section>
 
