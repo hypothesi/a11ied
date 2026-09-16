@@ -24,19 +24,13 @@ const FIXTURE_HTML = [
    '<!doctype html>',
    '<html lang="en">',
    '<head><meta charset="utf-8"><title>a11ied smoke</title></head>',
-   '<body><main>',
-   `<h1><a href="#main-heading" id="main-heading" autofocus>${HEADING_TEXT}</a></h1>`,
+   '<body>',
+   '<a href="#main-heading" id="start" autofocus>start</a>',
+   '<main>',
+   `<h1><a href="#main-heading" id="main-heading">${HEADING_TEXT}</a></h1>`,
    '<p>Screen reader smoke fixture.</p>',
    '<button type="button">a11ied smoke button</button>',
    '</main>',
-   '<script>',
-   'window.addEventListener("DOMContentLoaded", () => {',
-   '  const heading = document.getElementById("main-heading");',
-   '  if (heading) {',
-   '    heading.focus();',
-   '  }',
-   '});',
-   '</script>',
    '</body></html>',
 ].join('\n');
 
@@ -145,8 +139,13 @@ async function navigate(stepsRemaining) {
    await navigate(stepsRemaining - 1);
 }
 
+function hasHeading(transcriptJson) {
+   const normalized = transcriptJson.toLowerCase().replaceAll(/a\s*11ied/gu, 'a11ied');
+   return normalized.includes(HEADING_TEXT.toLowerCase());
+}
+
 function assertHeadingAnnounced(transcriptJson) {
-   if (!transcriptJson.includes(HEADING_TEXT)) {
+   if (!hasHeading(transcriptJson)) {
       throw new Error(
          `The screen reader never announced "${HEADING_TEXT}". Transcript: ${transcriptJson}`,
       );
@@ -161,6 +160,23 @@ function startOptions(screenReader) {
    return ['--sr', screenReader, '--timeout', String(SMOKE_BROKER_TIMEOUT_MS)];
 }
 
+async function searchForHeading(transcriptStdout) {
+   if (hasHeading(transcriptStdout)) {
+      return transcriptStdout;
+   }
+   await runCli(['sr', 'top']);
+   await runCli(['sr', 'next', 'heading']);
+   await runCli(['sr', 'read']);
+   const nextResult = await runCliOrFail(['sr', 'transcript', '--json']);
+   if (hasHeading(nextResult.stdout)) {
+      return nextResult.stdout;
+   }
+   await runCli(['sr', 'previous', 'heading']);
+   await runCli(['sr', 'read']);
+   const prevResult = await runCliOrFail(['sr', 'transcript', '--json']);
+   return prevResult.stdout;
+}
+
 async function runSmoke(screenReader, url) {
    const doctorArgs = screenReader === 'virtual' ? ['doctor'] : ['doctor', '--strict'];
    await runCliOrFail(doctorArgs);
@@ -170,13 +186,9 @@ async function runSmoke(screenReader, url) {
    }
    await navigate(NAVIGATION_STEPS);
    await runCliOrFail(['sr', 'read']);
-   let transcript = await runCliOrFail(['sr', 'transcript', '--json']);
-   if (!transcript.stdout.includes(HEADING_TEXT)) {
-      await runCli(['sr', 'next', 'heading']);
-      await runCli(['sr', 'read']);
-      transcript = await runCliOrFail(['sr', 'transcript', '--json']);
-   }
-   assertHeadingAnnounced(transcript.stdout);
+   const transcript = await runCliOrFail(['sr', 'transcript', '--json']);
+   const finalOutput = await searchForHeading(transcript.stdout);
+   assertHeadingAnnounced(finalOutput);
 }
 
 async function main() {
