@@ -59,11 +59,16 @@ function waitForChildExit(
             stderr += String(chunk);
          });
       }
+      const cleanup = (): void => {
+         child.stderr?.destroy();
+         child.unref();
+      };
       const timeout = setTimeout(() => {
          if (settled) {
             return;
          }
          settled = true;
+         cleanup();
          reject(
             new Error(`Browser open command timed out after ${String(timeoutMs)}ms.`),
          );
@@ -75,6 +80,7 @@ function waitForChildExit(
          }
          settled = true;
          clearTimeout(timeout);
+         cleanup();
          reject(error);
       });
 
@@ -84,6 +90,7 @@ function waitForChildExit(
          }
          settled = true;
          clearTimeout(timeout);
+         cleanup();
          if (code === 0) {
             resolve();
             return;
@@ -165,9 +172,10 @@ async function openUrlOnWindows(
       ? ['/c', 'start', '', candidate.location, url]
       : ['/c', 'start', '', url];
    const child = spawn('cmd', args, {
-      stdio: ['ignore', 'ignore', 'pipe'],
+      stdio: 'ignore',
       windowsHide: true,
    });
+   child.unref();
    await waitForChildExit(child, BROWSER_OPEN_TIMEOUT_MS);
 }
 

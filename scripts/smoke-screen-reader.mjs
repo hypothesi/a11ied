@@ -88,6 +88,9 @@ function runCli(args) {
       function finish(status) {
          if (!settled) {
             settled = true;
+            child.stdout?.destroy();
+            child.stderr?.destroy();
+            child.unref();
             resolveRun({ status: status ?? 0, stdout, stderr });
          }
       }
