@@ -1,4 +1,4 @@
-# a11ied
+![a11ied: automated screen reader and WCAG testing](.github/assets/header.png)
 
 `a11ied` is a CLI-first accessibility automation toolkit for real screen reader testing with VoiceOver and NVDA, built on Guidepup.
 

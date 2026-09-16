@@ -1,9 +1,11 @@
 ---
+import { Image } from 'astro:assets';
 import ArrowLeft from '@lucide/astro/icons/arrow-left';
 import ArrowRight from '@lucide/astro/icons/arrow-right';
 import ArrowUpRight from '@lucide/astro/icons/arrow-up-right';
 import Minus from '@lucide/astro/icons/minus';
 import Plus from '@lucide/astro/icons/plus';
+import logo from '../assets/logo.png';
 
 interface LinkItem { href: string; label: string; }
 interface LinkSection { title: string; links: LinkItem[]; }
@@ -107,7 +109,7 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH;
          .mobile-bar { display: none; }
          .brand { display: grid; gap: var(--md); margin-bottom: var(--xl); }
          .brand a { color: inherit; text-decoration: none; }
-         .mark { width: 4.4rem; aspect-ratio: 1; display: grid; place-items: center; background: var(--red); color: var(--paper-light); border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); font: 700 2.5rem/1 var(--display); transform: rotate(-2deg); }
+         .mark { display: block; width: 4.4rem; aspect-ratio: 1; object-fit: contain; }
          .brand-title { font: 700 3rem/0.78 var(--display); letter-spacing: -0.045em; text-transform: uppercase; }
          .brand-copy, .rail-note { margin: 0; max-width: 24ch; font-size: 0.92rem; line-height: 1.45; }
          .rail-note { margin-bottom: var(--xl); padding-block: var(--md); border-block: 2px solid var(--ink); font-weight: 600; }
@@ -272,7 +274,7 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH;
             .mobile-bar { position: sticky; top: 0; z-index: 5; display: block; padding: var(--sm) var(--md); background: var(--yellow); border-bottom: 3px solid var(--ink); }
             .mobile-topline { display: flex; justify-content: space-between; align-items: center; }
             .mobile-brand { display: flex; align-items: center; gap: var(--md); }
-            .mobile-brand .mark { width: 2.7rem; font-size: 1.55rem; box-shadow: 3px 3px 0 var(--ink); }
+            .mobile-brand .mark { width: 2.7rem; }
             .mobile-brand-copy { display: grid; gap: 0.12rem; }
             .mobile-brand-name, .mobile-brand-section { margin: 0; line-height: 1; }
             .mobile-brand-name { font: 700 1.5rem/1 var(--display); text-transform: uppercase; }
@@ -313,7 +315,7 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH;
       <div class:list={['shell', { 'shell--with-toc': toc.length > 0 }]}>
          <aside class="desktop-rail">
             <div class="brand">
-               <a href="/" aria-label="a11ied home"><div class="mark" aria-hidden="true">a!</div></a>
+               <a href="/" aria-label="a11ied home"><Image src={logo} alt="" class="mark" width={70} height={70} /></a>
                <div class="brand-title"><a href="/">a11ied</a></div>
                <p class="brand-copy">Run accessibility tests from your terminal or AI agent.</p>
             </div>
@@ -334,7 +336,7 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH;
                <div class="mobile-bar">
                   <div class="mobile-topline">
                      <div class="mobile-brand">
-                        <a href="/" aria-label="a11ied home"><div class="mark" aria-hidden="true">a!</div></a>
+                        <a href="/" aria-label="a11ied home"><Image src={logo} alt="" class="mark" width={44} height={44} /></a>
                         <div class="mobile-brand-copy"><p class="mobile-brand-name">a11ied</p><p class="mobile-brand-section">{activeSection?.title ?? 'Docs'}</p></div>
                      </div>
                   </div>
