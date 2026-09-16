@@ -25,10 +25,19 @@ const FIXTURE_HTML = [
    '<html lang="en">',
    '<head><meta charset="utf-8"><title>a11ied smoke</title></head>',
    '<body><main>',
-   `<h1>${HEADING_TEXT}</h1>`,
+   `<h1><a href="#main-heading" id="main-heading" autofocus>${HEADING_TEXT}</a></h1>`,
    '<p>Screen reader smoke fixture.</p>',
    '<button type="button">a11ied smoke button</button>',
-   '</main></body></html>',
+   '</main>',
+   '<script>',
+   'window.addEventListener("DOMContentLoaded", () => {',
+   '  const heading = document.getElementById("main-heading");',
+   '  if (heading) {',
+   '    heading.focus();',
+   '  }',
+   '});',
+   '</script>',
+   '</body></html>',
 ].join('\n');
 
 function log(message) {
@@ -51,6 +60,7 @@ function resolveScreenReader() {
 
 function closeServer(server) {
    return new Promise((closed) => {
+      server.closeAllConnections?.();
       server.close(() => {
          closed();
       });
@@ -131,7 +141,6 @@ async function navigate(stepsRemaining) {
    if (stepsRemaining <= 0) {
       return;
    }
-   await runCli(['sr', 'interact']);
    await runCliOrFail(['sr', 'next']);
    await navigate(stepsRemaining - 1);
 }
@@ -186,7 +195,8 @@ async function main() {
 
 try {
    await main();
+   process.exit(0);
 } catch (error) {
    log(`\nScreen reader smoke test failed: ${error.message}`);
-   process.exitCode = FAILURE_EXIT_CODE;
+   process.exit(FAILURE_EXIT_CODE);
 }
