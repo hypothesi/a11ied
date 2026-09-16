@@ -143,7 +143,7 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH;
          section.panel:nth-of-type(even) { transform: rotate(0.25deg); }
          section.panel:nth-of-type(odd) { transform: rotate(-0.15deg); }
          section.ledger { background: linear-gradient(color-mix(in oklch, var(--blue) 9%, transparent) 1px, transparent 1px) 0 0 / 100% 1.65rem, var(--paper-light); }
-         section.field-note { margin-inline: clamp(0rem, 3vw, 3rem) calc(clamp(0rem, 3vw, 3rem) * -1); background: var(--ink); color: var(--paper-light); box-shadow: 9px 9px 0 var(--red); transform: rotate(-0.4deg); }
+         section.field-note { margin-inline: 0; background: var(--ink); color: var(--paper-light); box-shadow: 9px 9px 0 var(--red); transform: none; }
          section.split { grid-template-columns: minmax(0, 1.7fr) minmax(13rem, 0.75fr); align-items: start; }
          .panel-head { display: grid; gap: var(--xs); padding-bottom: var(--md); border-bottom: 3px solid var(--ink); }
          .panel-kicker { margin: 0; font: 700 0.76rem/1 var(--display); letter-spacing: 0.15em; text-transform: uppercase; color: var(--red-dark); }
@@ -170,6 +170,37 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH;
          .copy-button { display: inline-flex; align-items: center; gap: 0.38rem; min-height: 1.8rem; margin: 0; padding: 0.28rem 0.48rem; border: 2px solid var(--ink); border-radius: 0; background: var(--paper-light); color: var(--ink); box-shadow: 2px 2px 0 var(--red); font: 700 0.68rem/1 var(--display); letter-spacing: 0.1em; cursor: pointer; }
          .copy-button:hover { background: var(--red); color: var(--paper-light); }
          .copy-button svg { width: 0.95rem; height: 0.95rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
+
+         /* Refined code blocks inside dark containers (.field-note) */
+         .field-note pre {
+            background: #0a0e1a;
+            border: 1px solid color-mix(in oklch, var(--paper-light) 20%, transparent);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+         }
+         .field-note pre .code-block-tools,
+         .field-note pre[data-label] .code-block-tools,
+         .field-note pre[data-label="AI AGENT PROMPT"] .code-block-tools,
+         .field-note pre[data-label="CONFIG"] .code-block-tools,
+         .field-note pre[data-label="OUTPUT"] .code-block-tools {
+            background: rgba(255, 255, 255, 0.06);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            color: color-mix(in oklch, var(--paper-light) 85%, transparent);
+         }
+         .field-note pre .copy-button,
+         .field-note pre[data-label] .copy-button,
+         .field-note pre[data-label="AI AGENT PROMPT"] .copy-button {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--paper-light);
+            box-shadow: none;
+         }
+         .field-note pre .copy-button:hover,
+         .field-note pre[data-label] .copy-button:hover,
+         .field-note pre[data-label="AI AGENT PROMPT"] .copy-button:hover {
+            background: var(--paper-light);
+            border-color: var(--paper-light);
+            color: var(--ink);
+         }
          .token-command { color: var(--yellow); font-weight: 800; }
          .token-option { color: oklch(80% 0.12 235); }
          .token-string { color: oklch(79% 0.15 45); }

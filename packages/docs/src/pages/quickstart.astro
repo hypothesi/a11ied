@@ -3,40 +3,49 @@ import DocShell from '../layouts/doc-shell.astro';
 import { docsLinks } from '../lib/nav';
 
 const toc = [
-   { id: 'install', label: '1. Install the package' },
+   { id: 'install', label: '1. Install the CLI' },
    { id: 'check', label: '2. Check your machine' },
-   { id: 'run', label: '3. Run axe' },
-   { id: 'coverage', label: '4. Check coverage' },
-   { id: 'session', label: '5. Start a session' },
-   { id: 'read', label: '6. Read the transcript' },
-   { id: 'stop', label: '7. Stop the session' },
-   { id: 'report', label: 'Claims this run supports' },
+   { id: 'audit', label: '3. Run an accessibility audit' },
+   { id: 'session', label: '4. Start a virtual screen reader' },
+   { id: 'navigate', label: '5. Drive keyboard navigation' },
+   { id: 'stop', label: '6. Stop the session' },
+   { id: 'next', label: 'Next steps' },
 ];
 ---
 
 <DocShell
    title="Quickstart"
-   summary="Install the package, confirm your machine is ready, then take one local route from an axe run to a screen reader transcript. It runs on the simulated screen reader, so nothing beyond Node and a running development server is required."
+   summary="<p>Install <code>a11ied</code>, verify your local environment with <code>a1 doctor</code>, run an automated accessibility audit, and drive your first virtual <abbr title='Assistive technology software that speaks on-screen text and UI controls to blind and low-vision users'>screen reader</abbr> session in under two minutes.</p><p>The virtual screen reader runs in-process with zero extra system permissions or audio hardware required.</p>"
    links={docsLinks}
    toc={toc}
 >
    <section class="panel" id="install">
       <div class="panel-head">
          <p class="panel-kicker">Step 1</p>
-         <h2>Install the package</h2>
+         <h2>Install the CLI</h2>
       </div>
+      <p>
+         Install <code>a11ied</code> globally, or add it to your project as a developer dependency:
+      </p>
       <pre><code>npm install --global a11ied</code></pre>
       <p>
-         The package installs two identical binaries, <code>a1</code> and <code>a11ied</code>.
-         Every example on this page uses <code>a1</code>.
+         The package provides two identical binaries: <code>a1</code> (short shorthand) and <code>a11ied</code>.
+         Every example throughout these docs uses <code>a1</code>.
+      </p>
+      <p>
+         If you prefer not to install globally, run any command with <code>npx a11ied &lt;command&gt;</code>.
       </p>
    </section>
 
    <section class="panel" id="check">
       <div class="panel-head">
          <p class="panel-kicker">Step 2</p>
-         <h2>Check your machine</h2>
+         <h2>Check your environment</h2>
       </div>
+      <p>
+         Run <code>a1 doctor</code> to inspect your local setup. It checks for installed browsers,
+         system permissions, and available screen reader targets:
+      </p>
       <pre><code>a1 doctor</code></pre>
       <pre data-label="OUTPUT"><code>✓ Ready for a1 commands on macOS 26.5.2 (arm64)
 
@@ -66,166 +75,161 @@ Environment
   npm     11.17.0
   Host    macOS 26.5.2 (arm64) [darwin]</code></pre>
       <p>
-         The first line is the verdict. <code>✓</code> means every check passed and you can move
-         on. A <code>✗</code> switches to an <strong>Action items</strong> list with the exact
-         command that fixes each step. The virtual target this quickstart uses needs no setup, so
-         the rest of the page works even when VoiceOver or NVDA still needs one.
+         A leading <code>✓</code> indicates your system is ready. If a native tool needs configuration,
+         <code>a1 doctor</code> displays an <strong>Action items</strong> list with the exact command to resolve it.
+         Because the virtual screen reader used in this quickstart runs entirely in software, it requires zero
+         OS configuration or elevated permissions.
       </p>
    </section>
 
-   <section class="split panel" id="run">
+   <section class="split panel" id="audit">
       <div class="stack">
          <div class="panel-head">
             <p class="panel-kicker">Step 3</p>
-            <h2>Run axe on the page</h2>
+            <h2>Run an automated accessibility audit</h2>
          </div>
          <p>
-            Start your development server, then run axe against the route you are working on.
-            axe runs the page in a browser it finds automatically, an installed Chrome, Edge,
-            Brave, or Chromium, or the Chromium <code>npx playwright install chromium</code>
-            downloads.
+            Start your local development server, then scan a route with <code>a1 audit</code>.
+            Powered by <abbr title="Open-source automated accessibility testing engine for HTML and DOM structure from Deque Systems"><a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noreferrer">axe-core</a></abbr>,
+            it checks rendered DOM structure against official <abbr title="Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility"><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG</a></abbr> success criteria:
          </p>
-         <pre><code>a1 axe http://localhost:3000/checkout --level AA --json</code></pre>
+         <pre><code>a1 audit http://localhost:3000/checkout --level AA</code></pre>
+         <pre data-label="OUTPUT"><code>✗ 1 problem to fix.
+
+4.1.2  Name, Role, Value  [A]
+  button[type="button"]
+  Fix: Buttons must have discernible text. Add an aria-label or visible text.
+
+Check by hand
+  18 criteria this page triggers require interactive or screen reader review:
+    • 2.1.1  Keyboard
+    • 2.4.3  Focus Order
+    • 4.1.3  Status Messages
+
+The page
+  Titled Checkout. It has 1 main landmark, 1 form, 2 textboxes, 2 buttons.</code></pre>
          <p>
-            The result has four arrays: <code>violations</code>, <code>passes</code>,
-            <code>incomplete</code>, and <code>inapplicable</code>. Each violation lists the axe
-            rule, its impact, the failing selector, and the failing HTML. See
-            <a href="/guides/violations">understand a violation</a> for what to do with one.
+            Every finding includes the official WCAG criterion, the failing element selector, and
+            actionable remediation advice. When scripting in CI, pass <code>--json</code> for machine-readable output.
          </p>
-         <pre data-label="OUTPUT"><code>"violations": [
-  &#123;
-    "id": "button-name",
-    "impact": "critical",
-    "help": "Buttons must have discernible text",
-    "nodes": [
-      &#123;
-        "target": ["button[type=\"button\"]"],
-        "html": "&lt;button type=\"button\"&gt;&lt;img src=\"cart.png\" alt=\"\"&gt;&lt;/button&gt;"
-      &#125;
-    ]
-  &#125;
-]</code></pre>
       </div>
       <div class="split-aside">
-         <div class="tag">Empty results</div>
+         <div class="tag">Static vs. runtime</div>
          <p class="aside-note">
-            If a single-page app has not mounted yet, the result has a <code>warnings</code>
-            entry saying the page had too little content to test. Load the route in a browser first
-            to confirm it renders.
+            Notice the <strong>Check by hand</strong> section: static scanners catch DOM syntax errors,
+            but cannot verify keyboard focus sequence, live region announcements, or widget state transitions.
          </p>
       </div>
-   </section>
-
-   <section class="panel" id="coverage">
-      <div class="panel-head">
-         <p class="panel-kicker">Step 4</p>
-         <h2>Check what the run left out</h2>
-      </div>
-      <p>
-         A clean axe run covers the success criteria that have axe rules. Check coverage, whether
-         axe can decide a criterion on its own, before you draw a conclusion.
-      </p>
-      <pre><code>a1 wcag 2.4.3 --json
-a1 wcag 1.4.3 --json</code></pre>
-      <p>
-         Focus Order returns <code>"coverageState": "hybrid"</code> with an empty
-         <code>axeRuleIds</code> list. Contrast (Minimum) returns
-         <code>"coverageState": "automated"</code> with <code>color-contrast</code>. The first needs
-         a screen reader session. The second is already covered by step 3.
-      </p>
-      <p>
-         <a href="/test-methods">Test methods</a> explains the four states and where the mapping
-         data comes from.
-      </p>
    </section>
 
    <section class="split panel" id="session">
       <div class="stack">
          <div class="panel-head">
-            <p class="panel-kicker">Step 5</p>
-            <h2>Start a screen reader session</h2>
+            <p class="panel-kicker">Step 4</p>
+            <h2>Start a virtual screen reader session</h2>
          </div>
          <p>
-            The virtual target loads the URL into a simulated reader. Pass
-            <code>--allow-virtual</code> to say the simulation is what you want.
+            To verify what assistive technology actually announces when interacting with your interface,
+            launch a virtual screen reader session against your URL:
          </p>
-         <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout --json</code></pre>
-         <pre data-label="OUTPUT"><code>"session": &#123;
-  "sessionId": "drv_c33f1d8f4461",
-  "target": "virtual",
-  "targetType": "simulated",
-  "url": "http://localhost:3000/checkout"
-&#125;</code></pre>
+         <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout</code></pre>
+         <pre data-label="OUTPUT"><code>✓ Session drv_c33f1d8f4461 started
+  Target: virtual (headless Chromium)
+  URL:    http://localhost:3000/checkout</code></pre>
          <p>
-            Every later <code>sr</code> command uses this session. No command takes a session id.
+            The virtual target runs inside a headless browser engine, computing the full <abbr title="Accessible Rich Internet Applications: W3C specification of attributes that define accessible UI roles, states, and properties"><a href="https://www.w3.org/TR/wai-aria/" target="_blank" rel="noreferrer">ARIA</a></abbr> accessibility tree
+            and speech queue. Page scripts, CSS transitions, and client-side framework components execute normally.
+         </p>
+         <p>
+            On macOS and Windows, passing <code>--allow-virtual</code> acts as an explicit safeguard confirming you want
+            the in-memory software engine rather than native <abbr title="Apple's built-in screen reader for macOS"><a href="https://support.apple.com/guide/voiceover/welcome/mac" target="_blank" rel="noreferrer">VoiceOver</a></abbr> or <abbr title="NonVisual Desktop Access: the open-source screen reader for Windows"><a href="https://www.nvaccess.org/" target="_blank" rel="noreferrer">NVDA</a></abbr>.
          </p>
       </div>
       <div class="split-aside">
-         <div class="tag">One session</div>
+         <div class="tag">Active session</div>
          <p class="aside-note">
-            One session is active per user. A second <code>a1 sr start</code> stops the first one
-            and reports it in the warnings.
+            Subsequent <code>a1 sr</code> commands automatically target this active session. You don't need
+            to copy or manage session IDs in your terminal.
          </p>
       </div>
    </section>
 
-   <section class="panel" id="read">
+   <section class="panel" id="navigate">
       <div class="panel-head">
-         <p class="panel-kicker">Step 6</p>
-         <h2>Step through the page and read the log</h2>
+         <p class="panel-kicker">Step 5</p>
+         <h2>Drive navigation and inspect speech</h2>
       </div>
       <p>
-         <code>sr next</code> moves one item and returns what the reader announced.
-         <code>sr read-all</code> steps from the cursor to the end of the document and returns
-         the whole transcript in one call.
+         Step through interactive elements one by one, or read the entire page from top to bottom
+         with <code>read-all</code>:
       </p>
-      <pre><code>a1 sr read-all --json</code></pre>
-      <pre data-label="OUTPUT"><code>"spokenPhraseLog": [
-  "document",
-  "heading, Checkout, level 1",
-  "form",
-  "Email",
-  "textbox, Email, required",
-  "Card number",
-  "textbox, Card number",
-  "button, Pay now",
-  "button",
-  "end of form",
-  "end of document"
-]</code></pre>
+      <pre><code>a1 sr read-all</code></pre>
+      <pre data-label="OUTPUT"><code>document
+heading, Checkout, level 1
+form
+Email
+textbox, Email, required
+Card number
+textbox, Card number
+button, Pay now
+button
+end of form
+end of document</code></pre>
       <p>
-         Read the log as a sequence. The email field announces its required state. The second to
-         last entry announces as <code>button</code> with nothing after it, which matches the
-         <code>button-name</code> violation from step 3.
+         Review the transcript in chronological order:
+      </p>
+      <ul>
+         <li>The first input correctly announces its label and its <strong>required</strong> state (satisfying <strong><abbr title="WCAG 4.1.2: Name, Role, Value requires that UI components have accessible names, roles, and states"><a href="https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html" target="_blank" rel="noreferrer">WCAG 4.1.2</a></abbr></strong>).</li>
+         <li>The second button speaks only <code>button</code> with no accessible name—confirming the exact violation identified during the audit in Step 3.</li>
+      </ul>
+      <p>
+         You can also send individual keyboard strokes like <code>a1 sr press Tab</code>, <code>a1 sr press ArrowDown</code>,
+         or <code>a1 sr next</code> to test dynamic widgets step-by-step.
       </p>
    </section>
 
    <section class="panel" id="stop">
       <div class="panel-head">
-         <p class="panel-kicker">Step 7</p>
+         <p class="panel-kicker">Step 6</p>
          <h2>Stop the session</h2>
       </div>
-      <pre><code>a1 sr stop --json</code></pre>
       <p>
-         Stopping shuts down the driver process, finishes any recording, and deletes the session
-         state file. Sessions outlive the shell that started them, so stop each one you start.
+         When you're finished testing, stop the session to release worker processes and temporary state:
       </p>
+      <pre><code>a1 sr stop</code></pre>
+      <pre data-label="OUTPUT"><code>✓ Session drv_c33f1d8f4461 stopped</code></pre>
    </section>
 
-   <section class="field-note" id="report">
+   <section class="field-note" id="next">
       <div class="panel-head">
-         <p class="panel-kicker">Result</p>
-         <h2>The evidence this run supports</h2>
+         <p class="panel-kicker">Next steps</p>
+         <h2>Integrate accessibility into your workflow</h2>
       </div>
       <p>
-         You have an axe result and a transcript of the announcement order, for one route on
-         one screen reader.
+         You've just audited a page and verified screen reader announcements from your terminal. Here is how to take it further:
       </p>
-      <p>
-         It is not a conformance claim. A scan cannot decide most of level AA on its own, and
-         this run checked one route.
-         Move to <a href="/guides/screen-reader">test with a screen reader</a> when the real
-         behavior of VoiceOver or NVDA is what you need to check.
-      </p>
+      <div class="route-list">
+         <div class="route-row">
+            <strong>Automate with Vitest</strong>
+            <span>
+               Run screen reader assertions alongside your unit tests using <code>a11ied/vitest</code>.
+               See the <a href="/guides/vitest">Vitest guide</a>.
+            </span>
+         </div>
+         <div class="route-row">
+            <strong>Equip AI coding agents</strong>
+            <span>
+               Connect the local <abbr title="Model Context Protocol: open standard for connecting AI coding assistants to external tools"><a href="https://modelcontextprotocol.io/" target="_blank" rel="noreferrer">MCP</a></abbr> server to Cursor, Claude Code, or Windsurf so agents can verify their own UI code.
+               See the <a href="/guides/agents">AI agents guide</a>.
+            </span>
+         </div>
+         <div class="route-row">
+            <strong>Test on real OS screen readers</strong>
+            <span>
+               Automate real macOS <abbr title="Apple's built-in screen reader for macOS"><a href="https://support.apple.com/guide/voiceover/welcome/mac" target="_blank" rel="noreferrer">VoiceOver</a></abbr> or Windows <abbr title="NonVisual Desktop Access: the open-source screen reader for Windows"><a href="https://www.nvaccess.org/" target="_blank" rel="noreferrer">NVDA</a></abbr> sessions and record video demos.
+               See the <a href="/screen-readers">screen readers guide</a>.
+            </span>
+         </div>
+      </div>
    </section>
 </DocShell>

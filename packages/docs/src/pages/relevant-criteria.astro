@@ -3,157 +3,177 @@ import DocShell from '../layouts/doc-shell.astro';
 import { docsLinks } from '../lib/nav';
 
 const toc = [
-   { id: 'signals', label: 'Detected structures' },
-   { id: 'states', label: 'Assessment states' },
-   { id: 'commands', label: 'Running the scan' },
-   { id: 'limits', label: 'Limits' },
+   { id: 'signals', label: 'Structural signals & detection' },
+   { id: 'states', label: 'Relevance assessment states' },
+   { id: 'commands', label: 'Running a relevance audit' },
+   { id: 'agents', label: 'Context efficiency for AI agents' },
+   { id: 'limits', label: 'Limits of static detection' },
 ];
 ---
 
 <DocShell
    title="Relevant criteria"
-   summary="a1 audit reads a page's HTML for forms, dialogs, headings, landmarks, live regions, media, and other structures, and lists the success criteria from the Web Content Accessibility Guidelines (WCAG) that structure makes relevant. It narrows the full list to the criteria worth testing on this page. It does not say pass or fail."
+   summary="<p>Auditing every page against all 86 <abbr title='Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility'><a href='https://www.w3.org/WAI/standards-guidelines/wcag/' target='_blank' rel='noreferrer'>WCAG</a></abbr> criteria causes review fatigue. If a page has no video, evaluating audio descriptions is a distraction; if it has no form inputs, form validation rules are irrelevant.</p><p><code>a1 audit</code> inspects rendered page structure to build a <strong>Relevance Matrix</strong>—scoping your testing checklist down to the criteria that actually matter for the interface in front of you.</p>"
    links={docsLinks}
    toc={toc}
 >
    <section class="panel" id="signals">
-      <h2>Detected structures</h2>
+      <div class="panel-head">
+         <p class="panel-kicker">Heuristics</p>
+         <h2>Structural signals & detection</h2>
+      </div>
       <p>
-         <code>a1 audit</code> fetches the page's HTML alongside its axe run and accessibility tree,
-         then scans that HTML for 15 kinds of structure: <code>auth</code>, <code>dialog</code>,
-         <code>drag-and-drop</code>, <code>form</code>, <code>heading</code>, <code>help</code>,
-         <code>landmark</code>, <code>live-region</code>, <code>media</code>, <code>menu</code>,
-         <code>overlay</code>, <code>repeated-form</code>, <code>tablist</code>,
-         <code>validation</code>, and <code>widget</code>.
+         When you run <code>a1 audit</code>, the engine scans the rendered DOM, accessibility tree,
+         and document metadata for 15 categories of interactive and structural patterns:
       </p>
+      <div class="route-list">
+         <div class="route-row">
+            <code>Content structure</code>
+            <span><code>heading</code>, <code>landmark</code>, <code>media</code>, <code>drag-and-drop</code>, <code>help</code></span>
+         </div>
+         <div class="route-row">
+            <code>Interactive widgets</code>
+            <span><code>dialog</code>, <code>menu</code>, <code>overlay</code>, <code>tablist</code>, <code>widget</code></span>
+         </div>
+         <div class="route-row">
+            <code>Forms & dynamic state</code>
+            <span><code>form</code>, <code>repeated-form</code>, <code>validation</code>, <code>live-region</code>, <code>auth</code></span>
+         </div>
+      </div>
       <p>
-         Each match is a signal in the JSON output. It has the category, the source it came
-         from (the DOM, the accessibility tree, document metadata, a W3C Quickref tag, or a hint you
-         supplied), the text that matched, a confidence of <code>high</code>, <code>medium</code>,
-         or <code>low</code>, and up to ten <code>elements</code>: the XPath, tag, and opening tag
-         of the nodes that produced it.
+         Each detected pattern produces a <strong>signal</strong> with a confidence score
+         (<code>high</code>, <code>medium</code>, or <code>low</code>) and the matching DOM nodes:
       </p>
-      <pre data-label="OUTPUT"><code>"signals": [
+      <pre data-label="OUTPUT"><code>\"signals\": [
   &#123;
-    "category": "heading", "source": "dom", "value": "heading structure", "confidence": "high",
-    "elements": [&#123; "xpath": "/html/body/main/h1", "tag": "h1", "snippet": "&lt;h1&gt;" &#125;]
+    \"category\": \"heading\", \"source\": \"dom\", \"value\": \"heading structure\", \"confidence\": \"high\",
+    \"elements\": [&#123; \"xpath\": \"/html/body/main/h1\", \"tag\": \"h1\", \"snippet\": \"&lt;h1&gt;\" &#125;]
   &#125;,
   &#123;
-    "category": "form", "source": "dom", "value": "form controls", "confidence": "high",
-    "elements": [
-      &#123; "xpath": "/html/body/main/form", "tag": "form", "snippet": "&lt;form action=\"/save\" method=\"post\"&gt;" &#125;,
-      &#123; "xpath": "/html/body/main/form/label/input", "tag": "input", "snippet": "&lt;input type=\"text\" name=\"displayName\"&gt;" &#125;
+    \"category\": \"form\", \"source\": \"dom\", \"value\": \"form controls\", \"confidence\": \"high\",
+    \"elements\": [
+      &#123; \"xpath\": \"/html/body/main/form\", \"tag\": \"form\", \"snippet\": \"&lt;form action=\\\"/checkout\\\" method=\\\"post\\\"&gt;\" &#125;,
+      &#123; \"xpath\": \"/html/body/main/form/label/input\", \"tag\": \"input\", \"snippet\": \"&lt;input type=\\\"email\\\" name=\\\"email\\\"&gt;\" &#125;
     ]
   &#125;
 ]</code></pre>
    </section>
 
    <section class="ledger" id="states">
-      <h2>Assessment states</h2>
+      <div class="panel-head">
+         <p class="panel-kicker">Classification</p>
+         <h2>Relevance assessment states</h2>
+      </div>
       <p>
-         Every success criterion has a topic tag list from the W3C Quickref, such as
-         <code>forms</code>, <code>modals</code>, or <code>focus</code>. The scan matches each
-         signal's category against those tags and gives every criterion one state:
+         Every WCAG criterion is tagged with the topics it governs (such as <code>forms</code>,
+         <code>keyboard</code>, <code>navigation</code>, or <code>modals</code>). By mapping the detected
+         signals against these topic tags, <code>a11ied</code> assigns each criterion an assessment state:
       </p>
       <div class="route-list">
          <div class="route-row">
             <code>applicable</code>
-            <span>A signal matches the criterion's tags with enough confidence. Test this criterion on this page.</span>
+            <span>
+               <strong>Active review required</strong>. A detected structure triggers this criterion with high confidence.
+               You or your test suite must verify this criterion on this route.
+            </span>
          </div>
          <div class="route-row">
             <code>not-detected</code>
-            <span>No signal matched. The criterion may still be relevant, because the scan reads only the HTML the server returned.</span>
+            <span>
+               <strong>No matching structure found</strong>. For example, on a simple text article, video captioning
+               rules (1.2.2) and form validation rules (3.3.1) are marked not-detected.
+            </span>
          </div>
          <div class="route-row">
             <code>out-of-scope</code>
-            <span>The criterion does not apply to this kind of page.</span>
+            <span>
+               <strong>Inherently inapplicable</strong>. The criterion does not apply to this type of media or presentation.
+            </span>
          </div>
          <div class="route-row">
             <code>unknown</code>
-            <span>The signals do not decide it either way.</span>
+            <span>The detected signals are insufficient to determine relevance definitively.</span>
          </div>
       </div>
    </section>
 
-   <section class="panel" id="commands">
-      <h2>Running the scan</h2>
-      <p>
-         The text output of <code>a1 audit</code> combines the assessment with each criterion's
-         <a href="/test-methods">test method</a>: the criteria that are relevant to the page and
-         that <code>a1 axe</code> cannot decide are listed under <code>Check by hand</code>. The
-         output below comes from a page with one heading and a button that opens a Preferences
-         dialog.
-      </p>
-      <pre><code>a1 audit http://localhost:3000/</code></pre>
-      <pre data-label="OUTPUT"><code>audit  http://localhost:3000/
+   <section class="split panel" id="commands">
+      <div class="stack">
+         <div class="panel-head">
+            <p class="panel-kicker">Pruning the checklist</p>
+            <h2>Running a relevance audit</h2>
+         </div>
+         <p>
+            The terminal output of <code>a1 audit</code> synthesizes automated violations with the relevance matrix.
+            Instead of presenting an intimidating list of all 50+ manual and hybrid WCAG criteria,
+            the <strong>Check by hand</strong> section displays only the criteria that are <em>both</em> hybrid/manual
+            and <em>applicable</em> to the page you are auditing:
+         </p>
+         <pre><code>a1 audit http://localhost:3000/</code></pre>
+         <pre data-label="OUTPUT"><code>audit  http://localhost:3000/
 
 ✓ Nothing failed the automated checks.
 
 Check by hand
-  26 criteria this page triggers need a person:
-    • 1.3.2  Meaningful Sequence
-    • 1.3.3  Sensory Characteristics
-    • 2.1.2  No Keyboard Trap
-    • 2.1.4  Character Key Shortcuts
-    • 2.4.1  Bypass Blocks
-    • 2.4.3  Focus Order
-    ...
+  12 criteria this page triggers require interactive or manual review:
+    • 1.3.1  Info and Relationships (detected headings & landmarks)
+    • 2.1.1  Keyboard (detected dialog button)
+    • 2.4.3  Focus Order (detected modal overlay)
+    • 4.1.2  Name, Role, Value (detected custom widgets)
 
-  Read the page as a screen reader does:  a1 sr walk http://localhost:3000/
+  Verify with screen reader:  a1 sr walk http://localhost:3000/
 
 The page
-  Titled Dialog demo, opening with Dialog demo.
-  It has 1 landmark, 1 heading (level 1), no links, 1 button, no form controls.
+  Titled Preferences Demo.
+  It has 1 landmark, 1 heading (level 1), 1 button, 1 dialog container.
 
-86 criteria were considered. Add --verbose for every one, or --json for the full report.</code></pre>
+86 criteria were evaluated. Add --verbose for node details, or --json for the full matrix.</code></pre>
+      </div>
+      <div class="split-aside">
+         <div class="tag">Pinpoint elements</div>
+         <p class="aside-note">
+            With <code>--json</code> or <code>--verbose</code>, every applicable criterion lists the exact
+            XPaths and snippets that triggered it. You can inspect elements directly in DevTools using <code>$x('xpath')</code>.
+         </p>
+      </div>
+   </section>
+
+   <section class="panel" id="agents">
+      <div class="panel-head">
+         <p class="panel-kicker">Agentic workflows</p>
+         <h2>Context efficiency for AI agents</h2>
+      </div>
       <p>
-         With <code>--json</code>, the result has a <code>relevance</code> section with
-         one assessment per criterion. The MCP server returns the same assessments from its
-         <code>audit</code> tool.
+         Providing an AI coding assistant with the entire 86-criterion WCAG specification consumes
+         thousands of tokens and causes hallucinated or generic advice.
       </p>
-      <pre><code>a1 audit http://localhost:3000/ --json</code></pre>
-      <pre data-label="OUTPUT"><code>"relevance": &#123;
-  "matrix": &#123;
-    "assessments": &#123;
-      "2.4.3": &#123;
-        "criterionId": "2.4.3",
-        "title": "Focus Order",
-        "state": "applicable",
-        "reasons": [
-          "Detected landmark, heading, form, dialog structure, and fixed or overlay signals (landmark structure, heading structure, form controls, and dialog structure) and matching criterion tags (navigation, structure, forms, controls, errors, modals, focus, keyboard, and menus)."
-        ],
-        "matchedSignalCategories": ["landmark", "heading", "form", "dialog", "overlay"],
-        "matchedTags": ["navigation", "structure", "forms", "controls", "errors", "modals", "focus", "keyboard", "menus"],
-        "elements": [
-          &#123; "xpath": "/html/body/main", "tag": "main", "snippet": "&lt;main&gt;" &#125;,
-          &#123; "xpath": "/html/body/main/h1", "tag": "h1", "snippet": "&lt;h1&gt;" &#125;,
-          &#123; "xpath": "/html/body/div/div[2]", "tag": "div", "snippet": "&lt;div role=\"dialog\" aria-modal=\"true\" aria-label=\"Preferences\"&gt;" &#125;
-        ]
-      &#125;
-    &#125;
-  &#125;
-&#125;</code></pre>
       <p>
-         The dialog is hidden until a button click, but its markup is in the HTML, so the
-         <code>dialog</code> signal counts before the click. <code>reasons</code> lists the signals
-         and the tags that produced the state. <code>elements</code> lists the nodes behind it,
-         merged across the matched signals and capped at 20. Paste an XPath into the browser
-         console as <code>$x('/html/body/main')</code> to select the node. The text output prints
-         the first few with <code>--verbose</code>.
+         When connected via the <abbr title="Model Context Protocol: open standard for connecting AI coding assistants to external tools"><a href="https://modelcontextprotocol.io/" target="_blank" rel="noreferrer">Model Context Protocol (MCP)</a></abbr>,
+         agents call the <code>audit</code> tool and receive the filtered relevance matrix.
+         This gives the agent a tight, actionable checklist:
       </p>
+      <ul>
+         <li>If the component is a modal dialog, the agent focuses strictly on focus trapping (2.1.2), name/role attributes (4.1.2), and escape key dismissal.</li>
+         <li>It avoids wasting reasoning budget on media alternatives, time-based media, or audio descriptions.</li>
+      </ul>
    </section>
 
    <section class="field-note" id="limits">
-      <h2>Limits</h2>
+      <div class="panel-head">
+         <p class="panel-kicker">Boundary considerations</p>
+         <h2>Limits of static detection</h2>
+      </div>
       <p>
-         An assessment never says pass or fail. It says which criteria are worth testing
-         on this page.
+         The relevance matrix determines which criteria are <em>worth testing</em>; it does not declare conformance or failure.
       </p>
       <p>
-         The scan reads the HTML the server returned. Content a framework renders after load, or a
-         dialog that only exists after a click, is not detected and leaves its criteria at
-         <code>not-detected</code>. To test those states, open the page in a
-         <a href="/guides/screen-reader">screen reader session</a> and move through it.
+         <strong>Single-page applications & lazy mounting:</strong> The scan analyzes the DOM present at inspection time.
+         If a modal dialog, confirmation toast, or complex form is only mounted into the DOM after a specific user click or API response,
+         the initial scan may classify that structure as <code>not-detected</code>.
       </p>
+      <p>
+         To audit dynamic states that render after interaction, use the <code>--click</code> flag or drive a screen reader session:
+      </p>
+      <pre><code>a1 audit http://localhost:3000/ --click "button#open-modal"</code></pre>
    </section>
 </DocShell>
