@@ -168,12 +168,16 @@ async function openUrlOnWindows(
    candidate: BrowserAutomationCandidate,
    url: string,
 ): Promise<void> {
-   const args = candidate.location
-      ? ['/c', 'start', '', candidate.location, url]
-      : ['/c', 'start', '', url];
-   const child = spawn('cmd', args, {
+   if (candidate.location) {
+      const child = spawn(candidate.location, [url], {
+         detached: true,
+         stdio: 'ignore',
+      });
+      child.unref();
+      return;
+   }
+   const child = spawn('cmd', ['/c', 'start', '', url], {
       stdio: 'ignore',
-      windowsHide: true,
    });
    child.unref();
    await waitForChildExit(child, BROWSER_OPEN_TIMEOUT_MS);

@@ -99,9 +99,16 @@ function spawnOpen(choice: BrowserChoice, url: string): ReturnType<typeof spawn>
       return spawn('open', ['-a', choice.appName, url], { stdio: 'ignore' });
    }
    if (process.platform === 'win32') {
-      return spawn('cmd', ['/c', 'start', '', choice.location ?? choice.appName, url], {
+      if (choice.location) {
+         const child = spawn(choice.location, [url], {
+            detached: true,
+            stdio: 'ignore',
+         });
+         child.unref();
+         return child;
+      }
+      return spawn('cmd', ['/c', 'start', '', choice.appName, url], {
          stdio: 'ignore',
-         windowsHide: true,
       });
    }
    return spawn(choice.location ?? choice.appName, [url], { stdio: 'ignore' });

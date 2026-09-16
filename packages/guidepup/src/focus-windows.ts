@@ -8,12 +8,16 @@ import {
    focusExecFile,
 } from './focus-shared.js';
 
+function stripSuffix(name: string): string {
+   return name.replace(/\.(app|exe)$/iu, '');
+}
+
 function resolveWindowsProcessName(target: DriverFocusTarget): string {
    if (target.processName) {
-      return target.processName;
+      return stripSuffix(target.processName);
    }
    if (target.appName) {
-      return target.appName;
+      return stripSuffix(target.appName);
    }
    return '';
 }
@@ -60,11 +64,19 @@ function buildWindowsFocusLines(args: {
    matchMode: string;
 }): string[] {
    return [
+      'Add-Type @"',
+      'using System; using System.Runtime.InteropServices;',
+      'public class A11iedFocus {',
+      '  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);',
+      '  [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);',
+      '}',
+      '"@ -ErrorAction SilentlyContinue',
       `$pid = ${args.pidExpression}`,
       `$processName = '${escapePowerShellString(args.processName)}'`,
       `$windowTitle = '${escapePowerShellString(args.windowTitle)}'`,
       `$matchMode = '${escapePowerShellString(args.matchMode)}'`,
       '$targetId = $null',
+      '$proc = $null',
       'if ($pid) { $targetId = $pid }',
       'if (-not $targetId -and $windowTitle) {',
       '  if ($matchMode -eq "contains") {',
@@ -76,14 +88,30 @@ function buildWindowsFocusLines(args: {
       '}',
       'if (-not $targetId -and $processName) {',
       '  $proc = Get-Process -Name $processName -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1',
+      '  if (-not $proc) {',
+      '    $proc = Get-Process -Name $processName -ErrorAction SilentlyContinue | Select-Object -First 1',
+      '  }',
       '  if ($proc) { $targetId = $proc.Id }',
       '}',
       'if (-not $targetId) {',
       '  Write-Output "not-found"',
       '  exit 0',
       '}',
+      'if ($targetId -is [int] -and -not $proc) {',
+      '  $proc = Get-Process -Id $targetId -ErrorAction SilentlyContinue | Select-Object -First 1',
+      '}',
+      'if ($proc -and $proc.MainWindowHandle -ne 0) {',
+      '  [void][A11iedFocus]::ShowWindow($proc.MainWindowHandle, 9)',
+      '  [void][A11iedFocus]::SetForegroundWindow($proc.MainWindowHandle)',
+      '}',
       '$activated = (New-Object -ComObject WScript.Shell).AppActivate($targetId)',
-      'if ($activated) { Write-Output "focused" } else { Write-Output "not-found" }',
+      'if ($activated) {',
+      '  Write-Output "focused"',
+      '} elseif ($proc -and $proc.MainWindowHandle -ne 0) {',
+      '  Write-Output "focused"',
+      '} else {',
+      '  Write-Output "not-found"',
+      '}',
    ];
 }
 
