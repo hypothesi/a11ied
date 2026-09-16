@@ -29,6 +29,7 @@ import {
 } from './drive-structure.js';
 import { DRIVE_GROUPS } from './drive-options.js';
 import { registerScreenshotCommand } from './drive-screenshot.js';
+import { registerTailCommand } from './drive-tail.js';
 import { registerTranscriptCommand } from './drive-transcript.js';
 import { registerWalkCommand } from './drive-walk.js';
 
@@ -67,6 +68,7 @@ const registrars: ReadonlyArray<(driveCommand: Command) => void> = [
    registerExpectCommand,
    registerCheckpointCommand,
    registerTranscriptCommand,
+   registerTailCommand,
    registerScreenshotCommand,
    registerBatchCommand,
    registerListCommand,

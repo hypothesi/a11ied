@@ -207,9 +207,9 @@ the CLI name in the description above to find the tool:
 | `a1 sr transcript`                                                           | `sr_transcript` |
 | `a1 doctor`                                                                  | `doctor`        |
 
-`a1 sr batch` and `a1 sr walk` have no MCP tool. Call `sr_action` once per step instead
+`a1 sr batch`, `a1 sr walk`, and `a1 sr tail` have no direct MCP tool. Call `sr_action` once per step instead
 of `batch`. Call `sr_session` (`start`), `sr_action` (`read-all`), then `sr_transcript`
-instead of `walk`.
+instead of `walk`. Run `a1 sr tail` from a shell or terminal when streaming real-time announcements.
 
 `resources/command-cheat-sheet.md` lists every command and tool with its arguments in
 one copy-pasteable page.

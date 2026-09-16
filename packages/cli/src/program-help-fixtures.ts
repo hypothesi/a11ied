@@ -222,6 +222,8 @@ export const driveRunHelpCases: HelpCase[] = [
         checkpoint <label>     Mark a named point in the transcript for --since.
         transcript             Print what the reader said, with timestamps and
                                checkpoints.
+        tail                   Continuously stream new screen reader announcements in
+                               real time.
 
       Other:
         screenshot <path>      Save a picture of what the VoiceOver cursor is on.

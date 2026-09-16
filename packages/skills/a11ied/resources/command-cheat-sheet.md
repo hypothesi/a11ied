@@ -180,15 +180,17 @@ a1 sr expect "Order placed"
 a1 sr transcript --since before-submit --tail 5
 ```
 
-| Command                                                    | MCP tool        | Arguments                            |
-| ---------------------------------------------------------- | --------------- | ------------------------------------ |
-| `sr list [--query text] [--sr reader] [--command-set set]` | `sr_list`       | `query`, `sr`, `commandSet`          |
-| `sr expect <text\|/regex/> [--since checkpoint] [--not]`   | `sr_expect`     | `pattern` (required), `since`, `not` |
-| `sr transcript [--since c] [--tail n] [--out path]`        | `sr_transcript` | `since`, `tail`, `out`, `format`     |
+| Command                                                      | MCP tool        | Arguments                                        |
+| ------------------------------------------------------------ | --------------- | ------------------------------------------------ |
+| `sr list [--query text] [--sr reader] [--command-set set]`   | `sr_list`       | `query`, `sr`, `commandSet`                      |
+| `sr expect <text\|/regex/> [--since checkpoint] [--not]`     | `sr_expect`     | `pattern` (required), `since`, `not`             |
+| `sr transcript [--since c] [--tail n] [--out path]`          | `sr_transcript` | `since`, `tail`, `out`, `format`                 |
+| `sr tail [--lines n] [--since c] [--interval ms] [--phrase]` | CLI only        | stream live announcements (NDJSON with `--json`) |
 
 ## Not exposed over MCP
 
 `a1 sr batch <file>` runs JSON-lines actions from a file in one process. Call `sr_action`
 once per line instead. `a1 sr walk [url]` starts a session (if needed), reads the whole
 page, and prints the transcript. Call `sr_session` (`start`), `sr_action` (`read-all`),
-then `sr_transcript` in that order for the same result.
+then `sr_transcript` in that order for the same result. `a1 sr tail` streams real-time
+announcements continuously in a terminal.

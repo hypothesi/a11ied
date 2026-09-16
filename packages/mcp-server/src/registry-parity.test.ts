@@ -27,6 +27,8 @@ const INTENTIONALLY_UNCOVERED: ReadonlySet<string> = new Set([
    'sr batch',
    // Composes sr_session start + sr_action read-all + sr_transcript.
    'sr walk',
+   // Streams real-time announcements continuously; not an RPC tool call.
+   'sr tail',
    // Deletes recorded results. An agent records and reads; a person decides what to drop.
    'audit clear',
 ]);

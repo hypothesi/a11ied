@@ -397,6 +397,21 @@ a1 sr transcript --since "opened the dialog"</code></pre>
          <code>--format json</code> or <code>--format md</code> to pick the format yourself.
       </p>
       <pre><code>a1 sr transcript --out ./transcripts/checkout.md</code></pre>
+      <h3>Stream announcements in real time with <code>sr tail</code></h3>
+      <p>
+         <code>sr tail</code> streams announcements continuously in real time as the screen reader speaks them,
+         similar to <code>tail -f</code> on a log file. It prints existing entries (default last 10, or <code>--lines 0</code> to start fresh)
+         and then outputs every new spoken phrase as it arrives.
+      </p>
+      <pre><code>a1 sr tail
+a1 sr tail --lines 0
+a1 sr tail --since "opened the dialog"
+a1 sr tail --json</code></pre>
+      <p>
+         <code>--phrase</code> outputs just the spoken text without timestamp headers.
+         <code>--json</code> streams structured newline-delimited JSON (NDJSON) objects, one per line.
+         Aliases for <code>tail</code> are <code>follow</code>, <code>stream</code>, and <code>watch</code>.
+      </p>
       <p>
          On VoiceOver, <code>sr screenshot &lt;path&gt;</code> saves a picture of the element the
          cursor is on. NVDA has no cursor screenshot and the simulated screen reader has no screen,

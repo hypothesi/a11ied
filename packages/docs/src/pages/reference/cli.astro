@@ -110,6 +110,7 @@ const toc = [
          <div class="route-row"><code>sr expect &lt;text|/regex/&gt;</code><span>Check the transcript for a phrase. Takes <code>--since &lt;checkpoint&gt;</code> and <code>--not</code>. Exits 4 on a mismatch.</span></div>
          <div class="route-row"><code>sr checkpoint &lt;label&gt;</code><span>Mark a point in the transcript for <code>--since</code>.</span></div>
          <div class="route-row"><code>sr transcript</code><span>Print what the reader said, with timestamps. Takes <code>--since</code>, <code>--tail</code>, <code>--out</code>, <code>--format</code>.</span></div>
+         <div class="route-row"><code>sr tail</code><span>Stream spoken announcements continuously in real time. Takes <code>--lines &lt;n&gt;</code> (default 10), <code>--since &lt;checkpoint&gt;</code>, <code>--interval &lt;ms&gt;</code> (default 250), <code>--phrase</code> (phrase only), and <code>--json</code> (NDJSON). Aliases: <code>follow</code>, <code>stream</code>, <code>watch</code>.</span></div>
          <div class="route-row"><code>sr batch [file]</code><span>Run JSON lines of actions, one per line or from stdin, over one broker connection. Stops at the first failed expect unless <code>--continue</code>.</span></div>
       </div>
       <h3>Session options</h3>
