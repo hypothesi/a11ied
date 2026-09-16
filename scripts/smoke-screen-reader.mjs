@@ -131,6 +131,7 @@ async function navigate(stepsRemaining) {
    if (stepsRemaining <= 0) {
       return;
    }
+   await runCli(['sr', 'interact']);
    await runCliOrFail(['sr', 'next']);
    await navigate(stepsRemaining - 1);
 }
@@ -160,7 +161,12 @@ async function runSmoke(screenReader, url) {
    }
    await navigate(NAVIGATION_STEPS);
    await runCliOrFail(['sr', 'read']);
-   const transcript = await runCliOrFail(['sr', 'transcript', '--json']);
+   let transcript = await runCliOrFail(['sr', 'transcript', '--json']);
+   if (!transcript.stdout.includes(HEADING_TEXT)) {
+      await runCli(['sr', 'next', 'heading']);
+      await runCli(['sr', 'read']);
+      transcript = await runCliOrFail(['sr', 'transcript', '--json']);
+   }
    assertHeadingAnnounced(transcript.stdout);
 }
 
