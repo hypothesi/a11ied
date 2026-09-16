@@ -51,7 +51,7 @@ export interface PatternTarget {
 }
 
 export const EXIT_SUCCESS = 0;
-const START_ARGS = ['--sr', 'virtual', '--allow-virtual', '--idle-timeout', '1'];
+const START_ARGS = ['--sr', 'virtual', '--idle-timeout', '1'];
 
 export function isAxeResult(value: unknown): value is AxeResult {
    return typeof value === 'object' && value !== null && 'verdict' in value;

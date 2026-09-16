@@ -13,7 +13,7 @@ import {
 
 const tempRoots: string[] = [];
 const testServer = useTestServer(tempRoots);
-const startArgs = ['--sr', 'virtual', '--allow-virtual', '--idle-timeout', '1'];
+const startArgs = ['--sr', 'virtual', '--idle-timeout', '1'];
 const WAIT_PAUSE_MS = 120;
 const WAIT_SHORT_TIMEOUT_MS = 300;
 const WAIT_LONG_TIMEOUT_MS = 8000;

@@ -42,7 +42,7 @@ const toc = [
                <code>✗ Error (missing-session): No active screen reader session. Start one with "a1 sr start".</code>
                Every <code>sr</code> command but <code>press</code>, <code>type</code>,
                <code>do</code>, and <code>walk</code> needs a session already running. Run
-               <code>sr start --sr virtual --allow-virtual &lt;url&gt;</code> first.
+               <code>sr start --sr virtual &lt;url&gt;</code> first.
             </span>
          </div>
          <div class="route-row">
@@ -98,11 +98,11 @@ const toc = [
          <code>sr start</code> and <code>sr walk</code> start VoiceOver on macOS when
          <code>--sr</code> is not given and no session is active. If VoiceOver just took over
          the screen, run <code>a1 sr stop</code> to end that session, then rerun the command
-         with <code>--sr virtual --allow-virtual</code>. Add those two flags to every script
+         with <code>--sr virtual</code>. Add that flag to every script
          and CI step. See <a href="/guides/ci#target">run in CI</a>.
       </p>
       <pre><code>a1 sr stop --json
-a1 sr walk http://localhost:3000/checkout --sr virtual --allow-virtual --json</code></pre>
+a1 sr walk http://localhost:3000/checkout --sr virtual --json</code></pre>
    </section>
 
    <section class="panel" id="recording">

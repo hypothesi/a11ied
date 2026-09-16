@@ -147,7 +147,7 @@ function assertHeadingAnnounced(transcriptJson) {
 
 function startOptions(screenReader) {
    if (screenReader === 'virtual') {
-      return ['--sr', 'virtual', '--allow-virtual'];
+      return ['--sr', 'virtual'];
    }
    return ['--sr', screenReader, '--timeout', String(SMOKE_BROKER_TIMEOUT_MS)];
 }

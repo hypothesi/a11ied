@@ -132,17 +132,13 @@ The page
             To verify what assistive technology actually announces when interacting with your interface,
             launch a virtual screen reader session against your URL:
          </p>
-         <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout</code></pre>
+         <pre><code>a1 sr start --sr virtual http://localhost:3000/checkout</code></pre>
          <pre data-label="OUTPUT"><code>✓ Session drv_c33f1d8f4461 started
   Target: virtual (headless Chromium)
   URL:    http://localhost:3000/checkout</code></pre>
          <p>
             The virtual target runs inside a headless browser engine, computing the full <abbr title="Accessible Rich Internet Applications: W3C specification of attributes that define accessible UI roles, states, and properties"><a href="https://www.w3.org/TR/wai-aria/" target="_blank" rel="noreferrer">ARIA</a></abbr> accessibility tree
             and speech queue. Page scripts, CSS transitions, and client-side framework components execute normally.
-         </p>
-         <p>
-            On macOS and Windows, passing <code>--allow-virtual</code> acts as an explicit safeguard confirming you want
-            the in-memory software engine rather than native <abbr title="Apple's built-in screen reader for macOS"><a href="https://support.apple.com/guide/voiceover/welcome/mac" target="_blank" rel="noreferrer">VoiceOver</a></abbr> or <abbr title="NonVisual Desktop Access: the open-source screen reader for Windows"><a href="https://www.nvaccess.org/" target="_blank" rel="noreferrer">NVDA</a></abbr>.
          </p>
       </div>
       <div class="split-aside">

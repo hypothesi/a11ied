@@ -91,10 +91,9 @@ a1 axe http://localhost:3000/checkout --level AA --fail-on serious</code></pre>
       <p>
          For a one-line result from a command that moves the screen reader, <code>--phrase</code>
          prints the last announcement alone, with no JSON to parse. It needs an active session.
-         <code>sr start</code> is the one command that takes <code>--sr</code> and
-         <code>--allow-virtual</code>.
+         <code>sr start</code> is the command that takes <code>--sr</code>.
       </p>
-      <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout --json
+      <pre><code>a1 sr start --sr virtual http://localhost:3000/checkout --json
 a1 sr next --phrase</code></pre>
       <pre data-label="OUTPUT"><code>heading, Checkout, level 1</code></pre>
       <p>

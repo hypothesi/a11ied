@@ -45,11 +45,9 @@ a1 sr start --sr voiceover --browser Safari http://localhost:3000/checkout</code
       <p>
          <code>--sr virtual</code> starts the simulated screen reader: a screen reader implemented
          in software that runs inside a headless Chromium page and produces the same kind of
-         announcements as VoiceOver or NVDA, with neither installed. It needs
-         <code>--allow-virtual</code> when VoiceOver or NVDA is available, to confirm you want the
-         simulation.
+         announcements as VoiceOver or NVDA, with neither installed.
       </p>
-      <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/dialog.html</code></pre>
+      <pre><code>a1 sr start --sr virtual http://localhost:3000/dialog.html</code></pre>
       <pre data-label="OUTPUT"><code>Session ready
 
   Target:        virtual
@@ -194,7 +192,7 @@ a1 sr next control --times 3</code></pre>
          defaults to 200, and says which. <code>elements</code>, <code>read-all</code>,
          <code>goto</code>, and <code>find</code> need an active session and exit with
          <code>missing-session</code> without one. Run
-         <code>sr start --sr virtual --allow-virtual &lt;url&gt;</code> first for the simulated
+         <code>sr start --sr virtual &lt;url&gt;</code> first for the simulated
          screen reader, since a plain <code>sr start</code> starts VoiceOver on macOS.
       </p>
       <pre data-label="OUTPUT"><code>sr elements heading  virtual
@@ -253,9 +251,9 @@ Stopped at the end of the document.</code></pre>
          none is active, or loads the URL in the active one, moves the cursor to the top, runs
          <code>read-all</code>, and prints the transcript. With no session and no
          <code>--sr</code>, <code>walk</code> starts VoiceOver on macOS. Pass
-         <code>--sr virtual --allow-virtual</code> for the simulated screen reader instead.
+         <code>--sr virtual</code> for the simulated screen reader instead.
       </p>
-      <pre><code>a1 sr walk http://localhost:3000/dialog.html --sr virtual --allow-virtual
+      <pre><code>a1 sr walk http://localhost:3000/dialog.html --sr virtual
 a1 sr walk --max 40 --out ./transcripts/checkout-walk.md</code></pre>
       <pre data-label="OUTPUT"><code>! No session was active, so one was started.
 # Transcript: virtual on http://localhost:3000/dialog.html

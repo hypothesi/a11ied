@@ -87,14 +87,9 @@ const toc = [
             watch loops or shared CI workers is often impractical.
          </p>
          <p>
-            When starting a virtual session explicitly on macOS or Windows, pass <code>--allow-virtual</code>:
+            When starting a virtual session explicitly on macOS or Windows, pass <code>--sr virtual</code>:
          </p>
-         <pre><code>a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout</code></pre>
-         <p>
-            The <code>--allow-virtual</code> flag is a deliberate safeguard: it prevents continuous integration
-            scripts from accidentally asserting against simulated behavior when the team intended to run
-            real OS-level regression tests.
-         </p>
+         <pre><code>a1 sr start --sr virtual http://localhost:3000/checkout</code></pre>
          <p>
             <strong>Execution modes:</strong>
          </p>

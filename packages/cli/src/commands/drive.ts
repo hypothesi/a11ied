@@ -34,7 +34,7 @@ import { registerWalkCommand } from './drive-walk.js';
 
 const SR_EXAMPLES = `
 Examples:
-  a1 sr start --sr virtual --allow-virtual
+  a1 sr start --sr virtual
   a1 sr next heading
   a1 sr read
 `;

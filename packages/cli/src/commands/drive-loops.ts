@@ -81,7 +81,7 @@ export function registerElementsCommand(driveCommand: Command): void {
          .helpGroup(DRIVE_GROUPS.move)
          .summary('List every element of one kind as the reader announces it.')
          .description(
-            `The rotor: move to the top, then list every element of one kind as the reader announces it. Kinds: ${ELEMENT_KINDS}. Needs an active session; run "a1 sr start --sr virtual --allow-virtual" first for the simulated reader instead of the VoiceOver default.`,
+            `The rotor: move to the top, then list every element of one kind as the reader announces it. Kinds: ${ELEMENT_KINDS}. Needs an active session; run "a1 sr start --sr virtual" first for the simulated reader instead of the VoiceOver default.`,
          )
          .option(
             '--max <n>',
@@ -112,7 +112,7 @@ export function registerReadAllCommand(driveCommand: Command): void {
          .helpGroup(DRIVE_GROUPS.move)
          .summary('Read from the cursor to the end of the document.')
          .description(
-            'Say-all as a transcript: step item by item from the cursor to the end of the document, bounded by --max. Needs an active session; run "a1 sr start --sr virtual --allow-virtual" first for the simulated reader instead of the VoiceOver default.',
+            'Say-all as a transcript: step item by item from the cursor to the end of the document, bounded by --max. Needs an active session; run "a1 sr start --sr virtual" first for the simulated reader instead of the VoiceOver default.',
          )
          .option(
             '--max <n>',
@@ -184,7 +184,7 @@ export function registerGotoCommand(driveCommand: Command): void {
          .helpGroup(DRIVE_GROUPS.move)
          .summary('Step forward to an item with a given role or name.')
          .description(
-            'Step forward until the current item has the given role, name, or both. Exits 4 when nothing matches. Needs an active session; run "a1 sr start --sr virtual --allow-virtual" first for the simulated reader instead of the VoiceOver default.',
+            'Step forward until the current item has the given role, name, or both. Exits 4 when nothing matches. Needs an active session; run "a1 sr start --sr virtual" first for the simulated reader instead of the VoiceOver default.',
          )
          .option('--role <role>', 'Role to match, such as link, button, or heading.')
          .option('--name <text>', 'Text the name must contain, ignoring case.')

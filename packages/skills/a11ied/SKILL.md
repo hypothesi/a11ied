@@ -126,7 +126,7 @@ Use the screen reader for labels, focus order, dialogs, menus, and live-region
 announcements. Axe reports none of those in sequence.
 
 ```txt
-a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout
+a1 sr start --sr virtual http://localhost:3000/checkout
 a1 sr walk
 a1 sr elements heading
 a1 sr goto --role button --name "Place order"
@@ -134,7 +134,7 @@ a1 sr expect "Place order, button"
 a1 sr stop
 ```
 
-- `sr start --sr virtual --allow-virtual <url>` starts one session and loads the page.
+- `sr start --sr virtual <url>` starts one session and loads the page.
   Only one session is active at a time.
 - `sr walk` reads the page top to bottom and prints the transcript, the fastest way to
   see everything the reader would announce.

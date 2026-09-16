@@ -69,7 +69,7 @@ export function registerFindCommand(driveCommand: Command): void {
          .helpGroup(DRIVE_GROUPS.move)
          .summary('Move the cursor to the next place the text appears.')
          .description(
-            `Move the cursor to the next place the text appears. Exits 4 when it is not found. Needs an active session; run "a1 sr start --sr virtual --allow-virtual" first for the simulated reader instead of the VoiceOver default.`,
+            `Move the cursor to the next place the text appears. Exits 4 when it is not found. Needs an active session; run "a1 sr start --sr virtual" first for the simulated reader instead of the VoiceOver default.`,
          ),
    ).action(async (text: string, options: DriveActionOptions) => {
       const { executeDriveActionCommand, renderDriveReadText } = await loadRunner();

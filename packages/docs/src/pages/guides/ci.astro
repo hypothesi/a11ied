@@ -14,7 +14,7 @@ const toc = [
 
 <DocShell
    title="Run in CI"
-   summary="A CI runner has no VoiceOver or NVDA, so every a1 command that starts a screen reader needs --sr virtual --allow-virtual. axe, tree, and audit need Chrome, Edge, Brave, or Chromium. --fail-on sets which impact level fails the build, and --baseline lets CI ignore existing violations while still failing on new ones."
+   summary="A CI runner has no VoiceOver or NVDA, so every a1 command that starts a screen reader needs --sr virtual. axe, tree, and audit need Chrome, Edge, Brave, or Chromium. --fail-on sets which impact level fails the build, and --baseline lets CI ignore existing violations while still failing on new ones."
    links={docsLinks}
    toc={toc}
 >
@@ -22,12 +22,12 @@ const toc = [
       <h2>The simulated screen reader in CI</h2>
       <p>
          <code>voiceover</code> only exists on macOS and <code>nvda</code> only on Windows, and
-         neither runs unattended on a CI runner. Pass <code>--sr virtual --allow-virtual</code>
+         neither runs unattended on a CI runner. Pass <code>--sr virtual</code>
          on every <code>sr start</code> or <code>sr walk</code> call in CI. Without
          <code>--sr</code>, <code>sr start</code> and <code>sr walk</code> start the platform's
          own screen reader, which on a macOS runner means VoiceOver.
       </p>
-      <pre><code>a1 sr walk http://localhost:3000/checkout --sr virtual --allow-virtual --json</code></pre>
+      <pre><code>a1 sr walk http://localhost:3000/checkout --sr virtual --json</code></pre>
    </section>
 
    <section class="panel" id="browser">
@@ -79,7 +79,7 @@ const toc = [
 
       - run: npx a1 doctor --strict
       - run: npx a1 axe http://localhost:3000/checkout --level AA --fail-on serious
-      - run: npx a1 sr walk http://localhost:3000/checkout --sr virtual --allow-virtual --out walk.md
+      - run: npx a1 sr walk http://localhost:3000/checkout --sr virtual --out walk.md
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -111,7 +111,7 @@ const toc = [
          nothing matches, so a step that checks one announcement fails the job the same way a
          failed axe run does.
       </p>
-      <pre><code>a1 sr start http://localhost:3000/checkout --sr virtual --allow-virtual --json
+      <pre><code>a1 sr start http://localhost:3000/checkout --sr virtual --json
 a1 sr goto --role button --name "Pay now"
 a1 sr expect "button, Pay now"
 a1 sr stop --json</code></pre>

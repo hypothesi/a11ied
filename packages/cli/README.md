@@ -47,7 +47,7 @@ The CLI and API support three target types:
 - `nvda`: real NVDA (Windows only)
 - `virtual`: headless virtual screen reader backed by `@guidepup/virtual-screen-reader`
 
-Pass `--sr virtual --allow-virtual` for fast, deterministic local runs.
+Pass `--sr virtual` for fast, deterministic local runs.
 
 One session is active per user. `sr start` stops any session already running, and no
 other command takes a session id. The session state file is `~/.a11ied/state/session.json`,

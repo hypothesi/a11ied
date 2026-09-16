@@ -5,7 +5,7 @@ import {
    type DriverActionResult,
 } from '#contracts';
 import type { CommandExecution } from '../lib/helpers.js';
-import { addAllowVirtualOption, addScreenReaderOption } from '../lib/options.js';
+import { addScreenReaderOption } from '../lib/options.js';
 import { parseMaxOption } from './drive-loops.js';
 import { addDriveActionOptions, DRIVE_GROUPS, parseTimeoutMs } from './drive-options.js';
 import { executeOpenAction } from './drive-session.js';
@@ -85,16 +85,14 @@ async function executeWalkAction(
 
 export function registerWalkCommand(driveCommand: Command): void {
    addDriveActionOptions(
-      addAllowVirtualOption(
-         addScreenReaderOption(
-            driveCommand
-               .command('walk [url]')
-               .helpGroup(DRIVE_GROUPS.move)
-               .summary('Read a whole page, starting the session if needed.')
-               .description(
-                  'Read the whole page top to bottom and print the transcript. Starts a session when none is active, defaulting to VoiceOver; with a URL, opens that page first. Pass --sr virtual --allow-virtual for the simulated reader instead.',
-               ),
-         ),
+      addScreenReaderOption(
+         driveCommand
+            .command('walk [url]')
+            .helpGroup(DRIVE_GROUPS.move)
+            .summary('Read a whole page, starting the session if needed.')
+            .description(
+               'Read the whole page top to bottom and print the transcript. Starts a session when none is active, defaulting to VoiceOver; with a URL, opens that page first. Pass --sr virtual for the simulated reader instead.',
+            ),
       )
          .option(
             '--max <n>',

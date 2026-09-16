@@ -7,52 +7,7 @@ import {
    type DocumentLoad,
    type ResolveDocumentTargetInput,
 } from '#core';
-import { getPlatformScreenReaders } from '../commands/drive-key-help.js';
-
-interface VirtualTargetGuardOptions {
-   allowVirtual?: boolean;
-}
-
-export function buildVirtualTargetGuardOptions(
-   allowVirtual?: boolean,
-): VirtualTargetGuardOptions | undefined {
-   if (allowVirtual) {
-      return { allowVirtual: true };
-   }
-   return undefined;
-}
-
-function ensureVirtualTargetAllowed(
-   target: Platform,
-   options?: VirtualTargetGuardOptions,
-): void {
-   if (target !== 'virtual') {
-      return;
-   }
-
-   const fallback = resolveDefaultTarget();
-   if (fallback.target === 'virtual') {
-      return;
-   }
-
-   if (options?.allowVirtual) {
-      return;
-   }
-
-   throw new CliUsageError(
-      'virtual-target-disallowed',
-      `The virtual target is a simulation. Omit --sr to use ${getPlatformScreenReaders()}, or pass --allow-virtual to proceed.`,
-      {
-         target,
-         defaultTarget: fallback.target,
-      },
-   );
-}
-
-export function parsePlatform(
-   target: string | undefined,
-   options?: VirtualTargetGuardOptions,
-): Platform {
+export function parsePlatform(target: string | undefined): Platform {
    if (!target) {
       const fallback = resolveDefaultTarget();
       throw new CliUsageError(
@@ -79,7 +34,6 @@ export function parsePlatform(
       );
    }
 
-   ensureVirtualTargetAllowed(parsed.data, options);
    return parsed.data;
 }
 

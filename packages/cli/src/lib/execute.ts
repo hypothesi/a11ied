@@ -24,7 +24,7 @@ import {
    normalizeError,
    printOutput,
 } from './helpers.js';
-import { buildVirtualTargetGuardOptions, parsePlatform } from './resolvers.js';
+import { parsePlatform } from './resolvers.js';
 
 export { parsePlatform, resolveOptionalCliTarget } from './resolvers.js';
 // Fallow-ignore-next-line unused-export
@@ -164,17 +164,13 @@ export function buildDefaultTargetWarnings(
    return warnings;
 }
 
-/** Resolves --sr and --allow-virtual to a target, defaulting to the platform reader. */
+/** Resolves --sr to a target, defaulting to the platform reader. */
 export async function resolveScreenReaderTarget(options: {
    sr?: string | undefined;
-   allowVirtual?: boolean | undefined;
 }): Promise<{ target: Platform; warnings: CliMessage[] }> {
    if (options.sr) {
       return {
-         target: parsePlatform(
-            options.sr,
-            buildVirtualTargetGuardOptions(options.allowVirtual),
-         ),
+         target: parsePlatform(options.sr),
          warnings: [],
       };
    }

@@ -3,7 +3,6 @@ import type { CliMessage, DriverFocusTarget, Platform } from '#contracts';
 import { CliUsageError } from '#core';
 import type { CommandExecution } from '../lib/helpers.js';
 import {
-   addAllowVirtualOption,
    addJsonOption,
    addRecordingOption,
    addScreenReaderOption,
@@ -17,7 +16,6 @@ export interface StartActionOptions {
    json?: boolean;
    verbose?: boolean;
    sr?: string;
-   allowVirtual?: boolean;
    recording?: string;
    idleTimeout?: string;
    timeout?: string;
@@ -124,16 +122,14 @@ export function registerStartCommand(driveCommand: Command): void {
       addJsonOption(
          addTimeoutOption(
             addRecordingOption(
-               addAllowVirtualOption(
-                  addScreenReaderOption(
-                     driveCommand
-                        .command('start [url]')
-                        .helpGroup(DRIVE_GROUPS.session)
-                        .summary('Start a screen reader session.')
-                        .description(
-                           'Start the screen reader session, replacing any active one. press, type, and do start one when none is active.',
-                        ),
-                  ),
+               addScreenReaderOption(
+                  driveCommand
+                     .command('start [url]')
+                     .helpGroup(DRIVE_GROUPS.session)
+                     .summary('Start a screen reader session.')
+                     .description(
+                        'Start the screen reader session, replacing any active one. press, type, and do start one when none is active.',
+                     ),
                ),
             )
                .option(

@@ -84,7 +84,7 @@ const toc = [
          as banner, navigation, or main that a screen reader lets a user jump straight to.
       </p>
       <div class="route-list">
-         <div class="route-row"><code>sr start [url]</code><span>Start the session, stopping any active one first. Opens the URL in a browser and waits until its window is in front. Takes <code>--sr</code>, <code>--allow-virtual</code>, <code>--browser &lt;name&gt;</code>, <code>--app &lt;name&gt;</code> for a native app instead of a page, <code>--recording &lt;path&gt;</code>, <code>--idle-timeout &lt;minutes&gt;</code>.</span></div>
+         <div class="route-row"><code>sr start [url]</code><span>Start the session, stopping any active one first. Opens the URL in a browser and waits until its window is in front. Takes <code>--sr</code>, <code>--browser &lt;name&gt;</code>, <code>--app &lt;name&gt;</code> for a native app instead of a page, <code>--recording &lt;path&gt;</code>, <code>--idle-timeout &lt;minutes&gt;</code>.</span></div>
          <div class="route-row"><code>sr open &lt;url&gt;</code><span>Move the running session to another page.</span></div>
          <div class="route-row"><code>sr status</code><span>Print the session target, URL, uptime, recording, and transcript counts.</span></div>
          <div class="route-row"><code>sr stop</code><span>Stop the session and delete its state file. Takes <code>--out &lt;path&gt;</code> and <code>--format</code>.</span></div>
@@ -99,7 +99,7 @@ const toc = [
          <div class="route-row"><code>sr goto</code><span>Step forward until the current item matches <code>--role &lt;role&gt;</code>, <code>--name &lt;text&gt;</code>, or both. Takes <code>--max</code>. Exits 4 when nothing matches. Needs an active session.</span></div>
          <div class="route-row"><code>sr elements &lt;kind&gt;</code><span>The rotor: from the top, every element of one kind as the reader announces it. Takes <code>--max</code>, default 200. Needs an active session.</span></div>
          <div class="route-row"><code>sr read-all</code><span>Read from the cursor to the end of the document, or to <code>--max</code> (default 500), and say which. Needs an active session. Use <code>sr walk</code> to read a whole page instead.</span></div>
-         <div class="route-row"><code>sr walk [url]</code><span>Start a session when none is active, move to the top, read the whole page, and print the transcript of the walk. Takes <code>--sr</code>, <code>--allow-virtual</code>, <code>--max</code>, <code>--out</code>, <code>--format</code>. With no <code>--sr</code> and no active session, this starts VoiceOver on macOS.</span></div>
+         <div class="route-row"><code>sr walk [url]</code><span>Start a session when none is active, move to the top, read the whole page, and print the transcript of the walk. Takes <code>--sr</code>, <code>--max</code>, <code>--out</code>, <code>--format</code>. With no <code>--sr</code> and no active session, this starts VoiceOver on macOS.</span></div>
          <div class="route-row"><code>sr press &lt;chord...&gt;</code><span>Press key chords in order, one chord per argument.</span></div>
          <div class="route-row"><code>sr type &lt;text&gt;</code><span>Type text through the active target.</span></div>
          <div class="route-row"><code>sr do &lt;command&gt;</code><span>Run a named command, or <code>&lt;command-set&gt;:&lt;name&gt;</code> when two sets share a name. Takes <code>--command-set</code>.</span></div>
@@ -115,7 +115,6 @@ const toc = [
       <h3>Session options</h3>
       <div class="route-list">
          <div class="route-row"><code>--sr &lt;reader&gt;</code><span><code>voiceover</code>, <code>nvda</code>, or <code>virtual</code>, on <code>sr start</code>, <code>sr walk</code>, and the commands that start a session. Without it, a11ied picks the platform reader and falls back to virtual.</span></div>
-         <div class="route-row"><code>--allow-virtual</code><span>Confirm you want the simulated reader when a real one is available.</span></div>
          <div class="route-row"><code>--timeout &lt;ms&gt;</code><span>Bound the screen reader command instead of using the built-in limits. On <code>sr wait</code> it is how long to wait for the phrase.</span></div>
          <div class="route-row"><code>--phrase</code><span>On a navigation verb, print the last spoken phrase alone, one line.</span></div>
          <div class="route-row"><code>--ephemeral</code><span>Run one action in a temporary session and tear it down.</span></div>
@@ -152,7 +151,7 @@ const toc = [
             <div class="route-row"><strong>VoiceOver</strong><span><code>VO</code> for Control and Option, plus <code>Command</code>, <code>Option</code>, <code>Meta</code>, and <code>Fn</code></span></div>
             <div class="route-row"><strong>NVDA</strong><span><code>NVDA</code> for Insert, plus <code>Windows</code>, <code>Application</code>, and the <code>NumPad0</code> to <code>NumPad9</code> keys</span></div>
          </div>
-         <pre><code>a1 sr press Tab Tab --sr virtual --allow-virtual --json
+         <pre><code>a1 sr press Tab Tab --sr virtual --json
 a1 sr press "VO+ArrowRight" --json</code></pre>
       </div>
       <div class="split-aside">
@@ -161,7 +160,7 @@ a1 sr press "VO+ArrowRight" --json</code></pre>
             <code>a1 sr press --help</code> prints every token the current platform accepts,
             including function keys and punctuation names. <code>press</code> starts a
             session when none is active, defaulting to VoiceOver on macOS, so pass
-            <code>--sr virtual --allow-virtual</code> unless a VoiceOver chord such as
+            <code>--sr virtual</code> unless a VoiceOver chord such as
             <code>VO+ArrowRight</code> is what you want to run.
          </p>
       </div>

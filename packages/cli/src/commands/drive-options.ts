@@ -1,7 +1,6 @@
 import type { Command } from 'commander';
 import { CliUsageError } from '#core';
 import {
-   addAllowVirtualOption,
    addJsonOption,
    addPhraseOption,
    addScreenReaderOption,
@@ -33,7 +32,6 @@ export interface DriveActionOptions {
 /** Options for the verbs that start a session when none is active. */
 export interface DriveAutoStartOptions extends DriveActionOptions {
    sr?: string;
-   allowVirtual?: boolean;
    ephemeral?: boolean;
 }
 
@@ -47,7 +45,7 @@ export function addDriveNavigationOptions(command: Command): Command {
 
 export function addDriveAutoStartOptions(command: Command): Command {
    return addDriveActionOptions(
-      addAllowVirtualOption(addScreenReaderOption(command)).option(
+      addScreenReaderOption(command).option(
          '--ephemeral',
          'Run one action in a temporary session and tear it down immediately.',
       ),

@@ -13,7 +13,7 @@ import { expectFirstErrorMessage } from './helpers.js';
 
 const tempRoots: string[] = [];
 const testServer = useTestServer(tempRoots);
-const startArgs = ['--sr', 'virtual', '--allow-virtual', '--idle-timeout', '1'];
+const startArgs = ['--sr', 'virtual', '--idle-timeout', '1'];
 
 interface CurrentItemShape {
    role?: string;

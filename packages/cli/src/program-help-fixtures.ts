@@ -102,25 +102,22 @@ const NVDA_KEY_HELP_SECTION = [
 function resolvePressSrOption(): string {
    if (process.platform === 'win32') {
       return [
-         '        --sr <reader>    Screen reader to drive: nvda or virtual. Defaults to an',
-         '                         available NVDA target, then falls back to virtual as a',
-         '                         last resort. Use --allow-virtual to explicitly request',
-         '                         simulation.',
+         '        --sr <reader>   Screen reader to drive: nvda or virtual. Defaults to an',
+         '                        available NVDA target, then falls back to virtual as a',
+         '                        last resort.',
       ].join('\n');
    }
    if (process.platform !== 'darwin') {
       return [
-         '        --sr <reader>    Screen reader to drive: voiceover, nvda, or virtual. Defaults',
-         '                         to an available VoiceOver or NVDA target, then falls back to',
-         '                         virtual as a last resort. Use --allow-virtual to explicitly',
-         '                         request simulation.',
+         '        --sr <reader>   Screen reader to drive: voiceover, nvda, or virtual. Defaults to',
+         '                        an available VoiceOver or NVDA target, then falls back to',
+         '                        virtual as a last resort.',
       ].join('\n');
    }
    return [
-      '        --sr <reader>    Screen reader to drive: voiceover or virtual. Defaults to an',
-      '                         available VoiceOver target, then falls back to virtual as a',
-      '                         last resort. Use --allow-virtual to explicitly request',
-      '                         simulation.',
+      '        --sr <reader>   Screen reader to drive: voiceover or virtual. Defaults to an',
+      '                        available VoiceOver target, then falls back to virtual as a',
+      '                        last resort.',
    ].join('\n');
 }
 
@@ -142,16 +139,14 @@ function resolvePressHelpExpected(): string {
 
       Options:
 ${resolvePressSrOption()}
-        --allow-virtual  Allow the virtual (simulated) screen reader when a real
-                         target is available.
-        --ephemeral      Run one action in a temporary session and tear it down
-                         immediately.
-        --timeout <ms>   Bound the screen reader command in milliseconds instead of
-                         using the built-in limits.
-        --json           Print JSON instead of human-readable text.
-        --verbose        Print more detail in text output.
-        --phrase         Print only the last spoken phrase, one line, for shell loops.
-        -h, --help       display help for command
+        --ephemeral     Run one action in a temporary session and tear it down
+                        immediately.
+        --timeout <ms>  Bound the screen reader command in milliseconds instead of
+                        using the built-in limits.
+        --json          Print JSON instead of human-readable text.
+        --verbose       Print more detail in text output.
+        --phrase        Print only the last spoken phrase, one line, for shell loops.
+        -h, --help      display help for command
 
       Supported key tokens:
         Chord syntax: join tokens with "+", for example Tab, Shift+Tab, Control+F,
@@ -235,7 +230,7 @@ export const driveRunHelpCases: HelpCase[] = [
         help [command]         display help for command
 
       Examples:
-        a1 sr start --sr virtual --allow-virtual
+        a1 sr start --sr virtual
         a1 sr next heading
         a1 sr read
       "

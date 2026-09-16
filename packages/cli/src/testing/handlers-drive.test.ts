@@ -16,7 +16,7 @@ import { expectFirstErrorMessage } from './helpers.js';
 
 const tempRoots: string[] = [];
 const testServer = useTestServer(tempRoots);
-const virtualArgs = ['--sr', 'virtual', '--allow-virtual'];
+const virtualArgs = ['--sr', 'virtual'];
 const startArgs = [...virtualArgs, '--idle-timeout', '1'];
 
 interface SrResult {
@@ -231,7 +231,7 @@ async function assertAutoStart(): Promise<void> {
    expect(resultOf<ActionShape>(pressed).session.target).toBe('virtual');
    expect(resultOf<ActionShape>(await runSr(['status'])).session.target).toBe('virtual');
 
-   const ignored = await runSr(['type', 'hello', '--sr', 'virtual', '--allow-virtual']);
+   const ignored = await runSr(['type', 'hello', '--sr', 'virtual']);
    expect(warningCodes(ignored)).not.toContain('session-auto-started');
 
    await runSr(['stop']);

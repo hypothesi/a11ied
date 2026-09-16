@@ -29,14 +29,7 @@ export function addWcagVersionOption(command: Command): Command {
 export function addScreenReaderOption(command: Command): Command {
    return command.option(
       '--sr <reader>',
-      `Screen reader to drive: ${getPlatformTargets()}. Defaults to an available ${getPlatformScreenReaders()} target, then falls back to virtual as a last resort. Use --allow-virtual to explicitly request simulation.`,
-   );
-}
-
-export function addAllowVirtualOption(command: Command): Command {
-   return command.option(
-      '--allow-virtual',
-      'Allow the virtual (simulated) screen reader when a real target is available.',
+      `Screen reader to drive: ${getPlatformTargets()}. Defaults to an available ${getPlatformScreenReaders()} target, then falls back to virtual as a last resort.`,
    );
 }
 

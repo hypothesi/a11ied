@@ -66,15 +66,10 @@ function isCommandList(value: unknown): value is DriverCommandList {
 
 function buildCommandsExecution(args: {
    options: DriveCommandsOptions;
-   parsePlatform: (
-      target: string | undefined,
-      options?: { allowVirtual?: boolean },
-   ) => Platform;
+   parsePlatform: (target: string | undefined) => Platform;
    core: typeof Core;
 }): CommandExecution {
-   const target = args.options.sr
-      ? args.parsePlatform(args.options.sr, { allowVirtual: true })
-      : undefined;
+   const target = args.options.sr ? args.parsePlatform(args.options.sr) : undefined;
    const commandSet = resolveCommandSet(args.options.commandSet, args.core);
    const list = args.core.listDriverCommands(
       buildCommandListOptions({ target, commandSet, query: args.options.query }),

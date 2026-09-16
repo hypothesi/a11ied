@@ -112,7 +112,7 @@ criterion pending.
 ## Screen reader session
 
 ```txt
-a1 sr start --sr virtual --allow-virtual http://localhost:3000/checkout
+a1 sr start --sr virtual http://localhost:3000/checkout
 a1 sr open http://localhost:3000/settings
 a1 sr status
 a1 sr stop --out transcript.md
