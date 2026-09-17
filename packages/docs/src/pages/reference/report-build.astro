@@ -1,0 +1,43 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'build', label: 'Build a report' },
+   { id: 'outputs', label: 'Outputs' },
+];
+---
+
+<DocShell
+   title="a1 report build"
+   summary="Combine a discovery inventory and per-page audit results into HTML, PDF, JSON, and one W3C EARL report."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="panel" id="build">
+      <h2>Build a report</h2>
+      <pre><code>a1 report build \
+   --inventory .a11ied/audits/example/inventory.json \
+   --results-dir .a11ied/audits/example/pages \
+   --out .a11ied/audits/example/report</code></pre>
+      <p>
+         Use <code>--formats html,json</code> to skip PDF and EARL when a fast local check is
+         enough. JSON is always written because it is the complete presentation data contract.
+         <code>--fail-on</code> uses the same impact levels as <code>a1 audit</code>.
+      </p>
+   </section>
+
+   <section class="panel" id="outputs">
+      <h2>Outputs</h2>
+      <div class="route-list">
+         <div class="route-row"><code>report.html</code><span>Self-contained report for a browser.</span></div>
+         <div class="route-row"><code>report.pdf</code><span>Print-ready copy of the HTML report.</span></div>
+         <div class="route-row"><code>report.json</code><span>Every fact shown by the built-in report.</span></div>
+         <div class="route-row"><code>report.earl.json</code><span>One EARL JSON-LD graph for all audited pages.</span></div>
+      </div>
+      <p>
+         Missing or corrupt page files appear as page errors. They do not prevent the report
+         from describing the rest of the run.
+      </p>
+   </section>
+</DocShell>

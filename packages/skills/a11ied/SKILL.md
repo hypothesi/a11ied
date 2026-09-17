@@ -8,6 +8,10 @@ description: Use when you need to plan, script, or execute accessibility checks 
 Use this skill when the task is specifically about the `a11ied` toolchain: the `a1` CLI,
 the `@a11ied/mcp-server` MCP server, or the `a11ied` TypeScript package.
 
+For an entire site or a large section of one, use the `full-site-audit` skill. It handles
+page discovery, template sampling, resumable progress, real screen reader evidence, and
+the combined report. Keep this skill for one page or a component development loop.
+
 `a1 help-all` prints every command and option this skill refers to. Run it once at the
 start of a session if a command below looks unfamiliar.
 

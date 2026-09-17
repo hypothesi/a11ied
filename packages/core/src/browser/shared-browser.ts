@@ -216,7 +216,12 @@ async function withCustomPage<TResult>(
    try {
       const userAgent =
          options.extraHeaders?.['user-agent'] ?? (await resolveCleanUserAgent(browser));
-      const page = await browser.newPage({ userAgent });
+      const context = options.storageStatePath
+         ? await browser.newContext({ storageState: options.storageStatePath, userAgent })
+         : undefined;
+      const page = context
+         ? await context.newPage()
+         : await browser.newPage({ userAgent });
       try {
          await applyPageSetup(page, options);
          await loadDocumentIntoPage(page, load, options);
@@ -224,6 +229,7 @@ async function withCustomPage<TResult>(
          return await callback(page);
       } finally {
          await page.close();
+         await context?.close();
       }
    } finally {
       releaseSharedBrowser();

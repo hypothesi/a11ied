@@ -67,6 +67,17 @@ export interface AuditEarlReportOptions {
    version: string;
 }
 
+/** Builds every EARL assertion for one page audit without wrapping them in a document. */
+export function buildPageEarlAssertions(
+   report: AuditReport,
+   profile: EarlProfile,
+): EarlAssertionInput[] {
+   return [
+      ...listAxeEarlAssertions(report.axe, profile),
+      ...report.recorded.map((record) => toAssertion(record, report.axe.wcagVersion)),
+   ];
+}
+
 /**
  * Builds one EARL 1.0 report holding both what axe decided and what a person or an agent
  * recorded, for `a1 audit --format earl`.
@@ -79,13 +90,8 @@ export function buildAuditEarlReport(
    report: AuditReport,
    options: AuditEarlReportOptions,
 ): EarlReport {
-   const wcagVersion = report.axe.wcagVersion;
-
    return buildEarlReport({
-      assertions: [
-         ...listAxeEarlAssertions(report.axe, options.profile),
-         ...report.recorded.map((record) => toAssertion(record, wcagVersion)),
-      ],
+      assertions: buildPageEarlAssertions(report, options.profile),
       assertor: buildA11iedAssertor(options.version),
    });
 }

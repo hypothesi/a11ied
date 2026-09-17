@@ -39,6 +39,7 @@ export interface BuildAuditReportInput {
    timeoutMs?: number | undefined;
    waitFor?: string | undefined;
    click?: string | undefined;
+   storageStatePath?: string | undefined;
    /** The canonical key recorded results were stored under. */
    subject?: string | undefined;
    /** Where recorded results live. Defaults to `.a11ied/evidence.jsonl`. */
@@ -62,21 +63,32 @@ function buildRollupOutcomeMap(recorded: EvidenceRecord[]): Record<string, strin
    );
 }
 
+function getPageOptions(input: BuildAuditReportInput): {
+   click?: string | undefined;
+   storageStatePath?: string | undefined;
+   timeoutMs?: number | undefined;
+   waitFor?: string | undefined;
+} {
+   return {
+      timeoutMs: input.timeoutMs,
+      waitFor: input.waitFor,
+      click: input.click,
+      storageStatePath: input.storageStatePath,
+   };
+}
+
 export async function buildAuditReport(
    input: BuildAuditReportInput,
 ): Promise<AuditReport> {
    const wcagVersion = parseWcagVersion(input.wcagVersion);
-   const pageOptions = {
-      timeoutMs: input.timeoutMs,
-      waitFor: input.waitFor,
-      click: input.click,
-   };
+   const pageOptions = getPageOptions(input);
 
    const axe = await runAxe(input.load, {
       wcagVersion,
       timeoutMs: input.timeoutMs,
       waitFor: input.waitFor,
       click: input.click,
+      storageStatePath: input.storageStatePath,
    });
    const tree = await getAccessibilityTree(input.load, pageOptions);
    const pageTitle = await getPageTitle(input.load, pageOptions);

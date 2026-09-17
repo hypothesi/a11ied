@@ -4,6 +4,7 @@ import {
    addClickOption,
    addHtmlOption,
    addJsonOption,
+   addStorageStateOption,
    addTargetTimeoutOption,
    addVerboseOption,
    addWaitForOption,
@@ -11,6 +12,7 @@ import {
 } from '../lib/options.js';
 import { handleAuditAction, type AuditActionOptions } from './audit-actions.js';
 import { registerAuditEvidenceCommands } from './audit-evidence.js';
+import { registerAuditDiscoverCommand } from './audit-discover.js';
 
 interface AuditCommandOptions extends AuditActionOptions {
    format?: string;
@@ -24,53 +26,55 @@ Examples:
 `;
 
 function buildAuditCommand(program: Command): Command {
-   return addClickOption(
-      addWaitForOption(
-         addTargetTimeoutOption(
-            addHtmlOption(
-               addVerboseOption(
-                  addJsonOption(
-                     addWcagVersionOption(
-                        program
-                           .command('audit [target]')
-                           .helpGroup(TOP_LEVEL_GROUPS.fix)
-                           .summary('Scan a page and list what to fix.')
-                           .description(
-                              'Run the full audit loop against a target: axe, an ' +
-                                 'accessibility tree summary, the relevant criteria scan, and a ' +
-                                 'criterion rollup.',
-                           )
-                           .addHelpText('after', AUDIT_EXAMPLES)
-                           .option(
-                              '--fail-on <impact>',
-                              'Only fail on axe violations at or above this impact: ' +
-                                 'minor, moderate, serious, or critical. Defaults to any ' +
-                                 'violation.',
-                           )
-                           .option(
-                              '--baseline <file>',
-                              'JSON file of accepted axe findings that do not count ' +
-                                 'toward the exit code.',
-                           )
-                           .option(
-                              '--update-baseline',
-                              'Write the current axe violations to --baseline instead ' +
-                                 'of asserting against it.',
-                           )
-                           .option(
-                              '--results <file>',
-                              'Read recorded manual results from here. Defaults to ' +
-                                 '.a11ied/evidence.jsonl, or $A11IED_EVIDENCE.',
-                           )
-                           .option(
-                              '--format <format>',
-                              'Output format: text, json, or earl. Defaults to text ' +
-                                 '(json with --json).',
-                           )
-                           .option(
-                              '--out <file>',
-                              'Write the report to this file instead of stdout.',
-                           ),
+   return addStorageStateOption(
+      addClickOption(
+         addWaitForOption(
+            addTargetTimeoutOption(
+               addHtmlOption(
+                  addVerboseOption(
+                     addJsonOption(
+                        addWcagVersionOption(
+                           program
+                              .command('audit [target]')
+                              .helpGroup(TOP_LEVEL_GROUPS.fix)
+                              .summary('Scan a page and list what to fix.')
+                              .description(
+                                 'Run the full audit loop against a target: axe, an ' +
+                                    'accessibility tree summary, the relevant criteria scan, and a ' +
+                                    'criterion rollup.',
+                              )
+                              .addHelpText('after', AUDIT_EXAMPLES)
+                              .option(
+                                 '--fail-on <impact>',
+                                 'Only fail on axe violations at or above this impact: ' +
+                                    'minor, moderate, serious, or critical. Defaults to any ' +
+                                    'violation.',
+                              )
+                              .option(
+                                 '--baseline <file>',
+                                 'JSON file of accepted axe findings that do not count ' +
+                                    'toward the exit code.',
+                              )
+                              .option(
+                                 '--update-baseline',
+                                 'Write the current axe violations to --baseline instead ' +
+                                    'of asserting against it.',
+                              )
+                              .option(
+                                 '--results <file>',
+                                 'Read recorded manual results from here. Defaults to ' +
+                                    '.a11ied/evidence.jsonl, or $A11IED_EVIDENCE.',
+                              )
+                              .option(
+                                 '--format <format>',
+                                 'Output format: text, json, or earl. Defaults to text ' +
+                                    '(json with --json).',
+                              )
+                              .option(
+                                 '--out <file>',
+                                 'Write the report to this file instead of stdout.',
+                              ),
+                        ),
                      ),
                   ),
                ),
@@ -83,6 +87,7 @@ function buildAuditCommand(program: Command): Command {
 export function registerAuditCommand(program: Command): void {
    const auditCommand = buildAuditCommand(program);
    registerAuditEvidenceCommands(auditCommand);
+   registerAuditDiscoverCommand(auditCommand);
    auditCommand.action(
       async (target: string | undefined, options: AuditCommandOptions) => {
          if (options.format === 'earl') {
@@ -103,6 +108,7 @@ export function registerAuditCommand(program: Command): void {
                wcagVersion: options.wcag,
                json: options.json || options.format === 'json',
                verbose: options.verbose,
+               out: options.out,
             },
             () => handleAuditAction(target, options),
             renderers.renderAuditText,

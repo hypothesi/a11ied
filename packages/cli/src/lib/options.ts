@@ -82,3 +82,11 @@ export function addTargetTimeoutOption(command: Command): Command {
       `Timeout for loading the target, in milliseconds. Defaults to ${DEFAULT_TARGET_TIMEOUT_MS}.`,
    );
 }
+
+/** Adds the local Playwright authentication state option used by page commands. */
+export function addStorageStateOption(command: Command): Command {
+   return command.option(
+      '--storage-state <file>',
+      'Load Playwright authentication state from this local file.',
+   );
+}

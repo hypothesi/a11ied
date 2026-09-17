@@ -17,6 +17,8 @@ export interface PageCookie {
 }
 
 export interface PageSetupOptions {
+   /** A Playwright storage-state file used to create an isolated authenticated context. */
+   storageStatePath?: string | undefined;
    viewport?: { width: number; height: number } | undefined;
    extraHeaders?: Record<string, string> | undefined;
    cookies?: PageCookie[] | undefined;
@@ -36,6 +38,7 @@ export interface PageSetupOptions {
 export function hasPageSetup(options: PageSetupOptions): boolean {
    return Boolean(
       options.viewport ??
+      options.storageStatePath ??
       options.extraHeaders ??
       options.cookies?.length ??
       options.waitFor ??

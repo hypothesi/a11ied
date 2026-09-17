@@ -10,6 +10,7 @@ const LOW_CONTENT_TEXT_THRESHOLD = 50;
 const axeScriptSource = axe.source;
 
 export interface AxeScanOptions {
+   storageStatePath?: string | undefined;
    timeoutMs?: number | undefined;
    selector?: string | undefined;
    exclude?: string | undefined;

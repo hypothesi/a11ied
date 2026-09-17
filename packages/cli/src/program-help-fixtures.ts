@@ -19,6 +19,7 @@ export const topLevelHelpCases: HelpCase[] = [
 
       Find and fix problems:
         audit [target]    Scan a page and list what to fix.
+        report            Build a multi-page accessibility report.
         axe [targets...]  Run axe-core against one or more targets.
         tree [target]     Print a page's accessibility tree.
 

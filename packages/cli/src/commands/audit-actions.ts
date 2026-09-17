@@ -14,6 +14,7 @@ export interface AuditActionOptions {
    baseline?: string;
    updateBaseline?: boolean;
    results?: string;
+   storageState?: string;
 }
 
 function parseTimeoutMs(timeout: string | undefined): number | undefined {
@@ -95,6 +96,7 @@ export async function runAudit(
       timeoutMs: parseTimeoutMs(options.timeout),
       waitFor: options.waitFor,
       click: options.click,
+      storageStatePath: options.storageState,
       subject: core.stripFragment(resolved.reportTarget.resolvedUrl),
       evidenceFile: options.results,
    });

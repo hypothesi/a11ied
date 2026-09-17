@@ -3,6 +3,9 @@
    "skills": {
       "a11ied": {
          "path": "./a11ied/"
+      },
+      "full-site-audit": {
+         "path": "./full-site-audit/"
       }
    }
 }

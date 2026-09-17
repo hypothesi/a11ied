@@ -1,3 +1,5 @@
+import { writeFile } from 'node:fs/promises';
+
 import {
    cliExitCodes,
    cliOutputEnvelopeSchema,
@@ -84,6 +86,7 @@ interface PrintOutputOptions {
    verbose: boolean | undefined;
    envelope: CliOutputEnvelope;
    renderText: (envelope: CliOutputEnvelope, options: { verbose: boolean }) => string;
+   out?: string | undefined;
 }
 
 function printWarningsToStderr(warnings: CliMessage[]): void {
@@ -101,12 +104,25 @@ function printWarningsToStderr(warnings: CliMessage[]): void {
  * verdict. `a1 sr expect "Save" > report.txt` keeps its report. A command that produced
  * no result prints its error to stderr instead, so a piped stdout stream stays empty.
  */
-export function printOutput(opts: PrintOutputOptions): void {
+async function writeTextOutput(body: string, out: string | undefined): Promise<void> {
+   if (out) {
+      await writeFile(out, `${body}\n`, 'utf8');
+      return;
+   }
+   process.stdout.write(`${body}\n`);
+}
+
+export async function printOutput(opts: PrintOutputOptions): Promise<void> {
    printWarningsToStderr(opts.envelope.warnings);
    const body = opts.renderText(opts.envelope, { verbose: Boolean(opts.verbose) });
 
    if (opts.json) {
-      process.stdout.write(`${JSON.stringify(opts.envelope, undefined, JSON_INDENT)}\n`);
+      const output = `${JSON.stringify(opts.envelope, undefined, JSON_INDENT)}\n`;
+      if (opts.out) {
+         await writeFile(opts.out, output, 'utf8');
+      } else {
+         process.stdout.write(output);
+      }
       if (!opts.envelope.ok) {
          process.stderr.write(`${body}\n`);
       }
@@ -117,7 +133,7 @@ export function printOutput(opts: PrintOutputOptions): void {
       process.stderr.write(`${body}\n`);
       return;
    }
-   process.stdout.write(`${body}\n`);
+   await writeTextOutput(body, opts.out);
 }
 
 function buildCliUsageErrors(error: CliUsageError): {

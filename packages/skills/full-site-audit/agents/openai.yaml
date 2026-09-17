@@ -1,0 +1,3 @@
+display_name: Full-site accessibility audit
+short_description: Run a resumable WCAG AA evidence audit across a page, section, or site.
+default_prompt: Audit the requested site scope with a1, preserve explicit evidence status, and produce HTML, PDF, JSON, and EARL reports.

@@ -4,6 +4,7 @@ import { registerSessionCommands } from './commands/drive.js';
 import { registerAxeCommand } from './commands/axe.js';
 import { registerTreeCommand } from './commands/tree.js';
 import { registerAuditCommand } from './commands/audit.js';
+import { registerReportCommand } from './commands/report.js';
 import { registerSetupCommand } from './commands/setup.js';
 import { registerPatternCommands } from './commands/pattern.js';
 import { registerSearchCommand } from './commands/search.js';
@@ -96,6 +97,7 @@ function registerHelpAllCommand(program: Command): void {
 /** Registers every top-level command, in the order its group is listed in `a1 --help`. */
 function registerAllCommands(program: Command): void {
    registerAuditCommand(program);
+   registerReportCommand(program);
    registerAxeCommand(program);
    registerTreeCommand(program);
    registerSessionCommands(program);

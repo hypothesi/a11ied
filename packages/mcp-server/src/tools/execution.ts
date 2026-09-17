@@ -260,6 +260,7 @@ function registerTreeTool(server: McpServer): void {
 }
 
 const auditInputSchema = pageTargetInputSchema.extend({
+   storageStatePath: z.string().min(1).optional(),
    version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
    failOn: axeFailOnImpactSchema
       .optional()
@@ -290,6 +291,7 @@ async function handleAudit(input: AuditInput): Promise<AuditToolResult> {
       userHints: resolved.userHints,
       wcagVersion: input.version,
       timeoutMs: input.timeoutMs,
+      storageStatePath: input.storageStatePath,
    });
    const verdict = evaluateAxeVerdict({
       violations: report.axe.violations,

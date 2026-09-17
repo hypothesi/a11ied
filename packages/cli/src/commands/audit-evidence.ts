@@ -3,6 +3,7 @@ import type { Command } from 'commander';
 import {
    addHtmlOption,
    addJsonOption,
+   addStorageStateOption,
    addVerboseOption,
    addWcagVersionOption,
 } from '../lib/options.js';
@@ -94,24 +95,26 @@ function registerRecordCommand(auditCommand: Command): void {
 }
 
 function registerPendingCommand(auditCommand: Command): void {
-   const command = addHtmlOption(
-      addVerboseOption(
-         addJsonOption(
-            addWcagVersionOption(
-               addEvidenceOptions(
-                  auditCommand
-                     .command('pending [target]')
-                     .summary('List criteria for a target that still need a person.')
-                     .description(
-                        'List the criteria that apply to a target, that axe cannot ' +
-                           'decide, and that have no recorded result yet. Reads the ' +
-                           'WCAG data and the results file; it does not open a browser.',
-                     )
-                     .addHelpText('after', PENDING_EXAMPLES)
-                     .option(
-                        '--level <level>',
-                        'Restrict to one WCAG level: A, AA, or AAA.',
-                     ),
+   const command = addStorageStateOption(
+      addHtmlOption(
+         addVerboseOption(
+            addJsonOption(
+               addWcagVersionOption(
+                  addEvidenceOptions(
+                     auditCommand
+                        .command('pending [target]')
+                        .summary('List criteria for a target that still need a person.')
+                        .description(
+                           'List the criteria that apply to a target, that axe cannot ' +
+                              'decide, and that have no recorded result yet. Reads the ' +
+                              'WCAG data and the results file; it does not open a browser.',
+                        )
+                        .addHelpText('after', PENDING_EXAMPLES)
+                        .option(
+                           '--level <level>',
+                           'Restrict to one WCAG level: A, AA, or AAA.',
+                        ),
+                  ),
                ),
             ),
          ),

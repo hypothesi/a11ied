@@ -322,3 +322,22 @@ export {
    type VirtualHostChoice,
 } from './driver/virtual-host-choice.js';
 export { createPlaywrightVirtualHost } from './driver/virtual-playwright-host.js';
+export {
+   discoverSite,
+   readInventory,
+   writeInventoryAtomic,
+   buildOriginKey,
+   buildPageId,
+   type DiscoverOptions,
+} from './discovery/runtime.js';
+export { discoverSitemapUrls, parseSitemap } from './discovery/sitemap.js';
+export { crawlSameOrigin, normalizeUrl } from './discovery/crawl.js';
+export {
+   buildAggregateEarlReport,
+   buildReportModel,
+   loadPageAuditReports,
+   type LoadedPageAudit,
+} from './report/aggregate.js';
+export { renderHtmlReport } from './report/render-html.js';
+export { renderPdfReport } from './report/render-pdf.js';
+export { buildReportBundle, type BuildReportBundleOptions } from './report/runtime.js';

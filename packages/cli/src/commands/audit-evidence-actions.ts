@@ -35,6 +35,7 @@ export interface EvidenceActionOptions {
    verbose?: boolean;
    timeout?: string;
    html?: string;
+   storageState?: string;
 }
 
 function parseOutcome(value: string | undefined): EvidenceOutcome {

@@ -112,6 +112,7 @@ export async function executeCommand(
       wcagVersion: string | undefined;
       json: boolean | undefined;
       verbose?: boolean | undefined;
+      out?: string | undefined;
    },
    handler: () => Promise<CommandExecution> | CommandExecution,
    renderText: RenderText,
@@ -122,20 +123,22 @@ export async function executeCommand(
       const execution = await handler();
       const built = buildSuccessEnvelope(args, execution, startedAt);
       process.exitCode = built.exitCode;
-      printOutput({
+      await printOutput({
          json: args.json,
          verbose: args.verbose,
          envelope: built.envelope,
          renderText,
+         out: args.out,
       });
    } catch (error) {
       const built = buildErrorEnvelope(args, error, startedAt);
       process.exitCode = built.exitCode;
-      printOutput({
+      await printOutput({
          json: args.json,
          verbose: args.verbose,
          envelope: built.envelope,
          renderText: renderErrorText,
+         out: args.out,
       });
    }
 }

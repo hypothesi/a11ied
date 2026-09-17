@@ -76,6 +76,7 @@ export const cliCommandFamilySchema = z.enum([
    'axe',
    'tree',
    'audit',
+   'report',
    'doctor',
    'setup',
    'mcp',

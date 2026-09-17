@@ -33,6 +33,7 @@ export const docsLinks: DocSection[] = [
          { href: '/guides/vitest', label: 'Test with Vitest' },
          { href: '/guides/agents', label: 'Test from an AI agent' },
          { href: '/guides/agent-skill', label: 'Install the agent skill' },
+         { href: '/guides/full-site-audit', label: 'Audit a full site' },
          { href: '/guides/recording', label: 'Record a session' },
          { href: '/guides/violations', label: 'Understand a violation' },
          { href: '/guides/scripting', label: 'Script the CLI' },
@@ -44,6 +45,8 @@ export const docsLinks: DocSection[] = [
       title: 'Reference',
       links: [
          { href: '/reference/cli', label: 'CLI' },
+         { href: '/reference/audit-discover', label: 'Audit discovery' },
+         { href: '/reference/report-build', label: 'Report builder' },
          { href: '/reference/mcp', label: 'MCP tools' },
          { href: '/reference/api', label: 'TypeScript API' },
          { href: '/reference/wcag-data', label: 'WCAG data' },

@@ -58,6 +58,7 @@ const recordInputSchema = pageTargetInputSchema.extend({
 });
 
 const pendingInputSchema = pageTargetInputSchema.extend({
+   storageStatePath: z.string().min(1).optional(),
    level: z
       .string()
       .min(1)

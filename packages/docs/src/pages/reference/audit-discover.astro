@@ -1,0 +1,55 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'run', label: 'Run discovery' },
+   { id: 'resume', label: 'Resume' },
+   { id: 'limits', label: 'Limits and privacy' },
+];
+---
+
+<DocShell
+   title="a1 audit discover"
+   summary="Build a validated page inventory from sitemaps and rendered same-origin links before a multi-page accessibility audit."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="panel" id="run">
+      <h2>Run discovery</h2>
+      <pre><code>a1 audit discover https://example.com \
+   --scope site \
+   --out .a11ied/audits/example/inventory.json \
+   --json</code></pre>
+      <p>
+         Scope can be <code>page</code>, <code>section</code>, or <code>site</code>. Section scope
+         stays under the starting URL path. Discovery merges sitemap URLs with links found
+         after the page renders. Use <code>--sitemap-only</code> when rendered crawling is not
+         allowed.
+      </p>
+   </section>
+
+   <section class="panel" id="resume">
+      <h2>Resume</h2>
+      <pre><code>a1 audit discover https://example.com \
+   --resume-from .a11ied/audits/example/inventory.json \
+   --out .a11ied/audits/example/inventory.json \
+   --json</code></pre>
+      <p>
+         Resolved pages keep their page ids and are not resolved again. The command replaces
+         the inventory atomically after each page, so an interrupted process leaves a valid
+         previous or current file.
+      </p>
+   </section>
+
+   <section class="panel" id="limits">
+      <h2>Limits and privacy</h2>
+      <p>
+         <code>--max-pages</code>, <code>--max-sitemaps</code>, and
+         <code>--concurrency</code> bound the work. A stopped run says its inventory is partial.
+         <code>--storage-state</code> loads a local Playwright authentication file without
+         printing it. <code>--artifacts-dir</code> saves rendered page content, so use it only
+         after the site owner approves that capture.
+      </p>
+   </section>
+</DocShell>

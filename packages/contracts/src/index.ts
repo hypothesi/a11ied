@@ -11,3 +11,5 @@ export * from './schemas/apg-check.js';
 export * from './schemas/query.js';
 export * from './schemas/earl.js';
 export * from './schemas/evidence.js';
+export * from './schemas/discovery.js';
+export * from './schemas/report.js';

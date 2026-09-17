@@ -21,6 +21,7 @@ const INTENTIONALLY_UNCOVERED: ReadonlySet<string> = new Set([
    'help-all',
    'help',
    'sr help',
+   'report help',
    // Runs interactive OS permission prompts and downloads screen reader assets.
    'setup',
    // Reads a file of JSON-lines actions for shell scripting, not one call.
@@ -53,6 +54,9 @@ const TOOL_BY_COMMAND: Readonly<Record<string, readonly string[]>> = {
    audit: ['audit'],
    'audit record': ['record_result'],
    'audit pending': ['list_pending_results'],
+   'audit discover': ['audit_discover'],
+   'report build': ['report_build'],
+   report: ['report_build'],
    doctor: ['doctor'],
    sr: ['sr_session', 'sr_action', 'sr_list', 'sr_expect', 'sr_transcript'],
    'sr start': ['sr_session'],
