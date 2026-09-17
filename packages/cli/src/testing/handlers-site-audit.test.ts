@@ -79,6 +79,35 @@ describe('audit discover handler', () => {
    );
 });
 
+describe('audit discover progress', () => {
+   it(
+      'serializes inventory updates during concurrent discovery',
+      async () => {
+         const directory = await mkdtemp(resolve(tmpdir(), 'a11ied-discover-progress-')),
+            inventoryPath = resolve(directory, 'inventory.json');
+         try {
+            const url = await startPage();
+            const result = await handleAuditDiscoverAction(url, {
+               concurrency: '4',
+               out: inventoryPath,
+               probeErrorPages: true,
+               timeout: '5000',
+            });
+
+            expect(result.result.pages.length).toBeGreaterThan(0);
+            expect(
+               siteInventorySchema.parse(
+                  JSON.parse(await readFile(inventoryPath, 'utf8')),
+               ),
+            ).toEqual(result.result);
+         } finally {
+            await rm(directory, { recursive: true, force: true });
+         }
+      },
+      BROWSER_TEST_TIMEOUT_MS,
+   );
+});
+
 describe('report build handler', () => {
    it(
       'always writes report.json when formats omit it',

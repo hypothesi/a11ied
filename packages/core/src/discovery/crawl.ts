@@ -268,6 +268,19 @@ async function recordVisit(visit: PageVisitResult, state: CrawlState): Promise<v
    enqueueLinks(visit, state);
 }
 
+async function recordVisits(
+   visits: PageVisitResult[],
+   state: CrawlState,
+   index = 0,
+): Promise<void> {
+   const visit = visits[index];
+   if (!visit) {
+      return;
+   }
+   await recordVisit(visit, state);
+   await recordVisits(visits, state, index + 1);
+}
+
 async function crawlQueue(state: CrawlState): Promise<void> {
    if (state.queue.length === 0 || state.visits.length >= state.maxPages) {
       return;
@@ -282,7 +295,7 @@ async function crawlQueue(state: CrawlState): Promise<void> {
    const results = await Promise.all(
       batch.map((url) => visitPage(state.context, url, state.options)),
    );
-   await Promise.all(results.map((visit) => recordVisit(visit, state)));
+   await recordVisits(results, state);
    await crawlQueue(state);
 }
 
