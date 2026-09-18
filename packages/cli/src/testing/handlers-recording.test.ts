@@ -17,6 +17,7 @@ const coreMocks = vi.hoisted(() => ({
    openUrlInBrowserMock: vi.fn(),
    runDriverSessionActionMock: vi.fn(),
    startDriverSessionMock: vi.fn(),
+   stopDriverSessionMock: vi.fn(),
    waitForWindowFocusMock: vi.fn(),
 }));
 
@@ -30,6 +31,7 @@ vi.mock('#core', async () => {
       openUrlInBrowser: coreMocks.openUrlInBrowserMock,
       runDriverSessionAction: coreMocks.runDriverSessionActionMock,
       startDriverSession: coreMocks.startDriverSessionMock,
+      stopDriverSession: coreMocks.stopDriverSessionMock,
       waitForWindowFocus: coreMocks.waitForWindowFocusMock,
    };
 });
@@ -109,7 +111,52 @@ describe('real screen reader safety gates', () => {
       );
       expect(coreMocks.startDriverSessionMock).not.toHaveBeenCalled();
    });
+});
 
+describe('started real screen reader safety gates', () => {
+   it('stops a reader that takes focus away from the browser', async () => {
+      const session = createMockDriveSession('/tmp/a11ied-test');
+      coreMocks.openUrlInBrowserMock.mockResolvedValueOnce({
+         focusTarget: { appName: 'Chromium' },
+      });
+      coreMocks.waitForWindowFocusMock
+         .mockResolvedValueOnce({ focused: true, waitedMs: 0 })
+         .mockResolvedValueOnce({
+            focused: false,
+            frontmost: { appName: 'Terminal' },
+            waitedMs: 5000,
+         });
+      coreMocks.startDriverSessionMock.mockResolvedValueOnce({ session });
+      coreMocks.runDriverSessionActionMock.mockResolvedValueOnce({
+         session,
+         state: { transcript: [] },
+      });
+      coreMocks.stopDriverSessionMock.mockResolvedValueOnce({
+         session,
+         state: { transcript: [] },
+      });
+
+      const result = await runCliInProcess([
+         'sr',
+         'start',
+         `${testServer.getBaseUrl()}/basic-page.html`,
+         '--sr',
+         'voiceover',
+         '--timeout',
+         '1000',
+         '--json',
+      ]);
+      const json = parseJsonOutput(result.stdout);
+
+      expect(result.status).toBe(EXIT_ENVIRONMENT);
+      expect((json.errors as Array<{ code: string }>)[0]?.code).toBe(
+         'browser-focus-unconfirmed',
+      );
+      expect(coreMocks.stopDriverSessionMock).toHaveBeenCalledWith({ timeoutMs: 1000 });
+   });
+});
+
+describe('real screen reader walk safety gates', () => {
    it('rejects an empty transcript from a real reader walk', async () => {
       const session = createMockDriveSession('/tmp/a11ied-test');
       coreMocks.getActiveDriverSessionMock.mockResolvedValueOnce(session);

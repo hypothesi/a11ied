@@ -1,6 +1,21 @@
 import { describe, expect, it } from 'vitest';
 
-import { isFrontmostMatch } from './window-focus.js';
+import { isFrontmostMatch, parseMacFrontmostOutput } from './window-focus.js';
+
+describe('parseMacFrontmostOutput', () => {
+   it('keeps spaces in app names and window titles', () => {
+      expect(
+         parseMacFrontmostOutput(
+            'Google Chrome\u001Ecom.google.Chrome\u001E717\u001EExample page - Google Chrome\n',
+         ),
+      ).toEqual({
+         appName: 'Google Chrome',
+         bundleId: 'com.google.Chrome',
+         pid: 717,
+         windowTitle: 'Example page - Google Chrome',
+      });
+   });
+});
 
 describe('isFrontmostMatch', () => {
    it('matches by bundle id before anything else', () => {

@@ -10,7 +10,8 @@ import { delay } from './sequential.js';
 const FOCUS_POLL_INTERVAL_MS = 100;
 /** How long `sr start` and `sr open` wait for the window to come to the front. */
 export const WINDOW_FOCUS_TIMEOUT_MS = 5000;
-const FIELD_SEPARATOR = ' ';
+const MAC_FIELD_SEPARATOR = '\u001E';
+const WINDOWS_FIELD_SEPARATOR = ' ';
 
 /** What the operating system says is in front right now. */
 export interface FrontmostWindow {
@@ -39,19 +40,24 @@ function stripSuffix(name: string): string {
    return name.replace(/\.(app|exe)$/iu, '').toLowerCase();
 }
 
-async function readMacFrontmost(): Promise<FrontmostWindow> {
-   const { stdout } = await focusExecFile('osascript', ['-e', loadMacFrontmostScript()], {
-      timeout: FOCUS_COMMAND_TIMEOUT_MS,
-   });
+/** Parses the record-separator-delimited output from mac-frontmost.applescript. */
+export function parseMacFrontmostOutput(stdout: string): FrontmostWindow {
    const [appName = '', bundleId = '', pid = '', windowTitle = ''] = String(stdout)
       .trim()
-      .split(FIELD_SEPARATOR);
+      .split(MAC_FIELD_SEPARATOR);
    return {
       appName,
       bundleId: bundleId || undefined,
       pid: Number(pid) || undefined,
       windowTitle: windowTitle || undefined,
    };
+}
+
+async function readMacFrontmost(): Promise<FrontmostWindow> {
+   const { stdout } = await focusExecFile('osascript', ['-e', loadMacFrontmostScript()], {
+      timeout: FOCUS_COMMAND_TIMEOUT_MS,
+   });
+   return parseMacFrontmostOutput(String(stdout));
 }
 
 async function readWindowsFrontmost(): Promise<FrontmostWindow> {
@@ -62,7 +68,7 @@ async function readWindowsFrontmost(): Promise<FrontmostWindow> {
    );
    const [processName = '', pid = '', windowTitle = ''] = String(stdout)
       .trim()
-      .split(FIELD_SEPARATOR);
+      .split(WINDOWS_FIELD_SEPARATOR);
    return {
       appName: processName,
       processName,

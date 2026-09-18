@@ -79,6 +79,27 @@ async function openTarget(args: {
    return opened.focusTarget;
 }
 
+async function refocusStartedRealSession(args: {
+   app: DriverFocusTarget | undefined;
+   isReal: boolean;
+   timeoutMs: number | undefined;
+   url: string | undefined;
+   warnings: CliMessage[];
+}): Promise<void> {
+   if (!args.isReal || !args.app) {
+      return;
+   }
+   const core = await import('#core');
+   await core.runDriverSessionAction({ action: 'focus' }, { timeoutMs: args.timeoutMs });
+   await waitForFocusWithWarning(args.app, args.warnings);
+   try {
+      assertFocusConfirmed(args.warnings, args.url);
+   } catch (error) {
+      await core.stopDriverSession({ timeoutMs: args.timeoutMs });
+      throw error;
+   }
+}
+
 /** Starts the session and opens the page; `sr start` and `sr walk` both run this. */
 export async function executeStartAction(
    url: string | undefined,
@@ -96,6 +117,7 @@ export async function executeStartAction(
       warnings,
    });
    assertFocusConfirmed(warnings, resolved?.resolvedUrl);
+   const timeoutMs = parseTimeoutMs(options.timeout);
    const started = await core.startDriverSession({
       target,
       mode: core.resolveDriverMode(),
@@ -103,13 +125,16 @@ export async function executeStartAction(
       url: resolved?.resolvedUrl,
       app,
       idleTimeoutMinutes: parseCountOption(options.idleTimeout, 'idle-timeout'),
-      timeoutMs: parseTimeoutMs(options.timeout),
+      timeoutMs,
    });
-   if (started.session.targetType === 'real' && app) {
-      // Starting the reader can take focus; bring the window back and confirm it.
-      await core.runDriverSessionAction({ action: 'focus' });
-      await waitForFocusWithWarning(app, warnings);
-   } else if (resolved) {
+   await refocusStartedRealSession({
+      app,
+      isReal: started.session.targetType === 'real',
+      timeoutMs,
+      url: resolved?.resolvedUrl,
+      warnings,
+   });
+   if (started.session.targetType !== 'real' && resolved) {
       await core.attachDocumentToDriverSession({
          html: resolved.html,
          url: resolved.resolvedUrl,
