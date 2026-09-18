@@ -68,6 +68,13 @@ async function executeWalkAction(
    const result = await readFromTop(options);
    // Only what the reader said during this walk belongs in the walk's transcript.
    const entries = result.state.transcript.slice(before.state.transcript.length);
+   if (result.session.target !== 'virtual' && entries.length === 0) {
+      throw new core.CliEnvironmentError(
+         'screen-reader-empty-transcript',
+         'The real screen reader produced no announcements. The page was not verified.',
+         { url, target: result.session.target },
+      );
+   }
    const transcript = core.buildDriverTranscript(result.session, entries);
    const file = options.out
       ? await core.writeDriverTranscript({

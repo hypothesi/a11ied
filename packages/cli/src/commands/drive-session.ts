@@ -5,7 +5,7 @@ import type {
    DriverActionResult,
    DriverFocusTarget,
 } from '#contracts';
-import { CliUsageError } from '#core';
+import { CliEnvironmentError, CliUsageError } from '#core';
 import type { CommandExecution } from '../lib/helpers.js';
 import {
    addDriveActionOptions,
@@ -117,6 +117,13 @@ export async function executeOpenAction(
               timeoutMs,
               warnings,
            });
+   if (warnings.some((warning) => warning.code === 'window-focus-unconfirmed')) {
+      throw new CliEnvironmentError(
+         'browser-focus-unconfirmed',
+         'The browser did not come to the front. The screen-reader audit was not started.',
+         { url: resolved.resolvedUrl, warnings },
+      );
+   }
    return {
       target: resolved.reportTarget,
       result: { ...result, commandLine: `open ${url}` },

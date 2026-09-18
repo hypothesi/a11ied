@@ -144,9 +144,18 @@ a1 audit <url> --storage-state <path> --format json \
 Omit `--storage-state` for public pages. The coordinator updates the inventory after the
 worker returns.
 
-## Screen reader safety
+## Browser and screen-reader readiness
 
-Before the first real screen reader session, warn the user:
+Before starting VoiceOver or NVDA, orient in the browser first. Open the target with the browser automation path and verify all of the following:
+
+- the browser process/window exists and is frontmost;
+- the loaded URL matches the resolved target origin and path;
+- the document has a non-empty title or visible body content;
+- the page structure is observable (title, headings, landmarks, links, or controls).
+
+A focus warning is a hard blocker, not a recoverable warning. Retry with the detected browser or an available alternate browser, then stop with an explicit environment failure if focus or URL verification still fails. Do not start a screen reader, run `sr walk`, or record manual outcomes until this gate passes. An empty transcript is not evidence that the page was read; treat it as a failed readiness check.
+
+Only after browser readiness passes, before the first real screen reader session, warn the user:
 
 > VoiceOver or NVDA will take over this machine's speech and keyboard focus. Do not try
 > to exit the program while the audit runs. Keep the machine awake and unlocked until the
@@ -179,12 +188,14 @@ continue.
 
 ## Final report
 
-Set `run.phase` to `report-building`, then run:
+Set `run.phase` to `report-building`, then run. Do not run this step while a page is `not-tested` or `in-progress`; resolve each selected page as `audited` or `error` first:
 
 ```sh
 a1 report build --inventory <run-dir>/inventory.json \
    --results-dir <run-dir>/pages --out <run-dir>/report
 ```
+
+After the command, verify each file is present and non-empty. If any file is missing, the report phase failed and the run must not be marked complete.
 
 Confirm these files exist:
 
