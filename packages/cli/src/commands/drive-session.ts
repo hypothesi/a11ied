@@ -35,6 +35,18 @@ export async function waitForFocusWithWarning(
    });
 }
 
+/** Stops real-reader work when its target window could not be brought to the front. */
+export function assertFocusConfirmed(warnings: CliMessage[], url?: string): void {
+   if (!warnings.some((warning) => warning.code === 'window-focus-unconfirmed')) {
+      return;
+   }
+   throw new CliEnvironmentError(
+      'browser-focus-unconfirmed',
+      'The browser did not come to the front. The screen-reader audit was not started.',
+      { url, warnings },
+   );
+}
+
 /** Page targets are limited to http(s) URLs until the shared target resolver lands. */
 export function assertHttpUrl(url: string | undefined): void {
    if (url !== undefined && !/^https?:\/\//iu.test(url)) {
@@ -117,13 +129,7 @@ export async function executeOpenAction(
               timeoutMs,
               warnings,
            });
-   if (warnings.some((warning) => warning.code === 'window-focus-unconfirmed')) {
-      throw new CliEnvironmentError(
-         'browser-focus-unconfirmed',
-         'The browser did not come to the front. The screen-reader audit was not started.',
-         { url: resolved.resolvedUrl, warnings },
-      );
-   }
+   assertFocusConfirmed(warnings, resolved.resolvedUrl);
    return {
       target: resolved.reportTarget,
       result: { ...result, commandLine: `open ${url}` },

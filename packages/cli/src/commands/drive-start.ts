@@ -10,7 +10,11 @@ import {
    addVerboseOption,
 } from '../lib/options.js';
 import { DRIVE_GROUPS, parseCountOption, parseTimeoutMs } from './drive-options.js';
-import { assertHttpUrl, waitForFocusWithWarning } from './drive-session.js';
+import {
+   assertFocusConfirmed,
+   assertHttpUrl,
+   waitForFocusWithWarning,
+} from './drive-session.js';
 
 export interface StartActionOptions {
    json?: boolean;
@@ -91,6 +95,7 @@ export async function executeStartAction(
       target,
       warnings,
    });
+   assertFocusConfirmed(warnings, resolved?.resolvedUrl);
    const started = await core.startDriverSession({
       target,
       mode: core.resolveDriverMode(),
