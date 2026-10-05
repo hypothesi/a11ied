@@ -1,4 +1,4 @@
-import type { DriverFocusTarget } from '@a11ied/contracts';
+import { driverFocusTargetFieldsSchema, type DriverFocusTarget } from '@a11ied/contracts';
 
 import {
    FOCUS_COMMAND_TIMEOUT_MS,
@@ -11,7 +11,6 @@ const FOCUS_POLL_INTERVAL_MS = 100;
 /** How long `sr start` and `sr open` wait for the window to come to the front. */
 export const WINDOW_FOCUS_TIMEOUT_MS = 5000;
 const MAC_FIELD_SEPARATOR = '\u001E';
-const WINDOWS_FIELD_SEPARATOR = ' ';
 
 /** What the operating system says is in front right now. */
 export interface FrontmostWindow {
@@ -46,7 +45,7 @@ export function parseMacFrontmostOutput(stdout: string): FrontmostWindow {
       .trim()
       .split(MAC_FIELD_SEPARATOR);
    return {
-      appName,
+      appName: appName || undefined,
       bundleId: bundleId || undefined,
       pid: Number(pid) || undefined,
       windowTitle: windowTitle || undefined,
@@ -60,21 +59,18 @@ async function readMacFrontmost(): Promise<FrontmostWindow> {
    return parseMacFrontmostOutput(String(stdout));
 }
 
+/** Parse the foreground window record without truncating multiword titles. */
+export function parseWindowsFrontmostOutput(stdout: string): FrontmostWindow {
+   return driverFocusTargetFieldsSchema.parse(JSON.parse(stdout));
+}
+
 async function readWindowsFrontmost(): Promise<FrontmostWindow> {
    const { stdout } = await focusExecFile(
       'powershell',
       ['-NoProfile', '-NonInteractive', '-Command', loadWindowsFrontmostScript()],
       { timeout: FOCUS_COMMAND_TIMEOUT_MS },
    );
-   const [processName = '', pid = '', windowTitle = ''] = String(stdout)
-      .trim()
-      .split(WINDOWS_FIELD_SEPARATOR);
-   return {
-      appName: processName,
-      processName,
-      pid: Number(pid) || undefined,
-      windowTitle: windowTitle || undefined,
-   };
+   return parseWindowsFrontmostOutput(String(stdout));
 }
 
 /** Reads the frontmost app and window; undefined where the OS has no such query. */
@@ -107,10 +103,16 @@ export function isFrontmostMatch(
    target: DriverFocusTarget,
    frontmost: FrontmostWindow,
 ): boolean {
-   if (target.pid !== undefined && target.pid === frontmost.pid) {
-      return true;
+   if (target.windowTitle !== undefined && !titleMatches(target, frontmost.windowTitle)) {
+      return false;
    }
-   if (target.bundleId !== undefined && target.bundleId === frontmost.bundleId) {
+   if (target.pid !== undefined && target.pid !== frontmost.pid) {
+      return false;
+   }
+   if (target.bundleId !== undefined && target.bundleId !== frontmost.bundleId) {
+      return false;
+   }
+   if (target.pid !== undefined || target.bundleId !== undefined) {
       return true;
    }
    const names = [target.appName, target.processName].filter(
@@ -121,10 +123,10 @@ export function isFrontmostMatch(
          .filter((name): name is string => name !== undefined)
          .map((name) => stripSuffix(name)),
    );
-   if (names.some((name) => front.has(stripSuffix(name)))) {
-      return true;
+   if (names.length > 0) {
+      return names.some((name) => front.has(stripSuffix(name)));
    }
-   return titleMatches(target, frontmost.windowTitle);
+   return target.windowTitle !== undefined;
 }
 
 async function pollFocus(

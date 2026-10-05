@@ -2,6 +2,8 @@ import type {
    EvidenceMode,
    EvidenceOutcome,
    EvidenceRecord,
+   EvidenceProvenance,
+   EvidenceFinding,
    ApgExampleShowResult,
    UnifiedSearchResult,
    UnifiedSearchRow,
@@ -27,11 +29,12 @@ import {
 
 import { CliUsageError } from '../errors/cli-errors.js';
 import {
-   appendEvidence,
+   recordEvidence,
    readEvidenceForSubject,
    type EvidenceStoreOptions,
 } from '../evidence/store.js';
-import { buildRowKey } from './row-key.js';
+import { getApgExampleRowKeys } from './row-key.js';
+import { isPatternEvidenceComplete } from './outcomes.js';
 import { normalizeEngineError } from '../errors/engine-errors.js';
 
 const SUGGESTION_LIMIT = 5;
@@ -198,20 +201,8 @@ export function searchAll(
 /** Every row key one example has, keyboard rows first, then attribute rows. */
 export function listApgRowKeys(exampleId: string): string[] {
    const { example } = showApgExample(exampleId);
-   const keys: string[] = [];
-
-   for (const table of example.keyboardTables) {
-      for (const [index, row] of table.rows.entries()) {
-         keys.push(buildRowKey(row.testId, index));
-      }
-   }
-   for (const table of example.attributeTables) {
-      for (const [index, row] of table.rows.entries()) {
-         keys.push(buildRowKey(row.testId, index));
-      }
-   }
-
-   return keys;
+   const keys = getApgExampleRowKeys(example);
+   return [...keys.keyboard.flat(), ...keys.attributes.flat()];
 }
 
 /** The rows of one example with no recorded result for one target. */
@@ -249,6 +240,8 @@ export async function recordApgJudgment(input: {
    pointer?: string | undefined;
    assertedBy?: string | undefined;
    subjectHash?: string | undefined;
+   provenance?: EvidenceProvenance | undefined;
+   finding?: EvidenceFinding | undefined;
    evidence?: EvidenceStoreOptions;
 }): Promise<{ record: EvidenceRecord; file: string }> {
    assertRowExists(input.exampleId, input.rowKey);
@@ -263,15 +256,19 @@ export async function recordApgJudgment(input: {
       ...(input.pointer === undefined ? {} : { pointer: input.pointer }),
       ...(input.assertedBy === undefined ? {} : { assertedBy: input.assertedBy }),
       ...(input.subjectHash === undefined ? {} : { subjectHash: input.subjectHash }),
+      ...(input.provenance === undefined ? {} : { provenance: input.provenance }),
+      ...(input.finding === undefined ? {} : { finding: input.finding }),
    };
 
-   return { record, file: await appendEvidence(record, input.evidence ?? {}) };
+   return recordEvidence(record, input.evidence ?? {});
 }
 
 /** The rows of one example with no recorded result for one target. */
 export async function listPendingApgRows(input: {
    subject: string;
    exampleId: string;
+   pointer?: string | undefined;
+   subjectHash?: string | undefined;
    evidence?: EvidenceStoreOptions;
 }): Promise<{ subject: string; exampleId: string; pending: string[]; count: number }> {
    const records = await readEvidenceForSubject(input.subject, input.evidence ?? {});
@@ -280,6 +277,15 @@ export async function listPendingApgRows(input: {
          .filter(
             (record) =>
                record.test.kind === 'patternRow' &&
+               input.subjectHash !== undefined &&
+               isPatternEvidenceComplete({
+                  record,
+                  records,
+                  subjectHash: input.subjectHash,
+               }) &&
+               input.pointer !== undefined &&
+               record.pointer === input.pointer &&
+               record.outcome !== 'cantTell' &&
                record.test.exampleId === input.exampleId,
          )
          .map((record) => (record.test.kind === 'patternRow' ? record.test.rowKey : '')),

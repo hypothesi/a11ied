@@ -27,8 +27,25 @@ import {
    keyboardRowOutcome,
 } from './outcomes.js';
 import { showApgExample } from './runtime.js';
+import { getApgExampleRowKeys } from './row-key.js';
 
 const SINGLE_MATCH = 1;
+
+function withKeyboardOutcome(
+   row: ApgKeyboardCheckRow,
+   rowKey = row.rowKey,
+): ApgKeyboardCheckRow {
+   const outcome = keyboardRowOutcome(row.status);
+   return { ...row, rowKey, ...(outcome === undefined ? {} : { outcome }) };
+}
+
+function withAttributeOutcome(
+   row: ApgAttributeCheckRow,
+   rowKey = row.rowKey,
+): ApgAttributeCheckRow {
+   const outcome = attributeRowOutcome(row.status);
+   return { ...row, rowKey, ...(outcome === undefined ? {} : { outcome }) };
+}
 
 /**
  * Attaches the judgments already recorded for this page, keyed by the accessibility tree
@@ -40,24 +57,29 @@ async function replayJudgments(
    evidence: EvidenceStoreOptions | undefined,
 ): Promise<ApgCheckResult> {
    const records = await readEvidenceForSubject(result.subject, evidence ?? {});
+   const { example } = showApgExample(result.exampleId),
+      rowKeys = getApgExampleRowKeys(example);
+   const keyboardKeys =
+      rowKeys.keyboard[
+         example.keyboardTables.findIndex((table) => table.name === result.tableName)
+      ];
+   const scopedResult = {
+      ...result,
+      keyboardRows: result.keyboardRows.map((row, index) =>
+         withKeyboardOutcome(row, keyboardKeys?.[index]),
+      ),
+      attributeRows: result.attributeRows.map((row, index) =>
+         withAttributeOutcome(row, rowKeys.attributes[0]?.[index]),
+      ),
+   };
    return attachRecordedJudgments({
-      result,
+      result: scopedResult,
       records,
       subjectHash: hashAccessibilityTree({
          yaml: accessibilityTree,
          nodes: parseAriaSnapshot(accessibilityTree),
       }),
    });
-}
-
-function withKeyboardOutcome(row: ApgKeyboardCheckRow): ApgKeyboardCheckRow {
-   const outcome = keyboardRowOutcome(row.status);
-   return outcome === undefined ? row : { ...row, outcome };
-}
-
-function withAttributeOutcome(row: ApgAttributeCheckRow): ApgAttributeCheckRow {
-   const outcome = attributeRowOutcome(row.status);
-   return outcome === undefined ? row : { ...row, outcome };
 }
 
 export interface RunPatternCheckInput {
@@ -94,6 +116,16 @@ async function waitForClickedWidget(
             ? {}
             : { timeout: pageOptions.timeoutMs }),
       });
+}
+
+async function resetClickedWidget(
+   page: Page,
+   selector: string,
+   pageOptions: WithBrowserPageOptions,
+): Promise<void> {
+   await page.reload({ waitUntil: 'load' });
+   await clickAfterLoad(page, pageOptions);
+   await waitForClickedWidget(page, selector, pageOptions);
 }
 
 /**
@@ -183,6 +215,7 @@ export async function runPatternCheck(
 ): Promise<ApgCheckResult> {
    const { document, example, pattern } = showApgExample(input.exampleId);
    const { table, unprobed } = pickTable(example, input.tableName);
+   const rowKeys = getApgExampleRowKeys(example);
    const setupKeys = parseSetupKeys(input.setupKeys);
 
    const pageOptions = input.pageOptions ?? {};
@@ -200,13 +233,11 @@ export async function runPatternCheck(
             table: example.attributeTables[0],
             accessibilityTree: observation.accessibilityTree,
             keyboardTables: example.keyboardTables,
+            keyboardRowKeys: rowKeys.keyboard,
          });
 
-         const reset = async (): Promise<void> => {
-            await page.reload({ waitUntil: 'load' });
-            await clickAfterLoad(page, pageOptions);
-            await waitForClickedWidget(page, input.selector, pageOptions);
-         };
+         const reset = (): Promise<void> =>
+            resetClickedWidget(page, input.selector, pageOptions);
          const keyboardRows = table
             ? await probeApgKeyboard(
                  { page, selector: input.selector, reset, setupKeys },
@@ -223,8 +254,8 @@ export async function runPatternCheck(
             subject: input.subject,
             selector: input.selector,
             tableName: table?.name ?? '',
-            keyboardRows: keyboardRows.map((row) => withKeyboardOutcome(row)),
-            attributeRows: attributes.rows.map((row) => withAttributeOutcome(row)),
+            keyboardRows,
+            attributeRows: attributes.rows,
             applicabilityHints: attributes.hints,
             unprobedTables: unprobed,
          };

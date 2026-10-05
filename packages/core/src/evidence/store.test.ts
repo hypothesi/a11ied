@@ -32,7 +32,7 @@ async function createFile(): Promise<string> {
 function buildRecord(overrides: Partial<EvidenceRecord> = {}): EvidenceRecord {
    return {
       subject: 'https://shop.test/cart',
-      test: { kind: 'criterion', criterionId: '2.4.4', procedureId: 'manual_review' },
+      test: { kind: 'criterion', criterionId: '2.4.4', procedureId: 'wcag_2_4_4' },
       outcome: 'failed',
       mode: 'semiAutomatic',
       recordedAt: '2026-09-07T21:14:02.114Z',
@@ -49,7 +49,7 @@ async function assertRoundTrips(): Promise<void> {
    expect(records[0]?.test).toEqual({
       kind: 'criterion',
       criterionId: '2.4.4',
-      procedureId: 'manual_review',
+      procedureId: 'wcag_2_4_4',
    });
    expect(records[0]?.outcome).toStrictEqual('failed');
 }
@@ -65,7 +65,7 @@ async function assertOneLinePerRecord(): Promise<void> {
    await appendEvidence(buildRecord(), { file });
    await appendEvidence(
       buildRecord({
-         test: { kind: 'criterion', criterionId: '1.4.2', procedureId: 'manual_review' },
+         test: { kind: 'criterion', criterionId: '1.4.2', procedureId: 'wcag_1_4_2' },
          outcome: 'passed',
       }),
       {
@@ -97,12 +97,12 @@ async function assertPointerSeparatesRecords(): Promise<void> {
    expect(await readEvidence({ file })).toHaveLength(TWO_RECORDS);
 }
 
-async function assertBadLineIsSkipped(): Promise<void> {
+async function assertBadLineIsReported(): Promise<void> {
    const file = await createFile();
    await appendEvidence(buildRecord(), { file });
    await writeFile(file, `${await readFile(file, 'utf8')}not json at all\n`, 'utf8');
 
-   expect(await readEvidence({ file })).toHaveLength(1);
+   await expect(readEvidence({ file })).rejects.toThrow(`${file}:2:`);
 }
 
 async function assertConcurrentAppendsDoNotInterleave(): Promise<void> {
@@ -114,10 +114,11 @@ async function assertConcurrentAppendsDoNotInterleave(): Promise<void> {
             buildRecord({
                test: {
                   kind: 'criterion',
-                  criterionId: `1.1.${String(index)}`,
-                  procedureId: 'manual_review',
+                  criterionId: '2.4.4',
+                  procedureId: 'wcag_2_4_4',
                },
                note,
+               pointer: `#link-${index}`,
             }),
             { file },
          ),
@@ -162,7 +163,7 @@ describe('evidence store', () => {
    it('writes one JSON line per record', assertOneLinePerRecord);
    it('replaces an earlier result for the same check', assertRerecordReplaces);
    it('keeps results for different elements apart', assertPointerSeparatesRecords);
-   it('skips a line that does not parse', assertBadLineIsSkipped);
+   it('reports the file and line for corrupt evidence', assertBadLineIsReported);
    it('does not interleave concurrent appends', assertConcurrentAppendsDoNotInterleave);
    it('clears results for one target', assertClearBySubject);
    it('clears every result when no target is given', assertClearEverything);
@@ -201,7 +202,7 @@ describe('stripFragment', () => {
       const legacy = {
          subject: 'https://shop.test/cart',
          criterionId: '2.4.4',
-         procedureId: 'manual_review',
+         procedureId: 'wcag_2_4_4',
          outcome: 'passed',
          mode: 'manual',
          recordedAt: '2026-09-07T21:14:02.114Z',
@@ -213,7 +214,7 @@ describe('stripFragment', () => {
       expect(records[0]?.test).toEqual({
          kind: 'criterion',
          criterionId: '2.4.4',
-         procedureId: 'manual_review',
+         procedureId: 'wcag_2_4_4',
       });
    });
 

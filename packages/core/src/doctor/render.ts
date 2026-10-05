@@ -60,6 +60,11 @@ function renderHeadline(report: DoctorReport, style: DoctorTextStyle): string {
    }
 
    const required = report.actions.filter((action) => action.required).length;
+   if (required === 0) {
+      return style.fail(
+         `${MARKERS.fail} Requested environment is unavailable on ${describeHost(report)}`,
+      );
+   }
    const steps = required === 1 ? '1 setup step' : `${required} setup steps`;
    return style.fail(
       `${MARKERS.fail} ${steps} needed before a1 is fully usable on ${describeHost(report)}`,
@@ -190,6 +195,9 @@ function renderBrowserAutomation(report: DoctorReport, style: DoctorTextStyle): 
 }
 
 function renderEnvironment(report: DoctorReport, style: DoctorTextStyle): string[] {
+   const readers = Object.entries(report.readerVersions ?? {}).map(
+      ([reader, version]) => `${reader} ${version}`,
+   );
    return [
       '',
       style.heading('Environment'),
@@ -197,6 +205,9 @@ function renderEnvironment(report: DoctorReport, style: DoctorTextStyle): string
          `a11ied  ${report.packageVersion}`,
          `Node    ${report.nodeVersion}`,
          `npm     ${report.npmVersion}`,
+         `Browser ${report.browserVersion ?? 'Unavailable'}`,
+         'Browser versions confirm installation, not reader compatibility. See guides/screen-reader#browser-support in the a11ied docs.',
+         ...readers,
          `Host    ${describeHost(report)}${style.dim(` [${report.host.platform}]`)}`,
       ]),
    ];

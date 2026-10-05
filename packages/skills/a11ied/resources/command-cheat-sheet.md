@@ -7,14 +7,18 @@ for the full option list. This page keeps the common ones copy-pasteable.
 
 ```txt
 a1 doctor
-a1 doctor --strict
+a1 doctor --task scan --strict
+a1 doctor --task reader --sr voiceover --strict
 a1 setup
 ```
 
-`doctor` reports browser and screen reader readiness. `--strict` exits 3 when a required
+`doctor --task scan` checks browser prerequisites. `--task reader --sr voiceover`
+checks that reader; use `nvda` or `virtual` for the other targets. `--task audit`
+checks desktop assessment prerequisites. Add `--recording` only when recording is
+requested. `--strict` exits 3 when a required
 step is missing. `setup` runs the Guidepup install and OS permission steps `doctor`
 lists, then re-checks. MCP tool: `doctor` (no `--strict` equivalent, so check the
-`ready` field in its result instead).
+`ready` field in its result instead). MCP accepts `task`, `target`, and `recording`.
 
 ## WCAG lookup
 
@@ -81,33 +85,82 @@ a1 audit http://localhost:3000/checkout
 `axe` and `audit` exit 4 on a violation at or above `--fail-on` (default `minor`) not
 covered by `--baseline`. The MCP tools return the matching `verdict` and `exitCode`.
 
-## Checks you have to perform yourself
+## Saved reports
 
-axe decides 27 of the 86 WCAG 2.2 criteria. The other 59 need a person looking at the
-page, and you can do many of them: read the accessibility tree, drive the screen reader,
-or look at the rendered page. Record what you find so it reaches the same report.
-
-```txt
-a1 audit pending http://localhost:3000/checkout --level AA
-a1 audit record http://localhost:3000/checkout --criterion 2.4.4 --outcome failed \
-   --pointer 'nav > a:nth-child(3)' --note "Four links read 'Learn more'."
-a1 audit http://localhost:3000/checkout --format earl --out report.earl.json
+```bash
+a1 report build \
+   --inventory .a11ied/audits/createdbyfireside-com/inventory.json \
+   --results-dir .a11ied/audits/createdbyfireside-com/pages \
+   --out .a11ied/audits/createdbyfireside-com/report --draft
 ```
 
-| Command                  | MCP tool               | Arguments                                                                                         |
-| ------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------- |
-| `audit pending <target>` | `list_pending_results` | `target`/`html`, `level`, `wcagVersion`, `resultsFile`                                            |
-| `audit record <target>`  | `record_result`        | `target`/`html`, `criterionId`, `outcome`, `mode`, `procedureId`, `pointer`, `note`, `assertedBy` |
-| `audit clear <target>`   | none                   | `target`/`html`                                                                                   |
+Report builds stage and verify the selected files before replacing the published
+directory. `report.manifest.json` records file hashes, formats, and assessment
+completion separately. After interruption, repeat the command to recover the
+publication. Use a dedicated output directory outside audit inputs and the
+current working directory. The same behavior applies to MCP `report_build`.
 
-Work the loop: call `audit pending` to see what is left, inspect the page for one
-criterion, call `audit record` with what you found, repeat. `--outcome` takes `passed`,
-`failed`, `cantTell`, or `inapplicable`. Use `cantTell` when you looked and still cannot
-decide; it is an honest answer and it never contradicts anything.
+## Assessment coordinator
 
-Record only what you actually checked. A recorded result carries your name in
-`assertedBy` and lands in the report as evidence, so a guess is worse than leaving the
-criterion pending.
+A clean axe scan leaves criterion requirements unresolved. For durable assessment,
+use the shared coordinator through CLI or MCP `audit_assessment`:
+
+```bash
+a1 audit run https://createdbyfireside.com --environment environment.json \
+   --inventory .a11ied/fireside/inventory.json --json
+a1 audit state <run-file> --input <observed-state-file> --json
+a1 audit journey <run-file> --input <observed-journey-file> --json
+a1 audit next <run-file> --json
+a1 audit status <run-file> --offset 0 --limit 20 --json
+a1 audit record <target> --run <run-file> --results <evidence-file> \
+   --wcag 2.2 --criterion <criterion-id> --procedure <procedure-id> \
+   --outcome <outcome> --provenance <provenance-file> --mode semiAutomatic --json
+a1 audit evaluate <run-file> --check <check-id> --outcome <outcome> \
+   --evidence <saved-evidence-id> --json
+a1 audit block <run-file> --check <check-id> --reason '<specific blocker>'
+a1 audit resume <run-file> --retry <check-id> --json
+a1 audit finalize <run-file> --json
+```
+
+Use the paths returned by startup. With an inventory, startup links its run ID
+without JSON edits. Each `next` claims one obligation; execute the returned
+procedure before recording. Read every status page through `nextOffset`.
+
+MCP `audit_assessment` uses the corresponding `action` and `file`. Start supplies
+structured `target`, `environment`, optional `inventoryPath`, profile, and policy.
+State, journey, and queue actions supply their structured input. Evaluate supplies
+`checkId`, `outcome`, and `evidenceIds`. Resume accepts explicit `retryCheckIds`.
+Finalize accepts `allowPartial`; unresolved work keeps the run active.
+
+MCP `record_result` accepts `runFile`, explicit `resultsFile`, `criterionId`,
+`procedureId`, `outcome`, `mode`, `provenance`, and optional `finding`. `--run` alone
+does not select the coordinator's evidence log. Use its returned `evidenceFile`.
+
+For artifact identity, freshness, envelopes, and recovery details, read
+[run state and decisions](../../full-site-audit/resources/run-state-and-decisions.md).
+`audit pending` is a low-level criterion listing, not the coordinator's completion
+signal. `cantTell` remains unresolved. Do not drain that listing with guessed notes.
+
+Use `--finding finding.json` on `audit record` or `pattern record` to include a
+finding title, user impact, and remediation in the report. The MCP recording tools
+accept the same object as `finding`:
+
+```json
+{
+   "title": "Focus remains trapped in the navigation menu",
+   "userImpact": "Keyboard users cannot reach the page content after opening the menu.",
+   "remediation": "Let Tab leave the menu and restore focus to the trigger when it closes.",
+   "impact": "serious"
+}
+```
+
+`remediation` and `impact` are optional. Omitted severity is reported as not assessed.
+Record only details supported by the assessment. Completion still requires current run,
+state, action, and artifact provenance and an evaluated check that references the evidence.
+
+Record only actual observations. Structural evidence validation does not establish
+truth or correct WCAG judgment. A passing scan or an emptied queue cannot establish
+complete assessment coverage.
 
 ## Screen reader session
 
@@ -132,12 +185,12 @@ a1 sr read
 a1 sr next heading
 a1 sr previous
 a1 sr press Tab Tab
-a1 sr type "jane@example.com"
+a1 sr type "audit@createdbyfireside.com"
 a1 sr checkpoint before-submit
 a1 sr do move-right --sr voiceover
 a1 sr find "Continue"
 a1 sr goto --role button --name "Place order"
-a1 sr wait --for "Order placed"
+a1 sr wait --for "Order placed" --since before-submit
 a1 sr expect --since before-submit "Order placed"
 ```
 
@@ -166,7 +219,7 @@ with no payload column take none.
 | `sr do <command>`                 | `perform`          | `{ command, commandSet? }`                                          |
 | `sr focus --app name`             | `focus`            | `{ appName? \| bundleId? \| processName? \| pid? \| windowTitle? }` |
 | `sr screenshot <path>`            | `screenshot`       | `{ path }`                                                          |
-| `sr wait --for text`              | `wait`             | `{ for?, ms?, timeoutMs? }`                                         |
+| `sr wait --for text`              | `wait`             | `{ for?, since?, ms?, timeoutMs? }`                                 |
 | `sr checkpoint <label>`           | `checkpoint`       | `{ label }`                                                         |
 | `sr transcript` (raw, unfiltered) | `transcript`       | none                                                                |
 

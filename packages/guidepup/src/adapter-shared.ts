@@ -13,11 +13,47 @@ import {
    type DriverTableMove,
    type Platform,
    type PortableDriverVerb,
+   type NativeInputPolicy,
 } from '@a11ied/contracts';
 import type { SerializableDriverCommand } from './command-registry.js';
 
 /** Lists the driver actions exposed by the shipped adapter surface. */
 export const driverCapabilities: DriverCapability[] = [...driverActionNameSchema.options];
+
+const NATIVE_OBSERVATION_CAPABILITIES: ReadonlySet<DriverCapability> = new Set([
+   'read',
+   'transcript',
+   'wait',
+   'checkpoint',
+   'focus',
+   'screenshot',
+]);
+
+/** Advertise actions implemented by the selected adapter. */
+export function getDriverCapabilities(
+   target: Platform,
+   supportsPerform = true,
+   nativeInput: NativeInputPolicy = 'guarded',
+): DriverCapability[] {
+   return driverCapabilities.filter(function isSupported(
+      capability: DriverCapability,
+   ): boolean {
+      if (
+         target !== 'virtual' &&
+         nativeInput === 'require-binding' &&
+         !NATIVE_OBSERVATION_CAPABILITIES.has(capability)
+      ) {
+         return false;
+      }
+      if (capability === 'screenshot') {
+         return target === 'voiceover';
+      }
+      if (capability === 'focus') {
+         return target !== 'virtual';
+      }
+      return capability !== 'perform' || supportsPerform;
+   });
+}
 
 /** Per-call options an adapter action accepts. */
 export interface DriverActionOptions {
@@ -31,6 +67,8 @@ export interface DriverAdapter {
    checkReadiness(): Promise<DriverReadiness>;
    start(): Promise<void>;
    stop(): Promise<void>;
+   /** Protect external desktop side effects with the reader's ownership lease. */
+   runOwned<TResult>(run: () => Promise<TResult>): Promise<TResult>;
    attachDocument(document: { html: string; url: string }): Promise<void>;
    focus(target: DriverFocusTarget): Promise<DriverFocusResult>;
    /** Runs one portable verb through the shared portable table. */
@@ -40,7 +78,8 @@ export interface DriverAdapter {
    ): Promise<void>;
    /**
     * Jumps by kind through the navigation table. `moved` is reported by the virtual
-    * reader, which knows its cursor node; the real readers say so in their phrase.
+    * reader, which knows its cursor node; the native announcement text cannot prove
+    * movement.
     */
    navigate(
       request: DriverNavigateRequest,
@@ -53,7 +92,7 @@ export interface DriverAdapter {
     */
    readCurrentItem(): Promise<{
       item: DriverCurrentItem;
-      position: string;
+      position?: string | undefined;
       atEnd?: boolean;
    }>;
    /** The page title or window summary, with where it came from. */
@@ -105,16 +144,17 @@ export async function buildStateSnapshot(
 ): Promise<DriverStateSnapshot> {
    const [lastSpokenPhrase, currentItemText, spokenPhraseLog, itemTextLog] =
       await Promise.all([
-         reader.lastSpokenPhrase().catch(() => ''),
-         reader.itemText().catch(() => ''),
-         reader.spokenPhraseLog().catch(() => []),
-         reader.itemTextLog().catch(() => []),
+         reader.lastSpokenPhrase(),
+         reader.itemText(),
+         reader.spokenPhraseLog(),
+         reader.itemTextLog(),
       ]);
    const currentItem = describeItem
       ? await describeItem(lastSpokenPhrase, currentItemText)
       : undefined;
 
    return driverStateSnapshotSchema.parse({
+      observedAt: new Date().toISOString(),
       lastSpokenPhrase: lastSpokenPhrase || undefined,
       currentItemText: currentItemText || undefined,
       spokenPhraseLog,

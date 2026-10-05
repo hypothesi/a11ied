@@ -1,0 +1,655 @@
+{
+   "1.1.1": {
+      "family": "structure",
+      "applicability": "All non-text content, including controls, charts, CAPTCHA, decoration, and media previews.",
+      "actions": [
+         "Inventory non-text objects in every observed state and inspect each accessible alternative.",
+         "Compare each alternative with the object's purpose; test controls and record CAPTCHA and sensory exceptions."
+      ],
+      "passed": "Alternatives convey equivalent purpose; decorative objects are ignored and all special cases meet the criterion.",
+      "failed": "An applicable object has a missing, misleading, or insufficient alternative, or exposes decoration as meaningful content.",
+      "inapplicable": "The scoped states contain no non-text content, supported by an object inventory.",
+      "requiredCapabilities": ["screenshot"],
+      "requiredEvidence": ["screenshot"]
+   },
+   "1.2.1": {
+      "family": "media",
+      "applicability": "Prerecorded audio-only or video-only media, excluding clearly labeled alternatives to text.",
+      "actions": [
+         "Inventory and play audio-only and silent-video content through its full duration.",
+         "Compare transcripts or equivalent audio alternatives with all meaningful sounds, visual events, and interactions."
+      ],
+      "passed": "Each applicable recording has an equivalent alternative with all required information.",
+      "failed": "An applicable recording lacks an alternative or omits meaningful information.",
+      "inapplicable": "No applicable recordings exist; document any labeled text-alternative exception."
+   },
+   "1.2.2": {
+      "family": "media",
+      "applicability": "Prerecorded synchronized media with audio, excluding clearly labeled alternatives to text.",
+      "actions": [
+         "Enable captions and play each recording fully, including controls and alternate tracks.",
+         "Compare captions with speech, speaker identity, meaningful sounds, and timing."
+      ],
+      "passed": "Captions accurately convey required audio information and remain synchronized.",
+      "failed": "Captions are unavailable, materially inaccurate, incomplete, or unsynchronized.",
+      "inapplicable": "There is no applicable prerecorded synchronized media; document any text-alternative exception."
+   },
+   "1.2.3": {
+      "family": "media",
+      "applicability": "Prerecorded synchronized media with visual information, excluding labeled alternatives to text.",
+      "actions": [
+         "Play each recording and identify visual information absent from the main audio.",
+         "Compare its audio description or complete media alternative against events, dialogue, and available interactions."
+      ],
+      "passed": "Audio description or a complete media alternative supplies all required information and interactions.",
+      "failed": "Neither accepted alternative conveys the required visual information or interactions.",
+      "inapplicable": "No applicable synchronized recordings exist; document any text-alternative exception."
+   },
+   "1.2.4": {
+      "family": "media",
+      "applicability": "Live synchronized media with audio.",
+      "actions": [
+         "Observe a live session with captions enabled and record the observed time range.",
+         "Compare captions with speech, speaker changes, meaningful sounds, and timing."
+      ],
+      "passed": "Live captions convey all required audio information during the observed live session.",
+      "failed": "Required live captions are missing or lose meaningful audio information.",
+      "inapplicable": "The product has no live synchronized audio media; absence of a scheduled event alone is insufficient."
+   },
+   "1.2.5": {
+      "family": "media",
+      "applicability": "Prerecorded synchronized media containing video.",
+      "actions": [
+         "List meaningful visual information not conveyed by the main audio and play each description track fully.",
+         "Compare audio description against that list; a text transcript alone does not satisfy this criterion."
+      ],
+      "passed": "Audio description conveys all necessary visual information, or the main audio already conveys it.",
+      "failed": "Necessary visual information is absent from the main audio and the audio description.",
+      "inapplicable": "There is no prerecorded synchronized video in the scope."
+   },
+   "1.3.1": {
+      "family": "structure",
+      "actions": [
+         "Inventory headings, lists, tables, groups, form labels, and visually expressed relationships.",
+         "Read the same structures with the real reader and compare relationships with rendered layout or equivalent text."
+      ],
+      "applicability": "Information, structure, or relationships conveyed through presentation.",
+      "passed": "All presented relationships are programmatically determinable or explicitly available in text.",
+      "failed": "A meaningful relationship is conveyed only by presentation and has no equivalent text.",
+      "inapplicable": "No presentation conveys information or relationships; supply observations supporting that conclusion.",
+      "requiredCapabilities": ["screenshot"],
+      "requiredEvidence": ["screenshot"]
+   },
+   "1.3.2": {
+      "family": "structure",
+      "applicability": "Content whose sequence affects meaning.",
+      "actions": [
+         "Identify sequences whose order affects meaning, including columns and inserted dynamic content.",
+         "Read each sequence with the real reader and compare its programmatic order with the intended meaning."
+      ],
+      "passed": "At least one programmatically determinable sequence preserves meaning for every applicable sequence.",
+      "failed": "An applicable sequence loses meaning in its programmatically determined reading order.",
+      "inapplicable": "Meaning does not depend on any sequence in the observed states."
+   },
+   "1.3.3": {
+      "family": "content",
+      "applicability": "Instructions for understanding or operating content.",
+      "actions": [
+         "Collect instructions, including error, onboarding, and interaction instructions.",
+         "Check references to shape, color, size, location, orientation, and sound for an additional identifying cue."
+      ],
+      "passed": "Instructions can be followed without relying solely on sensory characteristics.",
+      "failed": "A required instruction identifies an action solely by a sensory characteristic.",
+      "inapplicable": "The scope contains no instructions."
+   },
+   "1.3.4": {
+      "family": "visual",
+      "applicability": "Rendered desktop content capable of portrait and landscape layouts.",
+      "actions": [
+         "Render portrait and landscape viewport configurations and operate the same functionality.",
+         "Inspect restrictions on orientation and obtain product context for any claimed essential orientation."
+      ],
+      "passed": "Content and operation are available in both orientations, except documented essential restrictions.",
+      "failed": "A nonessential orientation restriction prevents viewing or operation.",
+      "inapplicable": "Only an essential orientation applies, with a reason tied to the content rather than a preferred design.",
+      "requiredCapabilities": ["viewport"]
+   },
+   "1.3.5": {
+      "family": "structure",
+      "applicability": "User-information inputs matching the WCAG Input Purposes list in technologies supporting identification.",
+      "actions": [
+         "Inventory user-information fields and map each purpose to the normative Input Purposes list.",
+         "Inspect programmatic purpose metadata and compare it with the requested information; labels alone are insufficient."
+      ],
+      "passed": "Every applicable input exposes the correct programmatically determinable purpose.",
+      "failed": "An applicable input lacks correct programmatic purpose metadata.",
+      "inapplicable": "No inputs match the normative purposes, or the technology cannot support purpose identification.",
+      "requiredCapabilities": ["dom"],
+      "limitations": [
+         "Retain programmatic input-purpose metadata; spoken labels alone cannot establish the purpose declaration."
+      ]
+   },
+   "1.4.1": {
+      "family": "visual",
+      "applicability": "Color conveying information, action, response, or a distinction.",
+      "actions": [
+         "Compare normal, selected, invalid, disabled, chart, and link states for color-dependent meaning.",
+         "Remove or neutralize color and inspect whether text, shape, pattern, or another visual cue preserves the meaning."
+      ],
+      "passed": "Every meaningful color distinction has another visual means of conveying the same information.",
+      "failed": "Meaning or operation depends on color alone.",
+      "inapplicable": "Color conveys no information or distinction in the observed states."
+   },
+   "1.4.2": {
+      "family": "media",
+      "applicability": "Audio playing automatically for more than three seconds.",
+      "actions": [
+         "Load initial and dynamic states without requesting playback and observe automatic audio duration.",
+         "Locate and operate pause/stop or independent audio volume controls using the keyboard and reader."
+      ],
+      "passed": "Applicable audio can be paused or stopped, or its volume controlled independently of system volume.",
+      "failed": "Automatic audio exceeds three seconds without an accepted control.",
+      "inapplicable": "No audio plays automatically for more than three seconds.",
+      "requiredCapabilities": ["real-reader", "speech"],
+      "requiredEvidence": ["speech"]
+   },
+   "1.4.3": {
+      "family": "measurement",
+      "applicability": "Text and images of text, except logos, incidental content, and inactive controls.",
+      "actions": [
+         "Measure text/background contrast across states, images, gradients, and overlays; record size and weight.",
+         "Apply 4.5:1 for normal text and 3:1 for qualifying large text; document each normative exception."
+      ],
+      "passed": "Every applicable text sample meets its required contrast ratio.",
+      "failed": "An applicable text sample falls below its required ratio.",
+      "inapplicable": "All scoped text falls within documented normative exceptions."
+   },
+   "1.4.4": {
+      "family": "visual",
+      "applicability": "Text, excluding captions and images of text.",
+      "actions": [
+         "Increase text to 200 percent without assistive technology and capture before/after states.",
+         "Operate the interface and inspect clipping, overlap, missing content, and loss of controls at that size."
+      ],
+      "passed": "All applicable text resizes to 200 percent without loss of content or functionality.",
+      "failed": "Applicable text cannot resize or the resized state loses content or functionality.",
+      "inapplicable": "The scope contains only excluded captions or images of text.",
+      "requiredCapabilities": ["keyboard", "viewport"]
+   },
+   "1.4.5": {
+      "family": "visual",
+      "applicability": "Images of text where the technology can provide the intended presentation using text.",
+      "actions": [
+         "Inventory text rendered as images and compare available text presentation.",
+         "Test customization and document whether a particular presentation is essential, including logotype exceptions."
+      ],
+      "passed": "Text is used, or every image of text is customizable or essential under the normative exception.",
+      "failed": "A nonessential, noncustomizable image replaces text the technology could render.",
+      "inapplicable": "There are no applicable images of text."
+   },
+   "1.4.10": {
+      "family": "visual",
+      "applicability": "Content except parts requiring two-dimensional layout for usage or meaning.",
+      "actions": [
+         "Render vertical content at 320 CSS pixels wide, or horizontal content at 256 CSS pixels high.",
+         "Operate controls and inspect lost content and two-direction scrolling; assess exempt parts separately from surrounding content."
+      ],
+      "passed": "Applicable content reflows without loss or scrolling in two dimensions.",
+      "failed": "Nonexempt content loses information/functionality or requires two-direction scrolling.",
+      "inapplicable": "All scoped content requires two-dimensional layout; document the usage or meaning that requires it.",
+      "requiredCapabilities": ["viewport"]
+   },
+   "1.4.11": {
+      "family": "measurement",
+      "applicability": "Visual information needed to identify active controls, states, or meaningful graphical objects.",
+      "actions": [
+         "Inventory required control boundaries, state indicators, icons, charts, and focus indicators.",
+         "Measure contrast against adjacent colors for each state and document unmodified user-agent and essential-presentation exceptions."
+      ],
+      "passed": "Required visual information has at least 3:1 contrast against adjacent colors, or meets a normative exception.",
+      "failed": "Required nonexempt visual information has contrast below 3:1.",
+      "inapplicable": "No active controls or meaningful graphics need author-defined visual information."
+   },
+   "1.4.12": {
+      "family": "visual",
+      "applicability": "Markup-language content supporting text spacing properties.",
+      "actions": [
+         "Apply all supported spacing overrides together: line height 1.5, paragraph spacing 2, letter spacing 0.12, and word spacing 0.16 times font size.",
+         "Inspect and operate all states for lost content or functionality; language/script exceptions exclude only properties not used by that language."
+      ],
+      "passed": "The combined spacing overrides cause no loss of content or functionality.",
+      "failed": "The required spacing overrides hide content or prevent operation.",
+      "inapplicable": "Only when the technology supports none of the required spacing properties. Language exceptions do not exempt testing the remaining properties.",
+      "requiredCapabilities": ["dom", "style-overrides"]
+   },
+   "1.4.13": {
+      "family": "keyboard",
+      "applicability": "Additional content triggered and dismissed by pointer hover or keyboard focus.",
+      "actions": [
+         "Trigger every tooltip, popup, and hover/focus disclosure using pointer and keyboard separately.",
+         "Test dismissal without moving focus/pointer, hover over the disclosure, and persistence until dismissed or invalid."
+      ],
+      "passed": "Each applicable disclosure is dismissible, hoverable, and persistent, allowing the criterion's explicit exceptions.",
+      "failed": "A nonexempt disclosure fails dismissal, hoverability, or persistence.",
+      "inapplicable": "No author-controlled additional content appears on hover or focus.",
+      "requiredCapabilities": ["pointer"]
+   },
+   "2.1.1": {
+      "family": "keyboard",
+      "applicability": "All functionality except input whose underlying function requires a movement path.",
+      "actions": [
+         "Inventory functions and complete each task using only the keyboard, including dialogs and custom widgets.",
+         "Test alternate keyboard operation and timing requirements; distinguish handwriting/drawing from dragging a control."
+      ],
+      "passed": "Every nonexempt function operates through a keyboard interface without specific keystroke timing.",
+      "failed": "A nonexempt function needs pointer input or specific keystroke timing.",
+      "inapplicable": "No functionality exists, or all scoped functions have documented path-dependent exceptions."
+   },
+   "2.1.2": {
+      "family": "keyboard",
+      "applicability": "Components that receive keyboard focus.",
+      "actions": [
+         "Enter each component with the keyboard, including embedded content and dialogs.",
+         "Leave using standard navigation; test any documented nonstandard exit instructions and focus return."
+      ],
+      "passed": "Keyboard focus can leave every component, with instructions for any nonstandard exit method.",
+      "failed": "Focus becomes trapped or a required nonstandard exit lacks instructions.",
+      "inapplicable": "No component can receive keyboard focus."
+   },
+   "2.1.4": {
+      "family": "keyboard",
+      "applicability": "Shortcuts using only letters, punctuation, numbers, or symbols.",
+      "actions": [
+         "Inventory character-key shortcuts and test them while focus is inside and outside the associated control.",
+         "Test disabling or remapping to include nonprinting keys; verify focus-only activation alternatives."
+      ],
+      "passed": "Every character shortcut can be disabled/remapped or is active only when its control has focus.",
+      "failed": "A character shortcut remains active globally without an accepted disabling or remapping option.",
+      "inapplicable": "The scope has no character-only shortcuts."
+   },
+   "2.2.1": {
+      "family": "form",
+      "scope": "journey",
+      "applicability": "Time limits set by content, including session expiry and temporary responses.",
+      "actions": [
+         "Inventory limits and observe warnings, expiry, and recovery using authorized test data.",
+         "Test turning off or adjusting limits, or extending with at least 20 seconds warning and ten extensions; document exceptions."
+      ],
+      "passed": "Each time limit meets an accepted adjustment mechanism or a documented normative exception.",
+      "failed": "A nonexempt limit expires without a qualifying adjustment or extension mechanism.",
+      "inapplicable": "No content-imposed time limit exists; document any real-time, essential, or over-20-hour exception."
+   },
+   "2.2.2": {
+      "family": "keyboard",
+      "applicability": "Automatic moving, blinking, scrolling, or updating information presented alongside other content.",
+      "actions": [
+         "Observe motion duration and automatic updates in initial and dynamic states.",
+         "Operate pause/stop/hide controls for motion over five seconds and pause/stop/hide/frequency controls for updates."
+      ],
+      "passed": "All applicable motion and updates have accepted controls or documented essential exceptions.",
+      "failed": "Nonessential applicable motion or updates cannot be controlled as required.",
+      "inapplicable": "No applicable automatic information is presented alongside other content."
+   },
+   "2.3.1": {
+      "family": "media",
+      "applicability": "Flashing content, including video, animation, and state transitions.",
+      "actions": [
+         "Inventory flashing content without prolonged viewing; obtain recordings or source timing where safe.",
+         "Measure flashes per second or use validated general/red flash threshold analysis with area and luminance evidence."
+      ],
+      "passed": "Content flashes no more than three times per second or stays below the general and red flash thresholds.",
+      "failed": "Measured content exceeds three flashes per second and the applicable flash thresholds.",
+      "inapplicable": "The inventory and observations show no flashing content.",
+      "limitations": [
+         "Unaided visual judgment cannot establish flash thresholds; missing validated measurement remains uncertain."
+      ],
+      "requiredEvidence": ["measurement"],
+      "requiredCapabilities": ["measurement"]
+   },
+   "2.4.1": {
+      "family": "structure",
+      "scope": "site",
+      "applicability": "Blocks repeated across a set of pages.",
+      "actions": [
+         "Identify repeated blocks and navigate their bypass mechanisms with keyboard and real reader.",
+         "Verify that bypass reaches the intended content on every represented template and state."
+      ],
+      "passed": "An operable mechanism bypasses each repeated block on the scoped page set.",
+      "failed": "A repeated block has no operable bypass mechanism.",
+      "inapplicable": "There are no blocks repeated across scoped pages."
+   },
+   "2.4.2": {
+      "family": "structure",
+      "applicability": "Every scoped web page, including routes with changed purpose.",
+      "actions": [
+         "Read the document title after loading each route and meaningful navigation state.",
+         "Compare the title with the page's topic or purpose and distinguish separate documents."
+      ],
+      "passed": "Each document has a title describing its topic or purpose.",
+      "failed": "A document's title is absent or fails to describe its topic or purpose.",
+      "inapplicable": "Only for a non-web target where the web-page requirement cannot be applied; record the software guidance used."
+   },
+   "2.4.3": {
+      "family": "keyboard",
+      "applicability": "Sequential focus navigation where order affects meaning or operation.",
+      "actions": [
+         "Traverse focus in both directions through initial, dialog, error, and changed states.",
+         "Compare the sequence and focus restoration with the task's meaning and operation."
+      ],
+      "passed": "Every sequential focus order preserves meaning and operability.",
+      "failed": "A focus sequence loses meaning, skips required controls, or prevents operation.",
+      "inapplicable": "No sequentially navigable components affect meaning or operation."
+   },
+   "2.4.4": {
+      "family": "structure",
+      "applicability": "Links in each observed state.",
+      "actions": [
+         "Inventory links and determine each destination or action without submitting destructive operations.",
+         "Compare link names plus programmatically determined context with their purposes; examine ambiguity to users generally."
+      ],
+      "passed": "Every link's purpose is determinable from its text/context, except purpose ambiguous to users generally.",
+      "failed": "A nonexempt link purpose cannot be determined from link text and permitted programmatic context.",
+      "inapplicable": "There are no links in the scoped states."
+   },
+   "2.4.5": {
+      "family": "content",
+      "scope": "site",
+      "applicability": "Pages within a set, except results of or steps in a process.",
+      "actions": [
+         "Inventory non-process pages and locate them through navigation, search, sitemap, or other available methods.",
+         "Verify at least two distinct methods reach each applicable page, with process exceptions recorded."
+      ],
+      "passed": "Every applicable page can be located in more than one way.",
+      "failed": "An applicable page has fewer than two ways to locate it.",
+      "inapplicable": "The scope is a single standalone page or consists entirely of process steps/results."
+   },
+   "2.4.6": {
+      "family": "content",
+      "applicability": "Headings and labels that are present.",
+      "actions": [
+         "Collect headings and labels in all observed states and inspect the content or controls they identify.",
+         "Compare each heading/label with its topic or purpose, including repeated and icon-only controls."
+      ],
+      "passed": "Each heading and label describes its topic or purpose.",
+      "failed": "A present heading or label is misleading or does not describe its topic or purpose.",
+      "inapplicable": "No headings or labels are present; assess required labels under other applicable criteria."
+   },
+   "2.4.7": {
+      "family": "keyboard",
+      "applicability": "Keyboard-operable user interfaces.",
+      "actions": [
+         "Focus every keyboard-operable control, including nested widgets and changed states.",
+         "Capture its visible focus indicator and verify an available mode preserves it during keyboard operation."
+      ],
+      "passed": "A visible keyboard focus indicator is available for every keyboard-operable interface.",
+      "failed": "Keyboard focus cannot be visually located on an applicable interface.",
+      "inapplicable": "The scope has no keyboard-operable interface."
+   },
+   "2.4.11": {
+      "family": "keyboard",
+      "applicability": "Components receiving keyboard focus in author-created content.",
+      "actions": [
+         "Move focus through every control with sticky layers, dialogs, cookie notices, and zoomed layouts present.",
+         "Capture each focused component and test scrolling/revealing without moving focus for user-opened content."
+      ],
+      "passed": "Every focused component is at least partly visible, allowing the criterion's documented reveal exceptions.",
+      "failed": "Author content entirely hides a focused component without an accepted reveal mechanism.",
+      "inapplicable": "No user-interface component receives keyboard focus."
+   },
+   "2.5.1": {
+      "family": "pointer",
+      "applicability": "Multipoint or path-based gestures, excluding essential gestures and user-agent functionality.",
+      "actions": [
+         "Inventory pinch, swipe-path, drawing, and multi-pointer functions.",
+         "Complete each nonessential function with a single pointer without a path-based gesture; keyboard alone is insufficient."
+      ],
+      "passed": "Every nonessential gesture function has a single-pointer alternative requiring no path gesture.",
+      "failed": "A nonessential multipoint/path gesture is the only pointer operation for a function.",
+      "inapplicable": "No author-controlled multipoint or path-based gestures exist, or all are documented as essential."
+   },
+   "2.5.2": {
+      "family": "pointer",
+      "applicability": "Functions operated with a single pointer.",
+      "actions": [
+         "Inspect and exercise pointer down/up behavior with authorized test data.",
+         "Test abort before release, undo after completion, up-event reversal, and any essential down-event exceptions."
+      ],
+      "passed": "Each function avoids down-event completion or supplies a qualifying abort, undo, reversal, or essential exception.",
+      "failed": "A nonessential down-event action completes without an accepted cancellation mechanism.",
+      "inapplicable": "No functions use a single pointer."
+   },
+   "2.5.3": {
+      "family": "structure",
+      "applicability": "Controls with visible text or images of text as labels.",
+      "actions": [
+         "Inventory visible control labels and read their programmatic accessible names.",
+         "Compare the visible words with the name, including punctuation, symbol, and mathematical-expression treatment."
+      ],
+      "passed": "Each applicable accessible name contains its visible label text.",
+      "failed": "A control's accessible name omits or changes the visible label words.",
+      "inapplicable": "There are no controls with visible text labels.",
+      "requiredCapabilities": ["screenshot"],
+      "requiredEvidence": ["screenshot"]
+   },
+   "2.5.4": {
+      "family": "pointer",
+      "applicability": "Functions activated by device or user motion.",
+      "actions": [
+         "Inspect product controls and documentation for motion-operated functions and observe available hardware support.",
+         "Test interface alternatives and disabling motion response; document essential or accessibility-supported exceptions."
+      ],
+      "passed": "Motion functions have interface alternatives and can be disabled, or meet a documented normative exception.",
+      "failed": "A nonexempt motion function lacks an interface alternative or cannot be disabled.",
+      "inapplicable": "No motion-operated functions exist; absent host sensors alone do not establish inapplicability.",
+      "requiredCapabilities": ["motion-input"]
+   },
+   "2.5.7": {
+      "family": "pointer",
+      "applicability": "Author-defined functions using dragging, excluding essential dragging.",
+      "actions": [
+         "Inventory sortable lists, sliders, maps, uploads, and other dragging functions.",
+         "Complete each function using one pointer without dragging; test documented essential exceptions."
+      ],
+      "passed": "Each nonessential dragging function has a single-pointer operation without dragging.",
+      "failed": "A nonessential dragging function lacks a non-dragging pointer alternative.",
+      "inapplicable": "No author-defined dragging functions exist, or all dragging is essential under the criterion."
+   },
+   "2.5.8": {
+      "family": "measurement",
+      "applicability": "Targets for pointer input.",
+      "actions": [
+         "Measure each target's CSS-pixel dimensions and neighboring target geometry in every layout/state.",
+         "Test 24-by-24 sizing or the 24-pixel circle spacing rule; document equivalent, inline, user-agent, and essential exceptions."
+      ],
+      "passed": "Every pointer target meets minimum size/spacing or an explicit normative exception.",
+      "failed": "A nonexempt target is undersized and fails the required spacing.",
+      "inapplicable": "There are no pointer targets in scope."
+   },
+   "3.1.1": {
+      "family": "structure",
+      "applicability": "Human language of each page.",
+      "actions": [
+         "Determine the page's primary language and inspect its programmatic declaration.",
+         "Read language-dependent content with a configured real reader and compare declarations with the content."
+      ],
+      "passed": "The page's default human language is programmatically determinable and correctly identified.",
+      "failed": "The page's language declaration is missing or incorrect.",
+      "inapplicable": "A page normally requires a default language; unresolved language knowledge is uncertain, not inapplicable.",
+      "requiredCapabilities": ["dom"]
+   },
+   "3.1.2": {
+      "family": "structure",
+      "applicability": "Passages or phrases in a language different from the page's default.",
+      "actions": [
+         "Find language changes and inspect programmatic language metadata for each passage.",
+         "Read representative changes with the real reader; distinguish names, technical terms, indeterminate words, and vernacular."
+      ],
+      "passed": "All nonexempt language changes are correctly programmatically identified.",
+      "failed": "A nonexempt language change lacks correct programmatic identification.",
+      "inapplicable": "There are no nonexempt passages in another language, with documented exceptions.",
+      "requiredCapabilities": ["dom"]
+   },
+   "3.2.1": {
+      "family": "keyboard",
+      "applicability": "Components that receive focus.",
+      "actions": [
+         "Focus each control without activating it and capture any state, document, or window change.",
+         "Distinguish changes of context from content updates and compare the before/after focus location."
+      ],
+      "passed": "Receiving focus never initiates a change of context.",
+      "failed": "Focus alone initiates a change of context.",
+      "inapplicable": "No component can receive focus."
+   },
+   "3.2.2": {
+      "family": "form",
+      "applicability": "Changes to the setting of a user-interface component.",
+      "actions": [
+         "Inspect instructions, then change each setting using authorized test data without explicit submission.",
+         "Capture context changes and determine whether the user was advised before operating the component."
+      ],
+      "passed": "Setting changes avoid context changes or the user receives advance advice.",
+      "failed": "A setting change initiates an unannounced change of context.",
+      "inapplicable": "No component setting can be changed."
+   },
+   "3.2.3": {
+      "family": "structure",
+      "scope": "site",
+      "applicability": "Navigation mechanisms repeated within a set of pages.",
+      "actions": [
+         "Compare repeated navigation across scoped templates and authenticated states.",
+         "Record each mechanism's relative order and distinguish changes initiated by the user."
+      ],
+      "passed": "Repeated navigation occurs in the same relative order except for user-initiated changes.",
+      "failed": "Repeated navigation changes relative order without user initiation.",
+      "inapplicable": "There are no repeated navigation mechanisms across the page set."
+   },
+   "3.2.4": {
+      "family": "content",
+      "scope": "site",
+      "applicability": "Components with the same functionality within a set of pages.",
+      "actions": [
+         "Group controls by actual function across scoped pages, including icon and text variants.",
+         "Compare identification of equivalent functions and distinguish intentional differences in function."
+      ],
+      "passed": "Components with the same functionality are identified consistently.",
+      "failed": "Components with the same functionality are identified inconsistently.",
+      "inapplicable": "No components share functionality across scoped pages."
+   },
+   "3.2.6": {
+      "family": "content",
+      "scope": "site",
+      "applicability": "Repeated human contact, contact details, self-help, or automated contact mechanisms.",
+      "actions": [
+         "Inventory qualifying help mechanisms across the page set and inspect their relative content order.",
+         "Compare repeated mechanisms, accounting for user-initiated changes and viewport variations under the criterion."
+      ],
+      "passed": "Repeated qualifying help occurs in the same relative order unless the user initiates a change.",
+      "failed": "Repeated help changes relative order without an accepted exception.",
+      "inapplicable": "No qualifying help mechanism is repeated across the set of pages."
+   },
+   "3.3.1": {
+      "family": "form",
+      "applicability": "Input errors automatically detected by the content.",
+      "actions": [
+         "Trigger required-field, format, range, and server validation errors with authorized test data.",
+         "Compare each detected error's text with the field in error and read it with the real reader."
+      ],
+      "passed": "Each automatically detected error identifies the item and describes the error in text.",
+      "failed": "A detected error lacks textual identification or description.",
+      "inapplicable": "The scoped content detects no input errors; lack of access to validation remains uncertain."
+   },
+   "3.3.2": {
+      "family": "form",
+      "applicability": "Content requiring user input.",
+      "actions": [
+         "Inventory input requests and inspect labels, format guidance, required indicators, and grouped instructions.",
+         "Operate each field with the keyboard and reader and determine whether its requested input is understandable."
+      ],
+      "passed": "Labels or instructions are provided when the content requires input.",
+      "failed": "An input request lacks necessary labels or instructions.",
+      "inapplicable": "The scope requires no user input."
+   },
+   "3.3.3": {
+      "family": "form",
+      "applicability": "Automatically detected input errors with known correction suggestions.",
+      "actions": [
+         "Trigger errors and inspect available correction suggestions using authorized test data.",
+         "Compare suggestions with known correction paths; obtain context for security or purpose exceptions."
+      ],
+      "passed": "Known correction suggestions are provided unless doing so jeopardizes security or content purpose.",
+      "failed": "A known correction suggestion is withheld without an accepted exception.",
+      "inapplicable": "There are no applicable detected errors or known suggestions; document security/purpose exceptions."
+   },
+   "3.3.4": {
+      "family": "form",
+      "scope": "journey",
+      "applicability": "Legal/financial commitments, changes/deletions to user-controlled stored data, or submission of test responses.",
+      "actions": [
+         "Identify qualifying submissions and inspect reversibility, validation, and review/correction mechanisms.",
+         "Exercise authorized staging/test transactions through confirmation; stop before irreversible production actions."
+      ],
+      "passed": "Each qualifying submission is reversible, checked with correction opportunities, or confirmed after review/correction.",
+      "failed": "A qualifying submission has none of the accepted error-prevention mechanisms.",
+      "inapplicable": "There are no qualifying submissions; lack of submission authorization alone is insufficient."
+   },
+   "3.3.7": {
+      "family": "form",
+      "scope": "journey",
+      "applicability": "Information entered by or provided to the user that is requested again within the same process.",
+      "actions": [
+         "Complete ordered process steps and record every repeated request using authorized test data.",
+         "Test automatic population or user selection; document essential, security, and obsolete-information exceptions."
+      ],
+      "passed": "Repeated information is populated/selectable or meets a documented exception.",
+      "failed": "A nonexempt process requires the user to enter the same information again.",
+      "inapplicable": "The process never requests previously supplied information again."
+   },
+   "3.3.8": {
+      "family": "form",
+      "scope": "journey",
+      "applicability": "Every authentication step, including recovery and multifactor branches.",
+      "actions": [
+         "Walk all authentication branches with test accounts; identify memorization, transcription, and puzzle requirements.",
+         "Test password-manager/autofill/paste support and noncognitive alternatives; document object-recognition/personal-content exceptions."
+      ],
+      "passed": "Every cognitive function test has an accepted alternative, assistance mechanism, or normative exception.",
+      "failed": "An authentication step requires a nonexempt cognitive function test without accepted assistance or alternatives.",
+      "inapplicable": "The scoped product has no authentication process."
+   },
+   "4.1.1": {
+      "family": "markup",
+      "applicability": "Markup-language content under WCAG 2.1; this criterion is removed from WCAG 2.2.",
+      "actions": [
+         "Validate markup for complete tags, proper nesting, duplicate attributes, and unique IDs.",
+         "Compare each error with the markup specification's permitted syntax and retain the validation output."
+      ],
+      "passed": "Markup meets the criterion's parsing conditions or the specification explicitly permits the syntax.",
+      "failed": "Markup violates a required parsing condition without a specification allowance.",
+      "inapplicable": "The target is not implemented using a markup language.",
+      "limitations": [
+         "Retain markup-validator output covering every parsing condition; reader announcements alone cannot prove parsing."
+      ]
+   },
+   "4.1.2": {
+      "family": "structure",
+      "applicability": "All user-interface components, including custom and dynamically changed controls.",
+      "actions": [
+         "Inventory controls and inspect programmatic names, roles, states, properties, and values with a real reader.",
+         "Operate each control and change user-settable values; compare announced updates and programmatic semantics with behavior."
+      ],
+      "passed": "Names/roles are determinable, user-settable states/values are programmatic, and changes notify user agents and AT.",
+      "failed": "A control lacks required semantics, user-settable properties, or notification of changes.",
+      "inapplicable": "No user-interface components are present."
+   },
+   "4.1.3": {
+      "family": "form",
+      "applicability": "Status messages that do not constitute a change of context.",
+      "actions": [
+         "Trigger success, result-count, waiting, progress, and error status messages while preserving focus.",
+         "Record real-reader announcements and inspect roles/properties without moving focus to the message."
+      ],
+      "passed": "Each applicable status message is programmatically determinable and presented by AT without receiving focus.",
+      "failed": "An applicable status message cannot be presented by AT without focus.",
+      "inapplicable": "No status messages occur in the exercised functionality."
+   }
+}

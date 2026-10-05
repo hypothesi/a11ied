@@ -48,7 +48,7 @@ const publicApiExpectations: PublicApiExpectation[] = [
       classes: ['CliUsageError'],
    },
    {
-      file: 'packages/core/src/index.ts',
+      file: 'packages/core/src/command-catalog.ts',
       functions: ['listCliCommands'],
    },
    {

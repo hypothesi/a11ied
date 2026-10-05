@@ -29,6 +29,42 @@ describe('parseVoiceOverItem', () => {
       });
    });
 
+   it('reads the spoken role level when the accessible name also contains a level', () => {
+      const item = parseVoiceOverItem(
+         'heading level 2 help, heading level 1',
+         'heading level 2 help',
+      );
+
+      expect(item).toMatchObject({
+         role: 'heading',
+         level: 1,
+         name: 'heading level 2 help',
+      });
+   });
+});
+
+describe('parseVoiceOverItem ambiguous announcements', () => {
+   it('keeps an unrecognized role suffix from promoting the name to a heading role', () => {
+      const item = parseVoiceOverItem(
+         'heading level 2, en-tête niveau 1',
+         'heading level 2',
+      );
+
+      expect(item.role).toBeUndefined();
+      expect(item.level).toBeUndefined();
+      expect(item.name).toBe('heading level 2');
+   });
+
+   it.each(['heading level 2 help', 'heading level 2 help heading'])(
+      'keeps an unrecognized role chunk unresolved: %s',
+      (phrase) => {
+         const item = parseVoiceOverItem(phrase, phrase);
+
+         expect(item.role).toBeUndefined();
+         expect(item.level).toBeUndefined();
+      },
+   );
+
    it('leaves role empty when the phrase names none', () => {
       const item = parseVoiceOverItem('Some plain sentence', 'Some plain sentence');
 

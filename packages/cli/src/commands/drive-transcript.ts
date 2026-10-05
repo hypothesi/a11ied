@@ -11,6 +11,8 @@ import {
 interface TranscriptActionOptions extends DriveActionOptions {
    since?: string;
    tail?: string;
+   afterIndex?: string;
+   limit?: string;
    out?: string;
    format?: string;
 }
@@ -30,14 +32,23 @@ async function executeTranscriptAction(
       core.resolveTranscriptFormat(options.out, options.format);
    }
    const result = await core.runDriverSessionAction(
-      { action: 'transcript' },
+      {
+         action: 'transcript',
+         payload: {
+            since: options.since,
+            tail: parseCountOption(options.tail, 'tail'),
+            afterIndex:
+               options.afterIndex === undefined ? undefined : Number(options.afterIndex),
+            limit: parseCountOption(options.limit, 'limit'),
+         },
+      },
       { timeoutMs: parseTimeoutMs(options.timeout) },
    );
-   const entries = core.selectTranscriptEntries(result.state.transcript, {
-      since: options.since,
-      tail: parseCountOption(options.tail, 'tail'),
-   });
-   const transcript = core.buildDriverTranscript(result.session, entries);
+   const transcript = core.buildDriverTranscript(
+      result.session,
+      result.state.transcript,
+      result.state.transcriptWindow,
+   );
    const file = options.out
       ? await core.writeDriverTranscript({
            transcript,
@@ -60,6 +71,14 @@ export function registerTranscriptCommand(driveCommand: Command): void {
          .description('Print what the reader said, with timestamps and checkpoints.')
          .option('--since <checkpoint>', 'Only entries after the named checkpoint.')
          .option('--tail <count>', 'Only the last N phrases.')
+         .option(
+            '--after-index <index>',
+            'Entries after this session index; -1 starts at the beginning. Defaults to 200 entries.',
+         )
+         .option(
+            '--limit <count>',
+            'Maximum transcript entries, including checkpoints (up to 1000).',
+         )
          .option('--out <path>', 'Write the transcript to a .json or .md file.')
          .option(
             '--format <format>',

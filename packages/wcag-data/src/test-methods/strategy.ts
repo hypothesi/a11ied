@@ -103,10 +103,12 @@ export function strategyOverrideForCriterion(
 export function defaultStrategySeed(hasAxe: boolean, hasAct: boolean): StrategySeed {
    if (hasAxe) {
       return {
-         preferredEvidenceMode: preferredEvidenceModeSchema.parse('automated'),
-         procedureIds: ['axe_scan'],
-         requiresRealTarget: false,
-         notes: ['axe rules decide this criterion.'],
+         preferredEvidenceMode: preferredEvidenceModeSchema.parse('hybrid'),
+         procedureIds: ['axe_scan', 'manual_review'],
+         requiresRealTarget: true,
+         notes: [
+            'Mapped axe rules cover part of this criterion. Assess the remaining normative requirements on the target.',
+         ],
       };
    }
    if (hasAct) {

@@ -8,7 +8,12 @@ import {
    type DriverCurrentItem,
 } from '#contracts';
 import { count, dim, errorLine, fields, indent, title } from '../lib/format.js';
-import { navigationEntries, structureEntries, waitEntries } from './drive-details.js';
+import {
+   navigationEntries,
+   observationEntries,
+   structureEntries,
+   waitEntries,
+} from './drive-details.js';
 
 export { formatDriveCommands, renderDriveCommandsText } from './drive-commands.js';
 
@@ -96,6 +101,16 @@ function formatEngine(engine: AccessibilityDriverSession['engine']): string {
 function sessionSummaryEntries(session: AccessibilityDriverSession): Entry[] {
    return [
       ['Target', target(session.target)],
+      ...(session.target === 'virtual'
+         ? []
+         : ([
+              [
+                 'Native input',
+                 session.nativeInput === 'development'
+                    ? 'development (unverified)'
+                    : 'blocked until target binding is verified',
+              ],
+           ] satisfies Entry[])),
       ...(session.engine === undefined
          ? []
          : [['Engine', formatEngine(session.engine)] satisfies Entry]),
@@ -241,6 +256,7 @@ export function renderDriveStatusText(
          `${count(phrases, 'phrase')}, ${count(state.checkpoints.length, 'checkpoint')}`,
       ],
       ...sessionDetailEntries(session, options.verbose),
+      ...observationEntries(parsed.data),
    ];
    return [title('Session active'), '', ...indent(fields(entries))].join('\n');
 }
@@ -270,6 +286,7 @@ export function renderDriveReadText(
       ...navigationEntries(result),
       ...detailEntries(result, options.verbose),
       ...axEntries(result, options.verbose),
+      ...observationEntries(result),
    ];
    if (options.verbose) {
       entries.push([
@@ -312,6 +329,16 @@ export function renderDriveStopText(
       ...indent(
          fields([
             ['Target', target(session.target)],
+            ...(session.target === 'virtual'
+               ? []
+               : ([
+                    [
+                       'Native input',
+                       session.nativeInput === 'development'
+                          ? 'development (unverified)'
+                          : 'blocked until target binding is verified',
+                    ],
+                 ] satisfies Entry[])),
             ['Recording', formatRecording(session.recording)],
          ]),
       ),

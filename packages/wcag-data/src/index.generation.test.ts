@@ -164,7 +164,7 @@ async function assertTestMethodArtifactIsCorrect(
       >;
    };
    expect(testMethodArtifact.testMethods['2.5.8']).toMatchObject({
-      method: 'automated',
+      method: 'hybrid',
    });
    expect(testMethodArtifact.testMethods['2.4.7']).toMatchObject({
       method: 'hybrid',
@@ -192,7 +192,7 @@ function assertStrategyEntries(strategyArtifact: {
    });
    expect(strategyArtifact.strategies['3.3.8']).toMatchObject({
       preferredEvidenceMode: 'manual',
-      procedureIds: ['auth_flow_probe', 'manual_review'],
+      procedureIds: ['auth_flow_probe'],
    });
 }
 
@@ -209,8 +209,10 @@ function assertSummaryTotals(summaryArtifact: {
       ...EXPECTED_22_TEST_METHOD_COUNTS,
    });
    expect(summaryArtifact.representativeCriterionIds.hybrid).toEqual([
+      '1.1.1',
       '2.4.1',
       '2.4.7',
+      '2.5.8',
       '4.1.3',
    ]);
 }

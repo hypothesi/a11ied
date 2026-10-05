@@ -11,41 +11,59 @@ const toc = [
 
 <DocShell
    title="Audit a full site with an agent"
-   summary="The full-site-audit skill coordinates scope, page discovery, sampling decisions, real screen reader checks, and a resumable report bundle."
+   summary="The full-site-audit skill drives desktop assessment procedures through a durable coordinator, with observed states, complete journeys, current evidence, and explicit coverage gaps."
    links={docsLinks}
    toc={toc}
 >
    <section class="panel" id="workflow">
       <h2>Workflow</h2>
       <ol>
-         <li>The agent asks whether the target is one page, a section, or a site.</li>
-         <li>It runs <code>a1 audit discover</code> and reviews the page inventory.</li>
-         <li>Above 50 pages, it asks whether to audit every page or sample shared templates.</li>
-         <li>It runs automated page audits, then one real VoiceOver or NVDA session at a time.</li>
-         <li>It builds the HTML, PDF, JSON, and EARL reports.</li>
+         <li>The agent reuses your target, scope, WCAG profile, and authorized actions.</li>
+         <li>For websites, it discovers pages and links the inventory with <code>a1 audit run --inventory</code>.</li>
+         <li>It observes page or app states and registers ordered user journeys.</li>
+         <li>It claims each procedure with <code>audit next</code>, performs its actions, records current evidence, and evaluates the check. Reader procedures require VoiceOver or NVDA when the procedure specifies a real reader.</li>
+         <li>It resolves coverage gaps before finalization and builds website reports. Draft reports remain available during the assessment.</li>
       </ol>
+      <pre><code>a1 audit discover https://createdbyfireside.com --scope site \
+   --out .a11ied/fireside/inventory.json
+a1 audit run https://createdbyfireside.com --environment environment.json \
+   --inventory .a11ied/fireside/inventory.json --json
+a1 audit next .a11ied/fireside/run.json --json</code></pre>
       <p>
          Install the repository's <code>full-site-audit</code> skill through the same
-         <a href="/guides/agent-skill">agent skill package</a> as the page-level skill.
+         <a href="/guides/agent-skill">agent skill package</a> as the component development skill.
       </p>
    </section>
 
    <section class="panel" id="resume">
       <h2>Resume and hints</h2>
       <p>
-         The agent updates <code>inventory.json</code> after each page and phase. A later session
-         resumes audited pages without repeating them. Site hints live in
-         <code>.a11ied/sites/&lt;origin-key&gt;/hints.json</code>. The agent checks each hint against
-         the current site before it uses it.
+         Runtime commands own the inventory and assessment state. The agent reads
+         <code>audit status</code> after interruption and preserves the run's evidence paths.
+         <code>audit resume</code> blocks interrupted work; explicit retries follow restoration
+         of a safe UI state. Changed observations revoke old proof. Site hints are hypotheses
+         to check against the current product, not completed assessments.
       </p>
    </section>
 
    <section class="panel" id="claims">
       <h2>Evidence claims</h2>
       <p>
-         Sampled pages stay marked not tested. A partial crawl stays a partial inventory.
-         Automated, hybrid, and manual outcomes remain separate. A passing automated result
+         To view an unfinished assessment, use <code>a1 report build --draft</code> with
+         the run's inventory, page results, and output paths. The draft shows available
+         results and pending checks without marking the assessment complete. The MCP
+         <code>report_build</code> tool accepts <code>draft: true</code>.
+      </p>
+      <p>
+         Unassessed pages stay marked not tested. A partial crawl stays a partial inventory.
+         The report retains recorded procedures, outcomes, evidence notes, and pointers. It
+         reports accepted behavioral judgments with their provenance and artifacts. A passing automated result
          is not reported as full WCAG conformance.
+      </p>
+      <p>
+         Virtual observations remain simulated. <code>cantTell</code>, missing capabilities,
+         blocked journeys, and incomplete discovery remain unresolved. Native app assessment
+         can use the coordinator, but report publication requires a website inventory.
       </p>
    </section>
 </DocShell>

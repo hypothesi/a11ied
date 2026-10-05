@@ -1,38 +1,22 @@
 import type { AxeRuleResult } from '@a11ied/contracts';
 import axe from 'axe-core';
+import type { Page } from 'playwright';
+import { CliEnvironmentError } from '../errors/cli-errors.js';
 
-import type { PageCookie } from '../browser/page-setup.js';
-import { withLoadedPage } from '../browser/shared-browser.js';
+import {
+   withLoadedPage,
+   type WithBrowserPageOptions,
+} from '../browser/shared-browser.js';
 import type { DocumentLoad } from '../targets/parse.js';
 
 const LOW_CONTENT_NODE_THRESHOLD = 10;
 const LOW_CONTENT_TEXT_THRESHOLD = 50;
 const axeScriptSource = axe.source;
+const activeScans = new WeakSet<Page>();
 
-export interface AxeScanOptions {
-   storageStatePath?: string | undefined;
-   timeoutMs?: number | undefined;
+export interface AxeScanOptions extends WithBrowserPageOptions {
    selector?: string | undefined;
    exclude?: string | undefined;
-   waitFor?: string | undefined;
-   /** A selector for the one element to click after the page loads and before the scan. */
-   click?: string | undefined;
-   viewport?: { width: number; height: number } | undefined;
-   extraHeaders?: Record<string, string> | undefined;
-   cookies?: PageCookie[] | undefined;
-}
-
-/** True when a scan option would make the raw axe result unsafe to cache or reuse. */
-export function hasCustomScanOptions(options: AxeScanOptions): boolean {
-   return (
-      Boolean(options.selector) ||
-      Boolean(options.exclude) ||
-      Boolean(options.waitFor) ||
-      Boolean(options.click) ||
-      Boolean(options.viewport) ||
-      Boolean(options.extraHeaders) ||
-      (options.cookies?.length ?? 0) > 0
-   );
 }
 
 /** Selector steps nest when axe finds the element inside a shadow root. */
@@ -141,6 +125,21 @@ function buildWaitForSelectorOptions(timeoutMs: number | undefined): {
 }
 
 /** Loads a target, then runs axe-core against it inside the page. */
+async function scanBrowserPage(
+   page: Page,
+   args: AxeEvaluateArgs,
+   options: AxeScanOptions,
+): Promise<AxeScanResult> {
+   if (options.waitFor) {
+      await page.waitForSelector(
+         options.waitFor,
+         buildWaitForSelectorOptions(options.timeoutMs),
+      );
+   }
+   await page.evaluate(axeScriptSource);
+   return page.evaluate(runAxeInPage, args);
+}
+
 export async function executeAxeScan(
    load: DocumentLoad,
    ruleIds: string[],
@@ -149,20 +148,28 @@ export async function executeAxeScan(
    return withLoadedPage(
       load,
       async (page) => {
-         if (scanOptions.waitFor) {
-            await page.waitForSelector(
-               scanOptions.waitFor,
-               buildWaitForSelectorOptions(scanOptions.timeoutMs),
+         if (activeScans.has(page)) {
+            throw new CliEnvironmentError(
+               'browser-scan-conflict',
+               'An axe scan already owns this page. Wait for it before scanning again.',
             );
          }
-         await page.addScriptTag({ content: axeScriptSource });
-         return await page.evaluate(runAxeInPage, {
-            ruleIds,
-            selector: scanOptions.selector,
-            exclude: scanOptions.exclude,
-            nodeThreshold: LOW_CONTENT_NODE_THRESHOLD,
-            textThreshold: LOW_CONTENT_TEXT_THRESHOLD,
-         });
+         activeScans.add(page);
+         try {
+            return await scanBrowserPage(
+               page,
+               {
+                  ruleIds,
+                  selector: scanOptions.selector,
+                  exclude: scanOptions.exclude,
+                  nodeThreshold: LOW_CONTENT_NODE_THRESHOLD,
+                  textThreshold: LOW_CONTENT_TEXT_THRESHOLD,
+               },
+               scanOptions,
+            );
+         } finally {
+            activeScans.delete(page);
+         }
       },
       scanOptions,
    );

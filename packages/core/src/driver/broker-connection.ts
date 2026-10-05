@@ -5,6 +5,7 @@ import type { AccessibilityDriverSession } from '@a11ied/contracts';
 import { resolveBrokerSocketTimeoutMs } from './broker-client.js';
 import type { BrokerRequest, BrokerResponse } from './broker-types.js';
 import { requestInProcess } from './runtime-internal.js';
+import { assertSessionInputPolicy } from './broker-errors.js';
 import { normalizeBrokerTransportError } from './runtime-support.js';
 import { isInMemorySession } from './session-utils.js';
 
@@ -102,6 +103,7 @@ function closeInProcess(): void {
 export function openBrokerConnection(
    session: AccessibilityDriverSession,
 ): BrokerConnection {
+   assertSessionInputPolicy(session);
    if (isInMemorySession(session)) {
       return {
          send: (request) => requestInProcess(session.sessionId, request),

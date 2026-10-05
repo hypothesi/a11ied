@@ -6,7 +6,9 @@ const toc = [
    { id: 'install', label: 'Install' },
    { id: 'test', label: 'Test API' },
    { id: 'driver', label: 'Driver sessions' },
+   { id: 'assessment', label: 'Assessment lifecycle' },
    { id: 'axe', label: 'axe' },
+   { id: 'current-page', label: 'Shared browser state' },
    { id: 'wcag', label: 'WCAG lookup' },
    { id: 'inspect', label: 'Applicability' },
    { id: 'doctor', label: 'Diagnostics' },
@@ -58,8 +60,17 @@ await using sr = await queuedScreenReader({'{'} url: 'http://localhost:3000/chec
 sr.goTo({'{'} role: 'button', name: 'Pay' {'}'});
 sr.activate();
 sr.expectSpoken(/order placed/iu);</code></pre>
+      <p>
+         Native sessions default to <code>guarded</code>. Commands check the observed
+      foreground target, and typing checks between characters. Read the fresh
+      current item, focus observations, and transcript after each action. If focus
+      changes, refocus deliberately and inspect state before continuing.
+      <code>require-binding</code> is an optional strict mode that refuses unavailable
+      native binding. <code>development</code> bypasses target checks. Foreground
+      checks do not guarantee that focus cannot change during dispatch.
+   </p>
       <div class="route-list">
-         <div class="route-row"><code>screenReader(options?)</code><span>Takes <code>sr</code>, <code>url</code> or <code>html</code>, <code>mode</code> (<code>in-process</code> by default, or <code>broker</code>), <code>engine</code>, <code>recordingPath</code>, <code>idleTimeoutMinutes</code>, and <code>timeoutMs</code>. Returns a <code>ScreenReader</code> with the page open. Every method returns a promise.</span></div>
+         <div class="route-row"><code>screenReader(options?)</code><span>Takes <code>nativeInput</code>, <code>sr</code>, <code>url</code> or <code>html</code>, <code>mode</code> (<code>in-process</code> by default, or <code>broker</code>), <code>engine</code>, <code>page</code> (in-process virtual browser only), <code>recordingPath</code>, <code>idleTimeoutMinutes</code>, and <code>timeoutMs</code>. Returns a <code>ScreenReader</code> with the page open. Every method returns a promise.</span></div>
          <div class="route-row"><div class="route-terms"><code>queuedScreenReader(options?, queue?)</code>, <code>queueScreenReader(reader, queue?)</code></div><span>The same options, and a <code>QueuedScreenReader</code> instead. <code>queueScreenReader</code> wraps a <code>ScreenReader</code> that is already started.</span></div>
          <div class="route-row"><code>QueuedScreenReader</code><span>Every <code>ScreenReader</code> method except <code>stop</code>, with the same parameters, returning a <code>Queued&lt;T&gt;</code> thenable instead of a <code>Promise&lt;T&gt;</code>. A call queues a command and returns at once, and the queued commands run one at a time in the order they were queued. Awaiting a call runs the commands queued before it, then that one, and gives its value. <code>session</code> is a plain property, <code>reader</code> is the underlying <code>ScreenReader</code>, <code>drain()</code> waits for every queued command, and <code>stop()</code> drains, stops the reader even when the drain failed, then rethrows that error. <code>await using</code> calls <code>stop()</code>.</span></div>
          <div class="route-row"><code>CommandQueueOptions</code><span>The second argument to both. <code>track(settled)</code> receives one promise per command, which rejects only when the command failed and nothing awaited it. <code>signal</code>, an <code>AbortSignal</code>, skips every command not yet started once it aborts. The <code>a11ied/vitest</code> fixture passes both, and a test needs neither.</span></div>
@@ -114,7 +125,7 @@ try {'{'}
          <code>screenReader</code> from <code>a11ied/test</code> both do this work for you.
       </p>
       <div class="route-list">
-         <div class="route-row"><code>startDriverSession(options?)</code><span>Takes <code>target</code>, <code>mode</code>, <code>engine</code>, <code>recordingPath</code>, <code>url</code>, <code>app</code>, <code>idleTimeoutMinutes</code>, and <code>timeoutMs</code>. Returns the new <code>session</code> and, when one was already running, the <code>replacedSession</code> it stopped.</span></div>
+         <div class="route-row"><code>startDriverSession(options?)</code><span>Takes <code>nativeInput</code>, <code>target</code>, <code>mode</code>, <code>engine</code>, <code>page</code> (in-process virtual browser only), <code>recordingPath</code>, <code>url</code>, <code>app</code>, <code>idleTimeoutMinutes</code>, and <code>timeoutMs</code>. Returns the new <code>session</code> and, when one was already running, the <code>replacedSession</code> it stopped.</span></div>
          <div class="route-row"><code>runDriverSessionAction(request, options?)</code><span>The request is a <code>DriverActionRequestInput</code>, typed per action: <code>{'{'} action: 'next' {'}'}</code>, <code>{'{'} action: 'press', payload: {'{'} keys: ['Tab', 'Tab'] {'}'} {'}'}</code>, <code>{'{'} action: 'goto', payload: {'{'} role: 'button' {'}'} {'}'}</code>. A payload of the wrong shape does not compile, and payload fields with defaults, such as <code>max</code>, can be left out.</span></div>
          <div class="route-row"><code>getDriverSessionStatus(options?)</code><span>Read the session state without moving the cursor.</span></div>
          <div class="route-row"><code>attachDocumentToDriverSession(document, options?)</code><span>Point the session at another page.</span></div>
@@ -124,10 +135,17 @@ try {'{'}
          <div class="route-row"><code>buildDriverTranscript(session, entries)</code><span>Build the transcript document. <code>formatTranscript</code> renders it, and <code>writeDriverTranscript</code> writes it to a file.</span></div>
       </div>
       <p>
-         These are the functions the CLI runs. One session is active per user, so no function takes
-         a session id, and a session started with <code>mode: 'broker'</code> lives in its own
-         process until <code>stopDriverSession</code> or <code>idleTimeoutMinutes</code>, which
-         defaults to 30.
+         These are the functions the CLI runs. Calls use the active session by default.
+         <code>stopDriverSession</code> can select a retained recovery owner with
+         <code>options.sessionId</code>. A session started with <code>mode: 'broker'</code>
+         lives in its own process until stopped or until <code>idleTimeoutMinutes</code>,
+         which defaults to 30.
+      </p>
+      <p>
+         One in-process JSDOM reader can own the shared document at a time. A conflicting
+         session fails with <code>virtual-session-conflict</code> before changing the
+         document. Stop the owner, or use a separate process or browser engine. An ephemeral
+         JSDOM action follows the same rule.
       </p>
       <p>
          A test should use <code>screenReader</code> from <code>a11ied/test</code> instead: it
@@ -177,6 +195,57 @@ for (const violation of result.violations) {'{'}
          The result has <code>violations</code>, <code>passes</code>, <code>incomplete</code>,
          <code>inapplicable</code>, the resolved <code>ruleIds</code>, and a
          <code>selection</code> object that says how the rule list was chosen.
+      </p>
+   </section>
+
+   <section class="panel" id="current-page">
+      <div class="panel-head">
+         <p class="panel-kicker">Browser state</p>
+         <h2>Inspect the page the reader is using</h2>
+      </div>
+      <p>
+         <code>withLoadedPage(load, callback, options?)</code> keeps a browser page open
+         during the callback. <code>withInteractiveBrowserPage(url, callback, options?)</code>
+         uses a headed browser for interactive sign-in and navigation. Both accept the
+         existing storage, cookies, headers, viewport, click, and wait options.
+      </p>
+      <pre><code>import {'{'} runAxe, withInteractiveBrowserPage {'}'} from 'a11ied';
+import {'{'} screenReader {'}'} from 'a11ied/test';
+
+await withInteractiveBrowserPage('https://createdbyfireside.com/', async (page) =&gt; {'{'}
+   await using sr = await screenReader({'{'} page {'}'});
+   await sr.next('heading');
+   return runAxe(
+      {'{'} kind: 'goto', url: page.url() {'}'},
+      {'{'} wcagVersion: '2.2', level: 'AA', page {'}'},
+   );
+{'}'});</code></pre>
+      <p>
+         Complete sign-in or open the interaction state inside the callback before
+         collecting observations. Pass the same <code>page</code> to <code>runAxe</code>,
+         <code>buildAuditReport</code>, and the core tree, title, and HTML readers.
+         Screenshots use that page's Playwright API. These reads preserve the document,
+         cookies, and session storage. A new scan always inspects the current UI.
+      </p>
+      <p>
+         An existing page rejects replacement setup and a different requested URL.
+         Closed pages or main-document navigation during observation reject the result.
+         Stopping the reader leaves the caller's page open. A second virtual reader on
+         that page fails with <code>virtual-session-conflict</code> until the owner stops.
+      </p>
+      <p>
+         The <code>page</code> reader option supports the in-process virtual browser
+         engine. Broker sessions and native readers cannot receive a Playwright page.
+         This example verifies simulated behavior; it does not establish VoiceOver or
+         NVDA evidence or complete WCAG coverage.
+      </p>
+      <p>
+         Browser virtual activation clicks the exact DOM element selected by the
+         simulated reader. Playwright checks visibility and enabled state, scrolls
+         the element into view, and moves the mouse before clicking. This can trigger
+         hover behavior and differs from the JSDOM reader's simulated click. Activation
+         waits for initiated navigation and never retries a detached target or an
+         uncertain click. Same-document and hash changes preserve the reader state.
       </p>
    </section>
 
@@ -257,6 +326,34 @@ const {'{'} target, targetType, warning {'}'} = await resolveAvailableDefaultTar
          <code>resolveAvailableDefaultTarget</code> checks whether the platform screen reader is
          ready for automation and falls back to <code>virtual</code> when it is not. The returned
          <code>warning</code> is set on every fallback.
+      </p>
+   </section>
+
+   <section class="panel" id="assessment">
+      <h2>Assessment lifecycle</h2>
+      <p>
+         A host agent uses these shared operations to coordinate a desktop WCAG
+         assessment. The coordinator stores the work and validates proof. The
+         agent performs the procedure, captures observations, and evaluates the
+         result against the procedure's WCAG requirements.
+      </p>
+      <div class="route-list">
+         <div class="route-row"><code>startAuditAssessment(options)</code><span>Create a durable run with a target, WCAG version and level, scope, and observed environment capabilities. An existing run file is never replaced.</span></div>
+         <div class="route-row"><code>executeAuditAssessment(request)</code><span>Use the same validated start, state, journey, queue, next, status, resume, evaluate, block, and finalize operations as CLI and MCP. Status lists include totals and nextOffset; offset defaults to 0 and limit to 20, with a maximum of 100.</span></div>
+         <div class="route-row"><code>registerAuditState(input)</code><span>Record the observed target, state fingerprint, environment, setup, and artifact references. Identical observations preserve their original timestamp. Changed observations invalidate affected proof while retaining a live claim until recovery.</span></div>
+         <div class="route-row"><code>registerAuditJourney(input)</code><span>Record ordered states for a process that may span pages. Its assessment progress comes from validated checks. A saved completed flag cannot establish coverage.</span></div>
+         <div class="route-row"><code>nextAuditAssessment(file)</code><span>Claim one required check and return its procedure, including setup, actions, evidence requirements, evaluation rules, and recovery instructions. Concurrent callers cannot claim a second check. Unsupported capabilities remain visible.</span></div>
+         <div class="route-row"><code>recordEvidence(record, options)</code><span>Validate and save traceable observations and artifacts. Pass the run file and its evidence file. Provenance and non-image envelopes use <code>attempt</code> from the claimed check's <code>attempts</code>. Save the returned evidence ID for the result transition.</span></div>
+         <div class="route-row"><code>transitionAssessmentCheck(input)</code><span>Complete the claimed check with an outcome and saved evidence IDs, or record a specific blocker. Completion rejects missing, mismatched, conflicting, and obsolete proof.</span></div>
+         <div class="route-row"><code>getAuditAssessmentStatus(file)</code><span>Revalidate catalog obligations, saved artifacts, and discovery scope. Returns global coverage, progress for states, pages, and journeys, and explicit unresolved issues.</span></div>
+         <div class="route-row"><code>resumeAuditAssessment(input)</code><span>Keep interrupted work blocked without replaying actions. After inspecting saved proof and restoring a safe state, supply retryCheckIds in a separate call. Invalidated proof may be retried; valid completed checks cannot be replayed.</span></div>
+         <div class="route-row"><code>finalizeAuditAssessment(input)</code><span>Complete only a fully covered run. allowPartial preserves an active run and its unresolved issues for partial reporting. Discovery page flags and inconclusive outcomes cannot satisfy completion.</span></div>
+      </div>
+      <p>
+         These operations perform no target input themselves. Real reader
+         evidence still requires a runtime receipt that verifies the target and
+         session binding. Current native binding limitations remain unresolved;
+         virtual or mocked checks cannot establish a complete native audit.
       </p>
    </section>
 

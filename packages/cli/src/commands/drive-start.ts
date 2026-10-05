@@ -1,5 +1,5 @@
 import type { Command } from 'commander';
-import type { CliMessage, DriverFocusTarget, Platform } from '#contracts';
+import { nativeInputPolicySchema, type CliMessage } from '#contracts';
 import { CliUsageError } from '#core';
 import type { CommandExecution } from '../lib/helpers.js';
 import {
@@ -10,11 +10,7 @@ import {
    addVerboseOption,
 } from '../lib/options.js';
 import { DRIVE_GROUPS, parseCountOption, parseTimeoutMs } from './drive-options.js';
-import {
-   assertFocusConfirmed,
-   assertHttpUrl,
-   waitForFocusWithWarning,
-} from './drive-session.js';
+import { assertHttpUrl } from './drive-session.js';
 
 export interface StartActionOptions {
    json?: boolean;
@@ -22,6 +18,7 @@ export interface StartActionOptions {
    sr?: string;
    recording?: string;
    idleTimeout?: string;
+   nativeInput?: string;
    timeout?: string;
    app?: string;
    browser?: string;
@@ -52,94 +49,42 @@ function assertOneTarget(url: string | undefined, options: StartActionOptions): 
    assertHttpUrl(url);
 }
 
-/**
- * Opens what the session will read: the URL in a browser, or nothing for --app, which
- * names a window that is already open. Real targets then wait for it to come to front.
- */
-async function openTarget(args: {
-   url: string | undefined;
-   options: StartActionOptions;
-   target: Platform;
-   warnings: CliMessage[];
-}): Promise<DriverFocusTarget | undefined> {
-   const core = await import('#core');
-   if (args.target === 'virtual') {
-      return args.options.app === undefined ? undefined : { appName: args.options.app };
-   }
-   if (args.options.app !== undefined) {
-      return { appName: args.options.app };
-   }
-   if (args.url === undefined) {
-      return undefined;
-   }
-   const opened = await core.openUrlInBrowser(args.url, args.options.browser);
-   if (opened.focusTarget) {
-      await waitForFocusWithWarning(opened.focusTarget, args.warnings);
-   }
-   return opened.focusTarget;
-}
-
-async function refocusStartedRealSession(args: {
-   app: DriverFocusTarget | undefined;
-   isReal: boolean;
-   timeoutMs: number | undefined;
-   url: string | undefined;
-   warnings: CliMessage[];
-}): Promise<void> {
-   if (!args.isReal || !args.app) {
-      return;
-   }
-   const core = await import('#core');
-   await core.runDriverSessionAction({ action: 'focus' }, { timeoutMs: args.timeoutMs });
-   await waitForFocusWithWarning(args.app, args.warnings);
-   try {
-      assertFocusConfirmed(args.warnings, args.url);
-   } catch (error) {
-      await core.stopDriverSession({ timeoutMs: args.timeoutMs });
-      throw error;
-   }
-}
-
-/** Starts the session and opens the page; `sr start` and `sr walk` both run this. */
+/** Starts the shared session and attaches a virtual document when needed. */
 export async function executeStartAction(
    url: string | undefined,
    options: StartActionOptions,
 ): Promise<CommandExecution> {
-   const [{ resolveOptionalCliTarget, resolveScreenReaderTarget }, core] =
+   const parsedPolicy = nativeInputPolicySchema.safeParse(
+      options.nativeInput ?? 'guarded',
+   );
+   if (!parsedPolicy.success) {
+      throw new CliUsageError(
+         'validation-error',
+         'Native input must be guarded, require-binding, or development.',
+         { field: 'native-input' },
+      );
+   }
+   const nativeInput = parsedPolicy.data;
+   const [{ resolvePageTarget, resolveScreenReaderTarget, getCLIDriverMode }, core] =
       await Promise.all([import('../lib/execute.js'), import('#core')]);
    const { target, warnings } = await resolveScreenReaderTarget(options);
    assertOneTarget(url, options);
-   const resolved = await resolveOptionalCliTarget({ url });
-   const app = await openTarget({
-      url: resolved?.resolvedUrl,
-      options,
-      target,
-      warnings,
-   });
-   assertFocusConfirmed(warnings, resolved?.resolvedUrl);
+   const resolved =
+      url === undefined ? undefined : await resolvePageTarget({ target: url });
+   const resolvedUrl = resolved?.reportTarget.resolvedUrl;
+   const app = options.app === undefined ? undefined : { appName: options.app };
    const timeoutMs = parseTimeoutMs(options.timeout);
    const started = await core.startDriverSession({
       target,
-      mode: core.resolveDriverMode(),
+      mode: getCLIDriverMode(target),
       recordingPath: options.recording,
-      url: resolved?.resolvedUrl,
+      url: resolvedUrl,
       app,
+      browser: options.browser,
+      nativeInput,
       idleTimeoutMinutes: parseCountOption(options.idleTimeout, 'idle-timeout'),
       timeoutMs,
    });
-   await refocusStartedRealSession({
-      app,
-      isReal: started.session.targetType === 'real',
-      timeoutMs,
-      url: resolved?.resolvedUrl,
-      warnings,
-   });
-   if (started.session.targetType !== 'real' && resolved) {
-      await core.attachDocumentToDriverSession({
-         html: resolved.html,
-         url: resolved.resolvedUrl,
-      });
-   }
    return {
       target: resolved?.reportTarget ?? { kind: 'driver-target', value: target },
       result: { session: started.session },
@@ -169,6 +114,10 @@ export function registerStartCommand(driveCommand: Command): void {
                .option(
                   '--browser <name>',
                   'Open the URL in this browser: chrome, edge, brave, chromium, or any app name such as Safari. Defaults to the system automation browser.',
+               )
+               .option(
+                  '--native-input <policy>',
+                  'guarded (default) checks the observed foreground target. require-binding refuses unavailable binding. development bypasses target checks.',
                )
                .option(
                   '--idle-timeout <minutes>',

@@ -6,36 +6,35 @@ import type {
    DriverLoopStop,
    DriverNavigationKind,
    DriverReadAllPayload,
+   Platform,
 } from '@a11ied/contracts';
 import type { DriverActionOptions, DriverAdapter } from '@a11ied/guidepup/browser';
 
 import type { ActionExecutionResult } from './broker-types.js';
 
-/** NVDA says this when a structural jump has nowhere to go; VoiceOver repeats the phrase. */
-const NO_NEXT_PATTERN = /\bno (next|previous|more)\b/iu;
-
 interface LoopStop {
    item: DriverCurrentItem;
-   position: string;
+   position?: string | undefined;
    moved: boolean | undefined;
    atEnd: boolean | undefined;
 }
 
 interface LoopState {
    first: string | undefined;
-   previous: string;
+   previous: string | undefined;
    items: DriverLoopItem[];
 }
 
-/**
- * Whether the reader has nothing left to visit: the adapter said it did not move, the
- * phrase says so, the position repeated, or the loop came back around to its first stop.
- */
-function reachedEnd(state: LoopState, stop: LoopStop): boolean {
-   if (stop.moved === false || NO_NEXT_PATTERN.test(stop.item.phrase ?? '')) {
+/** Only adapter movement and simulated node identities can confirm the end. */
+function reachedEnd(state: LoopState, stop: LoopStop, target: Platform): boolean {
+   if (stop.moved === false) {
       return true;
    }
-   return stop.position === state.previous || stop.position === state.first;
+   return (
+      target === 'virtual' &&
+      stop.position !== undefined &&
+      (stop.position === state.previous || stop.position === state.first)
+   );
 }
 
 function toLoopItem(index: number, item: DriverCurrentItem): DriverLoopItem {
@@ -77,7 +76,7 @@ async function runLoop(
       return { items: state.items, stoppedAt: 'cap' };
    }
    const stop = await stepOnce(args);
-   if (reachedEnd(state, stop)) {
+   if (reachedEnd(state, stop, args.adapter.target)) {
       return { items: state.items, stoppedAt: 'end' };
    }
    const items = [...state.items, toLoopItem(state.items.length + 1, stop.item)];
@@ -97,15 +96,29 @@ async function runLoop(
 }
 
 /** Steps until the end detector fires, the cap is reached, or `isMatch` accepts an item. */
-export async function runBoundedLoop(
-   args: LoopArgs,
-): Promise<{ items: DriverLoopItem[]; stoppedAt: DriverLoopStop }> {
+export async function runBoundedLoop(args: LoopArgs): Promise<{
+   items: DriverLoopItem[];
+   stoppedAt: DriverLoopStop;
+   complete: boolean;
+   limitations: string[];
+}> {
    const start = await args.adapter.readCurrentItem();
-   return runLoop(
+   const result = await runLoop(
       args,
       { first: undefined, previous: start.position, items: [] },
       args.max,
    );
+   return {
+      ...result,
+      complete: result.stoppedAt !== 'cap',
+      limitations:
+         args.adapter.target === 'virtual'
+            ? []
+            : [
+                 'Item names depend on screen reader language and verbosity.',
+                 'Spoken text does not identify the real reader cursor or prove the end of a document.',
+              ],
+   };
 }
 
 /** The rotor: from the top, every element of one kind as the reader announces it. */
@@ -115,7 +128,7 @@ export async function runElementsAction(
    options: DriverActionOptions,
 ): Promise<ActionExecutionResult> {
    await adapter.performPortable('top', options);
-   const { items, stoppedAt } = await runBoundedLoop({
+   const loop = await runBoundedLoop({
       adapter,
       max: payload.max,
       step: () => adapter.navigate({ direction: 'next', kind: payload.kind }, options),
@@ -123,9 +136,8 @@ export async function runElementsAction(
    return {
       details: {
          kind: payload.kind,
-         count: items.length,
-         items,
-         stoppedAt,
+         count: loop.items.length,
+         ...loop,
          max: payload.max,
       },
    };
@@ -137,12 +149,12 @@ export async function runReadAllAction(
    payload: DriverReadAllPayload,
    options: DriverActionOptions,
 ): Promise<ActionExecutionResult> {
-   const { items, stoppedAt } = await runBoundedLoop({
+   const loop = await runBoundedLoop({
       adapter,
       max: payload.max,
       step: () => adapter.navigate({ direction: 'next', kind: 'item' }, options),
    });
-   return { details: { count: items.length, items, stoppedAt, max: payload.max } };
+   return { details: { count: loop.items.length, ...loop, max: payload.max } };
 }
 
 /** Roles whose elements have a jump key, so goto can use it instead of stepping by item. */
@@ -215,7 +227,7 @@ export async function runGotoAction(
    if (matchesItem(start.item, payload)) {
       return { details: { ...payload, found: true, steps: 0, kind } };
    }
-   const { items, stoppedAt } = await runBoundedLoop({
+   const loop = await runBoundedLoop({
       adapter,
       max: payload.max,
       step: () => adapter.navigate({ direction: 'next', kind }, options),
@@ -224,10 +236,10 @@ export async function runGotoAction(
    return {
       details: {
          ...payload,
-         found: stoppedAt === 'match',
-         steps: items.length,
+         found: loop.stoppedAt === 'match',
+         steps: loop.items.length,
          kind,
-         stoppedAt,
+         ...loop,
       },
    };
 }

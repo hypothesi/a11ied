@@ -5,6 +5,8 @@ import {
    type TestMethod,
    type NormalizedCriteriaArtifact,
    type WcagVersion,
+   type EvidenceStrategy,
+   type NormalizedCriterion,
 } from '@a11ied/contracts';
 
 import type {
@@ -18,6 +20,7 @@ import { buildAxeRuleIndex } from './axe-rules.js';
 import { buildActRulesByCriterion, buildAxeRulesByCriterion } from './indexing.js';
 import { defaultStrategySeed, strategyOverrideForCriterion } from './strategy.js';
 import { buildSummaryTotals } from './summary.js';
+import { buildAssessmentProcedures, getProcedureCoverage } from './procedures.js';
 
 const REPRESENTATIVE_LIMIT = 5;
 
@@ -80,31 +83,25 @@ export interface TestMethodEntry {
    updatedAt: string;
 }
 
-interface StrategyEntry {
-   criterionId: string;
-   preferredEvidenceMode: string;
-   procedureIds: string[];
-   requiresRealTarget: boolean;
-   notes: string[];
-}
+type StrategyEntry = EvidenceStrategy;
 
 function buildSingleEntry(input: {
-   criterionId: string;
+   criterion: NormalizedCriterion;
    actIndex: Map<string, string[]>;
    axeIndex: Map<string, { ruleIds: string[]; sourceAttribution: string[] }>;
    updatedAt: string;
 }): readonly [string, TestMethodEntry, StrategyEntry] {
-   const actRuleIds = input.actIndex.get(input.criterionId) ?? [];
-   const axeCov = input.axeIndex.get(input.criterionId);
+   const actRuleIds = input.actIndex.get(input.criterion.id) ?? [];
+   const axeCov = input.axeIndex.get(input.criterion.id);
    const axeRuleIds = axeCov?.ruleIds ?? [];
-   const override = strategyOverrideForCriterion(input.criterionId);
+   const override = strategyOverrideForCriterion(input.criterion.id);
    const seed =
       override ?? defaultStrategySeed(axeRuleIds.length > 0, actRuleIds.length > 0);
    return [
-      input.criterionId,
+      input.criterion.id,
       {
-         criterionId: input.criterionId,
-         method: seed.preferredEvidenceMode as TestMethod,
+         criterionId: input.criterion.id,
+         method: seed.preferredEvidenceMode,
          axeRuleIds,
          actRuleIds,
          sourceAttribution: buildSourceAttribution({
@@ -117,9 +114,12 @@ function buildSingleEntry(input: {
          updatedAt: input.updatedAt,
       },
       {
-         criterionId: input.criterionId,
+         criterionId: input.criterion.id,
          preferredEvidenceMode: seed.preferredEvidenceMode,
-         procedureIds: buildProcedureIds(axeRuleIds, seed),
+         ...buildAssessmentProcedures({
+            criterion: input.criterion,
+            procedureIds: buildProcedureIds(axeRuleIds, seed),
+         }),
          requiresRealTarget: seed.requiresRealTarget,
          notes: seed.notes,
       },
@@ -171,6 +171,7 @@ function parseArtifactSchemas(input: {
       }),
       testMethodSummaryArtifact: testMethodSummaryArtifactSchema.parse({
          version: input.version,
+         procedureCoverage: getProcedureCoverage(Object.values(input.strategies)),
          updatedAt: input.updatedAt,
          totals: input.stats.totals,
          byLevel: input.stats.byLevel,
@@ -210,7 +211,7 @@ export function buildTestMethodArtifacts(input: {
    });
    const entries = Object.values(input.criteriaArtifact.criteria).map((_criterion) =>
       buildSingleEntry({
-         criterionId: _criterion.id,
+         criterion: _criterion,
          actIndex,
          axeIndex,
          updatedAt: input.updatedAt,

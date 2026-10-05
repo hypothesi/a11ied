@@ -3,6 +3,7 @@ import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
 
 const toc = [
+   { id: 'browser-support', label: 'Reader and browser support' },
    { id: 'session', label: 'Start a session' },
    { id: 'move', label: 'Move and read' },
    { id: 'structure', label: 'Navigate by heading, link, or landmark' },
@@ -23,6 +24,25 @@ const toc = [
    links={docsLinks}
    toc={toc}
 >
+   <section class="panel" id="browser-support">
+      <h2>Reader and browser support</h2>
+      <p>
+         These combinations describe the available integrations. A detected browser version
+         confirms installation; it does not prove that a website works with that reader.
+         Run a reader smoke check against the build being assessed and keep its transcript.
+      </p>
+      <table>
+         <thead><tr><th scope="col">Reader and host</th><th scope="col">Browser</th><th scope="col">Available checks and limits</th></tr></thead>
+         <tbody>
+            <tr><td>VoiceOver on macOS</td><td>Chrome, Edge, Brave, Chromium</td><td>Guidepup controls the real reader with observed target checks. Playwright supports separate DOM scans in Chromium browsers. Correlate scans and reader observations with the tested page and state.</td></tr>
+            <tr><td>VoiceOver on macOS</td><td>Safari</td><td>Select Safari with <code>--browser Safari</code>. The current scan integration uses Chromium; a scan in another browser does not prove Safari behavior.</td></tr>
+            <tr><td>NVDA on Windows</td><td>Chrome, Edge, Brave, Chromium</td><td>Commands check the observed foreground target before controlling the installed NVDA bundle. DOM scans use Chromium. Acceptance still requires a Windows transcript; macOS and simulated tests cannot verify this pairing.</td></tr>
+            <tr><td>Virtual reader on any supported host</td><td>Headless Chromium or jsdom</td><td>Simulation for development. jsdom does not run page scripts. Neither engine provides real assistive technology evidence.</td></tr>
+            <tr><td>VoiceOver on Windows or Linux; NVDA on macOS or Linux</td><td>Any</td><td>Unsupported: these readers require their native operating system.</td></tr>
+            <tr><td>Other readers or browser combinations</td><td>Including Firefox</td><td>No verified audit integration. Opening an application by name does not establish support for a complete assessment.</td></tr>
+         </tbody>
+      </table>
+   </section>
    <section class="panel" id="session">
       <h2>Start a session</h2>
       <p>
@@ -32,10 +52,19 @@ const toc = [
       </p>
       <p>
          For VoiceOver or NVDA, a11ied opens the URL in a browser, waits until that window is in
-         front, and starts the screen reader. <code>--browser chrome</code>, <code>edge</code>,
+         front, after starting the screen reader under its desktop ownership lease. <code>--browser chrome</code>, <code>edge</code>,
          <code>brave</code>, <code>chromium</code>, or an app name such as <code>Safari</code>
          picks the browser. Without it, a11ied uses the system automation browser.
       </p>
+      <p>
+         Native sessions default to <code>guarded</code>. Commands check the observed
+      foreground target, and typing checks between characters. Read the fresh
+      current item, focus observations, and transcript after each action. If focus
+      changes, refocus deliberately and inspect state before continuing.
+      <code>require-binding</code> is an optional strict mode that refuses unavailable
+      native binding. <code>development</code> bypasses target checks. Foreground
+      checks do not guarantee that focus cannot change during dispatch.
+   </p>
       <pre><code>a1 sr start --sr voiceover http://localhost:3000/checkout --json
 a1 sr start --sr voiceover --browser Safari http://localhost:3000/checkout</code></pre>
       <p>
@@ -68,11 +97,15 @@ Every sr command now uses this session. Stop it with: a1 sr stop</code></pre>
          <a href="/screen-readers#virtual">screen readers</a> for the details of both engines.
       </p>
       <p>
-         One session is active at a time. Every later <code>sr</code> command uses it, and no
-         command takes a session id. A second <code>sr start</code> stops the first session and
-         reports it in the warnings. When the browser window never came to the front, the result
-         has a <code>window-focus-unconfirmed</code> warning that lists the window in front
-         instead.
+         Commands use the active session. A second <code>sr start</code> stops that session
+         and reports its replacement. To retry cleanup for a retained recovery owner,
+         use <code>a1 sr stop --session-id &lt;id&gt;</code>. Failed browser focus confirmation
+         returns <code>browser-focus-unconfirmed</code> and cancels startup.
+      </p>
+      <p>
+         In library code, only one in-process JSDOM session can own the document.
+         Starting another returns <code>virtual-session-conflict</code> without changing
+         the existing reader. Stop that reader or use a separate process or browser engine.
       </p>
    </section>
 
@@ -163,6 +196,12 @@ sr next heading  virtual
          element's text), <code>currentItem</code> (the role, name, value, states, and heading
          level, plus a <code>source</code> field), the running <code>spokenPhraseLog</code> (every
          announcement so far), and the timestamped <code>transcript</code>.
+         <code>state.observations</code> reports availability separately for keyboard
+         focus, reader-cursor identity, and target identity. An unavailable observation
+         includes a reason and, for query failures, an error code. Keyboard-focus
+         properties can differ from the reader's current item. Native reader-cursor
+         identity is unsupported by the installed reader connection; speech text alone
+         cannot prove which native element or document holds that cursor.
       </p>
       <p>
          Add <code>--phrase</code> to print the announcement alone, one line, for shell loops. Add
@@ -301,12 +340,13 @@ a1 sr expect /error/i --not</code></pre>
          <p>
             Use it for an announcement that arrives later than the command that caused it, such
             as a live region a network response fills, or the delay before VoiceOver finishes
-            speaking. An announcement the triggering command already printed in its own output
-            happened before the wait began, so run <code>expect</code> for that one instead.
-            Without <code>--for</code>, <code>wait</code> pauses for <code>--ms</code>.
+            speaking. Use <code>--since &lt;checkpoint&gt;</code> to include announcements after a checkpoint,
+         including those that arrived before the wait command started. Without <code>--for</code>,
+         <code>wait</code> pauses for <code>--ms</code>.
          </p>
-         <pre><code>a1 sr press Enter
-a1 sr wait --for /saved/i --timeout 3000</code></pre>
+         <pre><code>a1 sr checkpoint before-save
+a1 sr press Enter
+a1 sr wait --for /saved/i --since before-save --timeout 3000</code></pre>
       </div>
       <div class="split-aside">
          <div class="tag">Exit codes</div>
@@ -387,7 +427,7 @@ a1 sr list --query "VO-Command" --sr voiceover</code></pre>
       <p>
          When driving VoiceOver on macOS, <code>a11ied</code> supports two distinct command sets for controlling the screen reader:
          <strong>VoiceOver Commander</strong> (<code>voiceover-commander</code>) and <strong>VoiceOver Keycodes</strong> (<code>voiceover-keycode</code>).
-         Understanding how each mechanism operates under the hood helps you choose the right approach for your testing needs.
+         Choose a command set based on whether the test needs VoiceOver commands or simulated keystrokes.
       </p>
 
       <h3>What is VoiceOver Commander?</h3>
@@ -444,7 +484,7 @@ end tell</code></pre>
 
       <h3>Comparison & Contrast</h3>
       <p>
-         The following matrix highlights the operational differences and trade-offs between both command sets:
+         The table compares how the two command sets execute commands.
       </p>
       <div class="route-list">
          <div class="route-row">
@@ -469,7 +509,7 @@ end tell</code></pre>
          </div>
          <div class="route-row">
             <strong>Recommended for</strong>
-            <span><strong>Commander</strong> is best for fast, robust, headless CI and automated test suites; <strong>Keycodes</strong> are best for validating literal keyboard shortcuts and custom user chord mappings.</span>
+            <span><strong>Commander</strong> suits scripted screen reader commands in CI and test suites; <strong>Keycodes</strong> suit tests of keyboard shortcuts and custom chord mappings.</span>
          </div>
       </div>
 
@@ -507,6 +547,15 @@ a1 sr transcript --since "opened the dialog"</code></pre>
          element's text when the screen reader reported one. The Markdown output numbers the
          announcements 1, 2, 3 and prints a checkpoint as a heading between them.
          <code>--tail &lt;count&gt;</code> keeps the last N announcements.
+         Checkpoints between those announcements are also included. To cap all entries,
+         use <code>--limit &lt;count&gt;</code> (up to 1000). For index paging, use
+         <code>--after-index &lt;index&gt;</code>; <code>-1</code> starts at the beginning.
+         Index paging defaults to 200 entries. Use <code>transcript.window.nextAfterIndex</code>
+         from the JSON output for the next page. <code>hasMore</code> reports whether
+         more selected entries remain. <code>complete</code> reports whether this response
+         includes every session entry. Use a cursor only with the session that returned it.
+         Selected responses omit duplicate raw speech logs and include only their checkpoints.
+         A transcript without selection options includes every retained entry.
          <code>--out &lt;path&gt;</code> writes the transcript to a file, as JSON for a
          <code>.json</code> path and as Markdown for a <code>.md</code> path. Pass
          <code>--format json</code> or <code>--format md</code> to pick the format yourself.
@@ -588,12 +637,15 @@ Started 2026-09-06T11:07:38.042Z. Exported 2026-09-06T11:07:44.590Z. 6 phrases.
       <p>
          <code>sr stop --out</code> writes the transcript on the way out. When the session recorded
          video, a11ied also writes the Markdown transcript next to the recording file, so you can
-         read the two together.
+         read the two together. When cleanup is unconfirmed, retry
+         <code>sr stop --session-id &lt;id&gt;</code> with the session ID from the error.
+         The owner blocks further input until cleanup succeeds.
       </p>
       <p>
          For a single action with no session, add <code>--ephemeral</code> to
          <code>press</code>, <code>type</code>, or <code>do</code>. It starts a session, runs the
-         action, and stops the session in one command.
+         action, and stops the session in one command. Native actions use a detached broker
+         so a failed shutdown can be retried after the command exits.
       </p>
    </section>
 </DocShell>

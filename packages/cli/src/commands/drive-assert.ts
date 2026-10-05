@@ -21,6 +21,7 @@ interface WaitOptions {
    json?: boolean;
    verbose?: boolean;
    for?: string;
+   since?: string;
    ms?: string;
    timeout?: string;
 }
@@ -49,6 +50,9 @@ function buildWaitPayload(options: WaitOptions): DriverWaitPayload {
    if (options.for !== undefined) {
       payload.for = options.for;
    }
+   if (options.since !== undefined) {
+      payload.since = options.since;
+   }
    const ms = parseCountOption(options.ms, 'ms');
    if (ms !== undefined) {
       payload.ms = ms;
@@ -64,9 +68,13 @@ export function registerWaitCommand(driveCommand: Command): void {
             .helpGroup(DRIVE_GROUPS.check)
             .summary('Pause, or wait until the reader announces a phrase.')
             .description(
-               'Pause, or wait until the reader announces a phrase. Polls the transcript, so a phrase that arrives between two commands is not missed. Exits 4 on timeout.',
+               'Pause, or wait for a new announcement. Use --since to include announcements after a checkpoint, including those between commands. Exits 4 on timeout.',
             )
             .option('--for <text|/regex/>', 'The phrase to wait for; text ignores case.')
+            .option(
+               '--since <checkpoint>',
+               'Include announcements after this checkpoint.',
+            )
             .option(
                '--ms <n>',
                `Pause this long when --for is absent. Defaults to ${String(DEFAULT_WAIT_PAUSE_MS)}.`,

@@ -135,7 +135,9 @@ async function assertClickOpensTheWidget(baseUrl: string): Promise<void> {
    expect(opened.status).toBe(EXIT_SUCCESS);
    expect(result.violations).toEqual([]);
    expect(result.passes.map((rule) => rule.id)).toContain('label');
+}
 
+async function assertMissingClickTargetIsRejected(baseUrl: string): Promise<void> {
    const missing = await runCli([
       'axe',
       `${baseUrl}/dialog.html`,
@@ -153,6 +155,14 @@ describe('cli run axe / scan scoping', () => {
       '--click opens a widget the page renders only after a click',
       async () => {
          await assertClickOpensTheWidget(testServer.getBaseUrl());
+      },
+      TEST_TIMEOUT_LONG,
+   );
+
+   it(
+      'rejects a missing click target',
+      async () => {
+         await assertMissingClickTargetIsRejected(testServer.getBaseUrl());
       },
       TEST_TIMEOUT_LONG,
    );

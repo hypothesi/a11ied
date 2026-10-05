@@ -1,4 +1,4 @@
-import { cliExitCodes, type AxeVerdict } from '#contracts';
+import { cliExitCodes, wcagLevelSchema, type AxeVerdict } from '#contracts';
 import type * as Core from '#core';
 import type { AuditReport } from '#core';
 
@@ -10,6 +10,7 @@ export interface AuditActionOptions {
    waitFor?: string;
    click?: string;
    wcag: string;
+   level?: string;
    failOn?: string;
    baseline?: string;
    updateBaseline?: boolean;
@@ -93,6 +94,7 @@ export async function runAudit(
       metadata: resolved.metadata,
       userHints: resolved.userHints,
       wcagVersion: options.wcag,
+      ...(options.level ? { level: wcagLevelSchema.parse(options.level) } : {}),
       timeoutMs: parseTimeoutMs(options.timeout),
       waitFor: options.waitFor,
       click: options.click,

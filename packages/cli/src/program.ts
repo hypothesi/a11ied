@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { cliExitCodes } from '#contracts';
+import { cliExitCodes, doctorRequestSchema } from '#contracts';
 import { registerSessionCommands } from './commands/drive.js';
 import { registerAxeCommand } from './commands/axe.js';
 import { registerTreeCommand } from './commands/tree.js';
@@ -19,6 +19,47 @@ const NEXT_STEPS_HELP = dim(
    '\nRun a1 <command> --help for its options. Every command also takes --json.\n',
 );
 
+interface DoctorCommandOptions {
+   json?: boolean;
+   strict?: boolean;
+   task?: string;
+   sr?: string;
+   recording?: boolean;
+}
+
+async function executeDoctorCommand(options: DoctorCommandOptions): Promise<void> {
+   const [{ executeCommand }, { createDoctorReport }, renderers] = await Promise.all([
+      import('./lib/execute.js'),
+      import('#core'),
+      import('./renderers/index.js'),
+   ]);
+
+   await executeCommand(
+      {
+         family: 'doctor',
+         subcommand: 'doctor',
+         wcagVersion: undefined,
+         json: options.json,
+      },
+      () => {
+         const request = doctorRequestSchema.parse({
+            task: options.task,
+            target: options.sr,
+            recording: options.recording,
+         });
+         const report = createDoctorReport(undefined, request);
+         const execution: CommandExecution = {
+            result: report,
+         };
+         if (options.strict && !report.ready) {
+            execution.exitCode = cliExitCodes.environment;
+         }
+         return execution;
+      },
+      renderers.renderDoctorEnvelopeText,
+   );
+}
+
 function registerDoctorCommand(program: Command): void {
    program
       .command('doctor')
@@ -28,38 +69,17 @@ function registerDoctorCommand(program: Command): void {
          'Check this machine for browser and screen reader readiness, and list the setup steps still needed.',
       )
       .option('--json', 'Print JSON instead of human-readable text.')
+      .option('--task <task>', 'Check all, scan, reader, or audit prerequisites.', 'all')
+      .option('--sr <reader>', 'Check voiceover, nvda, or virtual.')
+      .option(
+         '--recording',
+         'Also check screen recording permission; captures a temporary video on macOS.',
+      )
       .option(
          '--strict',
          `Exit with code ${cliExitCodes.environment} when a required setup step is missing.`,
       )
-      .action(async (options: { json?: boolean; strict?: boolean }) => {
-         const [{ executeCommand }, { createDoctorReport }, renderers] =
-            await Promise.all([
-               import('./lib/execute.js'),
-               import('#core'),
-               import('./renderers/index.js'),
-            ]);
-
-         await executeCommand(
-            {
-               family: 'doctor',
-               subcommand: 'doctor',
-               wcagVersion: undefined,
-               json: options.json,
-            },
-            () => {
-               const report = createDoctorReport();
-               const execution: CommandExecution = {
-                  result: report as unknown as Record<string, unknown>,
-               };
-               if (options.strict && !report.ready) {
-                  execution.exitCode = cliExitCodes.environment;
-               }
-               return execution;
-            },
-            renderers.renderDoctorEnvelopeText,
-         );
-      });
+      .action(executeDoctorCommand);
 }
 
 function registerMcpCommand(program: Command): void {

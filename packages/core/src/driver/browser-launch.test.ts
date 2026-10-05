@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
 import type { BrowserAutomationCandidate } from '@a11ied/contracts';
@@ -44,5 +46,16 @@ describe('resolveBrowserChoice', () => {
          appName: 'Arc',
          focusTarget: { appName: 'Arc' },
       });
+   });
+
+   it('reuses the active macOS browser window', () => {
+      const script = readFileSync(
+         new URL('../../scripts/open-browser.applescript', import.meta.url),
+         'utf8',
+      );
+
+      expect(script).toContain('if (count of windows) is 0 then');
+      expect(script).toContain('set targetWindow to front window');
+      expect(script).not.toContain('set targetWindow to make new window');
    });
 });

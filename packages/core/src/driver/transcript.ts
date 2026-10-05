@@ -8,6 +8,7 @@ import {
    type DriverTranscript,
    type DriverTranscriptEntry,
    type DriverTranscriptFormat,
+   type DriverTranscriptWindow,
 } from '@a11ied/contracts';
 
 import { CliUsageError } from '../errors/cli-errors.js';
@@ -24,15 +25,19 @@ const ISO_TIME_END = 23;
 
 /** Builds the exportable transcript document from a session and its entries. */
 export function buildDriverTranscript(
-   session: Pick<AccessibilityDriverSession, 'target' | 'url' | 'startedAt'>,
+   session: Pick<AccessibilityDriverSession, 'target' | 'url' | 'startedAt'> &
+      Partial<Pick<AccessibilityDriverSession, 'sessionId'>>,
    entries: DriverTranscriptEntry[],
+   window?: DriverTranscriptWindow,
 ): DriverTranscript {
    return driverTranscriptSchema.parse({
+      sessionId: session.sessionId,
       target: session.target,
       url: session.url,
       startedAt: session.startedAt,
       exportedAt: new Date().toISOString(),
       entries,
+      window,
    });
 }
 
@@ -77,8 +82,17 @@ export function formatTranscriptMarkdown(transcript: DriverTranscript): string {
       '',
       `Started ${transcript.startedAt}. Exported ${transcript.exportedAt}. ${pluralize(phraseCount, 'phrase')}.`,
       '',
-      ...formatEntryLines(transcript.entries),
    ];
+   if (transcript.window && !transcript.window.complete) {
+      lines.push(
+         `Selected ${String(transcript.window.returnedEntries)} of ${String(transcript.window.totalEntries)} session entries.`,
+         transcript.window.hasMore
+            ? `More selected entries are available after index ${String(transcript.window.nextAfterIndex)}.`
+            : 'Earlier entries were omitted by the selection.',
+         '',
+      );
+   }
+   lines.push(...formatEntryLines(transcript.entries));
    return `${lines.join('\n').replaceAll(/\n{3,}/gu, '\n\n')}\n`;
 }
 

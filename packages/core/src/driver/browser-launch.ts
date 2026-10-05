@@ -4,7 +4,7 @@ import { basename } from 'node:path';
 import type { BrowserAutomationCandidate, DriverFocusTarget } from '@a11ied/contracts';
 
 import { createBrowserAutomationPolicy } from '../browser/policy.js';
-import { openUrlInSystemAutomationBrowser } from '../browser/helper.js';
+import { openUrlInSystemAutomationBrowser, openUrlOnMac } from '../browser/helper.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
 
 const BROWSER_OPEN_TIMEOUT_MS = 5000;
@@ -35,6 +35,8 @@ export interface BrowserChoice {
    appName: string;
    /** The executable, when a detected candidate provides one. */
    location?: string;
+   /** The detected browser candidate, when the name matched one. */
+   candidate?: BrowserAutomationCandidate;
    focusTarget: DriverFocusTarget;
 }
 
@@ -57,6 +59,9 @@ export function resolveBrowserChoice(
    const bundleId = BUNDLE_IDS[candidate?.id ?? id];
    const focusTarget: DriverFocusTarget = bundleId ? { appName, bundleId } : { appName };
    const choice: BrowserChoice = { appName, focusTarget };
+   if (candidate) {
+      choice.candidate = candidate;
+   }
    if (candidate?.location) {
       choice.location = candidate.location;
    }
@@ -136,6 +141,10 @@ export async function openUrlInBrowser(
       browser,
       createBrowserAutomationPolicy().candidates,
    );
+   if (process.platform === 'darwin' && choice.candidate) {
+      await openUrlOnMac(choice.candidate, url);
+      return { focusTarget: choice.focusTarget };
+   }
    await waitForExit(spawnOpen(choice, url), choice.appName);
    return { focusTarget: choice.focusTarget };
 }

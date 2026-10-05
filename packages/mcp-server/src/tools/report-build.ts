@@ -11,6 +11,7 @@ const reportBuildInputSchema = z.object({
    outDir: z.string().min(1),
    title: z.string().min(1).optional(),
    formats: z.array(reportFormatSchema).optional(),
+   draft: z.boolean().optional(),
 });
 
 export function registerReportBuildTool(server: McpServer): void {
@@ -31,6 +32,7 @@ export function registerReportBuildTool(server: McpServer): void {
                outDir: input.outDir,
                ...(input.title ? { title: input.title } : {}),
                ...(input.formats ? { formats: input.formats } : {}),
+               draft: input.draft,
                version: '0.1.0',
             }),
          ),

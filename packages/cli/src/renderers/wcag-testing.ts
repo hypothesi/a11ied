@@ -1,5 +1,6 @@
 import type {
    ActRuleIndexEntry,
+   AssessmentProcedure,
    CriterionTestMethod,
    EvidenceStrategy,
 } from '#contracts';
@@ -12,59 +13,6 @@ import {
 
 const FAILS_DISPLAY_LIMIT = 2;
 const PAIR_LENGTH = 2;
-
-interface ProcedureGuidance {
-   instruction: string;
-   commands?: string[];
-}
-
-/**
- * A by-hand instruction for each procedure id the testing strategy can name, with the
- * `sr` commands that help where one applies. "Probe" never appears in the wording: each
- * entry says what the check actually does.
- */
-const PROCEDURE_GUIDANCE: Record<string, ProcedureGuidance> = {
-   manual_review: {
-      instruction: 'Compare the page against the Understanding document by hand.',
-   },
-   landmark_sequence: {
-      instruction:
-         'Move through the landmarks in order and confirm you can reach the main content.',
-      commands: ['a1 sr walk <target>', 'a1 sr elements landmark'],
-   },
-   auth_flow_probe: {
-      instruction: 'Walk through the sign-in flow and check it against this criterion.',
-      commands: ['a1 sr walk <target>'],
-   },
-   focus_order_probe: {
-      instruction:
-         'Tab through the page and confirm focus moves in a sensible reading order.',
-      commands: ['a1 sr walk <target>'],
-   },
-   focus_visibility_probe: {
-      instruction:
-         'Tab through the page and confirm the focus indicator is visible at every stop.',
-      commands: ['a1 sr walk <target>'],
-   },
-   focus_obscured_probe: {
-      instruction:
-         'Tab through the page and confirm nothing, such as a sticky header, covers the focused element.',
-      commands: ['a1 sr walk <target>'],
-   },
-   redundant_entry_probe: {
-      instruction:
-         'Check that information already entered is not asked for again in the same process.',
-   },
-   status_message_probe: {
-      instruction:
-         'Trigger a status message and confirm a screen reader announces it without moving focus.',
-      commands: ['a1 sr expect <text>'],
-   },
-   cross_page_consistency_review: {
-      instruction:
-         'Compare repeated components, such as navigation or search, across pages for consistent order and labeling.',
-   },
-};
 
 function joinWithAnd(items: string[]): string {
    if (items.length <= 1) {
@@ -111,43 +59,53 @@ function axeScanLines(input: {
    ];
 }
 
-function procedureLines(input: { id: string; width: number }): string[] {
-   const guidance = PROCEDURE_GUIDANCE[input.id];
-   const instruction = guidance?.instruction ?? input.id;
-   const commandLines = guidance?.commands ? indent(guidance.commands.map(code)) : [];
-   return [...wrap(instruction, 0, input.width), ...commandLines];
+function procedureLines(input: {
+   procedure: AssessmentProcedure;
+   width: number;
+}): string[] {
+   const { procedure, width } = input;
+   const lines = [
+      `${procedure.title} (${procedure.procedureId}, version ${procedure.version})`,
+      ...fields([
+         ['Scope', procedure.scope],
+         ['Applies to', procedure.applicability],
+         ['Required capabilities', procedure.requiredCapabilities.join(', ')],
+         ['Required evidence', procedure.requiredEvidence.join(', ')],
+      ]),
+      ...section('Setup', listItems(procedure.setup)),
+      ...section('Actions', listItems(procedure.actions)),
+      ...section(
+         'Evaluation',
+         fields([
+            ['Pass', procedure.evaluation.passed],
+            ['Fail', procedure.evaluation.failed],
+            ['Not applicable', procedure.evaluation.inapplicable],
+            ['Uncertain', procedure.evaluation.cantTell],
+         ]),
+      ),
+      ...section('Recovery', listItems(procedure.recovery)),
+      ...section('Limitations', listItems(procedure.limitations)),
+      ...listItems(procedure.sources.map((source) => `${source.kind}: ${source.url}`)),
+   ];
+   return lines.flatMap((line) => wrap(line, 0, width));
 }
 
-function restProcedureLines(ids: readonly string[], width: number): string[] {
+function manualLines(input: { strategy: EvidenceStrategy; width: number }): string[] {
    const lines: string[] = [];
-   for (const id of ids) {
-      lines.push('', ...procedureLines({ id, width }));
+   for (const procedure of input.strategy.procedures) {
+      if (procedure.procedureId !== 'axe_scan') {
+         lines.push(...procedureLines({ procedure, width: input.width }), '');
+      }
+   }
+   if (input.strategy.coverageGap) {
+      lines.push(...wrap(`Coverage gap: ${input.strategy.coverageGap}`, 0, input.width));
    }
    return lines;
 }
 
-function manualLines(input: { procedureIds: string[]; width: number }): string[] {
-   const manualProcedureIds = input.procedureIds.filter((id) => id !== 'axe_scan');
-   if (manualProcedureIds.length === 0) {
-      return [];
-   }
-   const intro =
-      manualProcedureIds.length === 1 && input.procedureIds.length === 1
-         ? 'This needs a real page.'
-         : 'The rest needs a real page.';
-   const [first, ...rest] = manualProcedureIds;
-   const firstLines = procedureLines({ id: first as string, width: input.width });
-   return [
-      `${intro} ${firstLines[0] ?? ''}`,
-      ...firstLines.slice(1),
-      ...restProcedureLines(rest, input.width),
-   ];
-}
-
 /**
  * Answers "how do I test this criterion": the axe command as a runnable line naming the
- * rule it runs, then the by-hand check as an instruction with the `sr` commands that
- * help. Prints nothing when the strategy names no procedure at all.
+ * rule it runs, followed by the versioned assessment guidance and any coverage gap.
  */
 export function testingSection(input: {
    criterionId: string;
@@ -162,7 +120,7 @@ export function testingSection(input: {
       width: input.width,
    });
    const manual = manualLines({
-      procedureIds: input.strategy.procedureIds,
+      strategy: input.strategy,
       width: input.width,
    });
    const body =

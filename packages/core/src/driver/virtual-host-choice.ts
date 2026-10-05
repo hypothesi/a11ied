@@ -1,7 +1,9 @@
 import type { VirtualEngine } from '@a11ied/contracts';
+import type { Page } from 'playwright';
 import { createJsdomVirtualHost, type VirtualHost } from '@a11ied/guidepup';
 
 import { CliEnvironmentError } from '../errors/cli-errors.js';
+import { withCurrentBrowserPage } from '../browser/current-page.js';
 import { createPlaywrightVirtualHost, isPageUrl } from './virtual-playwright-host.js';
 
 export interface VirtualHostChoice {
@@ -9,10 +11,31 @@ export interface VirtualHostChoice {
    engine?: VirtualEngine | undefined;
    /** The page the session opens, when it opens one. */
    url?: string | undefined;
+   /** Existing browser document; never navigate it to initialize the reader. */
+   page?: Page | undefined;
 }
 
 function isBrowserUnavailable(error: unknown): boolean {
    return error instanceof CliEnvironmentError && error.code === 'browser-unavailable';
+}
+
+async function bindExistingPage(
+   choice: VirtualHostChoice,
+   page: Page,
+): Promise<VirtualHost> {
+   if (choice.engine === 'jsdom') {
+      throw new CliEnvironmentError(
+         'virtual-engine-conflict',
+         'An existing page requires the browser virtual engine.',
+      );
+   }
+   const url = choice.url ?? page.url();
+   await withCurrentBrowserPage({
+      load: { kind: 'goto', url },
+      page,
+      callback: async (current) => current.url(),
+   });
+   return createPlaywrightVirtualHost(page, url);
 }
 
 /**
@@ -21,6 +44,9 @@ function isBrowserUnavailable(error: unknown): boolean {
  * inline HTML, no URL, and a host where no Chromium-family browser is installed.
  */
 export async function createVirtualHost(choice: VirtualHostChoice): Promise<VirtualHost> {
+   if (choice.page) {
+      return bindExistingPage(choice, choice.page);
+   }
    if (choice.engine === 'jsdom') {
       return createJsdomVirtualHost();
    }

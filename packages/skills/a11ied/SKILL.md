@@ -1,6 +1,6 @@
 ---
 name: a11ied
-description: Use when you need to plan, script, or execute accessibility checks with the a11ied CLI or MCP server. Run the dev loop after a component change, use axe for the automated checks, and use the screen reader for behavior axe cannot see. Keep automated results, screen reader transcripts, and manual judgment separate.
+description: Check a desktop component or page during development with the a11ied CLI or MCP. Use scanner rules, keyboard interactions, and VoiceOver, NVDA, or simulated observations to assess the requested behavior. Use full-site-audit for a complete WCAG assessment with durable coverage and reporting.
 ---
 
 # a11ied
@@ -8,32 +8,49 @@ description: Use when you need to plan, script, or execute accessibility checks 
 Use this skill when the task is specifically about the `a11ied` toolchain: the `a1` CLI,
 the `@a11ied/mcp-server` MCP server, or the `a11ied` TypeScript package.
 
-For an entire site or a large section of one, use the `full-site-audit` skill. It handles
-page discovery, template sampling, resumable progress, real screen reader evidence, and
-the combined report. Keep this skill for one page or a component development loop.
+For a complete WCAG audit of a page, section, site, or desktop app, use
+`full-site-audit`. Keep this skill for a focused development check. It does not
+certify complete WCAG coverage. Desktop execution uses VoiceOver, NVDA, or virtual
+according to the behavior being assessed.
 
 `a1 help-all` prints every command and option this skill refers to. Run it once at the
 start of a session if a command below looks unfamiliar.
+
+Native sessions default to `nativeInput: guarded`. Observe the current item,
+foreground window, keyboard focus when available, and transcript before choosing
+an action. Commands check the observed target; typing checks between characters.
+Ordinary actions return current state and at most 200 new transcript entries.
+Use the returned cursor to fetch remaining entries. Status returns a recent bounded
+tail. Explicit transcript queries retain full or selected history.
+After each action, inspect fresh state and speech to confirm its effect. On a
+focus mismatch or uncertain delivery, read state, refocus deliberately, and
+inspect the control before continuing. Never replay a submission blindly.
+Native cursor identity can be unavailable without blocking an adaptive audit.
+Record actual session, speech, action, and artifact receipts; disclose observation
+limits. `require-binding` is an optional strict policy that refuses unavailable
+binding. `development` bypasses target checks. Virtual output cannot replace
+required real-reader evidence.
 
 ## The dev loop
 
 Run this after changing a component or page, the way you would run a test suite.
 
 ```txt
-a1 doctor --strict
 a1 audit http://localhost:3000/the/route/you/changed
 ```
 
-`doctor --strict` exits 3 when a required setup step is missing (a browser, a screen
-reader target). Fix that first. Every other command depends on it.
+A scan needs browser readiness, not screen reader or recording setup. Diagnose
+missing capabilities for the actual task. Before starting a reader, inspect its
+status and verify the intended desktop window and document.
 
 `audit <target>` runs axe against every mapped rule, prints an accessibility tree
 summary, lists the relevant criteria, and rolls the result up by criterion. It exits 4 when
 an axe violation was found. Read the `nextCommands` field in its output: it lists the
 exact `a1 wcag rule <id>` and `a1 sr walk <target>` commands to run next.
 
-Fix what `audit` reported, then rerun the same command. Do not consider the change done
-until `audit` exits 0.
+Fix reported scanner failures and rerun the same command. Then assess the requested
+keyboard, visual, and reader behavior. Exit 0 proves only the scanner threshold
+passed; unresolved criterion requirements still need observations and judgment.
 
 `<target>` accepts an http(s) URL, a local file path, `-` for HTML on stdin, or
 `--html '<button/>'`. Use a file or `--html` to test a component in isolation with no dev
@@ -114,15 +131,14 @@ skipped. Use `--table` with `--setup` to reach one of them.
 
 ## Test methods
 
-Every criterion has a test method, which says how much a tool can decide on its own:
+Every criterion has an assessment method. Scanner mappings cover individual rules:
 
-- automated: axe rules decide the criterion (most axe-mapped criteria)
-- hybrid: the automated checks run first and a person decides the rest (most screen
-  reader checks)
-- manual: the tool prints the requirement and the techniques, and a person tests it
+- Automated rules produce check results, not whole-criterion passes.
+- Hybrid assessments combine scanner checks with human or agent judgment.
+- Manual assessments require observations and judgment beyond scanner rules.
 
-Report the test method next to every result. A passing `a1 audit` run decides the
-automated criteria only. Do not describe it as full WCAG conformance.
+Report the assessment method next to every result. A clean scanner run leaves
+remaining criterion requirements unresolved. Do not describe it as full WCAG conformance.
 
 ## Screen reader recipe
 
@@ -130,11 +146,11 @@ Use the screen reader for labels, focus order, dialogs, menus, and live-region
 announcements. Axe reports none of those in sequence.
 
 ```txt
-a1 sr start --sr virtual http://localhost:3000/checkout
+a1 sr start --sr virtual http://localhost:3000/navigation
 a1 sr walk
 a1 sr elements heading
-a1 sr goto --role button --name "Place order"
-a1 sr expect "Place order, button"
+a1 sr goto --role button --name "Open menu"
+a1 sr expect "Open menu"
 a1 sr stop
 ```
 
@@ -157,9 +173,9 @@ phrases after `a1 sr checkpoint <label>`. This is the same exit code `a1 axe` an
 audit` use for a failing check, so a script or CI step can treat all three the same way:
 
 ```txt
-a1 sr checkpoint before-submit
+a1 sr checkpoint before-menu
 a1 sr activate
-a1 sr expect --since before-submit "Order placed"
+a1 sr expect --since before-menu "Navigation"
 echo "exit code: $?"
 ```
 
@@ -183,9 +199,24 @@ speaks every announcement out loud and takes keyboard focus for its own commands
 the session stops. Warn before starting one, and prefer running it on a machine nobody
 is using interactively at the time.
 
+## Durable criterion judgments
+
+For a complete assessment, use the coordinator workflow in `full-site-audit`.
+`audit next` returns one procedure with setup, actions, evidence, and evaluation
+requirements. The agent performs it, records current provenance with explicit
+`--run` and `--results`, then accepts its evidence through `audit evaluate`.
+
+A note alone is unverified. Agent work uses `semiAutomatic`; reserve `manual` for
+a person working without tool assistance. `cantTell` stays unresolved. Widget
+checks supplement required state assessments rather than replacing them.
+
+Before activating or typing into a control, verify current target identity and
+reuse the user's applicable authorization. If the action requires missing
+permission, block that action. A diagnostic check does not authorize submission.
+
 ## Cleanup
 
-Always stop a session before the task ends: `a1 sr stop`, or `sr_session` with `action:
+Stop only the session this task owns before it ends: `a1 sr stop`, or `sr_session` with `action:
 "stop"` over MCP. A session left open keeps the screen reader under automation and, for
 a real target, keeps controlling the machine's speech. `a1 sr status` shows whether one
 is still active. `a1 doctor` also flags a stale session under Action items.
@@ -195,21 +226,23 @@ is still active. `a1 doctor` also flags a stale session under Action items.
 The MCP server exposes the same operations as the CLI, one tool per command family. Use
 the CLI name in the description above to find the tool:
 
-| CLI command                                                                  | MCP tool        |
-| ---------------------------------------------------------------------------- | --------------- |
-| `a1 wcag show`                                                               | `wcag_show`     |
-| `a1 wcag criteria`                                                           | `wcag_criteria` |
-| `a1 search`                                                                  | `search`        |
-| `a1 wcag rule`                                                               | `wcag_rule`     |
-| `a1 axe`                                                                     | `run_axe`       |
-| `a1 tree`                                                                    | `tree`          |
-| `a1 audit`                                                                   | `audit`         |
-| `a1 sr start` / `open` / `stop` / `status`                                   | `sr_session`    |
-| every other `a1 sr` action (`next`, `press`, `perform`, `goto`, `wait`, ...) | `sr_action`     |
-| `a1 sr list`                                                                 | `sr_list`       |
-| `a1 sr expect`                                                               | `sr_expect`     |
-| `a1 sr transcript`                                                           | `sr_transcript` |
-| `a1 doctor`                                                                  | `doctor`        |
+| CLI command                                                                                   | MCP tool           |
+| --------------------------------------------------------------------------------------------- | ------------------ |
+| `a1 wcag show`                                                                                | `wcag_show`        |
+| `a1 wcag criteria`                                                                            | `wcag_criteria`    |
+| `a1 search`                                                                                   | `search`           |
+| `a1 wcag rule`                                                                                | `wcag_rule`        |
+| `a1 axe`                                                                                      | `run_axe`          |
+| `a1 tree`                                                                                     | `tree`             |
+| `a1 audit`                                                                                    | `audit`            |
+| `a1 audit run` / `state` / `journey` / `next` / `status` / `resume` / `evaluate` / `finalize` | `audit_assessment` |
+| `a1 report build`                                                                             | `report_build`     |
+| `a1 sr start` / `open` / `stop` / `status`                                                    | `sr_session`       |
+| every other `a1 sr` action (`next`, `press`, `perform`, `goto`, `wait`, ...)                  | `sr_action`        |
+| `a1 sr list`                                                                                  | `sr_list`          |
+| `a1 sr expect`                                                                                | `sr_expect`        |
+| `a1 sr transcript`                                                                            | `sr_transcript`    |
+| `a1 doctor`                                                                                   | `doctor`           |
 
 `a1 sr batch`, `a1 sr walk`, and `a1 sr tail` have no direct MCP tool. Call `sr_action` once per step instead
 of `batch`. Call `sr_session` (`start`), `sr_action` (`read-all`), then `sr_transcript`
@@ -226,5 +259,5 @@ one copy-pasteable page.
   reader said. A criterion pass or fail is a judgment made from it.
 - Do not skip the relevant criteria scan and jump straight from a target to a compliance
   claim. Run `a1 audit` or look up the criterion's test method first.
-- Do not leave a screen reader session open. Call `a1 sr stop` before the task ends.
+- Stop the screen reader session this task owns before yielding desktop control.
 - State the test method (automated, hybrid, manual) next to every claim.

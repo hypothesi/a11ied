@@ -1,13 +1,24 @@
 import type { VirtualEngine } from '@a11ied/contracts';
 
-import type { VirtualRuntime } from './virtual-runtime.js';
+import type {
+   VirtualRuntime,
+   VirtualSpeech,
+   VirtualCurrentItem,
+} from './virtual-runtime.js';
 
 /**
  * A runtime plus the document it runs against. The jsdom host swaps the document in
  * place. The Playwright host navigates a page and re-injects the runtime.
  */
-export interface VirtualHost extends VirtualRuntime {
+export interface VirtualHost extends Omit<
+   VirtualRuntime,
+   'readActivationNode' | 'isStarted'
+> {
    readonly engine: VirtualEngine;
+   /** Collect related observations under one document guard when the host can navigate. */
+   readSnapshot?:
+      | (() => Promise<{ speech: VirtualSpeech; current: VirtualCurrentItem }>)
+      | undefined;
    /**
     * Loads a document and starts the reader on it. The Playwright host navigates to `url`
     * when it is an http(s) or file URL and renders `html` otherwise. The jsdom host

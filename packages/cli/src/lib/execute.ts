@@ -5,6 +5,7 @@ import {
    type CliOutputEnvelope,
    type DriverActionRequest,
    type DriverActionResult,
+   type DriverMode,
    type Platform,
 } from '#contracts';
 import {
@@ -33,6 +34,11 @@ export { resolveCliTarget, resolvePageTarget } from './resolvers.js';
 export { resolveRunAxeSelection } from './resolvers.js';
 
 type RenderText = (envelope: CliOutputEnvelope, options: { verbose: boolean }) => string;
+
+/** Native owners must survive the one-shot CLI process to permit shutdown retries. */
+export function getCLIDriverMode(target: Platform): DriverMode {
+   return target === 'virtual' ? resolveDriverMode() : 'broker';
+}
 
 function resolveExitCode(execution: CommandExecution, ok: boolean): number {
    if (execution.exitCode !== undefined) {
@@ -256,7 +262,7 @@ async function runEphemeral(input: DriveActionCommandInput): Promise<CommandExec
 
 async function runAutoStart(input: DriveActionCommandInput): Promise<CommandExecution> {
    const { target, warnings } = await resolveScreenReaderTarget(input.options);
-   const started = await startDriverSession({ target, mode: resolveDriverMode() });
+   const started = await startDriverSession({ target, mode: getCLIDriverMode(target) });
    const result = await runDriverSessionAction(resolveRequest(input), {
       timeoutMs: parseTimeoutMs(input.options.timeout),
    });

@@ -71,9 +71,9 @@ a1 sr stop --json</code></pre>
          run <code>a1</code> from Terminal, Terminal needs the permission. If your editor or agent
          runs it, that app needs it.
       </p>
-      <pre><code>a1 doctor</code></pre>
+      <pre><code>a1 doctor --task reader --sr voiceover --recording</code></pre>
       <p>
-         On macOS, <code>doctor</code> records a few seconds of screen video with
+         On macOS, <code>doctor --recording</code> captures a temporary screen video with
          <code>screencapture</code> for the app that ran it, to confirm the permission works, and
          reports the result under the VoiceOver checks. Run it from the same app you plan to
          test from.

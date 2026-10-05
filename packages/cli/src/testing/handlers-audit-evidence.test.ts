@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { afterAll, describe, expect, it } from 'vitest';
+import { readEvidence } from '#core';
 
 import { createTempRoot } from './fixtures.js';
 import {
@@ -76,7 +77,7 @@ async function assertManualResultNeverUsesAxeProcedure(): Promise<void> {
    await record(results, ['--criterion', '2.4.4', '--outcome', 'passed']);
    const lines = await readLines(results);
 
-   expect(lines[0]?.test.procedureId).toBe('manual_review');
+   expect(lines[0]?.test.procedureId).toBe('wcag_2_4_4');
 }
 
 async function assertProcedureComesFromTheCriterion(): Promise<void> {
@@ -108,6 +109,7 @@ async function assertRerecordReplaces(): Promise<void> {
    const results = await createResultsPath();
    await record(results, ['--criterion', '2.4.7', '--outcome', 'failed']);
    await record(results, ['--criterion', '2.4.7', '--outcome', 'passed']);
+   const records = await readEvidence({ file: results });
    const listed = await runCli([
       'audit',
       'pending',
@@ -120,8 +122,10 @@ async function assertRerecordReplaces(): Promise<void> {
       pending: Array<{ criterionId: string }>;
    };
 
+   expect(records).toHaveLength(1);
+   expect(records[0]?.outcome).toStrictEqual('passed');
    expect(pending.pending.some((entry) => entry.criterionId === '2.4.7')).toStrictEqual(
-      false,
+      true,
    );
 }
 
@@ -149,7 +153,7 @@ async function assertPendingSkipsRecordedAndAutomated(): Promise<void> {
    const afterCount = (parseJsonOutput(after.stdout).result as { count: number }).count;
 
    expect(beforeCount).toBeGreaterThan(0);
-   expect(afterCount).toBe(beforeCount - 1);
+   expect(afterCount).toBe(beforeCount);
 }
 
 async function assertClearRemovesForOneTarget(): Promise<void> {
@@ -202,7 +206,7 @@ describe('cli audit record / pending / clear', () => {
       TEST_TIMEOUT_MEDIUM,
    );
    it(
-      'drops a criterion from pending once it is recorded',
+      'keeps a note-only judgment pending',
       assertPendingSkipsRecordedAndAutomated,
       TEST_TIMEOUT_MEDIUM,
    );

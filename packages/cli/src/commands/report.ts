@@ -26,12 +26,16 @@ export function registerReportCommand(program: Command): void {
                .requiredOption('--out <dir>', 'Output directory for the report bundle.')
                .option('--title <text>', 'Report title.')
                .option(
+                  '--draft',
+                  'Render available results from an unfinished assessment as a draft.',
+               )
+               .option(
                   '--formats <list>',
                   'Comma-separated html,pdf,earl,json. Defaults to all.',
                )
                .option(
                   '--fail-on <impact>',
-                  'Fail at or above minor, moderate, serious, or critical.',
+                  'Fail at or above minor, moderate, serious, or critical. Findings with unassessed severity always fail.',
                ),
          ),
       ),

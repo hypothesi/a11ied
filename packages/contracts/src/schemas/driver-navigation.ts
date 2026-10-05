@@ -114,6 +114,7 @@ export const DEFAULT_WAIT_PAUSE_MS = 500;
  */
 export const driverWaitPayloadSchema = z.object({
    for: z.string().min(1).optional(),
+   since: z.string().min(1).optional(),
    /** Fixed pause when `for` is absent. */
    ms: z.number().int().nonnegative().optional(),
    timeoutMs: z.number().int().positive().default(DEFAULT_WAIT_TIMEOUT_MS),

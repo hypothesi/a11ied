@@ -1,15 +1,13 @@
 import {
    axeRunResultSchema,
-   type AxeRuleResult,
    type AxeRunResult,
    type WcagVersion,
 } from '@a11ied/contracts';
 
-import { CliUsageError } from '../errors/cli-errors.js';
+import { parseWcagVersion } from '../wcag/parsing.js';
 import type { DocumentLoad } from '../targets/parse.js';
 import {
    executeAxeScan,
-   hasCustomScanOptions,
    normalizeRule,
    type AxeScanOptions,
    type RawAxeResults,
@@ -29,76 +27,12 @@ export type AxeRunOptions = { wcagVersion: string } & AxeScanOptions &
       | { criterion?: undefined; level?: undefined; ruleIds: string[] }
    );
 
-interface CachedAxeResult {
-   ruleIds: string[];
-   result: AxeRunResult;
-}
-
-const axeResultCache = new Map<string, CachedAxeResult>();
-
 /** Describes a load target for reporting: the URL it navigated to, or a fixed label. */
 function describeLoad(load: DocumentLoad): string {
    if (load.kind === 'goto') {
       return load.url;
    }
    return 'inline-html';
-}
-
-/**
- * Builds a cache key for a load target, or undefined when the result should not be
- * cached.
- */
-function buildAxeCacheKey(
-   load: DocumentLoad,
-   wcagVersion: WcagVersion,
-   scanOptions: AxeScanOptions,
-): string | undefined {
-   if (load.kind === 'html' || hasCustomScanOptions(scanOptions)) {
-      return undefined;
-   }
-   return `${load.url}::${wcagVersion}`;
-}
-
-function isSuperset(haystack: string[], needles: string[]): boolean {
-   if (needles.length === 0) {
-      return true;
-   }
-   const ruleSet = new Set(haystack);
-   return needles.every((ruleId) => ruleSet.has(ruleId));
-}
-
-function filterAxeResult(
-   cached: AxeRunResult,
-   ruleIds: string[],
-   selection: AxeRunResult['selection'],
-): AxeRunResult {
-   const ruleSet = new Set(ruleIds);
-   const filterRules = (rules: AxeRuleResult[]): AxeRuleResult[] =>
-      rules.filter((rule) => ruleSet.has(rule.id));
-   return axeRunResultSchema.parse({
-      ...cached,
-      selection,
-      ruleIds,
-      violations: filterRules(cached.violations),
-      passes: filterRules(cached.passes),
-      incomplete: filterRules(cached.incomplete),
-      inapplicable: filterRules(cached.inapplicable),
-   });
-}
-
-function getCachedAxeResult(args: {
-   cacheKey: string | undefined;
-   ruleIds: string[];
-   selection: AxeRunResult['selection'];
-}): AxeRunResult | undefined {
-   if (!args.cacheKey) {
-      return undefined;
-   }
-   const cached = axeResultCache.get(args.cacheKey);
-   if (cached && isSuperset(cached.ruleIds, args.ruleIds)) {
-      return filterAxeResult(cached.result, args.ruleIds, args.selection);
-   }
-   return undefined;
 }
 
 function buildParsedAxeResult(args: {
@@ -122,36 +56,6 @@ function buildParsedAxeResult(args: {
    });
 }
 
-function updateAxeCache(args: {
-   cacheKey: string | undefined;
-   ruleIds: string[];
-   result: AxeRunResult;
-}): void {
-   if (!args.cacheKey) {
-      return;
-   }
-   const cached = axeResultCache.get(args.cacheKey);
-   if (!cached || isSuperset(args.ruleIds, cached.ruleIds)) {
-      axeResultCache.set(args.cacheKey, { ruleIds: args.ruleIds, result: args.result });
-   }
-}
-
-function parseWcagVersion(version: string): WcagVersion {
-   if (version === '2.1' || version === '2.2') {
-      return version;
-   }
-
-   throw new CliUsageError(
-      'validation-error',
-      `WCAG version "${version}" is unsupported.`,
-      {
-         field: 'version',
-         value: version,
-         supportedVersions: ['2.2', '2.1'],
-      },
-   );
-}
-
 function resolveAxeSelection(
    options: AxeRunOptions,
    wcagVersion: WcagVersion,
@@ -171,14 +75,10 @@ function resolveAxeSelection(
    return resolveAllSelection(wcagVersion);
 }
 
-function resolveAxeInput(
-   load: DocumentLoad,
-   options: AxeRunOptions,
-): {
+function resolveAxeInput(options: AxeRunOptions): {
    wcagVersion: WcagVersion;
    selection: AxeRunResult['selection'];
    ruleIds: string[];
-   cacheKey: string | undefined;
 } {
    const wcagVersion = parseWcagVersion(options.wcagVersion);
    const { selection, ruleIds } = resolveAxeSelection(options, wcagVersion);
@@ -186,7 +86,6 @@ function resolveAxeInput(
       wcagVersion,
       selection,
       ruleIds,
-      cacheKey: buildAxeCacheKey(load, wcagVersion, options),
    };
 }
 
@@ -199,17 +98,9 @@ export async function runAxe(
    load: DocumentLoad,
    options: AxeRunOptions,
 ): Promise<AxeRunResult> {
-   const resolved = resolveAxeInput(load, options);
-   const cached = getCachedAxeResult({
-      cacheKey: resolved.cacheKey,
-      ruleIds: resolved.ruleIds,
-      selection: resolved.selection,
-   });
-   if (cached) {
-      return cached;
-   }
+   const resolved = resolveAxeInput(options);
    const { raw, warnings } = await executeAxeScan(load, resolved.ruleIds, options);
-   const parsed = buildParsedAxeResult({
+   return buildParsedAxeResult({
       reportUrl: describeLoad(load),
       wcagVersion: resolved.wcagVersion,
       selection: resolved.selection,
@@ -217,10 +108,4 @@ export async function runAxe(
       raw,
       warnings,
    });
-   updateAxeCache({
-      cacheKey: resolved.cacheKey,
-      ruleIds: resolved.ruleIds,
-      result: parsed,
-   });
-   return parsed;
 }

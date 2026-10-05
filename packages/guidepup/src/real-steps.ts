@@ -2,6 +2,8 @@ import type { DriverNavigateRequest, Platform } from '@a11ied/contracts';
 
 import type { DriverActionOptions } from './adapter-shared.js';
 import { normalizeDriverKeys } from './key-aliases.js';
+import { DriverCommandError } from './driver-command-error.js';
+import { parseVoiceOverItem } from './current-item.js';
 import {
    getNvdaKeyCodeCommand,
    getVoiceOverKeyCodeCommand,
@@ -23,7 +25,8 @@ import { waitForSpeechStabilization } from './speech.js';
 
 export const REAL_TARGET_NAV_TIMEOUT_MS = 10_000;
 export const REAL_TARGET_INPUT_TIMEOUT_MS = 15_000;
-const REAL_TARGET_RETRIES = 2;
+// Guidepup counts attempts, so one prevents replay after uncertain input delivery.
+const REAL_TARGET_RETRIES = 1;
 /** How many headings a VoiceOver level filter visits before giving up. */
 const HEADING_LEVEL_SEARCH_CAP = 100;
 
@@ -130,23 +133,27 @@ async function runVoiceOverRepeatUntil(
    context: RealStepContext,
    step: RepeatUntilPhraseStep<VoiceOverPortableStep>,
 ): Promise<void> {
-   let previousPhrase = await context.reader.lastSpokenPhrase().catch(() => '');
-   let stalled = false;
-   await repeatUntil(
-      async () => {
-         const phrase = await context.reader.lastSpokenPhrase().catch(() => '');
-         return stalled || phrase.includes(step.phraseIncludes);
-      },
-      async () => {
-         await runVoiceOverStep(context, step.step);
-         await waitForSpeechStabilization(context.reader);
-         const phrase = await context.reader.lastSpokenPhrase().catch(() => '');
-         // The same phrase twice in a row means the reader had nowhere left to jump.
-         stalled = phrase === previousPhrase;
-         previousPhrase = phrase;
-      },
-      HEADING_LEVEL_SEARCH_CAP,
+   async function jumpHeading(): Promise<void> {
+      await runVoiceOverStep(context, step.step);
+      await waitForSpeechStabilization(context.reader);
+   }
+   async function isMatchingHeading(): Promise<boolean> {
+      const { level } = parseVoiceOverItem(await context.reader.lastSpokenPhrase(), '');
+      return step.phraseIncludes === `level ${String(level)}`;
+   }
+   await jumpHeading();
+   const reached = await repeatUntil(
+      isMatchingHeading,
+      jumpHeading,
+      HEADING_LEVEL_SEARCH_CAP - 1,
    );
+   if (!reached) {
+      throw new DriverCommandError(
+         'reader-navigation-unconfirmed',
+         'The heading search reached its limit without a matching announcement. Cursor position remains unconfirmed.',
+         { limit: HEADING_LEVEL_SEARCH_CAP, phraseIncludes: step.phraseIncludes },
+      );
+   }
 }
 
 async function runOneRealMove(

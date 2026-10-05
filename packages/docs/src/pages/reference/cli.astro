@@ -11,6 +11,7 @@ const toc = [
    { id: 'axe', label: 'a1 axe' },
    { id: 'tree', label: 'a1 tree' },
    { id: 'audit', label: 'a1 audit' },
+   { id: 'assessment', label: 'Agent-led assessment' },
    { id: 'doctor', label: 'a1 doctor and mcp' },
    { id: 'browser', label: 'Browser selection' },
 ];
@@ -67,8 +68,9 @@ const toc = [
             <code>A11IED_STATE_DIR</code> sets the directory that stores the active session's
             state file, lock, and broker socket. Without it, a11ied uses
             <code>$XDG_STATE_HOME/a11ied</code>, then <code>~/.a11ied/state</code>.
-            <code>A11IED_DRIVER_MODE=in-process</code> runs the session inside the calling
-            process instead of a separate broker.
+            Native CLI sessions always run in a separate broker so cleanup can be retried
+            after the command exits. <code>A11IED_DRIVER_MODE=in-process</code> applies to
+            virtual sessions and API hosts that remain running.
          </p>
       </div>
    </section>
@@ -106,19 +108,28 @@ const toc = [
          <div class="route-row"><code>sr list</code><span>The commands <code>sr do</code> accepts, grouped by command set and by what they do. Takes <code>--query</code>, <code>--sr</code>, <code>--command-set</code>.</span></div>
          <div class="route-row"><code>sr focus</code><span>Bring a window to the front. With no options, refocus the app the session opened. Takes <code>--app</code>, <code>--bundle-id</code>, <code>--process</code>, <code>--pid</code>, <code>--window-title</code>, <code>--match</code>.</span></div>
          <div class="route-row"><code>sr screenshot &lt;path&gt;</code><span>Save a picture of what the VoiceOver cursor is on. NVDA and virtual exit 2.</span></div>
-         <div class="route-row"><code>sr wait</code><span>Pause for <code>--ms</code>, or poll the transcript until <code>--for &lt;text|/regex/&gt;</code> is announced. Exits 4 at <code>--timeout</code>, default 5000 ms.</span></div>
+         <div class="route-row"><code>sr wait</code><span>Pause for <code>--ms</code>, or poll the transcript until <code>--for &lt;text|/regex/&gt;</code> is announced. Use <code>--since &lt;checkpoint&gt;</code> to include announcements after a checkpoint. Exits 4 at <code>--timeout</code>, default 5000 ms.</span></div>
          <div class="route-row"><code>sr expect &lt;text|/regex/&gt;</code><span>Check the transcript for a phrase. Takes <code>--since &lt;checkpoint&gt;</code> and <code>--not</code>. Exits 4 on a mismatch.</span></div>
          <div class="route-row"><code>sr checkpoint &lt;label&gt;</code><span>Mark a point in the transcript for <code>--since</code>.</span></div>
-         <div class="route-row"><code>sr transcript</code><span>Print what the reader said, with timestamps. Takes <code>--since</code>, <code>--tail</code>, <code>--out</code>, <code>--format</code>.</span></div>
+         <div class="route-row"><code>sr transcript</code><span>Print what the reader said, with timestamps. Takes <code>--since</code>, <code>--tail</code>, <code>--after-index</code>, <code>--limit</code>, <code>--out</code>, <code>--format</code>. Index paging defaults to 200 entries. The transcript window reports omissions and the next index.</span></div>
          <div class="route-row"><code>sr tail</code><span>Stream spoken announcements continuously in real time. Takes <code>--lines &lt;n&gt;</code> (default 10), <code>--since &lt;checkpoint&gt;</code>, <code>--interval &lt;ms&gt;</code> (default 250), <code>--phrase</code> (phrase only), and <code>--json</code> (NDJSON). Aliases: <code>follow</code>, <code>stream</code>, <code>watch</code>.</span></div>
          <div class="route-row"><code>sr batch [file]</code><span>Run JSON lines of actions, one per line or from stdin, over one broker connection. Stops at the first failed expect unless <code>--continue</code>.</span></div>
       </div>
       <h3>Session options</h3>
+      <p>
+         Native sessions default to <code>guarded</code>. Commands check the observed
+      foreground target, and typing checks between characters. Read the fresh
+      current item, focus observations, and transcript after each action. If focus
+      changes, refocus deliberately and inspect state before continuing.
+      <code>require-binding</code> is an optional strict mode that refuses unavailable
+      native binding. <code>development</code> bypasses target checks. Foreground
+      checks do not guarantee that focus cannot change during dispatch.
+   </p>
       <div class="route-list">
          <div class="route-row"><code>--sr &lt;reader&gt;</code><span><code>voiceover</code>, <code>nvda</code>, or <code>virtual</code>, on <code>sr start</code>, <code>sr walk</code>, and the commands that start a session. Without it, a11ied picks the platform reader and falls back to virtual.</span></div>
          <div class="route-row"><code>--timeout &lt;ms&gt;</code><span>Bound the screen reader command instead of using the built-in limits. On <code>sr wait</code> it is how long to wait for the phrase.</span></div>
          <div class="route-row"><code>--phrase</code><span>On a navigation verb, print the last spoken phrase alone, one line.</span></div>
-         <div class="route-row"><code>--ephemeral</code><span>Run one action in a temporary session and tear it down.</span></div>
+         <div class="route-row"><code>--ephemeral</code><span>Run one action and stop its session. Native actions use a detached broker. Unconfirmed cleanup leaves a recovery session.</span></div>
          <div class="route-row"><code>--command-set &lt;set&gt;</code><span><code>auto</code>, <code>portable</code>, <code>voiceover-commander</code>, or <code>voiceover-keycode</code>. Defaults to <code>auto</code>.</span></div>
       </div>
       <div class="route-list">
@@ -208,8 +219,8 @@ a1 wcag G18</code></pre>
          <div class="route-row"><code>pattern role &lt;role&gt;</code><span>The examples the APG example index files under one ARIA role.</span></div>
          <div class="route-row"><code>pattern attribute &lt;attribute&gt;</code><span>The examples the index files under one property or state, such as <code>aria-expanded</code>.</span></div>
          <div class="route-row"><code>pattern check &lt;target&gt;</code><span>Press every key one example declares against a live widget, and check its documented attributes. <code>--pattern</code> and <code>--selector</code> are both required. <code>--click</code> opens a widget the page renders only after a click, such as a dialog behind its trigger. <code>--table</code> and <code>--setup</code> reach a state the first keyboard table does not cover.</span></div>
-         <div class="route-row"><code>pattern record &lt;target&gt;</code><span>Record what you decided about one row the check could not decide. <code>--pattern</code>, <code>--row</code>, <code>--outcome</code>, and <code>--selector</code> are required. Pass the same <code>--click</code> the check used. The widget's accessibility tree is hashed with the judgment, so it expires when the component changes.</span></div>
-         <div class="route-row"><code>pattern pending &lt;target&gt;</code><span>The rows of one example with no recorded result for this target yet.</span></div>
+         <div class="route-row"><code>pattern record &lt;target&gt;</code><span>Record what you decided about one row the check could not decide. <code>--pattern</code>, <code>--row</code>, <code>--outcome</code>, and <code>--selector</code> are required. Pass the same <code>--click</code> the check used. Supply <code>--run</code>, <code>--provenance</code>, and the current <code>--subject-hash</code> for a scoped assessment. A note alone stays unverified. Keyboard rows require typed keypress evidence for a documented key; attribute rows require observations of the widget's role or attribute.</span></div>
+         <div class="route-row"><code>pattern pending &lt;target&gt;</code><span>The rows still awaiting verified evidence. Supply <code>--run</code>, <code>--pointer</code>, and <code>--subject-hash</code> to match the observed widget. Every queued state and environment must be assessed.</span></div>
       </div>
       <pre><code>a1 pattern combobox
 a1 pattern combobox-select-only --section keyboard
@@ -360,7 +371,7 @@ a1 tree http://localhost:3000 --name "Sign in" --json</code></pre>
    <section class="split panel" id="audit">
       <div class="stack">
          <div class="panel-head">
-            <p class="panel-kicker">Full loop</p>
+            <p class="panel-kicker">Page observations</p>
             <h2>a1 audit</h2>
          </div>
          <div class="route-list">
@@ -379,7 +390,7 @@ a1 audit --html '&lt;h1&gt;Hi&lt;/h1&gt;'</code></pre>
          <p>
             <code>audit</code> runs axe against every rule mapped in the WCAG version, reads the
             accessibility tree, and derives applicability from the target's HTML, all against one
-            resolved target. The result has four sections:
+            resolved target. The result includes these sections:
          </p>
          <div class="route-list">
             <div class="route-row"><code>axe</code><span>The full axe run.</span></div>
@@ -399,13 +410,13 @@ a1 audit --html '&lt;h1&gt;Hi&lt;/h1&gt;'</code></pre>
          </p>
          <h3>Checks a11ied cannot automate</h3>
          <p>
-            axe decides 27 of the 86 WCAG 2.2 criteria. The other 59 need a person, and a coding
-            agent can perform many of them. Three subcommands let those results reach the same
-            report as the axe results.
+            Axe checks specific conditions within selected criteria. Assessment procedures
+            cover the remaining behavior and content requirements. An agent records observed
+            results through these commands.
          </p>
          <div class="route-list">
-            <div class="route-row"><code>a1 audit pending &lt;target&gt;</code><span>List the criteria that apply, that axe cannot decide, and that have no recorded result yet. Reads the WCAG data and the results file; it does not open a browser.</span></div>
-            <div class="route-row"><code>a1 audit record &lt;target&gt;</code><span>Record one outcome. Takes <code>--criterion</code>, <code>--outcome</code>, and optionally <code>--pointer</code>, <code>--note</code>, <code>--procedure</code>, <code>--mode</code>, and <code>--by</code>.</span></div>
+            <div class="route-row"><code>a1 audit pending &lt;target&gt;</code><span>List criteria with remaining manual procedures. Each returned procedure needs its own recorded result. Reads WCAG data and the evidence file without opening a browser.</span></div>
+            <div class="route-row"><code>a1 audit record &lt;target&gt;</code><span>Record one outcome. Takes <code>--criterion</code>, <code>--outcome</code>, and optionally <code>--pointer</code>, <code>--note</code>, <code>--procedure</code>, <code>--mode</code>, <code>--by</code>, <code>--run</code>, and <code>--provenance</code>. <code>--finding &lt;file&gt;</code> accepts a JSON title, userImpact, optional remediation, and optional impact. Notes without current run and artifact provenance remain unverified and do not complete a criterion.</span></div>
             <div class="route-row"><code>a1 audit clear &lt;target&gt;</code><span>Drop recorded results for one target.</span></div>
          </div>
          <pre><code>a1 audit pending http://localhost:3000 --level AA
@@ -413,9 +424,14 @@ a1 audit record http://localhost:3000 --criterion 2.4.4 --outcome failed \
    --pointer 'nav &gt; a:nth-child(3)' --note "Four links read 'Learn more'."
 a1 audit http://localhost:3000 --format earl --out report.earl.json</code></pre>
          <p>
+         Pass <code>--results &lt;run-dir&gt;/evidence.jsonl</code> on every audit, pending, and
+         record call in a site audit. Resume with the same file; use a fresh file for a new
+         run. A passing procedure does not erase a failure recorded for another procedure.
+      </p>
+      <p>
             <code>--outcome</code> takes passed, failed, cantTell, or inapplicable. Results go to
             <code>.a11ied/evidence.jsonl</code>, one JSON object per line, so several agent calls
-            can record at once. Recording the same criterion twice replaces the earlier result.
+            can record at once. Recording the same procedure and element again replaces its earlier result.
             Recording a result never stores it under the axe procedure, so a person's judgment
             cannot appear in the report as an automated one.
          </p>
@@ -435,6 +451,46 @@ a1 audit http://localhost:3000 --format earl --out report.earl.json</code></pre>
       </div>
    </section>
 
+   <section class="panel" id="assessment">
+      <h2>Agent-led assessment</h2>
+      <p>
+         <code>audit run</code> creates durable work for a host agent. It sends no UI input.
+         The agent performs each procedure, saves observed evidence, and evaluates the result.
+         The environment JSON records its observed platform, OS, capabilities, and limitations.
+         Web scope defaults to site; <code>--app</code> selects an existing desktop app target and defaults to app scope.
+      </p>
+      <p>
+         With <code>--inventory</code>, startup uses the discovered run ID and links the
+         coordinator without editing JSON. Its default path is <code>run.json</code> beside
+         the inventory. A compatible coordinator can be attached after interrupted startup;
+         conflicting identity, profile, environment, policy, or inventory paths are rejected.
+      </p>
+      <p>
+         Evidence provenance and non-image artifact envelopes include the claimed check's
+         <code>attempts</code> value as <code>attempt</code>. A retry requires fresh proof for
+         that generation, even after a clock change. Raw screenshots retain their PNG format;
+         their provenance and companion artifacts identify the attempt.
+      </p>
+      <pre><code>a1 audit discover https://createdbyfireside.com --out .a11ied/fireside/inventory.json
+a1 audit run https://createdbyfireside.com --environment environment.json \
+  --inventory .a11ied/fireside/inventory.json --run .a11ied/fireside/run.json
+a1 audit next .a11ied/fireside/run.json --json
+a1 audit status .a11ied/fireside/run.json --limit 20 --json</code></pre>
+      <div class="route-list">
+         <div class="route-row"><code>run [url]</code><span>Requires <code>--environment</code>. Accepts <code>--app</code>, <code>--scope</code>, <code>--wcag</code>, <code>--level</code>, <code>--inventory</code>, <code>--run</code>, <code>--id</code>, and <code>--policy</code>. Policy JSON declares allowed origins and approved submission or destructive actions; both action flags default to disabled.</span></div>
+         <div class="route-row"><code>state, journey, queue &lt;run&gt;</code><span>Register an observed state, ordered journey, or explicit obligation with <code>--input &lt;file&gt;</code>. Use <code>-</code> for stdin. Responses return the saved identity and revision even beyond the first status page.</span></div>
+         <div class="route-row"><code>next &lt;run&gt;</code><span>Claim one check with its procedure and observed scope context. Execute its setup and actions, preserve evidence, and supply the required agent judgment. A changed claim is rejected before any UI input.</span></div>
+         <div class="route-row"><code>evaluate &lt;run&gt;</code><span>Requires <code>--check</code>, <code>--outcome</code>, and saved <code>--evidence &lt;id...&gt;</code> from <code>audit record --run</code>. Missing, mismatched, or stale proof is rejected.</span></div>
+         <div class="route-row"><code>block, resume &lt;run&gt;</code><span>Block a check with <code>--check</code> and <code>--reason</code>. Resume preserves interrupted work as blocked. After restoring a safe state, pass explicit <code>--retry &lt;check...&gt;</code>; completed assessments cannot be replayed.</span></div>
+         <div class="route-row"><code>status, finalize &lt;run&gt;</code><span>Status revalidates coverage, artifacts, and scope. Lists use <code>--offset</code> and <code>--limit</code> (1 to 100; default 20). Finalize requires complete validated coverage; <code>--partial</code> returns unresolved work and keeps the run active.</span></div>
+      </div>
+      <p>
+         Finalization updates assessment status. Report building remains a separate operation
+         over discovery and page artifacts. Native reader binding and complete installed audits
+         still require their own runtime verification.
+      </p>
+   </section>
+
    <section class="panel" id="doctor">
       <div class="panel-head">
          <p class="panel-kicker">Runtime</p>
@@ -442,7 +498,9 @@ a1 audit http://localhost:3000 --format earl --out report.earl.json</code></pre>
       </div>
       <pre><code>a1 doctor
 a1 doctor --json
-a1 doctor --strict
+a1 doctor --task scan --strict
+a1 doctor --task audit --sr voiceover --strict
+a1 doctor --task reader --sr nvda --recording
 a1 setup
 a1 setup --json
 a1 setup --skip-setup
@@ -455,11 +513,14 @@ a1 help-all</code></pre>
          automate, and the a11ied, Node, npm, and host versions at the bottom.
       </p>
       <p>
-         Targets that only exist on another OS get one dim line instead of instructions. On macOS
-         it also records a few seconds of screen video with <code>screencapture</code> for the
-         current host app, to confirm the permission works.
+         Use <code>--task scan</code> for browser scans, <code>--task reader</code> for reader sessions,
+         or <code>--task audit</code> for desktop audit prerequisites. Use <code>--sr voiceover</code>
+         on macOS or <code>--sr nvda</code> on Windows to check one reader. A virtual reader cannot
+         satisfy audit prerequisites. These checks do not establish audit coverage.
       </p>
       <p>
+         Recording permission is checked only with <code>--recording</code>. On macOS this captures
+         a temporary video from the current host app and deletes it. Scans do not check reader settings.
          The exit code is 0 unless you pass <code>--strict</code>, which exits with 3 while a
          required step is missing. <code>--json</code> wraps the report in the standard envelope,
          under <code>result</code>.

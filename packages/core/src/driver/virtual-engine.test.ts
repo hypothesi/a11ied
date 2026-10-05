@@ -51,9 +51,9 @@ async function assertPageScriptsRun(): Promise<void> {
       payload: { label: 'before save' },
    });
    const activated = await runDriverSessionAction({ action: 'activate' });
-   const announced = selectTranscriptEntries(activated.state.transcript, {
-      since: 'before save',
-   }).map((entry) => entry.phrase);
+   const announced = selectTranscriptEntries(activated.state.transcript).map(
+      (entry) => entry.phrase,
+   );
 
    expect(announced).toContain('polite: Profile saved successfully.');
    await stopDriverSession();

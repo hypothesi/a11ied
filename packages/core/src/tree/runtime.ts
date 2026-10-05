@@ -31,9 +31,8 @@ export async function getAccessibilityTree(
 }
 
 /**
- * Loads a target and reads its document title. Reuses the shared cached page when the
- * target was already loaded for a `goto` load with no custom viewport, headers, or
- * cookies, so this does not navigate a second time.
+ * A supplied page retains the current document and journey state. Independent calls load
+ * a fresh document before reading its title.
  */
 export async function getPageTitle(
    load: DocumentLoad,

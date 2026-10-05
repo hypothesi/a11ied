@@ -25,6 +25,7 @@ Examples:
 /** `--results` and `--by` apply to every evidence subcommand. */
 function addEvidenceOptions(command: Command): Command {
    return command
+      .option('--run <file>', 'Validate assessment evidence against this run file.')
       .option(
          '--results <file>',
          'Read and write recorded results here. Defaults to .a11ied/evidence.jsonl, ' +
@@ -50,7 +51,15 @@ function addRecordOptions(command: Command): Command {
          'manual for a person alone, semiAutomatic with tool help. Defaults to semiAutomatic.',
       )
       .option('--pointer <selector>', 'CSS selector for the element judged.')
-      .option('--note <text>', 'Why the result is what it is.');
+      .option('--note <text>', 'Why the result is what it is.')
+      .option(
+         '--finding <file>',
+         'JSON finding title, userImpact, optional remediation and impact.',
+      )
+      .option(
+         '--provenance <file>',
+         'JSON provenance with run, state, actor, action, and artifact references.',
+      );
 }
 
 function registerRecordCommand(auditCommand: Command): void {
@@ -105,9 +114,9 @@ function registerPendingCommand(auditCommand: Command): void {
                         .command('pending [target]')
                         .summary('List criteria for a target that still need a person.')
                         .description(
-                           'List the criteria that apply to a target, that axe cannot ' +
-                              'decide, and that have no recorded result yet. Reads the ' +
-                              'WCAG data and the results file; it does not open a browser.',
+                           'List criteria with unrecorded manual procedures for a target. ' +
+                              'Each returned procedure needs a result. Reads the WCAG data ' +
+                              'and the evidence file without opening a browser.',
                         )
                         .addHelpText('after', PENDING_EXAMPLES)
                         .option(

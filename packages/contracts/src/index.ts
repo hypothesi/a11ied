@@ -1,5 +1,6 @@
 export * from './schemas/core.js';
 export * from './schemas/driver-actions.js';
+export * from './schemas/driver-transcript.js';
 export * from './schemas/driver-focus.js';
 export * from './schemas/driver-navigation.js';
 export * from './schemas/driver-batch.js';
@@ -13,3 +14,6 @@ export * from './schemas/earl.js';
 export * from './schemas/evidence.js';
 export * from './schemas/discovery.js';
 export * from './schemas/report.js';
+export * from './schemas/audit-run.js';
+export * from './schemas/assessment.js';
+export * from './schemas/audit-assessment.js';

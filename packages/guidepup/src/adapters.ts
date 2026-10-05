@@ -1,21 +1,28 @@
 import { nvda, voiceOver } from './upstream.js';
-import {
-   driverStateSnapshotSchema,
-   type DriverCheckpoint,
-   type DriverCurrentItem,
-   type DriverFocusResult,
-   type DriverFocusTarget,
-   type DriverNavigateRequest,
-   type DriverPerformPayload,
-   type DriverReadiness,
-   type DriverStateSnapshot,
-   type DriverTableMove,
-   type Platform,
-   type PortableDriverVerb,
+import type {
+   DriverCheckpoint,
+   DriverCurrentItem,
+   DriverFocusResult,
+   DriverFocusTarget,
+   DriverNavigateRequest,
+   DriverPerformPayload,
+   DriverReadiness,
+   DriverStateSnapshot,
+   DriverTableMove,
+   Platform,
+   PortableDriverVerb,
+   NativeInputPolicy,
 } from '@a11ied/contracts';
 
-import { queryFocusedAxProperties } from './ax-properties-mac.js';
+import { DriverCommandError } from './driver-command-error.js';
+import { readNativeState } from './native-observations.js';
+import { parseNvdaItem, parseVoiceOverItem } from './current-item.js';
 import { focusMacTarget, focusWindowsTarget } from './focus.js';
+import {
+   createLeasedReader,
+   setReaderFocusTarget,
+   withReaderOwnership,
+} from './leased-reader.js';
 import {
    checkDetectedReadiness,
    createReadinessError,
@@ -24,8 +31,7 @@ import {
    type ScreenReaderLike,
 } from './readiness.js';
 import {
-   buildStateSnapshot,
-   driverCapabilities,
+   getDriverCapabilities,
    type DriverActionOptions,
    type DriverAdapter,
 } from './adapter-shared.js';
@@ -35,7 +41,6 @@ import {
    serializeResolvedDriverCommand,
    type DriverCommandSet,
 } from './command-registry.js';
-import { parseNvdaItem, parseVoiceOverItem } from './current-item.js';
 import { getPortableCommand } from './portable-commands.js';
 import {
    buildCommandOptions,
@@ -59,13 +64,18 @@ import { createJsdomVirtualHost } from './virtual-dom.js';
 import type { VirtualHost } from './virtual-host.js';
 
 class RealScreenReaderAdapter implements DriverAdapter {
-   readonly capabilities = driverCapabilities;
+   readonly capabilities: DriverAdapter['capabilities'];
    readonly target: RealTarget;
    private readonly reader: ScreenReaderLike;
 
-   constructor(target: RealTarget, reader: ScreenReaderLike) {
+   constructor(
+      target: RealTarget,
+      reader: ScreenReaderLike,
+      nativeInput: NativeInputPolicy,
+   ) {
       this.target = target;
-      this.reader = reader;
+      this.capabilities = getDriverCapabilities(target, true, nativeInput);
+      this.reader = createLeasedReader(reader, target, nativeInput);
    }
 
    private stepContext(options?: DriverActionOptions): RealStepContext {
@@ -93,17 +103,27 @@ class RealScreenReaderAdapter implements DriverAdapter {
       await this.reader.stop({ timeout: REAL_TARGET_INPUT_TIMEOUT_MS });
    }
 
+   async runOwned<TResult>(run: () => Promise<TResult>): Promise<TResult> {
+      return withReaderOwnership(this.reader, run);
+   }
+
    async attachDocument(): Promise<void> {
       // Real screen readers read the live host window; the caller opens the page itself,
       // So the adapter only confirms its reader is still there.
-      await this.reader.lastSpokenPhrase().catch(ignoreError);
+      await this.reader.lastSpokenPhrase();
    }
 
    async focus(target: DriverFocusTarget): Promise<DriverFocusResult> {
-      if (this.target === 'voiceover') {
-         return focusMacTarget(target);
-      }
-      return focusWindowsTarget(target);
+      return withReaderOwnership(this.reader, async () => {
+         const result =
+            this.target === 'voiceover'
+               ? await focusMacTarget(target)
+               : await focusWindowsTarget(target);
+         if (result.status === 'focused') {
+            await setReaderFocusTarget(this.reader, target);
+         }
+         return result;
+      });
    }
 
    async performPortable(
@@ -126,16 +146,16 @@ class RealScreenReaderAdapter implements DriverAdapter {
       return {};
    }
 
-   async readCurrentItem(): Promise<{ item: DriverCurrentItem; position: string }> {
+   async readCurrentItem(): Promise<{ item: DriverCurrentItem }> {
       const [phrase, itemText] = await Promise.all([
-         this.reader.lastSpokenPhrase().catch(() => ''),
-         this.reader.itemText().catch(() => ''),
+         this.reader.lastSpokenPhrase(),
+         this.reader.itemText(),
       ]);
       const item =
          this.target === 'voiceover'
             ? parseVoiceOverItem(phrase, itemText)
             : parseNvdaItem(phrase, itemText);
-      return { item, position: `${phrase}\n${itemText}` };
+      return { item };
    }
 
    async readTitle(
@@ -205,18 +225,7 @@ class RealScreenReaderAdapter implements DriverAdapter {
    }
 
    async readState(checkpoints: DriverCheckpoint[]): Promise<DriverStateSnapshot> {
-      if (this.target === 'voiceover') {
-         const [snapshot, axFocusedElement] = await Promise.all([
-            buildStateSnapshot(this.reader, checkpoints, async (phrase, itemText) =>
-               parseVoiceOverItem(phrase, itemText),
-            ),
-            queryFocusedAxProperties().catch(() => undefined as undefined),
-         ]);
-         return driverStateSnapshotSchema.parse({ ...snapshot, axFocusedElement });
-      }
-      return buildStateSnapshot(this.reader, checkpoints, async (phrase, itemText) =>
-         parseNvdaItem(phrase, itemText),
-      );
+      return readNativeState(this.reader, this.target, checkpoints);
    }
 
    async waitForSpeechStabilization(): Promise<void> {
@@ -250,6 +259,65 @@ function resolveVirtualCommand(command: DriverPerformPayload): VirtualCommandRes
 export interface CreateDriverAdapterOptions {
    /** Where a virtual session runs; defaults to a jsdom document in this process. */
    virtualHost?: VirtualHost | undefined;
+   /** Development permits unverified desktop input and cannot prove an audit result. */
+   nativeInput?: NativeInputPolicy | undefined;
+}
+
+function serializeRealActions(adapter: RealScreenReaderAdapter): DriverAdapter {
+   let closing = true,
+      generation = 0,
+      shutdown: Promise<unknown> | undefined = undefined,
+      tail = Promise.resolve();
+   return new Proxy(adapter, {
+      get(instance, key): unknown {
+         const value: unknown = Reflect.get(instance, key);
+         if (typeof value !== 'function') {
+            return value;
+         }
+         if (key === 'start') {
+            return async (...args: unknown[]): Promise<unknown> => {
+               const submitted = generation;
+               await shutdown;
+               if (submitted !== generation) {
+                  throw new DriverCommandError(
+                     'reader-start-cancelled',
+                     'Reader startup was cancelled by a stop request.',
+                     {},
+                  );
+               }
+               closing = false;
+               return Reflect.apply(value, instance, args);
+            };
+         }
+         if (key === 'stop') {
+            return (...args: unknown[]): Promise<unknown> => {
+               closing = true;
+               generation += 1;
+               const stopped: Promise<unknown> = Reflect.apply(value, instance, args);
+               shutdown = Promise.all([tail, stopped]);
+               return shutdown;
+            };
+         }
+         if (key === 'checkReadiness') {
+            return value.bind(instance);
+         }
+         return (...args: unknown[]): Promise<unknown> => {
+            const inactive = closing,
+               pending = tail.then(() => {
+                  if (inactive || closing) {
+                     throw new DriverCommandError(
+                        'reader-session-inactive',
+                        'This real-reader session is inactive or stopping.',
+                        {},
+                     );
+                  }
+                  return Reflect.apply(value, instance, args);
+               });
+            tail = pending.then(ignoreError, ignoreError);
+            return pending;
+         };
+      },
+   });
 }
 
 /** Creates the adapter for one supported driver target. */
@@ -263,7 +331,15 @@ export function createDriverAdapter(
       });
    }
    if (target === 'voiceover') {
-      return new RealScreenReaderAdapter('voiceover', voiceOver);
+      return serializeRealActions(
+         new RealScreenReaderAdapter(
+            'voiceover',
+            voiceOver,
+            options.nativeInput ?? 'guarded',
+         ),
+      );
    }
-   return new RealScreenReaderAdapter('nvda', nvda);
+   return serializeRealActions(
+      new RealScreenReaderAdapter('nvda', nvda, options.nativeInput ?? 'guarded'),
+   );
 }

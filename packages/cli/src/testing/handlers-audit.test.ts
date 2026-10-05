@@ -98,7 +98,9 @@ async function assertAuditVerboseTable(baseUrl: string): Promise<void> {
       '--verbose',
    ]);
    expect(verbose.stdout).toContain('Every criterion');
-   expect(verbose.stdout).toMatch(/Criterion\s+Level\s+Automated check\s+Applies here/);
+   expect(verbose.stdout).toMatch(
+      /Criterion\s+Level\s+Outcome\s+Scanner checks\s+Applies here/,
+   );
    expect(verbose.stdout).toContain('failed');
    expect(verbose.stdout).not.toContain('axe=fail');
    expect(verbose.stdout).not.toContain('testMethod=automated');
@@ -117,12 +119,13 @@ async function assertAuditTextStatesFindings(baseUrl: string): Promise<void> {
    expect(failing.stdout).toContain('a1 wcag rule button-name');
    expect(failing.stdout).not.toContain('axe=fail');
    expect(failing.stdout).not.toContain('relevance=not-detected');
+}
 
+async function assertAuditTextWithoutFindings(baseUrl: string): Promise<void> {
    const passing = await runCli(['audit', `${baseUrl}/basic-page.html`]);
+
    expect(passing.stdout).toContain('Nothing failed the automated checks');
    expect(passing.stdout).not.toContain('Problems');
-
-   await assertAuditVerboseTable(baseUrl);
 }
 
 async function assertAuditInlineHtml(): Promise<void> {
@@ -162,9 +165,59 @@ describe('cli audit command', () => {
    );
 
    it(
+      'states when the text report has no findings',
+      async () => {
+         await assertAuditTextWithoutFindings(testServer.getBaseUrl());
+      },
+      TEST_TIMEOUT_LONG,
+   );
+
+   it(
+      'shows criterion details in the verbose text report',
+      async () => {
+         await assertAuditVerboseTable(testServer.getBaseUrl());
+      },
+      TEST_TIMEOUT_LONG,
+   );
+
+   it(
       '--fail-on carries through to the audit verdict',
       async () => {
          await assertAuditFailOnRespected(testServer.getBaseUrl());
+      },
+      TEST_TIMEOUT_LONG,
+   );
+});
+
+describe('CLI audit conformance level', () => {
+   it(
+      'applies AA to automated rules and the criterion assessment',
+      async () => {
+         const result = await runCli([
+            'audit',
+            `${testServer.getBaseUrl()}/basic-page.html`,
+            '--level',
+            'AA',
+            '--json',
+         ]);
+         const json = parseJsonOutput(result.stdout);
+
+         expect(result.status).toBe(EXIT_SUCCESS);
+         expect(json.result).toHaveProperty(
+            'axe.selection',
+            expect.objectContaining({ kind: 'level', level: 'AA' }),
+         );
+         expect(json.result).toHaveProperty(
+            'criteria',
+            expect.arrayContaining([
+               expect.objectContaining({ level: 'A' }),
+               expect.objectContaining({ level: 'AA' }),
+            ]),
+         );
+         expect(json.result).toHaveProperty(
+            'criteria',
+            expect.not.arrayContaining([expect.objectContaining({ level: 'AAA' })]),
+         );
       },
       TEST_TIMEOUT_LONG,
    );

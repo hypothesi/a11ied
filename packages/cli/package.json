@@ -16,6 +16,7 @@
       "#mcp-server": "./src/bridges/mcp-server.ts"
    },
    "exports": {
+      "./skills/*": "./dist/skills/*",
       ".": {
          "types": "./dist/index.d.ts",
          "import": "./dist/index.js"
@@ -47,6 +48,8 @@
       "clipboardy": "5.3.2",
       "commander": "^15.0.0",
       "ink": "7.1.1",
+      "pngjs": "7.0.0",
+      "proper-lockfile": "4.1.2",
       "react": "19.2.8",
       "string-width": "8.1.0",
       "wrap-ansi": "10.0.1"

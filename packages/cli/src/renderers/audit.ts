@@ -1,4 +1,5 @@
 import type { CliOutputEnvelope } from '#contracts';
+import { getCriterionOutcome, type AuditCriterionRollup } from '#core';
 import {
    badge,
    code,
@@ -57,14 +58,7 @@ interface RelevanceAssessment {
    reasons: string[];
 }
 
-interface CriterionRollupEntry {
-   id: string;
-   title: string;
-   level: string;
-   axeVerdict: string;
-   relevance: string;
-   testMethod: string;
-}
+type CriterionRollupEntry = AuditCriterionRollup;
 
 interface AuditVerdict {
    passed: boolean;
@@ -251,6 +245,7 @@ function renderPageSection(report: AuditReport): string[] {
 const AXE_VERDICTS: Readonly<Record<string, string>> = {
    pass: `${symbols.pass} passed`,
    fail: `${symbols.fail} failed`,
+   incomplete: `${symbols.skip} unresolved`,
    'not-covered': `${symbols.skip} ${dim('no rule')}`,
 };
 
@@ -273,6 +268,7 @@ function rollupRow(entry: CriterionRollupEntry): string[] {
    return [
       `${code(entry.id)}  ${entry.title}`,
       level(entry.level),
+      getCriterionOutcome(entry),
       AXE_VERDICTS[entry.axeVerdict] ?? entry.axeVerdict,
       APPLIES_HERE[entry.relevance] ?? entry.relevance,
       HOW_TO_CHECK[entry.testMethod] ?? entry.testMethod,
@@ -290,7 +286,7 @@ function renderRollupSection(report: AuditReport, options: RenderOptions): strin
       ];
    }
    const rows = table(
-      ['Criterion', 'Level', 'Automated check', 'Applies here', 'How to check'],
+      ['Criterion', 'Level', 'Outcome', 'Scanner checks', 'Applies here', 'How to check'],
       report.criteria.map((entry) => rollupRow(entry)),
       [TITLE_COLUMN_CAP],
    );

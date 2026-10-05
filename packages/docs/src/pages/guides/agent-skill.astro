@@ -55,12 +55,12 @@ error messages with the screen reader. Keep the two results separate.</code></pr
             <span>When the task includes a criterion from the Web Content Accessibility Guidelines (WCAG), the agent runs <code>wcag_show</code> and reads the criterion's <a href="/test-methods">test method</a> before it runs anything else.</span>
          </div>
          <div class="route-row">
-            <strong>Narrows to the relevant criteria</strong>
-            <span>The agent runs <code>audit</code> and reads the list of criteria the page's structure makes <a href="/relevant-criteria">relevant</a>, instead of testing every criterion on every route.</span>
+            <strong>Keeps the requested scope</strong>
+            <span>The development skill uses relevant criteria to focus a requested component check. The complete audit skill uses the coordinator's required procedures and coverage issues; relevance hints do not remove WCAG obligations.</span>
          </div>
          <div class="route-row">
             <strong>Picks the test method</strong>
-            <span>Automated when axe rules decide the criterion, hybrid when a person judges part of the result, manual when a11ied can only explain the criterion.</span>
+            <span>Mapped scanner checks provide partial coverage. Hybrid criteria also need interaction or semantic assessment; manual criteria need human or agent judgment.</span>
          </div>
          <div class="route-row">
             <strong>Moves from simulated to real</strong>
@@ -81,8 +81,9 @@ error messages with the screen reader. Keep the two results separate.</code></pr
          instructions for using them.
       </p>
       <p>
-         The installed instructions come from <code>packages/skills/a11ied/SKILL.md</code> in the
-         repository.
+         The package installs <code>a11ied</code> for component development and
+         <code>full-site-audit</code> for complete desktop assessments. The audit skill uses
+         runtime state, evidence validation, and recovery rather than hand-editing inventories.
       </p>
       <p>
          Follow <a href="/guides/agents">use with an AI agent</a> to connect the MCP server. Use

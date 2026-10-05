@@ -125,8 +125,8 @@ export async function readVirtualItem(
    virtual: VirtualReader,
 ): Promise<DriverCurrentItem> {
    const [phrase, itemText] = await Promise.all([
-      virtual.lastSpokenPhrase().catch(() => ''),
-      virtual.itemText().catch(() => ''),
+      virtual.lastSpokenPhrase(),
+      virtual.itemText(),
    ]);
    const node = virtual.activeNode;
    if (!node) {

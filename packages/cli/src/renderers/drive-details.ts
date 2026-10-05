@@ -4,6 +4,26 @@ import { dim } from '../lib/format.js';
 
 type Entry = [string, string];
 
+/** Unavailable observations remain visible in ordinary CLI output. */
+export function observationEntries(result: DriverActionResult): Entry[] {
+   const observations = result.state.observations;
+   if (!observations) {
+      return [];
+   }
+   const labels = {
+      keyboardFocus: 'Keyboard focus',
+      readerCursorIdentity: 'Reader cursor identity',
+      targetIdentity: 'Target identity',
+   };
+   return Object.entries(observations).map(([key, observation]): Entry => {
+      const label = Object.entries(labels).find(([name]) => name === key)?.[1] ?? key;
+      const reason = observation.status === 'observed' ? '' : `: ${observation.reason}`;
+      const code =
+         'code' in observation && observation.code ? ` [${observation.code}]` : '';
+      return [label, `${observation.status} (${observation.source})${reason}${code}`];
+   });
+}
+
 function spoken(value: string | null | undefined): string {
    if (!value) {
       return dim('none');

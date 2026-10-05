@@ -34,14 +34,14 @@ export const EXPECTED_CRITERIA_COUNTS_BY_VERSION = {
 };
 
 export const EXPECTED_22_TEST_METHOD_COUNTS = {
-   automated: 2,
-   hybrid: 3,
+   automated: 0,
+   hybrid: 5,
    manual: 2,
    unknown: 0,
 };
 const EXPECTED_21_TEST_METHOD_COUNTS = {
-   automated: 1,
-   hybrid: 3,
+   automated: 0,
+   hybrid: 4,
    manual: 0,
    unknown: 0,
 };

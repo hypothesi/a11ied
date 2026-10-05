@@ -34,10 +34,7 @@ import type {
    ScreenReaderTransport,
 } from './screen-reader-transport.js';
 import type { RetryOptions, SpokenMatch, SpokenOptions } from './spoken-matchers.js';
-import {
-   selectTranscriptEntries,
-   type TranscriptSelection,
-} from './transcript-recorder.js';
+import type { TranscriptSelection } from './transcript-recorder.js';
 
 export type {
    LoopOptions,
@@ -54,6 +51,7 @@ export type {
 export class ScreenReader implements AsyncDisposable {
    private readonly transport: ScreenReaderTransport;
    private stopped = false;
+   private shutdown: Promise<void> | undefined = undefined;
 
    constructor(transport: ScreenReaderTransport) {
       this.transport = transport;
@@ -166,10 +164,16 @@ export class ScreenReader implements AsyncDisposable {
       return currentItemOf(state);
    }
 
-   /** The full reader state after the last action, including the transcript. */
-   async state(): Promise<DriverStateSnapshot> {
+   /**
+    * Reader state includes optional transcript selection and observation availability.
+    * Keyboard-focus properties do not establish native reader-cursor or target identity.
+    */
+   async state(selection?: TranscriptSelection): Promise<DriverStateSnapshot> {
       this.assertRunning();
-      const step = await this.transport.status();
+      const step =
+         selection === undefined
+            ? await this.transport.status()
+            : await this.step({ action: 'transcript', payload: selection });
       return step.state;
    }
 
@@ -231,8 +235,8 @@ export class ScreenReader implements AsyncDisposable {
    }
 
    /**
-    * Pauses for `ms`, or polls the transcript until a phrase spoken after the call
-    * matches `for` and returns it. Throws at `timeoutMs`, which defaults to 5000.
+    * Pauses for `ms`, or polls announcements after this call or the `since` checkpoint.
+    * Returns the matching phrase. Throws at `timeoutMs`, which defaults to 5000.
     */
    async wait(options: WaitOptions): Promise<string> {
       const payload = buildWaitPayload(options);
@@ -254,12 +258,16 @@ export class ScreenReader implements AsyncDisposable {
       await this.step({ action: 'checkpoint', payload: { label } });
    }
 
-   /** The timestamped transcript, narrowed by `since` and `tail` when given. */
+   /**
+    * Select by checkpoint, phrase tail, or session index. `limit` counts checkpoints;
+    * index paging defaults to 200 entries. Use `state(selection)` for omission counts and
+    * the next index. Unselected calls return every retained transcript entry.
+    */
    async transcript(
       selection: TranscriptSelection = {},
    ): Promise<DriverTranscriptEntry[]> {
-      const step = await this.step({ action: 'transcript' });
-      return selectTranscriptEntries(step.state.transcript, selection);
+      const step = await this.step({ action: 'transcript', payload: selection });
+      return step.state.transcript;
    }
 
    /** Opens a page in the same session: a URL, or `{ html }` for inline markup. */
@@ -321,12 +329,15 @@ export class ScreenReader implements AsyncDisposable {
    }
 
    /** Stops the reader and releases its browser or broker. Safe to call twice. */
-   async stop(): Promise<void> {
-      if (this.stopped) {
-         return;
-      }
+   stop(): Promise<void> {
       this.stopped = true;
-      await this.transport.stop();
+      this.shutdown ??= Promise.resolve()
+         .then(() => this.transport.stop())
+         .catch((error: unknown) => {
+            this.shutdown = undefined;
+            throw error;
+         });
+      return this.shutdown;
    }
 
    async [Symbol.asyncDispose](): Promise<void> {

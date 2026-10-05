@@ -86,7 +86,7 @@ async function assertWcagCriteriaSummary(): Promise<void> {
    );
    expect(summary.version).toBe('2.2');
    expect(summary.totals.criteria).toBe(levelTotal);
-   expect(summary.totals.automated).toBeGreaterThan(0);
+   expect(summary.totals.automated).toStrictEqual(0);
 
    const text = await runCli(['wcag', 'criteria', '--summary']);
    expect(text.stdout).toContain('WCAG 2.2 test methods');
@@ -261,7 +261,9 @@ async function assertTextShowSnapshot(): Promise<void> {
    expect(show.stdout).not.toMatch(/^Understanding$/mu);
    expect(show.stdout).not.toContain('Test method');
    expect(show.stdout).toContain('Testing it');
-   expect(show.stdout).toContain('a1 sr expect <text>');
+   expect(show.stdout).toContain('Required evidence');
+   expect(show.stdout).toContain('speech');
+   expect(show.stdout).toContain('Evaluation');
    expect(show.stdout).toContain('If it fails');
    expect(show.stdout).toContain('ARIA22');
    expect(show.stdout).toContain('a1 wcag understanding 4.1.3');

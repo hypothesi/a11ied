@@ -27,7 +27,8 @@ const previousLink = activeIndex > 0 ? flatLinks[activeIndex - 1] : undefined;
 const nextLink = activeIndex === -1 ? undefined : flatLinks[activeIndex + 1];
 const pageNumber = Math.max(1, activeIndex + 1);
 const LONG_TITLE_LENGTH = 30;
-const isLongTitle = title.length > LONG_TITLE_LENGTH;
+const LONG_TITLE_WORD_LENGTH = 12;
+const isLongTitle = title.length > LONG_TITLE_LENGTH || title.split(/\s+/).some((word) => word.length > LONG_TITLE_WORD_LENGTH);
 ---
 
 <html lang="en">
@@ -125,8 +126,8 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH;
          .nav-link.active { margin-inline: -0.55rem; padding-inline: 0.55rem; background: var(--ink); color: var(--yellow); border-bottom-color: var(--ink); }
 
          .content { min-width: 0; padding: clamp(1.25rem, 3vw, 3rem) clamp(1rem, 5vw, 5.5rem) var(--3xl); }
-         .content-frame { width: min(100%, 76rem); display: grid; gap: var(--3xl); }
-         header { position: relative; display: grid; gap: var(--lg); padding-top: var(--xl); isolation: isolate; }
+         .content-frame { width: min(100%, 76rem); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--3xl); }
+         header { position: relative; container-type: inline-size; display: grid; gap: var(--lg); padding-top: var(--xl); isolation: isolate; }
          header::before { content: ""; position: absolute; width: clamp(7rem, 18vw, 13rem); aspect-ratio: 1; right: 1%; top: 0; z-index: -1; border-radius: 50%; background: radial-gradient(circle, var(--red) 1.5px, transparent 1.8px) 0 0 / 8px 8px; transform: rotate(7deg); }
          header::after { content: "NO. " attr(data-page); position: absolute; right: 0; bottom: -1rem; padding: 0.4rem 0.55rem; background: var(--blue); color: var(--paper-light); border: 2px solid var(--ink); font: 700 0.8rem/1 var(--display); letter-spacing: 0.13em; transform: rotate(2deg); }
          .eyebrow-row { display: flex; flex-wrap: wrap; gap: var(--xs); }
@@ -134,7 +135,7 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH;
          .eyebrow { background: var(--red); color: var(--paper-light); }
          .context-chip { background: var(--paper-light); color: var(--ink); }
          h1 { margin: 0; max-width: 13ch; font: 700 clamp(4.3rem, 10vw, 9.5rem)/0.88 var(--display); letter-spacing: -0.065em; text-transform: uppercase; text-wrap: balance; text-shadow: 4px 4px 0 var(--yellow), 7px 7px 0 color-mix(in oklch, var(--red) 62%, transparent); }
-         .title--long { max-width: 22ch; font-size: clamp(2.8rem, 6vw, 5.4rem); }
+         .title--long { max-width: 22ch; font-size: clamp(1rem, 11cqi, 5.4rem); }
          .summary { max-width: 60ch; margin: var(--xl) 0 0; padding-top: var(--lg); border-top: 3px solid var(--ink); font-size: clamp(1.12rem, 1.6vw, 1.35rem); font-weight: 500; line-height: 1.58; color: var(--ink-soft); }
          .summary > p { margin: 0; font-size: inherit; line-height: inherit; }
          .summary > p + p { margin-top: var(--md); }
@@ -162,7 +163,7 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH;
          li + li, p + p { margin-top: var(--sm); }
          strong { font-weight: 800; }
          code, pre { font-family: var(--code); }
-         code { font-size: 0.88em; font-weight: 600; }
+         code { overflow-wrap: anywhere; font-size: 0.88em; font-weight: 600; }
          :not(pre) > code { padding: 0.14em 0.28em; background: var(--yellow); color: var(--ink); box-decoration-break: clone; }
          pre { position: relative; overflow-x: auto; margin: 0; padding: 3.4rem 1.15rem 1.15rem; background: var(--ink); color: var(--paper-light); border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--red); font-size: 0.9rem; line-height: 1.7; }
          .code-block-tools { position: absolute; inset: 0 0 auto; min-height: 2.5rem; display: flex; align-items: center; justify-content: space-between; gap: var(--md); padding: 0.35rem 0.45rem 0.35rem 0.75rem; background: var(--yellow); color: var(--ink); font: 700 0.68rem/1 var(--display); letter-spacing: 0.14em; }

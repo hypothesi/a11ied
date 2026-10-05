@@ -50,7 +50,7 @@ export interface NvdaKeyCodeStep {
    command: keyof typeof NVDAKeyCodeCommands;
 }
 
-/** Repeats `step` until the phrase contains `phraseIncludes` or the reader stops moving. */
+/** Repeats `step` until the requested announcement is heard or the search cap is reached. */
 export interface RepeatUntilPhraseStep<TStep> {
    kind: 'repeat-until';
    step: TStep;

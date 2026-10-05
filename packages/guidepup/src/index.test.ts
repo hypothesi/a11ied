@@ -7,12 +7,40 @@ import {
    isVoiceOverRunning,
 } from './index.js';
 import { normalizeDriverKeys } from './key-aliases.js';
+import { buildStateSnapshot } from './adapter-shared.js';
+
+describe('reader observation failures', () => {
+   it('propagates a failed speech log instead of reporting silence', async () => {
+      const reader = {
+         lastSpokenPhrase: async (): Promise<string> => 'Save',
+         itemText: async (): Promise<string> => 'Save',
+         spokenPhraseLog: async (): Promise<string[]> => {
+            throw new Error('Reader disconnected');
+         },
+         itemTextLog: async (): Promise<string[]> => ['Save'],
+      };
+
+      await expect(buildStateSnapshot(reader, [])).rejects.toThrow('Reader disconnected');
+   });
+});
 
 describe('guidepup driver adapter capabilities', () => {
-   it('exposes one normalized capability set across all targets', () => {
-      expect(createDriverAdapter('virtual').capabilities).toEqual(driverCapabilities);
+   it('advertises supported actions for each target', () => {
+      expect(createDriverAdapter('virtual').capabilities).not.toContain('screenshot');
+      expect(createDriverAdapter('virtual').capabilities).not.toContain('focus');
+      expect(
+         createDriverAdapter('voiceover', { nativeInput: 'require-binding' })
+            .capabilities,
+      ).not.toContain('type');
+      expect(
+         createDriverAdapter('voiceover', { nativeInput: 'require-binding' })
+            .capabilities,
+      ).not.toContain('perform');
+      expect(
+         createDriverAdapter('voiceover', { nativeInput: 'development' }).capabilities,
+      ).toEqual(driverCapabilities);
       expect(createDriverAdapter('voiceover').capabilities).toEqual(driverCapabilities);
-      expect(createDriverAdapter('nvda').capabilities).toEqual(driverCapabilities);
+      expect(createDriverAdapter('nvda').capabilities).not.toContain('screenshot');
    });
 });
 

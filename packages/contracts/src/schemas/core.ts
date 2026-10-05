@@ -1,7 +1,12 @@
 import { z } from 'zod';
 import { browserAutomationPolicySchema } from './browser.js';
-import { driverFocusTargetFieldsSchema } from './driver-focus.js';
+import {
+   driverFocusTargetFieldsSchema,
+   driverObservationsSchema,
+   nativeInputPolicySchema,
+} from './driver-focus.js';
 import { driverCurrentItemSchema } from './driver-navigation.js';
+import { driverTranscriptWindowSchema } from './driver-transcript.js';
 import { platformSchema } from './platform.js';
 
 export { platformSchema, type Platform } from './platform.js';
@@ -49,7 +54,28 @@ export const doctorHostSchema = z.object({
 });
 export type DoctorHost = z.infer<typeof doctorHostSchema>;
 
+export const doctorRequestSchema = z
+   .object({
+      task: z.enum(['all', 'scan', 'reader', 'audit']).default('all'),
+      target: platformSchema.optional(),
+      recording: z.boolean().default(false),
+   })
+   .refine(
+      (request) =>
+         !request.recording ||
+         ((request.task === 'reader' || request.task === 'audit') &&
+            request.target !== 'virtual'),
+      {
+         message: 'Recording requires task reader or audit with a real reader.',
+         path: ['recording'],
+      },
+   );
+export type DoctorRequest = z.infer<typeof doctorRequestSchema>;
+
 export const doctorReportSchema = z.object({
+   request: doctorRequestSchema.optional(),
+   browserVersion: z.string().optional(),
+   readerVersions: z.partialRecord(platformSchema, z.string()).optional(),
    ready: z.boolean(),
    host: doctorHostSchema,
    packageVersion: z.string(),
@@ -209,7 +235,7 @@ export type DriverReadiness = z.infer<typeof driverReadinessSchema>;
 export const recordingFormatSchema = z.enum(['mov', 'mp4']);
 export type RecordingFormat = z.infer<typeof recordingFormatSchema>;
 
-export const recordingStatusSchema = z.enum(['active', 'completed']);
+export const recordingStatusSchema = z.enum(['active', 'completed', 'failed']);
 export type RecordingStatus = z.infer<typeof recordingStatusSchema>;
 
 export const sessionRecordingSchema = z.object({
@@ -239,6 +265,8 @@ export const accessibilityDriverSessionSchema = z.object({
    url: z.string().optional(),
    /** The app or browser window the session opened, used by a bare focus action. */
    app: driverFocusTargetFieldsSchema.optional(),
+   browser: z.string().min(1).optional(),
+   nativeInput: nativeInputPolicySchema.optional(),
    idleTimeoutMinutes: z.number().nonnegative().optional(),
    /** The engine a virtual session runs in; absent for VoiceOver and NVDA. */
    engine: virtualEngineSchema.optional(),
@@ -265,11 +293,13 @@ export const driverTranscriptEntrySchema = z.object({
 export type DriverTranscriptEntry = z.infer<typeof driverTranscriptEntrySchema>;
 
 export const driverTranscriptSchema = z.object({
+   sessionId: z.string().min(1).optional(),
    target: platformSchema,
    url: z.string().optional(),
    startedAt: z.string().datetime(),
    exportedAt: z.string().datetime(),
    entries: z.array(driverTranscriptEntrySchema),
+   window: driverTranscriptWindowSchema.optional(),
 });
 export type DriverTranscript = z.infer<typeof driverTranscriptSchema>;
 
@@ -293,6 +323,8 @@ export const axFocusedElementSchema = z.object({
 export type AxFocusedElement = z.infer<typeof axFocusedElementSchema>;
 
 export const driverStateSnapshotSchema = z.object({
+   observedAt: z.string().datetime().optional(),
+   foreground: driverFocusTargetFieldsSchema.optional(),
    lastSpokenPhrase: z.string().nullish(),
    currentItemText: z.string().nullish(),
    spokenPhraseLog: z.array(z.string()),
@@ -300,8 +332,10 @@ export const driverStateSnapshotSchema = z.object({
    logCursor: z.number().int().nonnegative(),
    checkpoints: z.array(driverCheckpointSchema),
    transcript: z.array(driverTranscriptEntrySchema).default([]),
+   transcriptWindow: driverTranscriptWindowSchema.optional(),
    axFocusedElement: axFocusedElementSchema.optional(),
    currentItem: driverCurrentItemSchema.optional(),
+   observations: driverObservationsSchema.optional(),
 });
 export type DriverStateSnapshot = z.infer<typeof driverStateSnapshotSchema>;
 

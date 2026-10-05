@@ -22,6 +22,7 @@ interface MockReadable {
 }
 
 interface MockChildProcess {
+   pid: number | undefined;
    stdout: MockReadable;
    stderr: MockReadable;
    stdin: {
@@ -56,6 +57,7 @@ function createMockChildProcess(): MockChildProcess {
    const exitListeners = new Set<ExitListener>();
 
    return {
+      pid: 1000,
       stdout: createReadable(),
       stderr: createReadable(),
       stdin: {
@@ -210,6 +212,31 @@ afterEach(async () => {
 });
 
 describe('driver recording start and stop', () => {
+   it('treats a failed spawn as terminal and retains the original failure reason', async () => {
+      setPlatform('darwin');
+      const child = createMockChildProcess();
+      child.pid = undefined;
+      recordingMocks.spawnMock.mockImplementationOnce(() => {
+         queueMicrotask(() =>
+            child.emitError(new Error('Recorder executable unavailable')),
+         );
+         return child;
+      });
+      const recording = startSessionRecording(
+         'voiceover',
+         './session.mov',
+         await createTempRoot(),
+      );
+
+      await expect(recording.stop()).rejects.toMatchObject({
+         code: 'recording-command-failed',
+         details: { reason: 'Recorder executable unavailable' },
+      });
+
+      expect(child.stdin.write).not.toHaveBeenCalled();
+   });
+});
+describe('driver recording completion', () => {
    it(
       'starts and stops one macOS recording with normalized metadata',
       async () => {

@@ -1,22 +1,26 @@
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
+import { z } from 'zod';
 
 import type { AxFocusedElement } from '@a11ied/contracts';
 
-import { loadPackageScript } from './focus-shared.js';
+import { DriverCommandError } from './driver-command-error.js';
+import { focusExecFile, loadPackageScript } from './focus-shared.js';
 
-const execFileAsync = promisify(execFile);
 const AX_QUERY_TIMEOUT_MS = 2000;
 
-// ASCII 30 (record separator) — won't appear in any real accessibility property value.
+// The record separator distinguishes empty AX attributes from missing focus.
 const FIELD_SEPARATOR = '\u001E';
-const EXPECTED_FIELD_COUNT = 6;
+const axFieldsSchema = z.tuple([
+   z.string(),
+   z.string(),
+   z.string(),
+   z.string(),
+   z.string(),
+   z.enum(['', 'true', 'false']),
+]);
 
 function loadAxPropertiesScript(): string {
    return loadPackageScript('scripts/ax-properties.applescript', import.meta.url);
 }
-
-type AxFields = [string, string, string, string, string, string];
 
 function parseEnabledField(enabledStr: string): boolean | undefined {
    if (enabledStr === 'true') {
@@ -28,9 +32,9 @@ function parseEnabledField(enabledStr: string): boolean | undefined {
    return undefined;
 }
 
-function buildAxResult([role, subrole, title, description, value, enabledStr]: AxFields):
-   | AxFocusedElement
-   | undefined {
+function buildAxResult([role, subrole, title, description, value, enabledStr]: z.infer<
+   typeof axFieldsSchema
+>): AxFocusedElement | undefined {
    const enabled = parseEnabledField(enabledStr);
    const result: AxFocusedElement = {
       ...(role && { role }),
@@ -44,28 +48,28 @@ function buildAxResult([role, subrole, title, description, value, enabledStr]: A
 }
 
 function parseAxOutput(raw: string): AxFocusedElement | undefined {
-   const parts = raw.trim().split(FIELD_SEPARATOR);
-   if (parts.length !== EXPECTED_FIELD_COUNT) {
+   if (raw.trim().length === 0) {
       return undefined;
    }
-   return buildAxResult(parts as AxFields);
+   const parsed = axFieldsSchema.safeParse(raw.trimEnd().split(FIELD_SEPARATOR));
+   if (!parsed.success) {
+      throw new DriverCommandError(
+         'keyboard-focus-invalid-response',
+         'The macOS keyboard-focus query returned an invalid property record.',
+         {},
+      );
+   }
+   return buildAxResult(parsed.data);
 }
 
 /**
  * Queries the AX properties of the system-focused UI element via System Events. macOS
- * only. Returns undefined on any error or when no element is focused.
+ * only. Returns undefined when no focus properties are available. Query failures
+ * propagate so callers can distinguish unavailable focus from permission or OS errors.
  */
 export async function queryFocusedAxProperties(): Promise<AxFocusedElement | undefined> {
-   try {
-      const { stdout } = await execFileAsync(
-         'osascript',
-         ['-e', loadAxPropertiesScript()],
-         {
-            timeout: AX_QUERY_TIMEOUT_MS,
-         },
-      );
-      return parseAxOutput(stdout);
-   } catch {
-      return undefined;
-   }
+   const { stdout } = await focusExecFile('osascript', ['-e', loadAxPropertiesScript()], {
+      timeout: AX_QUERY_TIMEOUT_MS,
+   });
+   return parseAxOutput(String(stdout));
 }

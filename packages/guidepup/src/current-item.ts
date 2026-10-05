@@ -78,12 +78,12 @@ const SPOKEN_STATES = [
 ] as const;
 
 const SPOKEN_STATE_SET: ReadonlySet<string> = new Set(SPOKEN_STATES);
-const HEADING_LEVEL_PATTERN = /\bheading level (\d)\b/iu;
+const HEADING_LEVEL_PATTERN = /^heading level (\d)\b/iu;
 
 function findSpokenRole(chunk: string): string | undefined {
    // "heading level 1" carries the level after the role word.
    const lowered = chunk.toLowerCase().replace(/\s+level \d$/u, '');
-   return SPOKEN_ROLES.find((role) => lowered === role || lowered.endsWith(` ${role}`));
+   return SPOKEN_ROLES.find((role) => lowered === role);
 }
 
 function extractStates(chunks: string[]): string[] {
@@ -135,10 +135,15 @@ export function parseVoiceOverItem(phrase: string, itemText: string): DriverCurr
       .split(',')
       .map((chunk) => chunk.trim())
       .filter(Boolean);
-   const roleIndex = chunks.findLastIndex((chunk) => findSpokenRole(chunk) !== undefined);
+   const roleIndex = chunks.findLastIndex(
+      (chunk) => !SPOKEN_STATE_SET.has(chunk.toLowerCase()),
+   );
    const roleChunk = roleIndex === -1 ? undefined : chunks[roleIndex];
-   const rest = chunks.filter((_chunk, index) => index !== roleIndex);
    const rawRole = roleChunk === undefined ? undefined : findSpokenRole(roleChunk);
+   const rest =
+      rawRole === undefined
+         ? chunks
+         : chunks.filter((_chunk, index) => index !== roleIndex);
    const base: DriverCurrentItem = {
       states: extractStates(rest),
       phrase,
@@ -147,9 +152,9 @@ export function parseVoiceOverItem(phrase: string, itemText: string): DriverCurr
          'VoiceOver: role and states parsed from the phrase, name from the item text',
    };
    return withOptional(base, {
-      role: rawRole === undefined ? undefined : normalizeRole(rawRole, phrase),
+      role: rawRole === undefined ? undefined : normalizeRole(rawRole, roleChunk ?? ''),
       name: itemText || rest.find((chunk) => !SPOKEN_STATE_SET.has(chunk.toLowerCase())),
-      level: readHeadingLevel(phrase),
+      level: rawRole === 'heading' ? readHeadingLevel(roleChunk ?? '') : undefined,
    });
 }
 

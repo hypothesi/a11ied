@@ -4,8 +4,8 @@ export const committedArtifactRegressionFixture = {
          criteriaCount: 86,
          testMethodTotals: {
             criteria: 86,
-            automated: 27,
-            hybrid: 9,
+            automated: 0,
+            hybrid: 36,
             manual: 50,
             unknown: 0,
          },
@@ -14,8 +14,8 @@ export const committedArtifactRegressionFixture = {
          criteriaCount: 78,
          testMethodTotals: {
             criteria: 78,
-            automated: 27,
-            hybrid: 5,
+            automated: 0,
+            hybrid: 32,
             manual: 46,
             unknown: 0,
          },

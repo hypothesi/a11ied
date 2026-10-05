@@ -89,7 +89,7 @@ async function pendingRows(results: string): Promise<string[]> {
 
 describe('the pattern triage loop', () => {
    it(
-      'sets a row aside once someone records it as inapplicable',
+      'keeps a live failure after an unverified note calls it inapplicable',
       async () => {
          const results = await createResultsFile();
 
@@ -99,8 +99,8 @@ describe('the pattern triage loop', () => {
 
          expect(before.status).toBe(EXIT_ASSERTION);
          expect(recorded.status).toBe(EXIT_SUCCESS);
-         expect(after.status).toBe(EXIT_SUCCESS);
-         expect(after.stdout).toContain('Already judged');
+         expect(after.status).toBe(EXIT_ASSERTION);
+         expect(after.stdout).toContain('unverified or stale evidence');
       },
       TEST_TIMEOUT_VERY_LONG,
    );
@@ -108,7 +108,7 @@ describe('the pattern triage loop', () => {
 
 describe('the pattern pending list', () => {
    it(
-      'lists the rows nobody has judged, and stops listing one that was judged',
+      'keeps rows pending after an unverified judgment',
       async () => {
          const results = await createResultsFile();
 
@@ -117,7 +117,7 @@ describe('the pattern pending list', () => {
          const after = await pendingRows(results);
 
          expect(before).toContain(DEAD_KEY_ROW);
-         expect(after).not.toContain(DEAD_KEY_ROW);
+         expect(after).toContain(DEAD_KEY_ROW);
       },
       TEST_TIMEOUT_VERY_LONG,
    );

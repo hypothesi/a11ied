@@ -9,16 +9,7 @@ import { CliUsageError } from '#core';
 
 import { resolvePageTarget } from '../lib/resolvers.js';
 import type { CommandExecution } from '../lib/helpers.js';
-
-/** The procedure recorded when the criterion's strategy names none. */
-const DEFAULT_PROCEDURE_ID = 'manual_review';
-
-/**
- * The strategy artifact names `axe_scan` for a criterion axe already covers. A person
- * recording a result did not run axe, so storing their outcome under `axe_scan` would put
- * a human judgment into the report as an automated one.
- */
-const AUTOMATED_PROCEDURE_ID = 'axe_scan';
+import { readEvidenceFinding, readEvidenceProvenance } from '../lib/evidence-input.js';
 
 export interface EvidenceActionOptions {
    criterion?: string;
@@ -29,6 +20,9 @@ export interface EvidenceActionOptions {
    note?: string;
    by?: string;
    results?: string;
+   run?: string;
+   provenance?: string;
+   finding?: string;
    level?: string;
    wcag?: string;
    json?: boolean;
@@ -120,52 +114,39 @@ function buildRecord(input: {
    };
 }
 
-/** Picks the procedure named on the flag, else the first one a person can perform. */
-async function resolveProcedureId(
-   criterionId: string,
-   options: EvidenceActionOptions,
-): Promise<string> {
-   if (options.procedure) {
-      return options.procedure;
-   }
-
-   const { getTestMethod, WcagEngineNotFoundError } = await import('@a11ied/wcag-engine');
-   try {
-      const lookupOptions = options.wcag === undefined ? {} : { version: options.wcag };
-      const { procedureIds } = getTestMethod(criterionId, lookupOptions).strategy;
-      const performable = procedureIds.find((id) => id !== AUTOMATED_PROCEDURE_ID);
-      return performable ?? DEFAULT_PROCEDURE_ID;
-   } catch (error) {
-      if (error instanceof WcagEngineNotFoundError) {
-         throw new CliUsageError(
-            'validation-error',
-            `No WCAG criterion "${criterionId}".`,
-            { field: 'criterion', value: criterionId },
-         );
-      }
-      throw error;
-   }
-}
-
 /** Records one result for a check a11ied cannot automate. */
 export async function handleRecordAction(
    target: string | undefined,
    options: EvidenceActionOptions,
 ): Promise<CommandExecution> {
-   const { appendEvidence } = await import('#core');
+   const { recordEvidence, resolveEvidenceProcedure } = await import('#core');
    const criterionId = requireCriterion(options.criterion);
    const subject = await resolveSubject(target, options);
    const record = buildRecord({
       subject,
       criterionId,
-      procedureId: await resolveProcedureId(criterionId, options),
+      procedureId: resolveEvidenceProcedure({
+         criterionId,
+         procedureId: options.procedure,
+         wcagVersion: options.wcag,
+      }).procedureId,
       options,
    });
-   const file = await appendEvidence(record, { file: options.results });
+   if (options.provenance) {
+      record.provenance = await readEvidenceProvenance(options.provenance);
+   }
+   if (options.finding) {
+      record.finding = await readEvidenceFinding(options.finding);
+   }
+   const accepted = await recordEvidence(record, {
+      file: options.results,
+      runFile: options.run,
+      wcagVersion: options.wcag,
+   });
 
    return {
       target: { kind: 'url', value: subject },
-      result: { record, file },
+      result: accepted,
    };
 }
 
@@ -179,6 +160,7 @@ export async function handlePendingAction(
    const pending = await listPendingCriteria({
       subject,
       file: options.results,
+      runFile: options.run,
       level: options.level,
       wcagVersion: options.wcag,
    });

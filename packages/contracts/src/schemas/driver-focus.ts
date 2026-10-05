@@ -1,6 +1,13 @@
 import { z } from 'zod';
 import { platformSchema } from './platform.js';
 
+export const nativeInputPolicySchema = z.enum([
+   'guarded',
+   'require-binding',
+   'development',
+]);
+export type NativeInputPolicy = z.infer<typeof nativeInputPolicySchema>;
+
 export const driverFocusMatchSchema = z.enum(['contains', 'exact']);
 export type DriverFocusMatch = z.infer<typeof driverFocusMatchSchema>;
 
@@ -51,3 +58,23 @@ export const driverFocusResultSchema = z.object({
    details: z.array(z.string()).optional(),
 });
 export type DriverFocusResult = z.infer<typeof driverFocusResultSchema>;
+
+/** Availability of an observation, without implying verified target binding. */
+export const driverObservationSchema = z.discriminatedUnion('status', [
+   z.object({
+      status: z.literal('observed'),
+      source: z.string().min(1),
+   }),
+   z.object({
+      status: z.enum(['unavailable', 'unsupported']),
+      source: z.string().min(1),
+      reason: z.string().min(1),
+      code: z.string().min(1).optional(),
+   }),
+]);
+
+export const driverObservationsSchema = z.object({
+   keyboardFocus: driverObservationSchema,
+   readerCursorIdentity: driverObservationSchema,
+   targetIdentity: driverObservationSchema,
+});

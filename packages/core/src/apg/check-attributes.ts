@@ -160,11 +160,13 @@ function checkOneRow(input: {
  * to decide which parts of the pattern apply to the component under test, which is a
  * judgment the tool does not make.
  */
-function buildApplicabilityHints(
-   names: string[],
-   readings: AttributeReadings,
-   keyboardTables: ApgKeyboardTable[],
-): ApgApplicabilityHint[] {
+function buildApplicabilityHints(input: {
+   names: string[];
+   readings: AttributeReadings;
+   keyboardTables: ApgKeyboardTable[];
+   keyboardRowKeys?: string[][] | undefined;
+}): ApgApplicabilityHint[] {
+   const { keyboardRowKeys, keyboardTables, names, readings } = input;
    const hints: ApgApplicabilityHint[] = [];
 
    for (const name of names) {
@@ -172,10 +174,13 @@ function buildApplicabilityHints(
          continue;
       }
       const relatedRowKeys: string[] = [];
-      for (const table of keyboardTables) {
+      for (const [tableIndex, table] of keyboardTables.entries()) {
          for (const [index, row] of table.rows.entries()) {
             if (row.description.some((line) => line.includes(name))) {
-               relatedRowKeys.push(buildRowKey(row.testId, index));
+               relatedRowKeys.push(
+                  keyboardRowKeys?.[tableIndex]?.[index] ??
+                     buildRowKey(row.testId, index),
+               );
             }
          }
       }
@@ -204,6 +209,7 @@ export async function checkApgAttributes(input: {
    table: ApgAttributeTable | undefined;
    accessibilityTree: string;
    keyboardTables: ApgKeyboardTable[];
+   keyboardRowKeys?: string[][];
 }): Promise<{ rows: ApgAttributeCheckRow[]; hints: ApgApplicabilityHint[] }> {
    const table = input.table;
    if (!table) {
@@ -225,5 +231,13 @@ export async function checkApgAttributes(input: {
       );
    }
 
-   return { rows, hints: buildApplicabilityHints(names, readings, input.keyboardTables) };
+   return {
+      rows,
+      hints: buildApplicabilityHints({
+         names,
+         readings,
+         keyboardTables: input.keyboardTables,
+         keyboardRowKeys: input.keyboardRowKeys,
+      }),
+   };
 }

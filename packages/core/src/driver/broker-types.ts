@@ -8,6 +8,7 @@ import type {
 import type { DriverAdapter } from '@a11ied/guidepup/browser';
 
 import type { TranscriptRecorder } from './transcript-recorder.js';
+import type { CliEnvironmentError } from '../errors/cli-errors.js';
 
 /** One newline-delimited JSON request to the broker. */
 export interface BrokerRequest {
@@ -20,6 +21,8 @@ export interface BrokerRequest {
 
 export interface BrokerResponse {
    ok: boolean;
+   stopping?: boolean;
+   session?: AccessibilityDriverSession;
    result?: DriverActionResult;
    error?: {
       code: string;
@@ -36,6 +39,7 @@ export interface BrokerResponse {
  * the test runners build this much and nothing more.
  */
 export interface ActionContext {
+   stopping?: boolean;
    adapter: DriverAdapter;
    session: Pick<AccessibilityDriverSession, 'app'>;
    checkpoints: DriverCheckpoint[];
@@ -43,6 +47,8 @@ export interface ActionContext {
 }
 
 export interface BrokerHandlerContext extends ActionContext {
+   resourcesStopped?: boolean;
+   startupError?: CliEnvironmentError;
    session: AccessibilityDriverSession;
    writeMetadata: (session: AccessibilityDriverSession) => Promise<void>;
    finishRecording?: () => Promise<SessionRecording | undefined>;

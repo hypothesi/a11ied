@@ -9,7 +9,19 @@
       <main>
          <h1><a href="#main-heading" id="main-heading">a11ied smoke heading</a></h1>
          <p>Screen reader smoke fixture.</p>
-         <button type="button">a11ied smoke button</button>
+         <label for="smoke-input">a11ied smoke input</label>
+         <input
+            id="smoke-input"
+            onchange="fetch('/typed?value=' + encodeURIComponent(this.value))" />
+         <button
+            type="button"
+            onclick="
+               fetch('/activated');
+               document.getElementById('result').textContent = 'a11ied smoke submitted';
+            ">
+            a11ied smoke button
+         </button>
+         <p id="result" role="status"></p>
       </main>
    </body>
 </html>

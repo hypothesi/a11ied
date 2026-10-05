@@ -1,10 +1,11 @@
-import type {
-   AccessibilityDriverSession,
-   DriverActionRequestInput,
-   DriverActionResult,
-   DriverMode,
-   Platform,
-   VirtualEngine,
+import {
+   nativeInputPolicySchema,
+   type AccessibilityDriverSession,
+   type DriverActionRequestInput,
+   type DriverActionResult,
+   type DriverMode,
+   type Platform,
+   type VirtualEngine,
 } from '@a11ied/contracts';
 
 import { isVoiceOverRunning } from '@a11ied/guidepup';
@@ -20,12 +21,17 @@ import { resolveAvailableDefaultTarget } from './default-target.js';
 import { resolveDriverMode } from './environment.js';
 import { validateRecordingRequest } from './recording.js';
 import { runEphemeralAction } from './runtime-ephemeral.js';
-import { hasInProcessSession, startInProcessSession } from './runtime-internal.js';
+import {
+   getRetainedInProcessSession,
+   hasInProcessSession,
+   requestInProcess,
+   startInProcessSession,
+} from './runtime-internal.js';
 import { ensureScreenReaderAssets } from './assets.js';
 import { assertTargetReady, parseBrokerActionResult } from './runtime-support.js';
 import { withSessionStartLock } from './session-lock.js';
+import { CliEnvironmentError } from '../errors/cli-errors.js';
 import {
-   createMissingSessionError,
    createSessionId,
    ensureStateDirectory,
    getActiveSessionFile,
@@ -34,6 +40,7 @@ import {
    isProcessRunning,
    readActiveSessionMetadata,
    removeSessionArtifacts,
+   requireMatchingDriverSession,
 } from './session-utils.js';
 
 export { getActiveSessionFile, getDriverSocketPath } from './session-utils.js';
@@ -45,27 +52,28 @@ const MS_PER_MINUTE = 60_000;
 export interface DriverRequestOptions {
    /** Bounds the screen reader command; the broker reply is allowed a few seconds more. */
    timeoutMs?: number | undefined;
+   /** Refuses replacement adoption by a session-bound library handle. */
+   expectedSessionId?: string | undefined;
 }
 
 export interface StartDriverSessionOptions {
    /** Defaults to the platform screen reader, falling back to virtual. */
    target?: Platform;
+   replaceActive?: boolean;
    /** Defaults to `$A11IED_DRIVER_MODE`, which is `broker` unless set to `in-process`. */
    mode?: DriverMode;
    recordingPath?: string | undefined;
-   /** The page the session opened; recorded in the session metadata. */
    url?: string | undefined;
-   /** The app the session opened; a bare focus action refocuses it. */
    app?: AccessibilityDriverSession['app'] | undefined;
+   /** Selects the browser opened after the real-reader session owns the desktop. */
+   browser?: string | undefined;
+   /** Guarded sessions check observed targets; strict binding remains opt-in. */
+   nativeInput?: AccessibilityDriverSession['nativeInput'];
    /** 0 disables the idle timeout. */
    idleTimeoutMinutes?: number | undefined;
    /** Bounds how long to wait for the broker to come up. */
    timeoutMs?: number | undefined;
-   /**
-    * Where a virtual session runs. Without it, a session with an http(s) URL uses the
-    * browser when Chromium launches and jsdom otherwise; a session without a URL uses
-    * jsdom.
-    */
+   /** Virtual URLs prefer available Chromium; inline documents use jsdom. */
    engine?: VirtualEngine | undefined;
 }
 
@@ -107,20 +115,26 @@ async function isSessionLive(session: AccessibilityDriverSession): Promise<boole
       return false;
    }
 
-   if (session.target === 'voiceover') {
-      const running = await checkVoiceOverRunning().catch(() => false);
-      if (!running) {
-         return false;
-      }
-   }
-
-   if (isInMemorySession(session)) {
-      return true;
-   }
-
    try {
-      const response = await connectToBroker(session.socketPath, { command: 'ping' });
-      return response.ok;
+      const response = isInMemorySession(session)
+         ? await requestInProcess(session.sessionId, { command: 'ping' })
+         : await connectToBroker(session.socketPath, { command: 'ping' });
+      if (!response.ok || response.stopping) {
+         return response.ok;
+      }
+      if (
+         session.target === 'voiceover' &&
+         !(await checkVoiceOverRunning().catch(() => false))
+      ) {
+         // A live owner must finish recording and release its lease before removal.
+         try {
+            const stopped = await sendSessionRequest(session, { command: 'stop' });
+            return !stopped.ok;
+         } catch {
+            return true;
+         }
+      }
+      return true;
    } catch {
       return false;
    }
@@ -132,7 +146,7 @@ export async function getActiveDriverSession(): Promise<
 > {
    const session = await readActiveSessionMetadata();
    if (!session) {
-      return undefined;
+      return getRetainedInProcessSession();
    }
 
    if (await isSessionLive(session)) {
@@ -144,10 +158,7 @@ export async function getActiveDriverSession(): Promise<
    return undefined;
 }
 
-/**
- * Removes the active session file when its broker no longer answers; returns the ids
- * removed.
- */
+/** Removes metadata for sessions whose broker no longer answers. */
 export async function cleanupStaleDriverSessions(): Promise<string[]> {
    const session = await readActiveSessionMetadata();
    if (!session || (await isSessionLive(session))) {
@@ -159,12 +170,11 @@ export async function cleanupStaleDriverSessions(): Promise<string[]> {
    return [session.sessionId];
 }
 
-async function requireActiveSession(): Promise<AccessibilityDriverSession> {
+async function requireActiveSession(
+   options: DriverRequestOptions = {},
+): Promise<AccessibilityDriverSession> {
    const session = await getActiveDriverSession();
-   if (!session) {
-      throw createMissingSessionError();
-   }
-   return session;
+   return requireMatchingDriverSession(session, options.expectedSessionId);
 }
 
 async function resolveStartTarget(target: Platform | undefined): Promise<Platform> {
@@ -187,6 +197,8 @@ async function launchSession(
       recordingPath: options.recordingPath,
       url: options.url,
       app: options.app,
+      browser: options.browser,
+      nativeInput: options.nativeInput,
       idleTimeoutMinutes,
       engine: options.engine,
    };
@@ -210,7 +222,7 @@ async function launchSession(
 export async function getDriverSessionStatus(
    options: DriverRequestOptions = {},
 ): Promise<DriverActionResult> {
-   const session = await requireActiveSession();
+   const session = await requireActiveSession(options);
    const response = await sendSessionRequest(session, { command: 'status', ...options });
    return parseBrokerActionResult({
       actionErrorMessage: 'Could not read the active driver session.',
@@ -220,34 +232,60 @@ export async function getDriverSessionStatus(
 
 /** Stops the active session, finishing any recording, and removes its state files. */
 export async function stopDriverSession(
-   options: DriverRequestOptions = {},
+   options: DriverRequestOptions & { sessionId?: string | undefined } = {},
 ): Promise<DriverActionResult> {
-   const session = await requireActiveSession();
-   const response = await sendSessionRequest(session, { command: 'stop', ...options });
+   const session =
+      options.sessionId === undefined
+         ? await requireActiveSession(options)
+         : getRetainedInProcessSession(options.sessionId);
+   if (
+      options.sessionId !== undefined &&
+      !/^(drv|test|ephemeral)_[a-z0-9_-]+$/iu.test(options.sessionId)
+   ) {
+      throw new CliEnvironmentError(
+         'invalid-session-id',
+         'The recovery session ID is invalid.',
+      );
+   }
+   const response = session
+      ? await sendSessionRequest(session, {
+           command: 'stop',
+           timeoutMs: options.timeoutMs,
+        })
+      : await connectToBroker(
+           getDriverSocketPath(options.sessionId ?? ''),
+           { command: 'stop' },
+           options.timeoutMs,
+        );
    const result = parseBrokerActionResult({
       actionErrorMessage: 'Could not stop the active driver session.',
       response,
    });
-   await removeSessionArtifacts(session);
+   await removeSessionArtifacts(result.session);
    return result;
 }
 
-/**
- * Starts the one active driver session. A live previous session is stopped first and
- * returned as `replacedSession`; the start itself runs under an exclusive lock file.
- */
+/** Serialize startup and report any session it replaces. */
 export async function startDriverSession(
    options: StartDriverSessionOptions = {},
 ): Promise<DriverSessionStart> {
+   nativeInputPolicySchema.parse(options.nativeInput ?? 'guarded');
    await ensureStateDirectory();
    const target = await resolveStartTarget(options.target);
    await ensureScreenReaderAssets(target);
-   await assertTargetReady(target);
+   await assertTargetReady(target, options.app);
    if (options.recordingPath) {
       validateRecordingRequest(target, options.recordingPath);
    }
    return withSessionStartLock(async () => {
       const previous = await getActiveDriverSession();
+      if (previous && options.replaceActive === false) {
+         throw new CliEnvironmentError(
+            'session-already-active',
+            'A driver session is already active.',
+            { sessionId: previous.sessionId },
+         );
+      }
       if (previous) {
          await stopDriverSession();
       }
@@ -256,15 +294,12 @@ export async function startDriverSession(
    });
 }
 
-/**
- * Points the active session at a page. The virtual target loads the HTML; real targets
- * only record the URL, because they read whatever window is on screen.
- */
+/** Open a document through the owning adapter and update session identity. */
 export async function attachDocumentToDriverSession(
    document: { html: string; url: string },
    options: DriverRequestOptions = {},
 ): Promise<DriverActionResult> {
-   const session = await requireActiveSession();
+   const session = await requireActiveSession(options);
    const response = await sendSessionRequest(session, {
       command: 'attach-document',
       payload: document,
@@ -281,7 +316,7 @@ export async function runDriverSessionAction(
    request: DriverActionRequestInput,
    options: DriverRequestOptions = {},
 ): Promise<DriverActionResult> {
-   const session = await requireActiveSession();
+   const session = await requireActiveSession(options);
    const response = await sendSessionRequest(session, {
       command: 'action',
       action: request.action,

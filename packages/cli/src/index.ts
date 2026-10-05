@@ -113,3 +113,30 @@ export {
 } from '@a11ied/core';
 
 export type { BrowserChoice, FrontmostWindow, WindowFocusResult } from '@a11ied/core';
+
+export {
+   startAuditAssessment,
+   nextAuditAssessment,
+   getAuditAssessmentStatus,
+   resumeAuditAssessment,
+   finalizeAuditAssessment,
+   registerAuditState,
+   registerAuditJourney,
+   queueAssessmentCheck,
+   transitionAssessmentCheck,
+   getAuditRunPaths,
+   recordEvidence,
+   readEvidence,
+} from '@a11ied/core';
+
+export type { AuditAssessmentStatus, CreateAuditRunOptions } from '@a11ied/core';
+export {
+   buildAuditReport,
+   withLoadedPage,
+   withInteractiveBrowserPage,
+} from '@a11ied/core';
+export type {
+   AuditReport,
+   BuildAuditReportInput,
+   WithBrowserPageOptions,
+} from '@a11ied/core';

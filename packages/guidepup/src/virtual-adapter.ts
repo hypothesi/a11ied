@@ -11,12 +11,13 @@ import {
    type PortableDriverVerb,
 } from '@a11ied/contracts';
 
-import { driverCapabilities, type DriverAdapter } from './adapter-shared.js';
+import { getDriverCapabilities, type DriverAdapter } from './adapter-shared.js';
 import type { SerializableDriverCommand } from './command-registry.js';
 import { DriverCommandError } from './driver-command-error.js';
 import { loadPackageScript } from './focus-shared.js';
 import { createScreenshotUnsupportedError } from './screenshot-unsupported.js';
 import type { VirtualHost } from './virtual-host.js';
+import type { VirtualSpeech, VirtualCurrentItem } from './virtual-runtime.js';
 
 /** The document a virtual session reads before a page is attached. */
 export const defaultVirtualDocument = {
@@ -55,14 +56,24 @@ async function virtualCheckReadiness(): Promise<DriverReadiness> {
    });
 }
 
-async function virtualReadState(
+async function readVirtualSnapshot(
    host: VirtualHost,
-   checkpoints: DriverCheckpoint[],
-): Promise<DriverStateSnapshot> {
+): Promise<{ speech: VirtualSpeech; current: VirtualCurrentItem }> {
+   if (host.readSnapshot) {
+      return host.readSnapshot();
+   }
    const [speech, current] = await Promise.all([
       host.readSpeech(),
       host.readCurrentItem(),
    ]);
+   return { speech, current };
+}
+
+async function virtualReadState(
+   host: VirtualHost,
+   checkpoints: DriverCheckpoint[],
+): Promise<DriverStateSnapshot> {
+   const { speech, current } = await readVirtualSnapshot(host);
    return driverStateSnapshotSchema.parse({
       lastSpokenPhrase: speech.lastSpokenPhrase || undefined,
       currentItemText: speech.itemText || undefined,
@@ -71,6 +82,23 @@ async function virtualReadState(
       logCursor: speech.spokenPhraseLog.length,
       checkpoints,
       currentItem: current.item,
+      observations: {
+         keyboardFocus: {
+            status: 'unsupported',
+            source: 'virtual-model',
+            reason: 'The virtual adapter does not observe native keyboard focus.',
+         },
+         readerCursorIdentity: {
+            status: 'unavailable',
+            source: 'virtual-model',
+            reason: 'This snapshot does not include a model cursor position token.',
+         },
+         targetIdentity: {
+            status: 'unsupported',
+            source: 'virtual-model',
+            reason: 'The virtual adapter has no native desktop window.',
+         },
+      },
    });
 }
 
@@ -117,10 +145,16 @@ export function createVirtualAdapter(
 ): DriverAdapter {
    return {
       target: 'virtual',
-      capabilities: driverCapabilities,
+      capabilities: getDriverCapabilities(
+         'virtual',
+         options.resolveCommand !== undefined,
+      ),
       checkReadiness: virtualCheckReadiness,
       start: () => host.attachDocument(defaultVirtualDocument),
       stop: () => host.dispose(),
+      async runOwned<TResult>(run: () => Promise<TResult>): Promise<TResult> {
+         return run();
+      },
       attachDocument: (document) => host.attachDocument(document),
       focus: virtualFocus,
       performPortable: async (verb) => {

@@ -1,5 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { z } from 'zod';
+import * as core from '@a11ied/core';
+import { driverStateSnapshotSchema, driverTranscriptSchema } from '@a11ied/contracts';
 import { withStateDir } from '../../cli/src/testing/fixtures.js';
+import { createMockDriveSession } from '../../cli/src/testing/recording-fixtures.js';
 
 import {
    getInvalidContentText,
@@ -10,6 +14,113 @@ import {
 
 const CLI_EXIT_ASSERTION = 4;
 const tempRoots: string[] = [];
+
+afterEach(() => vi.restoreAllMocks());
+
+describe('MCP real-target navigation', () => {
+   it.each(['protected', 'missing'])(
+      'delegates %s pages without fetching anonymous HTML',
+      async (path) => {
+         const session = createMockDriveSession('/tmp/mcp-real-navigation'),
+            state = driverStateSnapshotSchema.parse({
+               spokenPhraseLog: [],
+               itemTextLog: [],
+               logCursor: 0,
+               checkpoints: [],
+            }),
+            url = `https://createdbyfireside.com/${path}/`;
+         const attach = vi
+               .spyOn(core, 'attachDocumentToDriverSession')
+               .mockResolvedValue({
+                  session,
+                  action: 'attach-document',
+                  state,
+               }),
+            fetch = vi
+               .spyOn(globalThis, 'fetch')
+               .mockRejectedValue(new Error('Unexpected anonymous fetch')),
+            start = vi.spyOn(core, 'startDriverSession').mockResolvedValue({ session });
+         vi.spyOn(core, 'getActiveDriverSession').mockResolvedValue(session);
+         await withHarness(async (harness) => {
+            const started = await harness.client.callTool({
+               name: 'sr_session',
+               arguments: {
+                  action: 'start',
+                  target: 'voiceover',
+                  url,
+                  browser: 'Safari',
+               },
+            });
+            const opened = await harness.client.callTool({
+               name: 'sr_session',
+               arguments: { action: 'open', url },
+            });
+
+            expect(started.isError).toBeFalsy();
+            expect(opened.isError).toBeFalsy();
+            expect(start).toHaveBeenCalledWith(
+               expect.objectContaining({ url, browser: 'Safari' }),
+            );
+            expect(attach).toHaveBeenCalledExactlyOnceWith(
+               { html: '', url },
+               { timeoutMs: undefined },
+            );
+            expect(fetch).not.toHaveBeenCalled();
+         });
+      },
+   );
+});
+
+describe('MCP session target validation', () => {
+   it.each(['require-binding', 'development'])(
+      'forwards the %s native input policy to shared startup',
+      async (nativeInput) => {
+         const session = createMockDriveSession('/tmp/mcp-native-policy'),
+            start = vi.spyOn(core, 'startDriverSession').mockResolvedValue({ session });
+         await withHarness(async (harness) => {
+            const result = await harness.client.callTool({
+               name: 'sr_session',
+               arguments: { action: 'start', target: 'voiceover', nativeInput },
+            });
+
+            expect(result.isError).toBeFalsy();
+            expect(start).toHaveBeenCalledWith(
+               expect.objectContaining({ target: 'voiceover', nativeInput }),
+            );
+         });
+      },
+   );
+
+   it('rejects an unknown native policy before replacing a session', async () => {
+      const start = vi.spyOn(core, 'startDriverSession');
+      await withHarness(async (harness) => {
+         const result = await harness.client.callTool({
+            name: 'sr_session',
+            arguments: { action: 'start', target: 'voiceover', nativeInput: 'unknown' },
+         });
+
+         expect(result.isError).toStrictEqual(true);
+         expect(start).not.toHaveBeenCalled();
+      });
+   });
+
+   it('rejects a URL and app before replacing an active session', async () => {
+      const start = vi.spyOn(core, 'startDriverSession');
+      await withHarness(async (harness) => {
+         const result = await harness.client.callTool({
+            name: 'sr_session',
+            arguments: {
+               action: 'start',
+               url: 'https://createdbyfireside.com/',
+               app: 'Safari',
+            },
+         });
+
+         expect(result.isError).toStrictEqual(true);
+         expect(start).not.toHaveBeenCalled();
+      });
+   });
+});
 
 describe('sr_list tool', () => {
    it('lists named commands, matching a1 sr list', async () => {
@@ -131,13 +242,16 @@ describe('sr_expect and sr_transcript tools', () => {
 
                const transcript = await harness.client.callTool({
                   name: 'sr_transcript',
-                  arguments: { since: 'start' },
+                  arguments: { since: 'start', limit: 1 },
                });
                expect(transcript.isError).toBeFalsy();
-               const transcriptPayload = transcript.structuredContent as {
-                  transcript: { entries: unknown[] };
-               };
-               expect(transcriptPayload.transcript.entries.length).toBeGreaterThan(0);
+               const transcriptPayload = z
+                  .object({ transcript: driverTranscriptSchema })
+                  .parse(transcript.structuredContent).transcript;
+
+               expect(transcriptPayload.entries).toHaveLength(1);
+               expect(transcriptPayload.window?.returnedEntries).toStrictEqual(1);
+               expect(transcriptPayload.window?.omittedEntries).toBeGreaterThan(0);
 
                await harness.client.callTool({
                   name: 'sr_session',

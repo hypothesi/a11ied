@@ -3,6 +3,7 @@ import type { Command } from 'commander';
 import { evidenceModeSchema, evidenceOutcomeSchema } from '#contracts';
 
 import { addJsonOption, addVerboseOption } from '../lib/options.js';
+import { readEvidenceFinding, readEvidenceProvenance } from '../lib/evidence-input.js';
 
 interface PatternRecordOptions {
    json?: boolean;
@@ -17,20 +18,29 @@ interface PatternRecordOptions {
    selector?: string;
    click?: string;
    results?: string;
+   run?: string;
+   provenance?: string;
+   finding?: string;
+   subjectHash?: string;
 }
 
 interface PatternPendingOptions {
+   run?: string;
    json?: boolean;
    verbose?: boolean;
    pattern?: string;
    results?: string;
+   pointer?: string;
+   subjectHash?: string;
 }
 
 function addResultsOption(command: Command): Command {
-   return command.option(
-      '--results <path>',
-      'Read and write recorded results at this path instead of .a11ied/evidence.jsonl.',
-   );
+   return command
+      .option('--run <file>', 'Validate scoped evidence against this assessment run.')
+      .option(
+         '--results <path>',
+         'Read and write recorded results at this path instead of .a11ied/evidence.jsonl.',
+      );
 }
 
 async function resolveSubject(target: string | undefined): Promise<string> {
@@ -78,8 +88,8 @@ function buildRecordCommand(patternCommand: Command): Command {
                .description(
                   'Record what you decided about one row the check could not decide. Record ' +
                      'inapplicable when the component does not implement that part of the ' +
-                     'pattern, and say why in the note. The next check sets the row aside until ' +
-                     'the page changes under it.',
+                     'pattern, and say why in the note. Supply run provenance and artifacts to ' +
+                     'verify the judgment; a note alone does not complete the row.',
                )
                .requiredOption(
                   '--pattern <exampleId>',
@@ -107,7 +117,19 @@ function buildRecordCommand(patternCommand: Command): Command {
                )
                .option('--pointer <selector>', 'CSS selector for the element judged.')
                .option('--note <text>', 'Why the result is what it is.')
-               .option('--by <name>', 'Who or what recorded the result.'),
+               .option(
+                  '--finding <file>',
+                  'JSON finding title, userImpact, optional remediation and impact.',
+               )
+               .option('--by <name>', 'Who or what recorded the result.')
+               .option(
+                  '--provenance <file>',
+                  'JSON provenance with run, state, action, and artifact references.',
+               )
+               .option(
+                  '--subject-hash <hash>',
+                  'Current widget tree hash from the observed assessment state.',
+               ),
          ),
       ),
    );
@@ -136,19 +158,23 @@ function registerRecordCommand(patternCommand: Command): void {
                   exampleId: options.pattern ?? '',
                   rowKey: options.row ?? '',
                   outcome: evidenceOutcomeSchema.parse(options.outcome),
-                  subjectHash: await hashWidget(
-                     target,
-                     options.selector ?? 'body',
-                     options.click,
-                  ),
+                  subjectHash:
+                     options.subjectHash ??
+                     (await hashWidget(
+                        target,
+                        options.selector ?? 'body',
+                        options.click,
+                     )),
                   mode:
                      options.mode === undefined
                         ? undefined
                         : evidenceModeSchema.parse(options.mode),
                   note: options.note,
-                  pointer: options.pointer,
+                  pointer: options.pointer ?? options.selector,
+                  provenance: await readEvidenceProvenance(options.provenance),
+                  finding: await readEvidenceFinding(options.finding),
                   assertedBy: options.by,
-                  evidence: { file: options.results },
+                  evidence: { file: options.results, runFile: options.run },
                }),
             }),
             renderers.renderPatternRecordText,
@@ -163,6 +189,14 @@ function registerPendingCommand(patternCommand: Command): void {
          addJsonOption(
             patternCommand
                .command('pending <target>')
+               .option(
+                  '--pointer <selector>',
+                  'Widget identity for the current assessment.',
+               )
+               .option(
+                  '--subject-hash <hash>',
+                  'Hash of the current widget accessibility tree.',
+               )
                .summary('List the rows of one example with no recorded result yet.')
                .description(
                   'List the rows of one APG example that have no recorded result for this target.',
@@ -192,7 +226,9 @@ function registerPendingCommand(patternCommand: Command): void {
             result: await core.listPendingApgRows({
                subject: await resolveSubject(target),
                exampleId: options.pattern ?? '',
-               evidence: { file: options.results },
+               pointer: options.pointer,
+               subjectHash: options.subjectHash,
+               evidence: { file: options.results, runFile: options.run },
             }),
          }),
          renderers.renderPatternPendingText,

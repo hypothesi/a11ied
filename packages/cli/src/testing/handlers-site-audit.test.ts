@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { siteInventorySchema } from '#contracts';
+import { writeInventoryAtomic } from '#core';
 import { handleAuditDiscoverAction } from '../commands/audit-discover-actions.js';
 import { handleReportBuildAction } from '../commands/report-actions.js';
 
@@ -117,11 +118,21 @@ describe('report build handler', () => {
             reportDir = resolve(directory, 'report');
          try {
             const url = await startPage();
-            await handleAuditDiscoverAction(url, {
+            const discovered = await handleAuditDiscoverAction(url, {
                scope: 'page',
                timeout: '5000',
                out: inventoryPath,
             });
+            const [page] = discovered.result.pages;
+            if (!page) {
+               throw new Error('Discovery found no fixture page.');
+            }
+            page.auditStatus = 'error';
+            page.error = {
+               code: 'fixture-not-tested',
+               message: 'Fixture has no assessment results.',
+            };
+            await writeInventoryAtomic(discovered.result, inventoryPath);
             const result = await handleReportBuildAction({
                inventory: inventoryPath,
                resultsDir: resolve(directory, 'pages'),

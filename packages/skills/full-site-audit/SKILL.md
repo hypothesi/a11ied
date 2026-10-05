@@ -1,232 +1,190 @@
 ---
 name: full-site-audit
-description: Audit one page, a section, or a whole site against WCAG 2.2 Level AA with a1. Use for evidence audits that need discovery, template sampling, real screen reader checks, resumable progress, and HTML, PDF, JSON, and EARL reports. The workflow keeps untested and uncertain results explicit instead of claiming compliance from incomplete evidence.
+description: Perform a resumable WCAG 2 desktop audit of a page, section, site, or desktop app with the a11ied CLI or MCP. Use the assessment coordinator to discover states and complete journeys, execute procedures with observed evidence, and publish reports with explicit coverage gaps. Use a11ied for a component development check.
 ---
 
-# Full-site accessibility audit
+# Complete desktop accessibility audit
 
-Use this skill for a WCAG 2.2 Level AA evidence audit across one page, a section, or a
-whole site. Use the separate `a11ied` skill for a component-level development loop.
+Use the host agent's reasoning and a11ied's durable assessment coordinator together.
+The coordinator assigns obligations and validates proof. The host agent observes the
+product, performs each procedure, and judges its result. A scanner run starts the
+assessment; it does not finish it.
 
-Read [run state and decisions](resources/run-state-and-decisions.md) before starting. It
-contains the inventory transitions, resume branches, authentication handoff, privacy
-choice, sampling language, and hints format.
+Use VoiceOver, NVDA, or virtual execution as the task requires. Virtual observations
+remain simulated. Procedures requiring `real-reader` need an actual native session.
+Keep mobile execution outside this workflow.
 
-## Resuming an interrupted audit
+Native sessions default to `nativeInput: guarded`. Observe the current item,
+foreground window, keyboard focus when available, and transcript before choosing
+an action. Commands check the observed target; typing checks between characters.
+Ordinary actions return current state and at most 200 new transcript entries.
+Use the returned cursor to fetch remaining entries. Status returns a recent bounded
+tail. Explicit transcript queries retain full or selected history.
+After each action, inspect fresh state and speech to confirm its effect. On a
+focus mismatch or uncertain delivery, read state, refocus deliberately, and
+inspect the control before continuing. Never replay a submission blindly.
+Native cursor identity can be unavailable without blocking an adaptive audit.
+Record actual session, speech, action, and artifact receipts; disclose observation
+limits. `require-binding` is an optional strict policy that refuses unavailable
+binding. `development` bypasses target checks. Virtual output cannot replace
+required real-reader evidence.
 
-Before asking about scope, normalize the target origin and inspect
-`.a11ied/audits/*/inventory.json`. Find inventories for that origin whose `run.phase` is
-not `complete`.
+Read [run state and decisions](resources/run-state-and-decisions.md) for command
+inputs, provenance, authentication, recovery, and report limitations.
 
-If one exists, ask whether to resume it or start a separate run. Never silently resume,
-replace, or discard it. When resuming:
+## Continue or start
 
-1. Load and validate the inventory.
-2. Run `a1 sr status` and `a1 doctor` before any other work.
-3. Stop and clean up any stale screen reader session.
-4. Continue from the recorded phase and choices. Do not ask those questions again.
-5. Skip pages marked `audited`.
-6. For a page marked `in-progress`, start with `a1 audit pending <url>`. Recorded evidence
-   survives in `.a11ied/evidence.jsonl`, so do not restart its checks from scratch.
+Reuse the user's target, WCAG profile, scope, and authorized actions. A request for a
+full site means site scope. Ask only for a missing decision that affects the work.
 
-## Scope
+If the conversation identifies an existing run, inspect it with `audit status`.
+Reuse its returned `file`, `evidenceFile`, `artifactsDir`, and stored policy. Read all
+status pages through `nextOffset`; the first response contains at most 20 entries.
+An inventory's old `audited` flags do not establish completed assessments.
 
-For a new run, ask whether the audit covers one page, a section, or the entire site. Do
-not assume the entire site. A section uses the starting URL path as its default boundary.
+If no run was identified, inspect matching local runs before creating another.
+If several runs could match and the intended one is unclear, ask which to use.
+Never overwrite an unrelated coordinator or discard saved work.
 
-Create one run directory:
+Run `a1 help-all` or inspect MCP input schemas for unfamiliar commands. Use available
+MCP tools or the CLI interchangeably; both use shared core assessment operations.
 
-```sh
-.a11ied/audits/<timestamp>-<origin-key>/
+## Observe the environment
+
+Run task-specific diagnostics before using that capability. A scan does not need
+screen reader or recording setup. Before native interaction, inspect `a1 sr status`
+and the intended browser/app window. Do not stop a session owned by another task.
+
+Record observed platform, OS, browser, reader version, capabilities, and limitations
+in environment JSON. Do not declare a capability merely because it is installed.
+Confirm actual target document identity, usable keyboard input, and reader speech.
+Warn once before starting VoiceOver or NVDA because it controls desktop focus and
+speech. Reuse an already acknowledged warning for the same session.
+
+Before an action, confirm the target control and applicable run policy. Submission
+and destructive actions default to disabled. A saved policy describes authorization;
+it does not grant new permission or automatically prevent every low-level action.
+
+## Discover scope and create the coordinator
+
+For a website, run discovery into a dedicated run directory:
+
+```bash
+a1 audit discover https://createdbyfireside.com --scope site \
+   --out .a11ied/fireside/inventory.json --json
+a1 audit run https://createdbyfireside.com --environment environment.json \
+   --inventory .a11ied/fireside/inventory.json --json
 ```
 
-Keep the inventory at `<run-dir>/inventory.json`, page results under
-`<run-dir>/pages/<pageId>/audit.json`, and the report under `<run-dir>/report/`.
+Startup retains discovery's run ID and links sibling `run.json` automatically.
+Use the returned paths for every following command. Do not edit inventory phases,
+page statuses, template groups, or assessment identities by hand.
 
-## Preflight
+Discovery limits, failures, and unresolved URLs remain coverage gaps. Resume
+unfinished discovery with `--resume-from`. A large inventory is more work, not an
+implicit license to sample. If the user narrows scope, disclose unassessed pages.
+The coordinator checks every inventoried page; template similarity cannot certify
+pages the agent did not assess.
 
-Run `a1 doctor --strict`. Confirm that `a1` works. Check the current tool list for the
-a11ied MCP tools. If MCP tools are missing, use the CLI. In this repository, build the
-CLI with `npm run build --workspace packages/cli` when the MCP server cannot start from
-`.mcp.json`.
+For a desktop app, start with `audit run --app <target> --environment <file>`.
+Observe its screens and processes through the existing desktop tools. Scanner and
+website discovery commands cannot substitute for native app observations.
 
-## Lessons from an earlier audit
+## Discover states and journeys
 
-If `.a11ied/sites/<origin-key>/hints.json` exists, read it before discovery. Each entry is
-a hypothesis to check, not a fact. The site may have changed. Use a hint to decide where
-to look first. Never use it to skip a check. Correct or invalidate a stale hint during
-this run.
+Visit every scoped page or app screen. Inspect content, controls, menus, dialogs,
+forms, errors, loading states, and dynamic updates that actually exist. Follow
+complete user processes across pages; a URL list cannot capture these behaviors.
 
-## Authentication and artifact consent
+Register each observed state with `audit state <run> --input <file>`. Supply its
+actual target, label, environment, setup, fingerprint, and registered artifacts.
+Use the returned `mutation.stateId`. Preserve stable state IDs when updating an
+observation. A changed fingerprint revokes old proof; do not keep it to preserve a
+pass. Adding artifact paths to the same fingerprint preserves observation identity.
 
-Start without authentication. Ask about a QA environment and sign-in only if discovery
-finds a 401 or 403 response, a login redirect, or a password form.
+Register ordered process states with `audit journey <run> --input <file>`. Mark a
+journey completed only after observing its intended result. If an authorized step
+cannot be performed, save the specific blocker and stop that journey safely.
 
-Never ask for a username, password, cookie, token, or request header in chat or on a
-command line. Open Playwright codegen and ask the user to sign in there and close the
-window:
+The coordinator derives catalog obligations from observed scope. Use `audit queue`
+for an additional widget or element obligation supported by the procedure catalog.
+An element check supplements the required state assessment; it cannot replace it.
 
-```sh
-npx --no-install playwright codegen --save-storage=<ignored-local-path> <url>
+## Perform the assessment loop
+
+1. Read `audit status <run> --json` and its coverage issues.
+2. Call `audit next <run> --json` to claim one obligation.
+3. Read the returned procedure's applicability, setup, actions, evaluation rules,
+   required evidence, recovery guidance, and limitations.
+4. Restore the referenced state or journey and confirm current target identity.
+5. Perform the actual procedure in its declared environment. Capture observations
+   and actions after the claim starts; use bounded transcripts and checkpoints.
+6. Judge the result against the procedure and normative WCAG requirement.
+7. Save evidence with `audit record`, explicit `--run` and `--results`, and current
+   provenance, including the claimed attempt generation. Use `semiAutomatic` for agent work.
+8. Accept the saved evidence with `audit evaluate`, its exact check ID, outcome,
+   and returned evidence IDs. Resolve any validation rejection before proceeding.
+9. Read status again, discover missing scope, and continue with the next obligation.
+
+A second `next` cannot bypass an active claim. Do not batch guesses, manufacture
+transcripts, or replace observations with notes. Scanner success, transcript text,
+and criterion judgment are distinct evidence.
+
+For `inapplicable`, observe the absence required by the procedure and explain it.
+For `cantTell`, document the real attempt, observations, and specific uncertainty.
+`cantTell` remains unresolved; it never completes the audit. If the environment or
+an unauthorized action prevents an attempt, block the check with its reason.
+Do not fill every pending criterion with the same blocker.
+
+If `next` returns no check, inspect coverage issues and unsupported obligations.
+No queued work does not imply completion. Missing capabilities, pages, states,
+journeys, scanner coverage, or artifacts still require work or a disclosed gap.
+
+## Recover and hand off
+
+After interruption, inspect status, current UI identity, and saved evidence.
+Run `audit resume <run>` to preserve interrupted work as blocked. Restore a safe
+state before explicitly retrying selected check IDs. Do not replay completed work
+or submit a form twice just to recreate a transcript.
+
+Before context compaction, save the run path, target/profile, active check ID,
+current UI/session identity, artifact paths, transcript cursor, and next safe action
+in the task handoff. Keep authorization decisions with their scope. Resume by
+reading runtime status; a prose handoff cannot override current validation.
+
+Stop only the reader session this task owns before yielding desktop control.
+Keep unresolved blockers and recovery actions in the coordinator.
+
+## Publish results
+
+For website previews, use one command:
+
+```bash
+a1 report build --inventory .a11ied/fireside/inventory.json \
+   --results-dir .a11ied/fireside/pages --out .a11ied/fireside/report --draft
 ```
 
-Restrict the file to its owner where the platform supports that. Pass only the path with
-`--storage-state`. Never read or print the file. Delete it after the run unless the user
-asks to keep it. If the site stores authentication only in session storage, explain that
-the capture cannot reproduce it and offer an interactive user-signed-in audit.
+Keep page scanner artifacts under `pages/<pageId>/audit.json`. Pass the run's exact
+profile and `evidenceFile` to page audits. Missing scans remain unresolved even
+when behavioral findings are valid.
 
-Separately ask once whether to save rendered HTML and accessibility trees. Explain that
-these files may contain private page content. Record the choice in `inventory.json`.
-Authenticated artifacts need an explicit yes. Reports do not embed the raw artifacts.
-
-## Discovery
-
-Set `run.phase` to `discovering`, then run:
-
-```sh
-a1 audit discover <url> --scope <page|section|site> \
-   --out <run-dir>/inventory.json --json
+```bash
+a1 audit <page-url> --wcag <version> --level <level> --results <evidence-file> \
+   --format json --out <pages-dir>/<pageId>/audit.json
 ```
 
-Add the applicable `--storage-state`, `--include`, `--exclude`, `--artifacts-dir`, or
-limit options. Discovery reads sitemaps and rendered same-origin links by default. Use
-`--sitemap-only` only when the user requests it.
+Use discovered page IDs for the output directories. The CLI writes the envelope
+the report loader expects; do not replace it with a raw scanner result.
 
-If discovery stops at a page, sitemap, time, or retry limit, keep
-`discovery.complete: false` and its reason. Call it a partial inventory. Do not call it a
-full-site audit.
+Call `audit finalize <run>` only after status reports complete validated coverage.
+Then build without `--draft`. Partial finalization preserves unresolved work and
+keeps the run active. Report generation never establishes assessment completion.
 
-For 50 or fewer deduplicated pages, audit every page unless the user narrows the scope.
-For more than 50 pages:
+Verify the generated manifest and selected HTML/PDF/JSON/EARL files. Link the files
+and describe unresolved scope beside them. A report threshold exit code of 4 means
+findings met the threshold; inspect output before treating it as generation failure.
+Report publication can be retried after interruption without rebuilding proof.
 
-1. Report the exact page count.
-2. Review the URL, title, heading, and approved artifacts. Explain your current template
-   assessment as a judgment, not a measured fact.
-3. Estimate the full and sampled duration from the page and template counts.
-4. Ask the user to choose a complete audit or a template-sampled audit.
-5. Explain that sampling tests representative pages and observed variants. Every other
-   page remains `not-tested`. Never claim those pages passed.
-
-If the user chooses a complete audit, rerun discovery with `--probe-error-pages`. This
-adds one synthetic 404 and retains pages that already returned 5xx. Never try to cause a
-500 response.
-
-Record the scope, audit mode, error-page probe choice, artifact choice, and parallel work
-choice in `run.optionsChosen`.
-
-## Template review
-
-Set `run.phase` to `template-review`. Inspect representative pages and state or structure
-variants. Do not infer a template from URL shape alone.
-
-Write `pages[].templateId` and `templates` directly into `inventory.json`, then validate
-the file again. Keep every sampled-out page at `auditStatus: not-tested`.
-
-## Running inventory
-
-Only the coordinator writes `inventory.json`. It atomically saves the file after every
-phase transition and page completion. Parallel workers write only their assigned
-`pages/<pageId>/audit.json`, then report completion to the coordinator.
-
-## Parallel automated checks
-
-If the runtime supports subagents, ask whether to parallelize the axe-only page audits.
-Say plainly that screen reader checks cannot run in parallel because only one real screen
-reader session can be active.
-
-Each worker runs only:
-
-```sh
-a1 audit <url> --storage-state <path> --format json \
-   --out <run-dir>/pages/<pageId>/audit.json
-```
-
-Omit `--storage-state` for public pages. The coordinator updates the inventory after the
-worker returns.
-
-## Browser and screen-reader readiness
-
-Before starting VoiceOver or NVDA, orient in the browser first. Open the target with the browser automation path and verify all of the following:
-
-- the browser process/window exists and is frontmost;
-- the loaded URL matches the resolved target origin and path;
-- the document has a non-empty title or visible body content;
-- the page structure is observable (title, headings, landmarks, links, or controls).
-
-A focus warning is a hard blocker, not a recoverable warning. Retry with the detected browser or an available alternate browser, then stop with an explicit environment failure if focus or URL verification still fails. Do not start a screen reader, run `sr walk`, or record manual outcomes until this gate passes. An empty transcript is not evidence that the page was read; treat it as a failed readiness check.
-
-Only after browser readiness passes, before the first real screen reader session, warn the user:
-
-> VoiceOver or NVDA will take over this machine's speech and keyboard focus. Do not try
-> to exit the program while the audit runs. Keep the machine awake and unlocked until the
-> session stops.
-
-This audit never uses `--sr virtual` for compliance judgments. Use the real reader that
-`a1 doctor` reports as available: VoiceOver on macOS or NVDA on Windows. The `a11ied`
-skill's "Real screen reader vs. virtual" section explains the difference.
-
-## Per-page loop
-
-Set `run.phase` to `auditing` once. For each selected, non-duplicate page:
-
-1. Mark the page `in-progress` and save the inventory.
-2. Run `a1 audit pending <url>` to list hybrid and manual work still open.
-3. Use one real screen reader session to gather the remaining evidence.
-4. Record each judgment with `a1 audit record <url> --criterion <id> --outcome <outcome>`.
-5. Run `a1 audit <url> --format json --out <run-dir>/pages/<pageId>/audit.json`.
-6. Mark the page `audited`, add `auditedAt` and violation counts, and save the inventory.
-
-Pass the storage-state path to discovery and audit calls for authenticated pages. For a
-real screen reader, start on the login page, pause while the user signs in inside the
-controlled browser, and keep that session open across pages.
-
-Never activate a control flagged as destructive. This includes checkout, place order,
-delete, remove, cancel subscription, and close account controls.
-
-A page failure does not end the run. Mark that page `error`, record the reason, save, and
-continue.
-
-## Final report
-
-Set `run.phase` to `report-building`, then run. Do not run this step while a page is `not-tested` or `in-progress`; resolve each selected page as `audited` or `error` first:
-
-```sh
-a1 report build --inventory <run-dir>/inventory.json \
-   --results-dir <run-dir>/pages --out <run-dir>/report
-```
-
-After the command, verify each file is present and non-empty. If any file is missing, the report phase failed and the run must not be marked complete.
-
-Confirm these files exist:
-
-- `report.html`
-- `report.pdf`
-- `report.json`
-- `report.earl.json`
-
-Set `run.phase` to `complete` only after the report finishes. Tell the user where all four
-files are.
-
-The default HTML and PDF are not a constraint. If the user asks for a logo, brand colors,
-or another layout, build a custom presentation from `report.json`. Use
-`report.earl.json` when the presentation needs the standards assertion graph. This is
-normal agent work, not an error fallback.
-
-## Lessons for next time
-
-Write or update `.a11ied/sites/<origin-key>/hints.json`. Record confirmed template groups,
-pages that need authentication, destructive controls, sitemap or redirect quirks, and axe
-findings worth checking again. Timestamp each entry and include this run's id. Correct or
-invalidate stale entries. Tell the user the file exists and that a later run will
-re-verify it.
-
-## Rules
-
-- Never use `--sr virtual` for a compliance judgment in this workflow.
-- Never click or submit a flagged destructive control.
-- Keep one coordinator as the only inventory writer.
-- Save after every page and phase transition.
-- Always warn before a real screen reader session.
-- Re-verify every reused hint.
-- State automated, hybrid, or manual next to every reported claim.
-- Never turn a partial inventory or an untested page into a compliance claim.
+The bundle builder requires a website inventory. For a native app, preserve the
+assessment and report this publication limitation explicitly; do not invent a web
+inventory or claim a native report was generated.

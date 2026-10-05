@@ -185,7 +185,8 @@ async function openWithAppleScript(appName: string, url: string): Promise<boolea
    }
 }
 
-async function openUrlOnMac(
+/** Opens a URL in the candidate's active macOS window without spawning another window. */
+export async function openUrlOnMac(
    candidate: BrowserAutomationCandidate,
    url: string,
 ): Promise<void> {
@@ -203,17 +204,7 @@ async function openUrlOnMac(
    const fallback = spawn('open', fallbackArgs, {
       stdio: ['ignore', 'ignore', 'pipe'],
    });
-   try {
-      await waitForChildExit(fallback, BROWSER_OPEN_TIMEOUT_MS);
-      return;
-   } catch {
-      // Fall back to opening the URL with the system's default browser.
-   }
-
-   const systemDefault = spawn('open', [url], {
-      stdio: ['ignore', 'ignore', 'pipe'],
-   });
-   await waitForChildExit(systemDefault, BROWSER_OPEN_TIMEOUT_MS);
+   await waitForChildExit(fallback, BROWSER_OPEN_TIMEOUT_MS);
 }
 
 async function openUrlOnWindows(

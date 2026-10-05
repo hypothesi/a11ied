@@ -14,6 +14,7 @@ const { env: processEnv, execPath, platform } = process;
 
 const CLI_PATH = resolve(import.meta.dirname, '..', 'packages', 'cli', 'dist', 'cli.js');
 const HEADING_TEXT = 'a11ied smoke heading';
+const INPUT_TEXT = 'native audit';
 const NAVIGATION_STEPS = 8;
 const LOCAL_HOST = '127.0.0.1';
 const EPHEMERAL_PORT = 0;
@@ -54,7 +55,15 @@ function closeServer(server) {
 }
 
 function startFixtureServer() {
-   const server = createServer((_request, response) => {
+   const observed = { value: '', activations: 0 };
+   const server = createServer((request, response) => {
+      const url = new URL(request.url, `http://${LOCAL_HOST}`);
+      if (url.pathname === '/typed') {
+         observed.value = url.searchParams.get('value') ?? '';
+      }
+      if (url.pathname === '/activated') {
+         observed.activations += 1;
+      }
       response.writeHead(HTTP_OK, { 'content-type': 'text/html; charset=utf-8' });
       response.end(FIXTURE_HTML);
    });
@@ -64,6 +73,7 @@ function startFixtureServer() {
          const { port } = server.address();
          resolveServer({
             url: `http://${LOCAL_HOST}:${port}/`,
+            observed,
             close: () => closeServer(server),
          });
       });
@@ -149,7 +159,14 @@ function startOptions(screenReader) {
    if (screenReader === 'virtual') {
       return ['--sr', 'virtual'];
    }
-   return ['--sr', screenReader, '--timeout', String(SMOKE_BROKER_TIMEOUT_MS)];
+   return [
+      '--sr',
+      screenReader,
+      '--native-input',
+      'guarded',
+      '--timeout',
+      String(SMOKE_BROKER_TIMEOUT_MS),
+   ];
 }
 
 async function searchForHeading(transcriptStdout) {
@@ -169,10 +186,24 @@ async function searchForHeading(transcriptStdout) {
    return prevResult.stdout;
 }
 
-async function runSmoke(screenReader, url) {
+async function checkInteraction(fixture) {
+   await runCliOrFail(['sr', 'top']);
+   await runCliOrFail(['sr', 'next', 'form-field']);
+   await runCliOrFail(['sr', 'type', INPUT_TEXT]);
+   await runCliOrFail(['sr', 'next', 'button']);
+   await runCliOrFail(['sr', 'activate']);
+   if (fixture.observed.value !== INPUT_TEXT || fixture.observed.activations !== 1) {
+      throw new Error(
+         `Fixture interaction did not arrive: ${JSON.stringify(fixture.observed)}`,
+      );
+   }
+   log('Native-style typing and one activation reached the fixture.');
+}
+
+async function runSmoke(screenReader, fixture) {
    const doctorArgs = screenReader === 'virtual' ? ['doctor'] : ['doctor', '--strict'];
    await runCliOrFail(doctorArgs);
-   await runCliOrFail(['sr', 'start', ...startOptions(screenReader), url]);
+   await runCliOrFail(['sr', 'start', ...startOptions(screenReader), fixture.url]);
    if (screenReader !== 'virtual') {
       await runCliOrFail(['sr', 'wait', '--ms', '2000']);
    }
@@ -181,6 +212,7 @@ async function runSmoke(screenReader, url) {
    const transcript = await runCliOrFail(['sr', 'transcript', '--json']);
    const finalOutput = await searchForHeading(transcript.stdout);
    assertHeadingAnnounced(finalOutput);
+   await checkInteraction(fixture);
 }
 
 async function main() {
@@ -189,7 +221,7 @@ async function main() {
    log(`Screen reader smoke test: ${screenReader} against ${server.url}`);
 
    try {
-      await runSmoke(screenReader, server.url);
+      await runSmoke(screenReader, server);
       log('\nScreen reader smoke test passed.');
    } finally {
       await runCli(['sr', 'stop']);

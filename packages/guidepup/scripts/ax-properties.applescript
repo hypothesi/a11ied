@@ -1,7 +1,7 @@
-try
   set delim to (ASCII character 30)
   tell application "System Events"
     set fe to value of attribute "AXFocusedUIElement" of (first application process whose frontmost is true)
+    if fe is missing value then return ""
     set r to ""
     set s to ""
     set t to ""
@@ -32,6 +32,3 @@ try
     end try
     return r & delim & s & delim & t & delim & d & delim & v & delim & e
   end tell
-on error
-  return ""
-end try

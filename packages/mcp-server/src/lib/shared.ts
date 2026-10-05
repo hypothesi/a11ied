@@ -37,21 +37,6 @@ export const activeAnnotations = {
    openWorldHint: true,
 } as const;
 
-/** A URL a real screen reader can navigate to, used by every `sr_session` action. */
-export const targetInputSchema = z
-   .object({
-      url: z.string().url().optional(),
-   })
-   .superRefine((value, ctx) => {
-      if (value.url === undefined) {
-         ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'Provide url.',
-            path: ['url'],
-         });
-      }
-   });
-
 /**
  * The page target every `axe`, `tree`, and `audit` tool call accepts: an http(s) URL, a
  * local file path, or inline HTML. Mirrors the CLI's positional `<target>` and `--html`.
@@ -69,7 +54,6 @@ export const pageTargetInputSchema = z.object({
 export type PageTargetInput = z.infer<typeof pageTargetInputSchema>;
 
 export type SupportedWcagVersion = (typeof SUPPORTED_WCAG_VERSIONS)[number];
-export type TargetInput = z.infer<typeof targetInputSchema>;
 
 export interface ToolResponse<TPayload> {
    [key: string]: unknown;
@@ -80,16 +64,6 @@ export interface ToolResponse<TPayload> {
 interface JsonResource {
    [key: string]: unknown;
    contents: Array<{ uri: string; mimeType: string; text: string }>;
-}
-
-interface ResolvedExecutionTarget {
-   resolvedUrl: string;
-   reportTarget: {
-      kind: 'url';
-      value: string;
-      resolvedUrl: string;
-   };
-   html: string;
 }
 
 /** The target a page-tool result reports: kind, the value given, and the resolved URL. */
@@ -160,34 +134,6 @@ export function ensureVirtualTargetAllowed(
    throw new Error(
       'The virtual target is a simulation. Omit target to use VoiceOver/NVDA, or set allowVirtual=true to proceed.',
    );
-}
-
-export function buildTargetInput(input: TargetInput): {
-   url?: string;
-} {
-   if (input.url) {
-      return { url: input.url };
-   }
-   return {};
-}
-
-/** Resolves a session-lifecycle `url` input, the way `sr start` and `sr open` do. */
-export async function resolveExecutionTarget(
-   input: TargetInput,
-): Promise<ResolvedExecutionTarget> {
-   const targetInput = buildTargetInput(input);
-   const resolved = await resolveDocumentTarget(targetInput);
-   const resolvedUrl = describeResolvedTarget(resolved);
-
-   return {
-      resolvedUrl,
-      reportTarget: {
-         kind: 'url',
-         value: resolved.target.value,
-         resolvedUrl,
-      },
-      html: await resolved.readHtml(),
-   };
 }
 
 /** Resolves an `axe`/`tree`/`audit` page target the way the CLI's positional target does. */

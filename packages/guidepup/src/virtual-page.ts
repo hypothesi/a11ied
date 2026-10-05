@@ -33,8 +33,10 @@ function encoded<Args extends unknown[], Result>(
 const wrapped: VirtualRuntime = {
    start: encoded(runtime.start),
    stop: encoded(runtime.stop),
+   isStarted: encoded(runtime.isStarted),
    readSpeech: encoded(runtime.readSpeech),
    readCurrentItem: encoded(runtime.readCurrentItem),
+   readActivationNode: encoded(runtime.readActivationNode),
    runPortable: encoded(runtime.runPortable),
    navigate: encoded(runtime.navigate),
    press: encoded(runtime.press),

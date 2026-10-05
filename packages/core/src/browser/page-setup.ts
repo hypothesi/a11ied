@@ -34,14 +34,14 @@ export interface PageSetupOptions {
    timeoutMs?: number | undefined;
 }
 
-/** True when any option here would require a fresh, uncached page. */
+/** Existing-page observations reject setup changes instead of replacing current state. */
 export function hasPageSetup(options: PageSetupOptions): boolean {
    return Boolean(
-      options.viewport ??
-      options.storageStatePath ??
-      options.extraHeaders ??
-      options.cookies?.length ??
-      options.waitFor ??
+      options.viewport ||
+      options.storageStatePath ||
+      options.extraHeaders ||
+      options.cookies?.length ||
+      options.waitFor ||
       options.click,
    );
 }

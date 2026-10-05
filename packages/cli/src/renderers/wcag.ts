@@ -93,7 +93,8 @@ export function renderTestMethodSummaryText(
          ]),
       ),
    ];
-   const sources = summary.ruleSources;
+   const coverage = summary.procedureCoverage,
+      sources = summary.ruleSources;
 
    return [
       `${title(`WCAG ${summary.version} test methods`)}  ${dim(`updated ${summary.updatedAt.slice(0, 'YYYY-MM-DD'.length)}`)}`,
@@ -101,6 +102,11 @@ export function renderTestMethodSummaryText(
       '',
       ...indent([
          `${sources.criteriaWithAxe} criteria have an axe rule, ${sources.criteriaWithAct} have an ACT rule, ${sources.criteriaWithBoth} have both.`,
+      ]),
+      ...indent([
+         coverage
+            ? `Desktop procedures: ${coverage.definedCriterionIds.length} criteria defined; ${coverage.gapCriterionIds.length} require additional guidance.`
+            : 'Desktop procedure coverage is unavailable in this artifact.',
       ]),
    ].join('\n');
 }

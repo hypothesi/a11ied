@@ -10,6 +10,8 @@ import {
 } from '@a11ied/wcag-engine';
 
 import { readEvidenceForSubject, type EvidenceStoreOptions } from './store.js';
+import { getCriterionEvidence } from './criteria.js';
+import { isVerifiedEvidence } from './validation.js';
 
 const LEVELS = ['A', 'AA', 'AAA'] as const;
 
@@ -22,7 +24,7 @@ const LEVELS = ['A', 'AA', 'AAA'] as const;
 export function listRecordedCriterionIds(records: EvidenceRecord[]): Set<string> {
    const ids = new Set<string>();
    for (const record of records) {
-      if (record.test.kind === 'criterion') {
+      if (record.test.kind === 'criterion' && isVerifiedEvidence(record)) {
          ids.add(record.test.criterionId);
       }
    }
@@ -34,9 +36,12 @@ function needsAPerson(evidenceMode: string): boolean {
    return evidenceMode !== 'automated';
 }
 
-function readStrategy(criterionId: string): EvidenceStrategy | undefined {
+function readStrategy(
+   criterionId: string,
+   version: string,
+): EvidenceStrategy | undefined {
    try {
-      return getTestMethod(criterionId).strategy;
+      return getTestMethod(criterionId, { version }).strategy;
    } catch (error) {
       if (error instanceof WcagEngineNotFoundError) {
          return undefined;
@@ -49,9 +54,19 @@ function buildPending(input: {
    criterionId: string;
    title: string;
    level: string;
+   records: EvidenceRecord[];
+   version: string;
 }): PendingCriterion | undefined {
-   const strategy = readStrategy(input.criterionId);
+   const strategy = readStrategy(input.criterionId, input.version);
    if (!strategy || !needsAPerson(strategy.preferredEvidenceMode)) {
+      return undefined;
+   }
+   const { pendingProcedureIds } = getCriterionEvidence({
+      criterionId: input.criterionId,
+      records: input.records,
+      strategy,
+   });
+   if (pendingProcedureIds.length === 0) {
       return undefined;
    }
 
@@ -60,7 +75,7 @@ function buildPending(input: {
       title: input.title,
       level: input.level,
       evidenceMode: strategy.preferredEvidenceMode,
-      procedureIds: strategy.procedureIds,
+      procedureIds: pendingProcedureIds,
    };
 }
 
@@ -72,8 +87,7 @@ export interface ListPendingCriteriaInput extends EvidenceStoreOptions {
 }
 
 /**
- * Lists the criteria for one target that axe cannot decide and that nobody has recorded a
- * result for yet.
+ * Lists criteria for one target that still have unrecorded manual procedures.
  *
  * This reads the WCAG strategy artifact and the evidence file. It never opens a browser,
  * so an agent can call it between checks without paying for a page load. `a1 audit`
@@ -82,22 +96,19 @@ export interface ListPendingCriteriaInput extends EvidenceStoreOptions {
 export async function listPendingCriteria(
    input: ListPendingCriteriaInput,
 ): Promise<PendingCriterion[]> {
-   const records = await readEvidenceForSubject(input.subject, { file: input.file });
-   const recorded = listRecordedCriterionIds(records);
-
+   const records = await readEvidenceForSubject(input.subject, input);
    const levels = input.level ? [input.level] : [...LEVELS];
    const version = input.wcagVersion ?? '2.2';
 
    return levels
       .flatMap((level) => listCriteriaByLevel(level, version).criteria)
       .flatMap((criterion) => {
-         if (recorded.has(criterion.id)) {
-            return [];
-         }
          const pending = buildPending({
             criterionId: criterion.id,
             title: criterion.title,
             level: criterion.level,
+            records,
+            version,
          });
          return pending ? [pending] : [];
       });

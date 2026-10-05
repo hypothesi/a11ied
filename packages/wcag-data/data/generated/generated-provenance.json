@@ -91,15 +91,6 @@
          ]
       },
       {
-         "fileName": "apg-patterns.json",
-         "sha256": "4af4581c0d86dce1433891d82ebf7ea514b0b77a67615669eee40d7d01bc3532",
-         "sourceFileNames": [],
-         "sourceUrls": [
-            "https://www.w3.org/WAI/ARIA/apg/example-index/",
-            "https://www.w3.org/WAI/ARIA/apg/patterns/"
-         ]
-      },
-      {
          "fileName": "axe-rules.2.1.json",
          "sha256": "b6c872939f94e4e4eca6bf6a62bf66ef7de1e21afdeec221ff3ef75d7f94005c",
          "wcagVersion": "2.1",
@@ -215,7 +206,7 @@
       },
       {
          "fileName": "strategy.2.1.json",
-         "sha256": "6b216c216bd471a31a4b2eed7e30a1aff1700651716ba29ef2bd6544023c1bdc",
+         "sha256": "aa44f9790b8b0c784172d57bb039127629804b73c54eb8b771f96cd8ea27b024",
          "wcagVersion": "2.1",
          "sourceFileNames": [
             "wcag.2.1.json",
@@ -232,7 +223,7 @@
       },
       {
          "fileName": "strategy.2.2.json",
-         "sha256": "bf2abfffe673a12e64c427a73cf0869e9851ee686be6bff413f0a78613287d27",
+         "sha256": "3e74d5b8f528cd20f671883c63903924ecfeb13cceae8d381db04e3f7c113435",
          "wcagVersion": "2.2",
          "sourceFileNames": [
             "wcag.2.2.json",
@@ -269,7 +260,7 @@
       },
       {
          "fileName": "test-method-summary.2.1.json",
-         "sha256": "37bbb3004c501a8333bca07fb4b1320c7e61bde1d64ae1a38d3a255f7d51312e",
+         "sha256": "4493abacef24c53a5529d7b827bfe5661514c0498287c81c8d550f43cc2986c1",
          "wcagVersion": "2.1",
          "sourceFileNames": [
             "wcag.2.1.json",
@@ -286,7 +277,7 @@
       },
       {
          "fileName": "test-method-summary.2.2.json",
-         "sha256": "8089a9f7790aab409399eb340ff6ce4d97bb632fa65ee86b5fed43d0420bdab4",
+         "sha256": "0f228f075bbb82cc86877750738ff489053bd5ee08b7a2da1cf8f7ad34c0e2a5",
          "wcagVersion": "2.2",
          "sourceFileNames": [
             "wcag.2.2.json",
@@ -303,7 +294,7 @@
       },
       {
          "fileName": "test-methods.2.1.json",
-         "sha256": "6216f07418b14e4f68cdefbdf2e742507d9c6506392671b7fa2516bdaca9e648",
+         "sha256": "a0c9c4274a14c237d5145b8ba73de49bb2b4a1853261a14a4db24a476bcd2520",
          "wcagVersion": "2.1",
          "sourceFileNames": [
             "wcag.2.1.json",
@@ -320,7 +311,7 @@
       },
       {
          "fileName": "test-methods.2.2.json",
-         "sha256": "be508a959037928162d336cf30f057e614b8edfe7d6aa09201fa5796e37ee77c",
+         "sha256": "2f6aeba12c69006a2e6e32b5c3a073048cd66f36670bc8d5f5c4f45c617fc9af",
          "wcagVersion": "2.2",
          "sourceFileNames": [
             "wcag.2.2.json",

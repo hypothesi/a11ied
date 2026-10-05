@@ -21,6 +21,15 @@ export interface ActiveSessionRecording {
    stop(): Promise<SessionRecording>;
 }
 
+/** These errors confirm recorder exit, but its output cannot be used. */
+export function isRecordingArtifactFailure(error: unknown): boolean {
+   return (
+      error instanceof CliEnvironmentError &&
+      (error.code === 'recording-file-missing' ||
+         error.code === 'recording-command-failed')
+   );
+}
+
 function requireRealRecordingTarget(target: Platform): RealRecordingTarget {
    if (target === 'virtual') {
       throw new CliUsageError(
@@ -176,9 +185,19 @@ export function startSessionRecording(
             return completedRecording;
          }
 
-         await stopNativeRecording();
+         try {
+            await stopNativeRecording();
+         } catch (error) {
+            if (isRecordingArtifactFailure(error)) {
+               activeRecording.status = 'failed';
+               activeRecording.stoppedAt = new Date().toISOString();
+            }
+            throw error;
+         }
          const recordingCaptured = await waitForRecordingFile(validated.absolutePath);
          if (!recordingCaptured) {
+            activeRecording.status = 'failed';
+            activeRecording.stoppedAt = new Date().toISOString();
             throw new CliEnvironmentError(
                'recording-file-missing',
                `The native recorder stopped without writing "${validated.absolutePath}".`,

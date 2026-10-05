@@ -8,6 +8,7 @@ const toc = [
    { id: 'wcag', label: 'wcag_show, wcag_criteria, wcag_rule, search' },
    { id: 'pattern', label: 'pattern_show, pattern_find, pattern_check, pattern_record' },
    { id: 'axe', label: 'run_axe, tree, audit' },
+   { id: 'assessment', label: 'audit_assessment' },
    { id: 'sr', label: 'sr_session and sr_action' },
    { id: 'sr-checks', label: 'sr_list, sr_expect, sr_transcript' },
    { id: 'resources', label: 'Resources' },
@@ -17,7 +18,7 @@ const toc = [
 
 <DocShell
    title="MCP reference"
-   summary="Tool names, inputs, resource URIs, and side effects for the a11ied MCP server. Every tool calls the same runtime function as the matching CLI command, so results match across the two, and every tool name generated from the CLI command registry keeps them from drifting apart."
+   summary="Tool inputs, resources, and side effects for the MCP server. Assessment operations share validation and durable progress with the CLI."
    links={docsLinks}
    toc={toc}
 >
@@ -42,6 +43,12 @@ const toc = [
 }`}</code></pre>
       </div>
       <div class="split-aside">
+         <p>
+            For a source checkout, build the workspace and copy the root
+            <code>mcp.example.json</code> entry into your client's configuration.
+            Set the client's working directory to the repository root, or use an absolute
+            path to <code>packages/cli/dist/cli.js</code>.
+         </p>
          <div class="tag">Defaults</div>
          <p class="aside-note">
             Every tool that takes <code>version</code> defaults to <code>2.2</code>. The other
@@ -122,6 +129,15 @@ const toc = [
          <code>a1 axe</code> with no filter.
       </p>
       <p>
+         <code>audit</code> takes <code>level</code> to select cumulative A, AA, or AAA
+         coverage, and <code>resultsFile</code> to read the current run's manual evidence.
+         Use the same evidence path on <code>record_result</code> and <code>pattern_record</code> calls. Supply <code>runFile</code> and <code>provenance</code> to validate the run, scoped check, states, actor, actions, and artifacts. A note alone stays unverified. For APG rows, pass the observed <code>subjectHash</code> and widget <code>pointer</code>. Keyboard rows require typed action evidence; attribute rows require scoped observations. <code>pattern_pending</code> requires the same run, pointer, and hash to count judgments across all queued states.
+      </p>
+      <p>
+         Provenance and non-image artifact envelopes include <code>attempt</code> from the
+         claimed check's <code>attempts</code>. Evidence from another attempt is rejected.
+      </p>
+      <p>
          <code>tree</code> takes <code>role</code> and <code>name</code> to keep only matching
          nodes and their ancestors. <code>run_axe</code> and <code>tree</code> take
          <code>click</code>, a selector for the one element to click after the page loads,
@@ -139,6 +155,31 @@ const toc = [
       </p>
    </section>
 
+   <section class="panel" id="assessment">
+      <h2>audit_assessment</h2>
+      <p>
+         This tool uses the same validated coordinator as the CLI assessment commands.
+         <code>action</code> selects <code>start</code>, <code>state</code>, <code>journey</code>,
+         <code>queue</code>, <code>next</code>, <code>status</code>, <code>resume</code>,
+         <code>evaluate</code>, <code>block</code>, or <code>finalize</code>.
+         It sends no UI input. The host agent executes procedures and supplies observed evidence and judgments.
+      </p>
+      <div class="route-list">
+         <div class="route-row"><code>start</code><span>Requires a structured <code>target</code> and observed <code>environment</code>. Accepts <code>profile</code>, <code>scope</code>, <code>file</code>, <code>runId</code>, <code>inventoryPath</code>, and <code>actionPolicy</code>. Defaults are WCAG 2.2 AA and site scope for web targets or app scope for desktop app targets.</span></div>
+         <div class="route-row"><code>state, journey, queue</code><span>Require <code>file</code> and the corresponding structured object. Return the saved identity and revision separately from status pagination. Invented procedures, obsolete versions, invalid scopes, and unknown APG rows are rejected before persistence.</span></div>
+         <div class="route-row"><code>next</code><span>Requires <code>file</code>. Returns one check, procedure, environment, journey, and bounded state context. Read additional status state pages by ID when needed. Concurrent claims or changed claim generations are rejected.</span></div>
+         <div class="route-row"><code>status</code><span>Requires <code>file</code>. Accepts <code>offset</code> and <code>limit</code>; defaults are 0 and 20, with a maximum of 100. Each list returns items, total, and an optional nextOffset.</span></div>
+         <div class="route-row"><code>evaluate, block</code><span>Require <code>file</code> and <code>checkId</code>. Evaluate requires <code>outcome</code> and saved <code>evidenceIds</code>. Block requires a recovery <code>reason</code>.</span></div>
+         <div class="route-row"><code>resume, finalize</code><span>Resume keeps interrupted checks blocked; <code>retryCheckIds</code> requests explicit safe retries. Finalize rejects incomplete coverage unless <code>allowPartial</code> is true, which preserves an active run.</span></div>
+      </div>
+      <pre data-label="MCP INPUT"><code>{`{"action":"status","file":".a11ied/fireside/run.json","offset":0,"limit":20}`}</code></pre>
+      <p>
+         <code>record_result</code> saves validated evidence before <code>evaluate</code>.
+         <code>report_build</code> remains separate and consumes discovery and page artifacts.
+         A lifecycle receipt alone does not establish native reader or complete installed-audit verification.
+      </p>
+   </section>
+
    <section class="panel" id="sr">
       <div class="panel-head">
          <p class="panel-kicker">Screen reader</p>
@@ -151,11 +192,14 @@ const toc = [
          <div class="route-row"><code>allowVirtual</code><span>(<code>start</code> only) Set to <code>true</code> to accept the simulated reader when a real one is available.</span></div>
          <div class="route-row"><code>url</code><span>(<code>start</code> and <code>open</code>) The page to load. Virtual loads it directly. VoiceOver and NVDA open it in a system browser and refocus it.</span></div>
          <div class="route-row"><code>app</code><span>(<code>start</code> only) A native app that is already open, to read instead of a page.</span></div>
+         <div class="route-row"><code>nativeInput</code><span>(<code>start</code> only) Defaults to <code>guarded</code>: commands check the observed foreground target. Inspect returned state and speech after actions. <code>require-binding</code> refuses unavailable native binding; <code>development</code> bypasses target checks.</span></div>
       </div>
       <p>
-         One session is active at a time, so no action takes a session id, and <code>start</code>
+         One session is active at a time, and <code>start</code>
          stops any session already active. The start response includes <code>session</code>, which
          has <code>sessionId</code>, <code>target</code>, and <code>targetType</code>.
+         Pass <code>sessionId</code> to <code>stop</code> to retry a recovery owner named
+         in an error, even when active-session metadata could not be published.
          <code>targetType</code> is <code>real</code> for VoiceOver and NVDA, and
          <code>simulated</code> for virtual. <code>status</code> returns
          <code>{`{ noSession: true }`}</code> instead of throwing when no session is active.
@@ -176,7 +220,7 @@ const toc = [
       <div class="route-list">
          <div class="route-row"><code>press</code><span>Payload <code>{`{ keys }`}</code>, one chord per entry, pressed in order, such as <code>["Tab", "Tab"]</code>.</span></div>
          <div class="route-row"><code>type</code><span>Payload <code>{`{ text }`}</code>.</span></div>
-         <div class="route-row"><code>checkpoint</code><span>Payload <code>{`{ label }`}</code>, a named point in the transcript for <code>sr_expect</code>'s <code>since</code>.</span></div>
+         <div class="route-row"><code>checkpoint</code><span>Payload <code>{`{ label }`}</code>, a named point in the transcript for the <code>since</code> parameter for expectations and waits.</span></div>
          <div class="route-row"><code>perform</code><span>Payload <code>{`{ command, commandSet? }`}</code>. Runs a named screen reader command. Call <code>sr_list</code> for the names.</span></div>
          <div class="route-row"><code>focus</code><span>Payload with one of <code>appName</code>, <code>bundleId</code>, <code>processName</code>, <code>pid</code>, or <code>windowTitle</code>.</span></div>
          <div class="route-row"><code>find</code><span>Payload <code>{`{ text }`}</code>. Moves to the next place the text appears.</span></div>
@@ -184,7 +228,7 @@ const toc = [
          <div class="route-row"><code>elements</code><span>Payload <code>{`{ kind, max? }`}</code>. The rotor for one kind, from the top of the page.</span></div>
          <div class="route-row"><code>read-all</code><span>Payload <code>{`{ max? }`}</code>. Say-all as a transcript from the cursor.</span></div>
          <div class="route-row"><code>goto</code><span>Payload <code>{`{ role?, name?, max? }`}</code>. Steps forward until the item matches.</span></div>
-         <div class="route-row"><code>wait</code><span>Payload <code>{`{ for?, ms?, timeoutMs? }`}</code>. Polls the transcript for a phrase.</span></div>
+         <div class="route-row"><code>wait</code><span>Payload <code>{`{ for?, since?, ms?, timeoutMs? }`}</code>. Polls the transcript for a phrase.</span></div>
          <div class="route-row"><code>screenshot</code><span>Payload <code>{`{ path }`}</code>. VoiceOver cursor only.</span></div>
       </div>
       <p>
@@ -209,7 +253,7 @@ const toc = [
          <div class="route-list">
             <div class="route-row"><code>sr_list</code><span><code>query</code>, <code>sr</code>, and <code>commandSet</code> all optional. Start with <code>query</code>. The unfiltered list is over 400 entries.</span></div>
             <div class="route-row"><code>sr_expect</code><span><code>pattern</code> required, text (case-insensitive) or <code>/regex/flags</code>. <code>since</code> limits the check to phrases after a checkpoint. <code>not</code> passes when the phrase was NOT announced.</span></div>
-            <div class="route-row"><code>sr_transcript</code><span><code>since</code>, <code>tail</code>, <code>out</code>, and <code>format</code> all optional. <code>out</code> also writes the transcript to a <code>.json</code> or <code>.md</code> path.</span></div>
+            <div class="route-row"><code>sr_transcript</code><span><code>since</code>, <code>tail</code>, <code>afterIndex</code>, <code>limit</code>, <code>out</code>, and <code>format</code> are optional. Index paging defaults to 200 entries. <code>transcript.window</code> reports omitted entries and the next index. <code>out</code> also writes the transcript to a <code>.json</code> or <code>.md</code> path.</span></div>
          </div>
          <p>
             <code>sr_expect</code> returns <code>exitCode</code> 4 (the CLI assertion exit code) and a
@@ -251,7 +295,7 @@ const toc = [
       <div class="route-list">
          <div class="route-row"><div class="route-terms"><code>wcag_show</code>, <code>wcag_criteria</code>, <code>wcag_rule</code>, <code>search</code>, <code>pattern_show</code>, <code>pattern_find</code></div><span>Read local files. <code>wcag_rule</code> also reads the installed axe-core package for help text.</span></div>
          <div class="route-row"><div class="route-terms"><code>run_axe</code>, <code>tree</code>, <code>audit</code></div><span>Open the target in browser automation.</span></div>
-         <div class="route-row"><code>doctor</code><span>Reads the host settings and installed browsers, and runs a short recording check on macOS.</span></div>
+         <div class="route-row"><code>doctor</code><span>Reads prerequisites for the requested task. Reader checks inspect settings; recording checks run only when requested.</span></div>
       </div>
       <p>
          The <code>sr_*</code> tools change the state of the machine. A real session puts VoiceOver

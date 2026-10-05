@@ -1,3 +1,4 @@
-display_name: a11ied
-short_description: Plan and run a11ied accessibility automation workflows.
-default_prompt: Use the a11ied CLI and workspace packages to script accessibility checks, with screen reader behavior treated as the primary signal.
+interface:
+   display_name: 'a11ied development checks'
+   short_description: 'Check desktop component accessibility with a11ied.'
+   default_prompt: 'Use $a11ied to check the requested desktop component with scanner and interaction evidence.'

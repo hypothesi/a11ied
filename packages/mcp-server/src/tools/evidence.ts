@@ -1,12 +1,16 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { EvidenceRecord } from '@a11ied/contracts';
 import {
-   appendEvidence,
+   evidenceFindingSchema,
+   evidenceProvenanceSchema,
+   type EvidenceRecord,
+} from '@a11ied/contracts';
+import {
+   recordEvidence,
+   resolveEvidenceProcedure,
    buildSubjectKey,
    listPendingCriteria,
    resolveDocumentTarget,
 } from '@a11ied/core';
-import { getTestMethod, WcagEngineNotFoundError } from '@a11ied/wcag-engine';
 import { z } from 'zod';
 
 import {
@@ -17,10 +21,11 @@ import {
 } from '../lib/shared.js';
 
 /** The strategy artifact names this for a criterion axe covers; a person did not run axe. */
-const AUTOMATED_PROCEDURE_ID = 'axe_scan';
-const DEFAULT_PROCEDURE_ID = 'manual_review';
-
 const recordInputSchema = pageTargetInputSchema.extend({
+   finding: evidenceFindingSchema.optional(),
+   provenance: evidenceProvenanceSchema.optional(),
+   runFile: z.string().min(1).optional(),
+   wcagVersion: z.string().min(1).optional(),
    criterionId: z
       .string()
       .min(1)
@@ -59,6 +64,7 @@ const recordInputSchema = pageTargetInputSchema.extend({
 
 const pendingInputSchema = pageTargetInputSchema.extend({
    storageStatePath: z.string().min(1).optional(),
+   runFile: z.string().min(1).optional(),
    level: z
       .string()
       .min(1)
@@ -79,22 +85,6 @@ async function resolveSubject(input: {
    return buildSubjectKey(resolved);
 }
 
-function pickProcedureId(criterionId: string, wcagVersion?: string): string {
-   try {
-      const lookup = wcagVersion === undefined ? {} : { version: wcagVersion };
-      const { procedureIds } = getTestMethod(criterionId, lookup).strategy;
-      const performable = procedureIds.find(
-         (procedureId: string) => procedureId !== AUTOMATED_PROCEDURE_ID,
-      );
-      return performable ?? DEFAULT_PROCEDURE_ID;
-   } catch (error) {
-      if (error instanceof WcagEngineNotFoundError) {
-         return DEFAULT_PROCEDURE_ID;
-      }
-      throw error;
-   }
-}
-
 function registerRecordTool(server: McpServer): void {
    server.registerTool(
       'record_result',
@@ -104,7 +94,7 @@ function registerRecordTool(server: McpServer): void {
             'Record what you found for a WCAG criterion that a11ied cannot check automatically, so it reaches the same ' +
             'report as the axe results. Use it after you have actually inspected the page for that criterion: read the ' +
             'accessibility tree, drove the screen reader, or looked at the rendered page. Call list_pending_results first ' +
-            'to see which criteria still need you. Recording the same criterion twice replaces the earlier result.',
+            'to see the remaining procedures. Recording the same procedure and element again replaces its earlier result.',
          inputSchema: recordInputSchema,
          annotations: activeAnnotations,
       },
@@ -115,20 +105,30 @@ function registerRecordTool(server: McpServer): void {
             test: {
                kind: 'criterion',
                criterionId: input.criterionId,
-               procedureId: input.procedureId ?? pickProcedureId(input.criterionId),
+               procedureId: resolveEvidenceProcedure({
+                  criterionId: input.criterionId,
+                  procedureId: input.procedureId,
+                  wcagVersion: input.wcagVersion,
+               }).procedureId,
             },
             outcome: input.outcome,
             mode: input.mode ?? 'semiAutomatic',
             recordedAt: new Date().toISOString(),
+            ...(input.provenance ? { provenance: input.provenance } : {}),
+            ...(input.finding ? { finding: input.finding } : {}),
             ...(input.pointer === undefined ? {} : { pointer: input.pointer }),
             ...(input.note === undefined ? {} : { note: input.note }),
             ...(input.assertedBy === undefined ? {} : { assertedBy: input.assertedBy }),
          };
-         const file = await appendEvidence(record, { file: input.resultsFile });
+         const accepted = await recordEvidence(record, {
+            file: input.resultsFile,
+            runFile: input.runFile,
+            wcagVersion: input.wcagVersion,
+         });
 
          return createToolResponse({
             target: { kind: 'url', value: subject },
-            result: { record, file },
+            result: accepted,
          });
       },
    );
@@ -140,9 +140,8 @@ function registerPendingTool(server: McpServer): void {
       {
          title: 'List checks that still need a person',
          description:
-            'List the WCAG criteria for a target that axe cannot decide and that have no recorded result yet. Each entry ' +
-            'carries the procedure to perform. This reads the WCAG data and the results file and never opens a browser, ' +
-            'so it is cheap to call between checks. Record what you find with record_result.',
+            'List WCAG criteria with unrecorded manual procedures for a target. Each entry lists the remaining procedures. ' +
+            'This reads WCAG data and the evidence file without opening a browser. Record results with record_result.',
          inputSchema: pendingInputSchema,
          annotations: readOnlyAnnotations,
       },
@@ -151,6 +150,7 @@ function registerPendingTool(server: McpServer): void {
          const pending = await listPendingCriteria({
             subject,
             file: input.resultsFile,
+            runFile: input.runFile,
             level: input.level,
             wcagVersion: input.wcagVersion,
          });

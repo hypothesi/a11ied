@@ -92,7 +92,7 @@ describe('wcag-engine test method and strategy', () => {
       const result = getTestMethod('4.1.2');
 
       expect(result.criterion.id).toBe('4.1.2');
-      expect(result.testMethod.method).toBe('automated');
+      expect(result.testMethod.method).toBe('hybrid');
       expect(result.testMethod.axeRuleIds.length).toBeGreaterThan(0);
       expect(result.testMethod.actRuleIds.length).toBeGreaterThan(0);
       expect(result.strategy.procedureIds).toContain('axe_scan');

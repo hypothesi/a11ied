@@ -6,27 +6,27 @@ import { fileURLToPath } from 'node:url';
 
 import {
    DEFAULT_WAIT_TIMEOUT_MS,
+   accessibilityDriverSessionSchema,
    type AccessibilityDriverSession,
    type Platform,
    type VirtualEngine,
 } from '@a11ied/contracts';
 
+import { getDriverSocketPath } from './session-utils.js';
+
 import type { BrokerRequest, BrokerResponse } from './broker-types.js';
 import { delay } from './delay.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
+import { throwIfBrokerStartupFailed } from './broker-startup.js';
 
 const VIRTUAL_SOCKET_TIMEOUT_MS = 2000;
-// Must cover: guidepup op (up to 15s) + speech stabilization (5s) + retries
 const REAL_TARGET_SOCKET_TIMEOUT_MS = 30_000;
 const REAL_TARGET_STOP_SOCKET_TIMEOUT_MS = 20_000;
 const VIRTUAL_STOP_SOCKET_TIMEOUT_MS = 7000;
-/** A page load in the browser engine, plus the reader's first read of it. */
 const ATTACH_DOCUMENT_SOCKET_TIMEOUT_MS = 30_000;
 const BROKER_POLL_DELAY_MS = 100;
-/** Covers a Chromium launch for the browser engine on a loaded machine. */
 const DEFAULT_BROKER_READY_TIMEOUT_MS = 15_000;
 const REAL_TARGET_BROKER_READY_TIMEOUT_MS = 120_000;
-/** Extra time the reply gets on top of a caller-supplied command timeout. */
 const BROKER_RESPONSE_GRACE_MS = 6000;
 
 function isBrokerResponse(value: unknown): value is BrokerResponse {
@@ -45,7 +45,9 @@ function parseResponseLine(line: string): BrokerResponse {
 export async function connectToBroker(
    socketPath: string,
    request: BrokerRequest,
-   timeoutMs = VIRTUAL_SOCKET_TIMEOUT_MS,
+   timeoutMs = request.command === 'stop'
+      ? REAL_TARGET_STOP_SOCKET_TIMEOUT_MS
+      : VIRTUAL_SOCKET_TIMEOUT_MS,
 ): Promise<BrokerResponse> {
    return await new Promise<BrokerResponse>((resolvePromise, rejectPromise) => {
       let buffered = '';
@@ -104,11 +106,7 @@ function readPayloadMax(
    return typeof max === 'number' ? max : undefined;
 }
 
-/**
- * How long a `wait` action may take before it answers: its fixed pause, or the time it
- * polls for a phrase. A batch step sends the payload as written, so a missing phrase
- * timeout means the broker's default.
- */
+/** Include the pause or phrase timeout; batches may omit the default phrase timeout. */
 function readWaitBudget(payload: Record<string, unknown> | undefined): number {
    const ms = payload?.ms,
       timeoutMs = payload?.timeoutMs;
@@ -148,10 +146,9 @@ export function resolveBrokerSocketTimeoutMs(
 }
 
 export function resolveBrokerReadyTimeoutMs(target: Platform): number {
-   if (target === 'virtual') {
-      return DEFAULT_BROKER_READY_TIMEOUT_MS;
-   }
-   return REAL_TARGET_BROKER_READY_TIMEOUT_MS;
+   return target === 'virtual'
+      ? DEFAULT_BROKER_READY_TIMEOUT_MS
+      : REAL_TARGET_BROKER_READY_TIMEOUT_MS;
 }
 
 interface WaitForBrokerOptions {
@@ -162,14 +159,31 @@ interface WaitForBrokerOptions {
 
 async function pingSession(
    session: AccessibilityDriverSession | undefined,
+   sessionId: string,
 ): Promise<AccessibilityDriverSession | undefined> {
-   if (!session) {
-      return undefined;
-   }
    try {
-      const response = await connectToBroker(session.socketPath, { command: 'ping' });
-      return response.ok ? session : undefined;
-   } catch {
+      const socketPath = session?.socketPath ?? getDriverSocketPath(sessionId);
+      const response = await connectToBroker(socketPath, { command: 'ping' });
+      if (response.error?.code === 'session-starting') {
+         return undefined;
+      }
+      if (response.error) {
+         throw new CliEnvironmentError(
+            response.error.code,
+            response.error.message,
+            response.error.details,
+         );
+      }
+      const parsed = accessibilityDriverSessionSchema.safeParse(
+         response.session ?? session,
+      );
+      return response.ok && parsed.success && parsed.data.sessionId === sessionId
+         ? parsed.data
+         : undefined;
+   } catch (error) {
+      if (error instanceof CliEnvironmentError) {
+         throw error;
+      }
       return undefined;
    }
 }
@@ -178,6 +192,7 @@ async function pollForBroker(
    options: WaitForBrokerOptions,
    startedAt: number,
 ): Promise<AccessibilityDriverSession> {
+   await throwIfBrokerStartupFailed(options.sessionId);
    if (Date.now() - startedAt >= options.timeoutMs) {
       throw new CliEnvironmentError(
          'driver-broker-timeout',
@@ -188,6 +203,7 @@ async function pollForBroker(
    const session = await options.readSession();
    const live = await pingSession(
       session?.sessionId === options.sessionId ? session : undefined,
+      options.sessionId,
    );
    if (live) {
       return live;
@@ -196,7 +212,7 @@ async function pollForBroker(
    return pollForBroker(options, startedAt);
 }
 
-/** Polls the session file and the socket until the broker answers a ping or time runs out. */
+/** Poll metadata or the known broker socket until startup answers. */
 export async function waitForBroker(
    options: WaitForBrokerOptions,
 ): Promise<AccessibilityDriverSession> {
@@ -229,10 +245,7 @@ function resolveCorePackageRoot(): string | undefined {
       return undefined;
    }
    const packageDir = dirname(packageEntryPath);
-   if (basename(packageDir) === 'dist') {
-      return dirname(packageDir);
-   }
-   return packageDir;
+   return basename(packageDir) === 'dist' ? dirname(packageDir) : packageDir;
 }
 
 export function getBrokerEntryFromPackageRoot(packageRoot: string): string | undefined {
@@ -280,6 +293,8 @@ export interface BrokerSpawnOptions {
    recordingPath?: string | undefined;
    url?: string | undefined;
    app?: AccessibilityDriverSession['app'] | undefined;
+   browser?: string | undefined;
+   nativeInput?: AccessibilityDriverSession['nativeInput'];
    engine?: VirtualEngine | undefined;
 }
 
@@ -303,6 +318,8 @@ function brokerSpawnArgs(options: BrokerSpawnOptions): string[] {
       options.socketPath,
       '--idle-timeout-ms',
       String(options.idleTimeoutMs),
+      '--native-input',
+      options.nativeInput ?? 'guarded',
    ];
    if (options.recordingPath) {
       args.push('--recording-path', options.recordingPath);
@@ -315,6 +332,9 @@ function brokerSpawnArgs(options: BrokerSpawnOptions): string[] {
    }
    if (options.engine) {
       args.push('--engine', options.engine);
+   }
+   if (options.browser) {
+      args.push('--browser', options.browser);
    }
    return args;
 }

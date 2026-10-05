@@ -1,39 +1,23 @@
 import {
-   decodeDriverCommandError,
+   defaultVirtualDocument,
    ignoreError,
    readVirtualPageScript,
    type VirtualHost,
+   type VirtualSpeech,
+   type VirtualCurrentItem,
 } from '@a11ied/guidepup';
-import type { Page } from 'playwright';
+import type { JSHandle, Page } from 'playwright';
 
 import { waitForDocumentSettled } from '../browser/load.js';
 import { launchAutomationBrowser } from '../browser/policy.js';
+import { withCurrentBrowserPage } from '../browser/current-page.js';
+import { CliEnvironmentError, CliUsageError } from '../errors/cli-errors.js';
 
-type HostMethod = (...args: never[]) => Promise<unknown>;
-
-function decorate(method: HostMethod): HostMethod {
-   return async (...args) => {
-      try {
-         return await method(...args);
-      } catch (error) {
-         const decoded = decodeDriverCommandError(error);
-         throw decoded instanceof Error ? decoded : error;
-      }
-   };
-}
-
-/**
- * Rebuilds the typed error a page threw, so a command the reader cannot run reports the
- * same code and exit status it reports on the jsdom engine.
- */
-function withDecodedErrors(host: VirtualHost): VirtualHost {
-   const entries = Object.entries(host).map(([name, value]) =>
-      typeof value === 'function' ? [name, decorate(value as HostMethod)] : [name, value],
-   );
-   return Object.fromEntries(entries) as VirtualHost;
-}
+import { ownVirtualPage } from './virtual-page-owner.js';
+import { isNavigationError, withDecodedErrors } from './virtual-browser-errors.js';
 
 const PAGE_URL_PATTERN = /^(?:https?|file):/iu;
+const BROWSER_ACTIVATION_TIMEOUT_MS = 10_000;
 
 /** Whether a document URL names a page a browser can open, rather than a placeholder. */
 export function isPageUrl(url: string): boolean {
@@ -54,26 +38,15 @@ async function loadDocument(
 }
 
 /**
- * The init script runs on every navigation, but a page that rewrites its own document can
- * drop it, so the runtime is added again by script tag when it is missing.
+ * Borrowed pages retain their CSP and receive no permanent navigation script. Evaluate
+ * the trusted bundle when a navigation or document rewrite removed the runtime.
  */
-async function ensureRuntime(page: Page, pageScript: string): Promise<void> {
+async function ensureRuntime(page: Page, pageScript: string): Promise<boolean> {
    const present = await page.evaluate(() => 'a11iedVirtualRuntime' in globalThis);
    if (!present) {
-      await page.addScriptTag({ content: pageScript });
+      await page.evaluate(pageScript);
    }
-}
-
-function isNavigationError(error: unknown): boolean {
-   if (!(error instanceof Error)) {
-      return false;
-   }
-   const message = error.message.toLowerCase();
-   return (
-      message.includes('execution context was destroyed') ||
-      message.includes('navigation') ||
-      message.includes('cannot find context')
-   );
+   return !(await page.evaluate(() => globalThis.a11iedVirtualRuntime.isStarted()));
 }
 
 interface NavigationRecoveryContext {
@@ -81,84 +54,136 @@ interface NavigationRecoveryContext {
    pageScript: string;
 }
 
-const DEFAULT_NAVIGATED_SPEECH = {
-   lastSpokenPhrase: '',
-   itemText: '',
-   spokenPhraseLog: [],
-   itemTextLog: [],
-};
-
-const DEFAULT_NAVIGATED_ITEM = {
-   item: { role: 'document', name: '', states: [], source: 'tag' },
-   position: 'document',
-   atEnd: false,
-};
-
 async function recoverNavigation<ResultType>(
    context: NavigationRecoveryContext,
    action: () => Promise<ResultType>,
-   defaultNavigatedResult?: ResultType,
-): Promise<ResultType | undefined> {
+   replay = false,
+): Promise<ResultType> {
    try {
+      if (await ensureRuntime(context.page, context.pageScript)) {
+         await context.page.evaluate(() => globalThis.a11iedVirtualRuntime.start());
+      }
       return await action();
    } catch (error) {
       if (isNavigationError(error)) {
-         await context.page.waitForLoadState('load').catch(ignoreError);
+         await context.page.waitForLoadState('load');
          await waitForDocumentSettled(context.page);
          await ensureRuntime(context.page, context.pageScript);
-         await context.page
-            .evaluate(() => globalThis.a11iedVirtualRuntime.start())
-            .catch(ignoreError);
-         return defaultNavigatedResult;
+         await context.page.evaluate(() => globalThis.a11iedVirtualRuntime.start());
+         if (replay) {
+            return action();
+         }
+         throw new CliEnvironmentError(
+            'browser-state-changed',
+            'The document changed during this reader action. Reobserve before continuing.',
+         );
       }
       throw error;
+   }
+}
+
+async function readBrowserSnapshot(
+   context: NavigationRecoveryContext,
+): Promise<{ speech: VirtualSpeech; current: VirtualCurrentItem }> {
+   return withCurrentBrowserPage({
+      load: { kind: 'goto', url: context.page.url() },
+      page: context.page,
+      callback: async () =>
+         recoverNavigation(
+            context,
+            () =>
+               context.page.evaluate(async () => {
+                  const [speech, current] = await Promise.all([
+                     globalThis.a11iedVirtualRuntime.readSpeech(),
+                     globalThis.a11iedVirtualRuntime.readCurrentItem(),
+                  ]);
+                  return { speech, current };
+               }),
+            true,
+         ),
+   });
+}
+
+/** A bound click can finish navigation without replaying input in the next document. */
+async function activateBrowserCursor(
+   context: NavigationRecoveryContext,
+): Promise<{ moved: boolean }> {
+   const { page } = context,
+      handles: Pick<JSHandle<unknown>, 'dispose'>[] = [];
+   try {
+      const prepared = await withCurrentBrowserPage({
+         load: { kind: 'goto', url: page.url() },
+         page,
+         async callback() {
+            const before = await readBrowserSnapshot(context),
+               document = await page.evaluateHandle(() => globalThis.document);
+            handles.push(document);
+            const node = await page.evaluateHandle(() =>
+               globalThis.a11iedVirtualRuntime.readActivationNode(),
+            );
+            handles.push(node);
+            return { before, document, node };
+         },
+      });
+      const element = prepared.node.asElement();
+      if (!element) {
+         return { moved: false };
+      }
+      await element.click({ noWaitAfter: false, timeout: BROWSER_ACTIVATION_TIMEOUT_MS });
+      const sameDocument = await prepared.document
+         .evaluate((document) => document === globalThis.document)
+         .catch((error: unknown) => {
+            if (isNavigationError(error)) {
+               return false;
+            }
+            throw error;
+         });
+      if (!sameDocument) {
+         await ensureRuntime(page, context.pageScript);
+         await page.evaluate(() => globalThis.a11iedVirtualRuntime.start());
+      }
+      const after = await readBrowserSnapshot(context);
+      return {
+         moved:
+            !sameDocument || prepared.before.current.position !== after.current.position,
+      };
+   } finally {
+      await Promise.all(handles.map((handle) => handle.dispose()));
    }
 }
 
 function buildHostNavigationMethods(
    recovery: NavigationRecoveryContext,
 ): Pick<VirtualHost, 'runPortable' | 'navigate' | 'press' | 'type'> {
+   const { page } = recovery;
    return {
-      runPortable: async (verb) => {
-         const result = await recoverNavigation(
-            recovery,
-            () =>
-               recovery.page.evaluate(
-                  (wanted) => globalThis.a11iedVirtualRuntime.runPortable(wanted),
-                  verb,
-               ),
-            { moved: true },
-         );
-         return result ?? { moved: true };
-      },
-      navigate: async (request) => {
-         const result = await recoverNavigation(
-            recovery,
-            () =>
-               recovery.page.evaluate(
-                  (move) => globalThis.a11iedVirtualRuntime.navigate(move),
-                  request,
-               ),
-            { moved: true },
-         );
-         return result ?? { moved: true };
-      },
-      press: async (keys) => {
-         await recoverNavigation(recovery, () =>
-            recovery.page.evaluate(
+      runPortable: (verb) =>
+         verb === 'activate'
+            ? activateBrowserCursor(recovery)
+            : recoverNavigation(recovery, () =>
+                 page.evaluate(
+                    (wanted) => globalThis.a11iedVirtualRuntime.runPortable(wanted),
+                    verb,
+                 ),
+              ),
+      navigate: (request) =>
+         recoverNavigation(recovery, () =>
+            page.evaluate(
+               (move) => globalThis.a11iedVirtualRuntime.navigate(move),
+               request,
+            ),
+         ),
+      press: (keys) =>
+         recoverNavigation(recovery, () =>
+            page.evaluate(
                (chords) => globalThis.a11iedVirtualRuntime.press(chords),
                [...keys],
             ),
-         );
-      },
-      type: async (text) => {
-         await recoverNavigation(recovery, () =>
-            recovery.page.evaluate(
-               (typed) => globalThis.a11iedVirtualRuntime.type(typed),
-               text,
-            ),
-         );
-      },
+         ),
+      type: (text) =>
+         recoverNavigation(recovery, () =>
+            page.evaluate((typed) => globalThis.a11iedVirtualRuntime.type(typed), text),
+         ),
    };
 }
 
@@ -170,60 +195,133 @@ function buildVirtualHostMethods(
    return {
       start: () => page.evaluate(() => globalThis.a11iedVirtualRuntime.start()),
       stop: () => page.evaluate(() => globalThis.a11iedVirtualRuntime.stop()),
-      readSpeech: async () => {
-         const result = await recoverNavigation(
+      readSnapshot: () => readBrowserSnapshot(recovery),
+      readSpeech: () =>
+         recoverNavigation(
             recovery,
             () => page.evaluate(() => globalThis.a11iedVirtualRuntime.readSpeech()),
-            DEFAULT_NAVIGATED_SPEECH,
-         );
-         return result ?? DEFAULT_NAVIGATED_SPEECH;
-      },
-      readCurrentItem: async () => {
-         const result = await recoverNavigation(
+            true,
+         ),
+      readCurrentItem: () =>
+         recoverNavigation(
             recovery,
             () => page.evaluate(() => globalThis.a11iedVirtualRuntime.readCurrentItem()),
-            DEFAULT_NAVIGATED_ITEM,
-         );
-         return result ?? DEFAULT_NAVIGATED_ITEM;
-      },
+            true,
+         ),
       ...buildHostNavigationMethods(recovery),
-      readTitle: () => page.evaluate(() => globalThis.a11iedVirtualRuntime.readTitle()),
+      readTitle: () =>
+         recoverNavigation(
+            recovery,
+            () => page.evaluate(() => globalThis.a11iedVirtualRuntime.readTitle()),
+            true,
+         ),
       findText: (text) =>
-         page.evaluate(
-            (wanted) => globalThis.a11iedVirtualRuntime.findText(wanted),
-            text,
+         recoverNavigation(recovery, () =>
+            page.evaluate(
+               (wanted) => globalThis.a11iedVirtualRuntime.findText(wanted),
+               text,
+            ),
          ),
       moveInTable: (move) =>
-         page.evaluate((step) => globalThis.a11iedVirtualRuntime.moveInTable(step), move),
+         recoverNavigation(recovery, () =>
+            page.evaluate(
+               (step) => globalThis.a11iedVirtualRuntime.moveInTable(step),
+               move,
+            ),
+         ),
    };
 }
 
+async function attachHostDocument(input: {
+   page: Page;
+   pageScript: string;
+   document: { html: string; url: string };
+   existing: boolean;
+}): Promise<void> {
+   const { page, pageScript, document, existing } = input;
+   async function start(): Promise<void> {
+      await ensureRuntime(page, pageScript);
+      await page.evaluate(() => globalThis.a11iedVirtualRuntime.start());
+   }
+   if (existing) {
+      if (document !== defaultVirtualDocument && document.html !== '') {
+         throw new CliUsageError(
+            'browser-page-setup-conflict',
+            'An existing reader page cannot load replacement HTML.',
+         );
+      }
+      await withCurrentBrowserPage({
+         load: {
+            kind: 'goto',
+            url: document === defaultVirtualDocument ? page.url() : document.url,
+         },
+         page,
+         callback: start,
+      });
+      return;
+   }
+   await loadDocument(page, document);
+   await start();
+}
+
+async function createBrowserVirtualHost(existingPage?: Page): Promise<VirtualHost> {
+   const launch = existingPage ? undefined : await launchAutomationBrowser();
+   try {
+      const createdPage = existingPage ?? (await launch?.browser.newPage()),
+         pageScript = await readVirtualPageScript();
+      if (!createdPage) {
+         throw new CliEnvironmentError(
+            'browser-unavailable',
+            'The virtual reader could not create its browser page.',
+         );
+      }
+      const page = createdPage;
+      if (!existingPage) {
+         await page.addInitScript({ content: pageScript });
+      }
+      return withDecodedErrors({
+         engine: 'browser',
+         attachDocument: (document) =>
+            attachHostDocument({
+               page,
+               pageScript,
+               document,
+               existing: existingPage !== undefined,
+            }),
+         async dispose(): Promise<void> {
+            if (existingPage) {
+               if (!page.isClosed()) {
+                  await page.evaluate(() => globalThis.a11iedVirtualRuntime.stop());
+               }
+               return;
+            }
+            await page
+               .evaluate(() => globalThis.a11iedVirtualRuntime.stop())
+               .catch(ignoreError);
+            await launch?.browser.close();
+         },
+         ...buildVirtualHostMethods(page, pageScript),
+      });
+   } catch (error) {
+      await launch?.browser.close();
+      throw error;
+   }
+}
+
 /**
- * The Playwright host: a headless Chromium page holds the document and the injected
- * script runs the reader inside it, so the page's own scripts, live regions, and focus
- * changes are what the reader sees. Every call crosses into the page with
- * `page.evaluate`, and `dispose` closes the browser.
+ * A simulated reader runs inside the browser document. Supplying a page retains the
+ * caller's browser and state; otherwise disposal closes the browser this host creates.
  */
-export async function createPlaywrightVirtualHost(): Promise<VirtualHost> {
-   const [pageScript, launch] = await Promise.all([
-      readVirtualPageScript(),
-      launchAutomationBrowser(),
-   ]);
-   const page = await launch.browser.newPage();
-   await page.addInitScript({ content: pageScript });
-   return withDecodedErrors({
-      engine: 'browser',
-      async attachDocument(document): Promise<void> {
-         await loadDocument(page, document);
-         await ensureRuntime(page, pageScript);
-         await page.evaluate(() => globalThis.a11iedVirtualRuntime.start());
-      },
-      async dispose(): Promise<void> {
-         await page
-            .evaluate(() => globalThis.a11iedVirtualRuntime.stop())
-            .catch(ignoreError);
-         await launch.browser.close();
-      },
-      ...buildVirtualHostMethods(page, pageScript),
-   });
+export async function createPlaywrightVirtualHost(
+   existingPage?: Page,
+   expectedURL = existingPage?.url(),
+): Promise<VirtualHost> {
+   if (existingPage && expectedURL !== undefined) {
+      return ownVirtualPage({
+         page: existingPage,
+         url: expectedURL,
+         create: () => createBrowserVirtualHost(existingPage),
+      });
+   }
+   return createBrowserVirtualHost();
 }

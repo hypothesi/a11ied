@@ -4,6 +4,7 @@ import type {
    DriverMode,
    Platform,
    VirtualEngine,
+   NativeInputPolicy,
 } from '@a11ied/contracts';
 
 /** One action's outcome as the test API reads it: the state after it and its details. */
@@ -19,6 +20,7 @@ export interface ScreenReaderSession {
    mode: DriverMode;
    /** The engine of a virtual session: `browser` for a Playwright page, `jsdom` otherwise. */
    engine?: VirtualEngine | undefined;
+   nativeInput?: NativeInputPolicy | undefined;
    /** The page the session last opened. */
    url?: string | undefined;
 }

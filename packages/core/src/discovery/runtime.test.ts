@@ -6,11 +6,20 @@ import {
 } from 'node:http';
 
 import { afterEach, describe, expect, it } from 'vitest';
+import type { SiteInventory } from '@a11ied/contracts';
 
 import { discoverSite } from './runtime.js';
 
 let server: Server | undefined = globalThis.undefined;
 const BROWSER_TEST_TIMEOUT_MS = 90_000;
+const CHILD_COUNT = 2;
+const CRAWL_PAGE_COUNT = 3;
+
+function respondWithRedirect(response: ServerResponse, location: string): void {
+   response.statusCode = 302;
+   response.setHeader('location', location);
+   response.end();
+}
 
 function respondToFixture(input: {
    incrementRootRequests: () => void;
@@ -21,18 +30,26 @@ function respondToFixture(input: {
    const { incrementRootRequests, origin, request, response } = input;
    const path = request.url ?? '/';
    const bodies: Record<string, string> = {
-      '/robots.txt': `User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`,
-      '/sitemap.xml': `<urlset><url><loc>${origin}/</loc></url><url><loc>${origin}/article</loc></url><url><loc>${origin}/canonical</loc></url></urlset>`,
+      '/robots.txt': 'User-agent: *\nAllow: /\n',
+      '/sitemap.xml': `<urlset><url><loc>${origin}/</loc></url><url><loc>${origin}/redirect</loc></url><url><loc>${origin}/article</loc></url><url><loc>${origin}/article-extra</loc></url><url><loc>${origin}/canonical</loc></url><url><loc>https://outside.invalid/</loc></url></urlset>`,
       '/': '<title>Home</title><h1>Welcome</h1><input type="password"><button>Delete account</button><a href="/article">Article</a>',
       '/article': `<title>Article</title><link rel="canonical" href="${origin}/canonical"><h1>Article</h1>`,
       '/canonical': '<title>Canonical</title><h1>Canonical article</h1>',
+      '/crawl-only':
+         '<title>Crawl</title><h1>Crawl</h1><a href="/child-one">One</a><a href="/child-two">Two</a>',
+      '/child-one': '<title>One</title><h1>One</h1><a href="/crawl-only">Home</a>',
+      '/child-two': '<title>Two</title><h1>Two</h1><a href="/crawl-only">Home</a>',
    };
    response.setHeader(
       'content-type',
       path.endsWith('.xml') ? 'application/xml' : 'text/html',
    );
-   if (path === '/') {
+   if (path === '/' || path === '/crawl-only') {
       incrementRootRequests();
+   }
+   if (path === '/redirect') {
+      respondWithRedirect(response, `${origin}/`);
+      return;
    }
    if (bodies[path]) {
       response.end(bodies[path]);
@@ -49,6 +66,10 @@ async function startFixtureServer(): Promise<{
    let boundOrigin = '',
       rootRequests = 0;
    server = createServer((request, response) => {
+      if (request.url === '/connection-failure') {
+         response.destroy();
+         return;
+      }
       respondToFixture({
          request,
          response,
@@ -82,6 +103,134 @@ afterEach(async () => {
 
 describe('discoverSite', () => {
    it(
+      'completes page scope without following outgoing links',
+      async () => {
+         const { origin } = await startFixtureServer();
+         const inventory = await discoverSite(`${origin}/`, {
+            scope: 'page',
+            timeoutMs: 5000,
+         });
+
+         expect(inventory.discovery.complete).toStrictEqual(true);
+         expect(inventory.discovery.pendingUrls).to.eql([]);
+         expect(inventory.pages).toHaveLength(1);
+      },
+      BROWSER_TEST_TIMEOUT_MS,
+   );
+
+   it(
+      'filters sitemap seeds by origin, section and excluded paths',
+      async () => {
+         const { origin } = await startFixtureServer();
+         const section = await discoverSite(`${origin}/article`, {
+            scope: 'section',
+            timeoutMs: 5000,
+         });
+         const excluded = await discoverSite(`${origin}/`, {
+            exclude: ['/article'],
+            timeoutMs: 5000,
+         });
+
+         expect(section.pages.map((page) => page.url)).to.eql([`${origin}/article`]);
+         expect(
+            excluded.pages.some((page) => page.url === `${origin}/article`),
+         ).toStrictEqual(false);
+         expect(
+            excluded.pages.every((page) => new URL(page.url).origin === origin),
+         ).toStrictEqual(true);
+      },
+      BROWSER_TEST_TIMEOUT_MS,
+   );
+});
+
+describe('discovery page limits', () => {
+   it(
+      'resumes a limited crawl from its saved frontier without revisiting resolved pages',
+      async () => {
+         const fixture = await startFixtureServer();
+         const first = await discoverSite(`${fixture.origin}/crawl-only`, {
+            sitemapUrl: `${fixture.origin}/missing-sitemap`,
+            maxPages: 1,
+            timeoutMs: 5000,
+         });
+         const beforeCount = fixture.getRootRequests();
+         const stillLimited = await discoverSite(first.startUrl, { resumeFrom: first });
+         const resumed = await discoverSite(first.startUrl, {
+            resumeFrom: first,
+            maxPages: 10,
+            timeoutMs: 5000,
+         });
+
+         expect(first.discovery.complete).toStrictEqual(false);
+         expect(first.discovery.pendingUrls).toHaveLength(CHILD_COUNT);
+         expect(stillLimited.pages).toHaveLength(1);
+         expect(stillLimited.discovery.complete).toStrictEqual(false);
+         expect(stillLimited.discovery.pendingUrls).toHaveLength(CHILD_COUNT);
+         expect(resumed.discovery.complete).toStrictEqual(true);
+         expect(resumed.discovery.truncatedReason).toBeUndefined();
+         expect(resumed.pages).toHaveLength(CRAWL_PAGE_COUNT);
+         expect(fixture.getRootRequests()).toStrictEqual(beforeCount);
+      },
+      BROWSER_TEST_TIMEOUT_MS,
+   );
+});
+
+describe('discovery failures', () => {
+   it(
+      'keeps a failed page inventory incomplete after resume',
+      async () => {
+         const { origin } = await startFixtureServer();
+         const failed = await discoverSite(`${origin}/connection-failure`, {
+            scope: 'page',
+            timeoutMs: 5000,
+         });
+         const resumed = await discoverSite(failed.startUrl, { resumeFrom: failed });
+
+         expect(failed.pages[0]?.discoveryStatus).toStrictEqual('error');
+         expect(failed.discovery.complete).toStrictEqual(false);
+         expect(resumed.discovery.complete).toStrictEqual(false);
+         expect(resumed.discovery.truncatedReason).toContain('Page discovery failed');
+      },
+      BROWSER_TEST_TIMEOUT_MS,
+   );
+});
+
+describe('discovery checkpoints', () => {
+   it(
+      'keeps the frontier in the last checkpoint when interrupted after a page',
+      async () => {
+         const { origin } = await startFixtureServer();
+         const checkpoints: SiteInventory[] = [];
+         await expect(
+            discoverSite(`${origin}/crawl-only`, {
+               sitemapUrl: `${origin}/missing-sitemap`,
+               timeoutMs: 5000,
+               onProgress: (inventory) => {
+                  if (inventory.pages.length === 1) {
+                     checkpoints.push(inventory);
+                     throw new Error('Interrupted fixture');
+                  }
+               },
+            }),
+         ).rejects.toThrow('Interrupted fixture');
+         const checkpoint = checkpoints[0];
+         if (!checkpoint) {
+            throw new Error('No checkpoint was captured.');
+         }
+         const resumed = await discoverSite(checkpoint.startUrl, {
+            resumeFrom: checkpoint,
+            timeoutMs: 5000,
+         });
+
+         expect(resumed.discovery.complete).toStrictEqual(true);
+         expect(resumed.pages).toHaveLength(CRAWL_PAGE_COUNT);
+      },
+      BROWSER_TEST_TIMEOUT_MS,
+   );
+});
+
+describe('discovery page records', () => {
+   it(
       'captures page signals, canonical duplicates, and an error probe',
       async () => {
          const { origin } = await startFixtureServer();
@@ -99,6 +248,15 @@ describe('discoverSite', () => {
          expect(
             inventory.pages.some((page) => page.isDuplicateOf !== undefined),
          ).toStrictEqual(true);
+         expect(
+            inventory.pages.some(
+               (page) =>
+                  page.isDuplicateOf !== undefined && page.isDuplicateOf !== page.pageId,
+            ),
+         ).toStrictEqual(true);
+         expect(new Set(inventory.pages.map((page) => page.pageId)).size).toStrictEqual(
+            inventory.pages.length,
+         );
          expect(
             inventory.pages.some((page) => page.discoveredVia === 'error-probe'),
          ).toStrictEqual(true);

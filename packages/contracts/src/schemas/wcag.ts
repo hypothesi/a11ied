@@ -2,15 +2,10 @@ import { z } from 'zod';
 
 import { wcagLevelSchema, wcagVersionSchema } from './core.js';
 import { fourWayAutomationCountSchema, techniqueReferenceSchema } from './helpers.js';
+import { assessmentProcedureSchema, procedureCoverageSchema } from './assessment.js';
+import { criterionIdSchema, criterionLookupKeySchema } from './criterion.js';
 
-export const criterionIdSchema = z.string().regex(/^\d+\.\d+\.\d+$/);
-export type CriterionId = z.infer<typeof criterionIdSchema>;
-
-export const criterionSlugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
-export type CriterionSlug = z.infer<typeof criterionSlugSchema>;
-
-export const criterionLookupKeySchema = z.union([criterionIdSchema, criterionSlugSchema]);
-export type CriterionLookupKey = z.infer<typeof criterionLookupKeySchema>;
+export * from './criterion.js';
 
 export const axeImpactSchema = z
    .enum(['minor', 'moderate', 'serious', 'critical'])
@@ -254,6 +249,8 @@ export const evidenceStrategySchema = z.object({
    procedureIds: z.array(z.string()),
    requiresRealTarget: z.boolean(),
    notes: z.array(z.string()),
+   procedures: z.array(assessmentProcedureSchema).default([]),
+   coverageGap: z.string().min(1).optional(),
 });
 export type EvidenceStrategy = z.infer<typeof evidenceStrategySchema>;
 
@@ -269,6 +266,7 @@ const testMethodSummaryBucketSchema = fourWayAutomationCountSchema.extend({
 
 export const testMethodSummaryArtifactSchema = z.object({
    version: wcagVersionSchema,
+   procedureCoverage: procedureCoverageSchema.optional(),
    updatedAt: z.string().datetime(),
    totals: testMethodSummaryBucketSchema,
    byLevel: z.object({

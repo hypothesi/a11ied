@@ -1,10 +1,23 @@
-import type {
-   AxeRunResult,
-   RelevanceMatrix,
-   PageSignal,
-   EvidenceRecord,
-   TargetReference,
+import {
+   axeRunResultSchema,
+   evidenceRecordSchema,
+   relevanceMatrixSchema,
+   pageSignalSchema,
+   type AxeRunResult,
+   type RelevanceMatrix,
+   type PageSignal,
+   type EvidenceRecord,
+   type TargetReference,
+   type WcagLevel,
+   type WcagVersion,
 } from '@a11ied/contracts';
+import { z } from 'zod';
+import type { Page } from 'playwright';
+import { withCurrentBrowserPage } from '../browser/current-page.js';
+import {
+   withLoadedPage,
+   type WithBrowserPageOptions,
+} from '../browser/shared-browser.js';
 import { listRelevantCriteria } from '@a11ied/wcag-engine';
 
 import { scanHtmlForPageSignals } from '../relevance/html.js';
@@ -14,6 +27,7 @@ import { getAccessibilityTree, getPageHtml, getPageTitle } from '../tree/runtime
 import { parseWcagVersion } from '../wcag/parsing.js';
 import { buildSubjectKey } from '../evidence/subject.js';
 import { readEvidenceForSubject } from '../evidence/store.js';
+import { isVerifiedEvidence } from '../evidence/validation.js';
 import { buildCriteriaRollup, type AuditCriterionRollup } from './criteria-rollup.js';
 import { summarizeAccessibilityTree, type AuditTreeSummary } from './tree-summary.js';
 
@@ -29,72 +43,120 @@ export interface AuditReport {
    recorded: EvidenceRecord[];
 }
 
-export interface BuildAuditReportInput {
+/** Validate complete saved reports before reading their findings or rebuilding coverage. */
+export const auditReportSchema = z.object({
+   axe: axeRunResultSchema,
+   tree: z.object({
+      pageTitle: z.string(),
+      firstHeading: z.string().default(''),
+      counts: z.object({
+         landmarks: z.number().int().nonnegative(),
+         headings: z.number().int().nonnegative(),
+         links: z.number().int().nonnegative(),
+         buttons: z.number().int().nonnegative(),
+         formControls: z.number().int().nonnegative(),
+      }),
+      headingLevels: z.array(z.number().int()),
+      roles: z.array(z.string()),
+   }),
+   relevance: z.object({
+      signals: z.array(pageSignalSchema),
+      matrix: relevanceMatrixSchema,
+   }),
+   criteria: z.array(
+      z.object({
+         id: z.string(),
+         title: z.string(),
+         level: z.string(),
+         axeVerdict: z.enum(['fail', 'pass', 'incomplete', 'not-covered']),
+         relevance: z.string(),
+         testMethod: z.string(),
+         evidenceMode: z.string(),
+         procedureIds: z.array(z.string()),
+         pending: z.boolean(),
+         pendingProcedureIds: z.array(z.string()).optional(),
+         recordedOutcome: z.string().optional(),
+      }),
+   ),
+   recorded: z.array(evidenceRecordSchema),
+});
+
+function rebuildEvidenceStatus(record: EvidenceRecord): EvidenceRecord {
+   if (isVerifiedEvidence(record)) {
+      return record;
+   }
+   return {
+      ...record,
+      verification: {
+         status: record.verification?.status === 'stale' ? 'stale' : 'unverified',
+         reasons: record.verification?.reasons ?? [
+            'Recorded judgment has not been verified.',
+         ],
+      },
+   };
+}
+
+/**
+ * Rebuild outcomes from the current catalog and validated records, ignoring saved verdict
+ * flags.
+ */
+export function rebuildAuditAssessment(
+   report: AuditReport,
+   profile?: { wcagVersion: WcagVersion; level: WcagLevel },
+): AuditReport {
+   const recorded = report.recorded.map(rebuildEvidenceStatus);
+   return {
+      ...report,
+      recorded,
+      criteria: buildCriteriaRollup({
+         version: profile?.wcagVersion ?? report.axe.wcagVersion,
+         level:
+            profile?.level ??
+            (report.axe.selection.kind === 'level' ? report.axe.selection.level : 'AAA'),
+         axe: report.axe,
+         relevanceStates: Object.fromEntries(
+            Object.entries(report.relevance.matrix.assessments).map(
+               ([id, assessment]) => [id, assessment.state],
+            ),
+         ),
+         recorded,
+      }),
+   };
+}
+
+export interface BuildAuditReportInput extends WithBrowserPageOptions {
    load: DocumentLoad;
    readHtml: () => Promise<string>;
    target: TargetReference;
    metadata: Record<string, string>;
    userHints: string[];
    wcagVersion: string;
-   timeoutMs?: number | undefined;
-   waitFor?: string | undefined;
-   click?: string | undefined;
-   storageStatePath?: string | undefined;
+   level?: WcagLevel | undefined;
    /** The canonical key recorded results were stored under. */
    subject?: string | undefined;
    /** Where recorded results live. Defaults to `.a11ied/evidence.jsonl`. */
    evidenceFile?: string | undefined;
 }
 
-/**
- * Builds the full audit report for one target: an axe scan of every mapped rule, an
- * accessibility tree summary, the relevant criteria scan, a per-criterion rollup of axe
- * verdict, relevance, and test method, and any result a person or an agent recorded for
- * the checks axe cannot decide.
- */
-function buildRollupOutcomeMap(recorded: EvidenceRecord[]): Record<string, string> {
-   return Object.fromEntries(
-      recorded
-         .filter((record) => record.test.kind === 'criterion')
-         .map((record) => [
-            record.test.kind === 'criterion' ? record.test.criterionId : '',
-            record.outcome,
-         ]),
-   );
-}
-
-function getPageOptions(input: BuildAuditReportInput): {
-   click?: string | undefined;
-   storageStatePath?: string | undefined;
-   timeoutMs?: number | undefined;
-   waitFor?: string | undefined;
-} {
-   return {
-      timeoutMs: input.timeoutMs,
-      waitFor: input.waitFor,
-      click: input.click,
-      storageStatePath: input.storageStatePath,
-   };
-}
-
-export async function buildAuditReport(
+async function buildReportFromPage(
    input: BuildAuditReportInput,
+   page: Page,
 ): Promise<AuditReport> {
    const wcagVersion = parseWcagVersion(input.wcagVersion);
-   const pageOptions = getPageOptions(input);
+   const pageOptions = { page, timeoutMs: input.timeoutMs, waitFor: input.waitFor };
+   const load: DocumentLoad =
+      input.load.kind === 'goto' ? { kind: 'goto', url: page.url() } : input.load;
 
-   const axe = await runAxe(input.load, {
+   const axe = await runAxe(load, {
       wcagVersion,
-      timeoutMs: input.timeoutMs,
-      waitFor: input.waitFor,
-      click: input.click,
-      storageStatePath: input.storageStatePath,
+      ...(input.level ? { level: input.level } : {}),
+      ...pageOptions,
    });
-   const tree = await getAccessibilityTree(input.load, pageOptions);
-   const pageTitle = await getPageTitle(input.load, pageOptions);
+   const tree = await getAccessibilityTree(load, pageOptions);
+   const pageTitle = await getPageTitle(load, pageOptions);
    const treeSummary = summarizeAccessibilityTree(tree.nodes, pageTitle);
 
-   const html = await getPageHtml(input.load, pageOptions).catch(() => input.readHtml());
+   const html = await getPageHtml(load, pageOptions);
    const pageScan = scanHtmlForPageSignals(input.target.value, html, {
       target: input.target,
       metadata: input.metadata,
@@ -120,9 +182,10 @@ export async function buildAuditReport(
    const recorded = await readEvidenceForSubject(subject, { file: input.evidenceFile });
    const criteria = buildCriteriaRollup({
       version: wcagVersion,
+      ...(input.level ? { level: input.level } : {}),
       axe,
       relevanceStates,
-      recordedOutcomes: buildRollupOutcomeMap(recorded),
+      recorded,
    });
 
    return {
@@ -132,4 +195,23 @@ export async function buildAuditReport(
       criteria,
       recorded,
    };
+}
+
+/** Combines automated checks with recorded procedure evidence for one target. */
+export async function buildAuditReport(
+   input: BuildAuditReportInput,
+): Promise<AuditReport> {
+   return withLoadedPage(
+      input.load,
+      (page) => {
+         const load: DocumentLoad =
+            input.load.kind === 'goto' ? { kind: 'goto', url: page.url() } : input.load;
+         return withCurrentBrowserPage({
+            load,
+            page,
+            callback: (current) => buildReportFromPage(input, current),
+         });
+      },
+      input,
+   );
 }

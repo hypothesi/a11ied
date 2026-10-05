@@ -1,4 +1,8 @@
-import { cliExitCodes, driverTranscriptFormatSchema } from '@a11ied/contracts';
+import {
+   cliExitCodes,
+   driverTranscriptFormatSchema,
+   driverTranscriptPayloadSchema,
+} from '@a11ied/contracts';
 import {
    buildDriverTranscript,
    describeExpectationFailure,
@@ -6,7 +10,6 @@ import {
    parseTextMatcher,
    resolveTranscriptFormat,
    runDriverSessionAction,
-   selectTranscriptEntries,
    writeDriverTranscript,
 } from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -74,13 +77,7 @@ function registerSrExpectTool(server: McpServer): void {
    );
 }
 
-const srTranscriptInputSchema = z.object({
-   since: z
-      .string()
-      .min(1)
-      .optional()
-      .describe('Only entries after this checkpoint label.'),
-   tail: z.number().int().positive().optional().describe('Only the last N phrases.'),
+const srTranscriptInputSchema = driverTranscriptPayloadSchema.extend({
    out: z
       .string()
       .min(1)
@@ -99,14 +96,22 @@ async function handleSrTranscript(
       resolveTranscriptFormat(input.out, input.format);
    }
    const result = await runDriverSessionAction(
-      { action: 'transcript' },
+      {
+         action: 'transcript',
+         payload: {
+            since: input.since,
+            tail: input.tail,
+            afterIndex: input.afterIndex,
+            limit: input.limit,
+         },
+      },
       { timeoutMs: input.timeoutMs },
    );
-   const entries = selectTranscriptEntries(result.state.transcript, {
-      since: input.since,
-      tail: input.tail,
-   });
-   const transcript = buildDriverTranscript(result.session, entries);
+   const transcript = buildDriverTranscript(
+      result.session,
+      result.state.transcript,
+      result.state.transcriptWindow,
+   );
    const file = input.out
       ? await writeDriverTranscript({
            transcript,
@@ -125,7 +130,9 @@ function registerSrTranscriptTool(server: McpServer): void {
          description:
             "Print what the active sr session's reader said, with timestamps and checkpoints. " +
             'Matches the CLI a1 sr transcript command. since keeps only entries after that checkpoint label. ' +
-            'tail keeps only the last N phrases. out also writes the transcript to a .json or .md path.',
+            'tail keeps only the last N phrases. afterIndex pages forward by session index, defaulting to 200 entries. ' +
+            'limit caps entries including checkpoints. transcript.window discloses omitted entries and the next index. ' +
+            'out also writes the transcript to a .json or .md path.',
          inputSchema: srTranscriptInputSchema,
          annotations: readOnlyAnnotations,
       },

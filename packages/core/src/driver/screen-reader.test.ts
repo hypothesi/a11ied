@@ -1,4 +1,7 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { ScreenReader } from './screen-reader.js';
+import { createContextTransport } from './screen-reader-context.js';
+import { createVirtualContextFixture } from './test-fixtures.js';
 
 import {
    cleanupTempRoots,
@@ -16,6 +19,34 @@ const PROCESS_EXIT_POLL_MS = 100;
 const PROCESS_EXIT_TIMEOUT_MS = 10_000;
 const tempRoots: string[] = [];
 const testServer = createTestServer();
+
+describe('public reader shutdown retries', () => {
+   it('deduplicates cleanup and allows retry while input stays blocked', async () => {
+      const { context } = await createVirtualContextFixture('public-stop-retry'),
+         stop = vi
+            .fn<() => Promise<void>>()
+            .mockRejectedValueOnce(new Error('Recorder busy'));
+      stop.mockImplementation(async () => context.adapter.stop());
+      const sr = new ScreenReader(
+         createContextTransport({
+            context,
+            session: { sr: 'virtual', mode: 'in-process' },
+            load: async () => ({ html: '', url: '' }),
+            stop,
+         }),
+      );
+      const first = sr.stop(),
+         second = sr.stop();
+
+      expect(first).toStrictEqual(second);
+      await expect(first).rejects.toThrow('Recorder busy');
+      await expect(sr.next()).rejects.toMatchObject({ code: 'session-stopped' });
+      await sr.stop();
+      await sr.stop();
+
+      expect(stop.mock.calls).to.eql([[], []]);
+   });
+});
 
 const SIGN_UP_HTML = `
 <!doctype html>
@@ -226,6 +257,22 @@ describe('screenReader with the broker', () => {
       () => withStateDir(tempRoots, assertBrokerDisposalLeavesNoProcess),
       TIMEOUT_MS,
    );
+});
+
+describe('checkpoint-scoped library waits', () => {
+   it('waits from a checkpoint for an announcement already captured by an action', async () => {
+      await using sr = await screenReader({ html: SIGN_UP_HTML });
+      await sr.checkpoint('before-field');
+      await sr.goTo({ role: 'button', name: 'Create account' });
+
+      expect(
+         await sr.wait({
+            for: 'Create account',
+            since: 'before-field',
+            timeoutMs: 1,
+         }),
+      ).toContain('Create account');
+   });
 });
 
 describe('checks that wait', () => {

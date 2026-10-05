@@ -23,6 +23,8 @@ export interface LoopOptions extends ScreenReaderRunOptions {
 export interface WaitOptions extends ScreenReaderRunOptions {
    /** A phrase to wait for. Without it, `ms` is a fixed pause. */
    for?: SpokenMatch | undefined;
+   /** Include announcements after this checkpoint, even before the wait call. */
+   since?: string | undefined;
    ms?: number | undefined;
 }
 
@@ -57,10 +59,11 @@ export function pickMax(options: LoopOptions): { max?: number } {
 
 export function buildWaitPayload(options: WaitOptions): {
    for?: string;
+   since?: string;
    ms?: number;
    timeoutMs?: number;
 } {
-   const payload: { for?: string; ms?: number; timeoutMs?: number } = {};
+   const payload: { for?: string; since?: string; ms?: number; timeoutMs?: number } = {};
    if (options.for !== undefined) {
       payload.for =
          typeof options.for === 'string'
@@ -69,6 +72,9 @@ export function buildWaitPayload(options: WaitOptions): {
    }
    if (options.ms !== undefined) {
       payload.ms = options.ms;
+   }
+   if (options.since !== undefined) {
+      payload.since = options.since;
    }
    if (options.timeoutMs !== undefined) {
       payload.timeoutMs = options.timeoutMs;

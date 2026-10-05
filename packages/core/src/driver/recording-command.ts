@@ -6,6 +6,7 @@ const MACOS_RECORDING_ARGS = ['-v', '-C', '-k', '-T0'] as const;
 
 interface RecordingCommandResult {
    error: unknown;
+   spawnFailed: boolean;
    code: number | undefined;
    signal: NodeJS.Signals | undefined;
 }
@@ -50,6 +51,7 @@ function captureRecordingCompletion(
       child.on('error', (error) => {
          resolvePromise({
             error,
+            spawnFailed: child.pid === undefined,
             code: undefined,
             signal: undefined,
          });
@@ -57,6 +59,7 @@ function captureRecordingCompletion(
       child.on('exit', (code, signal) => {
          resolvePromise({
             error: undefined,
+            spawnFailed: false,
             code: code ?? undefined,
             signal: signal ?? undefined,
          });
@@ -73,11 +76,11 @@ function assertSuccessfulRecordingCommand(args: {
       return;
    }
 
-   if (args.result.error instanceof Error) {
+   if (args.result.error instanceof Error && !args.result.spawnFailed) {
       throw args.result.error;
    }
 
-   throw new CliEnvironmentError(
+   const failure = new CliEnvironmentError(
       'recording-command-failed',
       createRecordingCommandMessage({
          absolutePath: args.absolutePath,
@@ -90,8 +93,12 @@ function assertSuccessfulRecordingCommand(args: {
          code: args.result.code,
          signal: args.result.signal,
          stderr: args.stderr || undefined,
+         reason:
+            args.result.error instanceof Error ? args.result.error.message : undefined,
       },
    );
+   failure.cause = args.result.error;
+   throw failure;
 }
 
 export function createMacOSStopRecording(absolutePath: string): () => Promise<void> {
@@ -103,8 +110,10 @@ export function createMacOSStopRecording(absolutePath: string): () => Promise<vo
    const completion = captureRecordingCompletion(child);
 
    return async () => {
-      child.stdin.write('q');
-      child.stdin.end();
+      if (child.pid !== undefined) {
+         child.stdin.write('q');
+         child.stdin.end();
+      }
       const result = await completion;
       assertSuccessfulRecordingCommand({
          absolutePath,

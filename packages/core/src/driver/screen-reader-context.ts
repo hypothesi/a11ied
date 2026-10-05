@@ -1,8 +1,16 @@
-import type { DriverActionRequestInput } from '@a11ied/contracts';
+import {
+   DEFAULT_DRIVER_TRANSCRIPT_LIMIT,
+   type DriverActionRequestInput,
+} from '@a11ied/contracts';
 
 import { parseActionRequest } from './broker-actions.js';
 import type { ActionContext } from './broker-types.js';
-import { captureContextState, runContextAction } from './context-action.js';
+import {
+   captureContextState,
+   runContextAction,
+   runContextWait,
+} from './context-action.js';
+import { cleanupAfterError, closeContext, withContextCommand } from './context-queue.js';
 import type {
    ScreenReaderDocument,
    ScreenReaderRunOptions,
@@ -45,22 +53,42 @@ export function createContextTransport(
             'payload' in request ? request.payload : undefined,
          );
          const timeoutMs = runOptions.timeoutMs ?? options.timeoutMs;
-         return runContextAction(
-            context,
-            parsed,
-            timeoutMs === undefined ? {} : { timeoutMs },
+         if (parsed.action === 'wait') {
+            return runContextWait(context, parsed.payload, async (result) => result);
+         }
+         return withContextCommand(context, () =>
+            runContextAction(
+               context,
+               parsed,
+               timeoutMs === undefined ? {} : { timeoutMs },
+            ),
          );
       },
       async open(document: ScreenReaderDocument): Promise<ScreenReaderStep> {
-         const loaded = await options.load(document);
-         await context.adapter.attachDocument(loaded);
-         session.url = loaded.url;
-         const state = await captureContextState(context);
-         return { action: 'attach-document', state, details: { url: loaded.url } };
+         try {
+            return await withContextCommand(context, async () => {
+               const loaded = await options.load(document);
+               await context.adapter.attachDocument(loaded);
+               session.url = loaded.url;
+               const state = await captureContextState(context, {
+                  tail: DEFAULT_DRIVER_TRANSCRIPT_LIMIT,
+                  limit: DEFAULT_DRIVER_TRANSCRIPT_LIMIT,
+               });
+               return { action: 'attach-document', state, details: { url: loaded.url } };
+            });
+         } catch (error) {
+            return cleanupAfterError(() => closeContext(context, options.stop), error);
+         }
       },
       async status(): Promise<ScreenReaderStep> {
-         return { action: 'status', state: await captureContextState(context) };
+         return withContextCommand(context, async () => ({
+            action: 'status',
+            state: await captureContextState(context, {
+               tail: DEFAULT_DRIVER_TRANSCRIPT_LIMIT,
+               limit: DEFAULT_DRIVER_TRANSCRIPT_LIMIT,
+            }),
+         }));
       },
-      stop: options.stop,
+      stop: () => closeContext(context, options.stop),
    };
 }

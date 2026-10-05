@@ -1,11 +1,11 @@
 import {
+   DEFAULT_DRIVER_TRANSCRIPT_LIMIT,
    driverActionResultSchema,
    type DriverActionName,
    type DriverActionResult,
    type DriverStateSnapshot,
 } from '@a11ied/contracts';
 
-import { CliEnvironmentError, CliUsageError } from '../errors/cli-errors.js';
 import type {
    BrokerHandlerContext,
    BrokerRequest,
@@ -13,30 +13,15 @@ import type {
    HandleResult,
 } from './broker-types.js';
 import { parseActionRequest } from './broker-actions.js';
-import { captureContextState, runContextAction } from './context-action.js';
-
-type BrokerError = NonNullable<BrokerResponse['error']>;
-
-function toBrokerError(error: unknown): BrokerError {
-   if (error instanceof CliUsageError || error instanceof CliEnvironmentError) {
-      const brokerError: BrokerError = {
-         code: error.code,
-         message: error.message,
-         exitCode: error.exitCode,
-      };
-      if (error.details) {
-         brokerError.details = error.details;
-      }
-      return brokerError;
-   }
-   if (error instanceof Error && 'code' in error) {
-      return { code: String(error.code), message: error.message };
-   }
-   if (error instanceof Error) {
-      return { code: 'broker-error', message: error.message };
-   }
-   return { code: 'broker-error', message: String(error) };
-}
+import {
+   captureContextState,
+   runContextAction,
+   runContextWait,
+   type ContextActionResult,
+} from './context-action.js';
+import { withContextCommand } from './context-queue.js';
+import { toBrokerError } from './broker-errors.js';
+import { initializeSessionTarget, stopSessionResources } from './session-context.js';
 
 /** Persists the session with the log cursor the state reports and builds the result. */
 async function finishActionResult(
@@ -61,7 +46,10 @@ async function buildActionResult(
    action: DriverActionName,
    details?: Record<string, unknown>,
 ): Promise<DriverActionResult> {
-   const state = await captureContextState(context);
+   const state = await captureContextState(context, {
+      tail: DEFAULT_DRIVER_TRANSCRIPT_LIMIT,
+      limit: DEFAULT_DRIVER_TRANSCRIPT_LIMIT,
+   });
    return finishActionResult(context, { action, state }, details);
 }
 
@@ -70,30 +58,61 @@ async function handleStatusCommand(context: BrokerHandlerContext): Promise<Handl
    return { response: { ok: true, result }, shouldStop: false };
 }
 
-async function finishStopRecording(
+async function getStopObservation(
    context: BrokerHandlerContext,
-): Promise<BrokerError | undefined> {
-   if (!context.finishRecording) {
-      return undefined;
-   }
+): Promise<Pick<BrokerResponse, 'result' | 'error'>> {
    try {
-      const completedRecording = await context.finishRecording();
-      if (completedRecording) {
-         context.session = { ...context.session, recording: completedRecording };
-      }
-      return undefined;
+      return { result: await buildActionResult(context, 'stop') };
    } catch (error) {
-      return toBrokerError(error);
+      return { error: toBrokerError(error) };
    }
 }
 
-async function handleStopCommand(context: BrokerHandlerContext): Promise<HandleResult> {
-   const recordingError = await finishStopRecording(context);
-   const result = await buildActionResult(context, 'stop');
-   if (!recordingError) {
-      return { response: { ok: true, result }, shouldStop: true };
+async function finishStopRecording(context: BrokerHandlerContext): Promise<void> {
+   const recording = await context.finishRecording?.();
+   if (recording) {
+      context.session.recording = recording;
    }
-   return { response: { ok: false, error: recordingError, result }, shouldStop: true };
+}
+
+function buildStopResult(
+   context: BrokerHandlerContext,
+   observation: Pick<BrokerResponse, 'error' | 'result'>,
+   error = observation.error,
+): HandleResult {
+   if (observation.result) {
+      observation.result.session = context.session;
+   }
+   if (error) {
+      error.details = {
+         ...error.details,
+         cleanupConfirmed: context.resourcesStopped ?? false,
+      };
+   }
+   return {
+      response: { ...observation, ok: error === undefined, ...(error ? { error } : {}) },
+      shouldStop: context.resourcesStopped ?? false,
+   };
+}
+
+async function handleStopCommand(context: BrokerHandlerContext): Promise<HandleResult> {
+   context.stopping = true;
+   const observation = await getStopObservation(context);
+   try {
+      if (!context.resourcesStopped) {
+         await stopSessionResources(
+            context.adapter,
+            () => finishStopRecording(context),
+            async () => {
+               context.resourcesStopped = true;
+            },
+         );
+      }
+      await context.writeMetadata(context.session);
+      return buildStopResult(context, observation);
+   } catch (error) {
+      return buildStopResult(context, observation, toBrokerError(error));
+   }
 }
 
 async function handleAttachDocumentCommand(
@@ -102,11 +121,37 @@ async function handleAttachDocumentCommand(
 ): Promise<HandleResult> {
    const html = String(request.payload?.html ?? '');
    const url = String(request.payload?.url ?? '');
+   const app =
+      context.session.target === 'virtual'
+         ? context.session.app
+         : await initializeSessionTarget(
+              {
+                 target: context.session.target,
+                 url,
+                 app: context.session.app,
+                 browser: context.session.browser,
+              },
+              context.adapter,
+           );
    await context.adapter.attachDocument({ html, url });
    if (url) {
-      context.session = { ...context.session, url };
+      context.session = {
+         ...context.session,
+         url,
+         app,
+         browser: context.session.browser ?? app?.appName,
+      };
    }
    const result = await buildActionResult(context, 'attach-document', { url });
+   return { response: { ok: true, result }, shouldStop: false };
+}
+
+async function finishHandledAction(
+   context: BrokerHandlerContext,
+   ran: ContextActionResult,
+): Promise<HandleResult> {
+   const result = await finishActionResult(context, ran, ran.details);
+   result.actionDurationMs = ran.actionDurationMs;
    return { response: { ok: true, result }, shouldStop: false };
 }
 
@@ -115,12 +160,15 @@ async function handleActionCommand(
    request: BrokerRequest,
 ): Promise<HandleResult> {
    const actionRequest = parseActionRequest(request.action, request.payload);
+   if (actionRequest.action === 'wait') {
+      return runContextWait(context, actionRequest.payload, (ran) =>
+         finishHandledAction(context, ran),
+      );
+   }
    const options =
       request.timeoutMs === undefined ? {} : { timeoutMs: request.timeoutMs };
    const ran = await runContextAction(context, actionRequest, options);
-   const result = await finishActionResult(context, ran, ran.details);
-   result.actionDurationMs = ran.actionDurationMs;
-   return { response: { ok: true, result }, shouldStop: false };
+   return finishHandledAction(context, ran);
 }
 
 async function routeCommand(
@@ -129,7 +177,17 @@ async function routeCommand(
 ): Promise<HandleResult> {
    switch (request.command) {
       case 'ping': {
-         return { response: { ok: true }, shouldStop: false };
+         return {
+            response: {
+               ok: true,
+               stopping: context.stopping ?? false,
+               session: context.session,
+               ...(context.startupError
+                  ? { error: toBrokerError(context.startupError) }
+                  : {}),
+            },
+            shouldStop: false,
+         };
       }
       case 'status': {
          return handleStatusCommand(context);
@@ -167,8 +225,22 @@ export async function handleBrokerRequest(
    request: BrokerRequest,
 ): Promise<HandleResult> {
    try {
-      return await routeCommand(context, request);
+      if (
+         request.command === 'ping' ||
+         (request.command === 'action' && request.action === 'wait')
+      ) {
+         return await routeCommand(context, request);
+      }
+      return await withContextCommand(
+         context,
+         () => routeCommand(context, request),
+         request.command === 'stop',
+      );
    } catch (error) {
-      return { response: { ok: false, error: toBrokerError(error) }, shouldStop: false };
+      const shouldStop = request.command === 'attach-document';
+      if (shouldStop) {
+         context.stopping = true;
+      }
+      return { response: { ok: false, error: toBrokerError(error) }, shouldStop };
    }
 }

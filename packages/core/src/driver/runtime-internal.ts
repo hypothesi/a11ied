@@ -6,19 +6,21 @@ import type {
 import { ignoreError, isVoiceOverRunning, type DriverAdapter } from '@a11ied/guidepup';
 
 import { handleBrokerRequest } from './broker-handlers.js';
+import { cleanupAfterError, closeContext } from './context-queue.js';
 import type {
    BrokerHandlerContext,
    BrokerRequest,
    BrokerResponse,
 } from './broker-types.js';
-import { startSessionRecording } from './recording.js';
-import { createDriverSessionContext } from './session-context.js';
+import { createDriverSessionContext, stopSessionResources } from './session-context.js';
 import {
    getActiveSessionFile,
    getInMemorySocketPath,
    removeSessionArtifacts,
-   writeSessionMetadata,
+   writeRecoveryMetadata,
 } from './session-utils.js';
+import { listFailureDetails } from './broker-errors.js';
+import { CliEnvironmentError } from '../errors/cli-errors.js';
 
 const VOICE_OVER_POLL_INTERVAL_MS = 1000;
 
@@ -31,14 +33,90 @@ interface InProcessSession {
 /** Sessions that live inside this process, keyed by session id. */
 const inProcessSessions = new Map<string, InProcessSession>();
 
+/** Resolve an explicit owner, or the latest stopping owner without metadata. */
+export function getRetainedInProcessSession(
+   sessionId?: string,
+): AccessibilityDriverSession | undefined {
+   if (sessionId !== undefined) {
+      return inProcessSessions.get(sessionId)?.context.session;
+   }
+   const entry = [...inProcessSessions.values()].findLast(
+      (candidate) => candidate.context.stopping,
+   );
+   return entry?.context.session;
+}
+
+/** Preserve a failed owner and its stop route before surfacing the original errors. */
+export async function retainInProcessRecovery(
+   context: BrokerHandlerContext,
+   error: unknown,
+): Promise<never> {
+   const previous = inProcessSessions.get(context.session.sessionId);
+   if (previous?.monitorTimer) {
+      clearInterval(previous.monitorTimer);
+   }
+   Object.assign(context, { stopping: true, writeMetadata: writeRecoveryMetadata });
+   context.session.metadataFile = getActiveSessionFile();
+   context.session.socketPath = getInMemorySocketPath(context.session.sessionId);
+   inProcessSessions.set(context.session.sessionId, {
+      adapter: context.adapter,
+      context,
+      monitorTimer: undefined,
+   });
+   const details = {
+      sessionId: context.session.sessionId,
+      mode: 'in-process',
+      failures: listFailureDetails(error),
+   };
+   const recoveryError = new CliEnvironmentError(
+      'session-cleanup-failed',
+      `Cleanup is unconfirmed. Call stopDriverSession({sessionId: "${context.session.sessionId}"}) in this process.`,
+      details,
+   );
+   recoveryError.cause = error;
+   try {
+      await writeRecoveryMetadata(context.session);
+   } catch (metadataError) {
+      recoveryError.cause = new AggregateError(
+         [error, metadataError],
+         'Cleanup and recovery publication failed.',
+      );
+      details.failures = listFailureDetails(recoveryError.cause);
+   }
+   throw recoveryError;
+}
+
 export interface InProcessStartOptions {
    target: Platform;
    sessionId: string;
    recordingPath?: string | undefined;
    url?: string | undefined;
    app?: AccessibilityDriverSession['app'] | undefined;
+   browser?: string | undefined;
+   nativeInput?: AccessibilityDriverSession['nativeInput'];
    idleTimeoutMinutes?: number | undefined;
    engine?: VirtualEngine | undefined;
+}
+
+/** Finalize a confirmed owner without reentering its command queue. */
+export async function finalizeInProcessRecovery(
+   context: BrokerHandlerContext,
+): Promise<void> {
+   const entry = inProcessSessions.get(context.session.sessionId);
+   if (entry?.context !== context) {
+      return;
+   }
+   if (!context.resourcesStopped) {
+      throw new CliEnvironmentError(
+         'session-cleanup-unconfirmed',
+         'Resource shutdown is unconfirmed.',
+      );
+   }
+   await removeSessionArtifacts(context.session);
+   if (entry.monitorTimer) {
+      clearInterval(entry.monitorTimer);
+   }
+   inProcessSessions.delete(context.session.sessionId);
 }
 
 async function teardownInProcessSession(sessionId: string): Promise<void> {
@@ -46,12 +124,17 @@ async function teardownInProcessSession(sessionId: string): Promise<void> {
    if (!entry) {
       return;
    }
-   if (entry.monitorTimer) {
-      clearInterval(entry.monitorTimer);
-   }
-   inProcessSessions.delete(sessionId);
-   await entry.adapter.stop().catch(ignoreError);
-   await removeSessionArtifacts(entry.context.session);
+   const finalize = async (): Promise<void> => {
+      entry.context.resourcesStopped = true;
+      await finalizeInProcessRecovery(entry.context);
+   };
+   await closeContext(entry.context, async () => {
+      if (entry.context.resourcesStopped) {
+         await finalize();
+         return;
+      }
+      await stopSessionResources(entry.adapter, entry.context.finishRecording, finalize);
+   });
 }
 
 function createVoiceOverInProcessMonitor(
@@ -62,9 +145,12 @@ function createVoiceOverInProcessMonitor(
       return undefined;
    }
    const timer = setInterval(async () => {
+      if (inProcessSessions.get(sessionId)?.context.stopping) {
+         return;
+      }
       const running = await isVoiceOverRunning().catch(() => false);
       if (!running) {
-         await teardownInProcessSession(sessionId);
+         await teardownInProcessSession(sessionId).catch(ignoreError);
       }
    }, VOICE_OVER_POLL_INTERVAL_MS);
    timer.unref();
@@ -75,22 +161,35 @@ function createVoiceOverInProcessMonitor(
 export async function startInProcessSession(
    options: InProcessStartOptions,
 ): Promise<AccessibilityDriverSession> {
-   const recording = options.recordingPath
-      ? startSessionRecording(options.target, options.recordingPath)
-      : undefined;
    const { adapter, context } = await createDriverSessionContext({
       ...options,
       metadataFile: getActiveSessionFile(),
       socketPath: getInMemorySocketPath(options.sessionId),
-      recording,
       persist: true,
    });
+   if (context.startupError) {
+      return retainInProcessRecovery(context, context.startupError);
+   }
    const monitorTimer = createVoiceOverInProcessMonitor(
       options.target,
       options.sessionId,
    );
    inProcessSessions.set(options.sessionId, { adapter, context, monitorTimer });
-   await writeSessionMetadata(context.session);
+   try {
+      await writeRecoveryMetadata(context.session);
+   } catch (error) {
+      try {
+         return await cleanupAfterError(
+            () => teardownInProcessSession(options.sessionId),
+            error,
+         );
+      } catch (cleanupError) {
+         if (inProcessSessions.has(options.sessionId)) {
+            return retainInProcessRecovery(context, cleanupError);
+         }
+         throw cleanupError;
+      }
+   }
    return context.session;
 }
 

@@ -2,6 +2,8 @@ import {
    cliExitCodes,
    evidenceModeSchema,
    evidenceOutcomeSchema,
+   evidenceProvenanceSchema,
+   evidenceFindingSchema,
    type ApgCheckResult,
 } from '@a11ied/contracts';
 import {
@@ -111,6 +113,10 @@ export function registerPatternCheckTool(server: McpServer): void {
 }
 
 const patternRecordInputSchema = pageTargetInputSchema.extend({
+   finding: evidenceFindingSchema.optional(),
+   provenance: evidenceProvenanceSchema.optional(),
+   runFile: z.string().min(1).optional(),
+   subjectHash: z.string().min(1).optional(),
    pattern: z.string().min(1).describe('The APG example the row belongs to.'),
    row: z.string().min(1).describe('The row key, such as combobox-key-home[5].'),
    selector: z
@@ -149,10 +155,12 @@ function registerPatternRecordTool(server: McpServer): void {
       async (input) => {
          const resolved = await resolvePageTarget(input, 'pattern record');
          const target = describePageReportTarget(resolved);
-         const tree = await getAccessibilityTree(requireLoad(resolved), {
-            selector: input.selector,
-            click: input.click,
-         });
+         const tree = input.subjectHash
+            ? undefined
+            : await getAccessibilityTree(requireLoad(resolved), {
+                 selector: input.selector,
+                 click: input.click,
+              });
 
          return createToolResponse(
             await recordApgJudgment({
@@ -162,10 +170,13 @@ function registerPatternRecordTool(server: McpServer): void {
                outcome: input.outcome,
                mode: input.mode,
                note: input.note,
-               pointer: input.pointer,
+               pointer: input.pointer ?? input.selector,
+               provenance: input.provenance,
+               finding: input.finding,
                assertedBy: input.assertedBy,
-               subjectHash: hashAccessibilityTree(tree),
-               evidence: { file: input.resultsFile },
+               subjectHash:
+                  input.subjectHash ?? (tree ? hashAccessibilityTree(tree) : undefined),
+               evidence: { file: input.resultsFile, runFile: input.runFile },
             }),
          );
       },
@@ -182,6 +193,9 @@ function registerPatternPendingTool(server: McpServer): void {
             'Matches the CLI pattern pending command.',
          inputSchema: pageTargetInputSchema.extend({
             pattern: z.string().min(1),
+            pointer: z.string().min(1).optional(),
+            subjectHash: z.string().min(1).optional(),
+            runFile: z.string().min(1).optional(),
             resultsFile: z.string().optional(),
          }),
          annotations: readOnlyAnnotations,
@@ -192,7 +206,9 @@ function registerPatternPendingTool(server: McpServer): void {
             await listPendingApgRows({
                subject: describePageReportTarget(resolved).value,
                exampleId: input.pattern,
-               evidence: { file: input.resultsFile },
+               pointer: input.pointer,
+               subjectHash: input.subjectHash,
+               evidence: { file: input.resultsFile, runFile: input.runFile },
             }),
          );
       },

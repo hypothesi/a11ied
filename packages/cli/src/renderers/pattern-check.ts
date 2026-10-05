@@ -1,3 +1,4 @@
+import { renderRecordText } from './audit-evidence.js';
 import {
    apgCheckResultSchema,
    type ApgCheckResult,
@@ -47,7 +48,7 @@ function judgedLines(result: ApgCheckResult): string[] {
       judged.map((row) => {
          const recorded = row.recorded;
          const stale = recorded?.stale
-            ? dim(' - the page changed since, so this row counts again')
+            ? dim(' - unverified or stale evidence; this row still counts')
             : '';
          return `${code(row.rowKey)} ${recorded?.outcome ?? ''}${stale} ${dim(recorded?.note ?? '')}`;
       }),
@@ -136,16 +137,6 @@ export function renderPatternCheckText(
    return lines.join('\n');
 }
 
-interface PatternRecordResult {
-   record: {
-      outcome: string;
-      note?: string;
-      test: { exampleId: string; rowKey: string };
-      subject: string;
-   };
-   file: string;
-}
-
 interface PatternPendingResult {
    subject: string;
    exampleId: string;
@@ -158,17 +149,7 @@ export function renderPatternRecordText(
    envelope: CliOutputEnvelope,
    _options: { verbose: boolean },
 ): string {
-   const result = envelope.result as unknown as PatternRecordResult;
-   const lines = [
-      `${result.record.test.exampleId} ${code(result.record.test.rowKey)} ${result.record.outcome}`,
-      dim(`  target  ${result.record.subject}`),
-   ];
-
-   if (result.record.note) {
-      lines.push(dim(`  note    ${result.record.note}`));
-   }
-   lines.push(dim(`  stored  ${result.file}`));
-   return lines.join('\n');
+   return renderRecordText(envelope, _options);
 }
 
 /** Prints the rows of one example nobody has judged yet for this target. */

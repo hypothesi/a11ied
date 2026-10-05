@@ -16,6 +16,7 @@ export interface ReportBuildActionOptions {
    out: string;
    title?: string;
    formats?: string;
+   draft?: boolean;
    failOn?: string;
    wcag?: string;
 }
@@ -28,11 +29,13 @@ function resolveFormats(value: string | undefined): Set<ReportFormat> {
 }
 
 function hasFailure(model: ReportModel, failOn: string | undefined): boolean {
-   if (!failOn) {
-      return Object.values(model.totals.violations).some((count) => count > 0);
-   }
-   const threshold = IMPACTS.indexOf(axeFailOnImpactSchema.parse(failOn));
-   return IMPACTS.slice(threshold).some((impact) => model.totals.violations[impact] > 0);
+   const threshold = IMPACTS.indexOf(axeFailOnImpactSchema.parse(failOn ?? 'minor'));
+   return model.pages.some((page) =>
+      page.findings.some(
+         (finding) =>
+            finding.impact === 'unknown' || IMPACTS.indexOf(finding.impact) >= threshold,
+      ),
+   );
 }
 
 export async function handleReportBuildAction(
@@ -44,6 +47,7 @@ export async function handleReportBuildAction(
       outDir: options.out,
       ...(options.title ? { title: options.title } : {}),
       formats: [...resolveFormats(options.formats)],
+      draft: options.draft,
       version: CLI_VERSION,
    });
    return {

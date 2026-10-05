@@ -3,8 +3,13 @@ import type { AccessibilityDriverSession } from '@a11ied/contracts';
 import { connectToBroker, resolveBrokerSocketTimeoutMs } from './broker-client.js';
 import type { BrokerRequest, BrokerResponse } from './broker-types.js';
 import { requestInProcess } from './runtime-internal.js';
+import { assertSessionInputPolicy } from './broker-errors.js';
 import { normalizeBrokerTransportError } from './runtime-support.js';
-import { isInMemorySession, removeSessionArtifacts } from './session-utils.js';
+import {
+   isInMemorySession,
+   isProcessRunning,
+   removeSessionArtifacts,
+} from './session-utils.js';
 
 /**
  * Sends one request to wherever the session lives: the in-process map when it was started
@@ -14,6 +19,9 @@ export async function sendSessionRequest(
    session: AccessibilityDriverSession,
    request: BrokerRequest,
 ): Promise<BrokerResponse> {
+   if (request.command === 'action') {
+      assertSessionInputPolicy(session);
+   }
    if (isInMemorySession(session)) {
       return requestInProcess(session.sessionId, request);
    }
@@ -24,7 +32,7 @@ export async function sendSessionRequest(
          resolveBrokerSocketTimeoutMs(request, session.target),
       );
    } catch (error) {
-      if (request.command === 'stop') {
+      if (request.command === 'stop' && !isProcessRunning(session.brokerPid)) {
          // The broker is gone; drop the stale files so the next start is clean.
          await removeSessionArtifacts(session);
       }

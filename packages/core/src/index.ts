@@ -1,5 +1,3 @@
-import type { CliCommand } from '../../contracts/src/index.js';
-
 export {
    CliEnvironmentError,
    CliUsageError,
@@ -80,6 +78,7 @@ export {
 export { buildAxeSarifLog, type AxeSarifLog } from './axe/sarif.js';
 export {
    appendEvidence,
+   recordEvidence,
    clearEvidence,
    readEvidence,
    readEvidenceForSubject,
@@ -91,6 +90,11 @@ export {
    type ListPendingCriteriaInput,
 } from './evidence/pending.js';
 export { EVIDENCE_FILE_ENV_VAR, resolveEvidenceFile } from './evidence/paths.js';
+export {
+   isVerifiedEvidence,
+   resolveEvidenceProcedure,
+   validateEvidenceRecord,
+} from './evidence/validation.js';
 export {
    buildSubjectKey,
    hashAccessibilityTree,
@@ -135,66 +139,51 @@ export {
    listPendingApgRows,
    recordApgJudgment,
 } from './apg/runtime.js';
-export { buildAuditReport, type AuditReport } from './audit/runtime.js';
+export {
+   buildAuditReport,
+   type AuditReport,
+   type BuildAuditReportInput,
+} from './audit/runtime.js';
+export {
+   withLoadedPage,
+   withInteractiveBrowserPage,
+   type WithBrowserPageOptions,
+} from './browser/shared-browser.js';
 export { buildNextCommands } from './audit/next-commands.js';
-export type { AuditCriterionRollup } from './audit/criteria-rollup.js';
+export {
+   getCriterionOutcome,
+   type AuditCriterionRollup,
+} from './audit/criteria-rollup.js';
 export type { AuditTreeSummary } from './audit/tree-summary.js';
+export {
+   createAuditRun,
+   readAuditRun,
+   updateAuditRun,
+   getAssessmentId,
+   getAuditRunPaths,
+   type CreateAuditRunOptions,
+} from './audit/run-store.js';
+export {
+   registerAuditState,
+   registerAuditJourney,
+   queueAssessmentCheck,
+   transitionAssessmentCheck,
+} from './audit/run-state.js';
 
-const cliCommands: CliCommand[] = [
-   {
-      name: 'wcag',
-      summary: 'Query pinned WCAG criteria, test methods, and testing strategy data.',
-      maturity: 'ready',
-   },
-   {
-      name: 'pattern',
-      summary:
-         'Query the ARIA Authoring Practices Guide keyboard and attribute tables, and check a page against one.',
-      maturity: 'ready',
-   },
-   {
-      name: 'sr',
-      summary:
-         'Control VoiceOver, NVDA, or the virtual screen reader through stable screen-reader sessions.',
-      maturity: 'ready',
-   },
-   {
-      name: 'axe',
-      summary: 'Run axe-core accessibility scans.',
-      maturity: 'ready',
-   },
-   {
-      name: 'tree',
-      summary: 'Print the accessibility tree for a target.',
-      maturity: 'ready',
-   },
-   {
-      name: 'audit',
-      summary:
-         'Run axe, the accessibility tree, and the relevant criteria scan against a target.',
-      maturity: 'ready',
-   },
-   {
-      name: 'doctor',
-      summary: 'Check the host for browser and screen reader readiness.',
-      maturity: 'ready',
-   },
-   {
-      name: 'setup',
-      summary: 'Run the Guidepup setup steps this host still needs.',
-      maturity: 'ready',
-   },
-   {
-      name: 'mcp',
-      summary: 'Expose the runtime over an MCP stdio server.',
-      maturity: 'ready',
-   },
-];
-
-/** Lists the shipped top-level CLI command families and their maturity labels. */
-export function listCliCommands(): CliCommand[] {
-   return cliCommands;
-}
+export { listCliCommands } from './command-catalog.js';
+export { migrateInventoryAuditRun } from './audit/run-inventory.js';
+export {
+   startAuditAssessment,
+   nextAuditAssessment,
+   getAuditAssessmentStatus,
+   resumeAuditAssessment,
+   finalizeAuditAssessment,
+} from './audit/run-lifecycle.js';
+export type { AuditAssessmentStatus } from './audit/run-status.js';
+export {
+   executeAuditAssessment,
+   type AuditAssessmentResponse,
+} from './audit/assessment-command.js';
 
 export {
    showWcagAxeRule,

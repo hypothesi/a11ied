@@ -1,3 +1,8 @@
+import { once } from 'node:events';
+import type net from 'node:net';
+import { CliEnvironmentError } from '../errors/cli-errors.js';
+import { recordBrokerStartupError } from './broker-startup.js';
+import { listFailureDetails } from './broker-errors.js';
 import { mkdir, rm } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
@@ -5,22 +10,18 @@ import {
    driverFocusTargetFieldsSchema,
    platformSchema,
    virtualEngineSchema,
+   nativeInputPolicySchema,
    type AccessibilityDriverSession,
    type Platform,
-   type SessionRecording,
    type VirtualEngine,
 } from '@a11ied/contracts';
-import {
-   createDriverAdapter,
-   ignoreError,
-   isVoiceOverRunning,
-   type DriverAdapter,
-} from '@a11ied/guidepup';
+import { createDriverAdapter, ignoreError, isVoiceOverRunning } from '@a11ied/guidepup';
 
 import { createBrokerServer, createIdleTimer, shutdownServer } from './broker-server.js';
-import { startSessionRecording, type ActiveSessionRecording } from './recording.js';
-import { createDriverSessionContext } from './session-context.js';
-import { removeSessionArtifactsSync, writeSessionMetadata } from './session-utils.js';
+import type { BrokerHandlerContext } from './broker-types.js';
+import { closeContext } from './context-queue.js';
+import { createDriverSessionContext, stopSessionResources } from './session-context.js';
+import { removeSessionArtifacts, removeSessionArtifactsSync } from './session-utils.js';
 
 const FIRST_USER_ARG = 2,
    MS_PER_MINUTE = 60_000,
@@ -35,13 +36,17 @@ interface BrokerArgs {
    recordingPath?: string;
    url?: string;
    app?: AccessibilityDriverSession['app'];
+   browser?: string | undefined;
+   nativeInput?: AccessibilityDriverSession['nativeInput'];
    engine?: VirtualEngine;
 }
 
 interface BrokerState {
    stopped: boolean;
    stopping: boolean;
-   recording: ActiveSessionRecording | undefined;
+   context?: BrokerHandlerContext | undefined;
+   startup?: Promise<BrokerHandlerContext | undefined> | undefined;
+   monitorTimer?: NodeJS.Timeout | undefined;
 }
 
 function collectArgValues(argv: string[]): Map<string, string> {
@@ -80,6 +85,10 @@ function parseArgs(argv: string[]): BrokerArgs {
       metadataFile: requireArg(values, '--metadata-file'),
       socketPath: requireArg(values, '--socket-path'),
       idleTimeoutMs: Number(requireArg(values, '--idle-timeout-ms')),
+      browser: values.get('--browser'),
+      nativeInput: nativeInputPolicySchema.parse(
+         values.get('--native-input') ?? 'guarded',
+      ),
    };
    const recordingPath = values.get('--recording-path'),
       url = values.get('--url');
@@ -114,30 +123,34 @@ async function assertTargetReady(target: Platform): Promise<void> {
    }
 }
 
-function createBrokerRecording(args: BrokerArgs): ActiveSessionRecording | undefined {
-   if (args.recordingPath) {
-      return startSessionRecording(args.target, args.recordingPath);
-   }
-   return undefined;
-}
-
 interface StopBrokerOptions {
-   adapter: DriverAdapter;
+   context: BrokerHandlerContext;
    args: BrokerArgs;
    state: BrokerState;
 }
 
 async function stopBroker(options: StopBrokerOptions): Promise<void> {
-   if (options.state.stopped) {
-      return;
-   }
-   options.state.stopped = true;
-   if (options.state.recording) {
-      await options.state.recording.stop().catch(ignoreError);
-      options.state.recording = undefined;
-   }
-   await options.adapter.stop().catch(ignoreError);
-   removeSessionArtifactsSync(options.args);
+   const finalize = async (): Promise<void> => {
+      options.context.resourcesStopped = true;
+      await removeSessionArtifacts(options.context.session);
+      options.state.stopped = true;
+   };
+   await closeContext(options.context, async () => {
+      if (options.context.resourcesStopped) {
+         await finalize();
+         return;
+      }
+      await stopSessionResources(
+         options.context.adapter,
+         options.context.finishRecording,
+         finalize,
+      );
+   }).catch((error: unknown) => {
+      if (!options.state.stopped) {
+         throw error;
+      }
+      process.stderr.write(`${String(error)}\n`);
+   });
 }
 
 /**
@@ -147,7 +160,8 @@ async function stopBroker(options: StopBrokerOptions): Promise<void> {
  */
 function installProcessHandlers(args: {
    stop: () => void;
-   stopOptions: StopBrokerOptions;
+   args: BrokerArgs;
+   state: BrokerState;
 }): void {
    for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP'] as const) {
       process.on(signal, args.stop);
@@ -161,20 +175,23 @@ function installProcessHandlers(args: {
       args.stop();
    });
    process.on('exit', () => {
-      if (!args.stopOptions.state.stopped) {
-         removeSessionArtifactsSync(args.stopOptions.args);
+      if (!args.state.stopped && args.state.context) {
+         removeSessionArtifactsSync(args.state.context.session);
       }
    });
 }
 
 function createVoiceOverMonitor(
-   target: Platform,
+   context: BrokerHandlerContext,
    onStop: () => void,
 ): NodeJS.Timeout | undefined {
-   if (target !== 'voiceover') {
+   if (context.session.target !== 'voiceover') {
       return undefined;
    }
    const timer = setInterval(async () => {
+      if (context.stopping) {
+         return;
+      }
       const running = await isVoiceOverRunning().catch(() => false);
       if (!running) {
          onStop();
@@ -184,50 +201,102 @@ function createVoiceOverMonitor(
    return timer;
 }
 
-async function main(): Promise<void> {
-   const args = parseArgs(process.argv.slice(FIRST_USER_ARG));
+async function initializeBrokerContext(
+   args: BrokerArgs,
+   state: BrokerState,
+): Promise<BrokerHandlerContext | undefined> {
    await assertTargetReady(args.target);
-   const state: BrokerState = {
-      stopped: false,
-      stopping: false,
-      recording: createBrokerRecording(args),
-   };
-   const { adapter, context } = await createDriverSessionContext({
+   if (state.stopping) {
+      return undefined;
+   }
+   const { context } = await createDriverSessionContext({
       ...args,
-      recording: state.recording,
       persist: true,
       idleTimeoutMinutes: args.idleTimeoutMs / MS_PER_MINUTE,
    });
-   context.finishRecording = async (): Promise<SessionRecording | undefined> => {
-      const completed = await state.recording?.stop();
-      state.recording = undefined;
-      return completed ?? context.session.recording;
-   };
-   await ensureSocketPath(args.socketPath);
-   const stopOptions: StopBrokerOptions = { adapter, args, state };
-   const controller = { stop: (): void => undefined };
-   const idleTimer = createIdleTimer(args.idleTimeoutMs, () => controller.stop());
-   let monitorTimer = createVoiceOverMonitor(args.target, () => controller.stop());
+   try {
+      await context.writeMetadata(context.session);
+   } catch (error) {
+      try {
+         await stopBroker({ context, args, state });
+      } catch (cleanupError) {
+         const failures = new AggregateError(
+            [context.startupError, error, cleanupError].filter(
+               (failure) => failure !== undefined,
+            ),
+            'Recovery publication failed.',
+         );
+         context.startupError = new CliEnvironmentError(
+            'session-metadata-cleanup-failed',
+            `Recovery metadata and cleanup failed. Retry "a1 sr stop --session-id ${args.sessionId}".`,
+            { sessionId: args.sessionId, failures: listFailureDetails(failures) },
+         );
+         context.startupError.cause = failures;
+         return context;
+      }
+      throw error;
+   }
+   return context;
+}
+
+function createBrokerEndpoint(
+   args: BrokerArgs,
+   state: BrokerState,
+): { server: net.Server; stop: () => void } {
+   const controller = { stop: (): void => undefined },
+      idleTimer = createIdleTimer(args.idleTimeoutMs, () => controller.stop());
    const server = createBrokerServer({
-      context,
+      context: () => state.context,
       onStop: () => controller.stop(),
       onActivity: idleTimer.touch,
    });
    controller.stop = (): void => {
-      if (!state.stopping) {
-         state.stopping = true;
-         if (monitorTimer) {
-            clearInterval(monitorTimer);
-            monitorTimer = undefined;
-         }
-         idleTimer.clear();
-         shutdownServer(server, () => stopBroker(stopOptions));
+      if (state.stopping) {
+         return;
       }
+      state.stopping = true;
+      if (state.monitorTimer) {
+         clearInterval(state.monitorTimer);
+         state.monitorTimer = undefined;
+      }
+      idleTimer.clear();
+      shutdownServer(server, async () => {
+         const context = state.context ?? (await state.startup?.catch(ignoreError));
+         if (context) {
+            await stopBroker({ context, args, state });
+         } else {
+            state.stopped = true;
+         }
+      }).catch((error: unknown) => {
+         state.stopping = false;
+         process.stderr.write(`${String(error)}\n`);
+      });
    };
-   installProcessHandlers({ stop: controller.stop, stopOptions });
-   server.listen(args.socketPath, () => {
-      writeSessionMetadata(context.session).catch(controller.stop);
-   });
+   installProcessHandlers({ stop: controller.stop, args, state });
+   return { server, stop: controller.stop };
+}
+
+async function main(): Promise<void> {
+   const args = parseArgs(process.argv.slice(FIRST_USER_ARG)),
+      state: BrokerState = { stopped: false, stopping: false };
+   // Bind a retry endpoint before any native resource can be acquired.
+   let endpoint: ReturnType<typeof createBrokerEndpoint> | undefined = undefined;
+   try {
+      await ensureSocketPath(args.socketPath);
+      endpoint = createBrokerEndpoint(args, state);
+      endpoint.server.listen(args.socketPath);
+      await once(endpoint.server, 'listening');
+      state.startup = initializeBrokerContext(args, state);
+      state.context = await state.startup;
+      if (state.context && !state.context.stopping && !state.stopping) {
+         state.monitorTimer = createVoiceOverMonitor(state.context, endpoint.stop);
+      }
+   } catch (error) {
+      process.stderr.write(`${String(error)}\n`);
+      process.exitCode = 1;
+      await recordBrokerStartupError(args.sessionId, error).catch(ignoreError);
+      endpoint?.stop();
+   }
 }
 
 // oxlint-disable-next-line unicorn/prefer-top-level-await

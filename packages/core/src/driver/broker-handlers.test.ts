@@ -11,17 +11,17 @@ import { driverCapabilities, type DriverAdapter } from '@a11ied/guidepup';
 import { handleBrokerRequest } from './broker-handlers.js';
 import type { BrokerHandlerContext } from './broker-types.js';
 import { TranscriptRecorder } from './transcript.js';
+import { CliEnvironmentError } from '../errors/cli-errors.js';
 
 const COMPLETED_RECORDING: SessionRecording = {
-   path: '/tmp/session.mov',
-   format: 'mov',
-   status: 'completed',
-   startedAt: '2026-04-08T00:00:00.000Z',
-   stoppedAt: '2026-04-08T00:00:10.000Z',
-};
-
-const RECORDING_FAILURE_MESSAGE =
-   'The native recorder stopped without writing "/tmp/session.mov".';
+      path: '/tmp/session.mov',
+      format: 'mov',
+      status: 'completed',
+      startedAt: '2026-04-08T00:00:00.000Z',
+      stoppedAt: '2026-04-08T00:00:10.000Z',
+   },
+   RECORDING_FAILURE_MESSAGE =
+      'The native recorder stopped without writing "/tmp/session.mov".';
 
 function createSession(): AccessibilityDriverSession {
    return {
@@ -60,6 +60,9 @@ function createMockAdapter(): DriverAdapter {
    const phrases = ['Button'];
    return {
       target: 'voiceover',
+      async runOwned<TResult>(run: () => Promise<TResult>): Promise<TResult> {
+         return run();
+      },
       capabilities: driverCapabilities,
       checkReadiness: vi.fn<DriverAdapter['checkReadiness']>(),
       start: vi.fn<DriverAdapter['start']>(),
@@ -125,6 +128,53 @@ function createContext(args: {
    };
 }
 
+describe('confirmed broker shutdown', () => {
+   it('waits for native cleanup before acknowledging stop', async () => {
+      const context = createContext({});
+      let release: () => void = vi.fn(),
+         settled = false;
+      vi.mocked(context.adapter.stop).mockImplementation(
+         () =>
+            new Promise<void>((resolve) => {
+               release = resolve;
+            }),
+      );
+      const stopped = handleBrokerRequest(context, { command: 'stop' }).then((result) => {
+         settled = true;
+         return result;
+      });
+      await vi.waitFor(() => expect(context.adapter.stop).toHaveBeenCalledTimes(1));
+
+      expect(settled).toStrictEqual(false);
+      expect(context.resourcesStopped).toBeUndefined();
+      release();
+      const result = await stopped;
+
+      expect(result.response.ok).toStrictEqual(true);
+      expect(context.resourcesStopped).toStrictEqual(true);
+   });
+
+   it('retains failed shutdown for retry and refuses input in between', async () => {
+      const context = createContext({});
+      vi.mocked(context.adapter.stop).mockRejectedValueOnce(
+         new Error('Native stop failed'),
+      );
+      const failed = await handleBrokerRequest(context, { command: 'stop' });
+      const input = await handleBrokerRequest(context, {
+         command: 'action',
+         action: 'activate',
+      });
+      const retried = await handleBrokerRequest(context, { command: 'stop' });
+
+      expect(failed.response.ok).toStrictEqual(false);
+      expect(failed.shouldStop).toStrictEqual(false);
+      expect(input.response.error?.code).toStrictEqual('session-stopping');
+      expect(context.adapter.performPortable).not.toHaveBeenCalled();
+      expect(retried.response.ok).toStrictEqual(true);
+      expect(retried.shouldStop).toStrictEqual(true);
+   });
+});
+
 describe('broker stop handling', () => {
    it('returns completed recording metadata in the stop result', async () => {
       const context = createContext({ completedRecording: COMPLETED_RECORDING });
@@ -141,11 +191,11 @@ describe('broker stop handling', () => {
 
    it('surfaces recording stop failures without pretending the session vanished', async () => {
       const context = createContext({});
-      context.finishRecording = vi.fn().mockRejectedValue(
-         Object.assign(new Error(RECORDING_FAILURE_MESSAGE), {
-            code: 'recording-file-missing',
-         }),
-      );
+      context.finishRecording = vi
+         .fn()
+         .mockRejectedValue(
+            new CliEnvironmentError('recording-file-missing', RECORDING_FAILURE_MESSAGE),
+         );
 
       const result = await handleBrokerRequest(context, { command: 'stop' });
 
@@ -154,6 +204,8 @@ describe('broker stop handling', () => {
       expect(result.response.error).toEqual({
          code: 'recording-file-missing',
          message: RECORDING_FAILURE_MESSAGE,
+         details: { cleanupConfirmed: true },
+         exitCode: 3,
       });
       expect(context.writeMetadata).toHaveBeenCalledWith(
          expect.objectContaining({ logCursor: 1 }),
@@ -215,8 +267,8 @@ describe('broker action handling', () => {
       expect(context.adapter.performPortable).toHaveBeenCalledWith('next', {});
       expect(
          result.response.result?.state.transcript.map((entry) => entry.phrase),
-      ).toEqual(['Button', 'Link']);
-      expect(result.response.result?.state.transcript[1]?.at).toMatch(
+      ).toEqual(['Link']);
+      expect(result.response.result?.state.transcript[0]?.at).toMatch(
          /^\d{4}-\d{2}-\d{2}T/,
       );
    });
@@ -279,20 +331,5 @@ describe('broker action state', () => {
          checkpoint: 'dialog open',
          phrase: '',
       });
-   });
-
-   it('records the url an attach-document request opened', async () => {
-      const context = createContext({});
-
-      const result = await handleBrokerRequest(context, {
-         command: 'attach-document',
-         payload: { html: '<p>Hi</p>', url: 'https://example.org/' },
-      });
-
-      expect(context.adapter.attachDocument).toHaveBeenCalledWith({
-         html: '<p>Hi</p>',
-         url: 'https://example.org/',
-      });
-      expect(result.response.result?.session.url).toBe('https://example.org/');
    });
 });

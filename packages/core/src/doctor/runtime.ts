@@ -1,16 +1,17 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
-import { arch, release, tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { arch, release } from 'node:os';
 
-import type {
-   BrowserAutomationPolicy,
-   DoctorAction,
-   DoctorCheck,
-   DoctorHost,
-   DoctorReport,
-   DoctorTarget,
-   Target,
+import {
+   doctorRequestSchema,
+   type BrowserAutomationCandidate,
+   type BrowserAutomationPolicy,
+   type DoctorAction,
+   type DoctorCheck,
+   type DoctorHost,
+   type DoctorReport,
+   type DoctorRequest,
+   type DoctorTarget,
+   type Target,
 } from '@a11ied/contracts';
 import {
    checkNvdaEnvironment,
@@ -21,13 +22,14 @@ import {
 } from '@a11ied/guidepup';
 
 import { createBrowserAutomationPolicy } from '../browser/policy.js';
+import { readDoctorBrowserVersion, readDoctorReaderVersion } from './versions.js';
+import {
+   checkWindowsRecording,
+   probeScreenRecordingWithScreencapture,
+} from './recording.js';
 
 const PACKAGE_VERSION = '0.1.0';
 const COMMAND_TIMEOUT_MS = 5000;
-const RECORDING_PROBE_SECONDS = 1;
-const RECORDING_PROBE_TIMEOUT_MS = 4000;
-const SCREEN_RECORDING_PERMISSION_NOTE =
-   'If the same recording command works from Terminal but fails here, grant Screen Recording permission to the current host app.';
 
 const supportedTargets: Target[] = [
    {
@@ -74,8 +76,12 @@ export interface DoctorDeps {
    guidepup: GuidepupEnvironmentDeps;
    browserAutomation: () => BrowserAutomationPolicy;
    probeScreenRecording: () => DoctorCheck;
+   probeWindowsRecording?: () => DoctorCheck;
    npmVersion: () => string;
    osVersion: () => string;
+   browserVersion?: (
+      candidate: BrowserAutomationCandidate | undefined,
+   ) => string | undefined;
 }
 
 function runCommand(command: string, args: string[]): string | undefined {
@@ -87,48 +93,6 @@ function runCommand(command: string, args: string[]): string | undefined {
       return undefined;
    }
    return result.stdout.trim() || undefined;
-}
-
-function describeRecordingProbeFailure(args: {
-   status: number | null;
-   stderr: string;
-}): string {
-   if (args.stderr) {
-      return `Recording probe failed: ${args.stderr}`;
-   }
-   return `Recording probe failed: screencapture exited with code ${String(args.status ?? 'unknown')} without writing a movie file.`;
-}
-
-function probeScreenRecordingWithScreencapture(): DoctorCheck {
-   const probeDir = mkdtempSync(join(tmpdir(), 'a11ied-doctor-'));
-   const probePath = join(probeDir, 'recording-probe.mov');
-   const label = 'Screen recording available to the current host app';
-
-   try {
-      const result = spawnSync(
-         '/usr/sbin/screencapture',
-         ['-v', '-V', String(RECORDING_PROBE_SECONDS), probePath],
-         { encoding: 'utf8', timeout: RECORDING_PROBE_TIMEOUT_MS },
-      );
-      if (!result.error && result.status === 0 && existsSync(probePath)) {
-         return { id: 'screen-recording', label, status: 'pass' };
-      }
-
-      const failure = result.error
-         ? `Recording probe failed: ${result.error.message}`
-         : describeRecordingProbeFailure({
-              status: result.status,
-              stderr: result.stderr.trim(),
-           });
-      return {
-         id: 'screen-recording',
-         label,
-         status: 'warn',
-         detail: `${failure} ${SCREEN_RECORDING_PERMISSION_NOTE}`,
-      };
-   } finally {
-      rmSync(probeDir, { recursive: true, force: true });
-   }
 }
 
 function resolveOsVersion(platform: NodeJS.Platform): string {
@@ -145,19 +109,77 @@ export function createDefaultDoctorDeps(): DoctorDeps {
       guidepup: createDefaultGuidepupEnvironmentDeps(),
       browserAutomation: createBrowserAutomationPolicy,
       probeScreenRecording: probeScreenRecordingWithScreencapture,
+      probeWindowsRecording: checkWindowsRecording,
       npmVersion: () => runCommand('npm', ['--version']) ?? 'unknown',
       osVersion: () => resolveOsVersion(platform),
+      browserVersion: (candidate) =>
+         readDoctorBrowserVersion(candidate, platform, runCommand),
    };
 }
 
-function runTargetChecks(target: Target, deps: DoctorDeps): DoctorCheck[] {
+function getRecordingCheck(target: Target, deps: DoctorDeps): DoctorCheck {
+   try {
+      const check =
+         target.platform === 'voiceover'
+            ? deps.probeScreenRecording()
+            : (deps.probeWindowsRecording?.() ?? {
+                 id: 'windows-recording',
+                 label: 'Windows recording dependency',
+                 status: 'fail',
+                 detail: 'The recorder prerequisite check is unavailable.',
+              });
+
+      return { ...check, status: check.status === 'pass' ? 'pass' : 'fail' };
+   } catch (error) {
+      return {
+         id: 'recording-prerequisite-unreadable',
+         label: 'Recording prerequisite check could not complete',
+         status: 'fail',
+         detail: error instanceof Error ? error.message : String(error),
+      };
+   }
+}
+
+function runTargetChecks(
+   target: Target,
+   deps: DoctorDeps,
+   request: DoctorRequest,
+): DoctorCheck[] {
    if (target.platform === 'voiceover') {
-      return [...checkVoiceOverEnvironment(deps.guidepup), deps.probeScreenRecording()];
+      const checks = checkVoiceOverEnvironment(deps.guidepup);
+      if (!request.recording) {
+         return checks;
+      }
+      return [...checks, getRecordingCheck(target, deps)];
    }
    if (target.platform === 'nvda') {
-      return checkNvdaEnvironment(deps.guidepup);
+      const checks = checkNvdaEnvironment(deps.guidepup);
+      if (!request.recording) {
+         return checks;
+      }
+      return [...checks, getRecordingCheck(target, deps)];
    }
    return [];
+}
+
+function getTargetChecks(
+   target: Target,
+   deps: DoctorDeps,
+   request: DoctorRequest,
+): DoctorCheck[] {
+   try {
+      return runTargetChecks(target, deps, request);
+   } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      return [
+         {
+            id: 'reader-environment-unreadable',
+            label: 'Reader prerequisite check could not complete',
+            status: 'fail',
+            detail: `${detail} Reinstall the a11ied package or workspace dependencies, then run ${A11IED_SETUP_COMMAND}.`,
+         },
+      ];
+   }
 }
 
 function summarizeChecks(checks: DoctorCheck[]): string {
@@ -171,7 +193,11 @@ function summarizeChecks(checks: DoctorCheck[]): string {
    return 'Ready for real screen reader sessions.';
 }
 
-function buildDoctorTarget(target: Target, deps: DoctorDeps): DoctorTarget {
+function buildDoctorTarget(
+   target: Target,
+   deps: DoctorDeps,
+   request: DoctorRequest,
+): DoctorTarget {
    const requiredPlatform = requiredPlatformByTarget[target.platform];
    if (requiredPlatform && requiredPlatform !== deps.platform) {
       return {
@@ -182,11 +208,27 @@ function buildDoctorTarget(target: Target, deps: DoctorDeps): DoctorTarget {
       };
    }
 
+   if (target.platform === 'virtual' && request.task === 'audit') {
+      return {
+         ...target,
+         status: 'requires-setup',
+         summary: 'Select a real desktop reader for an audit.',
+         checks: [
+            {
+               id: 'real-audit-reader',
+               label: 'A desktop audit requires VoiceOver or NVDA',
+               status: 'fail',
+               detail:
+                  'Select --sr voiceover on macOS or --sr nvda on Windows. Virtual output is simulated evidence.',
+            },
+         ],
+      };
+   }
    if (target.platform === 'virtual') {
       return { ...target, summary: 'No setup needed.', checks: [] };
    }
 
-   const checks = runTargetChecks(target, deps);
+   const checks = getTargetChecks(target, deps, request);
    const hasFailure = checks.some((check) => check.status === 'fail');
    return {
       ...target,
@@ -199,11 +241,18 @@ function buildDoctorTarget(target: Target, deps: DoctorDeps): DoctorTarget {
 function collectActions(
    targets: DoctorTarget[],
    browserAutomation: BrowserAutomationPolicy,
+   browserRequired: boolean,
 ): DoctorAction[] {
    const actions: DoctorAction[] = [];
    const seenCommands = new Set<string>();
 
-   for (const check of targets.flatMap((target) => target.checks)) {
+   const checks = targets
+      .flatMap((target) => target.checks)
+      .toSorted(
+         (left, right) =>
+            Number(right.status === 'fail') - Number(left.status === 'fail'),
+      );
+   for (const check of checks) {
       if (check.status === 'pass' || !check.action || seenCommands.has(check.action)) {
          continue;
       }
@@ -215,7 +264,7 @@ function collectActions(
       });
    }
 
-   if (!browserAutomation.preferredCandidate) {
+   if (browserRequired && !browserAutomation.preferredCandidate) {
       actions.push({
          label: 'Install a Chromium browser for axe scans',
          command: browserAutomation.installCommand,
@@ -237,16 +286,49 @@ function buildHost(deps: DoctorDeps): DoctorHost {
    };
 }
 
+function selectDoctorTargets(
+   platform: NodeJS.Platform,
+   request: DoctorRequest,
+): Target[] {
+   if (request.task === 'scan') {
+      return supportedTargets.filter((target) => target.platform === 'virtual');
+   }
+   if (request.task === 'all' && request.target === undefined) {
+      return supportedTargets;
+   }
+   const target = request.target ?? (platform === 'darwin' ? 'voiceover' : 'nvda');
+   return supportedTargets.filter((entry) => entry.platform === target);
+}
+
 /** Builds the doctor report shown by the public CLI and library surface. */
 export function createDoctorReport(
    deps: DoctorDeps = createDefaultDoctorDeps(),
+   input: Partial<DoctorRequest> = {},
 ): DoctorReport {
-   const browserAutomation = deps.browserAutomation();
-   const targets = supportedTargets.map((target) => buildDoctorTarget(target, deps));
-   const actions = collectActions(targets, browserAutomation);
+   const browserAutomation = deps.browserAutomation(),
+      request = doctorRequestSchema.parse(input),
+      targets = selectDoctorTargets(deps.platform, request).map((target) =>
+         buildDoctorTarget(target, deps, request),
+      );
+   const actions = collectActions(targets, browserAutomation, request.task !== 'reader');
+   const targetsReady = targets.every(
+      (target) =>
+         !target.checks.some((check) => check.status === 'fail') &&
+         ((request.task === 'all' && request.target === undefined) ||
+            target.status !== 'unsupported'),
+   );
 
    return {
-      ready: actions.every((action) => !action.required),
+      ready: targetsReady && actions.every((action) => !action.required),
+      request,
+      browserVersion:
+         deps.browserVersion?.(browserAutomation.preferredCandidate) ?? 'Unavailable',
+      readerVersions: Object.fromEntries(
+         targets.map((target) => [
+            target.platform,
+            readDoctorReaderVersion(target.platform, deps.guidepup, deps.osVersion()),
+         ]),
+      ),
       host: buildHost(deps),
       packageVersion: PACKAGE_VERSION,
       nodeVersion: process.version,

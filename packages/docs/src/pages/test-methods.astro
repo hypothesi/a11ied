@@ -34,8 +34,8 @@ const toc = [
             <span>
                <strong>Direct rule evaluation</strong>. Software algorithms can definitively decide pass or fail
                by inspecting the DOM, styles, and computed values. For example, <strong>1.4.3 (Contrast)</strong>
-               and missing image <code>alt</code> attributes in <strong>1.1.1 (Non-text Content)</strong> are fully automated.
-               If <code>a1 audit</code> passes these checks, no manual verification is needed.
+               and missing image <code>alt</code> attributes in <strong>1.1.1 (Non-text Content)</strong> have automated checks for some requirements.
+               Passing these checks still requires assessment of the remaining criterion requirements.
             </span>
          </div>
          <div class="route-row">
@@ -71,18 +71,18 @@ const toc = [
       <pre><code>a1 wcag criteria --summary</code></pre>
       <pre data-label="OUTPUT"><code>WCAG 2.2 test methods  updated 2026-09-05
   Level      Criteria   Automated  Hybrid     Manual     Unknown
-  A          31         15         3          13         0
-  AA         24         7          4          13         0
-  AAA        31         5          2          24         0
-  All        86         27         9          50         0
+  A          31         0          18         13         0
+  AA         24         0          11         13         0
+  AAA        31         0          7          24         0
+  All        86         0          36         50         0
 
   28 criteria have an axe rule, 21 have an ACT rule, 19 have both.</code></pre>
       <p>
          At the standard <strong>Level AA</strong> compliance baseline (55 total criteria across Level A and AA):
       </p>
       <ul>
-         <li>Only <strong>22 criteria (~40%)</strong> can be verified through automated static scans.</li>
-         <li>The remaining <strong>33 criteria (~60%)</strong> are hybrid or manual, requiring interactive keyboard testing, screen reader observation, or editorial review.</li>
+         <li>Scanner rules cover parts of the criteria; no whole criterion passes on a clean scan alone.</li>
+         <li>Criterion assessments require interactive keyboard testing, screen reader observation, or semantic review.</li>
       </ul>
       <p>
          This is why <code>a11ied</code> combines axe-core scanning with virtual and native screen reader automation:
@@ -170,7 +170,7 @@ a1 pattern combobox                      # Query ARIA Authoring Practices Guide 
       <div class="route-list">
          <div class="route-row">
             <strong>Automated axe scan:</strong>
-            <span>Proves zero syntax or DOM contrast/naming violations across the ~27 automated criteria.</span>
+            <span>Reports mapped scanner results and leaves interaction and semantic requirements pending.</span>
          </div>
          <div class="route-row">
             <strong>Screen reader test suite:</strong>

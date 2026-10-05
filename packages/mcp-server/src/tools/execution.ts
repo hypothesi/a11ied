@@ -20,6 +20,7 @@ import {
 } from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { registerAuditAssessmentTool } from './audit-assessment.js';
 
 import {
    DEFAULT_WCAG_VERSION,
@@ -260,6 +261,14 @@ function registerTreeTool(server: McpServer): void {
 }
 
 const auditInputSchema = pageTargetInputSchema.extend({
+   level: wcagLevelSchema
+      .optional()
+      .describe('Audit WCAG through this level: A, AA, or AAA.'),
+   resultsFile: z
+      .string()
+      .min(1)
+      .optional()
+      .describe('Read evidence from this audit run instead of the global log.'),
    storageStatePath: z.string().min(1).optional(),
    version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
    failOn: axeFailOnImpactSchema
@@ -290,6 +299,8 @@ async function handleAudit(input: AuditInput): Promise<AuditToolResult> {
       metadata: resolved.metadata,
       userHints: resolved.userHints,
       wcagVersion: input.version,
+      level: input.level,
+      evidenceFile: input.resultsFile,
       timeoutMs: input.timeoutMs,
       storageStatePath: input.storageStatePath,
    });
@@ -317,10 +328,11 @@ function registerAuditTool(server: McpServer): void {
       {
          title: 'Audit',
          description:
-            'Run the full audit loop against a target: an http(s) URL, a local file path (target), or inline HTML (html). ' +
+            'Collect page observations for an http(s) URL, a local file path (target), or inline HTML (html). ' +
             'Runs axe against every mapped rule, an accessibility tree summary, the relevant criteria scan, and a per-criterion rollup. ' +
             'The result carries verdict.passed and nextCommands, and the tool returns exitCode 4 (the CLI assertion exit code) ' +
-            'when an axe violation at or above failOn is not covered by baseline, and 0 otherwise. Run this after any component change.',
+            'when an axe violation at or above failOn is not covered by baseline, and 0 otherwise. ' +
+            'That exit code covers axe findings. Use audit_assessment for durable assessment procedures and evidence-backed judgments.',
          inputSchema: auditInputSchema,
          annotations: { ...readOnlyAnnotations, openWorldHint: true },
       },
@@ -329,6 +341,7 @@ function registerAuditTool(server: McpServer): void {
 }
 
 export function registerExecutionTools(server: McpServer): void {
+   registerAuditAssessmentTool(server);
    registerRunAxeTool(server);
    registerTreeTool(server);
    registerAuditTool(server);

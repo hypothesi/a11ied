@@ -5,6 +5,7 @@ import { docsLinks } from '../../lib/nav';
 const toc = [
    { id: 'build', label: 'Build a report' },
    { id: 'outputs', label: 'Outputs' },
+   { id: 'publication', label: 'Publication and recovery' },
 ];
 ---
 
@@ -17,14 +18,26 @@ const toc = [
    <section class="panel" id="build">
       <h2>Build a report</h2>
       <pre><code>a1 report build \
-   --inventory .a11ied/audits/example/inventory.json \
-   --results-dir .a11ied/audits/example/pages \
-   --out .a11ied/audits/example/report</code></pre>
+   --inventory .a11ied/audits/createdbyfireside-com/inventory.json \
+   --results-dir .a11ied/audits/createdbyfireside-com/pages \
+   --out .a11ied/audits/createdbyfireside-com/report</code></pre>
       <p>
          Use <code>--formats html,json</code> to skip PDF and EARL when a fast local check is
          enough. JSON is always written because it is the complete presentation data contract.
          <code>--fail-on</code> uses the same impact levels as <code>a1 audit</code>.
+         Exit code 4 reports findings at that threshold after the bundle has been written;
+         it does not mean file generation failed.
       </p>
+      <p>
+         Add <code>--draft</code> to view an unfinished assessment in one command. It reads
+         available page results, labels HTML and PDF as drafts, and sets
+         <code>status: "draft"</code> in JSON. Page statuses and the saved inventory stay
+         unchanged. Pending checks remain incomplete; the command does not perform them.
+      </p>
+      <pre><code>a1 report build \
+   --inventory .a11ied/audits/createdbyfireside-com/inventory.json \
+   --results-dir .a11ied/audits/createdbyfireside-com/pages \
+   --out .a11ied/audits/createdbyfireside-com/preview --draft</code></pre>
    </section>
 
    <section class="panel" id="outputs">
@@ -34,10 +47,38 @@ const toc = [
          <div class="route-row"><code>report.pdf</code><span>Print-ready copy of the HTML report.</span></div>
          <div class="route-row"><code>report.json</code><span>Every fact shown by the built-in report.</span></div>
          <div class="route-row"><code>report.earl.json</code><span>One EARL JSON-LD graph for all audited pages.</span></div>
+         <div class="route-row"><code>report.manifest.json</code><span>Generated file paths, SHA-256 hashes, formats, and assessment revision when supplied.</span></div>
       </div>
       <p>
-         Missing or corrupt page files appear as page errors. They do not prevent the report
-         from describing the rest of the run.
+         Without <code>--draft</code>, every selected page must have valid audit results with no pending procedures, or
+         an explicit error with a reason. Missing or corrupt files for pages marked audited
+         block generation. In a sampled audit, unselected pages stay not tested and do not
+         block the report. The report includes recorded manual evidence and coverage gaps.
+      </p>
+   </section>
+   <section class="panel" id="publication">
+      <h2>Publication and recovery</h2>
+      <p>
+         Report files are rendered in a sibling staging directory and checked against the
+         manifest before the complete directory replaces the published bundle. A rendering
+         failure preserves the previous report. Concurrent builds for the same output
+         directory run one at a time.
+      </p>
+      <p>
+         After an interruption, repeat the same command. It discards unfinished generation
+         or recovers a verified directory swap before building again. Unexpected directory
+         replacements stop recovery and preserve their files. A swap can leave the output
+         directory temporarily absent until recovery finishes.
+      </p>
+      <p>
+         Use a dedicated output directory outside the inventory, page results, run file,
+         verified raw evidence inputs, and the current working directory. Existing unrelated
+         files and old artifact files are retained. Unselected report formats are removed
+         from the new bundle. PDF artifact links point to the published local bundle directory.
+      </p>
+      <p>
+         Successful publication confirms that the generated files passed their hash checks.
+         Assessment completion remains a separate value in the manifest and report.
       </p>
    </section>
 </DocShell>

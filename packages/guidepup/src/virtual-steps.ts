@@ -30,7 +30,8 @@ export interface VirtualMoveOutcome {
    moved: boolean;
 }
 
-function isElementNode(node: Node): node is Element {
+/** Narrow DOM nodes without relying on a particular window's Element constructor. */
+export function isElementNode(node: Node): node is Element {
    return node.nodeType === node.ELEMENT_NODE;
 }
 

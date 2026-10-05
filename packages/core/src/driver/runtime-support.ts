@@ -1,6 +1,8 @@
 import {
    cliExitCodes,
    driverActionResultSchema,
+   driverFocusTargetFieldsSchema,
+   type DriverFocusTarget,
    type DriverActionResult,
    type Platform,
 } from '@a11ied/contracts';
@@ -66,7 +68,12 @@ export function normalizeBrokerTransportError(args: {
    });
 }
 
-export async function assertTargetReady(target: Platform): Promise<void> {
+/** Invalid launch identifiers must fail in the parent, where callers can act on them. */
+export async function assertTargetReady(
+   target: Platform,
+   app?: DriverFocusTarget,
+): Promise<void> {
+   driverFocusTargetFieldsSchema.optional().parse(app);
    const readiness = await createDriverAdapter(target).checkReadiness();
    if (readiness.status !== 'ready') {
       throw new CliEnvironmentError('target-not-ready', readiness.summary, {

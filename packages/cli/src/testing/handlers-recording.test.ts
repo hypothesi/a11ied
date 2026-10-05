@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { CliEnvironmentError } from '#core';
+
 import { createMockDriveSession } from './recording-fixtures.js';
+import { getCLIDriverMode } from '../lib/execute.js';
 import {
    EXIT_ENVIRONMENT,
    EXIT_SUCCESS,
@@ -40,6 +43,7 @@ const tempRoots: string[] = [];
 const testServer = useTestServer(tempRoots);
 
 afterEach(() => {
+   vi.unstubAllEnvs();
    for (const mock of Object.values(coreMocks)) {
       mock.mockReset();
    }
@@ -66,7 +70,7 @@ async function runDriveRecordingSmoke(stateDir: string): Promise<void> {
    expect(coreMocks.startDriverSessionMock).toHaveBeenCalledWith(
       expect.objectContaining({
          target: 'voiceover',
-         mode: 'in-process',
+         mode: 'broker',
          recordingPath: './recordings/voiceover.mov',
       }),
    );
@@ -77,6 +81,14 @@ async function runDriveRecordingSmoke(stateDir: string): Promise<void> {
 }
 
 describe('cli recording flag wiring', () => {
+   it('keeps native owners outside a one-shot CLI even with the in-process environment override', () => {
+      vi.stubEnv('A11IED_DRIVER_MODE', 'in-process');
+
+      expect(getCLIDriverMode('voiceover')).toStrictEqual('broker');
+      expect(getCLIDriverMode('nvda')).toStrictEqual('broker');
+      expect(getCLIDriverMode('virtual')).toStrictEqual('in-process');
+   });
+
    it(
       'passes recording through sr start',
       () => withStateDir(tempRoots, runDriveRecordingSmoke),
@@ -85,15 +97,13 @@ describe('cli recording flag wiring', () => {
 });
 
 describe('real screen reader safety gates', () => {
-   it('does not start the reader when the browser cannot be focused', async () => {
-      coreMocks.openUrlInBrowserMock.mockResolvedValueOnce({
-         focusTarget: { appName: 'Chromium' },
-      });
-      coreMocks.waitForWindowFocusMock.mockResolvedValueOnce({
-         focused: false,
-         frontmost: { appName: 'Terminal' },
-         waitedMs: 5000,
-      });
+   it('propagates typed core startup focus failures', async () => {
+      coreMocks.startDriverSessionMock.mockRejectedValueOnce(
+         new CliEnvironmentError(
+            'browser-focus-unconfirmed',
+            'Browser focus was unconfirmed.',
+         ),
+      );
 
       const result = await runCliInProcess([
          'sr',
@@ -109,32 +119,24 @@ describe('real screen reader safety gates', () => {
       expect((json.errors as Array<{ code: string }>)[0]?.code).toBe(
          'browser-focus-unconfirmed',
       );
-      expect(coreMocks.startDriverSessionMock).not.toHaveBeenCalled();
+      expect(coreMocks.startDriverSessionMock).toHaveBeenCalledWith(
+         expect.objectContaining({
+            target: 'voiceover',
+            url: `${testServer.getBaseUrl()}/basic-page.html`,
+         }),
+      );
+      expect(coreMocks.openUrlInBrowserMock).not.toHaveBeenCalled();
    });
 });
 
 describe('started real screen reader safety gates', () => {
-   it('stops a reader that takes focus away from the browser', async () => {
-      const session = createMockDriveSession('/tmp/a11ied-test');
-      coreMocks.openUrlInBrowserMock.mockResolvedValueOnce({
-         focusTarget: { appName: 'Chromium' },
-      });
-      coreMocks.waitForWindowFocusMock
-         .mockResolvedValueOnce({ focused: true, waitedMs: 0 })
-         .mockResolvedValueOnce({
-            focused: false,
-            frontmost: { appName: 'Terminal' },
-            waitedMs: 5000,
-         });
-      coreMocks.startDriverSessionMock.mockResolvedValueOnce({ session });
-      coreMocks.runDriverSessionActionMock.mockResolvedValueOnce({
-         session,
-         state: { transcript: [] },
-      });
-      coreMocks.stopDriverSessionMock.mockResolvedValueOnce({
-         session,
-         state: { transcript: [] },
-      });
+   it('delegates timed startup and cleanup to core', async () => {
+      coreMocks.startDriverSessionMock.mockRejectedValueOnce(
+         new CliEnvironmentError(
+            'browser-focus-unconfirmed',
+            'Reader startup could not confirm browser focus.',
+         ),
+      );
 
       const result = await runCliInProcess([
          'sr',
@@ -152,7 +154,10 @@ describe('started real screen reader safety gates', () => {
       expect((json.errors as Array<{ code: string }>)[0]?.code).toBe(
          'browser-focus-unconfirmed',
       );
-      expect(coreMocks.stopDriverSessionMock).toHaveBeenCalledWith({ timeoutMs: 1000 });
+      expect(coreMocks.startDriverSessionMock).toHaveBeenCalledWith(
+         expect.objectContaining({ timeoutMs: 1000 }),
+      );
+      expect(coreMocks.stopDriverSessionMock).not.toHaveBeenCalled();
    });
 });
 

@@ -67,6 +67,7 @@ function onFixture(fixture: string, fn: () => Promise<void>): () => Promise<void
 
 async function assertPoliteRegionIsWaitedFor(): Promise<void> {
    await runSrJson(['goto', '--role', 'button', '--name', 'Save draft']);
+   await runCli(['sr', 'checkpoint', 'save', '--json']);
    await runSrJson(['activate']);
 
    const waited = await runCli([
@@ -74,6 +75,8 @@ async function assertPoliteRegionIsWaitedFor(): Promise<void> {
       'wait',
       '--for',
       '/draft saved/i',
+      '--since',
+      'save',
       '--timeout',
       WAIT_TIMEOUT_MS,
       '--json',

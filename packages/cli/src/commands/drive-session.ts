@@ -1,11 +1,6 @@
 import type { Command } from 'commander';
-import type {
-   AccessibilityDriverSession,
-   CliMessage,
-   DriverActionResult,
-   DriverFocusTarget,
-} from '#contracts';
-import { CliEnvironmentError, CliUsageError } from '#core';
+import type { AccessibilityDriverSession, DriverActionResult } from '#contracts';
+import { CliUsageError } from '#core';
 import type { CommandExecution } from '../lib/helpers.js';
 import {
    addDriveActionOptions,
@@ -13,39 +8,6 @@ import {
    parseTimeoutMs,
    type DriveActionOptions,
 } from './drive-options.js';
-
-/**
- * Waits for the window to come to the front and adds a warning when it did not, naming
- * what is in front instead. The reader can only read a window that is in front.
- */
-export async function waitForFocusWithWarning(
-   target: DriverFocusTarget,
-   warnings: CliMessage[],
-): Promise<void> {
-   const core = await import('#core');
-   const focus = await core.waitForWindowFocus(target);
-   if (focus.focused) {
-      return;
-   }
-   const front = focus.frontmost?.appName ?? 'an unknown window';
-   warnings.push({
-      code: 'window-focus-unconfirmed',
-      message: `${target.appName ?? target.windowTitle ?? 'The window'} did not come to the front within ${String(focus.waitedMs)} ms; ${front} is in front.`,
-      details: { target, frontmost: focus.frontmost },
-   });
-}
-
-/** Stops real-reader work when its target window could not be brought to the front. */
-export function assertFocusConfirmed(warnings: CliMessage[], url?: string): void {
-   if (!warnings.some((warning) => warning.code === 'window-focus-unconfirmed')) {
-      return;
-   }
-   throw new CliEnvironmentError(
-      'browser-focus-unconfirmed',
-      'The browser did not come to the front. The screen-reader audit was not started.',
-      { url, warnings },
-   );
-}
 
 /** Page targets are limited to http(s) URLs until the shared target resolver lands. */
 export function assertHttpUrl(url: string | undefined): void {
@@ -61,6 +23,7 @@ export function assertHttpUrl(url: string | undefined): void {
 interface StopActionOptions extends DriveActionOptions {
    out?: string;
    format?: string;
+   sessionId?: string;
 }
 
 async function requireActiveSession(): Promise<AccessibilityDriverSession> {
@@ -75,31 +38,6 @@ async function requireActiveSession(): Promise<AccessibilityDriverSession> {
    return session;
 }
 
-async function refocusRealTarget(args: {
-   session: AccessibilityDriverSession;
-   url: string;
-   timeoutMs: number | undefined;
-   warnings: CliMessage[];
-}): Promise<DriverActionResult> {
-   const core = await import('#core');
-   const opened = await core.openUrlInBrowser(args.url);
-   const app = opened.focusTarget ?? args.session.app;
-   if (app) {
-      await waitForFocusWithWarning(app, args.warnings);
-   }
-   const recorded = await core.attachDocumentToDriverSession(
-      { html: '', url: args.url },
-      { timeoutMs: args.timeoutMs },
-   );
-   if (!app) {
-      return recorded;
-   }
-   return core.runDriverSessionAction(
-      { action: 'focus', payload: app },
-      { timeoutMs: args.timeoutMs },
-   );
-}
-
 /** Points the active session at a page; `sr open` and `sr walk <url>` both run this. */
 export async function executeOpenAction(
    url: string,
@@ -107,33 +45,23 @@ export async function executeOpenAction(
 ): Promise<CommandExecution> {
    const session = await requireActiveSession();
    assertHttpUrl(url);
-   const [{ resolveOptionalCliTarget }, core] = await Promise.all([
+   const [{ resolvePageTarget }, core] = await Promise.all([
       import('../lib/execute.js'),
       import('#core'),
    ]);
-   const resolved = await resolveOptionalCliTarget({ url });
-   if (!resolved) {
-      throw new CliUsageError('missing-target', 'Provide a URL to open.');
-   }
-   const timeoutMs = parseTimeoutMs(options.timeout),
-      warnings: CliMessage[] = [];
-   const result =
-      session.target === 'virtual'
-         ? await core.attachDocumentToDriverSession(
-              { html: resolved.html, url: resolved.resolvedUrl },
-              { timeoutMs },
-           )
-         : await refocusRealTarget({
-              session,
-              url: resolved.resolvedUrl,
-              timeoutMs,
-              warnings,
-           });
-   assertFocusConfirmed(warnings, resolved.resolvedUrl);
+   const resolved = await resolvePageTarget({ target: url });
+   const resolvedUrl = resolved.reportTarget.resolvedUrl;
+   const timeoutMs = parseTimeoutMs(options.timeout);
+   const result = await core.attachDocumentToDriverSession(
+      {
+         html: session.engine === 'jsdom' ? await resolved.readHtml() : '',
+         url: resolvedUrl,
+      },
+      { timeoutMs },
+   );
    return {
       target: resolved.reportTarget,
       result: { ...result, commandLine: `open ${url}` },
-      warnings,
    };
 }
 
@@ -165,7 +93,9 @@ async function writeStopTranscripts(
 }
 
 async function executeStopAction(options: StopActionOptions): Promise<CommandExecution> {
-   const session = await requireActiveSession();
+   if (options.sessionId === undefined) {
+      await requireActiveSession();
+   }
    if (options.out) {
       const core = await import('#core');
       core.resolveTranscriptFormat(options.out, options.format);
@@ -173,10 +103,11 @@ async function executeStopAction(options: StopActionOptions): Promise<CommandExe
    const core = await import('#core');
    const result = await core.stopDriverSession({
       timeoutMs: parseTimeoutMs(options.timeout),
+      sessionId: options.sessionId,
    });
    const transcriptFiles = await writeStopTranscripts(result, options);
    return {
-      target: { kind: 'driver-session', value: session.target },
+      target: { kind: 'driver-session', value: result.session.target },
       result: { ...result, transcriptFiles },
    };
 }
@@ -227,6 +158,7 @@ export function registerStopCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('stop')
+         .option('--session-id <id>', 'Retry cleanup for a specific recovery owner.')
          .helpGroup(DRIVE_GROUPS.session)
          .summary('Stop the active session.')
          .description(

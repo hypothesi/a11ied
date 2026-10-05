@@ -32,6 +32,12 @@
       "axe-core": "^4.13.0",
       "jsdom": "30.0.1",
       "playwright": "^1.62.1",
+      "pngjs": "7.0.0",
+      "proper-lockfile": "4.1.2",
       "robots-parser": "3.0.1"
+   },
+   "devDependencies": {
+      "@types/pngjs": "6.0.5",
+      "@types/proper-lockfile": "4.1.4"
    }
 }

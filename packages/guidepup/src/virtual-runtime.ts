@@ -6,12 +6,12 @@ import type {
 } from '@a11ied/contracts';
 
 import { virtualPortableSteps } from './portable-commands-virtual.js';
-import { ignoreError } from './sequential.js';
 import { readVirtualItem } from './virtual-item.js';
 import { getVirtualPositionToken } from './virtual-position.js';
 import type { VirtualReader, VirtualWindow } from './virtual-reader.js';
 import {
    isAtTreeEnd,
+   isElementNode,
    pressVirtualKeys,
    runVirtualNavigation,
    runVirtualStep,
@@ -41,16 +41,19 @@ export interface VirtualCurrentItem {
 
 /**
  * The operations the virtual adapter needs from wherever the reader's document lives.
- * Every argument and result is plain JSON, so the same calls cross a Playwright page
- * boundary unchanged: `createVirtualRuntime` runs inside the page, and the Node side
- * forwards each method through `page.evaluate`.
+ * Actions and observations cross the page boundary as JSON. Browser activation uses an
+ * element handle so navigation cannot destroy a pending simulated-click promise.
  */
 export interface VirtualRuntime {
    /** Starts the reader on the body of the current document. */
    start(): Promise<void>;
    stop(): Promise<void>;
+   /** An injected bundle can exist before its reader is initialized. */
+   isStarted(): Promise<boolean>;
    readSpeech(): Promise<VirtualSpeech>;
    readCurrentItem(): Promise<VirtualCurrentItem>;
+   /** Bind browser input to the cursor node without resolving a replacement selector. */
+   readActivationNode(): Promise<Element | undefined>;
    /** Runs one portable verb through the virtual column of the portable table. */
    runPortable(verb: PortableDriverVerb): Promise<VirtualMoveOutcome>;
    /** Jumps by kind through the virtual column of the navigation table. */
@@ -81,10 +84,10 @@ declare global {
 
 async function readSpeech(virtual: VirtualReader): Promise<VirtualSpeech> {
    const [lastSpokenPhrase, itemText, spokenPhraseLog, itemTextLog] = await Promise.all([
-      virtual.lastSpokenPhrase().catch(() => ''),
-      virtual.itemText().catch(() => ''),
-      virtual.spokenPhraseLog().catch(() => []),
-      virtual.itemTextLog().catch(() => []),
+      virtual.lastSpokenPhrase(),
+      virtual.itemText(),
+      virtual.spokenPhraseLog(),
+      virtual.itemTextLog(),
    ]);
    return { lastSpokenPhrase, itemText, spokenPhraseLog, itemTextLog };
 }
@@ -114,16 +117,40 @@ export function createVirtualRuntime(options: VirtualRuntimeOptions): VirtualRun
          const virtual = await options.getVirtual(),
             window = options.getWindow();
          const container = options.getContainer?.() ?? window.document.body;
-         state.container = container;
+         if (state.container === container && container.isConnected) {
+            return;
+         }
+         if (state.container && state.container !== container) {
+            await virtual.stop();
+         }
+         state.container = undefined;
          await virtual.start({ container, window });
+         state.container = container;
       },
       async stop(): Promise<void> {
          const virtual = await options.getVirtual();
-         await virtual.stop().catch(ignoreError);
+         await virtual.stop();
          state.container = undefined;
+      },
+      async isStarted(): Promise<boolean> {
+         const container = state.container,
+            document = options.getWindow().document;
+         return (
+            container !== undefined &&
+            container.isConnected &&
+            (container === document || container.ownerDocument === document)
+         );
       },
       readSpeech: async () => readSpeech(await options.getVirtual()),
       readCurrentItem: async () => readCurrentItem(await context()),
+      async readActivationNode(): Promise<Element | undefined> {
+         const virtual = await options.getVirtual();
+         const node = virtual.activeNode;
+         if (!node) {
+            return undefined;
+         }
+         return isElementNode(node) ? node : (node.parentElement ?? undefined);
+      },
       runPortable: async (verb) =>
          runVirtualStep(await context(), virtualPortableSteps[verb]),
       navigate: async (request) => runVirtualNavigation(await context(), request),

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { matchesGlob, relative, resolve } from 'node:path';
 
@@ -40,16 +41,20 @@ export interface CrawlOptions {
    maxPages?: number | undefined;
    timeoutMs?: number | undefined;
    seedUrls?: string[] | undefined;
+   resolvedUrls?: string[] | undefined;
    followLinks?: boolean | undefined;
    include?: string[] | undefined;
    exclude?: string[] | undefined;
    sectionPath?: string | undefined;
-   onVisit?: ((visit: PageVisitResult) => Promise<void> | void) | undefined;
+   onVisit?:
+      | ((visit: PageVisitResult, pendingUrls: string[]) => Promise<void> | void)
+      | undefined;
 }
 
 export interface CrawlResult {
    visits: PageVisitResult[];
    truncated: boolean;
+   pendingUrls: string[];
    failures: Array<{ source: string; message: string }>;
 }
 
@@ -63,19 +68,22 @@ export function normalizeUrl(value: string): string {
    ) {
       url.port = '';
    }
-   if (url.pathname === '') {
-      url.pathname = '/';
-   }
    return url.toString();
+}
+
+/** Builds a fixed-length artifact directory key without shared-URL-prefix collisions. */
+export function buildArtifactKey(url: string): string {
+   return createHash('sha256').update(url).digest('hex').slice(0, ARTIFACT_KEY_LENGTH);
 }
 
 function matchesBoundary(url: string, startUrl: string, options: CrawlOptions): boolean {
    const parsed = new URL(url),
       path = parsed.pathname,
       start = new URL(startUrl);
+   const section = options.sectionPath?.replace(/\/$/u, '');
    if (
       parsed.origin !== start.origin ||
-      (options.sectionPath && !path.startsWith(options.sectionPath))
+      (section && path !== section && !path.startsWith(`${section}/`))
    ) {
       return false;
    }
@@ -149,11 +157,7 @@ async function readPageSignals(input: {
          /\blog[ -]?in\b/iu.test(finalUrl),
       title = titleText.trim() || undefined;
    const artifacts = options.artifactsDir
-      ? await saveArtifacts(
-           page,
-           options.artifactsDir,
-           Buffer.from(finalUrl).toString('base64url').slice(0, ARTIFACT_KEY_LENGTH),
-        )
+      ? await saveArtifacts(page, options.artifactsDir, buildArtifactKey(finalUrl))
       : {};
    return {
       url: requestedUrl,
@@ -261,11 +265,12 @@ function enqueueLinks(visit: PageVisitResult, state: CrawlState): void {
 
 async function recordVisit(visit: PageVisitResult, state: CrawlState): Promise<void> {
    state.visits.push(visit);
-   await state.options.onVisit?.(visit);
+   state.queue = state.queue.filter((url) => url !== visit.url);
+   enqueueLinks(visit, state);
+   await state.options.onVisit?.(visit, [...state.queue]);
    if (visit.error) {
       state.failures.push({ source: visit.url, message: visit.error.message });
    }
-   enqueueLinks(visit, state);
 }
 
 async function recordVisits(
@@ -285,7 +290,7 @@ async function crawlQueue(state: CrawlState): Promise<void> {
    if (state.queue.length === 0 || state.visits.length >= state.maxPages) {
       return;
    }
-   const batch = state.queue.splice(
+   const batch = state.queue.slice(
       0,
       Math.min(state.concurrency, state.maxPages - state.visits.length),
    );
@@ -306,9 +311,9 @@ export async function crawlSameOrigin(
 ): Promise<CrawlResult> {
    const initialUrls = [
       ...new Set((options.seedUrls ?? [startUrl]).map((url) => normalizeUrl(url))),
-   ];
+   ].filter((url) => matchesBoundary(url, startUrl, options));
    if (initialUrls.length === 0) {
-      return { visits: [], failures: [], truncated: false };
+      return { visits: [], failures: [], truncated: false, pendingUrls: [] };
    }
    const launch = await launchAutomationBrowser();
    const context = await createContext(launch.browser, options);
@@ -324,7 +329,7 @@ export async function crawlSameOrigin(
          queue: initialUrls,
          queued: new Set(initialUrls),
          startUrl,
-         visited: new Set<string>(),
+         visited: new Set(options.resolvedUrls),
          visits: [],
       };
       await crawlQueue(state);
@@ -332,6 +337,7 @@ export async function crawlSameOrigin(
          visits: state.visits,
          failures: state.failures,
          truncated: state.queue.length > 0,
+         pendingUrls: [...state.queue],
       };
    } finally {
       await context.close();

@@ -27,7 +27,7 @@ function getNodeId(node: Node | null): string {
  * once as "end of ...", so the phrase is part of the key.
  */
 export async function getVirtualPositionToken(virtual: VirtualReader): Promise<string> {
-   const phrase = await virtual.lastSpokenPhrase().catch(() => '');
+   const phrase = await virtual.lastSpokenPhrase();
    return `${getNodeId(virtual.activeNode)}:${phrase}`;
 }
 

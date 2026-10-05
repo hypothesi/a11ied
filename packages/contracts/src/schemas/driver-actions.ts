@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { portableDriverVerbSchema } from './core.js';
 import { driverFocusTargetSchema } from './driver-focus.js';
 import { driverNavigationActionRequestSchemas } from './driver-navigation.js';
+import { driverTranscriptPayloadSchema } from './driver-transcript.js';
 
 export const driverPressPayloadSchema = z.object({
    keys: z.array(z.string().min(1)).min(1),
@@ -28,7 +29,6 @@ export type DriverCheckpointPayload = z.infer<typeof driverCheckpointPayloadSche
 const payloadFreeActionSchema = z.enum([
    ...portableDriverVerbSchema.exclude(['next', 'previous']).options,
    'read',
-   'transcript',
    'title',
 ]);
 
@@ -38,6 +38,10 @@ const payloadFreeActionSchema = z.enum([
  */
 export const driverActionRequestSchema = z.discriminatedUnion('action', [
    z.object({ action: payloadFreeActionSchema }),
+   z.object({
+      action: z.literal('transcript'),
+      payload: driverTranscriptPayloadSchema.optional(),
+   }),
    ...driverNavigationActionRequestSchemas,
    z.object({ action: z.literal('press'), payload: driverPressPayloadSchema }),
    z.object({ action: z.literal('type'), payload: driverTypePayloadSchema }),

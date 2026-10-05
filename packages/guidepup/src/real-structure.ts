@@ -40,7 +40,7 @@ async function runOnTarget(context: RealStepContext, steps: TargetSteps): Promis
 
 async function settledPhrase(context: RealStepContext): Promise<string> {
    await waitForSpeechStabilization(context.reader);
-   return context.reader.lastSpokenPhrase().catch(() => '');
+   return context.reader.lastSpokenPhrase();
 }
 
 /** Speaks the window summary (VoiceOver) or the window title (NVDA) and returns it. */

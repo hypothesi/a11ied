@@ -6,7 +6,7 @@ export function renderReportText(envelope: CliOutputEnvelope): string {
       ? model.outputFiles.filter((file): file is string => typeof file === 'string')
       : [];
    return [
-      `Built report for ${String(model.discovery.auditedPages)} audited pages.`,
+      `Built ${model.status} report for ${String(model.discovery.discoveredPages)} discovered pages.`,
       ...files.map((file) => `Wrote ${file}`),
    ].join('\n');
 }

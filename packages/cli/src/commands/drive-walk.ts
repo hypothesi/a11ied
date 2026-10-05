@@ -62,12 +62,18 @@ async function executeWalkAction(
       core.resolveTranscriptFormat(options.out, options.format);
    }
    const warnings = await prepareWalkSession(url, options);
-   const before = await core.getDriverSessionStatus({
-      timeoutMs: parseTimeoutMs(options.timeout),
-   });
    const result = await readFromTop(options);
-   // Only what the reader said during this walk belongs in the walk's transcript.
-   const entries = result.state.transcript.slice(before.state.transcript.length);
+   const history = result.state.transcriptWindow?.hasMore
+      ? await core.runDriverSessionAction({ action: 'transcript' })
+      : result;
+   const firstIndex = result.state.transcript[0]?.index ?? 0,
+      lastIndex =
+         result.state.transcriptWindow?.latestIndex ??
+         result.state.transcript.at(-1)?.index ??
+         -1;
+   const entries = history.state.transcript.filter(
+      (entry) => entry.index >= firstIndex && entry.index <= lastIndex,
+   );
    if (result.session.target !== 'virtual' && entries.length === 0) {
       throw new core.CliEnvironmentError(
          'screen-reader-empty-transcript',

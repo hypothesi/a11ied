@@ -44,7 +44,7 @@ function shouldStopPolling(
 }
 
 async function poll(reader: ScreenReaderLike, state: SpeechPollState): Promise<void> {
-   const phrase = await reader.lastSpokenPhrase().catch(() => '');
+   const phrase = await reader.lastSpokenPhrase();
    const now = Date.now();
    const { next, isStable } = updateSpeechState(state, phrase, now);
    if (shouldStopPolling(next, now, isStable)) {

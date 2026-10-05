@@ -4,6 +4,7 @@ import {
    searchResultKindSchema,
    unifiedSearchResultSchema,
    doctorReportSchema,
+   doctorRequestSchema,
    techniqueLookupResultSchema,
    wcagLevelSchema,
    wcagVersionSchema,
@@ -37,12 +38,16 @@ function registerDoctorTool(server: McpServer): void {
       'doctor',
       {
          title: 'Doctor',
-         description: 'Return runtime details and the current support matrix.',
-         inputSchema: z.object({}),
+         description:
+            'Check prerequisites for scans, reader sessions, or desktop audits. Recording is checked only when requested.',
+         inputSchema: doctorRequestSchema,
          outputSchema: doctorReportSchema,
          annotations: readOnlyAnnotations,
       },
-      async () => createToolResponse(doctorReportSchema.parse(createDoctorReport())),
+      async (input) =>
+         createToolResponse(
+            doctorReportSchema.parse(createDoctorReport(undefined, input)),
+         ),
    );
 }
 

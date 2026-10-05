@@ -52,6 +52,10 @@ export function renderRecordText(
    if (record.note) {
       lines.push(dim(`  note       ${record.note}`));
    }
+   lines.push(dim(`  evidence   ${record.verification?.status ?? 'unverified'}`));
+   for (const reason of record.verification?.reasons ?? []) {
+      lines.push(dim(`  ${reason}`));
+   }
    lines.push(dim(`  written to ${result.file}`));
    return lines.join('\n');
 }

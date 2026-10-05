@@ -3,6 +3,7 @@ import type {
    EarlProfile,
    EarlReport,
    EvidenceRecord,
+   AuditRun,
 } from '@a11ied/contracts';
 import { buildEarlReport } from '@a11ied/earl';
 import { getCriterion, WcagEngineNotFoundError } from '@a11ied/wcag-engine';
@@ -11,7 +12,9 @@ import { buildA11iedAssertor, listAxeEarlAssertions } from '../axe/earl.js';
 
 /** Where an APG example lives, so a pattern row assertion links to the page it is about. */
 const APG_EXAMPLE_BASE = 'https://www.w3.org/WAI/ARIA/apg/patterns';
-import type { AuditReport } from './runtime.js';
+import { rebuildAuditAssessment, type AuditReport } from './runtime.js';
+import { getCriterionOutcome, type AuditCriterionRollup } from './criteria-rollup.js';
+import { isVerifiedEvidence } from '../evidence/validation.js';
 
 /** EARL writes a success criterion as its slug, and the report stores its number. */
 function listCriterionSlug(criterionId: string, wcagVersion: string): string[] {
@@ -54,6 +57,19 @@ function toAssertion(record: EvidenceRecord, wcagVersion: string): EarlAssertion
       outcome: record.outcome,
       mode: record.mode,
       procedure: toProcedure(record, wcagVersion),
+      info: [
+         record.finding?.title,
+         record.finding?.userImpact,
+         record.finding?.remediation,
+         record.finding?.impact ? `Severity: ${record.finding.impact}.` : '',
+         record.note,
+         record.provenance?.rationale,
+         record.provenance
+            ? `Collected through ${record.provenance.source} by ${record.provenance.actor.name} (${record.provenance.actor.kind}); run ${record.provenance.runId}, check ${record.provenance.checkId}, environment ${record.provenance.environmentId}.`
+            : '',
+      ]
+         .filter(Boolean)
+         .join('\n'),
    };
 
    if (record.pointer === undefined) {
@@ -67,14 +83,51 @@ export interface AuditEarlReportOptions {
    version: string;
 }
 
+/** Behavioral evidence remains an assertion even when no scanner result was available. */
+export function buildRecordedEarlAssertions(
+   records: EvidenceRecord[],
+   wcagVersion: string,
+): EarlAssertionInput[] {
+   return records
+      .filter((record) => isVerifiedEvidence(record))
+      .map((record) => toAssertion(record, wcagVersion));
+}
+
+/** Criterion outcomes use the same rollup whether a scan was saved or unavailable. */
+export function buildCriterionEarlAssertions(input: {
+   criteria: AuditCriterionRollup[];
+   subject: string;
+   wcagVersion: string;
+}): EarlAssertionInput[] {
+   return input.criteria.map((criterion): EarlAssertionInput => {
+      const outcome = getCriterionOutcome(criterion);
+      return {
+         subject: input.subject,
+         outcome: outcome === 'notTested' ? 'untested' : outcome,
+         mode: criterion.recordedOutcome ? 'semiAutomatic' : 'automatic',
+         procedure: {
+            title: `WCAG ${criterion.id}: ${criterion.title}`,
+            criterionSlugs: listCriterionSlug(criterion.id, input.wcagVersion),
+         },
+      };
+   });
+}
+
 /** Builds every EARL assertion for one page audit without wrapping them in a document. */
 export function buildPageEarlAssertions(
    report: AuditReport,
    profile: EarlProfile,
+   assessmentProfile?: AuditRun['profile'],
 ): EarlAssertionInput[] {
+   const current = rebuildAuditAssessment(report, assessmentProfile);
    return [
-      ...listAxeEarlAssertions(report.axe, profile),
-      ...report.recorded.map((record) => toAssertion(record, report.axe.wcagVersion)),
+      ...listAxeEarlAssertions(current.axe, profile),
+      ...buildRecordedEarlAssertions(current.recorded, current.axe.wcagVersion),
+      ...buildCriterionEarlAssertions({
+         criteria: current.criteria,
+         subject: current.axe.url,
+         wcagVersion: current.axe.wcagVersion,
+      }),
    ];
 }
 
