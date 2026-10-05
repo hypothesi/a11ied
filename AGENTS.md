@@ -4,6 +4,8 @@ This project uses **bd** (beads) for issue tracking. Run `bd onboard` to get sta
 
 Maintainer release workflow reference: `internal-docs/maintainer-release-checklist.md`
 
+Dependency policy and approved exceptions: `internal-docs/dependency-licenses.md`
+
 ## Quick Reference
 
 ```bash

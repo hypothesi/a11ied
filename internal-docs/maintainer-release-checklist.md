@@ -9,6 +9,8 @@ This is a maintainer-facing release checklist for the monorepo. It is not part o
 3. Run a manual Windows NVDA smoke pass on representative fixtures or demo targets.
 4. Review deferred items and make an explicit accept-or-block decision for each.
 5. Record what was exercised and any environment constraints that applied.
+6. Check dependency licenses against [the dependency policy](dependency-licenses.md),
+   including the approved scanner, recorder, and build exceptions and their notices.
 
 ## Required commands
 
