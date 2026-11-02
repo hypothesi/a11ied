@@ -8,7 +8,10 @@ import { readAuditRun, updateAuditRun } from './run-store.js';
 import { registerAuditJourney, registerAuditState } from './run-state.js';
 import { createEvidenceTestAssessment } from '../evidence/test-fixtures.js';
 import { recordEvidence } from '../evidence/store.js';
-import { listAssessmentObligations } from './run-obligations.js';
+import {
+   listAssessmentObligations,
+   queueAssessmentObligations,
+} from './run-obligations.js';
 import { buildState, createObservedAuditRun } from './test-fixtures.js';
 
 const FIRST_PAGE_LIMIT = 20,
@@ -159,6 +162,19 @@ async function assertJourneyOrder(): Promise<void> {
                stateIds,
                journeyId: 'process',
                environmentId: 'mac-voiceover',
+            },
+         });
+         await updateAuditRun({
+            file,
+            change(run) {
+               queueAssessmentObligations(run);
+               for (const check of run.checks) {
+                  if (check.scope === 'state') {
+                     check.status = 'blocked';
+                     check.reason = 'This fixture isolates journey response ordering.';
+                  }
+               }
+               return run;
             },
          });
          const response = await executeAuditAssessment({ action: 'next', file });

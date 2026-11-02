@@ -162,6 +162,40 @@ describe('current assessment attempts', () => {
    });
 });
 
+describe('page assessment scheduling', () => {
+   it('selects all executable state checks for one page before another page', async () => {
+      const { file } = await buildRun();
+      const first = await readAuditRun(file),
+         state = first.states[0];
+      if (!state) {
+         throw new Error('The fixture needs its first page state.');
+      }
+      await registerAuditState({
+         file,
+         state: {
+            ...state,
+            stateId: 'second-page',
+            target: { kind: 'url', value: 'https://example.test/second' },
+         },
+      });
+      const claimed = await nextAuditAssessment(file);
+      if (!claimed.check) {
+         throw new Error('The fixture needs an executable check.');
+      }
+      await transitionAssessmentCheck({
+         file,
+         checkId: claimed.check.checkId,
+         status: 'blocked',
+         reason: 'Preserved specific fixture blocker.',
+      });
+      const following = await nextAuditAssessment(file);
+
+      expect(claimed.check.stateIds).to.eql([state.stateId]);
+      expect(following.check?.stateIds).to.eql([state.stateId]);
+      expect(following.check?.criterionId).not.toStrictEqual(claimed.check.criterionId);
+   });
+});
+
 describe('atomic coordinator selection', () => {
    it('claims only one check across competing callers and keeps interrupted work blocked', async () => {
       const { file } = await buildRun();

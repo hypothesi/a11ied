@@ -73,7 +73,26 @@ function selectNextCheck(run: AuditRun): AssessmentCheck | undefined {
          'A check is already running. Complete it or resume with an explicit recovery decision.',
       );
    }
-   for (const check of run.checks.filter((entry) => entry.status === 'queued')) {
+   const stateTargets = new Map(
+         run.states.map((state) => [state.stateId, state.target.value]),
+      ),
+      targets = [...new Set(run.states.map((state) => state.target.value))];
+   const queued = run.checks.filter((entry) => entry.status === 'queued');
+   queued.sort((first, second) => {
+      const firstTarget = stateTargets.get(first.stateIds[0] ?? ''),
+         secondTarget = stateTargets.get(second.stateIds[0] ?? '');
+      const firstOrder =
+            first.scope !== 'site' && first.scope !== 'journey'
+               ? targets.indexOf(firstTarget ?? '')
+               : targets.length,
+         secondOrder =
+            second.scope !== 'site' && second.scope !== 'journey'
+               ? targets.indexOf(secondTarget ?? '')
+               : targets.length;
+
+      return firstOrder - secondOrder;
+   });
+   for (const check of queued) {
       const procedure = resolveEvidenceProcedure({
          ...check,
          wcagVersion: run.profile.wcagVersion,

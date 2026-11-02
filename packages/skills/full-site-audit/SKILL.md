@@ -126,6 +126,15 @@ An element check supplements the required state assessment; it cannot replace it
    and returned evidence IDs. Resolve any validation rejection before proceeding.
 9. Read status again, discover missing scope, and continue with the next obligation.
 
+Complete every applicable criterion for the current page and its observed states
+before moving to another page. A check blocked by authorization or a genuinely
+unavailable capability must retain its specific recovery reason; finish the other
+checks for that page. Site and complete-process checks follow page assessments.
+A failed judgment must describe the user impact, reproduction, and how to fix it.
+Reader command failures do not justify ending the entire audit while executable
+checks remain. Continue until validated scope is complete or only specific blockers
+remain; report unattempted work separately from those blockers.
+
 A second `next` cannot bypass an active claim. Do not batch guesses, manufacture
 transcripts, or replace observations with notes. Scanner success, transcript text,
 and criterion judgment are distinct evidence.
