@@ -1,3 +1,4 @@
+import { isVerifiedEvidence } from '../evidence/validation.js';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, realpath } from 'node:fs/promises';
 import { dirname, isAbsolute, relative, resolve } from 'node:path';
@@ -141,4 +142,29 @@ export async function exportFindingEvidence(input: {
          .map((finding) => exportSingleFinding({ finding, assessment, root, outDir })),
    );
    return [...new Set(files.flat())];
+}
+
+export function buildBehavioralFindings(records: EvidenceRecord[]): ReportFinding[] {
+   return records
+      .filter((record) => isVerifiedEvidence(record) && record.outcome === 'failed')
+      .map((record) => ({
+         title:
+            record.finding?.title ??
+            (record.test.kind === 'criterion'
+               ? `WCAG ${record.test.criterionId}: ${record.test.procedureId}`
+               : `${record.test.exampleId}: ${record.test.rowKey}`),
+         source: 'behavioral',
+         impact: record.finding?.impact ?? 'unknown',
+         description:
+            record.finding?.userImpact ??
+            record.note ??
+            record.provenance?.rationale ??
+            '',
+         guidance: record.finding?.remediation ?? '',
+         criterionIds: record.test.kind === 'criterion' ? [record.test.criterionId] : [],
+         selectors: record.pointer ? [record.pointer] : [],
+         evidence: record,
+         reproduction: [],
+         artifactLinks: [],
+      }));
 }

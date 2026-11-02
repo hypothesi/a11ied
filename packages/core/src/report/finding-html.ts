@@ -1,5 +1,6 @@
 import type { ReportFinding, ReportModel } from '@a11ied/contracts';
 import { escapeHtml, renderLink } from './outcome-html.js';
+import { getFindingID } from './finding-reference.js';
 
 function renderGuidanceGroup(group: string): string {
    const lines = group
@@ -19,7 +20,7 @@ function renderGuidance(guidance: string): string {
    const groups = guidance
       .split(/\r?\n\s*\r?\n/)
       .map((group) => renderGuidanceGroup(group));
-   return `<div class="guidance"><h5>How to fix</h5>${groups.join('')}</div>`;
+   return `<details class="guidance"><summary>How to fix</summary>${groups.join('')}</details>`;
 }
 
 function renderFindingEvidence(finding: ReportFinding): string {
@@ -54,8 +55,11 @@ export function renderFindings(page: ReportModel['pages'][number]): string {
    }
    return page.findings
       .map(
-         (finding) => `<article class="finding finding--${escapeHtml(finding.impact)}">
+         (
+            finding,
+         ) => `<article id="${escapeHtml(getFindingID(page.url, finding))}" class="finding finding--${escapeHtml(finding.impact)}">
          <h4>${escapeHtml(finding.title ?? finding.ruleId ?? 'Accessibility finding')}</h4>
+         <p class="finding-reference">Reference: ${renderLink(`#${getFindingID(page.url, finding)}`, getFindingID(page.url, finding), false)}</p>
          <p>Severity: ${escapeHtml(finding.impact === 'unknown' ? 'Not assessed' : finding.impact)}. Source: ${finding.source === 'behavioral' ? 'Behavioral assessment' : 'Automated scan'}.</p>
          <p>${escapeHtml(finding.description)}</p>
          <p><strong>WCAG:</strong> ${escapeHtml(finding.criterionIds.join(', ') || 'No mapped criterion')}</p>

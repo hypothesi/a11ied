@@ -12,7 +12,7 @@ import { buildReportTestAudit, buildReportTestInventory } from './test-fixtures.
 
 const BROWSER_TEST_TIMEOUT_MS = 90_000;
 
-const PAGE_TABLE_COUNT = 2;
+const PAGE_TABLE_COUNT = 3;
 
 describe('renderHtmlReport', () => {
    it('shows manual outcomes, evidence and coverage warnings in the offline report', () => {

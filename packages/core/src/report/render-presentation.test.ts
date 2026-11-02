@@ -97,10 +97,10 @@ describe('report navigation', () => {
          .document;
       const contents = [...document.querySelectorAll('nav a')],
          links = [...document.querySelectorAll('a')].filter(
-            (link) => !link.closest('nav'),
+            (link) => !link.closest('nav') && !link.getAttribute('href')?.startsWith('#'),
          );
 
-      expect(document.querySelector('details')?.hasAttribute('open')).toStrictEqual(
+      expect(document.querySelector('.criteria')?.hasAttribute('open')).toStrictEqual(
          false,
       );
       expect(
@@ -147,7 +147,7 @@ describe('report hierarchy', () => {
       const document = new JSDOM(renderHtmlReport(model)).window.document;
 
       expect(
-         [...document.querySelectorAll('nav > ol > li > a')].map(
+         [...document.querySelectorAll('nav details > ol > li > a')].map(
             (link) => link.textContent,
          ),
       ).to.eql([
@@ -157,9 +157,9 @@ describe('report hierarchy', () => {
          'Page assessments',
          'Page inventory',
       ]);
-      expect(document.querySelectorAll('nav > ol > li > ol > li > a')).toHaveLength(
-         model.discovery.discoveredPages,
-      );
+      expect(
+         document.querySelectorAll('nav details > ol > li > ol > li > a'),
+      ).toHaveLength(model.discovery.discoveredPages);
       expect(document.querySelector('#assessments')?.tagName).toStrictEqual('H2');
       expect(
          document.querySelectorAll(
@@ -174,8 +174,39 @@ describe('report hierarchy', () => {
          'Criterion outcomes',
       );
       expect(document.querySelector('.finding > h4')).not.toBeNull();
-      expect(document.querySelector('.guidance > h5')?.textContent).toStrictEqual(
+      expect(document.querySelector('.guidance > summary')?.textContent).toStrictEqual(
          'How to fix',
+      );
+   });
+});
+
+describe('traceable report findings', () => {
+   it('links failed criterion outcomes to stable finding references and collapsed remediation', () => {
+      const model = buildPresentationModel();
+      const criterion = model.pages[0]?.criteria.find(
+         (entry) => entry.outcome === 'failed',
+      );
+      if (!criterion) {
+         throw new Error('The fixture needs a failed criterion.');
+      }
+      criterion.criterionId = '4.1.2';
+      const document = new JSDOM(renderHtmlReport(model)).window.document;
+      const finding = document.querySelector('.finding'),
+         link = document.querySelector('.criterion--failed a');
+
+      expect(finding?.id).toMatch(/^F-[a-f0-9]{12}$/u);
+      expect(link?.getAttribute('href')).toStrictEqual(`#${finding?.id}`);
+      expect(document.querySelector('.guidance')?.hasAttribute('open')).toStrictEqual(
+         false,
+      );
+      expect(document.querySelector('.guidance summary')?.textContent).toStrictEqual(
+         'How to fix',
+      );
+      expect(document.querySelector('.coverage-table tbody')?.textContent).toContain(
+         '1 failed criteria; 1 findings',
+      );
+      expect(document.querySelector('.back-to-top')?.getAttribute('href')).toStrictEqual(
+         '#report-top',
       );
    });
 });
@@ -225,10 +256,10 @@ describe('sticky report headings', () => {
          const html = renderHtmlReport(buildPresentationModel());
          await withLoadedPage({ kind: 'html', html }, async (page) => {
             await page.setViewportSize(REPORT_TEST_VIEWPORT);
-            await page.locator('details summary').first().click();
+            await page.locator('.criteria > summary').first().click();
             await page.waitForFunction(() => {
                const section = document.querySelector('#assessments'),
-                  summary = document.querySelector('details summary'),
+                  summary = document.querySelector('.criteria > summary'),
                   title = document.querySelector(
                      'section[aria-labelledby="assessments"] > section > h3',
                   );
@@ -245,7 +276,7 @@ describe('sticky report headings', () => {
             });
             const state = await page.evaluate(() => {
                const section = document.querySelector('#assessments'),
-                  summary = document.querySelector('details summary'),
+                  summary = document.querySelector('.criteria > summary'),
                   title = document.querySelector(
                      'section[aria-labelledby="assessments"] > section > h3',
                   );

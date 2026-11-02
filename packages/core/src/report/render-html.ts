@@ -1,4 +1,5 @@
 import type { EvidenceRecord, ReportModel } from '@a11ied/contracts';
+import { readFileSync } from 'node:fs';
 import {
    escapeHtml,
    renderOutcome,
@@ -7,6 +8,10 @@ import {
 } from './outcome-html.js';
 
 import { renderFindings } from './finding-html.js';
+import { getFindingID } from './finding-reference.js';
+import { renderAssessmentIssues } from './coverage-html.js';
+
+const REPORT_STYLES = readFileSync(new URL('report.scss', import.meta.url), 'utf8');
 
 const PAGE_STATUSES = new Map([
    ['audited', 'Assessment complete'],
@@ -57,7 +62,8 @@ function getAssessmentPages(model: ReportModel): ReportModel['pages'] {
 function renderContents(model: ReportModel): string {
    const sections = [
       { id: 'methodology', label: 'What was checked' },
-      ...([...model.discovery.gaps, ...model.warnings].length > 0
+      ...([...model.discovery.gaps, ...model.warnings].length > 0 ||
+      model.assessment?.issues.length
          ? [{ id: 'coverage-gaps', label: 'Coverage gaps' }]
          : []),
       { id: 'templates', label: 'Page coverage' },
@@ -74,10 +80,10 @@ function renderContents(model: ReportModel): string {
          )
          .join('');
    return [
-      '<nav class="contents" aria-label="Table of contents"><h2>Contents</h2><ol>',
+      '<nav class="contents" aria-label="Table of contents"><details class="contents-menu" open><summary>Contents</summary><ol>',
       sectionsList,
       `<li>${renderLink('#assessments', 'Page assessments', false)}<ol>${pagesList}</ol></li>`,
-      `<li>${renderLink('#inventory', 'Page inventory', false)}</li></ol></nav>`,
+      `<li>${renderLink('#inventory', 'Page inventory', false)}</li></ol></details></nav>`,
    ].join('');
 }
 
@@ -91,17 +97,31 @@ function renderCounts(model: ReportModel): string {
 }
 
 function renderTemplates(model: ReportModel): string {
-   if (model.templates.length === 0) {
-      return '<p>Available results are reported separately for each discovered page.</p>';
-   }
-   return model.templates
-      .map(
-         (template) => `<article><h3>Pages with a shared layout</h3>
+   const rows = getAssessmentPages(model)
+      .map((page) => {
+         const failed = page.criteria.filter(
+               (criterion) => criterion.outcome === 'failed',
+            ).length,
+            progress = model.assessment?.progress.pages.find(
+               (entry) => entry.id === page.pageId,
+            );
+
+         return `<tr><th scope="row">${renderLink(`#page-${page.pageId}`, page.title ?? page.url, false)}</th><td>${escapeHtml(PAGE_STATUSES.get(page.auditStatus) ?? page.auditStatus)}</td><td>${progress ? `${String(progress.assessed)} / ${String(progress.total)} checks assessed; ${String(progress.unresolved)} unresolved` : 'No coordinator progress available'}</td><td>${String(failed)} failed criteria; ${String(page.findings.length)} findings</td></tr>`;
+      })
+      .join('');
+   const coverage = `<div class="table-scroll" tabindex="0" role="region" aria-label="Page coverage table"><table class="coverage-table"><caption>Assessment progress by page</caption><thead><tr><th scope="col">Page</th><th scope="col">Status</th><th scope="col">Coverage</th><th scope="col">Findings</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+
+   return (
+      coverage +
+      model.templates
+         .map(
+            (template) => `<article><h3>Pages with a shared layout</h3>
          <p>Selected page: ${renderLink(`#page-${template.representativePageId}`, model.pages.find((page) => page.pageId === template.representativePageId)?.url ?? template.representativePageId)}</p>
          <p>Completed page assessments: ${escapeHtml(template.auditedPageIds.length)}.</p>
          <p>Other pages without an assessment: ${escapeHtml(template.notTestedPageIds.length)}. Their results are not inferred from the selected page.</p></article>`,
-      )
-      .join('');
+         )
+         .join('')
+   );
 }
 
 function renderCriterionTotals(page: ReportModel['pages'][number]): string {
@@ -125,18 +145,29 @@ function renderCriteria(page: ReportModel['pages'][number]): string {
       return '<p>No criterion assessment was recorded for this page.</p>';
    }
    const rows = page.criteria
-      .map((criterion) =>
-         [
+      .map((criterion) => {
+         const findings = page.findings.filter((finding) =>
+               finding.criterionIds.includes(criterion.criterionId),
+            ),
+            links = findings.map((finding) =>
+               renderLink(
+                  `#${getFindingID(page.url, finding)}`,
+                  getFindingID(page.url, finding),
+                  false,
+               ),
+            );
+
+         return [
             `<tr class="criterion--${criterion.outcome}"><th scope="row">${escapeHtml(criterion.criterionId)} ${escapeHtml(criterion.title)}</th>`,
             `<td>${escapeHtml(criterion.level)}</td><td>${renderOutcome(criterion.outcome)}</td>`,
-            `<td>${escapeHtml(criterion.testMethod)}</td></tr>`,
-         ].join(''),
-      )
+            `<td>${escapeHtml(criterion.testMethod)}</td><td>${links.join('<br>') || (criterion.pending ? 'Assessment unfinished' : 'No failure finding')}</td></tr>`,
+         ].join('');
+      })
       .join('');
    return [
       `<details class="criteria"><summary><h4>Criterion outcomes</h4> <span class="criteria-total">${String(page.criteria.length)} criteria</span><span class="criteria-totals">${renderCriterionTotals(page)}</span></summary>`,
       '<div class="table-scroll" tabindex="0" role="region" aria-label="Criterion outcomes table"><table><caption>Criterion outcomes</caption><thead><tr><th scope="col">Criterion</th>',
-      '<th scope="col">Level</th><th scope="col">Outcome</th><th scope="col">Test strategy</th></tr></thead>',
+      '<th scope="col">Level</th><th scope="col">Outcome</th><th scope="col">Test strategy</th><th scope="col">Finding references</th></tr></thead>',
       `<tbody>${rows}</tbody></table></div></details>`,
    ].join('');
 }
@@ -173,34 +204,50 @@ function renderRecorded(page: ReportModel['pages'][number]): string {
                   ? record.test.criterionId
                   : record.test.exampleId;
          return [
-            `<tr><th scope="row">${escapeHtml(test)}</th><td>${escapeHtml(procedure)}</td>`,
-            `<td>${renderRecordedOutcome(record)}</td><td>${getRecordedMethod(record)}</td><td>`,
+            `<tr><th scope="row">${escapeHtml(test)}</th>`,
+            `<td>${renderRecordedOutcome(record)}</td><td>`,
+            `<p>${getRecordedMethod(record)}. Procedure: <code>${escapeHtml(procedure)}</code></p>`,
             `<p>Evidence: ${escapeHtml(record.verification?.status ?? 'unverified')}</p>`,
             `<p>${escapeHtml(record.verification?.reasons.join(' ') ?? 'This record has not been verified.')}</p>`,
             `<p>${escapeHtml(record.note ?? record.provenance?.rationale ?? 'No explanation recorded.')}</p>`,
+            record.outcome === 'failed' && record.verification?.status === 'verified'
+               ? `<p>Recommendation and evidence: ${
+                    page.findings
+                       .filter(
+                          (finding) => finding.evidence?.evidenceId === record.evidenceId,
+                       )
+                       .map((finding) =>
+                          renderLink(
+                             `#${getFindingID(page.url, finding)}`,
+                             getFindingID(page.url, finding),
+                             false,
+                          ),
+                       )
+                       .join(', ') || 'No linked finding recorded'
+                 }</p>`
+               : '',
             `<code>${escapeHtml(record.pointer ?? 'Page')}</code><p>${escapeHtml(record.recordedAt)}</p></td></tr>`,
          ].join('');
       })
       .join('');
    return [
-      '<table><caption>Recorded checks</caption><thead><tr><th scope="col">Test</th>',
-      '<th scope="col">Procedure</th><th scope="col">Outcome</th><th scope="col">Evidence mode</th>',
-      `<th scope="col">Evidence</th></tr></thead><tbody>${rows}</tbody></table>`,
+      '<p>Recorded checks show agent and manual evidence. Criterion totals also include automated scanner results; failed criteria link to the findings above.</p>',
+      '<div class="table-scroll" tabindex="0" role="region" aria-label="Recorded checks table"><table class="recorded-table"><caption>Recorded checks</caption><thead><tr><th scope="col">Test</th>',
+      '<th scope="col">Outcome</th>',
+      `<th scope="col">Evidence and recommendations</th></tr></thead><tbody>${rows}</tbody></table></div>`,
    ].join('');
 }
 
 function renderGaps(model: ReportModel): string {
    const gaps = [...model.discovery.gaps, ...model.warnings];
-   if (gaps.length === 0) {
+   if (gaps.length === 0 && !model.assessment?.issues.length) {
       return '';
    }
    const items = gaps.map((gap) => `<li>${escapeHtml(gap)}</li>`).join('');
    return [
       '<section aria-labelledby="coverage-gaps"><h2 id="coverage-gaps">Coverage gaps</h2>',
       `<ul>${items}</ul>`,
-      model.assessment?.issues.length
-         ? `<details><summary>${String(model.assessment.issues.length)} unresolved assessment requirements</summary><ul>${model.assessment.issues.map((issue) => `<li>${escapeHtml(issue.message)}</li>`).join('')}</ul></details>`
-         : '',
+      renderAssessmentIssues(model),
       '</section>',
    ].join('');
 }
@@ -257,6 +304,15 @@ function renderStickyHeadings(): string {
       '   const observer = new ResizeObserver(updateOffsets);',
       '   headings.forEach((heading) => { observer.observe(heading); });',
       '   updateOffsets();',
+      "   const layout = document.querySelector('.report-layout'), menu = document.querySelector('.contents-menu'), main = document.querySelector('main');",
+      '   if (layout && menu && main) {',
+      '      let previousSidebar;',
+      '      const menuObserver = new ResizeObserver(() => {',
+      "         const sidebar = menu.closest('nav').getBoundingClientRect().width < main.getBoundingClientRect().width;",
+      '         if (sidebar !== previousSidebar) { menu.open = sidebar; previousSidebar = sidebar; }',
+      '      });',
+      '      menuObserver.observe(layout);',
+      '   }',
       '})();',
       '</script>',
    ].join('\n');
@@ -267,40 +323,16 @@ export function renderHtmlReport(model: ReportModel): string {
    return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(model.title)}</title><style>
-:root{color-scheme:light;--ink:#17202a;--muted:#465360;--paper:#fff;--line:#b8c1c8;--accent:#174ea6;--danger:#8b1a1a}
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,sans-serif;overflow-wrap:anywhere}
-header,main,footer{max-width:74rem;margin-inline:auto;padding:2rem}header{border-block-end:4px solid var(--ink)}
-h1,h2,h3{line-height:1.2}h4,h5{font-size:1rem}a{color:var(--accent);overflow-wrap:anywhere}.counts{display:flex;flex-wrap:wrap;gap:1rem;padding:0;list-style:none}
-.counts li{min-width:8rem;padding:.75rem;border:1px solid var(--line)}.counts strong{display:block;font-size:2rem}
-section{padding-block:1.5rem;border-block-end:1px solid var(--line)}.finding{padding:1rem;border-inline-start:5px solid var(--line)}
-.finding--critical,.finding--serious{border-color:var(--danger)}.error{color:var(--danger)}table{width:100%;border-collapse:collapse}
-th,td{padding:.6rem;border:1px solid var(--line);text-align:start;vertical-align:top}code{overflow-wrap:anywhere}
-@media print{header,main,footer{max-width:none;padding:1rem}a{color:inherit}.finding{break-inside:avoid}}
-.coverage-lead{font-size:1.15rem;font-weight:600}.contents ol{padding-inline-start:1.5rem}
-.contents ol ol{columns:2 24rem;column-gap:3rem;margin-block:.5rem}.contents li{padding-block:.25rem}
-.contents ol ol li{break-inside:avoid}.guidance li{margin-block:.4rem}.guidance h5{margin-block-end:.5rem}
-.criteria{margin-block:1rem}.criteria summary{cursor:pointer;padding:.75rem;border:1px solid var(--line);border-radius:.4rem}
-.table-scroll{max-inline-size:100%;overflow-x:auto}.criteria table{min-inline-size:38rem}
-.criteria summary h4{display:inline;font-size:1rem}.criteria-total{color:var(--muted);margin-inline-start:.75rem}
-.criteria-totals{display:flex;flex-wrap:wrap;gap:.5rem;margin-block-start:.5rem}
-.criteria summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.criteria[open] summary{margin-block-end:.5rem}
-.outcome{display:inline-flex;align-items:center;gap:.4rem;padding:.2rem .5rem;border-radius:.35rem;font-weight:600;white-space:nowrap}
-.outcome svg{width:1.1em;height:1.1em;flex:none}.outcome--passed{color:#14532d;background:#dcfce7}
-.outcome--failed{color:#7f1d1d;background:#fee2e2}.outcome--cantTell{color:#713f12;background:#fef3c7}
-.outcome--notTested{color:#334155;background:#e2e8f0}.outcome--inapplicable{color:#374151;background:#f3f4f6}
-.criterion--failed{background:#fff7f7}.criterion--cantTell{background:#fffdf2}
-@media screen{h1,h2,h3,h4,h5,.criteria summary{position:sticky;inset-block-start:var(--sticky-top,0px);z-index:var(--sticky-layer,1);padding-block:.75rem;margin-block:0;background:var(--paper);scroll-margin-block-start:calc(var(--sticky-top,0px) + 1rem)}.criteria summary h4{position:static;padding:0}}
-@media print{.contents{display:none}.criteria summary{border:0;padding:0}.criteria table{font-size:.8rem;min-inline-size:0}}
-@media print{.table-scroll{overflow:visible}h1,h2,h3,h4,h5{break-after:avoid}section[aria-labelledby="templates"]{break-inside:avoid}}
-</style></head><body><header><h1>${model.status === 'draft' ? 'Draft: ' : ''}${escapeHtml(model.title)}</h1>
+${REPORT_STYLES}
+</style></head><body><a class="skip-link" href="#report-main">Skip to report</a><header id="report-top"><h1>${model.status === 'draft' ? 'Draft: ' : ''}${escapeHtml(model.title)}</h1>
 ${model.status === 'draft' ? '<p><strong>Draft assessment.</strong> Available results are shown below. Unfinished page assessments and pending manual checks remain incomplete. This is not a final report.</p>' : ''}
 <p>${renderLink(model.startUrl, model.startUrl)}</p>${renderCoverage(model)}
-<ul class="counts" aria-label="Violations by impact">${renderCounts(model)}</ul></header><main>
-${renderContents(model)}
+<ul class="counts" aria-label="Violations by impact">${renderCounts(model)}</ul></header><div class="report-layout">
+${renderContents(model)}<main id="report-main" tabindex="-1">
 <section aria-labelledby="methodology"><h2 id="methodology">What was checked</h2>${renderMethods(model)}<p>${escapeHtml(model.methodology.statement)}</p></section>
 ${renderGaps(model)}
 <section aria-labelledby="templates"><h2 id="templates">Page coverage</h2>${renderTemplates(model)}</section>
 <section aria-labelledby="assessments"><h2 id="assessments">Page assessments</h2>${renderPages(model)}</section>
-<section aria-labelledby="inventory"><h2 id="inventory">Page inventory</h2><table><thead><tr><th scope="col">URL</th><th scope="col">HTTP status</th>${model.templates.length > 0 ? '<th scope="col">Layout group</th>' : ''}<th scope="col">Assessment</th></tr></thead>
-<tbody>${renderInventory(model)}</tbody></table></section></main><footer><p>Generated ${escapeHtml(model.generatedAt)}.</p></footer>${renderStickyHeadings()}</body></html>`;
+<section aria-labelledby="inventory"><h2 id="inventory">Page inventory</h2><div class="table-scroll" tabindex="0" role="region" aria-label="Page inventory table"><table><thead><tr><th scope="col">URL</th><th scope="col">HTTP status</th>${model.templates.length > 0 ? '<th scope="col">Layout group</th>' : ''}<th scope="col">Assessment</th></tr></thead>
+<tbody>${renderInventory(model)}</tbody></table></div></section></main></div><a class="back-to-top" href="#report-top">Back to top</a><footer><p>Generated ${escapeHtml(model.generatedAt)}.</p></footer>${renderStickyHeadings()}</body></html>`;
 }

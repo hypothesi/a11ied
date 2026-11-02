@@ -2,7 +2,6 @@ import {
    reportModelSchema,
    type EarlProfile,
    type EarlReport,
-   type EvidenceRecord,
    type ReportCriterion,
    type ReportFinding,
    type ReportModel,
@@ -28,6 +27,8 @@ import { buildA11iedAssertor } from '../axe/earl.js';
 import { isVerifiedEvidence } from '../evidence/validation.js';
 
 import type { LoadedPageAudit } from './loaded-audits.js';
+import { addFindingReferences } from './finding-reference.js';
+import { buildBehavioralFindings } from './finding-evidence.js';
 export { loadPageAuditReports, type LoadedPageAudit } from './loaded-audits.js';
 
 function emptyViolationCounts(): ViolationCounts {
@@ -78,31 +79,6 @@ function buildFindings(report: AuditReport): ReportFinding[] {
       reproduction: [],
       artifactLinks: [],
    }));
-}
-
-function buildBehavioralFindings(records: EvidenceRecord[]): ReportFinding[] {
-   return records
-      .filter((record) => isVerifiedEvidence(record) && record.outcome === 'failed')
-      .map((record) => ({
-         title:
-            record.finding?.title ??
-            (record.test.kind === 'criterion'
-               ? `WCAG ${record.test.criterionId}: ${record.test.procedureId}`
-               : `${record.test.exampleId}: ${record.test.rowKey}`),
-         source: 'behavioral',
-         impact: record.finding?.impact ?? 'unknown',
-         description:
-            record.finding?.userImpact ??
-            record.note ??
-            record.provenance?.rationale ??
-            '',
-         guidance: record.finding?.remediation ?? '',
-         criterionIds: record.test.kind === 'criterion' ? [record.test.criterionId] : [],
-         selectors: record.pointer ? [record.pointer] : [],
-         evidence: record,
-         reproduction: [],
-         artifactLinks: [],
-      }));
 }
 
 function countViolations(report: AuditReport): ViolationCounts {
@@ -162,6 +138,7 @@ function buildReportPage(
       ...(page.templateId ? { templateId: page.templateId } : {}),
       auditStatus: getReportPageStatus(page, loaded),
       ...assessment,
+      findings: addFindingReferences(page.finalUrl, assessment.findings),
       ...(loaded?.error || page.error
          ? { error: page.error?.message ?? loaded?.error }
          : {}),

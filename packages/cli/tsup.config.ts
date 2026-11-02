@@ -34,6 +34,10 @@ export default defineConfig([
       external: nodeExternals,
       onSuccess: async (): Promise<void> => {
          await cp(
+            resolve(import.meta.dirname, '../core/src/report/report.scss'),
+            resolve(import.meta.dirname, 'dist/report.scss'),
+         );
+         await cp(
             resolve(import.meta.dirname, '../skills'),
             resolve(import.meta.dirname, 'dist/skills'),
             { recursive: true },

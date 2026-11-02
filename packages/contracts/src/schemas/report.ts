@@ -16,6 +16,7 @@ export const reportOutcomeSchema = z.enum([
 export type ReportOutcome = z.infer<typeof reportOutcomeSchema>;
 
 export const reportFindingSchema = z.object({
+   findingID: z.string().min(1).optional(),
    ruleId: z.string().min(1).optional(),
    title: z.string().min(1).optional(),
    source: z.enum(['axe', 'behavioral']).default('axe'),
