@@ -2,6 +2,7 @@ import {
    auditAssessmentRequestSchema,
    type AssessmentCheck,
    type AssessmentProcedure,
+   type AuditAssessmentInput,
    type AuditAssessmentRequest,
    type AuditRun,
 } from '@a11ied/contracts';
@@ -224,7 +225,7 @@ async function applyMutation(
 
 /** Validate once and use the durable coordinator; this boundary never performs UI input. */
 export async function executeAuditAssessment(
-   input: AuditAssessmentRequest,
+   input: AuditAssessmentInput,
 ): Promise<AuditAssessmentResponse> {
    const request = auditAssessmentRequestSchema.parse(input);
    if (request.action === 'start') {

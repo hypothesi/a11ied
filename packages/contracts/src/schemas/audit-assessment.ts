@@ -96,3 +96,5 @@ export const auditAssessmentRequestSchema = z.discriminatedUnion('action', [
    }),
 ]);
 export type AuditAssessmentRequest = z.infer<typeof auditAssessmentRequestSchema>;
+/** What a caller may send before schema defaults fill omitted fields. */
+export type AuditAssessmentInput = z.input<typeof auditAssessmentRequestSchema>;
