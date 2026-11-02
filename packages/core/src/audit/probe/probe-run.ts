@@ -11,6 +11,7 @@ import { recordEvidence } from '../../evidence/store.js';
 import { executeAuditAssessment } from '../assessment-command.js';
 import { getAuditRunPaths, readAuditRun } from '../run-store.js';
 import { judgeCriterion } from './judge.js';
+import { observeInventoryPages } from './probe-observe.js';
 import {
    writeProbeArtifacts,
    type ArtifactInput,
@@ -330,9 +331,10 @@ export async function runAuditProbes(options: ProbeRunOptions): Promise<ProbeRun
       outcomes: { passed: 0, failed: 0, cantTell: 0, inapplicable: 0 },
    };
    await recoverChecks(file);
-   const run = await readAuditRun(file);
    const { browser } = await launchAutomationBrowser();
    try {
+      await observeInventoryPages(file, browser);
+      const run = await readAuditRun(file);
       const cache = new PageEvidenceCache(browser);
       const urls = [...new Set(run.states.map((state) => state.target.value))];
       const site = await buildSiteFacts(cache, urls);

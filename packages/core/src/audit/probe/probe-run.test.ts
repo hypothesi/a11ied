@@ -8,6 +8,7 @@ import { executeAuditAssessment } from '../assessment-command.js';
 import { runAuditProbes } from './probe-run.js';
 
 const PROBE_TIMEOUT_MS = 180_000;
+const SITE_TIMEOUT_MS = 600_000;
 const PROBED_CHECKS = 3;
 const PAGE =
    '<!doctype html><html lang="en"><head><title>Probe fixture</title></head><body><main><h1>Fixture</h1><p>Plain text.</p></main></body></html>';
@@ -37,7 +38,7 @@ async function startFixture(): Promise<string> {
    return `http://127.0.0.1:${String(address.port)}/`;
 }
 
-async function startRun(url: string): Promise<string> {
+async function startRun(url: string, extraStates = 0): Promise<string> {
    const directory = await mkdtemp(join(tmpdir(), 'a11ied-probe-'));
    fixture.directory = directory;
    const file = join(directory, 'run.json');
@@ -73,6 +74,20 @@ async function startRun(url: string): Promise<string> {
          environmentId: 'browser',
       },
    });
+   for (let index = 0; index < extraStates; index += 1) {
+      // oxlint-disable-next-line no-await-in-loop -- each state revises the run file
+      await executeAuditAssessment({
+         action: 'state',
+         file,
+         state: {
+            stateId: `extra-${String(index)}`,
+            target: { kind: 'url', value: `${url}extra-${String(index)}` },
+            label: `Extra page ${String(index)}`,
+            fingerprint: `extra-${String(index)}`,
+            environmentId: 'browser',
+         },
+      });
+   }
    return file;
 }
 
@@ -110,5 +125,29 @@ describe('runAuditProbes', () => {
          expect(status.coverage.assessed).toStrictEqual(1);
       },
       PROBE_TIMEOUT_MS,
+   );
+
+   it(
+      'verifies evidence for a site check that spans several states',
+      async () => {
+         const url = await startFixture();
+         const file = await startRun(url, 1);
+
+         const result = await runAuditProbes({ file });
+         const raw = await readFile(join(file, '..', 'evidence.jsonl'), 'utf8');
+         const records = raw
+            .trim()
+            .split('\n')
+            .map((line) => evidenceRecordSchema.parse(JSON.parse(line)));
+
+         expect(result.attempted).toStrictEqual(records.length);
+         expect(
+            records.every((record) => record.verification?.status === 'verified'),
+         ).toStrictEqual(true);
+         expect(
+            records.some((record) => (record.provenance?.states.length ?? 0) > 1),
+         ).toStrictEqual(true);
+      },
+      SITE_TIMEOUT_MS,
    );
 });

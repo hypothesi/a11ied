@@ -37,10 +37,8 @@ function sha256(body: Buffer): string {
    return createHash('sha256').update(body).digest('hex');
 }
 
-const timestamp = (): string => new Date().toISOString();
-
-function buildTrace(input: ArtifactInput): unknown[] {
-   const at = timestamp;
+function buildTrace(input: ArtifactInput, capturedAt: string): unknown[] {
+   const at = (): string => capturedAt;
    const first = input.states[0]?.stateId ?? '';
    return [
       {
@@ -60,11 +58,11 @@ function buildTrace(input: ArtifactInput): unknown[] {
 }
 
 /** Each kind's content must match what the evidence contract accepts for that kind. */
-function buildContent(kind: string, input: ArtifactInput): unknown {
+function buildContent(kind: string, input: ArtifactInput, capturedAt: string): unknown {
    const pages = input.pages.map((page) => page.url);
    switch (kind) {
       case 'action-trace': {
-         return buildTrace(input);
+         return buildTrace(input, capturedAt);
       }
       case 'measurement': {
          return input.pages.map((page) => ({
@@ -104,7 +102,7 @@ async function buildBody(
             source: 'browser',
             capturedAt,
             kind,
-            content: buildContent(kind, input),
+            content: buildContent(kind, input, capturedAt),
          },
          undefined,
          JSON_INDENT,
