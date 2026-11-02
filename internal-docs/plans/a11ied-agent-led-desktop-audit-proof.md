@@ -5,6 +5,13 @@ This document records implementation and verification for the
 Beads owns work status. An empty evidence entry means the requirement has not
 been proved. Source tests and virtual-reader tests do not prove real reader behavior.
 
+The [2026-10-08 installed Codex proof](../specs/manual-runs/a11ied-proof-kv8/2026-10-08-codex.md)
+exercises CLI/MCP judgment acceptance, interruption/retry, state/journey discovery,
+and fresh Fireside scanner reports. After macOS permission grants, real VoiceOver
+navigation, typing, activation, guarded recovery, and native evidence acceptance
+succeeded. Missing output-directory handling and unreadable PDF evidence columns
+remain tracked. Full-site and Windows acceptance remain open.
+
 | Bead             | Requirement                                    | Implementation evidence                                                                    |
 | ---------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | `a11lied-j24.1`  | Correct criterion outcomes                     | Scanner and procedure outcomes remain separate; see the receipt below.                     |
