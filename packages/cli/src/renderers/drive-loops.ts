@@ -24,7 +24,7 @@ function parseLoopItems(value: unknown): DriverLoopItem[] {
    return parsed.success ? parsed.data : [];
 }
 
-/** One line that says why the loop stopped: the end of the page or the cap. */
+/** One line that says why the loop stopped: the end of the page, the cap, or the time. */
 function stopLine(details: Record<string, unknown>): string {
    const stoppedAt = driverLoopStopSchema.safeParse(details.stoppedAt);
    const max = typeof details.max === 'number' ? details.max : undefined;
@@ -32,6 +32,9 @@ function stopLine(details: Record<string, unknown>): string {
       return dim(
          `Stopped at the cap of ${String(max ?? '?')} items; raise --max to see more.`,
       );
+   }
+   if (stoppedAt.success && stoppedAt.data === 'time') {
+      return dim('Stopped at the time limit; run the command again to continue.');
    }
    if (stoppedAt.success && stoppedAt.data === 'match') {
       return dim('Stopped at the match.');

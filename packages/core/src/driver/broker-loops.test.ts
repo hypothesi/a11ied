@@ -47,6 +47,31 @@ describe('bounded reader navigation', () => {
    });
 });
 
+describe('time-limited reader navigation', () => {
+   it('returns the items read so far once the time budget passes', async () => {
+      const { adapter } = await createVirtualContextFixture('out-of-time');
+      adapter.target = 'voiceover';
+      vi.spyOn(adapter, 'readCurrentItem').mockResolvedValue({
+         item: { phrase: 'Link', states: [], source: 'speech' },
+         position: 'Link',
+      });
+      try {
+         const result = await runBoundedLoop({
+            adapter,
+            max: MAX_STEPS,
+            budgetMs: 0,
+            step: async () => ({}),
+         });
+
+         expect(result.stoppedAt).toStrictEqual('time');
+         expect(result.complete).toStrictEqual(false);
+         expect(result.items).toEqual([]);
+      } finally {
+         await adapter.stop();
+      }
+   });
+});
+
 describe('cancelled reader navigation', () => {
    it('abandons a step that never returns once the signal aborts', async () => {
       const { adapter } = await createVirtualContextFixture('hung-step');

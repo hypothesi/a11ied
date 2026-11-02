@@ -11,6 +11,7 @@ import type {
 import type { DriverActionOptions, DriverAdapter } from '@a11ied/guidepup/browser';
 
 import type { ActionExecutionResult } from './broker-types.js';
+import { resolveLoopBudgetMs } from './loop-budget.js';
 
 interface LoopStop {
    item: DriverCurrentItem;
@@ -23,6 +24,8 @@ interface LoopState {
    first: string | undefined;
    previous: string | undefined;
    items: DriverLoopItem[];
+   /** When the loop runs out of time, as a `Date.now()` value. */
+   deadline: number;
 }
 
 /** Only adapter movement and simulated node identities can confirm the end. */
@@ -60,6 +63,8 @@ interface LoopArgs {
    isMatch?: (item: DriverCurrentItem) => boolean;
    /** Aborts the loop, even in the middle of a step, when the session starts stopping. */
    signal?: AbortSignal | undefined;
+   /** Overrides the time the loop may run, which defaults to the target's budget. */
+   budgetMs?: number;
 }
 
 /** How a loop action talks to the adapter, and what cancels it. */
@@ -109,6 +114,9 @@ async function runLoop(
    if (remaining <= 0) {
       return { items: state.items, stoppedAt: 'cap' };
    }
+   if (Date.now() >= state.deadline) {
+      return { items: state.items, stoppedAt: 'time' };
+   }
    const stop = await raceAbort(stepOnce(args), args.signal);
    if (reachedEnd(state, stop, args.adapter.target)) {
       return { items: state.items, stoppedAt: 'end' };
@@ -118,6 +126,7 @@ async function runLoop(
       first: state.first ?? stop.position,
       previous: stop.position,
       items,
+      deadline: state.deadline,
    };
    if (args.isMatch?.(stop.item)) {
       return { items, stoppedAt: 'match' };
@@ -129,22 +138,27 @@ async function runLoop(
    return runLoop(args, next, remaining - 1);
 }
 
-/** Steps until the end detector fires, the cap is reached, or `isMatch` accepts an item. */
+/**
+ * Steps until the end detector fires, the cap is reached, the time budget runs out, or
+ * `isMatch` accepts an item.
+ */
 export async function runBoundedLoop(args: LoopArgs): Promise<{
    items: DriverLoopItem[];
    stoppedAt: DriverLoopStop;
    complete: boolean;
    limitations: string[];
 }> {
+   const deadline =
+      Date.now() + (args.budgetMs ?? resolveLoopBudgetMs(args.adapter.target, args.max));
    const start = await args.adapter.readCurrentItem();
    const result = await runLoop(
       args,
-      { first: undefined, previous: start.position, items: [] },
+      { first: undefined, previous: start.position, items: [], deadline },
       args.max,
    );
    return {
       ...result,
-      complete: result.stoppedAt !== 'cap',
+      complete: result.stoppedAt !== 'cap' && result.stoppedAt !== 'time',
       limitations:
          args.adapter.target === 'virtual'
             ? []
