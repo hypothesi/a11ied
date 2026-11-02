@@ -112,6 +112,9 @@ An element check supplements the required state assessment; it cannot replace it
 
 ## Perform the assessment loop
 
+0. Run `audit probe <run>` first. It claims every check the environment supports,
+   probes each observed page in the browser, and records verified evidence. It
+   leaves reader and human-judgment checks for the steps below.
 1. Read `audit status <run> --json` and its coverage issues.
 2. Call `audit next <run> --json` to claim one obligation.
 3. Read the returned procedure's applicability, setup, actions, evaluation rules,

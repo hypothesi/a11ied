@@ -55,6 +55,7 @@ const TOOL_BY_COMMAND: Readonly<Record<string, readonly string[]>> = {
    'audit record': ['record_result'],
    'audit pending': ['list_pending_results'],
    'audit discover': ['audit_discover'],
+   'audit probe': ['audit_probe'],
    'audit run': ['audit_assessment'],
    'audit state': ['audit_assessment'],
    'audit journey': ['audit_assessment'],

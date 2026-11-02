@@ -14,6 +14,7 @@ import { handleAuditAction, type AuditActionOptions } from './audit-actions.js';
 import { registerAuditEvidenceCommands } from './audit-evidence.js';
 import { registerAuditDiscoverCommand } from './audit-discover.js';
 import { registerAuditAssessmentCommands } from './audit-assessment.js';
+import { registerAuditProbeCommand } from './audit-probe.js';
 
 interface AuditCommandOptions extends AuditActionOptions {
    format?: string;
@@ -99,6 +100,7 @@ export function registerAuditCommand(program: Command): void {
    registerAuditEvidenceCommands(auditCommand);
    registerAuditDiscoverCommand(auditCommand);
    registerAuditAssessmentCommands(auditCommand);
+   registerAuditProbeCommand(auditCommand);
    auditCommand.action(
       async (target: string | undefined, options: AuditCommandOptions) => {
          if (options.format === 'earl') {

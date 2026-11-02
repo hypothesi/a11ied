@@ -110,6 +110,7 @@ a1 audit run https://createdbyfireside.com --environment environment.json \
    --inventory .a11ied/fireside/inventory.json --json
 a1 audit state <run-file> --input <observed-state-file> --json
 a1 audit journey <run-file> --input <observed-journey-file> --json
+a1 audit probe <run-file>
 a1 audit next <run-file> --json
 a1 audit status <run-file> --offset 0 --limit 20 --json
 a1 audit record <target> --run <run-file> --results <evidence-file> \

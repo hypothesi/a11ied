@@ -21,6 +21,7 @@ import {
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { registerAuditAssessmentTool } from './audit-assessment.js';
+import { registerAuditProbeTool } from './audit-probe.js';
 
 import {
    DEFAULT_WCAG_VERSION,
@@ -342,6 +343,7 @@ function registerAuditTool(server: McpServer): void {
 
 export function registerExecutionTools(server: McpServer): void {
    registerAuditAssessmentTool(server);
+   registerAuditProbeTool(server);
    registerRunAxeTool(server);
    registerTreeTool(server);
    registerAuditTool(server);

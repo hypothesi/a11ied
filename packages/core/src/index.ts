@@ -184,6 +184,11 @@ export {
    executeAuditAssessment,
    type AuditAssessmentResponse,
 } from './audit/assessment-command.js';
+export {
+   runAuditProbes,
+   type ProbeRunOptions,
+   type ProbeRunResult,
+} from './audit/probe/probe-run.js';
 
 export {
    showWcagAxeRule,
