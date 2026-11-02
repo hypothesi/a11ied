@@ -104,7 +104,7 @@ describe('report navigation', () => {
          false,
       );
       expect(
-         [...document.querySelectorAll('details table .outcome')].map(
+         [...document.querySelectorAll('.criteria table .outcome')].map(
             (badge) => badge.textContent,
          ),
       ).to.eql([
@@ -117,7 +117,7 @@ describe('report navigation', () => {
          'Not tested',
       ]);
       expect(
-         document.querySelectorAll('details table .outcome svg[aria-hidden="true"]'),
+         document.querySelectorAll('.criteria table .outcome svg[aria-hidden="true"]'),
       ).toHaveLength(PRESENTATION_CRITERION_COUNT);
       expect(
          links.every(
@@ -151,6 +151,8 @@ describe('report hierarchy', () => {
             (link) => link.textContent,
          ),
       ).to.eql([
+         'What to fix',
+         'WCAG criteria',
          'What was checked',
          'Coverage gaps',
          'Page coverage',
@@ -163,7 +165,7 @@ describe('report hierarchy', () => {
       expect(document.querySelector('#assessments')?.tagName).toStrictEqual('H2');
       expect(
          document.querySelectorAll(
-            'section[aria-labelledby="assessments"] > section > h3',
+            'section[aria-labelledby="assessments"] > section > details > summary > h3',
          ),
       ).toHaveLength(model.discovery.discoveredPages);
       expect(document.querySelector('nav')?.textContent).not.toContain('Redirect alias');
@@ -192,7 +194,7 @@ describe('traceable report findings', () => {
       criterion.criterionId = '4.1.2';
       const document = new JSDOM(renderHtmlReport(model)).window.document;
       const finding = document.querySelector('.finding'),
-         link = document.querySelector('.criterion--failed a');
+         link = document.querySelector('.criteria .criterion--failed a');
 
       expect(finding?.id).toMatch(/^F-[a-f0-9]{12}$/u);
       expect(link?.getAttribute('href')).toStrictEqual(`#${finding?.id}`);
@@ -217,7 +219,7 @@ describe('criterion summary counts', () => {
          .document;
 
       expect(
-         [...document.querySelectorAll('summary .outcome')].map(
+         [...document.querySelectorAll('.criteria summary .outcome')].map(
             (badge) => badge.textContent,
          ),
       ).to.eql([
@@ -228,7 +230,7 @@ describe('criterion summary counts', () => {
          '1 not applicable',
       ]);
       expect(
-         document.querySelectorAll('summary .outcome svg[aria-hidden="true"]'),
+         document.querySelectorAll('.criteria summary .outcome svg[aria-hidden="true"]'),
       ).toHaveLength(reportOutcomeSchema.options.length);
    });
 
@@ -242,7 +244,7 @@ describe('criterion summary counts', () => {
       const document = new JSDOM(renderHtmlReport(model)).window.document;
 
       expect(
-         [...document.querySelectorAll('summary .outcome')].map(
+         [...document.querySelectorAll('.criteria summary .outcome')].map(
             (badge) => badge.textContent,
          ),
       ).to.eql(['7 passed', '0 failed', '0 not tested']);
@@ -251,36 +253,29 @@ describe('criterion summary counts', () => {
 
 describe('sticky report headings', () => {
    it(
-      'stacks the section, wrapped page heading, and criterion summary while scrolling',
+      'stacks the section heading and criterion summary while scrolling',
       async () => {
          const html = renderHtmlReport(buildPresentationModel());
          await withLoadedPage({ kind: 'html', html }, async (page) => {
             await page.setViewportSize(REPORT_TEST_VIEWPORT);
+            await page.locator('.page-assessment > details > summary').first().click();
             await page.locator('.criteria > summary').first().click();
             await page.waitForFunction(() => {
                const section = document.querySelector('#assessments'),
-                  summary = document.querySelector('.criteria > summary'),
-                  title = document.querySelector(
-                     'section[aria-labelledby="assessments"] > section > h3',
-                  );
+                  summary = document.querySelector('.criteria > summary');
                return (
                   section &&
-                  title &&
                   summary &&
                   Math.abs(
                      Number.parseFloat(getComputedStyle(summary).top) -
-                        section.getBoundingClientRect().height -
-                        title.getBoundingClientRect().height,
+                        section.getBoundingClientRect().height,
                   ) < 1
                );
             });
             const state = await page.evaluate(() => {
                const section = document.querySelector('#assessments'),
-                  summary = document.querySelector('.criteria > summary'),
-                  title = document.querySelector(
-                     'section[aria-labelledby="assessments"] > section > h3',
-                  );
-               if (!section || !title || !summary) {
+                  summary = document.querySelector('.criteria > summary');
+               if (!section || !summary) {
                   throw new Error('The fixture needs nested headings.');
                }
                const offset = Number.parseFloat(getComputedStyle(summary).top);
@@ -289,16 +284,16 @@ describe('sticky report headings', () => {
                   summary.getBoundingClientRect().top + window.scrollY - offset,
                );
                return {
-                  positions: [section, title, summary].map(
+                  positions: [section, summary].map(
                      (heading) => getComputedStyle(heading).position,
                   ),
                   gap:
                      summary.getBoundingClientRect().top -
-                     title.getBoundingClientRect().bottom,
+                     section.getBoundingClientRect().bottom,
                };
             });
 
-            expect(state.positions).to.eql(['sticky', 'sticky', 'sticky']);
+            expect(state.positions).to.eql(['sticky', 'sticky']);
             expect(Math.abs(state.gap)).toBeLessThanOrEqual(1);
          });
       },

@@ -183,11 +183,13 @@ a:focus-visible,
    display: inline;
    font-size: 1rem;
 }
-.criteria-total {
+.criteria-total,
+.rollup-total {
    margin-inline-start: 0.75rem;
    color: var(--muted);
 }
-.criteria-totals {
+.criteria-totals,
+.rollup-totals {
    display: flex;
    flex-wrap: wrap;
    gap: 0.5rem;
@@ -227,10 +229,12 @@ a:focus-visible,
    background: var(--surface);
    color: var(--muted);
 }
-.criterion--failed {
+.criterion--failed,
+.rollup--failed {
    background: oklch(98% 0.012 25);
 }
-.criterion--cantTell {
+.criterion--cantTell,
+.rollup--cantTell {
    background: oklch(98% 0.015 85);
 }
 .back-to-top {
@@ -255,6 +259,84 @@ a:focus-visible,
 .skip-link:focus {
    transform: none;
 }
+.tiles {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+   gap: 1rem;
+   padding: 0;
+   margin-block: 1.5rem;
+   list-style: none;
+}
+.tiles li {
+   padding: 1rem;
+   border: 1px solid var(--line);
+   border-radius: 0.5rem;
+   background: var(--surface);
+}
+.tiles strong {
+   display: block;
+   font-size: 2.25rem;
+   line-height: 1.1;
+}
+.tiles span {
+   color: var(--muted);
+}
+.issue,
+.principle,
+.page-assessment > details {
+   border: 1px solid var(--line);
+   border-radius: 0.5rem;
+   margin-block: 0.75rem;
+}
+.issue > summary,
+.principle > summary,
+.page-assessment > details > summary {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 0.5rem 0.75rem;
+   padding: 0.85rem 1rem;
+}
+.issue-scope {
+   flex-basis: 100%;
+   color: var(--muted);
+}
+.issue-body,
+.principle > .table-scroll,
+.page-assessment > details > :not(summary) {
+   margin-inline: 1rem;
+}
+.issue-body {
+   padding-block-end: 1rem;
+}
+.issue--critical {
+   border-inline-start: 0.4rem solid var(--danger);
+}
+.issue--serious {
+   border-inline-start: 0.4rem solid oklch(55% 0.15 45);
+}
+.impact {
+   padding: 0.15rem 0.6rem;
+   border-radius: 99rem;
+   background: var(--surface);
+   font-size: 0.85rem;
+   font-weight: 700;
+   text-transform: uppercase;
+}
+.impact--critical {
+   background: oklch(40% 0.14 25);
+   color: #fff;
+}
+.impact--serious {
+   background: oklch(94% 0.05 55);
+   color: oklch(35% 0.1 45);
+}
+.principle h3,
+.page-assessment h3 {
+   display: inline;
+   margin: 0;
+   font-size: 1.15rem;
+}
 @media screen {
    h1,
    h2,
@@ -270,7 +352,8 @@ a:focus-visible,
       background: var(--paper);
       scroll-margin-block-start: calc(var(--sticky-top, 0px) + 1rem);
    }
-   .criteria summary h4 {
+   .criteria summary h4,
+   summary h3 {
       position: static;
       padding: 0;
    }

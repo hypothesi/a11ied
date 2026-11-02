@@ -10,6 +10,12 @@ import {
 import { renderFindings } from './finding-html.js';
 import { getFindingID } from './finding-reference.js';
 import { renderAssessmentIssues } from './coverage-html.js';
+import { renderStickyHeadings } from './sticky-headings-html.js';
+import {
+   renderCriteriaByPrinciple,
+   renderFixFirst,
+   renderOverview,
+} from './site-summary-html.js';
 
 const REPORT_STYLES = readFileSync(new URL('report.scss', import.meta.url), 'utf8');
 
@@ -61,6 +67,8 @@ function getAssessmentPages(model: ReportModel): ReportModel['pages'] {
 
 function renderContents(model: ReportModel): string {
    const sections = [
+      { id: 'fix-first', label: 'What to fix' },
+      { id: 'criteria', label: 'WCAG criteria' },
       { id: 'methodology', label: 'What was checked' },
       ...([...model.discovery.gaps, ...model.warnings].length > 0 ||
       model.assessment?.issues.length
@@ -255,15 +263,17 @@ function renderGaps(model: ReportModel): string {
 function renderPages(model: ReportModel): string {
    return getAssessmentPages(model)
       .map(
-         (page) => `<section aria-labelledby="page-${escapeHtml(page.pageId)}">
-         <h3 id="page-${escapeHtml(page.pageId)}">${escapeHtml(page.title ?? page.url)}</h3>
+         (
+            page,
+         ) => `<section aria-labelledby="page-${escapeHtml(page.pageId)}" class="page-assessment">
+         <details id="page-details-${escapeHtml(page.pageId)}"><summary><h3 id="page-${escapeHtml(page.pageId)}">${escapeHtml(page.title ?? page.url)}</h3> <span class="rollup-total">${String(page.findings.length)} findings</span></summary>
          <p>${renderLink(page.url, page.url)}</p>
          <p>${escapeHtml(PAGE_STATUSES.get(page.auditStatus) ?? page.auditStatus)}. HTTP status: ${escapeHtml(page.status)}.</p>
          ${page.error ? `<p class="error"><strong>Error:</strong> ${escapeHtml(page.error)}</p>` : ''}
          ${renderFindings(page)}
          ${renderCriteria(page)}
          ${renderRecorded(page)}
-      </section>`,
+      </details></section>`,
       )
       .join('');
 }
@@ -278,46 +288,6 @@ function renderInventory(model: ReportModel): string {
       .join('');
 }
 
-/** Wrapped headings need measured offsets so nested sticky levels do not overlap. */
-function renderStickyHeadings(): string {
-   return [
-      '<script>',
-      '(function () {',
-      "   const headings = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,.criteria > summary'))",
-      "      .filter((heading) => { return !heading.matches('summary h4'); });",
-      '   function updateOffsets() {',
-      '      const heights = new Map(headings.map((heading) => { return [heading, heading.getBoundingClientRect().height]; }));',
-      '      for (const heading of headings) {',
-      '         let depth = 0, offset = 0, parent = heading.parentElement;',
-      '         while (parent) {',
-      "            const ancestor = parent.querySelector(':scope > h1,:scope > h2,:scope > h3,:scope > h4,:scope > h5,:scope > summary');",
-      '            if (ancestor && ancestor !== heading && heights.has(ancestor)) {',
-      '               offset += heights.get(ancestor);',
-      '               depth += 1;',
-      '            }',
-      '            parent = parent.parentElement;',
-      '         }',
-      "         heading.style.setProperty('--sticky-top', String(offset) + 'px');",
-      "         heading.style.setProperty('--sticky-layer', String(headings.length - depth));",
-      '      }',
-      '   }',
-      '   const observer = new ResizeObserver(updateOffsets);',
-      '   headings.forEach((heading) => { observer.observe(heading); });',
-      '   updateOffsets();',
-      "   const layout = document.querySelector('.report-layout'), menu = document.querySelector('.contents-menu'), main = document.querySelector('main');",
-      '   if (layout && menu && main) {',
-      '      let previousSidebar;',
-      '      const menuObserver = new ResizeObserver(() => {',
-      "         const sidebar = menu.closest('nav').getBoundingClientRect().width < main.getBoundingClientRect().width;",
-      '         if (sidebar !== previousSidebar) { menu.open = sidebar; previousSidebar = sidebar; }',
-      '      });',
-      '      menuObserver.observe(layout);',
-      '   }',
-      '})();',
-      '</script>',
-   ].join('\n');
-}
-
 /** Renders a complete offline HTML report from the public report model. */
 export function renderHtmlReport(model: ReportModel): string {
    return `<!doctype html>
@@ -327,12 +297,14 @@ ${REPORT_STYLES}
 </style></head><body><a class="skip-link" href="#report-main">Skip to report</a><header id="report-top"><h1>${model.status === 'draft' ? 'Draft: ' : ''}${escapeHtml(model.title)}</h1>
 ${model.status === 'draft' ? '<p><strong>Draft assessment.</strong> Available results are shown below. Unfinished page assessments and pending manual checks remain incomplete. This is not a final report.</p>' : ''}
 <p>${renderLink(model.startUrl, model.startUrl)}</p>${renderCoverage(model)}
-<ul class="counts" aria-label="Violations by impact">${renderCounts(model)}</ul></header><div class="report-layout">
+${renderOverview(model)}<ul class="counts" aria-label="Violations by impact">${renderCounts(model)}</ul></header><div class="report-layout">
 ${renderContents(model)}<main id="report-main" tabindex="-1">
+<section aria-labelledby="fix-first"><h2 id="fix-first">What to fix</h2>${renderFixFirst(model)}</section>
+<section aria-labelledby="criteria"><h2 id="criteria">WCAG criteria</h2>${renderCriteriaByPrinciple(model)}</section>
 <section aria-labelledby="methodology"><h2 id="methodology">What was checked</h2>${renderMethods(model)}<p>${escapeHtml(model.methodology.statement)}</p></section>
 ${renderGaps(model)}
 <section aria-labelledby="templates"><h2 id="templates">Page coverage</h2>${renderTemplates(model)}</section>
-<section aria-labelledby="assessments"><h2 id="assessments">Page assessments</h2>${renderPages(model)}</section>
+<section aria-labelledby="assessments"><h2 id="assessments">Page assessments</h2><p>Per-page findings and criterion tables, for reference.</p>${renderPages(model)}</section>
 <section aria-labelledby="inventory"><h2 id="inventory">Page inventory</h2><div class="table-scroll" tabindex="0" role="region" aria-label="Page inventory table"><table><thead><tr><th scope="col">URL</th><th scope="col">HTTP status</th>${model.templates.length > 0 ? '<th scope="col">Layout group</th>' : ''}<th scope="col">Assessment</th></tr></thead>
 <tbody>${renderInventory(model)}</tbody></table></div></section></main></div><a class="back-to-top" href="#report-top">Back to top</a><footer><p>Generated ${escapeHtml(model.generatedAt)}.</p></footer>${renderStickyHeadings()}</body></html>`;
 }
