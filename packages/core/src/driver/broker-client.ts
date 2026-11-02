@@ -16,12 +16,13 @@ import { getDriverSocketPath } from './session-utils.js';
 
 import type { BrokerRequest, BrokerResponse } from './broker-types.js';
 import { delay } from './delay.js';
+import { LOOP_ACTIONS, resolveLoopBudgetMs } from './loop-budget.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
 import { throwIfBrokerStartupFailed } from './broker-startup.js';
 
 const VIRTUAL_SOCKET_TIMEOUT_MS = 2000;
 const REAL_TARGET_SOCKET_TIMEOUT_MS = 30_000;
-const REAL_TARGET_STOP_SOCKET_TIMEOUT_MS = 20_000;
+const REAL_TARGET_STOP_SOCKET_TIMEOUT_MS = 30_000;
 const VIRTUAL_STOP_SOCKET_TIMEOUT_MS = 7000;
 const ATTACH_DOCUMENT_SOCKET_TIMEOUT_MS = 30_000;
 const BROKER_POLL_DELAY_MS = 100;
@@ -94,11 +95,6 @@ export async function connectToBroker(
    });
 }
 
-/** Actions that step up to `payload.max` times, so their reply budget scales with it. */
-const LOOP_ACTIONS: ReadonlySet<string> = new Set(['elements', 'read-all', 'goto']);
-const REAL_TARGET_LOOP_STEP_MS = 1500;
-const VIRTUAL_LOOP_STEP_MS = 50;
-
 function readPayloadMax(
    payload: Record<string, unknown> | undefined,
 ): number | undefined {
@@ -140,7 +136,7 @@ export function resolveBrokerSocketTimeoutMs(
       LOOP_ACTIONS.has(request.action) &&
       max !== undefined
    ) {
-      return base + max * (isReal ? REAL_TARGET_LOOP_STEP_MS : VIRTUAL_LOOP_STEP_MS);
+      return base + resolveLoopBudgetMs(target ?? 'virtual', max);
    }
    return base;
 }
