@@ -19,7 +19,7 @@ import {
    runContextWait,
    type ContextActionResult,
 } from './context-action.js';
-import { withContextCommand } from './context-queue.js';
+import { getContextStopSignal, withContextCommand } from './context-queue.js';
 import { toBrokerError } from './broker-errors.js';
 import { initializeSessionTarget, stopSessionResources } from './session-context.js';
 
@@ -230,6 +230,11 @@ export async function handleBrokerRequest(
          (request.command === 'action' && request.action === 'wait')
       ) {
          return await routeCommand(context, request);
+      }
+      if (request.command === 'stop') {
+         // Abort a running loop now instead of queueing behind it.
+         context.stopping = true;
+         getContextStopSignal(context);
       }
       return await withContextCommand(
          context,

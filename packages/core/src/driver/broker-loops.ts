@@ -58,6 +58,40 @@ interface LoopArgs {
    step: () => Promise<{ moved?: boolean }>;
    /** Ends the loop early with `match` when the item is the one wanted. */
    isMatch?: (item: DriverCurrentItem) => boolean;
+   /** Aborts the loop, even in the middle of a step, when the session starts stopping. */
+   signal?: AbortSignal | undefined;
+}
+
+/** How a loop action talks to the adapter, and what cancels it. */
+export interface LoopRun {
+   options: DriverActionOptions;
+   /** Aborts the loop, even in the middle of a step, when the session starts stopping. */
+   signal?: AbortSignal | undefined;
+}
+
+/** Settles with the abort reason as soon as the signal aborts, leaving `work` running. */
+async function raceAbort<TResult>(
+   work: Promise<TResult>,
+   signal: AbortSignal | undefined,
+): Promise<TResult> {
+   if (!signal) {
+      return work;
+   }
+   signal.throwIfAborted();
+   let abort: (() => void) | undefined = undefined;
+   const aborted = new Promise<never>((_resolve, reject) => {
+      abort = (): void => {
+         reject(signal.reason);
+      };
+      signal.addEventListener('abort', abort, { once: true });
+   });
+   try {
+      return await Promise.race([work, aborted]);
+   } finally {
+      if (abort) {
+         signal.removeEventListener('abort', abort);
+      }
+   }
 }
 
 async function stepOnce(args: LoopArgs): Promise<LoopStop> {
@@ -75,7 +109,7 @@ async function runLoop(
    if (remaining <= 0) {
       return { items: state.items, stoppedAt: 'cap' };
    }
-   const stop = await stepOnce(args);
+   const stop = await raceAbort(stepOnce(args), args.signal);
    if (reachedEnd(state, stop, args.adapter.target)) {
       return { items: state.items, stoppedAt: 'end' };
    }
@@ -125,13 +159,15 @@ export async function runBoundedLoop(args: LoopArgs): Promise<{
 export async function runElementsAction(
    adapter: DriverAdapter,
    payload: DriverElementsPayload,
-   options: DriverActionOptions,
+   run: LoopRun,
 ): Promise<ActionExecutionResult> {
-   await adapter.performPortable('top', options);
+   await adapter.performPortable('top', run.options);
    const loop = await runBoundedLoop({
       adapter,
+      signal: run.signal,
       max: payload.max,
-      step: () => adapter.navigate({ direction: 'next', kind: payload.kind }, options),
+      step: () =>
+         adapter.navigate({ direction: 'next', kind: payload.kind }, run.options),
    });
    return {
       details: {
@@ -147,12 +183,13 @@ export async function runElementsAction(
 export async function runReadAllAction(
    adapter: DriverAdapter,
    payload: DriverReadAllPayload,
-   options: DriverActionOptions,
+   run: LoopRun,
 ): Promise<ActionExecutionResult> {
    const loop = await runBoundedLoop({
       adapter,
+      signal: run.signal,
       max: payload.max,
-      step: () => adapter.navigate({ direction: 'next', kind: 'item' }, options),
+      step: () => adapter.navigate({ direction: 'next', kind: 'item' }, run.options),
    });
    return { details: { count: loop.items.length, ...loop, max: payload.max } };
 }
@@ -220,7 +257,7 @@ export function matchesItem(item: DriverCurrentItem, wanted: WantedItem): boolea
 export async function runGotoAction(
    adapter: DriverAdapter,
    payload: DriverGotoPayload,
-   options: DriverActionOptions,
+   run: LoopRun,
 ): Promise<ActionExecutionResult> {
    const kind = ROLE_KINDS[normalizeWords(payload.role ?? '')] ?? 'item';
    const start = await adapter.readCurrentItem();
@@ -229,8 +266,9 @@ export async function runGotoAction(
    }
    const loop = await runBoundedLoop({
       adapter,
+      signal: run.signal,
       max: payload.max,
-      step: () => adapter.navigate({ direction: 'next', kind }, options),
+      step: () => adapter.navigate({ direction: 'next', kind }, run.options),
       isMatch: (item) => matchesItem(item, payload),
    });
    return {

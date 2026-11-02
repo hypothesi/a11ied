@@ -46,3 +46,27 @@ describe('bounded reader navigation', () => {
       }
    });
 });
+
+describe('cancelled reader navigation', () => {
+   it('abandons a step that never returns once the signal aborts', async () => {
+      const { adapter } = await createVirtualContextFixture('hung-step');
+      const controller = new AbortController(),
+         reason = new Error('The session is stopping.');
+      try {
+         const looping = runBoundedLoop({
+            adapter,
+            max: MAX_STEPS,
+            step: () =>
+               new Promise<never>(() => {
+                  // The reader never answers.
+               }),
+            signal: controller.signal,
+         });
+         controller.abort(reason);
+
+         await expect(looping).rejects.toBe(reason);
+      } finally {
+         await adapter.stop();
+      }
+   });
+});
