@@ -116,6 +116,18 @@ const artifactContentSchemas = {
    screenshot: z.never(),
 };
 
+const ARTIFACT_CONTENT_HINTS = {
+   observation: 'Expected non-empty text or { "text": "..." }.',
+   speech: 'Expected non-empty text or { "text": "..." }.',
+   'product-context': 'Expected non-empty text or { "text": "..." }.',
+   measurement:
+      'Expected an array of { "value": number, "unit": string, "method": string }.',
+   media: 'Expected { "transcript": string, "source": string }.',
+   'action-trace':
+      'Expected an array of { "index", "action", "at", "stateId" } receipts, with an optional "checkpoint".',
+   screenshot: 'Screenshots are raw PNG files, not JSON envelopes.',
+} as const;
+
 /** Non-image artifacts identify the observations they contain, independently of notes. */
 export const assessmentArtifactEnvelopeSchema = z
    .object({
@@ -141,7 +153,7 @@ export const assessmentArtifactEnvelopeSchema = z
          context.addIssue({
             code: 'custom',
             path: ['content'],
-            message: `The ${artifact.kind} artifact has no usable evidence content.`,
+            message: `The ${artifact.kind} artifact has no usable evidence content. ${ARTIFACT_CONTENT_HINTS[artifact.kind]}`,
          });
       }
    });

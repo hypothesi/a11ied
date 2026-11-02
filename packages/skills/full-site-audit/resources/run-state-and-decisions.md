@@ -127,6 +127,15 @@ source, session, state references, claimed `attempt`, capture time, kind, and ty
 * `media`: a transcript and source.
 * `action-trace`: ordered action receipts with index, action, time, and state ID.
 
+A claim's `context.states` lists at most 20 states. For a `site` check with no
+`stateIds`, read every state through `audit status --limit 100` and cite all of them,
+in run order, in provenance and in each artifact envelope. For other scopes, cite the
+check's `stateIds` in that order.
+
+Each envelope repeats its provenance values exactly, including `capturedAt` for that
+artifact. Register every artifact path on its states with `audit state` before
+recording evidence; recording rejects an unregistered path.
+
 Action receipts must cover the declared inclusive `actions.start`/`end` range.
 A checkpoint must appear inside that range. Preserve typed driver `request`
 receipts when available; APG keyboard checks require a documented keypress.

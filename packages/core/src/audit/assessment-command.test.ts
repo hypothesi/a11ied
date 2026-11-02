@@ -233,3 +233,22 @@ describe('assessment response pagination', () => {
       assertWidgetEvidence,
    );
 });
+
+describe('state input defaults', () => {
+   it('accepts a state without artifacts or setup steps', async () => {
+      await withRun(async (file) => {
+         const { target, label, fingerprint, environmentId } = buildState('Bare', 'bare');
+         const response = await executeAuditAssessment({
+            action: 'state',
+            file,
+            state: { stateId: 'bare-state', target, label, fingerprint, environmentId },
+         });
+         const saved = response.states.items.find(
+            (item) => item.stateId === 'bare-state',
+         );
+
+         expect(saved?.artifacts).to.eql([]);
+         expect(saved?.setup).to.eql([]);
+      });
+   });
+});

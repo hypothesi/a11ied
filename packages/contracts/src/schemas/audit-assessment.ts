@@ -30,7 +30,11 @@ const checkIdSchema = assessmentCheckSchema.shape.checkId,
 const fileSchema = z.string().min(1),
    stateInputSchema = auditStateSchema
       .omit({ revision: true, observedAt: true })
-      .partial({ stateId: true });
+      .partial({ stateId: true })
+      .extend({
+         artifacts: auditStateSchema.shape.artifacts.default([]),
+         setup: auditStateSchema.shape.setup.default([]),
+      });
 
 /** The same validated operations drive shell commands and MCP requests. */
 export const auditAssessmentRequestSchema = z.discriminatedUnion('action', [

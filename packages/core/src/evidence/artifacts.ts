@@ -195,28 +195,29 @@ function validateArtifactContent(
    const envelope = assessmentArtifactEnvelopeSchema.parse(
       JSON.parse(body.toString('utf8')),
    );
-   const mismatchedIdentity =
-      envelope.runId !== run.runId ||
-      envelope.attempt !== provenance.attempt ||
-      envelope.environmentId !== provenance.environmentId ||
-      envelope.source !== provenance.source ||
-      envelope.sessionId !== provenance.sessionId;
-   const mismatchedObservation =
-      envelope.kind !== artifact.kind ||
-      envelope.capturedAt !== artifact.capturedAt ||
-      envelope.states.length !== provenance.states.length ||
-      envelope.states.some((state, index) => {
-         const expected = provenance.states[index];
-         return (
-            expected === undefined ||
-            state.stateId !== expected.stateId ||
-            state.revision !== expected.revision ||
-            state.fingerprint !== expected.fingerprint
-         );
-      });
-   if (mismatchedIdentity || mismatchedObservation) {
+   const mismatches = [
+      envelope.runId !== run.runId && 'runId',
+      envelope.attempt !== provenance.attempt && 'attempt',
+      envelope.environmentId !== provenance.environmentId && 'environmentId',
+      envelope.source !== provenance.source && 'source',
+      envelope.sessionId !== provenance.sessionId && 'sessionId',
+      envelope.kind !== artifact.kind && 'kind',
+      envelope.capturedAt !== artifact.capturedAt && 'capturedAt',
+      (envelope.states.length !== provenance.states.length ||
+         envelope.states.some((state, index) => {
+            const expected = provenance.states[index];
+            return (
+               expected === undefined ||
+               state.stateId !== expected.stateId ||
+               state.revision !== expected.revision ||
+               state.fingerprint !== expected.fingerprint
+            );
+         })) &&
+         'states',
+   ].filter(Boolean);
+   if (mismatches.length > 0) {
       throw new Error(
-         'The artifact identifies a different run, attempt, state, session, or collection source.',
+         `The artifact identifies a different run, attempt, state, session, or collection source (mismatched: ${mismatches.join(', ')}). Its envelope must repeat the provenance values exactly, including capturedAt.`,
       );
    }
    validateObservedContent(envelope, context);
