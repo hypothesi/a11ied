@@ -151,7 +151,7 @@ function renderIssue(issue: IssueGroup, pageCount: number): string {
          .slice(0, MAX_SELECTORS)
          .map((selector) => `<code>${escapeHtml(selector)}</code>`);
    return `<details class="issue issue--${escapeHtml(issue.impact)}" id="${getIssueAnchor(issue.key)}">
-<summary><span class="impact impact--${escapeHtml(issue.impact)}">${escapeHtml(issue.impact === 'unknown' ? 'Needs severity' : issue.impact)}</span>
+<summary><span class="impact impact--${escapeHtml(issue.impact)}">${escapeHtml(issue.impact === 'unknown' ? 'Not rated' : issue.impact)}</span>
 <strong>${escapeHtml(issue.title)}</strong>
 <span class="issue-scope">${String(issue.pages.size)} of ${String(pageCount)} pages | WCAG ${escapeHtml(issue.criterionIDs.join(', ') || 'unmapped')}</span></summary>
 <div class="issue-body"><p>${escapeHtml(issue.description)}</p>
@@ -188,7 +188,7 @@ function renderCriterionRow(
    return `<tr class="rollup--${rollup.outcome}"><th scope="row">${escapeHtml(criterion.criterionId)} ${escapeHtml(criterion.title)}</th>
 <td>${escapeHtml(criterion.level)}</td><td>${renderOutcome(rollup.outcome)}</td>
 <td>${rollup.failedPages > 0 ? `${String(rollup.failedPages)} of ${String(rollup.pageCount)} pages` : '-'}</td>
-<td>${links || '-'}</td></tr>`;
+<td>${links || (rollup.outcome === 'notTested' ? renderLink('#coverage-gaps', 'Not attempted in this run. See coverage gaps for why.', false) : '-')}</td></tr>`;
 }
 
 function renderOutcomeTotals(rollups: CriterionRollup[]): string {
@@ -227,14 +227,15 @@ export function renderCriteriaByPrinciple(model: ReportModel): string {
 export function renderOverview(model: ReportModel): string {
    const issues = groupIssues(model);
    const rollups = rollUpCriteria(model, issues);
-   const failed = rollups.filter((rollup) => rollup.outcome === 'failed').length;
+   const failed = String(rollups.filter((rollup) => rollup.outcome === 'failed').length);
+   const countOf = (outcome: ReportOutcome): string =>
+      String(rollups.filter((rollup) => rollup.outcome === outcome).length);
    const tiles = [
       [String(issues.length), 'distinct issues to fix'],
-      [String(failed), `of ${String(rollups.length)} criteria failing`],
-      [
-         String(rollups.filter((rollup) => rollup.outcome === 'notTested').length),
-         'criteria not yet tested',
-      ],
+      [failed, `of ${String(rollups.length)} criteria failing`],
+      [countOf('cantTell'), 'criteria need review'],
+      [countOf('passed'), 'criteria passing on every page'],
+      [countOf('notTested'), 'criteria not yet tested'],
       [String(model.discovery.discoveredPages), 'pages in scope'],
    ];
    return `<ul class="tiles" aria-label="Summary">${tiles

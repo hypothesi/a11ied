@@ -5,7 +5,7 @@ import { buildReportModel } from './aggregate.js';
 import { renderHtmlReport } from './render-html.js';
 import { buildReportTestAudit, buildReportTestInventory } from './test-fixtures.js';
 
-const SUMMARY_TILE_COUNT = 4,
+const SUMMARY_TILE_COUNT = 6,
    WCAG_AA_CRITERIA_FLOOR = 50;
 
 function buildDocument(): Document {
