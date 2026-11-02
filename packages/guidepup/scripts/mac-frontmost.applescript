@@ -18,4 +18,20 @@ tell application "System Events"
     set t to name of front window of p as text
   end try
 end tell
-return n & delim & b & delim & (processID as text) & delim & t
+set workspaceRecord to n & delim & b & delim & (processID as text) & delim & t
+if b is "com.apple.VoiceOver" or b is "com.apple.AccessibilityVisualsAgent" then
+  tell application "System Events"
+    try
+      set inputProcess to first application process whose frontmost is true
+      set inputName to name of inputProcess as text
+      set inputBundle to bundle identifier of inputProcess as text
+      set inputID to unix id of inputProcess as integer
+      set inputTitle to ""
+      try
+        set inputTitle to name of front window of inputProcess as text
+      end try
+      return workspaceRecord & (ASCII character 29) & inputName & delim & inputBundle & delim & (inputID as text) & delim & inputTitle
+    end try
+  end tell
+end if
+return workspaceRecord

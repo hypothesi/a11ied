@@ -44,4 +44,7 @@ tell application "System Events"
     end if
   end repeat
 end tell
-if matched then return "focused" else return "not-found"
+if matched then
+  return "focused"
+end if
+return "not-found"
