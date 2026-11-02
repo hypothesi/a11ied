@@ -1,7 +1,6 @@
-import { writeFile } from 'node:fs/promises';
-
 import { CLI_VERSION } from '../lib/constants.js';
 import type { AuditActionOptions } from './audit-actions.js';
+import { writeOutputFile } from '../lib/write-output-file.js';
 
 const EARL_INDENT = 2;
 
@@ -29,7 +28,7 @@ export async function handleAuditEarlFormat(
    const output = `${JSON.stringify(report, undefined, EARL_INDENT)}\n`;
 
    if (options.out) {
-      await writeFile(options.out, output, 'utf8');
+      await writeOutputFile(options.out, output);
    } else {
       process.stdout.write(output);
    }

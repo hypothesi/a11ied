@@ -1,7 +1,8 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 
 import { axeBaselineSchema, type AxeBaseline } from '#contracts';
 import { CliEnvironmentError, CliUsageError } from '#core';
+import { writeOutputFile } from '../lib/write-output-file.js';
 
 const BASELINE_INDENT = 2;
 
@@ -58,7 +59,7 @@ export async function writeAxeBaseline(
 ): Promise<void> {
    const contents = `${JSON.stringify(baseline, undefined, BASELINE_INDENT)}\n`;
    try {
-      await writeFile(path, contents, 'utf8');
+      await writeOutputFile(path, contents);
    } catch (error) {
       throw new CliEnvironmentError(
          'baseline-unavailable',

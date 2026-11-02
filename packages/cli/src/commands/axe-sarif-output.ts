@@ -1,7 +1,6 @@
-import { writeFile } from 'node:fs/promises';
-
 import { cliExitCodes } from '#contracts';
 import type { AxeActionOptions } from './axe-actions.js';
+import { writeOutputFile } from '../lib/write-output-file.js';
 
 const SARIF_INDENT = 2;
 
@@ -26,7 +25,7 @@ export async function handleAxeSarifFormat(
    const sarifLog = buildAxeSarifLog(reports.map((report) => report.result));
    const output = `${JSON.stringify(sarifLog, undefined, SARIF_INDENT)}\n`;
    if (options.out) {
-      await writeFile(options.out, output, 'utf8');
+      await writeOutputFile(options.out, output);
    } else {
       process.stdout.write(output);
    }

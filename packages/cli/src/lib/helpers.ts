@@ -1,5 +1,3 @@
-import { writeFile } from 'node:fs/promises';
-
 import {
    cliExitCodes,
    cliOutputEnvelopeSchema,
@@ -10,6 +8,7 @@ import {
 import { CliEnvironmentError, CliUsageError } from '#core';
 import { CLI_VERSION, JSON_INDENT } from './constants.js';
 import { warningLine } from './format.js';
+import { writeOutputFile } from './write-output-file.js';
 
 export interface CommandExecution {
    ok?: boolean;
@@ -106,7 +105,7 @@ function printWarningsToStderr(warnings: CliMessage[]): void {
  */
 async function writeTextOutput(body: string, out: string | undefined): Promise<void> {
    if (out) {
-      await writeFile(out, `${body}\n`, 'utf8');
+      await writeOutputFile(out, `${body}\n`);
       return;
    }
    process.stdout.write(`${body}\n`);
@@ -119,7 +118,7 @@ export async function printOutput(opts: PrintOutputOptions): Promise<void> {
    if (opts.json) {
       const output = `${JSON.stringify(opts.envelope, undefined, JSON_INDENT)}\n`;
       if (opts.out) {
-         await writeFile(opts.out, output, 'utf8');
+         await writeOutputFile(opts.out, output);
       } else {
          process.stdout.write(output);
       }

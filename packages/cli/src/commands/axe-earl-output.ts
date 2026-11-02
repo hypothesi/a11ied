@@ -1,8 +1,7 @@
-import { writeFile } from 'node:fs/promises';
-
 import { cliExitCodes } from '#contracts';
 import { CLI_VERSION } from '../lib/constants.js';
 import type { AxeActionOptions } from './axe-actions.js';
+import { writeOutputFile } from '../lib/write-output-file.js';
 
 const EARL_INDENT = 2;
 
@@ -35,7 +34,7 @@ export async function handleAxeEarlFormat(
    );
    const output = `${JSON.stringify(earlReport, undefined, EARL_INDENT)}\n`;
    if (options.out) {
-      await writeFile(options.out, output, 'utf8');
+      await writeOutputFile(options.out, output);
    } else {
       process.stdout.write(output);
    }
