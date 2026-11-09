@@ -50,9 +50,11 @@ The coordinator generates 46 obligations per state (1,297 checks for 28 states i
 
 `PageEvidenceCache` loads facts and axe in separate browser pages; `collectPageFacts` reloads for skip link and three viewports; each claimed check captures a fresh screenshot in a new context. There is no shared observation bundle, so 46 criteria re-observe the same DOM.
 
-### 5. Screen reader infrastructure is a platform, not a feature
+### 5. Screen reader infrastructure is a platform, not a feature — but the CLI must stay
 
-Broker, sessions, desktop leases, guarded input, transcripts, recording, tailing, batching, and two test APIs (queued + vitest) serve a general SR-automation product. For AA review the needed surface is small: start a (usually virtual) reader, walk, goto, expect a phrase, stop. The broker exists to keep a real VoiceOver session alive across CLI invocations — necessary for native readers, irrelevant for headless review, yet it shapes every MCP tool.
+Broker, sessions, desktop leases, guarded input, transcripts, recording, tailing, batching, and two test APIs (queued + vitest) serve a general SR-automation product. For AA review the needed surface is small: start a (usually virtual) reader, walk, goto, expect a phrase, stop.
+
+**Decision (2026-11-09): the CLI stays.** Agents and humans keep programmatic control over screen readers. The fix is organisation, not removal (see `a11ied-n4-sr-cli-reorganisation-plan.md`; "number 4" in this review). Keep every `a1 sr` verb working on all three surfaces (CLI, MCP, `queuedScreenReader`), grouped into session / navigate / interact / assert / inspect / bulk, with one registry driving help, MCP tools, and TS methods so they cannot drift. The broker stays for real VoiceOver/NVDA sessions; headless review uses the in-process virtual path by default. What goes is the flat, ungrouped command cloud and the hand-written `sr_action` description, not the capability.
 
 ### 6. Knowledge is inert during execution
 
@@ -93,10 +95,10 @@ verdict engine (deterministic, no agent)
   Tier-1: tree/keyboard/viewport analysis (structure, order, reflow, targets)
   -> Verdict[] { criterion, state, outcome, tier, confidence, evidenceRef, repro }
 
-agent loop (thin, 8 tools)
+agent loop (thin, 8 review tools; SR stays available via the retained, reorganised sr CLI/MCP)
   review.start(scope) -> review.next() -> review.observe() -> review.judge()
   review.status() -> review.report()
-  (sr_session, tree, axe are internal to observe, not exposed)
+  (sr_session, tree, axe are internal to observe by default; N4 keeps the full sr CLI/MCP surface for interactive human/agent use)
 
 persistence (one layer, from the unified file-governance plan)
   verdict store + observation cache, single lock, single atomic write, single append
@@ -136,13 +138,14 @@ Tier-0/1 passes close the criterion; tier-0/1 failures produce a finding with a 
 
 ### What happens to each current capability
 
-| Keep (with a smaller job)                                 | Merge                                                                              | Kill                                                                                            |
-| --------------------------------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `wcag-data` + `wcag-engine` (pure knowledge, zero I/O)    | `axe` + `tree` + probes into one `observe` bundle (single Playwright page per URL) | `audit probe` as a separate engine — probes become tier-0/1 verdict functions inside the engine |
-| EARL/SARIF serializers (as report views)                  | Three `audit` entry points into one `review` runner; CLI/MCP/TS into one registry  | `run.json` + envelope ritual for deterministic verdicts (verdict store replaces it)             |
-| `doctor`/`setup`                                          | Evidence tools into `review.judge` (one call)                                      | `sr_action` mega-tool; queued + vitest duplicate APIs collapse to one queued reader             |
-| discovery + template grouping (as representative + smoke) | SR broker: in-process by default, broker only for real desktop readers             | Per-state full re-judgment — replaced by cache + template groups                                |
-| report renderer (HTML/PDF)                                | Two skills into one skill with two generated recipes                               | File-integrity validation as the acceptance gate; replaced by verdict-schema + repro checks     |
+| Keep (with a smaller job)                                 | Merge                                                                              | Kill                                                                                             |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `wcag-data` + `wcag-engine` (pure knowledge, zero I/O)    | `axe` + `tree` + probes into one `observe` bundle (single Playwright page per URL) | `audit probe` as a separate engine — probes become tier-0/1 verdict functions inside the engine  |
+| EARL/SARIF serializers (as report views)                  | Three `audit` entry points into one `review` runner; CLI/MCP/TS into one registry  | `run.json` + envelope ritual for deterministic verdicts (verdict store replaces it)              |
+| `doctor`/`setup`                                          | Evidence tools into `review.judge` (one call)                                      | `sr_action` mega-tool as a hand-written description (replaced by generated registry; verbs stay) |
+| discovery + template grouping (as representative + smoke) | SR broker: in-process by default, broker only for real desktop readers             | Per-state full re-judgment — replaced by cache + template groups                                 |
+| **Screen-reader CLI for humans + agents (retained, N4)**  | Queued API + vitest become thin adapters over the SR verb registry                 | Flat ungrouped SR help (replaced by six groups, same verbs)                                      |
+| report renderer (HTML/PDF)                                | Two skills into one skill with two generated recipes                               | File-integrity validation as the acceptance gate; replaced by verdict-schema + repro checks      |
 
 ### Persistence
 
@@ -174,8 +177,8 @@ Procedure `actions` become `toolCalls` (P1-7) so `review.next` already names `re
 ## Risks and non-goals
 
 - Tier-0 honesty: a deterministic pass must be _provably_ 100% precision (ACT-covered rules preferred). When in doubt, the criterion drops to tier-1 or tier-2 — never upgrade confidence to close a queue.
-- Real screen readers stay opt-in. The default audit is virtual + browser; native VoiceOver/NVDA runs are a declared environment, not the product default.
-- Non-goals: a general browser-automation product, a hosted audit service, new SR targets, non-A/AA levels as the default path, and any auto-remediation beyond finding text.
+- Real screen readers stay opt-in. The default audit is virtual + browser; native VoiceOver/NVDA runs are a declared environment, not the product default. The SR CLI itself is retained for interactive human and agent control (N4); "opt-in" applies to the review default, not to the feature.
+- Non-goals: a general browser-automation product, a hosted audit service, new SR targets, non-A/AA levels as the default path, and any auto-remediation beyond finding text. SR automation as a human/agent tool is explicitly not a non-goal.
 
 ## Bottom line
 

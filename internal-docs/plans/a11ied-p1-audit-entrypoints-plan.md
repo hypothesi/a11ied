@@ -70,6 +70,14 @@ Out of scope:
 - Both names keep working with no behavior change.
 - Standards and tests pass.
 
+## Surrounding surface (retained, better organised)
+
+The entry-point consolidation above covers `check`/`audit run`/`audit probe`. The screen-reader surface is consolidated separately and retained for humans and agents (N4 + P2-15):
+
+- `a1 sr` keeps every verb, reorganised into six help groups (session, navigate, interact, assert, inspect, bulk), all scriptable with `--json` and exit codes 0/4/3.
+- MCP `sr_*` tools and the `queuedScreenReader` TS API are generated from the same verb registry (P2-15), not hand-written.
+- The merged skill (P2-14) documents both the interactive and scripted recipes.
+
 ## Sequencing
 
-Independent. Do before P1-7 (templates name the tools) so templates use final names.
+Independent. Do before P1-7 (templates name the tools) so templates use final names. Coordinate with N4 (SR CLI groups) so `check`/`audit run` help, SR help, and the skill use consistent group naming.

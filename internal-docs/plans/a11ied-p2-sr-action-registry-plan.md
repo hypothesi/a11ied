@@ -1,10 +1,10 @@
 # Screen reader tool registry (sr_action): implementation plan (2026-11-09)
 
-Source recommendation: `internal-docs/audit-performance-quality-review.md` P2-15.
+Source recommendation: `internal-docs/audit-performance-quality-review.md` P2-15. Updated 2026-11-09: the SR CLI is retained (see `a11ied-n4-sr-cli-reorganisation-plan.md`); this plan is its registry mechanism, not a removal plan.
 
 ## Summary
 
-Stop hand-writing the `sr_action` prose description. Generate it from the same command registry the CLI uses, or split the mega-tool into `sr_navigate`, `sr_act`, `sr_assert`. Whichever option is chosen, the MCP description and the CLI help cannot drift.
+Stop hand-writing the `sr_action` prose description. Generate it from the same command registry the CLI uses, or split the mega-tool into `sr_navigate`, `sr_act`, `sr_assert`. Whichever option is chosen, the MCP description and the CLI help cannot drift. The SR CLI (human + agent) is retained and better organised — see N4 for the six command groups; this plan is the shared registry underneath those groups.
 
 ## Objectives and scope
 
@@ -18,6 +18,7 @@ Out of scope:
 
 - Adding new SR verbs.
 - Changing session semantics (single active session stays).
+- Removing or demoting the SR CLI. The CLI remains the primary human/agent surface; MCP and the queued TS API are generated adapters over the same verbs (N4).
 
 ## Assumptions
 

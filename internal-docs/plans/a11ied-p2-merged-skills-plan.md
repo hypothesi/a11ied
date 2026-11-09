@@ -1,10 +1,10 @@
 # Merged skills: implementation plan (2026-11-09)
 
-Source recommendation: `internal-docs/audit-performance-quality-review.md` P2-14.
+Source recommendation: `internal-docs/audit-performance-quality-review.md` P2-14. Updated 2026-11-09: the merged skill documents the retained, reorganised SR CLI (N4) for both human and agent use.
 
 ## Summary
 
-Merge `full-site-audit` and `a11ied` into one skill with two recipes: "check this page" (scan + tree + targeted screen reader steps) and "audit this site" (coordinator). The shared screen reader and evidence chapters are currently duplicated across both skills.
+Merge `full-site-audit` and `a11ied` into one skill with two recipes: "check this page" (scan + tree + targeted screen reader steps) and "audit this site" (coordinator). The shared screen reader and evidence chapters are currently duplicated across both skills. The SR CLI is retained (N4): the merged skill teaches the six SR groups (session/navigate/interact/assert/inspect/bulk) once, with an interactive human recipe and an agent/script recipe (batch + `--json` + exit codes).
 
 ## Objectives and scope
 
@@ -19,6 +19,7 @@ Out of scope:
 
 - Changing skill behavior or tooling (content merge only).
 - Removing the `resources/` files (they are folded into the merged skill or kept as resources of one package).
+- Removing the SR CLI or its verbs. The merged skill is the index for the retained SR surface (N4); it must cover both human interactive use and agent scripting.
 
 ## Assumptions
 
@@ -73,4 +74,4 @@ Out of scope:
 
 ## Sequencing
 
-Land after P1-10 (entry-point names) so recipes use final command names. Independent of code changes.
+Land after P1-10 (entry-point names) so recipes use final command names. Independent of code changes. N4's six SR groups must land first so the skill teaches the final grouping.

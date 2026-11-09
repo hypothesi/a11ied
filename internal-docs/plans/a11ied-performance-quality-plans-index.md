@@ -36,9 +36,20 @@ Index for the 16 implementation plans responding to `internal-docs/audit-perform
 
 ## P2 — reduce skill and MCP surface
 
-- P2-14 merged skills: `a11ied-p2-merged-skills-plan.md`
-- P2-15 screen reader tool registry: `a11ied-p2-sr-action-registry-plan.md`
+- P2-14 merged skills: `a11ied-p2-merged-skills-plan.md` (documents the retained SR CLI groups)
+- P2-15 screen reader tool registry: `a11ied-p2-sr-action-registry-plan.md` (generated MCP from CLI registry; SR CLI retained, N4)
 - P2-16 procedure done definitions: `a11ied-p2-procedure-done-definitions-plan.md`
+
+## Target design (capabilities review — nothing sacred)
+
+From `internal-docs/capabilities-review-and-target-design.md`. The retained SR CLI (N4) is the one clarification applied across all of these:
+
+- N1 verdict store (one `Verdict` shape; tier-0/1 close without an agent): `a11ied-n1-verdict-store-plan.md`
+- N2 observation bundle + cache (one pass per URL, fingerprint-cached): `a11ied-n2-observation-bundle-plan.md`
+- N3 procedure registry + generated skill (tier + `toolCalls` per criterion): `a11ied-n3-procedure-registry-plan.md`
+- N4 screen-reader CLI reorganisation — retained for humans and agents, better organised: `a11ied-n4-sr-cli-reorganisation-plan.md`
+- N5 review facade (thin CLI/MCP/TS over verdicts; 8 MCP tools): `a11ied-n5-review-facade-plan.md`
+- N6 core decomposition (god-package split into six single-job packages): `a11ied-n6-core-decomposition-plan.md`
 
 ## Suggested order
 
@@ -47,3 +58,4 @@ Index for the 16 implementation plans responding to `internal-docs/audit-perform
 3. P0-4, P0-5, P0-6 (dedupe, priority, batching).
 4. P1-7, P1-8, P2-16 (templates, evidence, done definitions).
 5. P1-9, P1-10, P1-13, P2-14, P2-15 (status, names, parallelism, skills, registry).
+6. Target design: N4 (SR CLI groups, first — templates/skills/facade depend on it) → N2 (observation bundle) → N1 (verdict store) → N3 (registry) → N5 (review facade) → N6 (core split).
