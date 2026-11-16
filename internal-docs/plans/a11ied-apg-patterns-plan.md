@@ -42,7 +42,7 @@ the end widens the existing evidence store so a person or an agent can record a 
   row as well as a WCAG criterion.
 - In scope: Update `NOTICE.md`, both READMEs, and the docs reference pages.
 - Out of scope: Detecting which pattern a page implements without being told. `a1 pattern
-check` takes the pattern name as an argument in this release. Automatic detection is a
+  check` takes the pattern name as an argument in this release. Automatic detection is a
   follow-up that builds on the role index this plan creates.
 - Out of scope: Any stored mapping from APG patterns to WCAG success criteria. W3C publishes
   no such mapping and a11ied will not invent one. See the design decision in section 6.

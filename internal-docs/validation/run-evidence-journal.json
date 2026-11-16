@@ -1,0 +1,94 @@
+{
+   "verifiedAt": "2026-11-15T18:54:38.846944+00:00",
+   "bead": "a11ied-proof-wsj",
+   "behavior": "Run-bound evidence defaults to its coordinator journal; explicit files and unbound environment/project defaults remain supported. Read, append and clear use one path policy.",
+   "realSitePilot": {
+      "verifiedAt": "2026-11-15T18:53:31.125Z",
+      "passed": true,
+      "calls": [
+         {
+            "name": "record_result",
+            "elapsedMs": 106,
+            "isError": false
+         },
+         {
+            "name": "audit_assessment",
+            "elapsedMs": 47,
+            "isError": false
+         },
+         {
+            "name": "review.report",
+            "elapsedMs": 46,
+            "isError": false
+         },
+         {
+            "name": "review.report",
+            "elapsedMs": 35,
+            "isError": false
+         },
+         {
+            "name": "review.next",
+            "elapsedMs": 38,
+            "isError": false
+         }
+      ],
+      "evidenceFile": "/Users/mluedke/code/personal/a11ied/.a11ied/coordinator-pilot-3bd8984b-2d5f-4624-8109-c37941d2679e/evidence.jsonl",
+      "scope": "WCAG2.4.5 only; two actual controlled HTTP pages; virtual provenance; no complete production audit or journey claim",
+      "isDraft": false,
+      "complete": 1,
+      "unresolved": 0,
+      "summary": {
+         "scopeStatement": "Results cover only the listed pages, states and criteria. Excluded content and unassessed processes are outside these results.",
+         "overallConformance": "Does Not Support",
+         "totalStates": 2,
+         "evaluatedCriteriaCount": 1,
+         "failingCriteriaCount": 1,
+         "needsReviewCriteriaCount": 0,
+         "criticalFindingsCount": 0,
+         "seriousFindingsCount": 1,
+         "moderateFindingsCount": 0,
+         "minorFindingsCount": 0,
+         "headline": "Does Not Support: 1 failing criteria with 0 critical and 1 serious findings."
+      },
+      "artifactTamperRejected": true,
+      "restoredFinalAccepted": true,
+      "nextDone": true,
+      "paths": {
+         "jsonPath": "/Users/mluedke/code/personal/a11ied/.a11ied/coordinator-pilot-3bd8984b-2d5f-4624-8109-c37941d2679e/verdict-report.json",
+         "htmlPath": "/Users/mluedke/code/personal/a11ied/.a11ied/coordinator-pilot-3bd8984b-2d5f-4624-8109-c37941d2679e/verdict-report.html",
+         "markdownPath": "/Users/mluedke/code/personal/a11ied/.a11ied/coordinator-pilot-3bd8984b-2d5f-4624-8109-c37941d2679e/verdict-report.md"
+      }
+   },
+   "checks": [
+      {
+         "command": "npm run standards",
+         "passed": true,
+         "log": "/tmp/a11ied-run-evidence-standards.log",
+         "sha256": "4d439a86da3b3bf96966aba901c0f3931e6093d04a02989dfde1fa9eb058835d"
+      },
+      {
+         "command": "npm run pack:check",
+         "passed": true,
+         "log": "/tmp/a11ied-run-evidence-pack.log",
+         "sha256": "07ab3367c1c9a4d5daaf9adb2d2d8eed5dc981aa2d4b4503bf6f8de8dd5ebfc1"
+      },
+      {
+         "command": "Evidence store/coordinator/MCP regressions:38 passed",
+         "passed": true,
+         "log": "/tmp/a11ied-run-evidence-tests.log",
+         "sha256": "fa2ca82634e36220e130d9daffb7c29cfea36da386fc9154404b99b2014f1146"
+      }
+   ],
+   "sourceSha256": {
+      "packages/core/src/evidence/paths.ts": "11a478dbd8c779aa95e60850071eb137bbc493d86c8599c31ce4330b4e3387f7",
+      "packages/core/src/evidence/store.ts": "64d957d0508952fa71c2e0aa1aeb8b880237193545d7118dd5e2e77a461114f9",
+      "packages/core/src/audit/run-store.ts": "ab982c6357e0227054639461a0870764903e3945b220c7bbf19afc6fa6e72b81",
+      "packages/core/src/review/coordinator-scope.test.ts": "4749a0f14be00b3ada8578a8c47572d53958cb849e2210a0266f557b017b3bd2",
+      "packages/mcp-server/src/tools/evidence.ts": "71f53bf080825d4c2c10f824d1949070f82960f172bfbccb5e01617b72e24e34",
+      "packages/cli/src/commands/audit-evidence.ts": "0e4f1a9f4acb7919b7f612e2d21bc0e8684831aa36f6e5036520c82c27d693e9"
+   },
+   "limits": [
+      "WCAG2.4.5 selected site slice only. The overall representative workflow and production audit remain incomplete.",
+      "Earlier global-journal verified record, rejected attempts and artifacts remain preserved."
+   ]
+}

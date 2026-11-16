@@ -1,0 +1,57 @@
+{
+   "verifiedAt": "2026-11-12T05:03:35.516Z",
+   "collectorVersion": "observe-4",
+   "sourceSHA256": {
+      "packages/contracts/src/schemas/observe.ts": "0daac491c0d77dcc324f629eb4baf0ac4d2bbe17346444daefd487a5393a1568",
+      "packages/observe/src/cache.ts": "c9f87827e7c76a940ee8dd09a64ddac1794eaee16d0fd24dbabdd497ad3b2d7b",
+      "packages/observe/src/collector.ts": "942824b6eed6ceab15b2f7bc028bda3081951987276b13152e23a60dd7ad045b",
+      "packages/verdict/src/admission.ts": "e6fe46e90c023b9290321544ef23aa123c3f73951892886bc826df4bdba92e64",
+      "packages/verdict/src/template-dedupe.ts": "ace783a971df7d05abd8ebe0da27af6bf8ba388ba9746840c8268085690b56fd",
+      "packages/review/src/facade.ts": "160223843b8fd526b3d8dbd62b6eb84752d84faae9de90ed61fc48b82708f7b5",
+      "packages/core/src/observe/collector.test.ts": "fc12a982a4108a9efdd0f511b6743cd197166470cf2a7a48f18c7828f05356e1",
+      "packages/core/src/review/admission.test.ts": "5bf6dc01d03ae134e1e53c1ecdb674485b37110996198b7f4343994372cd68e2"
+   },
+   "checks": [
+      {
+         "command": "npm run standards",
+         "exitCode": 0,
+         "log": "/tmp/a11ied-live-audit-standards.log"
+      },
+      {
+         "command": "npm run lint",
+         "exitCode": 0,
+         "log": "/tmp/a11ied-live-audit-lint.log"
+      },
+      {
+         "command": "npm test",
+         "exitCode": 0,
+         "testsPassed": 1337,
+         "filesPassed": 183,
+         "log": "/tmp/a11ied-live-audit-tests.log"
+      },
+      {
+         "command": "npm run test:browser",
+         "exitCode": 0,
+         "testsPassed": 5,
+         "filesPassed": 1,
+         "log": "/tmp/a11ied-live-audit-browser-tests.log"
+      },
+      {
+         "command": "review report without --draft",
+         "exitCode": 2,
+         "expected": true,
+         "reason": "Incomplete criterion coverage",
+         "artifact": ".a11ied/fireside-review-20261110/live-final-refusal.json"
+      }
+   ],
+   "audit": {
+      "scope": "24 pages / 27 in-scope states; third-party chat excluded; no external submissions",
+      "completeChecks": 218,
+      "unresolvedChecks": 1267,
+      "excludedChecks": 55,
+      "draftDigest": "2f63698e616d558412a9f75c24f1dd6b6242638b0953c78948831ed973bbbbbf",
+      "scopeReconciliation": ".a11ied/fireside-review-20261110/live-scope-reconciliation.json",
+      "collectorManifest": ".a11ied/fireside-review-20261110/live-collection-manifest.json"
+   },
+   "limitation": "Validation of collector fixes and actual bounded audit evidence. The site audit is incomplete; this record does not accept unassessed site/journey/native procedures or confer WCAG conformance."
+}

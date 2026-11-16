@@ -381,7 +381,7 @@ Key decisions and why:
 - Per-page auditing reuses the existing engine. The only extension is shared
   `--storage-state <file>` page setup, passed into Playwright without reading or printing
   its contents. `a1 audit <target> --format json --out
-<file>` and `a1 audit record <target> --criterion ... --outcome ...` already exist and
+  <file>` and `a1 audit record <target> --criterion ... --outcome ...` already exist and
   already fold recorded screen-reader evidence into that page's JSON/EARL output via
   `buildAuditEarlReport` (`packages/core/src/audit/earl.ts`). This is also what makes
   per-page resumability nearly free: recorded evidence lives in `.a11ied/evidence.jsonl`,
@@ -507,10 +507,10 @@ the status cells below.
 
 1. Create `packages/core/src/discovery/sitemap.ts`.
 2. Implement `fetchRobotsSitemaps(originUrl: string, request: APIRequestContext):
-Promise<string[]>` so authenticated and unauthenticated discovery use the same
+   Promise<string[]>` so authenticated and unauthenticated discovery use the same
    timeout-bounded Playwright request context. Return an empty array on a non-200 response.
 3. Implement `parseSitemap(xml: string, sourceUrl: string): { urls: string[];
-childSitemaps: string[] }` using `jsdom`'s `DOMParser` in `text/xml` mode:
+   childSitemaps: string[] }` using `jsdom`'s `DOMParser` in `text/xml` mode:
    `new JSDOM(xml, { contentType: 'text/xml' })`. Read every `<url><loc>` text for a URL
    set, and every `<sitemap><loc>` text for a sitemap index's child sitemaps.
 4. Implement `discoverSitemapUrls(startUrl: string, options: { maxSitemaps?: number })`:
@@ -565,9 +565,9 @@ page in flight.
 **Step-by-step instructions:**
 
 1. Create `packages/core/src/discovery/runtime.ts`. Implement `discoverSite(startUrl:
-string, options: DiscoverOptions): Promise<SiteInventory>` where `DiscoverOptions`
+   string, options: DiscoverOptions): Promise<SiteInventory>` where `DiscoverOptions`
    includes an optional `resumeFrom?: SiteInventory` and an optional `onProgress?:
-(partial: SiteInventory) => Promise<void> | void`. The function:
+   (partial: SiteInventory) => Promise<void> | void`. The function:
    - Calls `discoverSitemapUrls` and `crawlSameOrigin` by default, then merges their URL
      sets. Skip crawling only for explicit `sitemapOnly`. Apply the section path and
      include/exclude filters before queuing a URL.
@@ -588,7 +588,7 @@ string, options: DiscoverOptions): Promise<SiteInventory>` where `DiscoverOption
      (FR-13) per page, setting `requiresAuth`/`hasDestructiveActions`.
    - When `options.probeErrorPages` is true (full-audit mode, FR-7): requests
      `<origin>/a11ied-404-probe-<random>` and adds it as a page with `discoveredVia:
-'error-probe'` if it returns a non-200 status (or a 200 whose title/heading contains
+     'error-probe'` if it returns a non-200 status (or a 200 whose title/heading contains
      "not found"/"404"); also promotes any page that already resolved to a 5xx status into
      scope rather than dropping it.
    - Assigns each page a cross-platform id made from a short `[a-z0-9-]` label plus an
@@ -620,13 +620,13 @@ implicit behavior.
 **Step-by-step instructions:**
 
 1. Add one shared `addStorageStateOption` helper and use it in `a1 audit`, `a1 audit
-pending`, and discovery. Extend the existing MCP `audit` and pending-results tools with
+   pending`, and discovery. Extend the existing MCP `audit` and pending-results tools with
    the same local path input. Pass the path into Playwright context creation and
    authenticated request contexts. Do not add raw cookie or header options to this
    workflow.
 2. Create `packages/cli/src/commands/audit-discover-actions.ts`: `handleAuditDiscoverAction(
-url: string, options: AuditDiscoverActionOptions): Promise<{ result: SiteInventory;
-exitCode: number }>`, calling `discoverSite` from `@a11ied/core` (re-export it from
+   url: string, options: AuditDiscoverActionOptions): Promise<{ result: SiteInventory;
+   exitCode: number }>`, calling `discoverSite` from `@a11ied/core` (re-export it from
    `packages/core/src/index.ts` the same way other engine entry points are re-exported).
    When `options.resumeFrom` is set, read that file with `readInventory` first and pass it
    through as `discoverSite`'s `resumeFrom`. Wire `discoverSite`'s `onProgress` callback to
@@ -637,7 +637,7 @@ exitCode: number }>`, calling `discoverSite` from `@a11ied/core` (re-export it f
    new exit code).
 3. Create `packages/cli/src/commands/audit-discover.ts`: export
    `registerAuditDiscoverCommand(auditCommand: Command): void` that registers `discover
-[url]` on the passed-in `audit` command, following the exact structure of
+   [url]` on the passed-in `audit` command, following the exact structure of
    `registerAuditEvidenceCommands` in `audit-evidence.ts`. Compose `addJsonOption`,
    `addVerboseOption`, `addStorageStateOption` (from step 1), plus command-specific
    options: `--scope <page|section|site>`, `--sitemap <url>`, `--sitemap-only`,
@@ -677,7 +677,7 @@ exitCode: number }>`, calling `discoverSite` from `@a11ied/core` (re-export it f
    already names the tools for `audit record`/`audit pending`, and match that convention
    exactly rather than introducing a second naming scheme for audit subcommands.
 2. Register the tool in `packages/mcp-server/src/server.ts` alongside the other `tools/
-*.ts` registrations.
+   *.ts` registrations.
 3. Add `'audit discover': ['audit_discover']` to `TOOL_BY_COMMAND` in
    `packages/mcp-server/src/registry-parity.test.ts`.
 4. Run `npm test --workspace @a11ied/mcp-server` and confirm the parity test passes.
@@ -700,7 +700,7 @@ reusing the existing per-page EARL-building code rather than re-deriving it.
    manual outcome. Count page-criterion outcomes, not unique criterion ids. Preserve each
    criterion's own test method; do not invent a page-level "dominant" method.
 4. Implement `buildAggregateEarlReport(pageReports: { pageId: string; report: AuditReport
-}[], options: AuditEarlReportOptions): EarlReport`: for each page, reuse
+   }[], options: AuditEarlReportOptions): EarlReport`: for each page, reuse
    `listAxeEarlAssertions(report.axe, profile)` and the `recorded.map(toAssertion)` logic
    already private to `packages/core/src/audit/earl.ts`. Export those two currently-
    private helpers (or a small `buildPageEarlAssertions(report, wcagVersion)` wrapper
@@ -722,7 +722,7 @@ site: an actual point of view, obvious hierarchy, no generic AI-web defaults.
 **Step-by-step instructions:**
 
 1. Create `packages/core/src/report/render-html.ts`. Implement `renderHtmlReport(model:
-ReportModel): string` returning one complete HTML document as a string: inline
+   ReportModel): string` returning one complete HTML document as a string: inline
    `<style>`, no external network requests, no external fonts (system font stack), so the
    file works standalone and offline and is safe to hand to `page.pdf()` in T-09.
 2. Structure, top to bottom:
@@ -760,7 +760,7 @@ ReportModel): string` returning one complete HTML document as a string: inline
 **Step-by-step instructions:**
 
 1. Create `packages/core/src/report/render-pdf.ts`. Implement `renderPdfReport(html:
-string, outPath: string): Promise<void>`:
+   string, outPath: string): Promise<void>`:
    - Launch a Chromium-family browser using the existing policy in
      `packages/core/src/browser/policy.ts`/`shared-browser.ts` (do not add a second
      browser-launch code path).
@@ -783,7 +783,7 @@ underlying data alongside the default render (FR-17).
 **Step-by-step instructions:**
 
 1. Create `packages/cli/src/commands/report-actions.ts`: `handleReportBuildAction(options:
-ReportBuildActionOptions): Promise<{ result: ReportModel; exitCode: number }>` that
+   ReportBuildActionOptions): Promise<{ result: ReportModel; exitCode: number }>` that
    reads the inventory (`readInventory`, T-04), loads every page's persisted audit result
    (`loadPageAuditReports`, T-07), builds the complete model, and writes `report.html`,
    `report.pdf`, `report.earl.json`, and `report.json` into `--out`. Exit code follows the
@@ -792,7 +792,7 @@ ReportBuildActionOptions): Promise<{ result: ReportModel; exitCode: number }>` t
 2. Create `packages/cli/src/commands/report.ts`: register a `report` command family with a
    `build` subcommand (mirroring how `audit-evidence.ts` nests `record`/`pending`/`clear`
    under `audit`): `a1 report build --inventory <file> --results-dir <dir> --out <dir>
-[--title <string>] [--formats <list>] [--fail-on <impact>] [--wcag <version>]`.
+   [--title <string>] [--formats <list>] [--fail-on <impact>] [--wcag <version>]`.
    `--formats` defaults to `html,pdf,earl,json`; accept a subset (e.g. `html,json` for a
    fast CI check without the PDF's browser-launch cost) but never allow omitting `json` -
    it must always be produced alongside whatever else is requested, since it is the data
@@ -873,7 +873,7 @@ instructions rather than code.
      resumable.
    - **Parallelization**: if the runtime supports subagents, ask whether to parallelize
      the axe-only per-page audits (each a plain `a1 audit <url> --format json --out
-<path>` call with no screen reader involvement); state plainly that screen-reader
+     <path>` call with no screen reader involvement); state plainly that screen-reader
      steps always run sequentially, one session at a time (FR-9). Workers write only their
      own page files; the coordinator merges completion into inventory state.
    - **Screen reader safety**: the VoiceOver/NVDA takeover warning, verbatim in spirit
@@ -886,7 +886,7 @@ instructions rather than code.
      per page: `a1 audit pending <url>` to see remaining hybrid/manual criteria (on a
      resumed page this already reflects evidence recorded before the interruption, per
      FR-22), `a1 sr ...` to gather the rest, `a1 audit record <url> --criterion ...
---outcome ...` per judged criterion, then `a1 audit <url> --format json --out <path>`
+     --outcome ...` per judged criterion, then `a1 audit <url> --format json --out <path>`
      to produce that page's final CLI-envelope report file and mark it `audited` in
      `inventory.json`
      (this exact sequence is what makes screen-reader evidence show up in the final EARL
@@ -1038,7 +1038,7 @@ instructions rather than code.
    fixture per-page `audit.json` files, all four output files, `--formats` filtering
    (confirming `json` is always produced), and `--fail-on` exit-code behavior.
 3. Extend the MCP server's existing test harness (`packages/mcp-server/src/testing/
-harness.ts`) coverage for the two new tools, following `sr.test.ts`'s/`index.test.ts`'s
+   harness.ts`) coverage for the two new tools, following `sr.test.ts`'s/`index.test.ts`'s
    existing shape.
 4. Run `npm test --workspace @a11ied/cli` and `npm test --workspace @a11ied/mcp-server`.
 
@@ -1071,7 +1071,7 @@ harness.ts`) coverage for the two new tools, following `sr.test.ts`'s/`index.tes
    by hand (including one real screen-reader session, watching for the takeover warning
    and confirming it is accurate). Partway through the third page - after recording at
    least one `a1 audit record` result but before that page's final `a1 audit --format json
---out` call - stop the process (Ctrl+C, or kill the shell) to simulate a crash.
+   --out` call - stop the process (Ctrl+C, or kill the shell) to simulate a crash.
 6. Start a fresh shell/session and re-run the skill's preflight/resume check by hand:
    confirm `.a11ied/audits/manual-check/inventory.json` is found and reports the correct
    `run.phase` and page counts; confirm `a1 sr status`/`a1 doctor` correctly reports (and

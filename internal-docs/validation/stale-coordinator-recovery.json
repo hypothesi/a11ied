@@ -1,0 +1,67 @@
+{
+   "verifiedAt": "2026-11-14T19:38:24.027524+00:00",
+   "bead": "a11ied-proof-ydh",
+   "actualPilot": ".a11ied/coordinator-pilot-3bd8984b-2d5f-4624-8109-c37941d2679e",
+   "rootBinding": {
+      "documentRequests": 2,
+      "collectionMs": 7462,
+      "resumeMs": 43,
+      "nextMs": 13
+   },
+   "recovery": {
+      "verifiedAt": "2026-11-14T19:37:45.535Z",
+      "passed": true,
+      "selectedStaleCheckRecoveredAndClaimed": [
+         {
+            "checkId": "check-b06a0511b624d566",
+            "criterionId": "2.4.5",
+            "status": "running",
+            "attempts": 1
+         }
+      ],
+      "lateRetryRejected": true,
+      "activeOwnershipPreserved": true,
+      "recollections": 0,
+      "verificationCorrection": "The first verification script read result.checks instead of result.next.checks after a successful public claim. Durable coordinator confirms the actual claim; this check verifies ownership without replaying it.",
+      "limits": [
+         "Broader dispatch/recovery only; no completed site judgment or final representative report"
+      ]
+   },
+   "checks": [
+      {
+         "command": "npm run standards",
+         "passed": true,
+         "log": "/tmp/a11ied-stale-final-standards.log",
+         "logSha256": "95b6bb75d7c550a0af24f3abbdbd72d9e703c0ac91855649280eba2e5fce74c0"
+      },
+      {
+         "command": "npm run pack:check",
+         "passed": true,
+         "log": "/tmp/a11ied-stale-final-pack.log",
+         "logSha256": "67517b17c9cf93069f46c608324fbe60f94eb1cd1b579b2e2872cc140e6fe583"
+      },
+      {
+         "command": "Corrected coordinator regression:18 passed",
+         "passed": true,
+         "log": "/tmp/a11ied-stale-test-corrected.log",
+         "logSha256": "b621b6165e8b3635963faddd27cfdcd0f0c779906e17b50bfc1dc9d8dd75ad93"
+      }
+   ],
+   "otherTests": {
+      "passed": 22,
+      "log": "/tmp/a11ied-stale-final-tests.log",
+      "note": "Original combined run had39 passes and one new test-fixture setup failure. The selected stale criterion was corrected; coordinator suite18 then passed. No production change after the final standards/package build."
+   },
+   "sourceSha256": {
+      "packages/review/src/execution.ts": "f779acc3ee95ed706c1337e09298ce1d6bd9d5ba975d14ac61194989e4ac6e1a",
+      "packages/review/src/types.ts": "6a42407868aa51a4bd22cfbfbe2eafafe2062d456a239ea7f96e746a12669ce9",
+      "packages/contracts/src/schemas/audit-assessment.ts": "a74d5f2b9f12b25ee5e73ed6393a10ee0d0d0a4d790c337b20f744fe7f2ea94b",
+      "packages/core/src/audit/run-lifecycle.ts": "42dfdf0a9c9fa46e81f271be7f96090ee804285207225fd1bb245768c8aaa29d",
+      "packages/core/src/audit/assessment-command.ts": "9d0a087448635507e680833172604c9c6169300ffc8f2dfb402c738461eac0dc",
+      "packages/core/src/review/coordinator-scope.test.ts": "d99bb8f5e6f1c519c413b9ce4c10d775b56663b9a760af0a8ee352ff6cb412f9"
+   },
+   "limits": [
+      "Broader dispatch and ownership only; representative site/journey/interactive/absence final report remains unverified.",
+      "Current production audit remains598 complete,887 unresolved,55 excluded."
+   ]
+}

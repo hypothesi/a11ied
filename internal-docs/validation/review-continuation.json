@@ -1,0 +1,74 @@
+{
+   "verifiedAt": "2026-11-14T15:37:05.490037+00:00",
+   "bead": "a11ied-proof-1bz",
+   "scope": "Durable review continuation contract; no automatic provider-relaunch claim and no newly performed site assessments.",
+   "behavior": [
+      "Same-run resume retains accepted work, roots and live ownership and prunes expired leases",
+      "Accepted partial-batch judgments renew remaining claims and record lastProgressAt",
+      "Local blockers stay visible while independent state work remains runnable",
+      "Missing journey context returns collect-scope instead of repeating empty claims",
+      "Active coordinator work returns waiting instead of a conflicting claim",
+      "Completion reuses actual final-report readiness, including scope gaps and empty excluded scope",
+      "A cold CLI process archives a partial journal suffix, preserves the valid accepted prefix and selects remaining work; MCP resumes the same saved state"
+   ],
+   "hostBoundary": "The execution host must relaunch after a provider failure and invoke the same run/worker resume command. Tests establish process-boundary recovery, not automatic model-provider restart.",
+   "checks": [
+      {
+         "command": "npm run standards",
+         "log": "/tmp/a11ied-continuation-standards.log",
+         "passed": true,
+         "logSha256": "6e7bdc9ce98ed4df39517b64f9035f9b38194d0d32cfc694734e7c95ae721fa4"
+      },
+      {
+         "command": "npm run pack:check",
+         "log": "/tmp/a11ied-continuation-pack.log",
+         "passed": true,
+         "logSha256": "3c2419541734b91aa176b81f5f5aa5a749a1854902404a2843c7a6a24b5237c6"
+      },
+      {
+         "command": "Scheduling, facade and coordinator API scenarios",
+         "log": "/tmp/a11ied-continuation-scheduling-tests.log",
+         "passed": true,
+         "logSha256": "4b0085f47260a9cebfec1c4b9c646e972fa7631208f2822fdfdde4f47f97f46c",
+         "result": {
+            "files": 3,
+            "passed": 22,
+            "skipped": 14
+         }
+      },
+      {
+         "command": "Public continuation, coordinator, facade, CLI, MCP, release and skill checks",
+         "log": "/tmp/a11ied-continuation-public-tests.log",
+         "passed": true,
+         "logSha256": "76f4331bb6458481db5c7f9fca6405e21c9bef65b97f99b1ed2c95a5f136f961",
+         "result": {
+            "files": 7,
+            "passed": 65,
+            "durationSeconds": 18.68
+         }
+      },
+      {
+         "command": "Cold interrupted-journal recovery and verdict store checks",
+         "log": "/tmp/a11ied-continuation-recovery-tests.log",
+         "passed": true,
+         "logSha256": "1d1b17b5f4e98ae8f7910825e9fc6867ba4de911950c35c5b6f6c151c6b4cd62",
+         "result": {
+            "files": 2,
+            "passed": 20,
+            "durationSeconds": 5.01
+         }
+      }
+   ],
+   "sourceSha256": {
+      "packages/review/src/execution.ts": "b692c27d4c8eba24ac52cc820293ba8b1a13fddf1f78a593d4732f4c8d2be324",
+      "packages/review/src/facade.ts": "983a6bce9c6d7fc19554672643795b3ae3f37566969d594ddd3d125d327ff90a",
+      "packages/review/src/types.ts": "13a74e79a70e844ec4f543c5601160f7195a527d866fa07049870508d33a4e4d",
+      "packages/review/src/index.ts": "ef2d06fc162d2339a23d902e8ffa452c9956bb5063b4567afe1cdef86d2e8409",
+      "packages/cli/src/commands/review.ts": "bf0ba8e937b85e6a7b3538d34852e64f594372c0fa669d7d1ad6e20ec029bb7e",
+      "packages/mcp-server/src/tools/review.ts": "7e789dbffa5a744a65a6536d665e2acb010807a7f8e615c490590343ef22266d",
+      "packages/core/src/review/continuation.test.ts": "1558f258b8fa32f2a53e189cb341abfc20d7e527205f58f82f53ada5c38fc286",
+      "packages/core/src/review/coordinator-scope.test.ts": "b20b86b0279a07438d38323ab1f413367fea3fb763c8c81ecba6c5dd9cdb5f3a",
+      "packages/skills/a11ied/resources/full-site-execution.md": "8dc7e41a2f544fd2648a00af610e9e1b5e3dfa6b745f1cb5aee142a817909d9d",
+      "packages/docs/src/pages/reference/cli.astro": "59ee4f7e4dcbda956bad8fb014dbeda832fa74a0e804593b8d34c9b00110ebb2"
+   }
+}

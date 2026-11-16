@@ -345,17 +345,13 @@ combobox('waits for the save announcement', async ({ sr }) => {
 `packages/core/src/driver/command-queue.ts`:
 
 ```ts
-/**
- * A queued command. Awaiting it runs every command queued before it, then
- * this one.
- */
+/** A queued command. Awaiting it runs every command queued before it, then this one. */
 export interface Queued<T> extends PromiseLike<T> {}
 
 export interface CommandQueueOptions {
    /**
-    * Receives one promise per command. It resolves when the command passes or
-    * when its failure went to an await, and rejects only when the failure
-    * went to no await.
+    * Receives one promise per command. It resolves when the command passes or when its
+    * failure went to an await, and rejects only when the failure went to no await.
     */
    track?: (settled: Promise<void>) => void;
    /** Skips every command not yet started once it aborts. */
@@ -366,8 +362,8 @@ export class CommandQueue {
    constructor(options: CommandQueueOptions = {});
    enqueue<T>(name: string, run: () => Promise<T>, callSite: Error): Queued<T>;
    /**
-    * Waits for every queued command. Rejects with the first failure nobody
-    * awaited, unless a `track` function already reported it.
+    * Waits for every queued command. Rejects with the first failure nobody awaited,
+    * unless a `track` function already reported it.
     */
    drain(): Promise<void>;
 }
@@ -394,14 +390,11 @@ export interface QueuedScreenReader extends Omit<QueuedMethods, 'stop'>, AsyncDi
    /** The reader under the queue, for a call that must run at once. */
    readonly reader: ScreenReader;
    /**
-    * Waits for every queued command. Rejects with the first failure nobody
-    * awaited, unless a `track` function already reported it.
+    * Waits for every queued command. Rejects with the first failure nobody awaited,
+    * unless a `track` function already reported it.
     */
    drain(): Promise<void>;
-   /**
-    * Drains, stops the reader even when the drain failed, then rethrows that
-    * failure.
-    */
+   /** Drains, stops the reader even when the drain failed, then rethrows that failure. */
    stop(): Promise<void>;
 }
 
@@ -448,8 +441,8 @@ export function createScreenReaderFixture<Options>(
 ) => Promise<void>;
 
 /**
- * Records a command promise on the test task, so the runner waits for it and
- * reports its rejection as an error of the test itself.
+ * Records a command promise on the test task, so the runner waits for it and reports its
+ * rejection as an error of the test itself.
  */
 export function recordOnTask(
    task: Readonly<RunnerTestCase>,
@@ -641,7 +634,7 @@ npx -y vitest run packages/core/src/driver/queued-screen-reader.test.ts \
 2. Implement `expectOn(wanted: WantedItem): Promise<void>` with
    `checkCurrentItem(await this.read(), wanted)`. On a failed check, throw
    `new ScreenReaderAssertionError(check.failure, { expected:
-describeWanted(wanted), phrases: check.phrases })`.
+   describeWanted(wanted), phrases: check.phrases })`.
 3. Implement `expectSpokenInOrder`. Its first parameter is
    `matches: readonly SpokenMatch[]` and its second is
    `options: Pick<SpokenOptions, 'since'> = {}`. Call
@@ -687,9 +680,9 @@ shared factory, and report an unawaited failure on the test itself.
    promise onto the array.
 3. Write the fixture body as
    `async ({ srOptions, task, signal }, use) => { const sr =
-queueScreenReader(await start(srOptions), { track: (settled) =>
-recordOnTask(task, settled), signal }); try { await use(sr); } finally
-{ await sr.stop(); } }`.
+   queueScreenReader(await start(srOptions), { track: (settled) =>
+   recordOnTask(task, settled), signal }); try { await use(sr); } finally
+   { await sr.stop(); } }`.
 4. Change `packages/cli/src/vitest/index.ts` so `ScreenReaderFixtures.sr` is
    `QueuedScreenReader` and the `sr` fixture is
    `createScreenReaderFixture(screenReader)`.

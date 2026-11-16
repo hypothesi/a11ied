@@ -69,7 +69,7 @@ What is missing for "browse without web fetches" and "understand how to fix":
   `slug-index`, plus `coverage-summary`) are built, validated, and released but never
   read at runtime (`wcag-engine/src/artifacts/runtime.ts:101-131`).
 - There is no reverse lookup from an axe rule id to a criterion. `wcag search
-button-name` happens to rank 4.1.2 first through the failure text, by luck.
+  button-name` happens to rank 4.1.2 first through the failure text, by luck.
 - `wcag levels` prints `A, AA, AAA`. It is the most prominent subcommand and the least
   useful.
 - `wcag` with no arguments prints help and exits 1.
@@ -282,7 +282,7 @@ browser tests" story, and it is the shortest path to it.
 
 - Remove `inspect` as a top-level command. Keep the signal detectors and XPaths as the
   "applicability" section of `a1 audit` and as the `--applicable` filter on `wcag
-criteria <target>`, but show only signal-backed `applicable` states by default. The
+  criteria <target>`, but show only signal-backed `applicable` states by default. The
   tag-based `likely-applicable` state is noise and should go.
 - Remove `wcag levels`, `click-current-item` (duplicate of `activate`), and the five
   unused generated index files, or wire the indexes in.

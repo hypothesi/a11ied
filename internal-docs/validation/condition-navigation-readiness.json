@@ -1,0 +1,22 @@
+{
+   "verifiedAt": "2026-11-16",
+   "bead": "a11ied-proof-4mp",
+   "change": "Use DOMContentLoaded instead of networkidle for condition navigation; retain exact target and semantic-root guard.",
+   "validation": {
+      "standards": "passed; /tmp/a11ied-capture-load-standards.log",
+      "packaging": "passed; /tmp/a11ied-capture-load-pack.log",
+      "focusedTests": "28 passed in two files; /tmp/a11ied-capture-load-tests.log",
+      "realBrowser": "Matching immutable fixture root captures successfully while a deliberately held background request remains open."
+   },
+   "liveLimitation": "Earlier Nov15 navigation timeouts remain preserved; Nov16 live site reachable. A source-level tsx harness injected __name into the browser exclusion helper and failed; actual built CLI captures preserve chat exclusion and succeed. No exclusion runtime code added.",
+   "status": "complete: regression and live-root verification pass",
+   "artifacts": [".a11ied/fireside-review-20261110/keyboard-fixed-metrics-20261115.json"],
+   "liveVerification": {
+      "date": "2026-11-16",
+      "result": "Both actual built-CLI homepage captures passed unchanged root guards with52 actions each, including24Tab and24Shift+Tab. Each completed in23.1sec concurrently.",
+      "artifacts": [
+         ".a11ied/fireside-review-20261110/keyboard-cli-home-initial-20261116.json",
+         ".a11ied/fireside-review-20261110/keyboard-cli-home-navigation-expanded-20261116.json"
+      ]
+   }
+}
