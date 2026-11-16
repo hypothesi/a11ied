@@ -9,6 +9,7 @@ output/
 .fallow
 *.tsbuildinfo
 .playwright-cli
+.playwright-mcp
 
 # Beads / Dolt files (added by bd init)
 .dolt/
