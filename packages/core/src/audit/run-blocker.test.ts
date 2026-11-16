@@ -38,7 +38,7 @@ async function getRetriedCheck(
       return run.checks.find((check) => check.checkId === checkId);
    }
    const next = await nextAuditAssessment(file);
-   return next.check;
+   return next.checks?.[0];
 }
 
 async function assertBackwardClock(direct: boolean): Promise<void> {
@@ -47,14 +47,18 @@ async function assertBackwardClock(direct: boolean): Promise<void> {
       vi.useFakeTimers({ toFake: ['Date'] });
       vi.setSystemTime(new Date('2030-01-01T00:00:00Z'));
       const claimed = await nextAuditAssessment(fixture.file);
-      if (!claimed.check) {
+      if (!claimed.checks?.length) {
          throw new Error('The fixture must claim a check.');
       }
-      await refineUnderBackwardClock(fixture.file, claimed.check.checkId);
-      const retried = await getRetriedCheck(fixture.file, claimed.check.checkId, direct);
+      await refineUnderBackwardClock(fixture.file, claimed.checks[0]?.checkId ?? '');
+      const retried = await getRetriedCheck(
+         fixture.file,
+         claimed.checks[0]?.checkId ?? '',
+         direct,
+      );
 
-      expect(retried?.checkId).toStrictEqual(claimed.check.checkId);
-      expect(retried?.attempts).toStrictEqual(claimed.check.attempts + 1);
+      expect(retried?.checkId).toStrictEqual(claimed.checks[0]?.checkId);
+      expect(retried?.attempts).toStrictEqual((claimed.checks[0]?.attempts ?? 0) + 1);
       expect(Date.parse(retried?.attemptStartedAt ?? '')).toBeGreaterThan(
          Date.parse('2030-01-01T00:00:10Z'),
       );
@@ -74,7 +78,7 @@ describe('recovered assessment blockers', () => {
          const claimed = await nextAuditAssessment(fixture.file),
             recovered = await resumeAuditAssessment({ file: fixture.file });
          const before = recovered.run.checks.find(
-            (check) => check.checkId === claimed.check?.checkId,
+            (check) => check.checkId === claimed.checks?.[0]?.checkId,
          );
          if (!before) {
             throw new Error('The fixture must claim a check before interruption.');
@@ -92,7 +96,7 @@ describe('recovered assessment blockers', () => {
             reason: 'The target window is unavailable; restore it before retrying.',
             updatedAt: expect.any(String),
          });
-         expect(updated.activeCheckId).toBeUndefined();
+         expect(updated.activeCheckIds).toStrictEqual([]);
          expect(updated.status).toStrictEqual('active');
       } finally {
          await rm(dirname(fixture.file), { recursive: true, force: true });

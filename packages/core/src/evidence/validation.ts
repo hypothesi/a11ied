@@ -1,3 +1,4 @@
+import { validateProcedureActionOutcomes } from '@a11ied/verdict';
 import {
    type AssessmentCheck,
    type AssessmentProcedure,
@@ -5,14 +6,18 @@ import {
    type EvidenceRecord,
    evidenceRecordSchema,
 } from '@a11ied/contracts';
-import { getTestMethod, WcagEngineNotFoundError } from '@a11ied/wcag-engine';
 import { readAuditRun } from '../audit/run-store.js';
 import { listAssessmentObligations } from '../audit/run-obligations.js';
-import { CliUsageError } from '../errors/cli-errors.js';
-import { listApgRowKeys } from '../apg/runtime.js';
 import { validatePatternRequirements } from '../apg/row-key.js';
 import { getArtifactError, type EvidenceArtifactContext } from './artifacts.js';
 import { stripFragment } from './subject.js';
+import { resolveEvidenceProcedure, validateEvidenceTest } from './procedure-catalog.js';
+export { resolveEvidenceProcedure, validateEvidenceTest } from './procedure-catalog.js';
+import {
+   getMissingCapabilities,
+   getRequiredCapabilities,
+   getRequiredEvidence,
+} from './procedure-requirements.js';
 import { validateNativeEvidence } from './native-evidence.js';
 
 const verifiedRecords = new WeakMap<EvidenceRecord, string>();
@@ -56,58 +61,6 @@ export function listEvidenceObligations(record: EvidenceRecord): AuditRun['check
    );
 }
 
-function readProcedureCatalog(input: {
-   criterionId: string;
-   wcagVersion?: string | undefined;
-}): AssessmentProcedure[] {
-   try {
-      return getTestMethod(input.criterionId, { version: input.wcagVersion ?? '2.2' })
-         .strategy.procedures;
-   } catch (error) {
-      if (error instanceof WcagEngineNotFoundError) {
-         throw new CliUsageError(
-            'validation-error',
-            `WCAG criterion ${input.criterionId} was not found.`,
-         );
-      }
-      throw error;
-   }
-}
-
-/** Select a catalog procedure once for every recording surface; invented IDs are rejected. */
-export function resolveEvidenceProcedure(input: {
-   criterionId: string;
-   procedureId?: string | undefined;
-   wcagVersion?: string | undefined;
-}): AssessmentProcedure {
-   const procedure = readProcedureCatalog(input).find(
-      (entry) =>
-         entry.procedureId !== 'axe_scan' &&
-         (!input.procedureId || entry.procedureId === input.procedureId),
-   );
-   if (!procedure) {
-      throw new CliUsageError(
-         'evidence-procedure-invalid',
-         `No executable procedure ${input.procedureId ?? ''} exists for WCAG ${input.criterionId}.`,
-      );
-   }
-   return procedure;
-}
-
-/** Both criterion procedures and APG rows must exist before they can be recorded. */
-export function validateEvidenceTest(record: EvidenceRecord, wcagVersion?: string): void {
-   if (record.test.kind === 'criterion') {
-      resolveEvidenceProcedure({ ...record.test, wcagVersion });
-      return;
-   }
-   if (!listApgRowKeys(record.test.exampleId).includes(record.test.rowKey)) {
-      throw new CliUsageError(
-         'pattern-row-not-found',
-         `No APG row ${record.test.rowKey} exists in ${record.test.exampleId}.`,
-      );
-   }
-}
-
 function validateStates({ record, provenance, run, check }: ValidationContext): void {
    const states =
       check.scope === 'site'
@@ -121,6 +74,7 @@ function validateStates({ record, provenance, run, check }: ValidationContext): 
          state.stateId !== reference.stateId ||
          state.revision !== reference.revision ||
          state.fingerprint !== reference.fingerprint ||
+         state.observationDigest !== reference.observationDigest ||
          state.environmentId !== provenance.environmentId
       );
    });
@@ -129,7 +83,9 @@ function validateStates({ record, provenance, run, check }: ValidationContext): 
       changed ||
       check.status === 'stale'
    ) {
-      throw new Error('The evidence state order, revision, or fingerprint is stale.');
+      throw new Error(
+         'The evidence state order, revision, fingerprint, or observation digest is stale.',
+      );
    }
    if (
       !states.some(
@@ -202,12 +158,16 @@ function validateRequirements({
    const environment = run.environments.find(
       (entry) => entry.environmentId === provenance.environmentId,
    );
-   const missingCapability = procedure.requiredCapabilities.some(
-      (capability) => !environment?.capabilities.includes(capability),
-   );
-   const missingArtifact = procedure.requiredEvidence.some(
-      (kind) => !provenance.artifacts.some((artifact) => artifact.kind === kind),
-   );
+   const missingCapability =
+      getMissingCapabilities({
+         procedure,
+         capabilities: environment?.capabilities ?? [],
+         isInapplicable: record.outcome === 'inapplicable',
+      }).length > 0;
+   const missingArtifact = getRequiredEvidence(
+      procedure,
+      record.outcome === 'inapplicable',
+   ).some((kind) => !provenance.artifacts.some((artifact) => artifact.kind === kind));
    if (missingCapability || missingArtifact) {
       throw new Error('Required procedure capabilities or artifacts are missing.');
    }
@@ -218,14 +178,56 @@ function validateRequirements({
    validateNativeEvidence({
       run,
       provenance,
-      requiresReader: procedure.requiredCapabilities.includes('real-reader'),
+      requiresReader: getRequiredCapabilities(
+         procedure,
+         record.outcome === 'inapplicable',
+      ).includes('real-reader'),
+      requiresScreenReader: getRequiredCapabilities(
+         procedure,
+         record.outcome === 'inapplicable',
+      ).includes('screen-reader'),
    });
 }
 
-interface ValidateEvidenceOptions {
+export interface ValidateEvidenceOptions {
    runFile: string;
    expectedRunId?: string | undefined;
    subject?: string | undefined;
+}
+
+function validateBroaderActionCoverage({
+   record,
+   procedure,
+   provenance,
+}: ValidationContext): void {
+   if (!['site', 'journey'].includes(procedure.scope) || record.outcome === 'cantTell') {
+      return;
+   }
+   const assessment = record.assessment;
+   if (!assessment || assessment.version !== procedure.version) {
+      throw new Error(
+         'Broader terminal results require explicit current procedure-action assessments.',
+      );
+   }
+   const indices = new Set(assessment.actions.map((action) => action.index));
+   if (
+      indices.size !== procedure.actions.length ||
+      indices.size !== assessment.actions.length ||
+      assessment.actions.some((action) => action.index >= procedure.actions.length)
+   ) {
+      throw new Error('Assess every broader procedure action exactly once.');
+   }
+   if (
+      assessment.actions.some((action) =>
+         action.artifactIndices.some((index) => index >= provenance.artifacts.length),
+      )
+   ) {
+      throw new Error('Procedure actions must reference captured provenance artifacts.');
+   }
+   validateProcedureActionOutcomes(record, assessment.actions);
+   if (assessment.actions.some((action) => action.outcome === 'cantTell')) {
+      throw new Error('A broader terminal result cannot leave an action unresolved.');
+   }
 }
 
 async function getValidationReasons(
@@ -259,9 +261,20 @@ async function getValidationReasons(
       runFile: options.runFile,
       check,
       procedure,
+      requiresMediaAbsence:
+         record.outcome === 'inapplicable' &&
+         procedure.inapplicability?.kind === 'media-absence' &&
+         getMissingCapabilities({
+            procedure,
+            capabilities:
+               run.environments.find(
+                  (entry) => entry.environmentId === provenance.environmentId,
+               )?.capabilities ?? [],
+         }).length > 0,
    };
    validateScope(context);
    validateRequirements(context);
+   validateBroaderActionCoverage(context);
    const errors = await Promise.all(
       provenance.artifacts.map((artifact) => getArtifactError(artifact, context)),
    );

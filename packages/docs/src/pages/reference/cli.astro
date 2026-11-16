@@ -12,6 +12,7 @@ const toc = [
    { id: 'tree', label: 'a1 tree' },
    { id: 'audit', label: 'a1 audit' },
    { id: 'assessment', label: 'Agent-led assessment' },
+   { id: 'review', label: 'Review workflow' },
    { id: 'doctor', label: 'a1 doctor and mcp' },
    { id: 'browser', label: 'Browser selection' },
 ];
@@ -479,8 +480,8 @@ a1 audit status .a11ied/fireside/run.json --limit 20 --json</code></pre>
       <div class="route-list">
          <div class="route-row"><code>run [url]</code><span>Requires <code>--environment</code>. Accepts <code>--app</code>, <code>--scope</code>, <code>--wcag</code>, <code>--level</code>, <code>--inventory</code>, <code>--run</code>, <code>--id</code>, and <code>--policy</code>. Policy JSON declares allowed origins and approved submission or destructive actions; both action flags default to disabled.</span></div>
          <div class="route-row"><code>state, journey, queue &lt;run&gt;</code><span>Register an observed state, ordered journey, or explicit obligation with <code>--input &lt;file&gt;</code>. Use <code>-</code> for stdin. Responses return the saved identity and revision even beyond the first status page.</span></div>
-         <div class="route-row"><code>next &lt;run&gt;</code><span>Claim one check with its procedure and observed scope context. Execute its setup and actions, preserve evidence, and supply the required agent judgment. A changed claim is rejected before any UI input.</span></div>
-         <div class="route-row"><code>probe &lt;run&gt;</code><span>Claims every check the run's environment supports, loads each observed page in a browser, and records verified evidence with its outcome. Accepts <code>--limit</code>. Criteria that need a screen reader, audio heard by a person, or human judgment stay unclaimed, or come back as needs review. MCP tool <code>audit_probe</code> does the same.</span></div>
+         <div class="route-row"><code>next &lt;run&gt;</code><span>Claim compatible checks with <code>--count</code> and optional comma-separated <code>--scope site,journey</code>. Scope filtering preserves unselected obligations. Execute its setup and actions, preserve evidence, and supply the required agent judgment. A changed claim is rejected before any UI input.</span></div>
+         <div class="route-row"><code>probe &lt;run&gt;</code><span>Runs supported automatic probes against observed pages. Probes cannot supply the explicit procedure-action judgments required for site and journey completion. Accepts <code>--limit</code>. Criteria that need a screen reader, audio heard by a person, or human judgment stay unclaimed, or come back as needs review. MCP tool <code>audit_probe</code> does the same.</span></div>
          <div class="route-row"><code>evaluate &lt;run&gt;</code><span>Requires <code>--check</code>, <code>--outcome</code>, and saved <code>--evidence &lt;id...&gt;</code> from <code>audit record --run</code>. Missing, mismatched, or stale proof is rejected.</span></div>
          <div class="route-row"><code>block, resume &lt;run&gt;</code><span>Block a check with <code>--check</code> and <code>--reason</code>. Resume preserves interrupted work as blocked. After restoring a safe state, pass explicit <code>--retry &lt;check...&gt;</code>; completed assessments cannot be replayed.</span></div>
          <div class="route-row"><code>status, finalize &lt;run&gt;</code><span>Status revalidates coverage, artifacts, and scope. Lists use <code>--offset</code> and <code>--limit</code> (1 to 100; default 20). Finalize requires complete validated coverage; <code>--partial</code> returns unresolved work and keeps the run active.</span></div>
@@ -489,6 +490,78 @@ a1 audit status .a11ied/fireside/run.json --limit 20 --json</code></pre>
          Finalization updates assessment status. Report building remains a separate operation
          over discovery and page artifacts. Native reader binding and complete installed audits
          still require their own runtime verification.
+      </p>
+   </section>
+
+   <section class="panel" id="review">
+      <h2>Review workflow</h2>
+      <p>
+         <code>a1 review start &lt;url&gt; --run-dir &lt;dir&gt;</code> launches a browser and
+         collects the initial page state. <code>--states &lt;jsonOrFile&gt;</code> registers
+         additional URLs and setup actions. Collection covers only those registered states;
+         it does not crawl links or discover a complete site automatically. Excluded states
+         are skipped. Passive collection does not submit forms; provide setup actions only
+         for interactions you are authorized to perform.
+      </p>
+      <p>
+         <code>a1 review resume --run-dir &lt;dir&gt; --run-id &lt;sameId&gt; --agent &lt;workerId&gt;</code>
+         resumes saved work without recollecting roots. Live leases remain owned;
+         expired leases can be reclaimed. Accepted partial-batch judgments renew the
+         remaining lease and record <code>lastProgressAt</code>.
+         Status exposes <code>execution.state</code>: <code>runnable</code>,
+         <code>waiting</code>, <code>blocked</code> or <code>complete</code>, plus a typed
+         next action. Local blockers do not hide independent work. Missing journey
+         context returns <code>collect-scope</code>; collect actual evidence before
+         registering a process. Provider relaunch remains the execution host's job.
+      </p>
+      <p>
+         <code>a1 review resume --run-dir &lt;dir&gt; --run-id &lt;reviewId&gt;
+         --coordinator &lt;runFile&gt; --coordinator-run-id &lt;coordinatorId&gt;</code>
+         attaches an existing coordinator while preserving roots, judgments and leases.
+         Every participant must match its current collected fingerprint, observation digest, environment,
+         target and setup. Register <code>observationDigest</code> on coordinator states and
+         repeat it in evidence state references. Textual setup instructions are separate
+         from the digest of collected typed setup. MCP <code>review.resume</code> accepts the same identities.
+         Linked coverage counts state procedures per state, site procedures per
+         environment and process procedures per ordered journey. This changes the legacy
+         denominator without performing additional assessments. Missing journeys remain
+         unresolved. <code>review next --json</code> returns
+         <code>coordinatorNextAction</code> when broader work remains; execute it through
+         <code>audit next --scope site,journey</code>.
+      </p>
+      <p>
+         Record broader evidence using <code>audit record --assessment &lt;file&gt;</code>.
+         The JSON contains the current procedure <code>version</code> and complete
+         <code>actions</code>: each action has an <code>index</code>, <code>outcome</code>,
+         concise <code>observation</code> and <code>artifactIndices</code> pointing into
+         provenance artifacts. Current hashes and complete scope are revalidated on
+         status and report. No second review judgment is required for accepted broader
+         results. Historical notes without action coverage remain unresolved.
+      </p>
+      <p>
+         <code>a1 review observe &lt;stateId&gt; --run-dir &lt;dir&gt; --slice facts</code> reads
+         cached evidence without opening a browser. Add <code>--refresh</code> to collect
+         again. Supplying <code>--setup &lt;jsonOrFile&gt;</code> also collects fresh evidence.
+         A new state needs <code>--target-url &lt;url&gt;</code> and either refresh or setup.
+         Use a separate state ID for a different URL. Each fresh capture gets a fingerprint,
+         digest, and collector receipt; older snapshots remain available.
+      </p>
+      <p>
+         Add <code>--capture &lt;jsonOrFile&gt;</code> to save state-bound interaction
+         evidence without replacing the root snapshot. The request contains a
+         <code>condition</code> (<code>default</code>, <code>text200</code>,
+         <code>reflow320</code> or <code>textSpacing</code>) and declarative
+         <code>actions</code>. Captures verify the baseline state and retain hashed
+         screenshots, action receipts and virtual speech. Reference the returned
+         artifacts in explicit judgments; captures do not assign outcomes.
+         Capture cannot be combined with refresh, setup, slice or target overrides.
+         Form submissions and navigation to other states are blocked.
+         MCP tools <code>review.start</code>, <code>review.observe</code>, and
+         <code>review.run</code> use the same browser lifecycle. Underscore aliases are also
+         available. Set <code>refresh: true</code> on observation calls to recollect.
+         <code>review next</code> claims assessment work, <code>review judge</code> submits
+         evidence for admission, and <code>review report --draft</code> reports incomplete
+         work. Automatic collection alone does not complete a WCAG AA review.
       </p>
    </section>
 
@@ -516,8 +589,8 @@ a1 help-all</code></pre>
       <p>
          Use <code>--task scan</code> for browser scans, <code>--task reader</code> for reader sessions,
          or <code>--task audit</code> for desktop audit prerequisites. Use <code>--sr voiceover</code>
-         on macOS or <code>--sr nvda</code> on Windows to check one reader. A virtual reader cannot
-         satisfy audit prerequisites. These checks do not establish audit coverage.
+         on macOS, <code>--sr nvda</code> on Windows, or <code>--sr virtual</code> for a virtual-reader
+         production audit. Virtual evidence retains simulated provenance. These checks do not establish audit coverage.
       </p>
       <p>
          Recording permission is checked only with <code>--recording</code>. On macOS this captures

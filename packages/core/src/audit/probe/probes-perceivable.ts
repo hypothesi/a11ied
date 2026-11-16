@@ -1,3 +1,4 @@
+import { judgeMediaInventory } from './media-inventory.js';
 import {
    fail,
    getFirstPass,
@@ -17,15 +18,16 @@ function hasMedia(media: { video: number; audio: number; embeds: string[] }): bo
 }
 
 const mediaAlternative: Probe = ({ facts }) => {
-   const played = facts.instrumented.mediaPlays + facts.instrumented.audioContexts;
-   if (!hasMedia(facts.media) && played === 0) {
-      return notApplicable(
-         'No audio or video elements, embeds, media playback, or audio contexts were observed.',
-      );
+   if (
+      facts.media.video +
+         facts.media.audio +
+         facts.instrumented.mediaPlays +
+         facts.instrumented.audioContexts >
+      0
+   ) {
+      return needsReview('Observed media requires evaluation of its alternatives.');
    }
-   return needsReview(
-      `Media is present (${String(facts.media.video)} video, ${String(facts.media.audio)} audio, ${String(facts.media.embeds.length)} embeds); its alternatives need a person.`,
-   );
+   return judgeMediaInventory(facts.mediaInventory);
 };
 
 export const perceivableProbes: Record<string, Probe> = {
@@ -166,15 +168,10 @@ export const perceivableProbes: Record<string, Probe> = {
            })
          : pass('axe color-contrast found no violations.');
    },
-   '1.4.4': ({ facts }) =>
-      facts.zoom200OverflowPx <= 0
-         ? pass('At a 640px viewport (200% zoom equivalent) nothing overflows sideways.')
-         : fail({
-              rationale: `At 200% zoom equivalent the page overflows by ${String(facts.zoom200OverflowPx)}px.`,
-              title: 'Content does not resize to 200%',
-              userImpact: 'Low-vision users who zoom must scroll sideways.',
-              remediation: 'Use fluid layouts and relative units.',
-           }),
+   '1.4.4': () =>
+      needsReview(
+         'A 640px viewport does not establish text enlargement. Verify enlargement up to 200% and preservation of content and functionality.',
+      ),
    '1.4.5': ({ facts }) =>
       needsReview(
          `Images of text need a visual review; the page has ${String(facts.images.length)} raster images and ${String(facts.svgImgs.length)} SVGs.`,

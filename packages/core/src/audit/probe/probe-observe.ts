@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { writeAtomic } from '../../files/store.js';
 import { dirname, join } from 'node:path';
 import type { AuditRun, SiteInventory } from '@a11ied/contracts';
 import type { Browser, Page } from 'playwright';
@@ -39,8 +39,7 @@ async function observePage(input: {
          .update(await describeStructure(view))
          .digest('hex');
       const path = `artifacts/${page.pageId}-state.png`;
-      await mkdir(join(dirname(file), 'artifacts'), { recursive: true });
-      await writeFile(join(dirname(file), path), await view.screenshot());
+      await writeAtomic(join(dirname(file), path), await view.screenshot());
       await executeAuditAssessment({
          action: 'state',
          file,

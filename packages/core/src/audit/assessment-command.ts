@@ -44,7 +44,7 @@ export interface AuditAssessmentResponse {
       | 'profile'
       | 'scope'
       | 'status'
-      | 'activeCheckId'
+      | 'activeCheckIds'
       | 'actionPolicy'
    >;
    complete: boolean;
@@ -65,8 +65,8 @@ export interface AuditAssessmentResponse {
       checkId?: string | undefined;
    };
    next?: {
-      check: AssessmentCheck;
-      procedure: AssessmentProcedure;
+      checks: AssessmentCheck[];
+      procedures: AssessmentProcedure[];
       context: {
          environment: AuditRun['environments'][number] | undefined;
          journey: AuditRun['journeys'][number] | undefined;
@@ -115,12 +115,13 @@ function buildResponse(input: {
    file: string;
    status: AuditAssessmentStatus;
    mutation?: AuditAssessmentResponse['mutation'];
-   next?: Pick<NonNullable<AuditAssessmentResponse['next']>, 'check' | 'procedure'>;
+   next?: Pick<NonNullable<AuditAssessmentResponse['next']>, 'checks' | 'procedures'>;
 }): AuditAssessmentResponse {
    const { request, status } = input;
+   const firstClaim = input.next?.checks[0];
    const limit = request.action === 'status' ? request.limit : DEFAULT_LIMIT,
       offset = request.action === 'status' ? request.offset : 0;
-   const { runId, revision, target, profile, scope, activeCheckId, actionPolicy } =
+   const { runId, revision, target, profile, scope, activeCheckIds, actionPolicy } =
       status.run;
    return {
       action: request.action,
@@ -132,7 +133,7 @@ function buildResponse(input: {
          profile,
          scope,
          status: status.run.status,
-         activeCheckId,
+         activeCheckIds,
          actionPolicy,
       },
       complete: status.complete,
@@ -147,11 +148,11 @@ function buildResponse(input: {
          journeys: getPage(status.progress.journeys, offset, limit),
       },
       ...(input.mutation ? { mutation: input.mutation } : {}),
-      ...(input.next
+      ...(input.next && firstClaim
          ? {
               next: {
                  ...input.next,
-                 context: getCheckContext(status.run, input.next.check),
+                 context: getCheckContext(status.run, firstClaim),
               },
            }
          : {}),
@@ -204,6 +205,7 @@ async function applyMutation(
          const status = await resumeAuditAssessment({
             file: request.file,
             ...(request.retryCheckIds ? { retryCheckIds: request.retryCheckIds } : {}),
+            ...(request.onlyIfIdle ? { onlyIfIdle: true } : {}),
          });
          return status.run;
       }
@@ -236,25 +238,31 @@ export async function executeAuditAssessment(
       return buildResponse({ request, file: started.file, status: started.status });
    }
    if (request.action === 'next') {
-      const next = await nextAuditAssessment(request.file),
-         status = await getAuditAssessmentStatus(request.file);
+      const next = await nextAuditAssessment(request.file, {
+         count: request.count,
+         scopes: request.scopes,
+         checkIds: request.checkIds,
+      });
+      const status = await getAuditAssessmentStatus(request.file);
+      const first = next.checks?.[0];
       if (
          status.run.revision !== next.run.revision ||
-         (next.check && status.run.activeCheckId !== next.check.checkId)
+         (first && !status.run.activeCheckIds.includes(first.checkId))
       ) {
          throw new CliUsageError(
             'audit-claim-changed',
             'The audit changed while claiming work. Inspect status and resume before retrying. No UI input was sent.',
          );
       }
-      return buildResponse({
-         request,
-         file: request.file,
-         status,
-         ...(next.check && next.procedure
-            ? { next: { check: next.check, procedure: next.procedure } }
-            : {}),
-      });
+      if (first && next.procedures && next.checks) {
+         return buildResponse({
+            request,
+            file: request.file,
+            status,
+            next: { checks: next.checks, procedures: next.procedures },
+         });
+      }
+      return buildResponse({ request, file: request.file, status });
    }
    const mutation =
       request.action === 'status'

@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync, symlinkSync, unlinkSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { homedir, release } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -44,6 +44,11 @@ const manifestSchema = z.object({
 });
 type GuidepupManifest = z.infer<typeof manifestSchema>;
 
+export interface PreferencesDirectoryAccessResult {
+   writable: boolean;
+   error?: string | undefined;
+}
+
 export interface GuidepupEnvironmentDeps {
    platform: NodeJS.Platform;
    osRelease: string;
@@ -57,6 +62,37 @@ export interface GuidepupEnvironmentDeps {
     */
    manifestPath: string | undefined;
    readManifest: (manifestPath: string) => GuidepupManifest;
+   /**
+    * Probes whether the host process can list and link portable preferences inside the
+    * VoiceOver preferences directory (which macOS TCC protects under `~/Library/Group
+    * Containers/group.com.apple.VoiceOver`).
+    */
+   probeDirectoryWriteAccess?: (directory: string) => PreferencesDirectoryAccessResult;
+}
+
+function probeDirectoryWriteAccessWithFs(
+   directory: string,
+): PreferencesDirectoryAccessResult {
+   const probePath = join(
+      directory,
+      `.a11ied-doctor-probe-${String(process.pid)}-${String(Date.now())}`,
+   );
+   try {
+      readdirSync(directory);
+      symlinkSync(VOICEOVER_LOCAL_PREFERENCES_FILE, probePath);
+      unlinkSync(probePath);
+      return { writable: true };
+   } catch (error) {
+      try {
+         unlinkSync(probePath);
+      } catch {
+         // Ignore cleanup failure when symlink creation was blocked by TCC.
+      }
+      return {
+         writable: false,
+         error: error instanceof Error ? error.message : String(error),
+      };
+   }
 }
 
 function readDefaultWithDefaultsCommand(domain: string, key: string): string | undefined {
@@ -92,6 +128,7 @@ export function createDefaultGuidepupEnvironmentDeps(): GuidepupEnvironmentDeps 
       readDefault: readDefaultWithDefaultsCommand,
       manifestPath: resolveManifestPath(),
       readManifest: readManifestFile,
+      probeDirectoryWriteAccess: probeDirectoryWriteAccessWithFs,
    };
 }
 
@@ -236,13 +273,42 @@ function buildVoiceOverPreferencesBundleCheck(
    });
 }
 
-/** Checks the pieces `@guidepup/setup` configures for VoiceOver automation on macOS. */
-export function checkVoiceOverEnvironment(deps: GuidepupEnvironmentDeps): DoctorCheck[] {
+function buildVoiceOverLocalPreferencesCheck(deps: GuidepupEnvironmentDeps): DoctorCheck {
+   const preferencesDirectory = resolveVoiceOverPreferencesDirectory(deps);
    const localPreferencesPath = join(
-      resolveVoiceOverPreferencesDirectory(deps),
+      preferencesDirectory,
       VOICEOVER_LOCAL_PREFERENCES_FILE,
    );
+   if (!deps.existsSync(localPreferencesPath)) {
+      return buildCheck({
+         id: 'voiceover-local-preferences',
+         label: 'VoiceOver local preferences exist',
+         passed: false,
+         failDetail: `${localPreferencesPath} is missing. Setup starts VoiceOver once to create it.`,
+         action: A11IED_SETUP_COMMAND,
+         actionLabel: 'Create the VoiceOver local preferences',
+      });
+   }
+   const access = deps.probeDirectoryWriteAccess?.(preferencesDirectory);
+   if (access && !access.writable) {
+      const reason = access.error ? ` (${access.error})` : '';
+      return buildCheck({
+         id: 'voiceover-local-preferences',
+         label: 'VoiceOver local preferences writable',
+         passed: false,
+         failDetail: `Cannot link portable VoiceOver preferences in ${preferencesDirectory}${reason}. Grant Full Disk Access to the host terminal or IDE in System Settings > Privacy & Security > Full Disk Access.`,
+      });
+   }
+   return buildCheck({
+      id: 'voiceover-local-preferences',
+      label: 'VoiceOver local preferences exist',
+      passed: true,
+      failDetail: '',
+   });
+}
 
+/** Checks the pieces `@guidepup/setup` configures for VoiceOver automation on macOS. */
+export function checkVoiceOverEnvironment(deps: GuidepupEnvironmentDeps): DoctorCheck[] {
    return [
       buildCheck({
          id: 'voiceover-applescript-setting',
@@ -262,14 +328,7 @@ export function checkVoiceOverEnvironment(deps: GuidepupEnvironmentDeps): Doctor
          action: A11IED_SETUP_COMMAND,
          actionLabel: 'Confirm AppleScript control for VoiceOver',
       }),
-      buildCheck({
-         id: 'voiceover-local-preferences',
-         label: 'VoiceOver local preferences exist',
-         passed: deps.existsSync(localPreferencesPath),
-         failDetail: `${localPreferencesPath} is missing. Setup starts VoiceOver once to create it.`,
-         action: A11IED_SETUP_COMMAND,
-         actionLabel: 'Create the VoiceOver local preferences',
-      }),
+      buildVoiceOverLocalPreferencesCheck(deps),
       buildCheck({
          id: 'voiceover-splash-screen',
          label: 'VoiceOver welcome dialog suppressed',

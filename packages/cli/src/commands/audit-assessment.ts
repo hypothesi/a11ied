@@ -22,11 +22,13 @@ interface AssessmentOptions {
    limit?: string;
    retry?: string[];
    check?: string;
+   checks?: string[];
    outcome?: string;
    evidence?: string[];
    reason?: string;
    partial?: boolean;
    policy?: string;
+   count?: string;
 }
 
 async function readInput(file: string | undefined): Promise<unknown> {
@@ -69,6 +71,19 @@ async function buildStartRequest(
       profile: { wcagVersion: options.wcag ?? '2.2', level: options.level ?? 'AA' },
       scope: options.scope ?? (options.app ? 'app' : 'site'),
       inventoryPath: options.inventory,
+   });
+}
+
+function buildNextRequest(
+   argument: string | undefined,
+   options: AssessmentOptions,
+): AuditAssessmentRequest {
+   return auditAssessmentRequestSchema.parse({
+      action: 'next',
+      file: argument,
+      scopes: options.scope?.split(','),
+      checkIds: options.checks,
+      count: options.count === undefined ? undefined : Number(options.count),
    });
 }
 
@@ -124,7 +139,7 @@ async function buildRequest(input: {
          });
       }
       case 'next': {
-         return auditAssessmentRequestSchema.parse(base);
+         return buildNextRequest(argument, options);
       }
       default: {
          throw new CliUsageError('audit-action-invalid', 'Unknown assessment action.');
@@ -234,7 +249,13 @@ function registerScopeCommands(auditCommand: Command): void {
    registerAction(
       auditCommand
          .command('next <run>')
-         .summary('Claim one procedure with setup, actions, and evidence requirements.'),
+         .summary('Claim one or more compatible procedures.')
+         .option('--checks <check...>', 'Claim only these existing check IDs.')
+         .option('--scope <scopes>', 'Select procedure scopes, such as site,journey.')
+         .option(
+            '--count <n>',
+            'Number of checks to claim in one batch, 1 to 20. Defaults to 1.',
+         ),
       'next',
    );
    registerAction(

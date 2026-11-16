@@ -45,7 +45,7 @@ describe('live claims during state invalidation', () => {
       const created = await createObservedRun();
       const work = await nextAuditAssessment(created.file);
       const state = created.run.states[0];
-      if (!state || !work.check) {
+      if (!state || !work.checks?.length) {
          throw new Error('Missing claimed fixture scope.');
       }
       await registerAuditState({
@@ -54,13 +54,13 @@ describe('live claims during state invalidation', () => {
       });
       const changed = await readAuditRun(created.file);
 
-      expect(changed.activeCheckId).toStrictEqual(work.check.checkId);
+      expect(changed.activeCheckIds).toStrictEqual([work.checks?.[0]?.checkId]);
       await expect(nextAuditAssessment(created.file)).rejects.toThrow('already running');
       const resumed = await resumeAuditAssessment({ file: created.file });
 
-      expect(resumed.run.activeCheckId).toBeUndefined();
+      expect(resumed.run.activeCheckIds).toStrictEqual([]);
       expect(
-         resumed.run.checks.find((check) => check.checkId === work.check?.checkId)
+         resumed.run.checks.find((check) => check.checkId === work.checks?.[0]?.checkId)
             ?.status,
       ).toStrictEqual('blocked');
    });
@@ -116,7 +116,7 @@ describe('live claims during journey invalidation', () => {
       await expect(nextAuditAssessment(created.file)).rejects.toThrow('already running');
       const stored = await readAuditRun(created.file);
 
-      expect(stored.activeCheckId).toStrictEqual(checkId);
+      expect(stored.activeCheckIds).toStrictEqual([checkId]);
    });
 });
 

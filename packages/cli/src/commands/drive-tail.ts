@@ -277,7 +277,7 @@ export function registerTailCommand(driveCommand: Command): void {
    configureTailCommand(
       driveCommand
          .command('tail')
-         .helpGroup(DRIVE_GROUPS.check)
+         .helpGroup(DRIVE_GROUPS.inspect)
          .summary('Continuously stream new screen reader announcements in real time.')
          .description(
             'Continuously stream new screen reader announcements in real time. ' +

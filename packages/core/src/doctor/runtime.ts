@@ -56,7 +56,9 @@ const supportedTargets: Target[] = [
       platform: 'virtual',
       os: 'Cross-platform',
       status: 'ready',
-      notes: ['Use the virtual screen reader for fast, local feedback loops.'],
+      notes: [
+         'Virtual-reader audits retain simulated-reader provenance and do not verify native assistive technology.',
+      ],
    },
 ];
 
@@ -208,22 +210,6 @@ function buildDoctorTarget(
       };
    }
 
-   if (target.platform === 'virtual' && request.task === 'audit') {
-      return {
-         ...target,
-         status: 'requires-setup',
-         summary: 'Select a real desktop reader for an audit.',
-         checks: [
-            {
-               id: 'real-audit-reader',
-               label: 'A desktop audit requires VoiceOver or NVDA',
-               status: 'fail',
-               detail:
-                  'Select --sr voiceover on macOS or --sr nvda on Windows. Virtual output is simulated evidence.',
-            },
-         ],
-      };
-   }
    if (target.platform === 'virtual') {
       return { ...target, summary: 'No setup needed.', checks: [] };
    }

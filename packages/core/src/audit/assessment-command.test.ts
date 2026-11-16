@@ -37,12 +37,12 @@ async function assertRetriedClaim(): Promise<void> {
       const readStatus = lifecycle.getAuditAssessmentStatus;
       vi.spyOn(lifecycle, 'getAuditAssessmentStatus').mockImplementationOnce(async () => {
          const run = await readAuditRun(file);
-         const checkId = run.activeCheckId ?? '';
+         const checkId = run.activeCheckIds[0] ?? '';
          await lifecycle.resumeAuditAssessment({ file });
          await lifecycle.resumeAuditAssessment({ file, retryCheckIds: [checkId] });
          const retried = await lifecycle.nextAuditAssessment(file);
 
-         expect(retried.check?.checkId).toStrictEqual(checkId);
+         expect(retried.checks?.[0]?.checkId).toStrictEqual(checkId);
          return readStatus(file);
       });
 
@@ -67,7 +67,7 @@ async function assertStaleClaim(): Promise<void> {
          });
          const status = await readStatus(file);
 
-         expect(status.run.activeCheckId).toStrictEqual(run.activeCheckId);
+         expect(status.run.activeCheckIds).toStrictEqual(run.activeCheckIds);
          return status;
       });
 
@@ -123,7 +123,7 @@ async function assertBeyondPage(): Promise<void> {
       });
       const selected = await executeAuditAssessment({ action: 'next', file });
 
-      expect(selected.next?.check.checkId).toStrictEqual(queued.mutation?.checkId);
+      expect(selected.next?.checks[0]?.checkId).toStrictEqual(queued.mutation?.checkId);
       expect(selected.next?.context.states.items[0]?.stateId).toStrictEqual(stateId);
       expect(selected.next?.context.environment?.environmentId).toStrictEqual(
          'mac-voiceover',

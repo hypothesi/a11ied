@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { appendFile, readFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
 import {
@@ -9,8 +9,8 @@ import {
    type EvidenceRecord,
 } from '@a11ied/contracts';
 
-import { resolveEvidenceFile } from './paths.js';
-import { withFileLock, writeTextAtomic } from '../files/atomic-json.js';
+import { resolveEvidenceStoreFile, type EvidencePathOptions } from './paths.js';
+import { appendLineUnlocked, withPathLock, writeAtomic } from '../files/store.js';
 import { CliUsageError } from '../errors/cli-errors.js';
 import {
    isVerifiedEvidence,
@@ -23,9 +23,7 @@ import {
  * JSON-line reads, appends, and clears share a lock so concurrent calls cannot corrupt
  * provenance or discard another check's result.
  */
-export interface EvidenceStoreOptions {
-   file?: string | undefined;
-   runFile?: string | undefined;
+export interface EvidenceStoreOptions extends EvidencePathOptions {
    wcagVersion?: string | undefined;
    expectedRunId?: string | undefined;
 }
@@ -68,41 +66,6 @@ function truncateNote(note: string | undefined): string | undefined {
    return note.slice(0, EVIDENCE_NOTE_MAX_LENGTH);
 }
 
-/** Store a validated result and return the exact record accepted by the shared boundary. */
-export async function recordEvidence(
-   record: EvidenceRecord,
-   options: EvidenceStoreOptions = {},
-): Promise<{
-   record: EvidenceRecord;
-   file: string;
-}> {
-   const file = resolveEvidenceFile(options.file);
-   const note = truncateNote(record.note);
-   const parsed = evidenceRecordSchema.parse(
-      note === undefined ? record : { ...record, note },
-   );
-
-   validateEvidenceTest(parsed, parsed.provenance?.wcagVersion ?? options.wcagVersion);
-   parsed.evidenceId ??= randomUUID();
-   const validated = await validateEvidenceRecord(parsed, {
-      runFile: options.runFile ?? resolve(dirname(file), 'run.json'),
-      expectedRunId: options.expectedRunId,
-   });
-   if (parsed.provenance && !isVerifiedEvidence(validated)) {
-      throw new CliUsageError(
-         'evidence-invalid',
-         validated.verification?.reasons.join(' ') ?? 'Evidence could not be verified.',
-      );
-   }
-   await withFileLock(file, async () => {
-      await appendFile(file, `${JSON.stringify(validated)}\n`, {
-         encoding: 'utf8',
-         mode: 0o600,
-      });
-   });
-   return { record: validated, file };
-}
-
 /**
  * A line written before the record could be about anything but a criterion put the
  * criterion and the procedure at the top level. Those are lifted into the `test` field on
@@ -138,6 +101,78 @@ function parseLine(
    }
 }
 
+async function assertNoEvidenceConflict(
+   file: string,
+   parsed: EvidenceRecord,
+): Promise<void> {
+   if (!parsed.provenance) {
+      return;
+   }
+   let body = '';
+   try {
+      body = await readFile(file, 'utf8');
+   } catch (error) {
+      if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+         return;
+      }
+      throw error;
+   }
+   for (const [index, line] of body.split('\n').entries()) {
+      const existing = parseLine(line, file, index + 1);
+      const isSameAttempt =
+         existing?.provenance &&
+         existing.provenance.runId === parsed.provenance.runId &&
+         existing.provenance.checkId === parsed.provenance.checkId &&
+         existing.provenance.attempt === parsed.provenance.attempt;
+      const isCorrection =
+         existing !== undefined &&
+         keyOf(existing) === keyOf(parsed) &&
+         Date.parse(parsed.recordedAt) > Date.parse(existing.recordedAt);
+      if (isSameAttempt && existing.outcome !== parsed.outcome && !isCorrection) {
+         throw new CliUsageError(
+            'audit-evidence-conflict',
+            `Check ${parsed.provenance.checkId} has conflicting saved outcomes.`,
+         );
+      }
+   }
+}
+
+/** Store a validated result and return the exact record accepted by the shared boundary. */
+export async function recordEvidence(
+   record: EvidenceRecord,
+   options: EvidenceStoreOptions = {},
+): Promise<{
+   record: EvidenceRecord;
+   file: string;
+}> {
+   const file = resolveEvidenceStoreFile(options);
+   const runFile = options.runFile ?? resolve(dirname(file), 'run.json');
+   const note = truncateNote(record.note);
+   const parsed = evidenceRecordSchema.parse(
+      note === undefined ? record : { ...record, note },
+   );
+
+   validateEvidenceTest(parsed, parsed.provenance?.wcagVersion ?? options.wcagVersion);
+   parsed.evidenceId ??= randomUUID();
+
+   return withPathLock(file, async () => {
+      const validated = await validateEvidenceRecord(parsed, {
+         runFile,
+         expectedRunId: options.expectedRunId,
+      });
+      if (parsed.provenance && !isVerifiedEvidence(validated)) {
+         throw new CliUsageError(
+            'evidence-invalid',
+            validated.verification?.reasons.join(' ') ??
+               'Evidence could not be verified.',
+         );
+      }
+      await assertNoEvidenceConflict(file, parsed);
+      await appendLineUnlocked(file, validated);
+      return { record: validated, file };
+   });
+}
+
 /**
  * Reads every recorded result, keeping the last one written for each check.
  *
@@ -147,7 +182,7 @@ function parseLine(
 async function readEvidenceUnlocked(
    options: EvidenceStoreOptions,
 ): Promise<EvidenceRecord[]> {
-   const file = resolveEvidenceFile(options.file);
+   const file = resolveEvidenceStoreFile(options);
    let body = '';
    try {
       body = await readFile(file, 'utf8');
@@ -182,7 +217,7 @@ async function clearEvidenceUnlocked(
    subject: string | undefined,
    options: EvidenceStoreOptions,
 ): Promise<number> {
-   const file = resolveEvidenceFile(options.file);
+   const file = resolveEvidenceStoreFile(options);
    const records = await readEvidenceUnlocked(options);
    const kept =
       subject === undefined ? [] : records.filter((record) => record.subject !== subject);
@@ -192,7 +227,7 @@ async function clearEvidenceUnlocked(
    }
 
    const body = kept.map((record) => JSON.stringify(record)).join('\n');
-   await writeTextAtomic(kept.length > 0 ? `${body}\n` : '', file);
+   await writeAtomic(file, kept.length > 0 ? `${body}\n` : '');
    return records.length - kept.length;
 }
 
@@ -212,8 +247,8 @@ export async function appendEvidence(
 export async function readEvidence(
    options: EvidenceStoreOptions = {},
 ): Promise<EvidenceRecord[]> {
-   const file = resolveEvidenceFile(options.file);
-   return withFileLock(file, () => readEvidenceUnlocked(options));
+   const file = resolveEvidenceStoreFile(options);
+   return withPathLock(file, () => readEvidenceUnlocked(options));
 }
 
 /** Remove results atomically while preserving concurrent appends for other subjects. */
@@ -221,8 +256,8 @@ export async function clearEvidence(
    subject: string | undefined,
    options: EvidenceStoreOptions = {},
 ): Promise<number> {
-   const file = resolveEvidenceFile(options.file);
-   return withFileLock(file, () => clearEvidenceUnlocked(subject, options));
+   const file = resolveEvidenceStoreFile(options);
+   return withPathLock(file, () => clearEvidenceUnlocked(subject, options));
 }
 
 /** Recorded results for one target. */

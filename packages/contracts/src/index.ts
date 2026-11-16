@@ -17,3 +17,5 @@ export * from './schemas/report.js';
 export * from './schemas/audit-run.js';
 export * from './schemas/assessment.js';
 export * from './schemas/audit-assessment.js';
+export * from './schemas/observe.js';
+export * from './schemas/verdict.js';

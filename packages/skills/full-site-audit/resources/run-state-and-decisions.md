@@ -1,5 +1,10 @@
 # Run state and decisions
 
+This document describes the existing `audit` state/journey coordinator. Its `--run` and
+`--scope` flags do not apply to `review`, which uses `--run-dir` and explicitly registered
+states. Use the unified skill for review admission and reporting. Historical coordinator
+completion does not transfer into a new review run without current evidence.
+
 The installed CLI help and MCP schemas define supported inputs. In the repository,
 field contracts live under `packages/contracts/src/schemas/`: `audit-run.ts`,
 `audit-assessment.ts`, `assessment.ts`, `evidence.ts`, and `discovery.ts`.
@@ -21,7 +26,7 @@ until the host agent verifies it:
 ```
 
 Use `voiceover`, `nvda`, or `virtual` for `platform`. Capability values include
-`rendered-ui`, `keyboard`, `real-reader`, `dom`, `native-tree`, `screenshot`,
+`rendered-ui`, `keyboard`, `screen-reader`, `real-reader`, `dom`, `native-tree`, `screenshot`,
 `speech`, `audio`, `product-context`, `pointer`, `viewport`, `style-overrides`,
 `measurement`, `markup-validation`, and `motion-input`. Declare only verified values.
 An existing environment cannot be replaced. If capability observations change,
@@ -83,8 +88,9 @@ ordered `stateIds`.
 
 ## Evidence and acceptance
 
-Always pass the returned evidence path explicitly. `--run` alone does not select
-the run's evidence file; otherwise recording defaults to the global evidence log.
+With `--run`, evidence recording defaults to that run's evidence journal. An explicit
+`--results` path takes precedence. Without either option, the configured project/global
+evidence path applies. Prefer the returned paths when an explicit override is needed.
 
 ```bash
 a1 audit record https://createdbyfireside.com/ --run <run-file> \
@@ -106,8 +112,19 @@ An agent actor uses `{ "kind": "agent", "name": "<agent-name>" }` and evidence
 mode `semiAutomatic`.
 
 Collection sources are `browser`, `native`, `real-reader`, `virtual`, and `user`.
-Use actual session identity for reader evidence. Virtual output cannot satisfy a
+Use actual session identity for reader evidence. Virtual output can satisfy
+`screen-reader` procedures in production audits, with `source: virtual`. It cannot satisfy a
 procedure requiring `real-reader`. A note alone remains unverified.
+
+A procedure may define a `media-absence` inapplicability path. Its reduced
+capabilities allow inventorying absence; passing, failing, or uncertain evaluation
+of present media still requires the full capabilities. Without those capabilities,
+a media artifact must include `observations` in the provenance state order. Each
+observation identifies `stateId`, the actual `url`, a descriptive `method`, and zero
+counts for `video`, `audio`, `embeds`, `mediaPlays`, `audioContexts`, and
+`uninspectedTrees`. Missing frames or instrumentation keep absence unproved.
+Restore interactive states before collecting their inventory. A fresh initial page
+cannot prove absence in a menu, dialog, or journey state.
 
 Each artifact contains its kind, path relative to the run directory, SHA-256 hash,
 and actual capture timestamp. Register paths on the observed states. Capture after
@@ -118,14 +135,15 @@ Non-image artifacts use a version `1` envelope with matching run, environment,
 source, session, state references, claimed `attempt`, capture time, kind, and typed `content`:
 
 - `observation`, `product-context`: nonempty text or `{ "text": "..." }`.
-- `speech`: nonempty text for other sources. For `real-reader`, use
+
+- `speech`: for `real-reader` and `virtual`, use
   `{ "text": "...", "transcript": { ... } }`. Preserve the driver export session ID,
-  native reader target, URL, timestamps, and relevant entries. Text must match the
+  matching reader target, URL, timestamps, and relevant entries. Text must match the
   non-checkpoint phrases joined with newlines.
 
-* `measurement`: values with units and measurement methods.
-* `media`: a transcript and source.
-* `action-trace`: ordered action receipts with index, action, time, and state ID.
+- `measurement`: values with units and measurement methods.
+- `media`: a transcript and source.
+- `action-trace`: ordered action receipts with index, action, time, and state ID.
 
 A claim's `context.states` lists at most 20 states. For a `site` check with no
 `stateIds`, read every state through `audit status --limit 100` and cite all of them,

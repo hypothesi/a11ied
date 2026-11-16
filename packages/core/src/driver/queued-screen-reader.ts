@@ -95,6 +95,44 @@ function createQueuedCall<Args extends unknown[], Result>(
    return queued;
 }
 
+/**
+ * Every method on a `QueuedScreenReader`: the keys of `queuedMethods` plus `stop`. The
+ * parity test maps these names onto the verb registry so the queued API cannot drift.
+ */
+export const QUEUED_READER_METHOD_NAMES: readonly (keyof QueuedMethods | 'stop')[] = [
+   'next',
+   'previous',
+   'press',
+   'type',
+   'interact',
+   'stopInteracting',
+   'activate',
+   'top',
+   'bottom',
+   'escape',
+   'perform',
+   'goto',
+   'goTo',
+   'read',
+   'state',
+   'title',
+   'find',
+   'elements',
+   'readAll',
+   'walk',
+   'wait',
+   'checkpoint',
+   'transcript',
+   'open',
+   'table',
+   'screenshot',
+   'focus',
+   'expectSpoken',
+   'expectCursorOn',
+   'expectSpokenInOrder',
+   'stop',
+];
+
 /*
  * Every async method is listed by hand, because a `Proxy` cannot be typed as
  * `QueuedScreenReader` without a cast. `QueuedMethods` is derived from `ScreenReader`, so a
@@ -124,6 +162,7 @@ function queuedMethods(
       state: wrap(reader.state.bind(reader)),
       title: wrap(reader.title.bind(reader)),
       find: wrap(reader.find.bind(reader)),
+      goto: wrap(reader.goto.bind(reader)),
       goTo: wrap(reader.goTo.bind(reader)),
       elements: wrap(reader.elements.bind(reader)),
       readAll: wrap(reader.readAll.bind(reader)),

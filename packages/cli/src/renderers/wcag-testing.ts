@@ -72,6 +72,13 @@ function procedureLines(input: {
          ['Required capabilities', procedure.requiredCapabilities.join(', ')],
          ['Required evidence', procedure.requiredEvidence.join(', ')],
       ]),
+      ...(procedure.inapplicability
+         ? wrap(
+              `Media absence can be assessed with ${procedure.inapplicability.requiredCapabilities.join(', ')} and scoped media-inventory evidence. Present media still requires the full capabilities above.`,
+              0,
+              width,
+           )
+         : []),
       ...section('Setup', listItems(procedure.setup)),
       ...section('Actions', listItems(procedure.actions)),
       ...section(

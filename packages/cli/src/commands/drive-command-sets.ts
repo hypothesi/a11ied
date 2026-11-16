@@ -113,7 +113,7 @@ export function registerDoCommand(driveCommand: Command): void {
    addDriveAutoStartOptions(
       driveCommand
          .command('do <command>')
-         .helpGroup(DRIVE_GROUPS.act)
+         .helpGroup(DRIVE_GROUPS.interact)
          .summary('Run a named screen reader command.')
          .description(
             'Run a named screen-reader command. Use sr list for all available commands.',
@@ -150,7 +150,7 @@ export function registerListCommand(driveCommand: Command): void {
       addJsonOption(
          driveCommand
             .command('list')
-            .helpGroup(DRIVE_GROUPS.other)
+            .helpGroup(DRIVE_GROUPS.inspect)
             .summary('List the named commands sr do accepts.')
             .description(
                'List the named commands sr do accepts, grouped by command set and by what they do. Start with --query; the full list is over 400 lines.',

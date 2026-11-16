@@ -9,7 +9,7 @@ import {
    type ReportModel,
 } from '@a11ied/contracts';
 import { z } from 'zod';
-import { writeBytesAtomic } from '../files/atomic-json.js';
+import { writeAtomic } from '../files/store.js';
 import type { AuditAssessmentSnapshot } from '../audit/run-status.js';
 
 const recordedActionsSchema = z.array(
@@ -91,7 +91,7 @@ async function exportFindingArtifact(input: {
       );
    }
    const href = `artifacts/${artifact.sha256}.${artifact.kind === 'screenshot' ? 'png' : 'json'}`;
-   await writeBytesAtomic(body, resolve(outDir, href));
+   await writeAtomic(resolve(outDir, href), body);
    return { body, href };
 }
 

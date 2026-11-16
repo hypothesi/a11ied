@@ -1,13 +1,14 @@
 import type { DriverNavigateRequest } from '@a11ied/contracts';
 
 import { normalizeDriverKeys } from './key-aliases.js';
+import { DriverCommandError } from './driver-command-error.js';
 import { resolveVirtualNavigationStep } from './portable-navigation-virtual.js';
 import type {
    MethodStep,
    VirtualPortableStep,
    VirtualRoleWalkStep,
 } from './portable-steps.js';
-import { repeatTimes, repeatUntil, runInOrder } from './sequential.js';
+import { repeatTimes, runInOrder } from './sequential.js';
 import { getVirtualPhraseRole, getVirtualPositionToken } from './virtual-position.js';
 import type { VirtualReader, VirtualWindow } from './virtual-reader.js';
 
@@ -64,15 +65,6 @@ export async function isAtTreeEnd(context: VirtualStepContext): Promise<boolean>
    }
    const phrase = await context.virtual.lastSpokenPhrase();
    return phrase.startsWith('end of ');
-}
-
-/** Moves the virtual cursor back to the first node of the document or open dialog. */
-export async function walkToTop(context: VirtualStepContext): Promise<void> {
-   await repeatUntil(
-      () => isAtTreeTop(context),
-      () => context.virtual.previous(),
-      VIRTUAL_WALK_STEP_CAP,
-   );
 }
 
 /** Presses each chord in order through the virtual reader. */
@@ -139,6 +131,28 @@ async function walkStep(
 export async function walkVirtualUntil(args: VirtualWalkArgs): Promise<boolean> {
    const start = await getVirtualPositionToken(args.context.virtual);
    return walkStep(args, start, VIRTUAL_WALK_STEP_CAP);
+}
+
+/** Moves the virtual cursor back to the first node of the document or open dialog. */
+export async function walkToTop(context: VirtualStepContext): Promise<void> {
+   if (await isAtTreeTop(context)) {
+      return;
+   }
+   const found = await walkVirtualUntil({
+      context,
+      direction: 'previous',
+      isMatch: (phrase, node) =>
+         node !== null &&
+         isTreeRoot(node, context.container) &&
+         !phrase.startsWith('end of '),
+   });
+   if (!found) {
+      throw new DriverCommandError(
+         'virtual-tree-edge-unavailable',
+         'The virtual tree has no observable root boundary. Read from the current item instead of seeking an edge.',
+         {},
+      );
+   }
 }
 
 async function runRoleWalk(

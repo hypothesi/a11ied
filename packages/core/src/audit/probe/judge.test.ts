@@ -12,6 +12,16 @@ const SITE: SiteFacts = {
 function buildFacts(overrides: Partial<PageFacts> = {}): PageFacts {
    return {
       url: 'https://example.test/',
+      mediaInventory: {
+         url: 'https://example.test/',
+         video: 0,
+         audio: 0,
+         embeds: 0,
+         mediaPlays: 0,
+         audioContexts: 0,
+         uninspectedTrees: 0,
+         method: 'Fixture inventory',
+      },
       title: 'Example',
       lang: 'en',
       headings: [{ level: 1, text: 'Example' }],
@@ -57,21 +67,21 @@ function input(overrides: Partial<PageFacts> = {}): ProbeInput {
 }
 
 describe('judgeCriterion', () => {
-   it('fails reflow when the page scrolls sideways at 320px', () => {
+   it('leaves overflowing reflow unresolved when the page scrolls sideways at 320px', () => {
       const result = judgeCriterion(
          '1.4.10',
          input({ reflow: { overflowPx: 23, wide: ['DIV.hero'] } }),
       );
 
-      expect(result.outcome).toStrictEqual('failed');
-      expect(result.finding?.impact).toStrictEqual('serious');
+      expect(result.outcome).toStrictEqual('cantTell');
+      expect(result.finding).toBeUndefined();
    });
 
-   it('passes reflow when nothing overflows', () => {
-      expect(judgeCriterion('1.4.10', input()).outcome).toStrictEqual('passed');
+   it('leaves reflow unresolved when nothing overflows', () => {
+      expect(judgeCriterion('1.4.10', input()).outcome).toStrictEqual('cantTell');
    });
 
-   it('fails focus visibility when tab stops sit in a collapsed container', () => {
+   it('flags focus visibility for review when tab stops sit in a collapsed container', () => {
       const stop = {
          tag: 'A',
          label: 'Services',
@@ -87,7 +97,7 @@ describe('judgeCriterion', () => {
 
       const result = judgeCriterion('2.4.7', input({ tabStops: [stop] }));
 
-      expect(result.outcome).toStrictEqual('failed');
+      expect(result.outcome).toStrictEqual('cantTell');
       expect(result.rationale).toContain('Services');
    });
 });
@@ -95,6 +105,13 @@ describe('judgeCriterion', () => {
 describe('judgeCriterion media and axe', () => {
    it('marks media criteria not applicable when the page has no media', () => {
       expect(judgeCriterion('1.2.2', input()).outcome).toStrictEqual('inapplicable');
+   });
+
+   it('leaves absence unproved without a complete inventory', () => {
+      const facts = input();
+      delete facts.facts.mediaInventory;
+
+      expect(judgeCriterion('1.2.2', facts).outcome).toStrictEqual('cantTell');
    });
 
    it('asks for review when media is present', () => {
@@ -134,4 +151,16 @@ describe('judgeCriterion media and axe', () => {
    it('leaves criteria without a probe for a person', () => {
       expect(judgeCriterion('9.9.9', input()).outcome).toStrictEqual('cantTell');
    });
+});
+
+describe('resize-text evidence boundary', () => {
+   it.each([0, 1])(
+      'keeps resize-text unresolved for viewport overflow %s',
+      (overflow) => {
+         const result = judgeCriterion('1.4.4', input({ zoom200OverflowPx: overflow }));
+
+         expect(result.outcome).toBe('cantTell');
+         expect(result.rationale).toContain('does not establish text enlargement');
+      },
+   );
 });

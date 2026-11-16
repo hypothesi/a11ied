@@ -1,3 +1,4 @@
+import { judgeMediaInventory } from './media-inventory.js';
 import type { AxeRuleResult } from '@a11ied/contracts';
 import { operableProbes } from './probes-operable.js';
 import { perceivableProbes } from './probes-perceivable.js';
@@ -16,9 +17,6 @@ const PROBES: Record<string, Probe> = {
    ...understandableProbes,
 };
 
-/** Rules whose probe adds detail axe does not carry. */
-const AXE_DETAIL_PROBES = new Set(['1.4.3']);
-
 function findViolation(
    criterionId: string,
    input: ProbeInput,
@@ -35,7 +33,7 @@ export function hasProbe(criterionId: string): boolean {
 /** Axe violations tagged with the criterion win; otherwise its probe decides. */
 export function judgeCriterion(criterionId: string, input: ProbeInput): Judgement {
    const violation = findViolation(criterionId, input);
-   if (violation && !AXE_DETAIL_PROBES.has(criterionId)) {
+   if (violation) {
       const target = violation.nodes[0]?.target.join(' ') ?? 'the page';
       return fail({
          rationale: `axe rule ${violation.id}: ${violation.help}. ${String(violation.nodes.length)} node(s), for example ${target}.`,
@@ -46,7 +44,20 @@ export function judgeCriterion(criterionId: string, input: ProbeInput): Judgemen
       });
    }
    const probe = PROBES[criterionId];
-   return probe
-      ? probe(input)
-      : needsReview(`No automated probe covers ${criterionId}; it needs a person.`);
+   if (!probe) {
+      return needsReview(`No automated probe covers ${criterionId}; it needs a person.`);
+   }
+   const observation = probe(input);
+   if (
+      (criterionId.startsWith('1.2.') || criterionId === '1.4.2') &&
+      observation.outcome === 'inapplicable'
+   ) {
+      const absence = judgeMediaInventory(input.facts.mediaInventory);
+      if (absence.outcome === 'inapplicable') {
+         return absence;
+      }
+   }
+   return needsReview(
+      `Unverified probe observation: ${observation.rationale} Criterion-specific assessment is required.`,
+   );
 }

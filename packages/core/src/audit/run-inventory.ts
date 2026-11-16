@@ -10,7 +10,7 @@ import {
 } from '@a11ied/contracts';
 import { readInventory, updateInventoryAtomic } from '../discovery/inventory.js';
 import { CliUsageError } from '../errors/cli-errors.js';
-import { getCanonicalPath, withFileLock } from '../files/atomic-json.js';
+import { getCanonicalPath, withPathLock } from '../files/store.js';
 import {
    createAuditRun,
    getAuditRunPaths,
@@ -135,7 +135,7 @@ export async function migrateInventoryAuditRun(
       ),
    );
    await assertInventoryStartOptions(input, inventory, paths.file);
-   const run = await withFileLock(paths.file, async () =>
+   const run = await withPathLock(paths.file, async () =>
       readOrCreateRun({
          file: paths.file,
          runId: inventory.run.runId,

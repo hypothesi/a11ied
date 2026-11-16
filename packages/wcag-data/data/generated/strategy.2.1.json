@@ -18,6 +18,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -58,11 +79,44 @@
                "applicability": "All non-text content, including controls, charts, CAPTCHA, decoration, and media previews.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard",
                   "screenshot"
                ],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.transcript (spokenOrder, headings, landmarks, links, formControls) and accessibility tree."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "walk"
+                     },
+                     "expect": "Walk interactive state or verify spoken role/name/value announcements when DOM transcript is insufficient.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record passed, failed, inapplicable, or cantTell verdict with ObservationRef pointers."
+                  }
+               ],
+               "done": {
+                  "passed": "Alternatives convey equivalent purpose; decorative objects are ignored and all special cases meet the criterion.",
+                  "failed": "An applicable object has a missing, misleading, or insufficient alternative, or exposes decoration as meaningful content.",
+                  "inapplicable": "The scoped states contain no non-text content, supported by an object inventory.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -90,6 +144,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -122,6 +177,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -161,6 +237,37 @@
                "scope": "state",
                "applicability": "Prerecorded audio-only or video-only media, excluding clearly labeled alternatives to text.",
                "requiredCapabilities": ["rendered-ui", "audio", "keyboard"],
+               "inapplicability": {
+                  "kind": "media-absence",
+                  "requiredCapabilities": ["rendered-ui", "dom"],
+                  "requiredEvidence": ["action-trace", "observation", "media"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle facts.media (video, audio, embeds, autoplay) and instrumented media plays."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with media alternatives, captions, or audio description evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Each applicable recording has an equivalent alternative with all required information.",
+                  "failed": "An applicable recording lacks an alternative or omits meaningful information.",
+                  "inapplicable": "No applicable recordings exist; document any labeled text-alternative exception.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "media-absence"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -183,6 +290,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -215,6 +323,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -254,6 +383,37 @@
                "scope": "state",
                "applicability": "Prerecorded synchronized media with audio, excluding clearly labeled alternatives to text.",
                "requiredCapabilities": ["rendered-ui", "audio", "keyboard"],
+               "inapplicability": {
+                  "kind": "media-absence",
+                  "requiredCapabilities": ["rendered-ui", "dom"],
+                  "requiredEvidence": ["action-trace", "observation", "media"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle facts.media (video, audio, embeds, autoplay) and instrumented media plays."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with media alternatives, captions, or audio description evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Captions accurately convey required audio information and remain synchronized.",
+                  "failed": "Captions are unavailable, materially inaccurate, incomplete, or unsynchronized.",
+                  "inapplicable": "There is no applicable prerecorded synchronized media; document any text-alternative exception.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "media-absence"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -276,6 +436,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -306,6 +467,37 @@
                "scope": "state",
                "applicability": "Prerecorded synchronized media with visual information, excluding labeled alternatives to text.",
                "requiredCapabilities": ["rendered-ui", "audio", "keyboard"],
+               "inapplicability": {
+                  "kind": "media-absence",
+                  "requiredCapabilities": ["rendered-ui", "dom"],
+                  "requiredEvidence": ["action-trace", "observation", "media"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle facts.media (video, audio, embeds, autoplay) and instrumented media plays."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with media alternatives, captions, or audio description evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Audio description or a complete media alternative supplies all required information and interactions.",
+                  "failed": "Neither accepted alternative conveys the required visual information or interactions.",
+                  "inapplicable": "No applicable synchronized recordings exist; document any text-alternative exception.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "media-absence"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -328,6 +520,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -358,6 +551,37 @@
                "scope": "state",
                "applicability": "Live synchronized media with audio.",
                "requiredCapabilities": ["rendered-ui", "audio", "keyboard"],
+               "inapplicability": {
+                  "kind": "media-absence",
+                  "requiredCapabilities": ["rendered-ui", "dom"],
+                  "requiredEvidence": ["action-trace", "observation", "media"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle facts.media (video, audio, embeds, autoplay) and instrumented media plays."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with media alternatives, captions, or audio description evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Live captions convey all required audio information during the observed live session.",
+                  "failed": "Required live captions are missing or lose meaningful audio information.",
+                  "inapplicable": "The product has no live synchronized audio media; absence of a scheduled event alone is insufficient.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "media-absence"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -380,6 +604,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -410,6 +635,37 @@
                "scope": "state",
                "applicability": "Prerecorded synchronized media containing video.",
                "requiredCapabilities": ["rendered-ui", "audio", "keyboard"],
+               "inapplicability": {
+                  "kind": "media-absence",
+                  "requiredCapabilities": ["rendered-ui", "dom"],
+                  "requiredEvidence": ["action-trace", "observation", "media"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle facts.media (video, audio, embeds, autoplay) and instrumented media plays."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with media alternatives, captions, or audio description evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Audio description conveys all necessary visual information, or the main audio already conveys it.",
+                  "failed": "Necessary visual information is absent from the main audio and the audio description.",
+                  "inapplicable": "There is no prerecorded synchronized video in the scope.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "media-absence"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -432,6 +688,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -500,6 +757,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -540,11 +818,44 @@
                "applicability": "Information, structure, or relationships conveyed through presentation.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard",
                   "screenshot"
                ],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.transcript (spokenOrder, headings, landmarks, links, formControls) and accessibility tree."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "walk"
+                     },
+                     "expect": "Walk interactive state or verify spoken role/name/value announcements when DOM transcript is insufficient.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record passed, failed, inapplicable, or cantTell verdict with ObservationRef pointers."
+                  }
+               ],
+               "done": {
+                  "passed": "All presented relationships are programmatically determinable or explicitly available in text.",
+                  "failed": "A meaningful relationship is conveyed only by presentation and has no equivalent text.",
+                  "inapplicable": "No presentation conveys information or relationships; supply observations supporting that conclusion.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -552,7 +863,7 @@
                ],
                "actions": [
                   "Inventory headings, lists, tables, groups, form labels, and visually expressed relationships.",
-                  "Read the same structures with the real reader and compare relationships with rendered layout or equivalent text."
+                  "Read the same structures with the selected screen reader and compare relationships with rendered layout or equivalent text."
                ],
                "requiredEvidence": [
                   "action-trace",
@@ -572,6 +883,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -603,10 +915,43 @@
                "applicability": "Content whose sequence affects meaning.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard"
                ],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.transcript (spokenOrder, headings, landmarks, links, formControls) and accessibility tree."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "walk"
+                     },
+                     "expect": "Walk interactive state or verify spoken role/name/value announcements when DOM transcript is insufficient.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record passed, failed, inapplicable, or cantTell verdict with ObservationRef pointers."
+                  }
+               ],
+               "done": {
+                  "passed": "At least one programmatically determinable sequence preserves meaning for every applicable sequence.",
+                  "failed": "An applicable sequence loses meaning in its programmatically determined reading order.",
+                  "inapplicable": "Meaning does not depend on any sequence in the observed states.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -614,7 +959,7 @@
                ],
                "actions": [
                   "Identify sequences whose order affects meaning, including columns and inserted dynamic content.",
-                  "Read each sequence with the real reader and compare its programmatic order with the intended meaning."
+                  "Read each sequence with the selected screen reader and compare its programmatic order with the intended meaning."
                ],
                "requiredEvidence": ["action-trace", "observation", "speech"],
                "evaluation": {
@@ -629,6 +974,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -659,6 +1005,31 @@
                "scope": "state",
                "applicability": "Instructions for understanding or operating content.",
                "requiredCapabilities": ["rendered-ui", "screenshot"],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect current DOM facts, relevant visual observations, and the baseline screenshot for this procedure."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record each required action outcome with snapshot-bound evidence and the measurements required by this procedure."
+                  }
+               ],
+               "done": {
+                  "passed": "Instructions can be followed without relying solely on sensory characteristics.",
+                  "failed": "A required instruction identifies an action solely by a sensory characteristic.",
+                  "inapplicable": "The scope contains no instructions.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -681,6 +1052,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -713,6 +1085,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -752,6 +1145,31 @@
                "scope": "state",
                "applicability": "Rendered desktop content capable of portrait and landscape layouts.",
                "requiredCapabilities": ["rendered-ui", "screenshot", "viewport"],
+               "tier": 1,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect current DOM facts, relevant visual observations, and the baseline screenshot for this procedure."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record each required action outcome with snapshot-bound evidence and the measurements required by this procedure."
+                  }
+               ],
+               "done": {
+                  "passed": "Content and operation are available in both orientations, except documented essential restrictions.",
+                  "failed": "A nonessential orientation restriction prevents viewing or operation.",
+                  "inapplicable": "Only an essential orientation applies, with a reason tied to the content rather than a preferred design.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -774,6 +1192,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -806,6 +1225,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -846,11 +1286,56 @@
                "applicability": "User-information inputs matching the WCAG Input Purposes list in technologies supporting identification.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard",
                   "dom"
                ],
+               "inapplicability": {
+                  "kind": "no-form",
+                  "requiredCapabilities": [
+                     "rendered-ui",
+                     "screen-reader",
+                     "speech",
+                     "keyboard",
+                     "dom"
+                  ],
+                  "requiredEvidence": ["action-trace", "observation", "speech"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.transcript (spokenOrder, headings, landmarks, links, formControls) and accessibility tree."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "walk"
+                     },
+                     "expect": "Walk interactive state or verify spoken role/name/value announcements when DOM transcript is insufficient.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record passed, failed, inapplicable, or cantTell verdict with ObservationRef pointers."
+                  }
+               ],
+               "done": {
+                  "passed": "Every applicable input exposes the correct programmatically determinable purpose.",
+                  "failed": "An applicable input lacks correct programmatic purpose metadata.",
+                  "inapplicable": "No inputs match the normative purposes, or the technology cannot support purpose identification.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "no-form"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -873,6 +1358,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements.",
                   "Retain programmatic input-purpose metadata; spoken labels alone cannot establish the purpose declaration."
                ],
@@ -915,6 +1401,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -954,6 +1461,31 @@
                "scope": "state",
                "applicability": "Color conveying information, action, response, or a distinction.",
                "requiredCapabilities": ["rendered-ui", "screenshot"],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect current DOM facts, relevant visual observations, and the baseline screenshot for this procedure."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record each required action outcome with snapshot-bound evidence and the measurements required by this procedure."
+                  }
+               ],
+               "done": {
+                  "passed": "Every meaningful color distinction has another visual means of conveying the same information.",
+                  "failed": "Meaning or operation depends on color alone.",
+                  "inapplicable": "Color conveys no information or distinction in the observed states.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -976,6 +1508,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -1008,6 +1541,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -1050,9 +1604,40 @@
                   "rendered-ui",
                   "audio",
                   "keyboard",
-                  "real-reader",
+                  "screen-reader",
                   "speech"
                ],
+               "inapplicability": {
+                  "kind": "media-absence",
+                  "requiredCapabilities": ["rendered-ui", "dom"],
+                  "requiredEvidence": ["action-trace", "observation", "media"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle facts.media (video, audio, embeds, autoplay) and instrumented media plays."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with media alternatives, captions, or audio description evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Applicable audio can be paused or stopped, or its volume controlled independently of system volume.",
+                  "failed": "Automatic audio exceeds three seconds without an accepted control.",
+                  "inapplicable": "No audio plays automatically for more than three seconds.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "media-absence"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -1075,6 +1660,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -1107,6 +1693,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -1146,6 +1753,31 @@
                "scope": "state",
                "applicability": "Text and images of text, except logos, incidental content, and inactive controls.",
                "requiredCapabilities": ["rendered-ui", "screenshot", "measurement"],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.viewports (reflow320, zoom200, portrait, textSpacingClipped) and smallTargets measurements."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with px/ms/Hz MeasurementRecord entries."
+                  }
+               ],
+               "done": {
+                  "passed": "Every applicable text sample meets its required contrast ratio.",
+                  "failed": "An applicable text sample falls below its required ratio.",
+                  "inapplicable": "All scoped text falls within documented normative exceptions.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -1173,6 +1805,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -1205,6 +1838,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -1249,6 +1903,31 @@
                   "keyboard",
                   "viewport"
                ],
+               "tier": 1,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect current DOM facts, relevant visual observations, and the baseline screenshot for this procedure."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record each required action outcome with snapshot-bound evidence and the measurements required by this procedure."
+                  }
+               ],
+               "done": {
+                  "passed": "All applicable text resizes to 200 percent without loss of content or functionality.",
+                  "failed": "Applicable text cannot resize or the resized state loses content or functionality.",
+                  "inapplicable": "The scope contains only excluded captions or images of text.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -1271,6 +1950,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -1303,6 +1983,31 @@
                "scope": "state",
                "applicability": "Images of text where the technology can provide the intended presentation using text.",
                "requiredCapabilities": ["rendered-ui", "screenshot"],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect current DOM facts, relevant visual observations, and the baseline screenshot for this procedure."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record each required action outcome with snapshot-bound evidence and the measurements required by this procedure."
+                  }
+               ],
+               "done": {
+                  "passed": "Text is used, or every image of text is customizable or essential under the normative exception.",
+                  "failed": "A nonessential, noncustomizable image replaces text the technology could render.",
+                  "inapplicable": "There are no applicable images of text.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -1325,6 +2030,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -1357,6 +2063,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -1433,6 +2160,31 @@
                "scope": "state",
                "applicability": "Content except parts requiring two-dimensional layout for usage or meaning.",
                "requiredCapabilities": ["rendered-ui", "screenshot", "viewport"],
+               "tier": 1,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect current DOM facts, relevant visual observations, and the baseline screenshot for this procedure."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record each required action outcome with snapshot-bound evidence and the measurements required by this procedure."
+                  }
+               ],
+               "done": {
+                  "passed": "Applicable content reflows without loss or scrolling in two dimensions.",
+                  "failed": "Nonexempt content loses information/functionality or requires two-direction scrolling.",
+                  "inapplicable": "All scoped content requires two-dimensional layout; document the usage or meaning that requires it.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -1455,6 +2207,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -1485,6 +2238,31 @@
                "scope": "state",
                "applicability": "Visual information needed to identify active controls, states, or meaningful graphical objects.",
                "requiredCapabilities": ["rendered-ui", "screenshot", "measurement"],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.viewports (reflow320, zoom200, portrait, textSpacingClipped) and smallTargets measurements."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with px/ms/Hz MeasurementRecord entries."
+                  }
+               ],
+               "done": {
+                  "passed": "Required visual information has at least 3:1 contrast against adjacent colors, or meets a normative exception.",
+                  "failed": "Required nonexempt visual information has contrast below 3:1.",
+                  "inapplicable": "No active controls or meaningful graphics need author-defined visual information.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -1512,6 +2290,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -1544,6 +2323,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -1588,6 +2388,31 @@
                   "dom",
                   "style-overrides"
                ],
+               "tier": 1,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect current DOM facts, relevant visual observations, and the baseline screenshot for this procedure."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record each required action outcome with snapshot-bound evidence and the measurements required by this procedure."
+                  }
+               ],
+               "done": {
+                  "passed": "The combined spacing overrides cause no loss of content or functionality.",
+                  "failed": "The required spacing overrides hide content or prevent operation.",
+                  "inapplicable": "Only when the technology supports none of the required spacing properties. Language exceptions do not exempt testing the remaining properties.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -1610,6 +2435,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -1645,6 +2471,40 @@
                   "keyboard",
                   "pointer"
                ],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle tabStops, focus-visible contrast samples, and trapSuspected flags."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "press",
+                        "key": "Tab"
+                     },
+                     "expect": "Verify interactive keyboard operation on custom widgets.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with keyboard and focus evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Each applicable disclosure is dismissible, hoverable, and persistent, allowing the criterion's explicit exceptions.",
+                  "failed": "A nonexempt disclosure fails dismissal, hoverability, or persistence.",
+                  "inapplicable": "No author-controlled additional content appears on hover or focus.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -1667,6 +2527,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -1699,6 +2560,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -1738,6 +2620,40 @@
                "scope": "state",
                "applicability": "All functionality except input whose underlying function requires a movement path.",
                "requiredCapabilities": ["rendered-ui", "screenshot", "keyboard"],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle tabStops, focus-visible contrast samples, and trapSuspected flags."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "press",
+                        "key": "Tab"
+                     },
+                     "expect": "Verify interactive keyboard operation on custom widgets.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with keyboard and focus evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Every nonexempt function operates through a keyboard interface without specific keystroke timing.",
+                  "failed": "A nonexempt function needs pointer input or specific keystroke timing.",
+                  "inapplicable": "No functionality exists, or all scoped functions have documented path-dependent exceptions.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -1760,6 +2676,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -1790,6 +2707,40 @@
                "scope": "state",
                "applicability": "Components that receive keyboard focus.",
                "requiredCapabilities": ["rendered-ui", "screenshot", "keyboard"],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle tabStops, focus-visible contrast samples, and trapSuspected flags."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "press",
+                        "key": "Tab"
+                     },
+                     "expect": "Verify interactive keyboard operation on custom widgets.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with keyboard and focus evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Keyboard focus can leave every component, with instructions for any nonstandard exit method.",
+                  "failed": "Focus becomes trapped or a required nonstandard exit lacks instructions.",
+                  "inapplicable": "No component can receive keyboard focus.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -1812,6 +2763,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -1844,6 +2796,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -1893,6 +2866,40 @@
                "scope": "state",
                "applicability": "Shortcuts using only letters, punctuation, numbers, or symbols.",
                "requiredCapabilities": ["rendered-ui", "screenshot", "keyboard"],
+               "tier": 1,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle tabStops, focus-visible contrast samples, and trapSuspected flags."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "press",
+                        "key": "Tab"
+                     },
+                     "expect": "Verify interactive keyboard operation on custom widgets.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with keyboard and focus evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Every character shortcut can be disabled/remapped or is active only when its control has focus.",
+                  "failed": "A character shortcut remains active globally without an accepted disabling or remapping option.",
+                  "inapplicable": "The scope has no character-only shortcuts.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -1915,6 +2922,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -1947,6 +2955,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -1987,10 +3016,59 @@
                "applicability": "Time limits set by content, including session expiry and temporary responses.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard"
                ],
+               "inapplicability": {
+                  "kind": "no-timed-event",
+                  "requiredCapabilities": [
+                     "rendered-ui",
+                     "screen-reader",
+                     "speech",
+                     "keyboard",
+                     "dom"
+                  ],
+                  "requiredEvidence": ["action-trace", "observation", "speech"]
+               },
+               "tier": 1,
+               "toolCalls": [
+                  {
+                     "tool": "audit_assessment",
+                     "args": {
+                        "action": "next",
+                        "scopes": ["journey"],
+                        "count": 1
+                     },
+                     "expect": "Use the linked coordinator file and inspect the claimed ordered journey, including actual transition evidence."
+                  },
+                  {
+                     "tool": "record_result",
+                     "expect": "After executing all procedure actions, submit their explicit outcomes with runFile, current state digests and registered producer artifacts. The run journal is the default results file."
+                  },
+                  {
+                     "tool": "audit_assessment",
+                     "args": {
+                        "action": "evaluate"
+                     },
+                     "expect": "Complete the claimed check using the verified evidence ID returned by record_result and its actual outcome."
+                  }
+               ],
+               "done": {
+                  "passed": "Each time limit meets an accepted adjustment mechanism or a documented normative exception.",
+                  "failed": "A nonexempt limit expires without a qualifying adjustment or extension mechanism.",
+                  "inapplicable": "No content-imposed time limit exists; document any real-time, essential, or over-20-hour exception.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "no-timed-event"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -2013,6 +3091,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -2045,6 +3124,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -2084,6 +3184,51 @@
                "scope": "state",
                "applicability": "Automatic moving, blinking, scrolling, or updating information presented alongside other content.",
                "requiredCapabilities": ["rendered-ui", "screenshot", "keyboard"],
+               "inapplicability": {
+                  "kind": "no-animation",
+                  "requiredCapabilities": [
+                     "rendered-ui",
+                     "screenshot",
+                     "keyboard",
+                     "dom"
+                  ],
+                  "requiredEvidence": ["action-trace", "observation", "screenshot"]
+               },
+               "tier": 1,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle tabStops, focus-visible contrast samples, and trapSuspected flags."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "press",
+                        "key": "Tab"
+                     },
+                     "expect": "Verify interactive keyboard operation on custom widgets.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with keyboard and focus evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "All applicable motion and updates have accepted controls or documented essential exceptions.",
+                  "failed": "Nonessential applicable motion or updates cannot be controlled as required.",
+                  "inapplicable": "No applicable automatic information is presented alongside other content.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "no-animation"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -2106,6 +3251,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -2147,6 +3293,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -2213,12 +3380,49 @@
                "title": "Assess Three Flashes or Below Threshold",
                "scope": "state",
                "applicability": "Flashing content, including video, animation, and state transitions.",
-               "requiredCapabilities": [
-                  "rendered-ui",
-                  "audio",
-                  "keyboard",
-                  "measurement"
+               "requiredCapabilities": ["rendered-ui", "screenshot", "measurement"],
+               "inapplicability": {
+                  "kind": "no-animation",
+                  "requiredCapabilities": [
+                     "rendered-ui",
+                     "screenshot",
+                     "measurement",
+                     "dom"
+                  ],
+                  "requiredEvidence": [
+                     "action-trace",
+                     "observation",
+                     "screenshot",
+                     "measurement",
+                     "media"
+                  ]
+               },
+               "tier": 1,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.viewports (reflow320, zoom200, portrait, textSpacingClipped) and smallTargets measurements."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with px/ms/Hz MeasurementRecord entries."
+                  }
                ],
+               "done": {
+                  "passed": "Content flashes no more than three times per second or stays below the general and red flash thresholds.",
+                  "failed": "Measured content exceeds three flashes per second and the applicable flash thresholds.",
+                  "inapplicable": "The inventory and observations show no flashing content.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "no-animation"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -2231,8 +3435,9 @@
                "requiredEvidence": [
                   "action-trace",
                   "observation",
-                  "media",
-                  "measurement"
+                  "screenshot",
+                  "measurement",
+                  "media"
                ],
                "evaluation": {
                   "passed": "Content flashes no more than three times per second or stays below the general and red flash thresholds.",
@@ -2246,6 +3451,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements.",
                   "Unaided visual judgment cannot establish flash thresholds; missing validated measurement remains uncertain."
                ],
@@ -2297,6 +3503,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -2337,17 +3564,54 @@
                "applicability": "Blocks repeated across a set of pages.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard"
                ],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "audit_assessment",
+                     "args": {
+                        "action": "next",
+                        "scopes": ["site"],
+                        "count": 1
+                     },
+                     "expect": "Use the linked coordinator file and inspect every participating state in the claimed site environment."
+                  },
+                  {
+                     "tool": "record_result",
+                     "expect": "After executing all procedure actions, submit their explicit outcomes with runFile, current state digests and registered producer artifacts. The run journal is the default results file."
+                  },
+                  {
+                     "tool": "audit_assessment",
+                     "args": {
+                        "action": "evaluate"
+                     },
+                     "expect": "Complete the claimed check using the verified evidence ID returned by record_result and its actual outcome."
+                  }
+               ],
+               "done": {
+                  "passed": "An operable mechanism bypasses each repeated block on the scoped page set.",
+                  "failed": "A repeated block has no operable bypass mechanism.",
+                  "inapplicable": "There are no blocks repeated across scoped pages.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
                   "Read the normative source below before evaluating its requirements and exceptions."
                ],
                "actions": [
-                  "Identify repeated blocks and navigate their bypass mechanisms with keyboard and real reader.",
+                  "Identify repeated blocks and navigate their bypass mechanisms with keyboard and the selected screen reader.",
                   "Verify that bypass reaches the intended content on every represented template and state."
                ],
                "requiredEvidence": ["action-trace", "observation", "speech"],
@@ -2363,6 +3627,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -2395,6 +3660,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -2435,10 +3721,43 @@
                "applicability": "Every scoped web page, including routes with changed purpose.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard"
                ],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.transcript (spokenOrder, headings, landmarks, links, formControls) and accessibility tree."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "walk"
+                     },
+                     "expect": "Walk interactive state or verify spoken role/name/value announcements when DOM transcript is insufficient.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record passed, failed, inapplicable, or cantTell verdict with ObservationRef pointers."
+                  }
+               ],
+               "done": {
+                  "passed": "Each document has a title describing its topic or purpose.",
+                  "failed": "A document's title is absent or fails to describe its topic or purpose.",
+                  "inapplicable": "Only for a non-web target where the web-page requirement cannot be applied; record the software guidance used.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -2461,6 +3780,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -2491,6 +3811,40 @@
                "scope": "state",
                "applicability": "Sequential focus navigation where order affects meaning or operation.",
                "requiredCapabilities": ["rendered-ui", "screenshot", "keyboard"],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle tabStops, focus-visible contrast samples, and trapSuspected flags."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "press",
+                        "key": "Tab"
+                     },
+                     "expect": "Verify interactive keyboard operation on custom widgets.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with keyboard and focus evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Every sequential focus order preserves meaning and operability.",
+                  "failed": "A focus sequence loses meaning, skips required controls, or prevents operation.",
+                  "inapplicable": "No sequentially navigable components affect meaning or operation.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -2513,6 +3867,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -2545,6 +3900,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -2585,10 +3961,43 @@
                "applicability": "Links in each observed state.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard"
                ],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.transcript (spokenOrder, headings, landmarks, links, formControls) and accessibility tree."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "walk"
+                     },
+                     "expect": "Walk interactive state or verify spoken role/name/value announcements when DOM transcript is insufficient.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record passed, failed, inapplicable, or cantTell verdict with ObservationRef pointers."
+                  }
+               ],
+               "done": {
+                  "passed": "Every link's purpose is determinable from its text/context, except purpose ambiguous to users generally.",
+                  "failed": "A nonexempt link purpose cannot be determined from link text and permitted programmatic context.",
+                  "inapplicable": "There are no links in the scoped states.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -2611,6 +4020,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -2641,6 +4051,49 @@
                "scope": "site",
                "applicability": "Pages within a set, except results of or steps in a process.",
                "requiredCapabilities": ["rendered-ui", "screenshot"],
+               "inapplicability": {
+                  "kind": "no-multipage-context",
+                  "requiredCapabilities": ["rendered-ui", "screenshot", "dom"],
+                  "requiredEvidence": ["action-trace", "observation", "screenshot"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "audit_assessment",
+                     "args": {
+                        "action": "next",
+                        "scopes": ["site"],
+                        "count": 1
+                     },
+                     "expect": "Use the linked coordinator file and inspect every participating state in the claimed site environment."
+                  },
+                  {
+                     "tool": "record_result",
+                     "expect": "After executing all procedure actions, submit their explicit outcomes with runFile, current state digests and registered producer artifacts. The run journal is the default results file."
+                  },
+                  {
+                     "tool": "audit_assessment",
+                     "args": {
+                        "action": "evaluate"
+                     },
+                     "expect": "Complete the claimed check using the verified evidence ID returned by record_result and its actual outcome."
+                  }
+               ],
+               "done": {
+                  "passed": "Every applicable page can be located in more than one way.",
+                  "failed": "An applicable page has fewer than two ways to locate it.",
+                  "inapplicable": "The scope is a single standalone page or consists entirely of process steps/results.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "no-multipage-context"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -2663,6 +4116,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -2693,6 +4147,31 @@
                "scope": "state",
                "applicability": "Headings and labels that are present.",
                "requiredCapabilities": ["rendered-ui", "screenshot"],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect current DOM facts, relevant visual observations, and the baseline screenshot for this procedure."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record each required action outcome with snapshot-bound evidence and the measurements required by this procedure."
+                  }
+               ],
+               "done": {
+                  "passed": "Each heading and label describes its topic or purpose.",
+                  "failed": "A present heading or label is misleading or does not describe its topic or purpose.",
+                  "inapplicable": "No headings or labels are present; assess required labels under other applicable criteria.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -2715,6 +4194,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -2747,6 +4227,40 @@
                "scope": "state",
                "applicability": "Keyboard-operable user interfaces.",
                "requiredCapabilities": ["rendered-ui", "screenshot", "keyboard"],
+               "tier": 1,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle tabStops, focus-visible contrast samples, and trapSuspected flags."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "press",
+                        "key": "Tab"
+                     },
+                     "expect": "Verify interactive keyboard operation on custom widgets.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with keyboard and focus evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "A visible keyboard focus indicator is available for every keyboard-operable interface.",
+                  "failed": "Keyboard focus cannot be visually located on an applicable interface.",
+                  "inapplicable": "The scope has no keyboard-operable interface.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -2769,6 +4283,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -2810,6 +4325,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -2868,6 +4404,37 @@
                "scope": "state",
                "applicability": "Multipoint or path-based gestures, excluding essential gestures and user-agent functionality.",
                "requiredCapabilities": ["rendered-ui", "screenshot", "pointer"],
+               "inapplicability": {
+                  "kind": "no-multipoint-gesture",
+                  "requiredCapabilities": ["rendered-ui", "screenshot", "pointer", "dom"],
+                  "requiredEvidence": ["action-trace", "observation", "screenshot"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle pointer facts, touch target dimensions, and gesture event listeners."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with pointer gesture or target-size evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Every nonessential gesture function has a single-pointer alternative requiring no path gesture.",
+                  "failed": "A nonessential multipoint/path gesture is the only pointer operation for a function.",
+                  "inapplicable": "No author-controlled multipoint or path-based gestures exist, or all are documented as essential.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "no-multipoint-gesture"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -2890,6 +4457,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -2920,6 +4488,31 @@
                "scope": "state",
                "applicability": "Functions operated with a single pointer.",
                "requiredCapabilities": ["rendered-ui", "screenshot", "pointer"],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle pointer facts, touch target dimensions, and gesture event listeners."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with pointer gesture or target-size evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Each function avoids down-event completion or supplies a qualifying abort, undo, reversal, or essential exception.",
+                  "failed": "A nonessential down-event action completes without an accepted cancellation mechanism.",
+                  "inapplicable": "No functions use a single pointer.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -2942,6 +4535,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -2974,6 +4568,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -3014,11 +4629,44 @@
                "applicability": "Controls with visible text or images of text as labels.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard",
                   "screenshot"
                ],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.transcript (spokenOrder, headings, landmarks, links, formControls) and accessibility tree."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "walk"
+                     },
+                     "expect": "Walk interactive state or verify spoken role/name/value announcements when DOM transcript is insufficient.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record passed, failed, inapplicable, or cantTell verdict with ObservationRef pointers."
+                  }
+               ],
+               "done": {
+                  "passed": "Each applicable accessible name contains its visible label text.",
+                  "failed": "A control's accessible name omits or changes the visible label words.",
+                  "inapplicable": "There are no controls with visible text labels.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -3046,6 +4694,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -3081,6 +4730,31 @@
                   "pointer",
                   "motion-input"
                ],
+               "tier": 1,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle pointer facts, touch target dimensions, and gesture event listeners."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with pointer gesture or target-size evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Motion functions have interface alternatives and can be disabled, or meet a documented normative exception.",
+                  "failed": "A nonexempt motion function lacks an interface alternative or cannot be disabled.",
+                  "inapplicable": "No motion-operated functions exist; absent host sensors alone do not establish inapplicability.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -3103,6 +4777,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -3153,6 +4828,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -3193,11 +4889,44 @@
                "applicability": "Human language of each page.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard",
                   "dom"
                ],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.transcript (spokenOrder, headings, landmarks, links, formControls) and accessibility tree."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "walk"
+                     },
+                     "expect": "Walk interactive state or verify spoken role/name/value announcements when DOM transcript is insufficient.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record passed, failed, inapplicable, or cantTell verdict with ObservationRef pointers."
+                  }
+               ],
+               "done": {
+                  "passed": "The page's default human language is programmatically determinable and correctly identified.",
+                  "failed": "The page's language declaration is missing or incorrect.",
+                  "inapplicable": "A page normally requires a default language; unresolved language knowledge is uncertain, not inapplicable.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -3205,7 +4934,7 @@
                ],
                "actions": [
                   "Determine the page's primary language and inspect its programmatic declaration.",
-                  "Read language-dependent content with a configured real reader and compare declarations with the content."
+                  "Read language-dependent content with the configured screen reader and compare declarations with the content."
                ],
                "requiredEvidence": ["action-trace", "observation", "speech"],
                "evaluation": {
@@ -3220,6 +4949,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -3252,6 +4982,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -3292,11 +5043,44 @@
                "applicability": "Passages or phrases in a language different from the page's default.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard",
                   "dom"
                ],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.transcript (spokenOrder, headings, landmarks, links, formControls) and accessibility tree."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "walk"
+                     },
+                     "expect": "Walk interactive state or verify spoken role/name/value announcements when DOM transcript is insufficient.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record passed, failed, inapplicable, or cantTell verdict with ObservationRef pointers."
+                  }
+               ],
+               "done": {
+                  "passed": "All nonexempt language changes are correctly programmatically identified.",
+                  "failed": "A nonexempt language change lacks correct programmatic identification.",
+                  "inapplicable": "There are no nonexempt passages in another language, with documented exceptions.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -3304,7 +5088,7 @@
                ],
                "actions": [
                   "Find language changes and inspect programmatic language metadata for each passage.",
-                  "Read representative changes with the real reader; distinguish names, technical terms, indeterminate words, and vernacular."
+                  "Read representative changes with the selected screen reader; distinguish names, technical terms, indeterminate words, and vernacular."
                ],
                "requiredEvidence": ["action-trace", "observation", "speech"],
                "evaluation": {
@@ -3319,6 +5103,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -3385,6 +5170,40 @@
                "scope": "state",
                "applicability": "Components that receive focus.",
                "requiredCapabilities": ["rendered-ui", "screenshot", "keyboard"],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle tabStops, focus-visible contrast samples, and trapSuspected flags."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "press",
+                        "key": "Tab"
+                     },
+                     "expect": "Verify interactive keyboard operation on custom widgets.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with keyboard and focus evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Receiving focus never initiates a change of context.",
+                  "failed": "Focus alone initiates a change of context.",
+                  "inapplicable": "No component can receive focus.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -3407,6 +5226,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -3438,10 +5258,55 @@
                "applicability": "Changes to the setting of a user-interface component.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard"
                ],
+               "inapplicability": {
+                  "kind": "no-form",
+                  "requiredCapabilities": [
+                     "rendered-ui",
+                     "screen-reader",
+                     "speech",
+                     "keyboard",
+                     "dom"
+                  ],
+                  "requiredEvidence": ["action-trace", "observation", "speech"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.transcript (spokenOrder, headings, landmarks, links, formControls) and accessibility tree."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "walk"
+                     },
+                     "expect": "Walk interactive state or verify spoken role/name/value announcements when DOM transcript is insufficient.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record passed, failed, inapplicable, or cantTell verdict with ObservationRef pointers."
+                  }
+               ],
+               "done": {
+                  "passed": "Setting changes avoid context changes or the user receives advance advice.",
+                  "failed": "A setting change initiates an unannounced change of context.",
+                  "inapplicable": "No component setting can be changed.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "no-form"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -3464,6 +5329,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -3495,10 +5361,59 @@
                "applicability": "Navigation mechanisms repeated within a set of pages.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard"
                ],
+               "inapplicability": {
+                  "kind": "no-multipage-context",
+                  "requiredCapabilities": [
+                     "rendered-ui",
+                     "screen-reader",
+                     "speech",
+                     "keyboard",
+                     "dom"
+                  ],
+                  "requiredEvidence": ["action-trace", "observation", "speech"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "audit_assessment",
+                     "args": {
+                        "action": "next",
+                        "scopes": ["site"],
+                        "count": 1
+                     },
+                     "expect": "Use the linked coordinator file and inspect every participating state in the claimed site environment."
+                  },
+                  {
+                     "tool": "record_result",
+                     "expect": "After executing all procedure actions, submit their explicit outcomes with runFile, current state digests and registered producer artifacts. The run journal is the default results file."
+                  },
+                  {
+                     "tool": "audit_assessment",
+                     "args": {
+                        "action": "evaluate"
+                     },
+                     "expect": "Complete the claimed check using the verified evidence ID returned by record_result and its actual outcome."
+                  }
+               ],
+               "done": {
+                  "passed": "Repeated navigation occurs in the same relative order except for user-initiated changes.",
+                  "failed": "Repeated navigation changes relative order without user initiation.",
+                  "inapplicable": "There are no repeated navigation mechanisms across the page set.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "no-multipage-context"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -3521,6 +5436,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -3551,6 +5467,49 @@
                "scope": "site",
                "applicability": "Components with the same functionality within a set of pages.",
                "requiredCapabilities": ["rendered-ui", "screenshot"],
+               "inapplicability": {
+                  "kind": "no-multipage-context",
+                  "requiredCapabilities": ["rendered-ui", "screenshot", "dom"],
+                  "requiredEvidence": ["action-trace", "observation", "screenshot"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "audit_assessment",
+                     "args": {
+                        "action": "next",
+                        "scopes": ["site"],
+                        "count": 1
+                     },
+                     "expect": "Use the linked coordinator file and inspect every participating state in the claimed site environment."
+                  },
+                  {
+                     "tool": "record_result",
+                     "expect": "After executing all procedure actions, submit their explicit outcomes with runFile, current state digests and registered producer artifacts. The run journal is the default results file."
+                  },
+                  {
+                     "tool": "audit_assessment",
+                     "args": {
+                        "action": "evaluate"
+                     },
+                     "expect": "Complete the claimed check using the verified evidence ID returned by record_result and its actual outcome."
+                  }
+               ],
+               "done": {
+                  "passed": "Components with the same functionality are identified consistently.",
+                  "failed": "Components with the same functionality are identified inconsistently.",
+                  "inapplicable": "No components share functionality across scoped pages.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "no-multipage-context"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -3573,6 +5532,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -3605,6 +5565,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -3655,10 +5636,55 @@
                "applicability": "Input errors automatically detected by the content.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard"
                ],
+               "inapplicability": {
+                  "kind": "no-form",
+                  "requiredCapabilities": [
+                     "rendered-ui",
+                     "screen-reader",
+                     "speech",
+                     "keyboard",
+                     "dom"
+                  ],
+                  "requiredEvidence": ["action-trace", "observation", "speech"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.transcript (spokenOrder, headings, landmarks, links, formControls) and accessibility tree."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "walk"
+                     },
+                     "expect": "Walk interactive state or verify spoken role/name/value announcements when DOM transcript is insufficient.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record passed, failed, inapplicable, or cantTell verdict with ObservationRef pointers."
+                  }
+               ],
+               "done": {
+                  "passed": "Each automatically detected error identifies the item and describes the error in text.",
+                  "failed": "A detected error lacks textual identification or description.",
+                  "inapplicable": "The scoped content detects no input errors; lack of access to validation remains uncertain.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "no-form"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -3666,7 +5692,7 @@
                ],
                "actions": [
                   "Trigger required-field, format, range, and server validation errors with authorized test data.",
-                  "Compare each detected error's text with the field in error and read it with the real reader."
+                  "Compare each detected error's text with the field in error and read it with the selected screen reader."
                ],
                "requiredEvidence": ["action-trace", "observation", "speech"],
                "evaluation": {
@@ -3681,6 +5707,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -3713,6 +5740,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -3753,10 +5801,55 @@
                "applicability": "Content requiring user input.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard"
                ],
+               "inapplicability": {
+                  "kind": "no-form",
+                  "requiredCapabilities": [
+                     "rendered-ui",
+                     "screen-reader",
+                     "speech",
+                     "keyboard",
+                     "dom"
+                  ],
+                  "requiredEvidence": ["action-trace", "observation", "speech"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.transcript (spokenOrder, headings, landmarks, links, formControls) and accessibility tree."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "walk"
+                     },
+                     "expect": "Walk interactive state or verify spoken role/name/value announcements when DOM transcript is insufficient.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record passed, failed, inapplicable, or cantTell verdict with ObservationRef pointers."
+                  }
+               ],
+               "done": {
+                  "passed": "Labels or instructions are provided when the content requires input.",
+                  "failed": "An input request lacks necessary labels or instructions.",
+                  "inapplicable": "The scope requires no user input.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "no-form"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -3779,6 +5872,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -3810,10 +5904,55 @@
                "applicability": "Automatically detected input errors with known correction suggestions.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard"
                ],
+               "inapplicability": {
+                  "kind": "no-form",
+                  "requiredCapabilities": [
+                     "rendered-ui",
+                     "screen-reader",
+                     "speech",
+                     "keyboard",
+                     "dom"
+                  ],
+                  "requiredEvidence": ["action-trace", "observation", "speech"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.transcript (spokenOrder, headings, landmarks, links, formControls) and accessibility tree."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "walk"
+                     },
+                     "expect": "Walk interactive state or verify spoken role/name/value announcements when DOM transcript is insufficient.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record passed, failed, inapplicable, or cantTell verdict with ObservationRef pointers."
+                  }
+               ],
+               "done": {
+                  "passed": "Known correction suggestions are provided unless doing so jeopardizes security or content purpose.",
+                  "failed": "A known correction suggestion is withheld without an accepted exception.",
+                  "inapplicable": "There are no applicable detected errors or known suggestions; document security/purpose exceptions.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "no-form"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -3836,6 +5975,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -3867,10 +6007,59 @@
                "applicability": "Legal/financial commitments, changes/deletions to user-controlled stored data, or submission of test responses.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard"
                ],
+               "inapplicability": {
+                  "kind": "no-form",
+                  "requiredCapabilities": [
+                     "rendered-ui",
+                     "screen-reader",
+                     "speech",
+                     "keyboard",
+                     "dom"
+                  ],
+                  "requiredEvidence": ["action-trace", "observation", "speech"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "audit_assessment",
+                     "args": {
+                        "action": "next",
+                        "scopes": ["journey"],
+                        "count": 1
+                     },
+                     "expect": "Use the linked coordinator file and inspect the claimed ordered journey, including actual transition evidence."
+                  },
+                  {
+                     "tool": "record_result",
+                     "expect": "After executing all procedure actions, submit their explicit outcomes with runFile, current state digests and registered producer artifacts. The run journal is the default results file."
+                  },
+                  {
+                     "tool": "audit_assessment",
+                     "args": {
+                        "action": "evaluate"
+                     },
+                     "expect": "Complete the claimed check using the verified evidence ID returned by record_result and its actual outcome."
+                  }
+               ],
+               "done": {
+                  "passed": "Each qualifying submission is reversible, checked with correction opportunities, or confirmed after review/correction.",
+                  "failed": "A qualifying submission has none of the accepted error-prevention mechanisms.",
+                  "inapplicable": "There are no qualifying submissions; lack of submission authorization alone is insufficient.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "no-form"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -3893,6 +6082,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -3943,6 +6133,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -3982,6 +6193,31 @@
                "scope": "state",
                "applicability": "Markup-language content under WCAG 2.1; this criterion is removed from WCAG 2.2.",
                "requiredCapabilities": ["rendered-ui", "dom", "markup-validation"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle DOM tree, markup validation errors, and parsed elements."
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record verdict with markup validity and well-formedness evidence."
+                  }
+               ],
+               "done": {
+                  "passed": "Markup meets the criterion's parsing conditions or the specification explicitly permits the syntax.",
+                  "failed": "Markup violates a required parsing condition without a specification allowance.",
+                  "inapplicable": "The target is not implemented using a markup language.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -4004,6 +6240,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements.",
                   "Retain markup-validator output covering every parsing condition; reader announcements alone cannot prove parsing."
                ],
@@ -4037,6 +6274,27 @@
                "scope": "state",
                "applicability": "A rendered web document supports the mapped axe rules.",
                "requiredCapabilities": ["rendered-ui", "dom"],
+               "tier": 0,
+               "toolCalls": [
+                  {
+                     "tool": "review.start",
+                     "expect": "Run mapped axe-core rules against the observed state and record deterministic violations."
+                  }
+               ],
+               "done": {
+                  "passed": "All mapped rules resolve with passes or inapplicable results. This completes the scanner procedure only.",
+                  "failed": "A mapped rule detects a criterion failure with a reproducible violating object.",
+                  "inapplicable": "All mapped rules report inapplicable in the observed document.",
+                  "cantTell": "A mapped rule is missing, incomplete, or cannot run in this environment.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the observed document and capture its current state fingerprint."
                ],
@@ -4077,17 +6335,50 @@
                "applicability": "All user-interface components, including custom and dynamically changed controls.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard"
                ],
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.transcript (spokenOrder, headings, landmarks, links, formControls) and accessibility tree."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "walk"
+                     },
+                     "expect": "Walk interactive state or verify spoken role/name/value announcements when DOM transcript is insufficient.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record passed, failed, inapplicable, or cantTell verdict with ObservationRef pointers."
+                  }
+               ],
+               "done": {
+                  "passed": "Names/roles are determinable, user-settable states/values are programmatic, and changes notify user agents and AT.",
+                  "failed": "A control lacks required semantics, user-settable properties, or notification of changes.",
+                  "inapplicable": "No user-interface components are present.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ]
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
                   "Read the normative source below before evaluating its requirements and exceptions."
                ],
                "actions": [
-                  "Inventory controls and inspect programmatic names, roles, states, properties, and values with a real reader.",
+                  "Inventory controls and inspect programmatic names, roles, states, properties, and values with the selected screen reader.",
                   "Operate each control and change user-settable values; compare announced updates and programmatic semantics with behavior."
                ],
                "requiredEvidence": ["action-trace", "observation", "speech"],
@@ -4103,6 +6394,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [
@@ -4136,10 +6428,55 @@
                "applicability": "Status messages that do not constitute a change of context.",
                "requiredCapabilities": [
                   "rendered-ui",
-                  "real-reader",
+                  "screen-reader",
                   "speech",
                   "keyboard"
                ],
+               "inapplicability": {
+                  "kind": "no-live-region",
+                  "requiredCapabilities": [
+                     "rendered-ui",
+                     "screen-reader",
+                     "speech",
+                     "keyboard",
+                     "dom"
+                  ],
+                  "requiredEvidence": ["action-trace", "observation", "speech"]
+               },
+               "tier": 2,
+               "toolCalls": [
+                  {
+                     "tool": "review.next",
+                     "expect": "Inspect ObservationBundle.transcript (spokenOrder, headings, landmarks, links, formControls) and accessibility tree."
+                  },
+                  {
+                     "tool": "sr_action",
+                     "args": {
+                        "action": "walk"
+                     },
+                     "expect": "Walk interactive state or verify spoken role/name/value announcements when DOM transcript is insufficient.",
+                     "capturesArtifact": true
+                  },
+                  {
+                     "tool": "review.judge",
+                     "expect": "Record passed, failed, inapplicable, or cantTell verdict with ObservationRef pointers."
+                  }
+               ],
+               "done": {
+                  "passed": "Each applicable status message is programmatically determinable and presented by AT without receiving focus.",
+                  "failed": "An applicable status message cannot be presented by AT without focus.",
+                  "inapplicable": "No status messages occur in the exercised functionality.",
+                  "cantTell": "Required objects, branches, capabilities, measurements, or context remain unavailable. Record what was attempted and a valid blockerCode.",
+                  "allowedBlockerCodes": [
+                     "capability-unsupported",
+                     "external-submission-unauthorized",
+                     "auth-credentials-missing",
+                     "third-party-out-of-scope",
+                     "hardware-sensor-unavailable",
+                     "human-judgment-required"
+                  ],
+                  "inapplicabilityKind": "no-live-region"
+               },
                "setup": [
                   "Bind the intended target and environment; capture the initial state and a fresh action checkpoint.",
                   "Inventory applicable objects and branches across the scoped states; use authorized test data for mutations.",
@@ -4147,7 +6484,7 @@
                ],
                "actions": [
                   "Trigger success, result-count, waiting, progress, and error status messages while preserving focus.",
-                  "Record real-reader announcements and inspect roles/properties without moving focus to the message."
+                  "Record screen-reader announcements and inspect roles/properties without moving focus to the message."
                ],
                "requiredEvidence": ["action-trace", "observation", "speech"],
                "evaluation": {
@@ -4162,6 +6499,7 @@
                ],
                "limitations": [
                   "Results apply only to the recorded states, environment, language, and complete processes actually observed.",
+                  "Virtual-reader evidence is valid for audits but does not verify VoiceOver or NVDA behavior.",
                   "Inspect all normative exceptions; informative techniques and APG examples are supporting guidance, not conformance requirements."
                ],
                "sources": [

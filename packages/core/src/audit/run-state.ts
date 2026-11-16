@@ -12,8 +12,17 @@ import {
    getAssessmentCheckId,
    listStateEnvironmentIds,
    updateAuditRun,
+   withRunTransaction,
+   type RunTransaction,
 } from './run-store.js';
-import { assertCheckEvidence, readRunEvidence } from './check-evidence.js';
+export {
+   getAssessmentId,
+   getAssessmentCheckId,
+   listStateEnvironmentIds,
+   updateAuditRun,
+   withRunTransaction,
+   type RunTransaction,
+};
 import {
    isAssessmentScopeSupported,
    resolveEvidenceProcedure,
@@ -76,12 +85,11 @@ function invalidateJourneyCompletion(
 }
 
 function invalidateStateJourneys(run: AuditRun, stateId: string): void {
+   const reason =
+      'A constituent state changed. Traverse the current journey before completing it.';
    run.journeys = run.journeys.map((journey) =>
       journey.stateIds.includes(stateId)
-         ? invalidateJourneyCompletion(
-              journey,
-              'A constituent state changed. Traverse the current journey before completing it.',
-           )
+         ? invalidateJourneyCompletion(journey, reason)
          : journey,
    );
 }
@@ -109,6 +117,7 @@ export async function registerAuditState(input: {
          const changed =
             previous !== undefined &&
             (previous.fingerprint !== input.state.fingerprint ||
+               previous.observationDigest !== input.state.observationDigest ||
                previous.target.value !== input.state.target.value ||
                previous.target.kind !== input.state.target.kind ||
                previous.environmentId !== input.state.environmentId);
@@ -122,19 +131,21 @@ export async function registerAuditState(input: {
          run.states = [...run.states.filter((item) => item.stateId !== stateId), state];
          if (!previous || changed) {
             invalidateStateJourneys(run, stateId);
-            run.checks = run.checks.map((check) =>
-               check.stateIds.includes(stateId) ||
-               (check.scope === 'site' &&
-                  (check.environmentId === state.environmentId ||
-                     check.environmentId === previous?.environmentId))
+            run.checks = run.checks.map((check) => {
+               const matches =
+                  check.stateIds.includes(stateId) ||
+                  (check.scope === 'site' &&
+                     (check.environmentId === state.environmentId ||
+                        check.environmentId === previous?.environmentId));
+               return matches
                   ? {
                        ...check,
                        status: 'stale',
                        updatedAt: state.observedAt,
                        reason: 'The observed state changed.',
                     }
-                  : check,
-            );
+                  : check;
+            });
             run.status = 'active';
          }
          return run;
@@ -270,60 +281,88 @@ export function startAssessmentCheck(check: AssessmentCheck): void {
    });
 }
 
-/** Separate work status from its result; an attempt never implies a passing outcome. */
-export async function transitionAssessmentCheck(input: {
+interface AssessmentTransitionInput {
    file: string;
    checkId: string;
    status: AssessmentCheck['status'];
    outcome?: AssessmentCheck['outcome'] | undefined;
    evidenceIds?: string[] | undefined;
    reason?: string | undefined;
-}): Promise<AuditRun> {
+}
+
+function assertTransitionAllowed(
+   run: AuditRun,
+   check: AssessmentCheck | undefined,
+   input: AssessmentTransitionInput,
+): asserts check is AssessmentCheck {
+   if (!check || !TRANSITIONS[check.status].includes(input.status)) {
+      throw new CliUsageError(
+         'audit-transition-invalid',
+         `Cannot transition check ${input.checkId} to ${input.status}.`,
+      );
+   }
+   const hasRunningCheck =
+      input.status === 'running' &&
+      (run.activeCheckIds.length > 0 ||
+         run.checks.some((item) => item.status === 'running'));
+   if (hasRunningCheck) {
+      throw new CliUsageError(
+         'audit-check-running',
+         'Finish or recover the running check before claiming another.',
+      );
+   }
+}
+
+function applyTransition(
+   run: AuditRun,
+   check: AssessmentCheck,
+   input: AssessmentTransitionInput,
+): void {
+   Object.assign(check, {
+      status: input.status,
+      updatedAt: input.status === 'running' ? check.updatedAt : new Date().toISOString(),
+      reason: input.reason,
+      ...(input.status === 'evaluated'
+         ? { outcome: input.outcome, evidenceIds: input.evidenceIds ?? [] }
+         : {}),
+   });
+   if (input.status === 'running') {
+      startAssessmentCheck(check);
+      if (!run.activeCheckIds.includes(check.checkId)) {
+         run.activeCheckIds.push(check.checkId);
+      }
+   } else if (run.activeCheckIds.includes(check.checkId)) {
+      run.activeCheckIds = run.activeCheckIds.filter((id) => id !== check.checkId);
+   }
+   run.status = 'active';
+}
+
+/** Separate work status from its result; an attempt never implies a passing outcome. */
+export async function transitionAssessmentCheck(
+   input: AssessmentTransitionInput,
+): Promise<AuditRun> {
+   if (input.status === 'evaluated') {
+      if (!input.outcome) {
+         throw new CliUsageError(
+            'audit-evidence-invalid',
+            'An evaluated check requires an outcome and unique evidence references.',
+         );
+      }
+      return withRunTransaction(input.file, (tx) =>
+         tx.evaluateCheck({
+            checkId: input.checkId,
+            outcome: input.outcome as NonNullable<AssessmentCheck['outcome']>,
+            evidenceIds: input.evidenceIds ?? [],
+            reason: input.reason,
+         }),
+      );
+   }
    return updateAuditRun({
       file: input.file,
       async change(run) {
          const check = run.checks.find((item) => item.checkId === input.checkId);
-         if (!check || !TRANSITIONS[check.status].includes(input.status)) {
-            throw new CliUsageError(
-               'audit-transition-invalid',
-               `Cannot transition check ${input.checkId} to ${input.status}.`,
-            );
-         }
-         if (
-            input.status === 'running' &&
-            (run.activeCheckId || run.checks.some((item) => item.status === 'running'))
-         ) {
-            throw new CliUsageError(
-               'audit-check-running',
-               'Finish or recover the running check before claiming another.',
-            );
-         }
-         if (input.status === 'evaluated') {
-            assertCheckEvidence({
-               check: {
-                  ...check,
-                  outcome: input.outcome,
-                  evidenceIds: input.evidenceIds ?? [],
-               },
-               records: await readRunEvidence({ file: input.file, run }),
-            });
-         }
-         Object.assign(check, {
-            status: input.status,
-            updatedAt:
-               input.status === 'running' ? check.updatedAt : new Date().toISOString(),
-            reason: input.reason,
-            ...(input.status === 'evaluated'
-               ? { outcome: input.outcome, evidenceIds: input.evidenceIds ?? [] }
-               : {}),
-         });
-         if (input.status === 'running') {
-            startAssessmentCheck(check);
-            run.activeCheckId = check.checkId;
-         } else if (run.activeCheckId === check.checkId) {
-            run.activeCheckId = undefined;
-         }
-         run.status = 'active';
+         assertTransitionAllowed(run, check, input);
+         applyTransition(run, check, input);
          return run;
       },
    });

@@ -21,6 +21,7 @@
    },
    "scripts": {
       "build": "tsup src/index.ts --format esm --dts --clean",
+      "generate": "tsx scripts/refresh-strategy.ts",
       "prepack": "npm run build",
       "sync": "tsx scripts/sync.ts",
       "typecheck": "tsc -p tsconfig.json --noEmit",

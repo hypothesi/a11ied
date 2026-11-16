@@ -38,13 +38,13 @@ async function loadDriveRunner(): Promise<DriveRunner> {
 }
 
 /**
- * The move-through-the-page verbs among interact, stop-interacting, activate, top,
- * bottom, and escape; the rest belong to "Act on it".
+ * The navigate-through-the-page verbs among interact, stop-interacting, activate, top,
+ * bottom, and escape; the rest belong to "Interact with controls".
  */
-const MOVE_VERBS: ReadonlySet<string> = new Set(['top', 'bottom', 'escape']);
+const NAVIGATE_VERBS: ReadonlySet<string> = new Set(['top', 'bottom']);
 
 function groupForVerb(verb: string): string {
-   return MOVE_VERBS.has(verb) ? DRIVE_GROUPS.move : DRIVE_GROUPS.act;
+   return NAVIGATE_VERBS.has(verb) ? DRIVE_GROUPS.navigate : DRIVE_GROUPS.interact;
 }
 
 /**
@@ -79,7 +79,7 @@ export function registerReadCommand(driveCommand: Command): void {
    addDriveNavigationOptions(
       driveCommand
          .command('read')
-         .helpGroup(DRIVE_GROUPS.read)
+         .helpGroup(DRIVE_GROUPS.navigate)
          .summary('Read the current item without moving.')
          .description(
             'Read the current item without moving: role, name, value, states, and the phrase, with the source of each.',
@@ -100,7 +100,7 @@ export function registerPressCommand(driveCommand: Command): void {
       addDriveAutoStartOptions(
          driveCommand
             .command('press <chord...>')
-            .helpGroup(DRIVE_GROUPS.act)
+            .helpGroup(DRIVE_GROUPS.interact)
             .summary('Press key chords in order, one chord per argument.')
             .description('Press key chords in order, one chord per argument.')
             .addHelpText('after', () => getDriveKeyHelp()),
@@ -122,7 +122,7 @@ export function registerTypeCommand(driveCommand: Command): void {
    addDriveAutoStartOptions(
       driveCommand
          .command('type <text>')
-         .helpGroup(DRIVE_GROUPS.act)
+         .helpGroup(DRIVE_GROUPS.interact)
          .summary('Type text through the active target.')
          .description('Type text through the active target.'),
    ).action(async (text: string, options: DriveAutoStartOptions) => {
@@ -171,7 +171,7 @@ export function registerFocusCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('focus')
-         .helpGroup(DRIVE_GROUPS.act)
+         .helpGroup(DRIVE_GROUPS.interact)
          .summary('Bring a window to the front.')
          .description(
             'Bring a window to the front. With no options, refocus the app the session opened.',
@@ -197,7 +197,7 @@ export function registerCheckpointCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('checkpoint <label>')
-         .helpGroup(DRIVE_GROUPS.check)
+         .helpGroup(DRIVE_GROUPS.assert)
          .summary('Mark a named point in the transcript for --since.')
          .description('Mark a named point in the transcript for --since.'),
    ).action(async (label: string, options: DriveActionOptions) => {

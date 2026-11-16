@@ -9,7 +9,11 @@ import { CliUsageError } from '#core';
 
 import { resolvePageTarget } from '../lib/resolvers.js';
 import type { CommandExecution } from '../lib/helpers.js';
-import { readEvidenceFinding, readEvidenceProvenance } from '../lib/evidence-input.js';
+import {
+   readArtifactProcedureAssessment,
+   readEvidenceFinding,
+   readEvidenceProvenance,
+} from '../lib/evidence-input.js';
 
 export interface EvidenceActionOptions {
    criterion?: string;
@@ -22,6 +26,7 @@ export interface EvidenceActionOptions {
    results?: string;
    run?: string;
    provenance?: string;
+   assessment?: string;
    finding?: string;
    level?: string;
    wcag?: string;
@@ -134,6 +139,9 @@ export async function handleRecordAction(
    });
    if (options.provenance) {
       record.provenance = await readEvidenceProvenance(options.provenance);
+   }
+   if (options.assessment) {
+      record.assessment = await readArtifactProcedureAssessment(options.assessment);
    }
    if (options.finding) {
       record.finding = await readEvidenceFinding(options.finding);

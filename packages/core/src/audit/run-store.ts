@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { resolve } from 'node:path';
 
 import {
    auditRunSchema,
@@ -8,11 +8,16 @@ import {
    type AuditEnvironment,
    type AssessmentCheck,
    type AuditRun,
+   type EvidenceRecord,
    type TargetReference,
 } from '@a11ied/contracts';
 
-import { getCanonicalPath, withFileLock, writeJsonAtomic } from '../files/atomic-json.js';
+import { getCanonicalPath, withPathLock, writeAtomic } from '../files/store.js';
 import { CliUsageError } from '../errors/cli-errors.js';
+import { getAuditRunPaths } from '../evidence/paths.js';
+export { getAuditRunPaths } from '../evidence/paths.js';
+import { recordEvidence, type EvidenceStoreOptions } from '../evidence/store.js';
+import { assertCheckEvidence, readRunEvidence } from './check-evidence.js';
 
 const ID_HASH_LENGTH = 16;
 
@@ -59,21 +64,6 @@ export function listStateEnvironmentIds(run: AuditRun, stateIds: string[]): Set<
    );
 }
 
-/** Resolve run artifacts together; callers do not assemble evidence paths themselves. */
-export function getAuditRunPaths(file: string): {
-   file: string;
-   evidenceFile: string;
-   artifactsDir: string;
-} {
-   const resolvedFile = resolve(file);
-   const directory = dirname(resolvedFile);
-   return {
-      file: resolvedFile,
-      evidenceFile: resolve(directory, 'evidence.jsonl'),
-      artifactsDir: resolve(directory, 'artifacts'),
-   };
-}
-
 function assertAssessmentCheckIdentities(run: AuditRun): void {
    const invalid = run.checks.find(
       (check) => getAssessmentCheckId(check) !== check.checkId,
@@ -89,7 +79,18 @@ function assertAssessmentCheckIdentities(run: AuditRun): void {
 
 /** Invalid or inaccessible run files stop execution instead of silently starting over. */
 export async function readAuditRun(file: string): Promise<AuditRun> {
-   const run = auditRunSchema.parse(JSON.parse(await readFile(resolve(file), 'utf8')));
+   const raw: unknown = JSON.parse(await readFile(resolve(file), 'utf8'));
+   if (
+      typeof raw === 'object' &&
+      raw !== null &&
+      'activeCheckId' in raw &&
+      !('activeCheckIds' in raw)
+   ) {
+      const legacy = (raw as Record<string, unknown>).activeCheckId;
+      (raw as Record<string, unknown>).activeCheckIds =
+         typeof legacy === 'string' ? [legacy] : [];
+   }
+   const run = auditRunSchema.parse(raw);
    assertAssessmentCheckIdentities(run);
    return run;
 }
@@ -141,7 +142,7 @@ export async function createAuditRun(options: CreateAuditRunOptions): Promise<{
                   : [],
          },
       });
-   await writeJsonAtomic(run, paths.file, false);
+   await writeAtomic(paths.file, run, { overwrite: false });
    return { run, ...paths };
 }
 
@@ -174,38 +175,152 @@ function assertRunIdentity(current: AuditRun, next: AuditRun): void {
    }
 }
 
+export interface RunTransaction {
+   readRun(): AuditRun;
+   updateRun(
+      change: (run: AuditRun) => AuditRun | Promise<AuditRun>,
+      expectedRevision?: number | undefined,
+   ): Promise<AuditRun>;
+   registerStateArtifacts(
+      states: ReadonlyArray<{ stateId: string; revision: number; fingerprint: string }>,
+      artifactPaths: string[],
+   ): Promise<AuditRun>;
+   recordEvidence(
+      record: EvidenceRecord,
+      options?: Omit<EvidenceStoreOptions, 'file' | 'runFile' | 'run'>,
+   ): Promise<{ record: EvidenceRecord; file: string }>;
+   evaluateCheck(input: {
+      checkId: string;
+      outcome: NonNullable<AssessmentCheck['outcome']>;
+      evidenceIds: string[];
+      reason?: string | undefined;
+   }): Promise<AuditRun>;
+}
+
+function prepareNextRun(current: AuditRun, candidate: AuditRun): AuditRun {
+   const next = auditRunSchema.parse(candidate);
+   const previousChecks = new Map(current.checks.map((check) => [check.checkId, check]));
+   assertAssessmentCheckIdentities(next);
+   assertRunIdentity(current, next);
+   for (const check of next.checks) {
+      const previous = previousChecks.get(check.checkId);
+      if (previous && Date.parse(check.updatedAt) < Date.parse(previous.updatedAt)) {
+         check.updatedAt = previous.updatedAt;
+      }
+   }
+   next.revision = current.revision + 1;
+   next.updatedAt = new Date().toISOString();
+   return next;
+}
+
+function applyStateArtifacts(
+   run: AuditRun,
+   states: ReadonlyArray<{ stateId: string; revision: number; fingerprint: string }>,
+   artifactPaths: string[],
+): AuditRun {
+   for (const ref of states) {
+      const state = run.states.find((item) => item.stateId === ref.stateId);
+      if (
+         !state ||
+         state.revision !== ref.revision ||
+         state.fingerprint !== ref.fingerprint
+      ) {
+         throw new CliUsageError(
+            'audit-revision-conflict',
+            'The observed state changed during check execution.',
+         );
+      }
+      state.artifacts = [...new Set([...state.artifacts, ...artifactPaths])];
+   }
+   return run;
+}
+
+function createRunTransaction(
+   canonicalFile: string,
+   paths: { file: string; evidenceFile: string; artifactsDir: string },
+   state: { current: AuditRun },
+): RunTransaction {
+   const tx: RunTransaction = {
+      readRun: () => structuredClone(state.current),
+      async updateRun(change, expectedRevision) {
+         if (
+            expectedRevision !== undefined &&
+            expectedRevision !== state.current.revision
+         ) {
+            throw new CliUsageError(
+               'audit-revision-conflict',
+               'The audit changed. Read its current state before retrying this update.',
+            );
+         }
+         state.current = prepareNextRun(
+            state.current,
+            await change(structuredClone(state.current)),
+         );
+         await writeAtomic(canonicalFile, state.current);
+         return state.current;
+      },
+      async registerStateArtifacts(states, artifactPaths) {
+         return tx.updateRun((run) => applyStateArtifacts(run, states, artifactPaths));
+      },
+      async recordEvidence(record, options) {
+         return recordEvidence(record, {
+            ...options,
+            file: paths.evidenceFile,
+            runFile: canonicalFile,
+         });
+      },
+      async evaluateCheck(input) {
+         return tx.updateRun(async (run) => {
+            const check = run.checks.find((item) => item.checkId === input.checkId);
+            if (!check || check.status !== 'running') {
+               throw new CliUsageError(
+                  'audit-transition-invalid',
+                  `Cannot transition check ${input.checkId} to evaluated.`,
+               );
+            }
+            assertCheckEvidence({
+               check: {
+                  ...check,
+                  outcome: input.outcome,
+                  evidenceIds: input.evidenceIds,
+               },
+               records: await readRunEvidence({ file: canonicalFile, run }),
+            });
+            check.status = 'evaluated';
+            check.updatedAt = new Date().toISOString();
+            check.outcome = input.outcome;
+            check.evidenceIds = input.evidenceIds;
+            check.reason = input.reason;
+            run.activeCheckIds = run.activeCheckIds.filter((id) => id !== check.checkId);
+            run.status = 'active';
+            return run;
+         });
+      },
+   };
+   return tx;
+}
+
+export async function withRunTransaction<TResult>(
+   file: string,
+   fn: (tx: RunTransaction) => Promise<TResult>,
+): Promise<TResult> {
+   const canonicalFile = await getCanonicalPath(file);
+   const paths = getAuditRunPaths(canonicalFile);
+
+   return withPathLock(canonicalFile, async () => {
+      const state = { current: await readAuditRun(canonicalFile) };
+      const tx = createRunTransaction(canonicalFile, paths, state);
+      return fn(tx);
+   });
+}
+
 /** Lock the read-modify-write boundary and reject writes based on an obsolete revision. */
 export async function updateAuditRun(input: {
    file: string;
    expectedRevision?: number | undefined;
    change: (run: AuditRun) => AuditRun | Promise<AuditRun>;
 }): Promise<AuditRun> {
-   const file = await getCanonicalPath(input.file);
-   return withFileLock(file, async () => {
-      const current = await readAuditRun(file);
-      if (
-         input.expectedRevision !== undefined &&
-         input.expectedRevision !== current.revision
-      ) {
-         throw new CliUsageError(
-            'audit-revision-conflict',
-            'The audit changed. Read its current state before retrying this update.',
-         );
-      }
-      const next = auditRunSchema.parse(await input.change(structuredClone(current))),
-         previousChecks = new Map(current.checks.map((check) => [check.checkId, check]));
-      assertAssessmentCheckIdentities(next);
-      assertRunIdentity(current, next);
-      // Retry boundaries retain the latest saved check time across wall-clock rollback.
-      for (const check of next.checks) {
-         const previous = previousChecks.get(check.checkId);
-         if (previous && Date.parse(check.updatedAt) < Date.parse(previous.updatedAt)) {
-            check.updatedAt = previous.updatedAt;
-         }
-      }
-      next.revision = current.revision + 1;
-      next.updatedAt = new Date().toISOString();
-      await writeJsonAtomic(next, file);
-      return next;
-   });
+   return withRunTransaction(input.file, (tx) =>
+      tx.updateRun(input.change, input.expectedRevision),
+   );
 }

@@ -13,6 +13,7 @@ import {
 import { registerPatternTools } from './tools/pattern.js';
 import { registerSrActionTool } from './tools/sr-action.js';
 import { registerSrListTool } from './tools/sr-list.js';
+import { registerReviewTools } from './tools/review.js';
 import { registerSrSessionTool } from './tools/sr-session.js';
 import { registerSrTranscriptTools } from './tools/sr-transcript.js';
 
@@ -25,6 +26,7 @@ export function createMcpServer(): McpServer {
 
    registerResources(server);
    registerKnowledgeTools(server);
+   registerReviewTools(server);
    registerPatternTools(server);
    registerPatternCheckTool(server);
    registerPatternEvidenceTools(server);

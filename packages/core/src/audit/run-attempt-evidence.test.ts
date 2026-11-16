@@ -34,7 +34,7 @@ async function assertOldAttemptRejected(): Promise<void> {
    const fixture = await createEvidenceTestAssessment();
    try {
       vi.restoreAllMocks();
-      const checkId = fixture.run.activeCheckId,
+      const checkId = fixture.run.activeCheckIds[0],
          saved = await recordEvidence(fixture.record, fixture);
       if (!checkId || !saved.record.evidenceId) {
          throw new Error('The fixture needs a claimed check and saved evidence.');

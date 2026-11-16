@@ -1,7 +1,7 @@
 import type { AuditRun, SiteInventory, TargetReference } from '@a11ied/contracts';
 import { readInventory } from '../discovery/inventory.js';
 import { normalizeUrl } from '../discovery/crawl.js';
-import { getCanonicalPath } from '../files/atomic-json.js';
+import { getCanonicalPath } from '../files/store.js';
 
 export interface AssessmentIssue {
    code: string;
@@ -182,10 +182,10 @@ export function getScopeIssues(
          run.target.kind === 'url' &&
          normalizeUrl(run.target.value) === normalizeUrl(page.url),
    );
-   if (run.activeCheckId) {
+   for (const checkId of run.activeCheckIds) {
       issues.push({
          code: 'audit-check-active',
-         checkId: run.activeCheckId,
+         checkId,
          message: 'A live assessment claim has not been completed or recovered.',
       });
    }

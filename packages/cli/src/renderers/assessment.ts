@@ -52,17 +52,21 @@ const textResultSchema = z.object({
    }),
    next: z
       .object({
-         check: z.object({
-            checkId: z.string(),
-            criterionId: z.string(),
-            environmentId: z.string(),
-         }),
-         procedure: z.object({
-            title: z.string(),
-            setup: z.array(z.string()),
-            actions: z.array(z.string()),
-            requiredEvidence: z.array(z.string()),
-         }),
+         checks: z.array(
+            z.object({
+               checkId: z.string(),
+               criterionId: z.string(),
+               environmentId: z.string(),
+            }),
+         ),
+         procedures: z.array(
+            z.object({
+               title: z.string(),
+               setup: z.array(z.string()),
+               actions: z.array(z.string()),
+               requiredEvidence: z.array(z.string()),
+            }),
+         ),
       })
       .optional(),
 });
@@ -149,19 +153,24 @@ export function renderAssessmentText(envelope: CliOutputEnvelope): string {
       `Assessed ${result.coverage.assessed} of ${result.coverage.total} checks; ${result.coverage.unresolved} unresolved.`,
    ];
    appendCoverage(lines, result);
-   if (result.next) {
-      const { check, procedure } = result.next;
-      lines.push(
-         '',
-         `Next: WCAG ${check.criterionId} - ${procedure.title}`,
-         `Check: ${check.checkId}`,
-         `Environment: ${check.environmentId}`,
-         'Setup:',
-      );
-      lines.push(...procedure.setup.map((step) => `  * ${step}`));
-      lines.push('Actions:');
-      lines.push(...procedure.actions.map((step) => `  * ${step}`));
-      lines.push(`Required evidence: ${procedure.requiredEvidence.join(', ')}`);
+   if (result.next && result.next.checks.length > 0) {
+      for (const [index, check] of result.next.checks.entries()) {
+         const procedure = result.next.procedures[index];
+         if (!procedure) {
+            continue;
+         }
+         lines.push(
+            '',
+            `Next: WCAG ${check.criterionId} - ${procedure.title}`,
+            `Check: ${check.checkId}`,
+            `Environment: ${check.environmentId}`,
+            'Setup:',
+         );
+         lines.push(...procedure.setup.map((step) => `  * ${step}`));
+         lines.push('Actions:');
+         lines.push(...procedure.actions.map((step) => `  * ${step}`));
+         lines.push(`Required evidence: ${procedure.requiredEvidence.join(', ')}`);
+      }
    }
    lines.push('', result.guidance);
    return lines.join('\n');

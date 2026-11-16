@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
 import { matchesGlob, relative, resolve } from 'node:path';
+import { writeAtomic } from '../files/store.js';
 
 import type { PageRecord } from '@a11ied/contracts';
 import type { Browser, BrowserContext, Page, Response } from 'playwright';
@@ -104,14 +104,12 @@ async function saveArtifacts(
    const directory = resolve(artifactsDir, artifactKey),
       htmlPath = resolve(directory, 'snapshot.html'),
       treePath = resolve(directory, 'accessibility-tree.json');
-   await mkdir(directory, { recursive: true });
    const html = await page.content(),
       snapshot = await page.locator('body').ariaSnapshot();
-   await writeFile(htmlPath, html, 'utf8');
-   await writeFile(
+   await writeAtomic(htmlPath, html);
+   await writeAtomic(
       treePath,
       `${JSON.stringify({ snapshot }, undefined, JSON_INDENT)}\n`,
-      'utf8',
    );
    return {
       htmlArtifactPath: relative(artifactsDir, htmlPath),

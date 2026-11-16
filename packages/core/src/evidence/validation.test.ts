@@ -6,6 +6,7 @@ import { assessmentArtifactEnvelopeSchema, type EvidenceRecord } from '@a11ied/c
 import { PNG } from 'pngjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { queueAssessmentCheck, registerAuditState } from '../audit/run-state.js';
+import { updateAuditRun } from '../audit/run-store.js';
 import { getCriterionEvidence } from './criteria.js';
 import { getTestMethod } from '@a11ied/wcag-engine';
 import { appendEvidence, clearEvidence, readEvidence } from './store.js';
@@ -13,6 +14,7 @@ import { isVerifiedEvidence, validateEvidenceRecord } from './validation.js';
 import { getArtifactError } from './artifacts.js';
 import {
    createEvidenceTestAssessment,
+   createBroaderEvidenceTestAssessment,
    type EvidenceTestFixture,
 } from './test-fixtures.js';
 
@@ -340,4 +342,122 @@ describe('action artifact chronology', () => {
          expect(errors.join(' ')).toContain('action range');
       },
    );
+});
+
+describe('broader procedure-action evidence', () => {
+   async function buildBroaderAssessment(): Promise<EvidenceTestFixture> {
+      const fixture = await createBroaderEvidenceTestAssessment();
+      roots.push(dirname(fixture.runFile));
+      return fixture;
+   }
+
+   it('accepts explicit complete site assessments and revalidates their artifacts', async () => {
+      const fixture = await buildBroaderAssessment();
+      await appendEvidence(fixture.record, fixture);
+      const [record] = await readEvidence(fixture);
+
+      expect(record && isVerifiedEvidence(record)).toStrictEqual(true);
+      await writeFile(join(dirname(fixture.runFile), 'observation.json'), 'altered');
+      const [altered] = await readEvidence(fixture);
+
+      expect(altered && isVerifiedEvidence(altered)).toStrictEqual(false);
+      expect(altered?.verification?.reasons.join(' ')).toContain('hash changed');
+   });
+
+   it.each([
+      'missing',
+      'version',
+      'duplicate',
+      'incomplete',
+      'artifact',
+      'contradiction',
+      'unresolved',
+   ])(
+      'rejects %s action coverage without trusting the stored verification label',
+      async (mutation) => {
+         const fixture = await buildBroaderAssessment();
+         const assessment = fixture.record.assessment;
+         if (!assessment || !assessment.actions[0]) {
+            throw new Error('Missing broader assessment fixture.');
+         }
+         switch (mutation) {
+            case 'missing': {
+               delete fixture.record.assessment;
+               break;
+            }
+            case 'version': {
+               assessment.version = 'obsolete';
+               break;
+            }
+            case 'duplicate': {
+               assessment.actions.push(assessment.actions[0]);
+               break;
+            }
+            case 'incomplete': {
+               assessment.actions.pop();
+               break;
+            }
+            case 'artifact': {
+               assessment.actions[0].artifactIndices = [
+                  fixture.record.provenance?.artifacts.length ?? 0,
+               ];
+               break;
+            }
+            case 'contradiction': {
+               assessment.actions[0].outcome = 'failed';
+               break;
+            }
+            case 'unresolved': {
+               assessment.actions[0].outcome = 'cantTell';
+               break;
+            }
+            default: {
+               throw new Error(`Unknown mutation ${mutation}`);
+            }
+         }
+         fixture.record.verification = { status: 'verified', reasons: [] };
+
+         await expect(appendEvidence(fixture.record, fixture)).rejects.toThrow();
+      },
+   );
+});
+
+describe('collected root digest binding', () => {
+   it('rejects a changed root digest even when fingerprint and revision are left unchanged', async () => {
+      const digest = createHash('sha256').update('fixture-root').digest('hex');
+      const fixture = await createBroaderEvidenceTestAssessment(
+         '2.2',
+         async ({ file, run }) => {
+            const state = run.states[0];
+            if (!state) {
+               throw new Error('Missing fixture state.');
+            }
+            await registerAuditState({
+               file,
+               state: { ...state, observationDigest: digest },
+            });
+         },
+      );
+      roots.push(dirname(fixture.runFile));
+      await appendEvidence(fixture.record, fixture);
+      const [current] = await readEvidence(fixture);
+
+      expect(current && isVerifiedEvidence(current)).toStrictEqual(true);
+      await updateAuditRun({
+         file: fixture.runFile,
+         change(run) {
+            const state = run.states[0];
+            if (state) {
+               state.observationDigest = createHash('sha256')
+                  .update('altered-root')
+                  .digest('hex');
+            }
+            return run;
+         },
+      });
+      const [stale] = await readEvidence(fixture);
+
+      expect(stale && isVerifiedEvidence(stale)).toStrictEqual(false);
+      expect(stale?.verification?.reasons.join(' ')).toContain('stale');
+   });
 });

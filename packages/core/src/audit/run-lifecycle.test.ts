@@ -179,23 +179,24 @@ describe('page assessment scheduling', () => {
          },
       });
       const claimed = await nextAuditAssessment(file);
-      if (!claimed.check) {
+      if (!claimed.checks?.length) {
          throw new Error('The fixture needs an executable check.');
       }
       await transitionAssessmentCheck({
          file,
-         checkId: claimed.check.checkId,
+         checkId: claimed.checks[0]?.checkId ?? '',
          status: 'blocked',
          reason: 'Preserved specific fixture blocker.',
       });
       const following = await nextAuditAssessment(file);
 
-      expect(claimed.check.stateIds).to.eql([state.stateId]);
-      expect(following.check?.stateIds).to.eql([state.stateId]);
-      expect(following.check?.criterionId).not.toStrictEqual(claimed.check.criterionId);
+      expect(claimed.checks?.[0]?.stateIds).to.eql([state.stateId]);
+      expect(following.checks?.[0]?.stateIds).to.eql([state.stateId]);
+      expect(following.checks?.[0]?.criterionId).not.toStrictEqual(
+         claimed.checks?.[0]?.criterionId,
+      );
    });
 });
-
 describe('atomic coordinator selection', () => {
    it('claims only one check across competing callers and keeps interrupted work blocked', async () => {
       const { file } = await buildRun();
@@ -224,8 +225,8 @@ describe('atomic coordinator selection', () => {
       ).toStrictEqual('blocked');
       const next = await nextAuditAssessment(file);
 
-      expect(next.check?.checkId).not.toStrictEqual(running.checkId);
-      expect(next.procedure?.actions.length).toBeGreaterThan(0);
+      expect(next.checks?.[0]?.checkId).not.toStrictEqual(running.checkId);
+      expect(next.procedures?.[0]?.actions.length).toBeGreaterThan(0);
    });
 
    it('starts a durable run and exposes missing scope without inventing state observations', async () => {

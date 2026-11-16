@@ -14,16 +14,12 @@ import {
 import { getDriverCapabilities, type DriverAdapter } from './adapter-shared.js';
 import type { SerializableDriverCommand } from './command-registry.js';
 import { DriverCommandError } from './driver-command-error.js';
-import { loadPackageScript } from './focus-shared.js';
+import { defaultVirtualDocument } from './default-virtual-document.js';
 import { createScreenshotUnsupportedError } from './screenshot-unsupported.js';
 import type { VirtualHost } from './virtual-host.js';
 import type { VirtualSpeech, VirtualCurrentItem } from './virtual-runtime.js';
 
-/** The document a virtual session reads before a page is attached. */
-export const defaultVirtualDocument = {
-   html: loadPackageScript('scripts/default-virtual-document.html', import.meta.url),
-   url: 'about:a11ied-virtual',
-};
+export { defaultVirtualDocument };
 
 /** What a named command resolved to: its description plus the portable step to run. */
 export interface VirtualCommandResolution {

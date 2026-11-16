@@ -211,6 +211,10 @@ export class ScreenReader implements AsyncDisposable {
       }
       return step.state.lastSpokenPhrase ?? '';
    }
+   /** Registry verb alias for `goTo`: `sr.goto(...)` and `sr.goTo(...)` work identically. */
+   goto(wanted: WantedItem, options: LoopOptions = {}): Promise<string> {
+      return this.goTo(wanted, options);
+   }
 
    /** The rotor: every element of one kind from the top of the page, as announced. */
    elements(

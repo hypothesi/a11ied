@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { evidenceRecordSchema } from '@a11ied/contracts';
+import { readAuditRun } from '../run-store.js';
 import { executeAuditAssessment } from '../assessment-command.js';
 import { runAuditProbes } from './probe-run.js';
 
@@ -128,7 +129,7 @@ describe('runAuditProbes', () => {
    );
 
    it(
-      'verifies evidence for a site check that spans several states',
+      'leaves broader checks unclaimed for explicit procedure-action judgments',
       async () => {
          const url = await startFixture();
          const file = await startRun(url, 1);
@@ -144,9 +145,16 @@ describe('runAuditProbes', () => {
          expect(
             records.every((record) => record.verification?.status === 'verified'),
          ).toStrictEqual(true);
+         const run = await readAuditRun(file);
+         const broader = run.checks.filter(
+            (check) => check.scope === 'site' || check.scope === 'journey',
+         );
+
          expect(
-            records.some((record) => (record.provenance?.states.length ?? 0) > 1),
+            records.every((record) => record.provenance?.states.length === 1),
          ).toStrictEqual(true);
+         expect(broader.length).toBeGreaterThan(0);
+         expect(broader.every((check) => check.attempts === 0)).toStrictEqual(true);
       },
       SITE_TIMEOUT_MS,
    );

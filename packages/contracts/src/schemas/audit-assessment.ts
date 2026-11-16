@@ -8,10 +8,12 @@ import {
    auditRunSchema,
    auditStateSchema,
 } from './audit-run.js';
+import { assessmentScopeSchema } from './assessment.js';
 import { evidenceOutcomeSchema } from './evidence.js';
 import { targetReferenceSchema } from './query.js';
 
 const DEFAULT_LIMIT = 20,
+   MAX_BATCH_CLAIM = 20,
    MAX_LIMIT = 100;
 
 const checkIdSchema = assessmentCheckSchema.shape.checkId,
@@ -64,7 +66,13 @@ export const auditAssessmentRequestSchema = z.discriminatedUnion('action', [
       file: fileSchema,
       check: checkInputSchema,
    }),
-   z.strictObject({ action: z.literal('next'), file: fileSchema }),
+   z.strictObject({
+      action: z.literal('next'),
+      file: fileSchema,
+      checkIds: z.array(checkIdSchema).min(1).optional(),
+      scopes: z.array(assessmentScopeSchema).min(1).optional(),
+      count: z.number().int().min(1).max(MAX_BATCH_CLAIM).default(1),
+   }),
    z.strictObject({
       action: z.literal('status'),
       file: fileSchema,
@@ -75,6 +83,7 @@ export const auditAssessmentRequestSchema = z.discriminatedUnion('action', [
       action: z.literal('resume'),
       file: fileSchema,
       retryCheckIds: z.array(checkIdSchema).optional(),
+      onlyIfIdle: z.boolean().optional(),
    }),
    z.strictObject({
       action: z.literal('evaluate'),

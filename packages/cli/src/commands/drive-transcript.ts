@@ -66,7 +66,7 @@ export function registerTranscriptCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('transcript')
-         .helpGroup(DRIVE_GROUPS.check)
+         .helpGroup(DRIVE_GROUPS.inspect)
          .summary('Print what the reader said, with timestamps and checkpoints.')
          .description('Print what the reader said, with timestamps and checkpoints.')
          .option('--since <checkpoint>', 'Only entries after the named checkpoint.')

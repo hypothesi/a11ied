@@ -111,7 +111,7 @@ a1 audit run https://createdbyfireside.com --environment environment.json \
 a1 audit state <run-file> --input <observed-state-file> --json
 a1 audit journey <run-file> --input <observed-journey-file> --json
 a1 audit probe <run-file>
-a1 audit next <run-file> --json
+a1 audit next <run-file> --count 5 --scope site,journey --json
 a1 audit status <run-file> --offset 0 --limit 20 --json
 a1 audit record <target> --run <run-file> --results <evidence-file> \
    --wcag 2.2 --criterion <criterion-id> --procedure <procedure-id> \
@@ -124,8 +124,10 @@ a1 audit finalize <run-file> --json
 ```
 
 Use the paths returned by startup. With an inventory, startup links its run ID
-without JSON edits. Each `next` claims one obligation; execute the returned
-procedure before recording. Read every status page through `nextOffset`.
+without JSON edits. Use `next --count <n>` to claim a compatible batch; execute the returned
+procedures before recording. Omit `--scope` for all procedures or select the needed
+procedure scopes; the filter does not remove other obligations. Read paginated status through `nextOffset` when a complete
+inventory is needed; avoid repeatedly dumping unchanged status.
 
 MCP `audit_assessment` uses the corresponding `action` and `file`. Start supplies
 structured `target`, `environment`, optional `inventoryPath`, profile, and policy.
@@ -180,6 +182,13 @@ a1 sr stop --out transcript.md
 | `sr status`            | `sr_session` `{ action: "status" }`                                                                        |
 
 ## Screen reader actions
+
+`a1 sr --help` groups every subcommand below into the same 6 task groups the registry
+uses: **Session** (`start`, `open`, `stop`, `status`), **Navigate** (`next`, `previous`,
+`goto`, `top`, `bottom`, `elements`, `read`, `read-all`, `title`, `find`, `table`),
+**Interact** (`press`, `escape`, `type`, `activate`, `focus`, `interact`,
+`stop-interacting`, `do`), **Assert** (`expect`, `wait`, `checkpoint`),
+**Inspect** (`transcript`, `tail`, `screenshot`, `list`), and **Bulk** (`walk`, `batch`).
 
 ```txt
 a1 sr read

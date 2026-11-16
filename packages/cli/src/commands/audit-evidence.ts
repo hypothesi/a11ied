@@ -28,7 +28,7 @@ function addEvidenceOptions(command: Command): Command {
       .option('--run <file>', 'Validate assessment evidence against this run file.')
       .option(
          '--results <file>',
-         'Read and write recorded results here. Defaults to .a11ied/evidence.jsonl, ' +
+         'Read and write recorded results here. Defaults to the --run journal, otherwise .a11ied/evidence.jsonl ' +
             'or $A11IED_EVIDENCE.',
       )
       .option('--by <name>', 'Who or what recorded the result, such as an agent name.');
@@ -49,6 +49,10 @@ function addRecordOptions(command: Command): Command {
       .option(
          '--mode <mode>',
          'manual for a person alone, semiAutomatic with tool help. Defaults to semiAutomatic.',
+      )
+      .option(
+         '--assessment <file>',
+         'JSON procedure version and action observations with provenance artifact indices.',
       )
       .option('--pointer <selector>', 'CSS selector for the element judged.')
       .option('--note <text>', 'Why the result is what it is.')

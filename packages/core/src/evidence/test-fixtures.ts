@@ -7,13 +7,16 @@ import type {
    AssessmentEvidenceKind,
    AuditRun,
    EvidenceRecord,
+   WcagVersion,
 } from '@a11ied/contracts';
+import { PNG } from 'pngjs';
 import { createAuditRun } from '../audit/run-store.js';
 import {
    queueAssessmentCheck,
    registerAuditState,
    transitionAssessmentCheck,
 } from '../audit/run-state.js';
+import { listEvidenceStateReferences } from './state-references.js';
 import { resolveEvidenceProcedure } from './validation.js';
 
 export interface EvidenceTestFixture {
@@ -25,6 +28,11 @@ export interface EvidenceTestFixture {
 
 interface FixtureOptions {
    scope?: 'element' | 'component';
+   criterionId?: string;
+   wcagVersion?: WcagVersion;
+   beforeEvidence?:
+      | ((input: { file: string; run: AuditRun }) => Promise<void>)
+      | undefined;
    pointer?: string;
    extraArtifacts?: AssessmentEvidenceKind[] | undefined;
 }
@@ -41,7 +49,10 @@ async function createFixtureArtifacts(input: {
    const { run, root, states, capturedAt } = input;
    return Promise.all(
       [
-         ...resolveEvidenceProcedure(FIXTURE_PROCEDURE).requiredEvidence,
+         ...resolveEvidenceProcedure({
+            criterionId: run.checks[0]?.criterionId ?? FIXTURE_PROCEDURE.criterionId,
+            wcagVersion: run.profile.wcagVersion,
+         }).requiredEvidence,
          ...(input.extraArtifacts ?? []),
       ].map(async (kind) => {
          const content =
@@ -56,8 +67,8 @@ async function createFixtureArtifacts(input: {
                        },
                     ]
                   : 'Markup validator found no parsing errors in the observed document.',
-            path = `${kind}.json`;
-         const body = JSON.stringify({
+            path = kind === 'screenshot' ? 'screenshot.png' : `${kind}.json`;
+         const envelope = JSON.stringify({
             version: '1',
             runId: run.runId,
             attempt: run.checks[0]?.attempts ?? 0,
@@ -68,6 +79,10 @@ async function createFixtureArtifacts(input: {
             kind,
             content,
          });
+         const body =
+            kind === 'screenshot'
+               ? PNG.sync.write(new PNG({ width: 1, height: 1 }))
+               : envelope;
          await writeFile(join(root, path), body);
          return {
             kind,
@@ -92,7 +107,7 @@ function buildFixtureRecord(input: {
    const procedure = resolveEvidenceProcedure({
       criterionId: check.criterionId,
       procedureId: check.procedureId,
-      wcagVersion: '2.1',
+      wcagVersion: run.profile.wcagVersion,
    });
    return {
       subject: run.target.value,
@@ -110,7 +125,7 @@ function buildFixtureRecord(input: {
          runId: run.runId,
          checkId: check.checkId,
          attempt: check.attempts,
-         wcagVersion: '2.1',
+         wcagVersion: run.profile.wcagVersion,
          procedureVersion: procedure.version,
          environmentId: 'browser',
          states,
@@ -136,9 +151,10 @@ async function startFixtureCheck(file: string, queued: AuditRun): Promise<AuditR
 async function registerFixtureState(input: {
    file: string;
    run: AuditRun;
+   criterionId: string;
    extraArtifacts?: AssessmentEvidenceKind[] | undefined;
-}): Promise<void> {
-   await registerAuditState({
+}): Promise<AuditRun> {
+   return registerAuditState({
       file: input.file,
       state: {
          stateId: 'initial',
@@ -148,8 +164,12 @@ async function registerFixtureState(input: {
          environmentId: 'browser',
          setup: [],
          artifacts: [
-            'action-trace.json',
-            'observation.json',
+            ...resolveEvidenceProcedure({
+               criterionId: input.criterionId,
+               wcagVersion: input.run.profile.wcagVersion,
+            }).requiredEvidence.map((kind) =>
+               kind === 'screenshot' ? 'screenshot.png' : `${kind}.json`,
+            ),
             ...(input.extraArtifacts ?? []).map((kind) => `${kind}.json`),
          ],
       },
@@ -162,13 +182,17 @@ export async function createEvidenceTestAssessment(
    options: FixtureOptions = {},
 ): Promise<EvidenceTestFixture> {
    const root = await mkdtemp(join(tmpdir(), 'a11ied-provenance-'));
-   const procedure = resolveEvidenceProcedure(FIXTURE_PROCEDURE);
+   const procedure = resolveEvidenceProcedure({
+      ...FIXTURE_PROCEDURE,
+      wcagVersion: options.wcagVersion ?? FIXTURE_PROCEDURE.wcagVersion,
+      criterionId: options.criterionId ?? FIXTURE_PROCEDURE.criterionId,
+   });
    const created = await createAuditRun({
       file: join(root, 'run.json'),
       runId: 'provenance-run',
       target: { kind: 'url', value: 'https://createdbyfireside.com/' },
       scope: 'site',
-      profile: { wcagVersion: '2.1', level: 'AA' },
+      profile: { wcagVersion: options.wcagVersion ?? '2.1', level: 'AA' },
       environment: {
          environmentId: 'browser',
          platform: 'voiceover',
@@ -177,11 +201,13 @@ export async function createEvidenceTestAssessment(
          limitations: [],
       },
    });
-   await registerFixtureState({
+   const observed = await registerFixtureState({
       file: created.file,
       run: created.run,
+      criterionId: procedure.criterionId,
       extraArtifacts: options.extraArtifacts,
    });
+   await options.beforeEvidence?.({ file: created.file, run: observed });
    const queued = await queueAssessmentCheck({
       file: created.file,
       check: {
@@ -190,16 +216,12 @@ export async function createEvidenceTestAssessment(
          procedureVersion: procedure.version,
          scope: options.scope ?? procedure.scope,
          ...(options.pointer ? { pointer: options.pointer } : {}),
-         stateIds: ['initial'],
+         stateIds: procedure.scope === 'site' ? [] : ['initial'],
          environmentId: 'browser',
       },
    });
    const run = await startFixtureCheck(created.file, queued);
-   const states = run.states.map((state) => ({
-      stateId: state.stateId,
-      fingerprint: state.fingerprint,
-      revision: state.revision,
-   }));
+   const states = listEvidenceStateReferences(run.states);
    const capturedAt = new Date().toISOString();
    const artifacts = await createFixtureArtifacts({
       run,
@@ -214,4 +236,27 @@ export async function createEvidenceTestAssessment(
       run,
       record: buildFixtureRecord({ run, states, artifacts }),
    };
+}
+
+/** Explicit full action judgments for broader admission integration fixtures. */
+export async function createBroaderEvidenceTestAssessment(
+   wcagVersion: WcagVersion = '2.1',
+   beforeEvidence?: FixtureOptions['beforeEvidence'],
+): Promise<EvidenceTestFixture> {
+   const fixture = await createEvidenceTestAssessment([], {
+      criterionId: '2.4.5',
+      wcagVersion,
+      beforeEvidence,
+   });
+   const procedure = resolveEvidenceProcedure({ criterionId: '2.4.5', wcagVersion });
+   fixture.record.assessment = {
+      version: procedure.version,
+      actions: procedure.actions.map((action, index) => ({
+         index,
+         outcome: 'passed',
+         observation: `Fixture observation for ${action}`,
+         artifactIndices: [0, 1],
+      })),
+   };
+   return fixture;
 }

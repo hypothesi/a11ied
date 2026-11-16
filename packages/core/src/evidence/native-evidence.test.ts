@@ -10,7 +10,7 @@ import {
 } from './test-fixtures.js';
 import { validateEvidenceRecord } from './validation.js';
 import { appendEvidence } from './store.js';
-import { validateNativeSpeech } from './native-evidence.js';
+import { validateReaderSpeech, validateNativeEvidence } from './native-evidence.js';
 
 const roots: string[] = [];
 afterEach(async () => {
@@ -19,15 +19,27 @@ afterEach(async () => {
    );
 });
 
-async function createNativeEvidence(sessionId?: string): Promise<EvidenceTestFixture> {
-   const fixture = await createEvidenceTestAssessment(['real-reader'], {
-         extraArtifacts: ['speech'],
-      }),
+async function createNativeEvidence(
+   sessionId?: string,
+   platform: 'voiceover' | 'virtual' = 'voiceover',
+): Promise<EvidenceTestFixture> {
+   const fixture = await createEvidenceTestAssessment(
+         [platform === 'virtual' ? 'screen-reader' : 'real-reader'],
+         {
+            extraArtifacts: ['speech'],
+         },
+      ),
       provenance = fixture.record.provenance;
    if (!provenance) {
       throw new Error('Missing fixture provenance.');
    }
-   provenance.source = 'real-reader';
+   provenance.source = platform === 'virtual' ? 'virtual' : 'real-reader';
+   const environment = fixture.run.environments[0];
+   if (!environment) {
+      throw new Error('Missing environment.');
+   }
+   environment.platform = platform;
+   await writeFile(fixture.runFile, JSON.stringify(fixture.run));
    provenance.sessionId = sessionId;
    fixture.record.evidenceId = 'native-source-fixture';
    roots.push(dirname(fixture.runFile));
@@ -37,14 +49,14 @@ async function createNativeEvidence(sessionId?: string): Promise<EvidenceTestFix
          const envelope = assessmentArtifactEnvelopeSchema.parse(
             JSON.parse(await readFile(path, 'utf8')),
          );
-         envelope.source = 'real-reader';
+         envelope.source = provenance.source;
          envelope.sessionId = sessionId;
          if (artifact.kind === 'speech') {
             envelope.content = {
                text: 'Fixture, button',
                transcript: {
                   sessionId,
-                  target: 'voiceover',
+                  target: platform,
                   url: fixture.run.target.value,
                   startedAt: fixture.run.startedAt,
                   exportedAt: envelope.capturedAt,
@@ -121,7 +133,7 @@ describe('observed native evidence', () => {
          const validated = await validateEvidenceRecord(fixture.record, fixture);
 
          expect(validated.verification?.status).toBe('unverified');
-         expect(validated.verification?.reasons.join(' ')).toContain('Native speech');
+         expect(validated.verification?.reasons.join(' ')).toContain('Reader speech');
       },
    );
 
@@ -146,7 +158,7 @@ describe('native session recovery and site states', () => {
       const at = provenance.artifacts[0]?.capturedAt ?? fixture.record.recordedAt;
 
       expect(() =>
-         validateNativeSpeech({
+         validateReaderSpeech({
             run: fixture.run,
             provenance,
             capturedAt: at,
@@ -163,5 +175,56 @@ describe('native session recovery and site states', () => {
             },
          }),
       ).not.toThrow();
+   });
+});
+
+describe('virtual production audit evidence', () => {
+   it('accepts matching virtual session receipts with explicit virtual provenance', async () => {
+      const fixture = await createNativeEvidence('virtual-session', 'virtual');
+      const validated = await validateEvidenceRecord(fixture.record, fixture);
+
+      expect(validated.verification?.status).toBe('verified');
+      expect(validated.provenance?.source).toBe('virtual');
+      await expect(appendEvidence(fixture.record, fixture)).resolves.toBeDefined();
+   });
+
+   it('rejects virtual speech without a correlated transcript', async () => {
+      const fixture = await createNativeEvidence('virtual-session', 'virtual');
+      await changeSpeechReceipt(fixture, 'An invented announcement.');
+      const validated = await validateEvidenceRecord(fixture.record, fixture);
+
+      expect(validated.verification?.status).toBe('unverified');
+   });
+});
+
+describe('reader capability boundary', () => {
+   it('accepts virtual observations for reader-neutral procedures and rejects native substitution', async () => {
+      const fixture = await createNativeEvidence('virtual-session', 'virtual');
+      const provenance = fixture.record.provenance;
+      if (!provenance) {
+         throw new Error('Missing provenance.');
+      }
+
+      expect(() =>
+         validateNativeEvidence({
+            run: fixture.run,
+            provenance,
+            requiresReader: false,
+            requiresScreenReader: true,
+         }),
+      ).not.toThrow();
+      expect(() =>
+         validateNativeEvidence({ run: fixture.run, provenance, requiresReader: true }),
+      ).toThrow('real screen reader');
+      provenance.sessionId = undefined;
+
+      expect(() =>
+         validateNativeEvidence({
+            run: fixture.run,
+            provenance,
+            requiresReader: false,
+            requiresScreenReader: true,
+         }),
+      ).toThrow('session ID');
    });
 });

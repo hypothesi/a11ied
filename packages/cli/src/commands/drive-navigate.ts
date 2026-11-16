@@ -110,7 +110,7 @@ export function registerDirectionCommand(
    addDriveNavigationOptions(
       driveCommand
          .command(`${direction} [kind]`)
-         .helpGroup(DRIVE_GROUPS.move)
+         .helpGroup(DRIVE_GROUPS.navigate)
          .summary(`Move to the ${direction} item, or jump by kind.`)
          .description(`Move to the ${direction} item, or jump by kind: ${KIND_LIST}.`)
          .option('--level <n>', 'With heading: only headings of this level, 1 to 6.')

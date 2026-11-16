@@ -59,12 +59,12 @@ async function createPatternFixture(): Promise<EvidenceTestFixture> {
          check.patternRow = { exampleId: 'checkbox', rowKey: 'key-space[1]' };
          check.scope = 'element';
          check.checkId = getAssessmentCheckId(check);
-         run.activeCheckId = check.checkId;
+         run.activeCheckIds = [check.checkId];
          return run;
       },
    });
    if (fixture.record.provenance) {
-      fixture.record.provenance.checkId = fixture.run.activeCheckId ?? '';
+      fixture.record.provenance.checkId = fixture.run.activeCheckIds[0] ?? '';
    }
    fixture.record.test = {
       kind: 'patternRow',

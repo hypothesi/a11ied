@@ -37,6 +37,11 @@ describe.each(VERSIONS)('WCAG %s desktop procedure catalog', (version) => {
                'normative',
                'informative',
             ]);
+            expect(procedure.tier).toBeDefined();
+            expect(procedure.toolCalls).toBeDefined();
+            expect(procedure.toolCalls?.length).toBeGreaterThan(0);
+            expect(procedure.done).toBeDefined();
+            expect(procedure.done?.allowedBlockerCodes?.length).toBeGreaterThan(0);
          }
       }
    });
@@ -67,14 +72,14 @@ describe.each(VERSIONS)('WCAG %s desktop procedure catalog', (version) => {
 });
 
 describe('evidence required by behavioral procedures', () => {
-   it('requires real speech for status checks and measured evidence for thresholds', () => {
+   it('requires reader speech for status checks and measured evidence for thresholds', () => {
       const contrast = getTestMethod('1.4.3').strategy.procedures.find(
             (procedure) => procedure.procedureId !== 'axe_scan',
          ),
          flashes = getTestMethod('2.3.1').strategy.procedures[0],
          status = getTestMethod('4.1.3').strategy.procedures[0];
 
-      expect(status?.requiredCapabilities).toContain('real-reader');
+      expect(status?.requiredCapabilities).toContain('screen-reader');
       expect(status?.requiredEvidence).toContain('speech');
       expect(flashes?.requiredEvidence).toContain('measurement');
       expect(flashes?.limitations.join(' ')).toContain('Unaided visual judgment');
@@ -95,5 +100,35 @@ describe('evidence required by behavioral procedures', () => {
       expect(purpose?.requiredCapabilities).toContain('dom');
       expect(parsing?.requiredCapabilities).toContain('markup-validation');
       expect(parsing?.requiredEvidence).toContain('observation');
+   });
+
+   it('exposes canonical toolCalls across all returned criteria procedures in getTestMethod', () => {
+      const canonicalTools = new Set([
+         'review.start',
+         'review.next',
+         'review.judge',
+         'review.report',
+         'review.run',
+         'audit_assessment',
+         'record_result',
+         'sr_session',
+         'sr_action',
+      ]);
+
+      const criteria = ['A', 'AA'].flatMap(
+         (level) => listCriteriaByLevel(level, '2.2').criteria,
+      );
+
+      for (const criterion of criteria) {
+         const result = getTestMethod(criterion.id, { version: '2.2' });
+         expect(result.strategy.procedures.length).toBeGreaterThan(0);
+
+         for (const procedure of result.strategy.procedures) {
+            expect(procedure.toolCalls).toBeDefined();
+            for (const toolCall of procedure.toolCalls ?? []) {
+               expect(canonicalTools.has(toolCall.tool)).toBe(true);
+            }
+         }
+      }
    });
 });

@@ -11,7 +11,7 @@ export function registerScreenshotCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('screenshot <path>')
-         .helpGroup(DRIVE_GROUPS.other)
+         .helpGroup(DRIVE_GROUPS.inspect)
          .summary('Save a picture of what the VoiceOver cursor is on.')
          .description(
             'Save a picture of what the VoiceOver cursor is on to the path. NVDA and the virtual reader have no cursor screenshot and exit 2.',

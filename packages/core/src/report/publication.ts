@@ -1,9 +1,14 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { cp, mkdir, readFile, realpath, rename, rm, rmdir } from 'node:fs/promises';
+import { cp, mkdir, readFile, realpath, rm, rmdir } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 import type { z } from 'zod';
 import type { ReportModel } from '@a11ied/contracts';
-import { getCanonicalPath, withFileLock, writeJsonAtomic } from '../files/atomic-json.js';
+import {
+   getCanonicalPath,
+   renameAtomicPath,
+   withDirectoryCommit,
+   writeAtomic,
+} from '../files/store.js';
 import { CliUsageError } from '../errors/cli-errors.js';
 import {
    getIdentity,
@@ -82,7 +87,7 @@ async function promoteMissingDirectory(
       await verifyBundle(paths.stage, journal.generation);
    } catch (error) {
       if (backup) {
-         await rename(paths.backup, outDir);
+         await renameAtomicPath(paths.backup, outDir);
       }
       await discardPublicationStage(outDir, journal);
       throw error;
@@ -92,7 +97,7 @@ async function promoteMissingDirectory(
          'The previous report directory is missing. Preserve the staged bundle and resolve the conflict.',
       );
    }
-   await rename(paths.stage, outDir);
+   await renameAtomicPath(paths.stage, outDir);
 }
 
 async function finishPublication(
@@ -115,8 +120,8 @@ async function finishPublication(
       }
       await assertOwnedStage(outDir, journal);
       await verifyBundle(paths.stage, journal.generation);
-      await rename(outDir, paths.backup);
-      await rename(paths.stage, outDir);
+      await renameAtomicPath(outDir, paths.backup);
+      await renameAtomicPath(paths.stage, outDir);
    } else if (!current) {
       await promoteMissingDirectory(outDir, journal);
    }
@@ -207,7 +212,7 @@ async function writeManifest(
       ),
       files,
    });
-   await writeJsonAtomic(manifest, resolve(stage, 'report.manifest.json'));
+   await writeAtomic(resolve(stage, 'report.manifest.json'), manifest);
    return manifest;
 }
 
@@ -243,10 +248,9 @@ async function beginPublication(
       previousIdentity: await getIdentity(outDir),
       phase: 'building',
    });
-   await writeJsonAtomic(journal, paths.journal, false);
-   await mkdir(paths.stage);
+   await writeAtomic(paths.journal, journal, { overwrite: false });
    const owned = { ...journal, stageIdentity: await getIdentity(paths.stage) };
-   await writeJsonAtomic(owned, paths.journal);
+   await writeAtomic(paths.journal, owned);
    return owned;
 }
 
@@ -260,20 +264,26 @@ export async function publishReportBundle(input: {
    ) => Promise<{ model: ReportModel; outputFiles: string[] }>;
 }): Promise<{ model: ReportModel; outputFiles: string[] }> {
    const outDir = await getOutputDirectory(input.outDir, input.protectedPaths);
-   return withFileLock(`${outDir}.publication`, async () => {
-      await recoverPublication(outDir);
-      const generation = randomUUID(),
-         paths = getTransactionPaths(outDir, generation);
-      const journal = await beginPublication(outDir, generation);
-      let ready = false;
-      try {
-         await prepareStage(outDir, paths.stage, journal.previousIdentity);
-         const result = await input.build(paths.stage, resolve(input.outDir));
-         const manifest = await writeManifest(paths.stage, generation, result);
-         await verifyBundle(paths.stage, generation);
+   const generation = randomUUID(),
+      paths = getTransactionPaths(outDir, generation);
+   let journal: z.infer<typeof journalSchema> | undefined = undefined;
+   let ready = false;
+   const requireJournal = (): z.infer<typeof journalSchema> => {
+      if (!journal) {
+         throw new Error('The publication journal was not initialized.');
+      }
+      return journal;
+   };
+   return withDirectoryCommit(
+      outDir,
+      async (stage) => {
+         const current = requireJournal();
+         await prepareStage(outDir, stage, current.previousIdentity);
+         const result = await input.build(stage, resolve(input.outDir));
+         const manifest = await writeManifest(stage, generation, result);
+         await verifyBundle(stage, generation);
          ready = true;
-         await writeJsonAtomic({ ...journal, phase: 'ready' }, paths.journal);
-         await finishPublication(outDir, journal);
+         await writeAtomic(paths.journal, { ...current, phase: 'ready' });
          return {
             model: result.model,
             outputFiles: [
@@ -281,10 +291,24 @@ export async function publishReportBundle(input: {
                resolve(input.outDir, 'report.manifest.json'),
             ],
          };
-      } finally {
-         if (!ready) {
-            await discardPublicationStage(outDir, journal);
-         }
-      }
-   });
+      },
+      {
+         lockPath: `${outDir}.publication`,
+         stagePath: paths.stage,
+         beforeCreateStage: async () => {
+            await recoverPublication(outDir);
+         },
+         afterCreateStage: async () => {
+            journal = await beginPublication(outDir, generation);
+         },
+         commitStage: async () => {
+            await finishPublication(outDir, requireJournal());
+         },
+         discardStage: async () => {
+            if (!ready) {
+               await discardPublicationStage(outDir, requireJournal());
+            }
+         },
+      },
+   );
 }

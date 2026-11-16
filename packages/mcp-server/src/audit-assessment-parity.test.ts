@@ -17,8 +17,8 @@ const EXIT_USAGE = 2,
    STATE_COUNT = 2;
 const nextSchema = z.object({
       next: z.object({
-         check: z.object({ checkId: z.string() }),
-         procedure: z.object({ actions: z.array(z.string()) }),
+         checks: z.array(z.object({ checkId: z.string() })),
+         procedures: z.array(z.object({ actions: z.array(z.string()) })),
       }),
    }),
    resultSchema = z.object({ result: z.record(z.string(), z.unknown()) });
@@ -69,7 +69,7 @@ async function assertDefaults(app: boolean): Promise<void> {
          expect(cliRun.scope).toStrictEqual(mcpRun.scope);
          expect(cliRun.actionPolicy).toEqual(mcpRun.actionPolicy);
          expect(cliRun.states).toEqual([]);
-         expect(cliRun.activeCheckId).toBeUndefined();
+         expect(cliRun.activeCheckIds).toStrictEqual([]);
       });
    } finally {
       await rm(root, { recursive: true, force: true });
@@ -162,7 +162,7 @@ async function assertBlockerRefinement(
       reason: 'Restore target window before retrying.',
       updatedAt: expect.any(String),
    });
-   expect(after.activeCheckId).toBeUndefined();
+   expect(after.activeCheckIds).toStrictEqual([]);
 }
 
 async function assertRecoveryParity(client: Client, file: string): Promise<void> {
@@ -173,7 +173,7 @@ async function assertRecoveryParity(client: Client, file: string): Promise<void>
    const duplicate = await runCli(['audit', 'next', file, '--json']),
       next = nextSchema.parse(resultSchema.parse(selected.structuredContent).result).next;
 
-   expect(next.procedure.actions.length).toBeGreaterThan(0);
+   expect(next.procedures[0]?.actions.length).toBeGreaterThan(0);
    expect(duplicate.status).toStrictEqual(EXIT_USAGE);
    expect(duplicate.stdout).toContain('audit-check-running');
 
@@ -181,27 +181,31 @@ async function assertRecoveryParity(client: Client, file: string): Promise<void>
    const blocked = await readAuditRun(file);
 
    expect(
-      blocked.checks.find((check) => check.checkId === next.check.checkId)?.status,
+      blocked.checks.find((check) => check.checkId === next.checks[0]?.checkId)?.status,
    ).toStrictEqual('blocked');
 
-   await assertBlockerRefinement(client, file, next.check.checkId);
+   await assertBlockerRefinement(client, file, next.checks[0]?.checkId ?? '');
    await client.callTool({
       name: 'audit_assessment',
-      arguments: { action: 'resume', file, retryCheckIds: [next.check.checkId] },
+      arguments: {
+         action: 'resume',
+         file,
+         retryCheckIds: [next.checks[0]?.checkId ?? ''],
+      },
    });
    const retried = await runCli(['audit', 'next', file, '--json']);
 
    expect(
-      nextSchema.parse(resultSchema.parse(JSON.parse(retried.stdout)).result).next.check
-         .checkId,
-   ).toStrictEqual(next.check.checkId);
+      nextSchema.parse(resultSchema.parse(JSON.parse(retried.stdout)).result).next
+         .checks[0]?.checkId,
+   ).toStrictEqual(next.checks[0]?.checkId);
 
    const blockedAgain = await runCli([
          'audit',
          'block',
          file,
          '--check',
-         next.check.checkId,
+         next.checks[0]?.checkId ?? '',
          '--reason',
          'Restore the menu before continuing.',
          '--json',

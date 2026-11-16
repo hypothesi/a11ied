@@ -12,7 +12,11 @@ import { z } from 'zod';
 import { PNG } from 'pngjs';
 import { getApgAssessmentRow } from '../apg/row-key.js';
 import { toPlaywrightKeys } from '../apg/keys.js';
-import { validateNativeSpeech } from './native-evidence.js';
+import { validateMediaAbsence } from './media-absence.js';
+import { validateReaderSpeech } from './native-evidence.js';
+
+const PNG_VALIDATION_CACHE_LIMIT = 512;
+const validatedScreenshots = new Set<string>();
 
 const actionReceiptSchema = z.object({
    index: z.number().int().nonnegative(),
@@ -28,6 +32,7 @@ export interface EvidenceArtifactContext {
    provenance: EvidenceProvenance;
    run: AuditRun;
    runFile: string;
+   requiresMediaAbsence?: boolean;
 }
 
 const patternObservationSchema = z.object({
@@ -166,13 +171,19 @@ function validateObservedContent(
    if (artifact.kind === 'action-trace') {
       validateActions(envelope.content, context, envelope.capturedAt);
    }
-   if (artifact.kind === 'speech' && provenance.source === 'real-reader') {
-      validateNativeSpeech({
+   if (
+      artifact.kind === 'speech' &&
+      (provenance.source === 'real-reader' || provenance.source === 'virtual')
+   ) {
+      validateReaderSpeech({
          content: envelope.content,
          run,
          provenance,
          capturedAt: envelope.capturedAt,
       });
+   }
+   if (artifact.kind === 'media' && context.requiresMediaAbsence) {
+      validateMediaAbsence(envelope.content, context);
    }
    if (artifact.kind === 'observation') {
       validatePatternObservation(envelope.content, context.record);
@@ -182,6 +193,18 @@ function validateObservedContent(
    }
 }
 
+function validateScreenshot(body: Buffer, hash: string): void {
+   // Callers rehash current file bytes before consulting this decode-only cache.
+   if (validatedScreenshots.has(hash)) {
+      return;
+   }
+   PNG.sync.read(body, { checkCRC: true });
+   if (validatedScreenshots.size >= PNG_VALIDATION_CACHE_LIMIT) {
+      validatedScreenshots.clear();
+   }
+   validatedScreenshots.add(hash);
+}
+
 function validateArtifactContent(
    body: Buffer,
    artifact: EvidenceProvenance['artifacts'][number],
@@ -189,7 +212,7 @@ function validateArtifactContent(
 ): void {
    const { provenance, run } = context;
    if (artifact.kind === 'screenshot') {
-      PNG.sync.read(body, { checkCRC: true });
+      validateScreenshot(body, artifact.sha256);
       return;
    }
    const envelope = assessmentArtifactEnvelopeSchema.parse(
@@ -210,7 +233,8 @@ function validateArtifactContent(
                expected === undefined ||
                state.stateId !== expected.stateId ||
                state.revision !== expected.revision ||
-               state.fingerprint !== expected.fingerprint
+               state.fingerprint !== expected.fingerprint ||
+               state.observationDigest !== expected.observationDigest
             );
          })) &&
          'states',

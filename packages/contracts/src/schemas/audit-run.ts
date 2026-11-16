@@ -28,6 +28,10 @@ export const auditStateSchema = z.object({
    target: targetReferenceSchema,
    label: z.string().min(1),
    fingerprint: z.string().min(1),
+   observationDigest: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/u)
+      .optional(),
    revision: z.number().int().positive(),
    environmentId: z.string().min(1),
    observedAt: z.string().datetime(),
@@ -131,7 +135,7 @@ const auditRunFieldsSchema = z.object({
    states: z.array(auditStateSchema),
    journeys: z.array(auditJourneySchema),
    checks: z.array(assessmentCheckSchema),
-   activeCheckId: z.string().min(1).optional(),
+   activeCheckIds: z.array(z.string().min(1)).default([]),
    actionPolicy: z.object({
       allowFormSubmission: z.boolean().default(false),
       allowDestructiveActions: z.boolean().default(false),
@@ -159,7 +163,7 @@ function validateCollectionIDs(
          message: 'Run IDs must be unique within each collection.',
       });
    }
-   if (run.activeCheckId && !checks.has(run.activeCheckId)) {
+   if (run.activeCheckIds.some((id) => !checks.has(id))) {
       context.addIssue({
          code: 'custom',
          message: 'The active claim references an unknown assessment check.',

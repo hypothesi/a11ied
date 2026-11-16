@@ -1,6 +1,16 @@
-import type { AssessmentCheck, AssessmentProcedure, AuditRun } from '@a11ied/contracts';
-import { getCanonicalPath, withFileLock } from '../files/atomic-json.js';
+import type {
+   AssessmentCapability,
+   AssessmentScope,
+   AssessmentCheck,
+   AssessmentProcedure,
+   AuditRun,
+} from '@a11ied/contracts';
+import { getCanonicalPath, withPathLock } from '../files/store.js';
 import { CliUsageError } from '../errors/cli-errors.js';
+import {
+   getMissingCapabilities,
+   getRequiredCapabilities,
+} from '../evidence/procedure-requirements.js';
 import { resolveEvidenceProcedure } from '../evidence/validation.js';
 import {
    createAuditRun,
@@ -47,15 +57,24 @@ export async function startAuditAssessment(options: CreateAuditRunOptions): Prom
    };
 }
 
+/** Keep source scope and proof locked through a consuming report transaction. */
+export async function withAuditAssessmentSnapshot<TResult>(
+   file: string,
+   consume: (snapshot: AuditAssessmentSnapshot) => Promise<TResult>,
+): Promise<TResult> {
+   const canonicalFile = await getCanonicalPath(file);
+   return withPathLock(canonicalFile, async () => {
+      const run = await readAuditRun(canonicalFile);
+      const snapshot = await buildAuditAssessmentSnapshot({ file: canonicalFile, run });
+      return consume(snapshot);
+   });
+}
+
 /** A read holds the coordinator lock while evidence and scope are revalidated. */
 export async function getAuditAssessmentSnapshot(
    file: string,
 ): Promise<AuditAssessmentSnapshot> {
-   const canonicalFile = await getCanonicalPath(file);
-   return withFileLock(canonicalFile, async () => {
-      const run = await readAuditRun(canonicalFile);
-      return buildAuditAssessmentSnapshot({ file: canonicalFile, run });
-   });
+   return withAuditAssessmentSnapshot(file, async (snapshot) => snapshot);
 }
 
 /** Coverage refers to the same locked view of the run and its current proof. */
@@ -66,17 +85,21 @@ export async function getAuditAssessmentStatus(
    return snapshot.status;
 }
 
-function selectNextCheck(run: AuditRun): AssessmentCheck | undefined {
-   if (run.activeCheckId || run.checks.some((check) => check.status === 'running')) {
-      throw new CliUsageError(
-         'audit-check-running',
-         'A check is already running. Complete it or resume with an explicit recovery decision.',
-      );
-   }
+function getQueuedChecks(run: AuditRun): AssessmentCheck[] {
    const stateTargets = new Map(
          run.states.map((state) => [state.stateId, state.target.value]),
       ),
-      targets = [...new Set(run.states.map((state) => state.target.value))];
+      targets = [
+         ...new Set(
+            run.checks.flatMap((check) => {
+               const checkTargets = check.stateIds.flatMap((stateId) => {
+                  const target = stateTargets.get(stateId);
+                  return target ? [target] : [];
+               });
+               return checkTargets;
+            }),
+         ),
+      ];
    const queued = run.checks.filter((entry) => entry.status === 'queued');
    queued.sort((first, second) => {
       const firstTarget = stateTargets.get(first.stateIds[0] ?? ''),
@@ -92,64 +115,145 @@ function selectNextCheck(run: AuditRun): AssessmentCheck | undefined {
 
       return firstOrder - secondOrder;
    });
-   for (const check of queued) {
-      const procedure = resolveEvidenceProcedure({
-         ...check,
-         wcagVersion: run.profile.wcagVersion,
-      });
-      const environment = run.environments.find(
-         (entry) => entry.environmentId === check.environmentId,
-      );
-      const missing = procedure.requiredCapabilities.filter(
-         (capability) => !environment?.capabilities.includes(capability),
-      );
-      if (missing.length > 0) {
-         Object.assign(check, {
-            status: 'unsupported',
-            reason: `Required capabilities are unavailable: ${missing.join(', ')}.`,
-            updatedAt: new Date().toISOString(),
-         });
-      } else if (
-         check.scope !== 'site' ||
-         run.states.some((state) => state.environmentId === check.environmentId)
-      ) {
-         startAssessmentCheck(check);
-         run.activeCheckId = check.checkId;
-         return check;
-      }
-   }
-   return undefined;
+   return queued;
 }
 
-/** Claim one obligation atomically and return its setup, actions, and proof requirements. */
-export async function nextAuditAssessment(file: string): Promise<{
+function assertNoRunningChecks(run: AuditRun): void {
+   if (
+      run.activeCheckIds.length > 0 ||
+      run.checks.some((check) => check.status === 'running')
+   ) {
+      throw new CliUsageError(
+         'audit-check-running',
+         'A check is already running. Complete it or resume with an explicit recovery decision.',
+      );
+   }
+}
+
+function getBatchKey(check: AssessmentCheck): string {
+   return JSON.stringify([check.environmentId, [...check.stateIds].toSorted()]);
+}
+
+function isClaimable(
+   run: AuditRun,
+   check: AssessmentCheck,
+   excludeCapabilities: readonly AssessmentCapability[],
+): boolean {
+   const procedure = resolveEvidenceProcedure({
+      ...check,
+      wcagVersion: run.profile.wcagVersion,
+   });
+   if (
+      getRequiredCapabilities(procedure, true).some((capability) =>
+         excludeCapabilities.includes(capability),
+      )
+   ) {
+      return false;
+   }
+   const environment = run.environments.find(
+      (entry) => entry.environmentId === check.environmentId,
+   );
+   const missing = getMissingCapabilities({
+      procedure,
+      capabilities: environment?.capabilities ?? [],
+      isInapplicable: true,
+   });
+   if (missing.length > 0) {
+      Object.assign(check, {
+         status: 'unsupported',
+         reason: `Required capabilities are unavailable: ${missing.join(', ')}.`,
+         updatedAt: new Date().toISOString(),
+      });
+      return false;
+   }
+   return (
+      check.scope !== 'site' ||
+      run.states.some((state) => state.environmentId === check.environmentId)
+   );
+}
+
+export interface NextAuditAssessmentOptions {
+   checkIds?: readonly string[] | undefined;
+   count?: number;
+   excludeCapabilities?: readonly AssessmentCapability[];
+   scopes?: readonly AssessmentScope[] | undefined;
+}
+
+function selectNextChecks(
+   run: AuditRun,
+   options: NextAuditAssessmentOptions & { count: number },
+): AssessmentCheck[] {
+   const { count, excludeCapabilities = [], scopes, checkIds } = options;
+   assertNoRunningChecks(run);
+   const candidates: AssessmentCheck[] = [];
+   const selected = getQueuedChecks(run).filter(
+      (check) =>
+         (!scopes || scopes.includes(check.scope)) &&
+         (!checkIds || checkIds.includes(check.checkId)),
+   );
+   for (const check of selected) {
+      if (candidates.length >= count) {
+         break;
+      }
+      if (isClaimable(run, check, excludeCapabilities)) {
+         candidates.push(check);
+      }
+   }
+   // Batch claim: only checks sharing the top state (same environment and stateIds) claim together.
+   const batchKey = candidates[0] ? getBatchKey(candidates[0]) : undefined;
+   const shared = candidates.filter(
+      (check) => batchKey !== undefined && getBatchKey(check) === batchKey,
+   );
+   for (const check of shared) {
+      startAssessmentCheck(check);
+      if (!run.activeCheckIds.includes(check.checkId)) {
+         run.activeCheckIds.push(check.checkId);
+      }
+   }
+   return shared;
+}
+
+/**
+ * Claim one or more obligations atomically and return their setup, actions, and proof
+ * requirements.
+ */
+export async function nextAuditAssessment(
+   file: string,
+   options: NextAuditAssessmentOptions = {},
+): Promise<{
    run: AuditRun;
-   check?: AssessmentCheck;
-   procedure?: AssessmentProcedure;
+   checks?: AssessmentCheck[];
+   procedures?: AssessmentProcedure[];
 }> {
+   const count = options.count ?? 1;
    const run = await updateAuditRun({
       file,
       change(current) {
          const previousCount = current.checks.length;
          queueAssessmentObligations(current);
-         selectNextCheck(current);
-         if (current.activeCheckId || current.checks.length !== previousCount) {
+         selectNextChecks(current, { ...options, count });
+         if (
+            current.activeCheckIds.length > 0 ||
+            current.checks.length !== previousCount
+         ) {
             current.status = 'active';
          }
          return current;
       },
    });
-   const selected = run.checks.find((check) => check.status === 'running');
-   if (!selected) {
+   const selected = run.checks.filter((check) => check.status === 'running');
+   if (selected.length === 0) {
       return { run };
    }
    return {
       run,
-      check: selected,
-      procedure: resolveEvidenceProcedure({
-         ...selected,
-         wcagVersion: run.profile.wcagVersion,
-      }),
+      checks: selected,
+      procedures: selected.map((check) =>
+         resolveEvidenceProcedure({
+            ...check,
+            wcagVersion: run.profile.wcagVersion,
+         }),
+      ),
    };
 }
 
@@ -157,6 +261,7 @@ export async function nextAuditAssessment(file: string): Promise<{
 export async function resumeAuditAssessment(input: {
    file: string;
    retryCheckIds?: string[];
+   onlyIfIdle?: boolean;
 }): Promise<AuditAssessmentStatus> {
    const retries = new Set(input.retryCheckIds);
    const run = await updateAuditRun({
@@ -172,9 +277,15 @@ export async function resumeAuditAssessment(input: {
                'A requested retry does not belong to this run.',
             );
          }
+         if (input.onlyIfIdle) {
+            assertNoRunningChecks(current);
+         }
          const records = await readRunEvidence({ file: input.file, run: current });
          for (const check of current.checks) {
-            if (check.status === 'running' || check.checkId === current.activeCheckId) {
+            if (
+               check.status === 'running' ||
+               current.activeCheckIds.includes(check.checkId)
+            ) {
                Object.assign(check, {
                   status: 'blocked',
                   reason:
@@ -199,7 +310,7 @@ export async function resumeAuditAssessment(input: {
                });
             }
          }
-         current.activeCheckId = undefined;
+         current.activeCheckIds = [];
          queueAssessmentObligations(current);
          current.status = 'active';
          return current;

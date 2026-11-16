@@ -1,11 +1,17 @@
 import { mkdtemp, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { AuditRun } from '@a11ied/contracts';
 
-import { createAuditRun, readAuditRun, updateAuditRun } from './run-store.js';
+import {
+   createAuditRun,
+   readAuditRun,
+   updateAuditRun,
+   withRunTransaction,
+} from './run-store.js';
+import { createEvidenceTestAssessment } from '../evidence/test-fixtures.js';
 import { migrateInventoryAuditRun } from './run-inventory.js';
 import { buildReportTestInventory } from '../report/test-fixtures.js';
 import { readInventory, writeInventoryAtomic } from '../discovery/inventory.js';
@@ -233,4 +239,87 @@ describe('scope reference validation', () => {
 
       expect(run.checks).to.eql([]);
    });
+});
+
+async function assertTransactionalCommit(): Promise<void> {
+   const fixture = await createEvidenceTestAssessment();
+   try {
+      const initial = await readAuditRun(fixture.runFile);
+      const state = initial.states[0];
+      const checkId = fixture.record.provenance?.checkId ?? '';
+      expect(state).toBeDefined();
+
+      const result = await withRunTransaction(fixture.runFile, async (tx) => {
+         await tx.registerStateArtifacts(
+            [
+               {
+                  stateId: state?.stateId ?? '',
+                  revision: state?.revision ?? 0,
+                  fingerprint: state?.fingerprint ?? '',
+               },
+            ],
+            ['custom-artifact.json'],
+         );
+         const recorded = await tx.recordEvidence(fixture.record);
+         return tx.evaluateCheck({
+            checkId,
+            outcome: 'passed',
+            evidenceIds: [recorded.record.evidenceId ?? ''],
+            reason: 'Validated successfully.',
+         });
+      });
+
+      const evaluatedCheck = result.checks.find((item) => item.checkId === checkId);
+      expect(evaluatedCheck?.status).toBe('evaluated');
+      expect(evaluatedCheck?.outcome).toBe('passed');
+      expect(result.states[0]?.artifacts).toContain('custom-artifact.json');
+      expect(await readAuditRun(fixture.runFile)).toEqual(result);
+   } finally {
+      await rm(dirname(fixture.runFile), { recursive: true, force: true });
+   }
+}
+
+async function assertStateConflictDetection(): Promise<void> {
+   const fixture = await createEvidenceTestAssessment();
+   try {
+      const initial = await readAuditRun(fixture.runFile);
+      const state = initial.states[0];
+      expect(state).toBeDefined();
+
+      await expect(
+         withRunTransaction(fixture.runFile, async (tx) => {
+            await tx.registerStateArtifacts(
+               [
+                  {
+                     stateId: state?.stateId ?? '',
+                     revision: state?.revision ?? 0,
+                     fingerprint: 'stale-tree',
+                  },
+               ],
+               ['stale-artifact.json'],
+            );
+         }),
+      ).rejects.toThrowError(
+         expect.objectContaining({
+            code: 'audit-revision-conflict',
+            message: 'The observed state changed during check execution.',
+         }),
+      );
+
+      expect(await readAuditRun(fixture.runFile)).toEqual(initial);
+   } finally {
+      await rm(dirname(fixture.runFile), { recursive: true, force: true });
+   }
+}
+
+describe('withRunTransaction', () => {
+   it(
+      'commits state artifacts, recorded evidence, and check evaluation atomically',
+      assertTransactionalCommit,
+   );
+
+   it(
+      'rejects state artifact registration when observed state fingerprint changed',
+      assertStateConflictDetection,
+   );
 });

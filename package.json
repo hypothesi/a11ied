@@ -16,7 +16,7 @@
       "dev:docs": "turbo run dev --filter=@a11ied/docs",
       "format": "oxlint --fix && oxfmt",
       "lint": "oxlint && oxfmt --check",
-      "pack:check": "npm pack --json --dry-run --workspace packages/contracts --workspace packages/earl --workspace packages/wcag-data --workspace packages/wcag-engine --workspace packages/guidepup --workspace packages/core --workspace packages/mcp-server --workspace packages/cli",
+      "pack:check": "npm pack --json --dry-run --workspace packages/contracts --workspace packages/earl --workspace packages/wcag-data --workspace packages/wcag-engine --workspace packages/guidepup --workspace packages/knowledge --workspace packages/observe --workspace packages/verdict --workspace packages/report --workspace packages/screen-reader --workspace packages/review --workspace packages/core --workspace packages/mcp-server --workspace packages/cli",
       "prose": "node scripts/ensure-vale.mjs && vale .",
       "smoke:sr": "node scripts/smoke-screen-reader.mjs",
       "standards": "npm run lint && npm run typecheck && npm run build && npm run typecheck:examples",
@@ -32,11 +32,11 @@
    "devDependencies": {
       "@types/jsdom": "^30.0.0",
       "@types/node": "^26.3.0",
-      "@vitest/browser": "4.1.11",
-      "@vitest/browser-playwright": "4.1.11",
-      "@vitest/coverage-v8": "^4.1.11",
+      "@vitest/browser": "4.1.12",
+      "@vitest/browser-playwright": "4.1.12",
+      "@vitest/coverage-v8": "4.1.12",
       "@vvago/vale": "3.20.0",
-      "oxfmt": "0.65.0",
+      "oxfmt": "0.78.0",
       "oxlint": "1.60.0",
       "oxlint-plugin-complexity": "2.1.7",
       "rimraf": "^6.1.3",
@@ -44,7 +44,7 @@
       "tsx": "^4.23.12",
       "turbo": "^2.10.12",
       "typescript": "^6.0.3",
-      "vitest": "^4.1.11"
+      "vitest": "4.1.12"
    },
    "overrides": {
       "tsup": {

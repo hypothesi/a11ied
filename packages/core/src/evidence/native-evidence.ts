@@ -6,7 +6,7 @@ import {
 import { z } from 'zod';
 
 /** Imported receipts are validated for correlation; collector honesty is a trust boundary. */
-export function validateNativeSpeech(input: {
+export function validateReaderSpeech(input: {
    content: unknown;
    run: AuditRun;
    provenance: EvidenceProvenance;
@@ -30,7 +30,9 @@ export function validateNativeSpeech(input: {
    if (
       transcript.sessionId !== provenance.sessionId ||
       transcript.target !== environment?.platform ||
-      !['voiceover', 'nvda'].includes(transcript.target) ||
+      (provenance.source === 'real-reader'
+         ? !['voiceover', 'nvda'].includes(transcript.target)
+         : provenance.source !== 'virtual' || transcript.target !== 'virtual') ||
       (run.target.kind === 'url' &&
          !provenance.states.some((reference) => {
             const state = run.states.find((entry) => entry.stateId === reference.stateId);
@@ -50,7 +52,30 @@ export function validateNativeSpeech(input: {
       )
    ) {
       throw new Error(
-         'Native speech must match the reader session, target, attempt time, and captured transcript.',
+         'Reader speech must match the reader session, target, attempt time, and captured transcript.',
+      );
+   }
+}
+
+function validateVirtualReaderEvidence(input: {
+   run: AuditRun;
+   provenance: EvidenceProvenance;
+   requiresScreenReader?: boolean;
+}): void {
+   const { provenance, run } = input;
+   if (provenance.source !== 'virtual' || !input.requiresScreenReader) {
+      return;
+   }
+   const environment = run.environments.find(
+      (entry) => entry.environmentId === provenance.environmentId,
+   );
+   if (
+      !environment?.capabilities.includes('screen-reader') ||
+      !provenance.sessionId ||
+      !provenance.artifacts.some((artifact) => artifact.kind === 'speech')
+   ) {
+      throw new Error(
+         'Virtual reader evidence requires a screen-reader environment, session ID, and captured speech.',
       );
    }
 }
@@ -60,12 +85,16 @@ export function validateNativeEvidence(input: {
    run: AuditRun;
    provenance: EvidenceProvenance;
    requiresReader: boolean;
+   requiresScreenReader?: boolean;
 }): void {
    const { run, provenance, requiresReader } = input,
       environment = run.environments.find(
          (entry) => entry.environmentId === provenance.environmentId,
       ),
       nativeSource = provenance.source === 'real-reader';
+   if (input.requiresScreenReader && !nativeSource && provenance.source !== 'virtual') {
+      throw new Error('A screen-reader procedure requires reader observations.');
+   }
    if (requiresReader && !nativeSource) {
       throw new Error(
          'A real-reader procedure requires observations from a real screen reader.',
@@ -82,6 +111,7 @@ export function validateNativeEvidence(input: {
          'Real-reader evidence requires a real-reader environment, session ID, and captured speech.',
       );
    }
+   validateVirtualReaderEvidence(input);
    if (provenance.source === 'virtual' && environment?.platform !== 'virtual') {
       throw new Error('Virtual observations cannot be substituted for this environment.');
    }

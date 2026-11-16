@@ -23,6 +23,16 @@ const toc = [
    links={docsLinks}
    toc={toc}
 >
+   <p>
+      The raw <code>review</code> TypeScript facade needs a caller-owned Playwright browser or
+      observation callback for fresh collection. CLI and MCP review operations own their browser
+      lifecycle through <code>browserReview</code> from <code>@a11ied/review</code>.
+      Import review orchestration from that package; <code>@a11ied/core</code> contains
+      the underlying browser, coordinator and evidence services.
+      A URL registers one initial state; neither surface automatically crawls or completes
+      a site audit. Review initiation, collected observations, admitted assessments, and a finalized
+      report are separate outcomes.
+   </p>
    <section class="split panel" id="install">
       <div class="stack">
          <div class="panel-head">
@@ -342,7 +352,7 @@ const {'{'} target, targetType, warning {'}'} = await resolveAvailableDefaultTar
          <div class="route-row"><code>executeAuditAssessment(request)</code><span>Use the same validated start, state, journey, queue, next, status, resume, evaluate, block, and finalize operations as CLI and MCP. Status lists include totals and nextOffset; offset defaults to 0 and limit to 20, with a maximum of 100.</span></div>
          <div class="route-row"><code>registerAuditState(input)</code><span>Record the observed target, state fingerprint, environment, setup, and artifact references. Identical observations preserve their original timestamp. Changed observations invalidate affected proof while retaining a live claim until recovery.</span></div>
          <div class="route-row"><code>registerAuditJourney(input)</code><span>Record ordered states for a process that may span pages. Its assessment progress comes from validated checks. A saved completed flag cannot establish coverage.</span></div>
-         <div class="route-row"><code>nextAuditAssessment(file)</code><span>Claim one required check and return its procedure, including setup, actions, evidence requirements, evaluation rules, and recovery instructions. Concurrent callers cannot claim a second check. Unsupported capabilities remain visible.</span></div>
+         <div class="route-row"><code>nextAuditAssessment(file, options?)</code><span>Optional <code>excludeCapabilities</code> leaves checks queued when the current executor cannot collect that evidence; browser probes use it to leave reader procedures for a reader session. Claim one required check and return its procedure, including setup, actions, evidence requirements, evaluation rules, and recovery instructions. Concurrent callers cannot claim a second check. Unsupported capabilities remain visible.</span></div>
          <div class="route-row"><code>recordEvidence(record, options)</code><span>Validate and save traceable observations and artifacts. Pass the run file and its evidence file. Provenance and non-image envelopes use <code>attempt</code> from the claimed check's <code>attempts</code>. Save the returned evidence ID for the result transition.</span></div>
          <div class="route-row"><code>transitionAssessmentCheck(input)</code><span>Complete the claimed check with an outcome and saved evidence IDs, or record a specific blocker. Completion rejects missing, mismatched, conflicting, and obsolete proof.</span></div>
          <div class="route-row"><code>getAuditAssessmentStatus(file)</code><span>Revalidate catalog obligations, saved artifacts, and discovery scope. Returns global coverage, progress for states, pages, and journeys, and explicit unresolved issues.</span></div>

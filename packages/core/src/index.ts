@@ -31,15 +31,30 @@ export type { TargetType } from './driver/default-target.js';
 export {
    DriverCommandError,
    driverCommandSets,
+   generateSrActionDescription,
+   generateSrSessionDescription,
+   getSrActionMetadata,
+   getSrVerbMetadata,
+   getVerbsForGroup,
+   getRegisteredQueuedMethodNames,
+   getRegisteredVitestMatcherNames,
    isDriverCommandSet,
    listDriverCommands,
    parseDriverCommandSet,
    resolveDriverCommand,
+   SR_ACTION_ENUM_VALUES,
+   SR_ACTION_METADATA,
+   SR_TASK_GROUPS,
+   SR_VERB_REGISTRY,
    type ConcreteDriverCommandSet,
    type DriverCommandList,
    type DriverCommandSet,
    type ListDriverCommandsOptions,
    type SerializableDriverCommand,
+   type SrActionEnumValue,
+   type SrActionMetadata,
+   type SrTaskGroup,
+   type SrVerbMetadata,
 } from '@a11ied/guidepup';
 export { runAxe, type AxeRunOptions } from './axe/runtime.js';
 export { openUrlInSystemAutomationBrowser } from './browser/helper.js';
@@ -176,10 +191,15 @@ export {
    startAuditAssessment,
    nextAuditAssessment,
    getAuditAssessmentStatus,
+   getAuditAssessmentSnapshot,
+   withAuditAssessmentSnapshot,
    resumeAuditAssessment,
    finalizeAuditAssessment,
 } from './audit/run-lifecycle.js';
-export type { AuditAssessmentStatus } from './audit/run-status.js';
+export type {
+   AuditAssessmentStatus,
+   AuditAssessmentSnapshot,
+} from './audit/run-status.js';
 export {
    executeAuditAssessment,
    type AuditAssessmentResponse,
@@ -279,6 +299,7 @@ export {
 } from './driver/command-queue.js';
 export {
    queueScreenReader,
+   QUEUED_READER_METHOD_NAMES,
    type QueuedAssertion,
    type QueuedChain,
    type QueuedCommands,
@@ -335,3 +356,79 @@ export {
 export { renderHtmlReport } from './report/render-html.js';
 export { renderPdfReport } from './report/render-pdf.js';
 export { buildReportBundle, type BuildReportBundleOptions } from './report/runtime.js';
+export {
+   appendLine,
+   withDirectoryCommit,
+   withLockedFile,
+   withPathLock,
+   writeAtomic,
+} from './files/store.js';
+export {
+   computeObservationFingerprint,
+   getObservationBundlePath,
+   readCachedObservationBundle,
+   writeCachedObservationBundle,
+} from './observe/cache.js';
+export { observeState } from './observe/collector.js';
+export {
+   DEFAULT_OBSERVATION_CONCURRENCY,
+   mapWithConcurrency,
+   observeTargetsInParallel,
+   type ObserveTargetInput,
+   type ParallelObserveOptions,
+} from './observe/parallel.js';
+export {
+   computePageVerdicts,
+   computeVerdictId,
+   getVerdictStorePath,
+   readVerdicts,
+   recordVerdict,
+} from './verdict/store.js';
+export { scoreObservationBundle, WCAG_22_AA_CRITERIA } from './verdict/engine.js';
+export {
+   createBundleRef,
+   createScreenshotBundleRef,
+   recordBundleVerdicts,
+} from './verdict/bundle-refs.js';
+export {
+   createExclusionVerdict,
+   expandStateObligations,
+   matchScopeExclusion,
+   revokeStaleMemberObligations,
+   type ObligationKind,
+   type StateObligation,
+   type TemplateStateDescriptor,
+} from './verdict/template-dedupe.js';
+export {
+   compareClaimableWork,
+   DEFAULT_CRITERION_IMPACT,
+   getCriterionImpact,
+   IMPACT_RANK,
+} from './verdict/priority-queue.js';
+export {
+   buildVerdictAuditReport,
+   DEFAULT_WCAG_22_AA_CRITERIA,
+   getCriterionLevel,
+   renderVerdictAuditHtml,
+   renderVerdictAuditMarkdown,
+   writeVerdictAuditReportFiles,
+   type BuildVerdictAuditReportInput,
+   type MethodologyDisclosure,
+   type RemediationRoadmapItem,
+   type VerdictAuditReport,
+   type VpatConformanceLevel,
+   type VpatCriterionRow,
+} from './report/verdict-report.js';
+export {
+   validateCantTellBlockerCode,
+   verifyBundleInapplicability,
+   type InapplicabilityCheckResult,
+} from './evidence/inapplicability.js';
+export { launchAutomationBrowser } from './browser/runtime.js';
+
+export {
+   getAssessmentCatalog,
+   listAssessmentObligations,
+} from './audit/run-obligations.js';
+
+export { getCheckEvidenceError } from './audit/check-evidence.js';

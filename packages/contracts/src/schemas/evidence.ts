@@ -26,6 +26,23 @@ export type EvidenceMode = z.infer<typeof evidenceModeSchema>;
 /** Notes are bounded for readable reports. Filesystem locks protect complete records. */
 export const EVIDENCE_NOTE_MAX_LENGTH = 2000;
 
+export const artifactProcedureAssessmentSchema = z.object({
+   version: z.string().min(1),
+   actions: z
+      .array(
+         z.object({
+            index: z.number().int().nonnegative(),
+            outcome: evidenceOutcomeSchema,
+            observation: z.string().trim().min(1).max(EVIDENCE_NOTE_MAX_LENGTH),
+            artifactIndices: z.array(z.number().int().nonnegative()).min(1),
+         }),
+      )
+      .min(1),
+});
+export type ArtifactProcedureAssessment = z.infer<
+   typeof artifactProcedureAssessmentSchema
+>;
+
 export const evidenceFindingSchema = z.object({
    title: z.string().trim().min(1).max(EVIDENCE_NOTE_MAX_LENGTH),
    userImpact: z.string().trim().min(1).max(EVIDENCE_NOTE_MAX_LENGTH),
@@ -38,6 +55,10 @@ export const evidenceStateReferenceSchema = z.object({
    stateId: z.string().min(1),
    revision: z.number().int().positive(),
    fingerprint: z.string().min(1),
+   observationDigest: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/u)
+      .optional(),
 });
 
 export const evidenceSourceSchema = z.enum([
@@ -79,6 +100,18 @@ export const evidenceProvenanceSchema = z.object({
    rationale: z.string().trim().min(1).max(EVIDENCE_NOTE_MAX_LENGTH),
 });
 export type EvidenceProvenance = z.infer<typeof evidenceProvenanceSchema>;
+
+export const mediaInventorySchema = z.object({
+   url: z.string().min(1),
+   video: z.number().int().nonnegative(),
+   audio: z.number().int().nonnegative(),
+   embeds: z.number().int().nonnegative(),
+   mediaPlays: z.number().int().nonnegative(),
+   audioContexts: z.number().int().nonnegative(),
+   uninspectedTrees: z.number().int().nonnegative(),
+   method: z.string().trim().min(1),
+});
+export type MediaInventory = z.infer<typeof mediaInventorySchema>;
 
 const nonemptyObservationSchema = z.union([
    z.string().trim().min(1),
@@ -193,6 +226,7 @@ export type EvidenceTest = z.infer<typeof evidenceTestSchema>;
  * spellings of its URL resolves to one row.
  */
 export const evidenceRecordSchema = z.object({
+   assessment: artifactProcedureAssessmentSchema.optional(),
    finding: evidenceFindingSchema.optional(),
    evidenceId: z.string().min(1).optional(),
    subject: z.string().min(1),

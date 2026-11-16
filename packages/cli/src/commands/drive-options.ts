@@ -1,6 +1,11 @@
 import type { Command } from 'commander';
 import { CliUsageError } from '#core';
 import {
+   SR_GROUP_HEADINGS,
+   getSrCliVerbGroupHeading,
+   type SrTaskGroup,
+} from '../../../guidepup/src/workflow-registry.js';
+import {
    addJsonOption,
    addPhraseOption,
    addScreenReaderOption,
@@ -9,17 +14,25 @@ import {
 } from '../lib/options.js';
 
 /**
- * The headings that group the sr subcommands in `a1 sr --help`, by what a reader wants to
- * do.
+ * The headings that group the sr subcommands in `a1 sr --help`, organized into the 6 N4
+ * task groups.
  */
 export const DRIVE_GROUPS = {
-   session: 'Start and stop a session:',
-   read: 'Read the current item:',
-   move: 'Move through the page:',
-   act: 'Act on it:',
-   check: 'Check what was said:',
-   other: 'Other:',
+   session: SR_GROUP_HEADINGS.session,
+   navigate: SR_GROUP_HEADINGS.navigate,
+   interact: SR_GROUP_HEADINGS.interact,
+   assert: SR_GROUP_HEADINGS.assert,
+   inspect: SR_GROUP_HEADINGS.inspect,
+   bulk: SR_GROUP_HEADINGS.bulk,
+   // Legacy aliases for backward compatibility
+   read: SR_GROUP_HEADINGS.navigate,
+   move: SR_GROUP_HEADINGS.navigate,
+   act: SR_GROUP_HEADINGS.interact,
+   check: SR_GROUP_HEADINGS.assert,
+   other: SR_GROUP_HEADINGS.inspect,
 } as const;
+
+export { getSrCliVerbGroupHeading, SR_GROUP_HEADINGS, type SrTaskGroup };
 
 /** Options shared by every sr command that talks to the active session. */
 export interface DriveActionOptions {

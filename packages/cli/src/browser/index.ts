@@ -49,7 +49,10 @@ export type {
 } from '../../../core/src/driver/spoken-matchers.js';
 
 export interface BrowserScreenReaderOptions {
-   /** The node the reader is bounded to; the document body by default. */
+   /**
+    * The node the reader is bounded to; the document body by default. A generic container
+    * can lack an announced tree boundary, making edge seeking unavailable.
+    */
    container?: Node | undefined;
 }
 

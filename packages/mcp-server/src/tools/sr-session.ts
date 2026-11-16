@@ -17,6 +17,7 @@ import {
    resolveRecordingTranscriptPath,
    resolveTranscriptFormat,
 } from '@a11ied/core';
+import { generateSrSessionDescription } from '@a11ied/guidepup';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
@@ -199,20 +200,7 @@ async function dispatchSrSession(input: SrSessionInput): Promise<SrSessionRespon
    return handleStatus(input);
 }
 
-const SR_SESSION_DESCRIPTION =
-   'Manage the one active sr session, matching a1 sr start/open/stop/status. ' +
-   'One session is active at a time. stop accepts sessionId to retry a recovery owner. ' +
-   'action "start": start a session, stopping any session already active. target is voiceover, nvda, or virtual. ' +
-   'Omit it to use the platform default (VoiceOver on macOS, NVDA on Windows), falling back to virtual. ' +
-   'Set allowVirtual=true to explicitly request the virtual (simulated) target when a real one is available. ' +
-   'url opens a page. Real targets open it in a system browser and refocus it. Virtual loads the HTML directly. ' +
-   'app names a native app that is already open to read instead of a page. ' +
-   'nativeInput defaults to guarded: check observed foreground targets and inspect state after each action. ' +
-   'require-binding refuses input without authoritative native binding; development bypasses target checks. ' +
-   'action "open": navigate the active session to url. ' +
-   'action "stop": stop the session. out writes its transcript to a .json or .md path. ' +
-   'action "status": read session metadata, or { noSession: true } when none is active. ' +
-   'The session carries a targetType field, "real" or "simulated".';
+export const SR_SESSION_DESCRIPTION = generateSrSessionDescription();
 
 export function registerSrSessionTool(server: McpServer): void {
    server.registerTool(

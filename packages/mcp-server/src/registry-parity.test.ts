@@ -1,8 +1,14 @@
 import { spawnSync } from 'node:child_process';
-import { resolve } from 'node:path';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import type { ObservationBundle } from '@a11ied/contracts';
 import { describe, expect, it } from 'vitest';
+import { z } from 'zod';
 
+import { getSrActionMetadata, getVerbsForGroup, SR_TASK_GROUPS } from '@a11ied/guidepup';
 import { withHarness } from './testing/harness.js';
+import { SR_ACTION_DESCRIPTION, srActionInputSchema } from './tools/sr-action.js';
 
 const CLI_DIST = resolve(import.meta.dirname, '../../cli/dist/cli.js');
 const COMMAND_NAME_PATTERN = /^ {2}([a-z][a-z-]*)/u;
@@ -22,6 +28,7 @@ const INTENTIONALLY_UNCOVERED: ReadonlySet<string> = new Set([
    'help',
    'sr help',
    'report help',
+   'review help',
    // Runs interactive OS permission prompts and downloads screen reader assets.
    'setup',
    // Reads a file of JSON-lines actions for shell scripting, not one call.
@@ -66,6 +73,15 @@ const TOOL_BY_COMMAND: Readonly<Record<string, readonly string[]>> = {
    'audit evaluate': ['audit_assessment'],
    'audit block': ['audit_assessment'],
    'audit finalize': ['audit_assessment'],
+   review: ['review.start', 'review_start'],
+   'review start': ['review.start', 'review_start'],
+   'review resume': ['review.resume', 'review_resume'],
+   'review next': ['review.next', 'review_next'],
+   'review observe': ['review.observe', 'review_observe'],
+   'review judge': ['review.judge', 'review_judge'],
+   'review status': ['review.status', 'review_status'],
+   'review report': ['review.report', 'review_report'],
+   'review run': ['review.run', 'review_run'],
    'report build': ['report_build'],
    report: ['report_build'],
    doctor: ['doctor'],
@@ -197,5 +213,231 @@ describe('MCP tool list against the CLI command registry', () => {
          stale,
          'tool mapping entries for a CLI command that no longer exists',
       ).toEqual([]);
+   });
+});
+
+describe('screen reader verb registry parity and MCP description budget (NFR-2)', () => {
+   it('every action in srActionInputSchema action enum is in the registry and in SR_ACTION_DESCRIPTION', () => {
+      const actions = srActionInputSchema.shape.action.options;
+      for (const action of actions) {
+         expect(getSrActionMetadata(action)).toBeDefined();
+         expect(SR_ACTION_DESCRIPTION).toContain(action);
+      }
+   });
+
+   it('all 6 N4 task groups and verbs are in the registry', () => {
+      const groups = [
+         'session',
+         'navigate',
+         'interact',
+         'assert',
+         'inspect',
+         'bulk',
+      ] as const;
+      expect([...SR_TASK_GROUPS].toSorted()).toEqual([...groups].toSorted());
+      for (const group of groups) {
+         expect(getVerbsForGroup(group).length).toBeGreaterThan(0);
+      }
+   });
+
+   it('every MCP screen reader tool description is <= 800 characters', async () => {
+      const maxDescriptionLength = 800;
+      const minSrToolsCount = 5;
+      expect(SR_ACTION_DESCRIPTION.length).toBeLessThanOrEqual(maxDescriptionLength);
+      await withHarness(async (harness) => {
+         const { tools } = await harness.client.listTools();
+         const srTools = tools.filter((tool) => tool.name.startsWith('sr_'));
+         expect(srTools.length).toBeGreaterThanOrEqual(minSrToolsCount);
+         for (const tool of srTools) {
+            expect(tool.description?.length ?? 0).toBeLessThanOrEqual(
+               maxDescriptionLength,
+            );
+         }
+      });
+   });
+});
+
+function createMcpMockBundle(): ObservationBundle {
+   return {
+      version: '1',
+      fingerprint: 'fp-mcp-review-test',
+      targetUrl: 'https://example.com/mcp-test',
+      stateId: 'root',
+      capturedAt: '2026-11-10T12:00:00.000Z',
+      setup: [],
+      actionTrace: [],
+      treeHash: 'tree-hash-mcp',
+      axe: { passes: [], violations: [], incomplete: [], inapplicable: [] },
+      tree: { yaml: 'root: page', nodes: [] },
+      facts: {
+         title: 'MCP Review Test Page',
+         lang: 'en',
+         landmarks: { main: 1 },
+         skipLink: '#main',
+         headings: [{ level: 1, text: 'MCP Review' }],
+         links: [{ name: 'Home', href: '/' }],
+         controls: [{ type: 'button', label: 'Submit' }],
+         tabStops: [{ id: 'b1', obscured: false, inView: true }],
+         interactiveCount: 1,
+         media: { video: 0, audio: 0, autoplay: 0, embeds: [] },
+         runningAnimations: [],
+         smallTargets: [],
+         noIndicator: [],
+         clickOnNonInteractive: [],
+         trapSuspected: false,
+         metaRefresh: false,
+         urlUnchangedAfterTab: true,
+      },
+      heuristics: {
+         hasSiteNavigation: true,
+         hasMultipointGesture: false,
+         hasDraggable: false,
+      },
+      contrast: [],
+      viewports: {
+         desktop: { width: 1280, height: 800 },
+         reflow320: { overflowPx: 0, wideElements: [] },
+         zoom200: { overflowPx: 0 },
+         portrait: { overflowPx: 0 },
+         textSpacingClipped: [],
+      },
+      screenshots: {
+         fullPagePath: 'cache/fp-mcp-review-test/full.png',
+         elements: {},
+      },
+      transcript: {
+         provenance: 'virtual-dom',
+         spokenOrder: ['MCP Review', 'Submit'],
+         headings: ['MCP Review'],
+         landmarks: ['main'],
+         links: [],
+         formControls: ['Submit'],
+         liveRegions: [],
+      },
+      interactiveCandidates: [],
+   };
+}
+
+describe('N5 review facade parity', () => {
+   it('registers all 8 review operations and their underscore aliases on McpServer', async () => {
+      await withHarness(async (harness) => {
+         const { tools } = await harness.client.listTools();
+         const toolNames = new Set(tools.map((tool) => tool.name));
+
+         const canonicalOps = [
+            'review.start',
+            'review.resume',
+            'review.next',
+            'review.observe',
+            'review.judge',
+            'review.status',
+            'review.report',
+            'wcag.show',
+            'doctor',
+         ];
+
+         for (const op of canonicalOps) {
+            expect(
+               toolNames.has(op),
+               `Expected canonical tool '${op}' to be registered`,
+            ).toBe(true);
+         }
+
+         const underscoreAliases = [
+            'review_start',
+            'review_resume',
+            'review_next',
+            'review_observe',
+            'review_judge',
+            'review_status',
+            'review_report',
+            'review_run',
+            'wcag_show',
+         ];
+
+         for (const alias of underscoreAliases) {
+            expect(
+               toolNames.has(alias),
+               `Expected underscore alias '${alias}' to be registered`,
+            ).toBe(true);
+         }
+      });
+   });
+
+   it('rejects generic MCP passes while retaining draft reporting', async () => {
+      const testDir = await mkdtemp(join(tmpdir(), 'a11ied-mcp-review-'));
+      try {
+         const mockBundle = createMcpMockBundle();
+
+         await withHarness(async (harness) => {
+            const startRes = await harness.client.callTool({
+               name: 'review.start',
+               arguments: {
+                  runDir: testDir,
+                  target: 'https://example.com/mcp-test',
+                  states: [
+                     {
+                        stateId: 'root',
+                        targetUrl: 'https://example.com/mcp-test',
+                        bundle: mockBundle,
+                     },
+                  ],
+               },
+            });
+            expect(startRes.isError).toBeFalsy();
+            expect(startRes.structuredContent).toMatchObject({
+               runId: expect.any(String),
+            });
+
+            const nextRes = await harness.client.callTool({
+               name: 'review.next',
+               arguments: { runDir: testDir, agentId: 'agent-mcp-test', count: 5 },
+            });
+            expect(nextRes.isError).toBeFalsy();
+            const nextContent = z
+               .object({
+                  packet: z.object({
+                     stateId: z.string(),
+                     checks: z.array(
+                        z.object({ criterionId: z.string(), procedureId: z.string() }),
+                     ),
+                  }),
+               })
+               .parse(nextRes.structuredContent);
+            const verdicts = nextContent.packet.checks.map((check) => ({
+               criterionId: check.criterionId,
+               procedureId: check.procedureId,
+               stateId: nextContent.packet.stateId,
+               method: 'agent-judgment',
+               outcome: 'passed',
+               rationale: 'Verified pass via MCP harness test.',
+            }));
+            const judgeRes = await harness.client.callTool({
+               name: 'review.judge',
+               arguments: { runDir: testDir, agentId: 'agent-mcp-test', verdicts },
+            });
+            expect(judgeRes.isError).toStrictEqual(true);
+
+            const statusRes = await harness.client.callTool({
+               name: 'review.status',
+               arguments: { runDir: testDir, full: true },
+            });
+            expect(statusRes.isError).toBeFalsy();
+
+            const reportRes = await harness.client.callTool({
+               name: 'review.report',
+               arguments: { runDir: testDir, draft: true },
+            });
+            expect(reportRes.isError).toBeFalsy();
+            expect(reportRes.structuredContent).toMatchObject({
+               paths: { markdownPath: expect.any(String) },
+            });
+            expect(reportRes.structuredContent).toMatchObject({
+               report: { isDraft: true },
+            });
+         });
+      } finally {
+         await rm(testDir, { recursive: true, force: true });
+      }
    });
 });

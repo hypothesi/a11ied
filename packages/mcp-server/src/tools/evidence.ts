@@ -1,5 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import {
+   artifactProcedureAssessmentSchema,
    evidenceFindingSchema,
    evidenceProvenanceSchema,
    type EvidenceRecord,
@@ -22,6 +23,7 @@ import {
 
 /** The strategy artifact names this for a criterion axe covers; a person did not run axe. */
 const recordInputSchema = pageTargetInputSchema.extend({
+   assessment: artifactProcedureAssessmentSchema.optional(),
    finding: evidenceFindingSchema.optional(),
    provenance: evidenceProvenanceSchema.optional(),
    runFile: z.string().min(1).optional(),
@@ -59,7 +61,9 @@ const recordInputSchema = pageTargetInputSchema.extend({
       .string()
       .min(1)
       .optional()
-      .describe('Where to store results. Defaults to .a11ied/evidence.jsonl.'),
+      .describe(
+         'Where to store results. Defaults to the run journal when runFile is set, otherwise .a11ied/evidence.jsonl or A11IED_EVIDENCE.',
+      ),
 });
 
 const pendingInputSchema = pageTargetInputSchema.extend({
@@ -115,6 +119,7 @@ function registerRecordTool(server: McpServer): void {
             mode: input.mode ?? 'semiAutomatic',
             recordedAt: new Date().toISOString(),
             ...(input.provenance ? { provenance: input.provenance } : {}),
+            ...(input.assessment ? { assessment: input.assessment } : {}),
             ...(input.finding ? { finding: input.finding } : {}),
             ...(input.pointer === undefined ? {} : { pointer: input.pointer }),
             ...(input.note === undefined ? {} : { note: input.note }),

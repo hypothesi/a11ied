@@ -1,10 +1,11 @@
-import { mkdtemp } from 'node:fs/promises';
+import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 
 import { JSDOM } from 'jsdom';
 import { describe, expect, it } from 'vitest';
 
+import { createEvidenceTestAssessment } from '../evidence/test-fixtures.js';
 import { buildAuditReport } from '../audit/runtime.js';
 import { buildReportModel } from './aggregate.js';
 import { renderHtmlReport } from './render-html.js';
@@ -86,4 +87,30 @@ describe('report markup accessibility', () => {
       },
       BROWSER_TEST_TIMEOUT_MS,
    );
+});
+
+describe('virtual audit report disclosure', () => {
+   it('identifies virtual observations beside recorded outcomes', async () => {
+      const fixture = await createEvidenceTestAssessment();
+      try {
+         const report = buildReportTestAudit();
+         const provenance = fixture.record.provenance;
+         if (!provenance) {
+            throw new Error('Missing provenance.');
+         }
+         provenance.source = 'virtual';
+         report.recorded.push({ ...fixture.record, subject: report.axe.url });
+         const html = renderHtmlReport(
+            buildReportModel(buildReportTestInventory(), [
+               { pageId: 'home-a1b2c3d4', report },
+            ]),
+         );
+
+         expect(new JSDOM(html).window.document.body.textContent).toContain(
+            'Virtual screen reader assessment (simulated; native reader behavior untested)',
+         );
+      } finally {
+         await rm(dirname(fixture.runFile), { recursive: true, force: true });
+      }
+   });
 });

@@ -71,7 +71,7 @@
       "family": "structure",
       "actions": [
          "Inventory headings, lists, tables, groups, form labels, and visually expressed relationships.",
-         "Read the same structures with the real reader and compare relationships with rendered layout or equivalent text."
+         "Read the same structures with the selected screen reader and compare relationships with rendered layout or equivalent text."
       ],
       "applicability": "Information, structure, or relationships conveyed through presentation.",
       "passed": "All presented relationships are programmatically determinable or explicitly available in text.",
@@ -85,7 +85,7 @@
       "applicability": "Content whose sequence affects meaning.",
       "actions": [
          "Identify sequences whose order affects meaning, including columns and inserted dynamic content.",
-         "Read each sequence with the real reader and compare its programmatic order with the intended meaning."
+         "Read each sequence with the selected screen reader and compare its programmatic order with the intended meaning."
       ],
       "passed": "At least one programmatically determinable sequence preserves meaning for every applicable sequence.",
       "failed": "An applicable sequence loses meaning in its programmatically determined reading order.",
@@ -150,7 +150,7 @@
       "passed": "Applicable audio can be paused or stopped, or its volume controlled independently of system volume.",
       "failed": "Automatic audio exceeds three seconds without an accepted control.",
       "inapplicable": "No audio plays automatically for more than three seconds.",
-      "requiredCapabilities": ["real-reader", "speech"],
+      "requiredCapabilities": ["screen-reader", "speech"],
       "requiredEvidence": ["speech"]
    },
    "1.4.3": {
@@ -291,7 +291,7 @@
       "inapplicable": "No applicable automatic information is presented alongside other content."
    },
    "2.3.1": {
-      "family": "media",
+      "family": "measurement",
       "applicability": "Flashing content, including video, animation, and state transitions.",
       "actions": [
          "Inventory flashing content without prolonged viewing; obtain recordings or source timing where safe.",
@@ -303,7 +303,7 @@
       "limitations": [
          "Unaided visual judgment cannot establish flash thresholds; missing validated measurement remains uncertain."
       ],
-      "requiredEvidence": ["measurement"],
+      "requiredEvidence": ["measurement", "media"],
       "requiredCapabilities": ["measurement"]
    },
    "2.4.1": {
@@ -311,7 +311,7 @@
       "scope": "site",
       "applicability": "Blocks repeated across a set of pages.",
       "actions": [
-         "Identify repeated blocks and navigate their bypass mechanisms with keyboard and real reader.",
+         "Identify repeated blocks and navigate their bypass mechanisms with keyboard and the selected screen reader.",
          "Verify that bypass reaches the intended content on every represented template and state."
       ],
       "passed": "An operable mechanism bypasses each repeated block on the scoped page set.",
@@ -470,7 +470,7 @@
       "applicability": "Human language of each page.",
       "actions": [
          "Determine the page's primary language and inspect its programmatic declaration.",
-         "Read language-dependent content with a configured real reader and compare declarations with the content."
+         "Read language-dependent content with the configured screen reader and compare declarations with the content."
       ],
       "passed": "The page's default human language is programmatically determinable and correctly identified.",
       "failed": "The page's language declaration is missing or incorrect.",
@@ -482,7 +482,7 @@
       "applicability": "Passages or phrases in a language different from the page's default.",
       "actions": [
          "Find language changes and inspect programmatic language metadata for each passage.",
-         "Read representative changes with the real reader; distinguish names, technical terms, indeterminate words, and vernacular."
+         "Read representative changes with the selected screen reader; distinguish names, technical terms, indeterminate words, and vernacular."
       ],
       "passed": "All nonexempt language changes are correctly programmatically identified.",
       "failed": "A nonexempt language change lacks correct programmatic identification.",
@@ -552,7 +552,7 @@
       "applicability": "Input errors automatically detected by the content.",
       "actions": [
          "Trigger required-field, format, range, and server validation errors with authorized test data.",
-         "Compare each detected error's text with the field in error and read it with the real reader."
+         "Compare each detected error's text with the field in error and read it with the selected screen reader."
       ],
       "passed": "Each automatically detected error identifies the item and describes the error in text.",
       "failed": "A detected error lacks textual identification or description.",
@@ -634,7 +634,7 @@
       "family": "structure",
       "applicability": "All user-interface components, including custom and dynamically changed controls.",
       "actions": [
-         "Inventory controls and inspect programmatic names, roles, states, properties, and values with a real reader.",
+         "Inventory controls and inspect programmatic names, roles, states, properties, and values with the selected screen reader.",
          "Operate each control and change user-settable values; compare announced updates and programmatic semantics with behavior."
       ],
       "passed": "Names/roles are determinable, user-settable states/values are programmatic, and changes notify user agents and AT.",
@@ -646,7 +646,7 @@
       "applicability": "Status messages that do not constitute a change of context.",
       "actions": [
          "Trigger success, result-count, waiting, progress, and error status messages while preserving focus.",
-         "Record real-reader announcements and inspect roles/properties without moving focus to the message."
+         "Record screen-reader announcements and inspect roles/properties without moving focus to the message."
       ],
       "passed": "Each applicable status message is programmatically determinable and presented by AT without receiving focus.",
       "failed": "An applicable status message cannot be presented by AT without focus.",

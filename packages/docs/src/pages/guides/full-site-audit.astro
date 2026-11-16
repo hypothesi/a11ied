@@ -21,8 +21,8 @@ const toc = [
          <li>The agent reuses your target, scope, WCAG profile, and authorized actions.</li>
          <li>For websites, it discovers pages and links the inventory with <code>a1 audit run --inventory</code>.</li>
          <li>It observes page or app states and registers ordered user journeys.</li>
-         <li>It runs <code>audit probe</code> to let a browser decide every check it can, then handles what remains.</li>
-         <li>It claims each remaining procedure with <code>audit next</code>, performs its actions, records current evidence, and evaluates the check. Reader procedures require VoiceOver or NVDA when the procedure specifies a real reader.</li>
+         <li>It collects fresh observations for each restored state and uses actual criterion-specific measurements. The general <code>audit probe</code> runner provides development diagnostics; its cached initial-page facts do not establish coverage of interactive states.</li>
+         <li>It claims each remaining procedure with <code>audit next</code>, performs its actions, records current evidence, and evaluates the check. Reader procedures accept an explicitly declared virtual screen reader in production audits. Retain virtual provenance and matching session transcripts; this does not verify VoiceOver or NVDA behavior. Procedures explicitly requiring a real reader still require VoiceOver or NVDA.</li>
          <li>It resolves coverage gaps before finalization and builds website reports. Draft reports remain available during the assessment.</li>
       </ol>
       <pre><code>a1 audit discover https://createdbyfireside.com --scope site \

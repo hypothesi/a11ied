@@ -201,6 +201,18 @@ describe('sr_action goto verdict', () => {
                const payload = goto.structuredContent as { exitCode: number };
                expect(payload.exitCode).toBe(CLI_EXIT_ASSERTION);
 
+               // Also verify canonical action enum alias 'navigate' works identically
+               const nav = await harness.client.callTool({
+                  name: 'sr_action',
+                  arguments: {
+                     action: 'navigate',
+                     payload: { role: 'button', name: 'does-not-exist', max: 5 },
+                  },
+               });
+               expect(nav.isError).toBeFalsy();
+               const navPayload = nav.structuredContent as { exitCode: number };
+               expect(navPayload.exitCode).toBe(CLI_EXIT_ASSERTION);
+
                await harness.client.callTool({
                   name: 'sr_session',
                   arguments: { action: 'stop' },

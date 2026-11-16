@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+   getRegisteredQueuedMethodNames,
    queuedScreenReader,
    queueScreenReader,
    screenReader,
    ScreenReader,
    ScreenReaderAssertionError,
    type CommandQueueOptions,
+   QUEUED_READER_METHOD_NAMES,
 } from '../index.js';
 
 const TIMEOUT_MS = 30_000;
@@ -205,6 +207,28 @@ describe('queueScreenReader', () => {
          await sr.stop();
 
          await expect(settled[0]).rejects.toBeInstanceOf(ScreenReaderAssertionError);
+      },
+      TIMEOUT_MS,
+   );
+});
+
+describe('queuedScreenReader registry parity', () => {
+   it('mirrors every registry queued method name 1:1', () => {
+      expect(new Set(QUEUED_READER_METHOD_NAMES)).toEqual(
+         new Set(getRegisteredQueuedMethodNames()),
+      );
+   });
+
+   it(
+      'sr.goto(...) and sr.goTo(...) resolve identically',
+      async () => {
+         await using sr = await queuedScreenReader({ html: CHECKOUT_HTML });
+
+         await sr.top();
+
+         expect(await sr.goto({ role: 'button', name: 'Pay now' })).toBe(
+            await sr.goTo({ role: 'button', name: 'Pay now' }),
+         );
       },
       TIMEOUT_MS,
    );

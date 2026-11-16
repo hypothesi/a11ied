@@ -181,6 +181,9 @@ function renderCriteria(page: ReportModel['pages'][number]): string {
 }
 
 function getRecordedMethod(record: EvidenceRecord): string {
+   if (record.provenance?.source === 'virtual') {
+      return 'Virtual screen reader assessment (simulated; native reader behavior untested)';
+   }
    if (record.provenance?.actor.kind === 'agent') {
       return 'Agent assessment';
    }

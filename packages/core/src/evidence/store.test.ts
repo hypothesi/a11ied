@@ -1,16 +1,18 @@
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 
 import type { EvidenceRecord } from '@a11ied/contracts';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { resolveEvidenceFile } from './paths.js';
-import { appendEvidence, clearEvidence, readEvidence } from './store.js';
+import { appendEvidence, clearEvidence, readEvidence, recordEvidence } from './store.js';
 import { stripFragment } from './subject.js';
+import { createEvidenceTestAssessment } from './test-fixtures.js';
 
 const roots: string[] = [];
 
+const SINGLE_RECORD = 1;
 const TWO_RECORDS = 2;
 const CONCURRENT_APPENDS = 60;
 const LONG_NOTE_LENGTH = 5000;
@@ -234,5 +236,55 @@ describe('stripFragment', () => {
       );
 
       expect(await readEvidence({ file })).toHaveLength(TWO_RECORDS);
+   });
+});
+
+describe('recordEvidence conflict detection under lock', () => {
+   it('rejects conflicting outcomes for the same check attempt under lock', async () => {
+      const fixture = await createEvidenceTestAssessment();
+      roots.push(dirname(fixture.runFile));
+
+      await recordEvidence(fixture.record, {
+         file: fixture.file,
+         runFile: fixture.runFile,
+      });
+
+      const conflictingRecord = {
+         ...fixture.record,
+         outcome: 'failed' as const,
+      };
+
+      await expect(
+         recordEvidence(conflictingRecord, {
+            file: fixture.file,
+            runFile: fixture.runFile,
+         }),
+      ).rejects.toThrowError(
+         expect.objectContaining({
+            code: 'audit-evidence-conflict',
+         }),
+      );
+   });
+
+   it('serializes concurrent records and rejects conflicting outcome on race', async () => {
+      const fixture = await createEvidenceTestAssessment();
+      roots.push(dirname(fixture.runFile));
+
+      const passRecord = { ...fixture.record, outcome: 'passed' as const };
+      const failRecord = { ...fixture.record, outcome: 'failed' as const };
+
+      const outcomes = await Promise.allSettled([
+         recordEvidence(passRecord, { file: fixture.file, runFile: fixture.runFile }),
+         recordEvidence(failRecord, { file: fixture.file, runFile: fixture.runFile }),
+      ]);
+
+      const fulfilled = outcomes.filter((outcome) => outcome.status === 'fulfilled');
+      const rejected = outcomes.filter((outcome) => outcome.status === 'rejected');
+
+      expect(fulfilled).toHaveLength(SINGLE_RECORD);
+      expect(rejected).toHaveLength(SINGLE_RECORD);
+      expect((rejected[0] as PromiseRejectedResult).reason).toMatchObject({
+         code: 'audit-evidence-conflict',
+      });
    });
 });

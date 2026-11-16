@@ -1,29 +1,29 @@
+import { listEvidenceStateReferences } from '../../evidence/state-references.js';
 import type {
    AssessmentCheck,
    AssessmentEvidenceKind,
+   AssessmentProcedure,
    AuditRun,
    EvidenceOutcome,
-   EvidenceRecord,
 } from '@a11ied/contracts';
 import type { Browser } from 'playwright';
 import { launchAutomationBrowser } from '../../browser/runtime.js';
-import { recordEvidence } from '../../evidence/store.js';
 import { executeAuditAssessment } from '../assessment-command.js';
-import { getAuditRunPaths, readAuditRun } from '../run-store.js';
+import { nextAuditAssessment } from '../run-lifecycle.js';
+import { readAuditRun, withRunTransaction } from '../run-store.js';
+import {
+   getMissingCapabilities,
+   getRequiredEvidence,
+} from '../../evidence/procedure-requirements.js';
+import { observeStateMedia } from './probe-media.js';
+import { buildRecord } from './probe-record.js';
 import { judgeCriterion } from './judge.js';
 import { observeInventoryPages } from './probe-observe.js';
-import {
-   writeProbeArtifacts,
-   type ArtifactInput,
-   type PageJudgement,
-   type StateReference,
-} from './probe-artifacts.js';
+import { writeProbeArtifacts, type PageJudgement } from './probe-artifacts.js';
 import { buildSiteFacts, PageEvidenceCache } from './probe-site.js';
 import type { Judgement, SiteFacts } from './probe-types.js';
 
-const ACTOR_NAME = 'a1 audit probe';
 const MAX_RECOVERY_ROUNDS = 3;
-const NOTE_LIMIT = 900;
 const SCREENSHOT = { width: 200, height: 120 };
 const SETTLE_MS = 300;
 const OUTCOME_ORDER: EvidenceOutcome[] = ['failed', 'cantTell', 'passed', 'inapplicable'];
@@ -40,7 +40,10 @@ export interface ProbeRunResult {
    outcomes: Record<EvidenceOutcome, number>;
 }
 
-type Claim = NonNullable<Awaited<ReturnType<typeof executeAuditAssessment>>['next']>;
+interface Claim {
+   check: AssessmentCheck;
+   procedure: AssessmentProcedure;
+}
 
 interface RunContext {
    file: string;
@@ -87,14 +90,6 @@ function statesForCheck(run: AuditRun, check: AssessmentCheck): AuditRun['states
    });
 }
 
-function toReferences(states: AuditRun['states']): StateReference[] {
-   return states.map((state) => ({
-      stateId: state.stateId,
-      revision: state.revision,
-      fingerprint: state.fingerprint,
-   }));
-}
-
 async function captureScreenshot(browser: Browser, url: string): Promise<Buffer> {
    const context = await browser.newContext({ viewport: SCREENSHOT });
    try {
@@ -107,30 +102,6 @@ async function captureScreenshot(browser: Browser, url: string): Promise<Buffer>
    }
 }
 
-/** Artifact paths must be registered on the states they observed before recording. */
-async function registerArtifactPaths(
-   file: string,
-   states: AuditRun['states'],
-   paths: string[],
-): Promise<void> {
-   for (const state of states) {
-      // oxlint-disable-next-line no-await-in-loop -- state writes are serialized by the run file
-      await executeAuditAssessment({
-         action: 'state',
-         file,
-         state: {
-            stateId: state.stateId,
-            target: state.target,
-            label: state.label,
-            fingerprint: state.fingerprint,
-            environmentId: state.environmentId,
-            setup: state.setup,
-            artifacts: [...new Set([...state.artifacts, ...paths])],
-         },
-      });
-   }
-}
-
 async function judgePages(
    context: RunContext,
    claim: Claim,
@@ -138,9 +109,14 @@ async function judgePages(
 ): Promise<PageJudgement[]> {
    return Promise.all(
       states.map(async (state) => {
+         if (claim.procedure.inapplicability?.kind === 'media-absence') {
+            return observeStateMedia(context.browser, state);
+         }
          const { facts, axe } = await context.cache.get(state.target.value);
          return {
             url: state.target.value,
+            mediaInventory: facts.mediaInventory,
+            facts,
             judgement: judgeCriterion(claim.check.criterionId, {
                facts,
                axe,
@@ -151,46 +127,32 @@ async function judgePages(
    );
 }
 
-interface RecordInput {
+async function blockUnavailableCheck(input: {
+   file: string;
    run: AuditRun;
-   check: AssessmentCheck;
-   procedure: Claim['procedure'];
+   claim: Claim;
    folded: Judgement;
-   states: AuditRun['states'];
-   artifacts: Awaited<ReturnType<typeof writeProbeArtifacts>>;
-}
-
-function buildRecord(input: RecordInput): EvidenceRecord {
-   const { run, check, procedure, folded, states, artifacts } = input;
-   return {
-      subject: states[0]?.target.value ?? run.target.value,
-      test: {
-         kind: 'criterion',
-         criterionId: check.criterionId,
-         procedureId: check.procedureId,
-      },
-      outcome: folded.outcome,
-      mode: 'semiAutomatic',
-      recordedAt: new Date().toISOString(),
-      note: folded.rationale.slice(0, NOTE_LIMIT),
-      assertedBy: ACTOR_NAME,
-      ...(folded.finding ? { finding: folded.finding } : {}),
-      provenance: {
-         version: '1',
-         runId: run.runId,
-         attempt: check.attempts,
-         environmentId: check.environmentId,
-         states: toReferences(states),
-         actor: { kind: 'agent', name: ACTOR_NAME },
-         source: 'browser',
+}): Promise<boolean> {
+   const { file, run, claim, folded } = input;
+   const { check, procedure } = claim;
+   const environment = run.environments.find(
+      (entry) => entry.environmentId === check.environmentId,
+   );
+   const missing = getMissingCapabilities({
+      procedure,
+      capabilities: environment?.capabilities ?? [],
+      isInapplicable: folded.outcome === 'inapplicable',
+   });
+   if (missing.length > 0) {
+      await executeAuditAssessment({
+         action: 'block',
+         file,
          checkId: check.checkId,
-         wcagVersion: run.profile.wcagVersion,
-         procedureVersion: procedure.version,
-         actions: { start: 0, end: states.length, checkpoint: check.checkId },
-         artifacts,
-         rationale: folded.rationale,
-      },
-   };
+         reason: `${folded.rationale} Required capabilities are unavailable: ${missing.join(', ')}.`,
+      });
+      return true;
+   }
+   return false;
 }
 
 async function runClaim(context: RunContext, claim: Claim): Promise<EvidenceOutcome> {
@@ -199,51 +161,51 @@ async function runClaim(context: RunContext, claim: Claim): Promise<EvidenceOutc
    const states = statesForCheck(run, check);
    const pages = await judgePages(context, claim, states);
    const folded = foldJudgements(pages);
-   const artifactInput: Omit<ArtifactInput, 'states'> = {
+   if (await blockUnavailableCheck({ file: context.file, run, claim, folded })) {
+      return 'cantTell';
+   }
+   const kinds = [
+      ...new Set<AssessmentEvidenceKind>([
+         'observation',
+         'action-trace',
+         ...getRequiredEvidence(procedure, folded.outcome === 'inapplicable'),
+      ]),
+   ];
+   const artifacts = await writeProbeArtifacts({
       runFile: context.file,
       runId: run.runId,
       checkId: check.checkId,
       attempt: check.attempts,
       environmentId: check.environmentId,
-      kinds: [
-         ...new Set<AssessmentEvidenceKind>([
-            'observation',
-            'action-trace',
-            ...procedure.requiredEvidence,
-         ]),
-      ],
+      kinds,
+      states: listEvidenceStateReferences(states),
       pages,
       rationale: folded.rationale,
       captureScreenshot: (url) => captureScreenshot(context.browser, url),
-   };
-   const first = await writeProbeArtifacts({
-      ...artifactInput,
-      states: toReferences(states),
    });
-   await registerArtifactPaths(
-      context.file,
-      states,
-      first.map((artifact) => artifact.path),
-   );
-   const refreshed = statesForCheck(await readAuditRun(context.file), check);
-   const artifacts = await writeProbeArtifacts({
-      ...artifactInput,
-      states: toReferences(refreshed),
-   });
-   const { record } = await recordEvidence(
-      buildRecord({ run, check, procedure, folded, states: refreshed, artifacts }),
-      {
-         file: getAuditRunPaths(context.file).evidenceFile,
-         runFile: context.file,
-         wcagVersion: run.profile.wcagVersion,
-      },
-   );
-   await executeAuditAssessment({
-      action: 'evaluate',
-      file: context.file,
-      checkId: check.checkId,
-      outcome: folded.outcome,
-      evidenceIds: [record.evidenceId ?? ''],
+   await withRunTransaction(context.file, async (tx) => {
+      await tx.registerStateArtifacts(
+         listEvidenceStateReferences(states),
+         artifacts.map((artifact) => artifact.path),
+      );
+      const currentRun = tx.readRun();
+      const refreshed = statesForCheck(currentRun, check);
+      const { record } = await tx.recordEvidence(
+         buildRecord({
+            run: currentRun,
+            check,
+            procedure,
+            folded,
+            states: refreshed,
+            artifacts,
+         }),
+         { wcagVersion: currentRun.profile.wcagVersion },
+      );
+      await tx.evaluateCheck({
+         checkId: check.checkId,
+         outcome: folded.outcome,
+         evidenceIds: [record.evidenceId ?? ''],
+      });
    });
    return folded.outcome;
 }
@@ -273,7 +235,7 @@ async function collectIssueChecks(file: string): Promise<string[]> {
 /** Interrupted and out-of-date claims are retried only after the run preserves them. */
 async function recoverChecks(file: string): Promise<number> {
    const run = await readAuditRun(file);
-   if (run.activeCheckId) {
+   if (run.activeCheckIds.length > 0) {
       await executeAuditAssessment({ action: 'resume', file });
    }
    const retryCheckIds = await collectIssueChecks(file);
@@ -290,18 +252,20 @@ async function drainClaims(
 ): Promise<void> {
    while (options.limit === undefined || result.attempted < options.limit) {
       // oxlint-disable-next-line no-await-in-loop -- one claim is active at a time
-      const { next } = await executeAuditAssessment({
-         action: 'next',
-         file: context.file,
+      const batch = await nextAuditAssessment(context.file, {
+         excludeCapabilities: ['screen-reader', 'real-reader', 'speech'],
+         scopes: ['state', 'element', 'component'],
       });
-      if (!next) {
+      const check = batch.checks?.[0],
+         procedure = batch.procedures?.[0];
+      if (!check || !procedure) {
          return;
       }
       // oxlint-disable-next-line no-await-in-loop -- the claim must finish before the next
-      const outcome = await runClaim(context, next);
+      const outcome = await runClaim(context, { check, procedure });
       result.attempted += 1;
       result.outcomes[outcome] += 1;
-      options.onProgress?.(`${next.check.criterionId} ${outcome}`);
+      options.onProgress?.(`${check.criterionId} ${outcome}`);
    }
 }
 
@@ -313,6 +277,9 @@ async function drainWithRecovery(
    for (let round = 0; round < MAX_RECOVERY_ROUNDS; round += 1) {
       // oxlint-disable-next-line no-await-in-loop -- each round depends on the last
       await drainClaims(context, options, result);
+      if (options.limit !== undefined && result.attempted >= options.limit) {
+         return;
+      }
       // oxlint-disable-next-line no-await-in-loop -- recovery follows the drained queue
       if ((await recoverChecks(context.file)) === 0) {
          return;

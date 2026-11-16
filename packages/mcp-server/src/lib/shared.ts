@@ -95,10 +95,13 @@ function toJsonText(value: unknown): string {
    return JSON.stringify(value, undefined, JSON_INDENT);
 }
 
-export function createToolResponse<TPayload>(payload: TPayload): ToolResponse<TPayload> {
+export function createToolResponse<TPayload>(
+   payload: TPayload,
+   summary?: string,
+): ToolResponse<TPayload> {
    return {
       structuredContent: payload,
-      content: [{ type: 'text', text: toJsonText(payload) }],
+      content: [{ type: 'text', text: summary ?? toJsonText(payload) }],
    };
 }
 

@@ -27,10 +27,22 @@ export default defineConfig({
             import.meta.dirname,
             'packages/guidepup/src/index.ts',
          ),
+         '@a11ied/knowledge': resolve(
+            import.meta.dirname,
+            'packages/knowledge/src/index.ts',
+         ),
          '@a11ied/mcp-server': resolve(
             import.meta.dirname,
             'packages/mcp-server/src/index.ts',
          ),
+         '@a11ied/observe': resolve(import.meta.dirname, 'packages/observe/src/index.ts'),
+         '@a11ied/report': resolve(import.meta.dirname, 'packages/report/src/index.ts'),
+         '@a11ied/review': resolve(import.meta.dirname, 'packages/review/src/index.ts'),
+         '@a11ied/screen-reader': resolve(
+            import.meta.dirname,
+            'packages/screen-reader/src/index.ts',
+         ),
+         '@a11ied/verdict': resolve(import.meta.dirname, 'packages/verdict/src/index.ts'),
          '@a11ied/wcag-engine': resolve(
             import.meta.dirname,
             'packages/wcag-engine/src/index.ts',

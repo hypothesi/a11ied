@@ -1,9 +1,9 @@
-import { mkdir, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, unlink } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
 import type { ReportFormat, ReportModel, SiteInventory } from '@a11ied/contracts';
 
-import { getCanonicalPath } from '../files/atomic-json.js';
+import { getCanonicalPath, writeAtomic } from '../files/store.js';
 import { readInventory } from '../discovery/runtime.js';
 import {
    buildAggregateEarlReport,
@@ -170,7 +170,7 @@ async function writeJsonFile(
    value: unknown,
 ): Promise<string> {
    const path = resolve(outDir, name);
-   await writeFile(path, `${JSON.stringify(value, undefined, JSON_INDENT)}\n`, 'utf8');
+   await writeAtomic(path, `${JSON.stringify(value, undefined, JSON_INDENT)}\n`);
    return path;
 }
 
@@ -184,7 +184,7 @@ async function writeRenderedReports(input: {
       htmlPath = resolve(outDir, 'report.html'),
       outputFiles: string[] = [];
    if (formats.has('html') || formats.has('pdf')) {
-      await writeFile(htmlPath, html, 'utf8');
+      await writeAtomic(htmlPath, html);
    }
    if (formats.has('html')) {
       outputFiles.push(htmlPath);

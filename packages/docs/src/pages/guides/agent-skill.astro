@@ -81,9 +81,11 @@ error messages with the screen reader. Keep the two results separate.</code></pr
          instructions for using them.
       </p>
       <p>
-         The package installs <code>a11ied</code> for component development and
-         <code>full-site-audit</code> for complete desktop assessments. The audit skill uses
-         runtime state, evidence validation, and recovery rather than hand-editing inventories.
+         The package installs the unified <code>a11ied</code> skill, covering both quick component
+          checks and full-site WCAG 2.2 AA reviews (<code>review.start</code> -&gt;
+          <code>review.next</code> -&gt; <code>review.judge</code> -&gt; <code>review.report</code>).
+          The review workflow validates evidence for registered states. It does not automatically discover
+          or assess a full site; inventory and journey coverage require explicit assessment. <code>full-site-audit</code> is retained as a backwards-compatible forwarding alias.
       </p>
       <p>
          Follow <a href="/guides/agents">use with an AI agent</a> to connect the MCP server. Use
