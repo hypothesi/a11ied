@@ -14,7 +14,7 @@ const toc = [
 
 <DocShell
    title="Run in CI"
-   summary="A CI runner has no VoiceOver or NVDA, so every a1 command that starts a screen reader needs --sr virtual. axe, tree, and audit need Chrome, Edge, Brave, or Chromium. --fail-on sets which impact level fails the build, and --baseline lets CI ignore existing violations while still failing on new ones."
+   summary="A CI runner has no VoiceOver or NVDA, so every a1 command that starts a screen reader needs --sr virtual. axe, tree, and check need Chrome, Edge, Brave, or Chromium. --fail-on sets which impact level fails the build, and --baseline lets CI ignore existing violations while still failing on new ones."
    links={docsLinks}
    toc={toc}
 >
@@ -33,7 +33,7 @@ const toc = [
    <section class="panel" id="browser">
       <h2>Install a browser</h2>
       <p>
-         <code>axe</code>, <code>tree</code>, and <code>audit</code> load the page in a headless
+         <code>axe</code>, <code>tree</code>, and <code>check</code> load the page in a headless
          browser. A CI image with no browser installed needs one added before the job runs them.
       </p>
       <pre><code>npx playwright install chromium</code></pre>

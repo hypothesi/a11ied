@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Page } from 'playwright';
-import { createTestServer, readFixture } from '../../../cli/src/testing/fixtures.js';
-import { buildAuditReport } from '../audit/runtime.js';
+import { createTestServer } from '../../../cli/src/testing/fixtures.js';
+import { runPageCheck } from '../check/runtime.js';
 import { runAxe } from '../axe/runtime.js';
 import { getAccessibilityTree, getPageHtml, getPageTitle } from '../tree/runtime.js';
 import { hasPageSetup } from './page-setup.js';
@@ -27,10 +27,9 @@ async function assertOneReportVisit(): Promise<void> {
    server.server.on('request', recordVisit);
    try {
       const url = `${server.getBaseUrl()}/dialog.html`;
-      const report = await buildAuditReport({
+      const report = await runPageCheck({
          load: { kind: 'goto', url },
          target: { kind: 'url', value: url },
-         readHtml: async () => readFixture('dialog.html'),
          metadata: {},
          userHints: [],
          wcagVersion: '2.2',

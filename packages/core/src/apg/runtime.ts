@@ -2,8 +2,6 @@ import type {
    EvidenceMode,
    EvidenceOutcome,
    EvidenceRecord,
-   EvidenceProvenance,
-   EvidenceFinding,
    ApgExampleShowResult,
    UnifiedSearchResult,
    UnifiedSearchRow,
@@ -240,15 +238,13 @@ export async function recordApgJudgment(input: {
    pointer?: string | undefined;
    assertedBy?: string | undefined;
    subjectHash?: string | undefined;
-   provenance?: EvidenceProvenance | undefined;
-   finding?: EvidenceFinding | undefined;
    evidence?: EvidenceStoreOptions;
 }): Promise<{ record: EvidenceRecord; file: string }> {
    assertRowExists(input.exampleId, input.rowKey);
 
    const record: EvidenceRecord = {
       subject: input.subject,
-      test: { kind: 'patternRow', exampleId: input.exampleId, rowKey: input.rowKey },
+      test: { exampleId: input.exampleId, rowKey: input.rowKey },
       outcome: input.outcome,
       mode: input.mode ?? 'manual',
       recordedAt: new Date().toISOString(),
@@ -256,8 +252,6 @@ export async function recordApgJudgment(input: {
       ...(input.pointer === undefined ? {} : { pointer: input.pointer }),
       ...(input.assertedBy === undefined ? {} : { assertedBy: input.assertedBy }),
       ...(input.subjectHash === undefined ? {} : { subjectHash: input.subjectHash }),
-      ...(input.provenance === undefined ? {} : { provenance: input.provenance }),
-      ...(input.finding === undefined ? {} : { finding: input.finding }),
    };
 
    return recordEvidence(record, input.evidence ?? {});
@@ -276,19 +270,13 @@ export async function listPendingApgRows(input: {
       records
          .filter(
             (record) =>
-               record.test.kind === 'patternRow' &&
                input.subjectHash !== undefined &&
-               isPatternEvidenceComplete({
-                  record,
-                  records,
-                  subjectHash: input.subjectHash,
-               }) &&
+               isPatternEvidenceComplete({ record, subjectHash: input.subjectHash }) &&
                input.pointer !== undefined &&
                record.pointer === input.pointer &&
-               record.outcome !== 'cantTell' &&
                record.test.exampleId === input.exampleId,
          )
-         .map((record) => (record.test.kind === 'patternRow' ? record.test.rowKey : '')),
+         .map((record) => record.test.rowKey),
    );
    const pending = listApgRowKeys(input.exampleId).filter((key) => !recorded.has(key));
 

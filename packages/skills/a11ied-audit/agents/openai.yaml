@@ -1,0 +1,4 @@
+interface:
+   display_name: 'a11ied accessibility audit'
+   short_description: 'Run a tracked, parallel WCAG audit and deliver the report.'
+   default_prompt: 'Use $a11ied-audit to audit the requested scope. Keep workers running until every unit is done or blocked, review the findings, and deliver the report.'

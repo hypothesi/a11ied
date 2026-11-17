@@ -14,14 +14,13 @@ import {
    getAccessibilityTree,
    runAxe,
    serializeAriaTree,
-   buildAuditReport,
+   capturePage,
+   runPageCheck,
    type AriaTreeNode,
-   type AuditReport,
+   type PageCheck,
 } from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { registerAuditAssessmentTool } from './audit-assessment.js';
-import { registerAuditProbeTool } from './audit-probe.js';
 
 import {
    DEFAULT_WCAG_VERSION,
@@ -261,15 +260,10 @@ function registerTreeTool(server: McpServer): void {
    );
 }
 
-const auditInputSchema = pageTargetInputSchema.extend({
+const checkInputSchema = pageTargetInputSchema.extend({
    level: wcagLevelSchema
       .optional()
-      .describe('Audit WCAG through this level: A, AA, or AAA.'),
-   resultsFile: z
-      .string()
-      .min(1)
-      .optional()
-      .describe('Read evidence from this audit run instead of the global log.'),
+      .describe('Check WCAG through this level: A, AA, or AAA.'),
    storageStatePath: z.string().min(1).optional(),
    version: wcagVersionSchema.default(DEFAULT_WCAG_VERSION),
    failOn: axeFailOnImpactSchema
@@ -281,70 +275,102 @@ const auditInputSchema = pageTargetInputSchema.extend({
       .optional()
       .describe('Accepted axe findings that do not count toward the exit code.'),
 });
-type AuditInput = z.infer<typeof auditInputSchema>;
+type CheckInput = z.infer<typeof checkInputSchema>;
 
-interface AuditToolResult {
+interface CheckToolResult {
    target: PageReportTarget;
-   result: AuditReport & { verdict: AxeVerdict; nextCommands: string[] };
+   result: PageCheck & { verdict: AxeVerdict; nextCommands: string[] };
    exitCode: number;
 }
 
-async function handleAudit(input: AuditInput): Promise<AuditToolResult> {
-   const resolved = await resolvePageTarget(input, 'audit');
+async function handleCheck(input: CheckInput): Promise<CheckToolResult> {
+   const resolved = await resolvePageTarget(input, 'check');
    const load = requireLoad(resolved),
       target = describePageReportTarget(resolved);
-   const report = await buildAuditReport({
+   const check = await runPageCheck({
       load,
-      readHtml: resolved.readHtml,
       target: resolved.target,
       metadata: resolved.metadata,
       userHints: resolved.userHints,
       wcagVersion: input.version,
       level: input.level,
-      evidenceFile: input.resultsFile,
       timeoutMs: input.timeoutMs,
       storageStatePath: input.storageStatePath,
    });
    const verdict = evaluateAxeVerdict({
-      violations: report.axe.violations,
+      violations: check.axe.violations,
       ...buildAxeVerdictInput({ failOn: input.failOn, baseline: input.baseline }),
    });
    const nextCommands = buildNextCommands({
-      axe: report.axe,
-      criteria: report.criteria,
+      axe: check.axe,
+      criteria: check.criteria,
       target: target.value,
-      roles: report.tree.roles,
+      roles: check.tree.roles,
    });
 
    return {
       target,
-      result: { ...report, verdict, nextCommands },
+      result: { ...check, verdict, nextCommands },
       exitCode: exitCodeForVerdict(verdict.passed),
    };
 }
 
-function registerAuditTool(server: McpServer): void {
+function registerCheckTool(server: McpServer): void {
    server.registerTool(
-      'audit',
+      'check',
       {
-         title: 'Audit',
+         title: 'Check one page',
          description:
-            'Collect page observations for an http(s) URL, a local file path (target), or inline HTML (html). ' +
-            'Runs axe against every mapped rule, an accessibility tree summary, the relevant criteria scan, and a per-criterion rollup. ' +
+            'Scan an http(s) URL, a local file path (target), or inline HTML (html) during development. ' +
+            'Runs axe against every mapped rule and returns an accessibility tree summary, the relevant criteria, and a per-criterion rollup. ' +
             'The result carries verdict.passed and nextCommands, and the tool returns exitCode 4 (the CLI assertion exit code) ' +
             'when an axe violation at or above failOn is not covered by baseline, and 0 otherwise. ' +
-            'That exit code covers axe findings. Use audit_assessment for durable assessment procedures and evidence-backed judgments.',
-         inputSchema: auditInputSchema,
+            'A clean scan never passes a criterion. Use the audit tools for a tracked WCAG audit with judged outcomes.',
+         inputSchema: checkInputSchema,
          annotations: { ...readOnlyAnnotations, openWorldHint: true },
       },
-      async (input) => createToolResponse({ ...(await handleAudit(input)) }),
+      async (input) => createToolResponse({ ...(await handleCheck(input)) }),
+   );
+}
+
+function registerCaptureTool(server: McpServer): void {
+   server.registerTool(
+      'capture',
+      {
+         title: 'Capture a page',
+         description:
+            'Load a page, put it in a condition, and save a PNG screenshot: a viewport size, a zoom factor, WCAG text ' +
+            'spacing, after clicking an element, after pressing keys such as "Tab*4", or while hovering. Returns the ' +
+            'file path, the focused element with whether it is in view or covered and its outline, and the horizontal ' +
+            'overflow in pixels. Same as a1 capture.',
+         inputSchema: {
+            url: z.string().min(1),
+            out: z.string().min(1).describe('PNG file to write.'),
+            viewport: z.string().optional().describe('WIDTHxHEIGHT, such as 320x800.'),
+            zoom: z.number().positive().optional(),
+            textSpacing: z.boolean().optional(),
+            click: z.string().optional(),
+            press: z.array(z.string()).optional(),
+            hover: z.string().optional(),
+            selector: z.string().optional(),
+            fullPage: z.boolean().optional(),
+            waitFor: z.string().optional(),
+            storageStatePath: z.string().optional(),
+            timeoutMs: z.number().int().positive().optional(),
+         },
+         annotations: {
+            ...readOnlyAnnotations,
+            readOnlyHint: false,
+            openWorldHint: true,
+         },
+      },
+      async (input) => createToolResponse({ ...(await capturePage(input.url, input)) }),
    );
 }
 
 export function registerExecutionTools(server: McpServer): void {
-   registerAuditAssessmentTool(server);
-   registerAuditProbeTool(server);
    registerRunAxeTool(server);
    registerTreeTool(server);
-   registerAuditTool(server);
+   registerCheckTool(server);
+   registerCaptureTool(server);
 }

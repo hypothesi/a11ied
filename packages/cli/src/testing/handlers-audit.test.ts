@@ -1,224 +1,190 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import {
    type TestServerHandle,
    createTestServer,
    runCli,
    parseJsonOutput,
-   EXIT_ASSERTION,
    EXIT_SUCCESS,
-   TEST_TIMEOUT_LONG,
+   EXIT_USAGE,
+   TEST_TIMEOUT_VERY_LONG,
 } from './setup.js';
 
 const testServer: TestServerHandle = createTestServer();
+const root = mkdtempSync(join(tmpdir(), 'a11ied-audit-cli-'));
+
+interface Packet {
+   unit: { id: string; criteria: string[] };
+   knownFindings: Array<{ id: string; criterion: string; locationHere?: string }>;
+   signals: Record<string, unknown>;
+}
 
 beforeAll(async () => {
+   vi.stubEnv('A11IED_AUDITS_DIR', root);
    await testServer.start();
 });
 
 afterAll(async () => {
    await testServer.stop();
+   vi.unstubAllEnvs();
+   rmSync(root, { recursive: true, force: true });
 });
 
-interface AuditResult {
-   axe: { violations: Array<{ id: string }> };
-   tree: {
-      pageTitle: string;
-      firstHeading?: string;
-      counts: { headings: number; links: number };
-   };
-   relevance: {
-      matrix: { assessments: Record<string, { state: string; reasons: string[] }> };
-   };
-   criteria: Array<{
-      id: string;
-      axeVerdict: string;
-      relevance: string;
-      testMethod: string;
-   }>;
-   verdict: { passed: boolean };
-   nextCommands: string[];
+async function audit(...args: string[]): Promise<Record<string, unknown>> {
+   const result = await runCli(['audit', ...args, '--json']);
+   expect(result.status, result.stderr).toBe(EXIT_SUCCESS);
+   const { result: payload } = parseJsonOutput(result.stdout);
+   return payload as Record<string, unknown>;
 }
 
-async function assertAuditFailsOnViolations(baseUrl: string): Promise<void> {
-   const result = await runCli([
-      'audit',
-      `${baseUrl}/button-name-failure.html`,
-      '--json',
-   ]);
-   const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_ASSERTION);
-   expect(json.ok).toBe(true);
-   const audit = json.result as unknown as AuditResult;
-   expect(audit.axe.violations.some((violation) => violation.id === 'button-name')).toBe(
-      true,
+function writeSubmission(packet: Packet, name: string): string {
+   const file = join(root, `${name}.json`);
+   const failing = new Set(
+      packet.knownFindings
+         .filter((finding) => finding.locationHere !== undefined)
+         .map((finding) => finding.criterion),
    );
-   expect(audit.verdict.passed).toBe(false);
-   expect(audit.nextCommands).toContain('a1 wcag rule button-name');
-}
-
-async function assertAuditReportsTreeAndRelevance(baseUrl: string): Promise<void> {
-   const result = await runCli(['audit', `${baseUrl}/status-message.html`, '--json']);
-   const json = parseJsonOutput(result.stdout);
-   const audit = json.result as unknown as AuditResult;
-
-   expect(audit.tree.pageTitle).toBeTruthy();
-   expect(audit.tree.counts.headings).toBeGreaterThan(0);
-   expect(audit.relevance.matrix.assessments['4.1.3']?.state).toBe('relevant');
-
-   const rollupEntry = audit.criteria.find((entry) => entry.id === '4.1.3');
-   expect(rollupEntry?.relevance).toBe('relevant');
-}
-
-async function assertAuditFailOnRespected(baseUrl: string): Promise<void> {
-   const withoutFailOn = await runCli([
-      'audit',
-      `${baseUrl}/contrast-failure.html`,
-      '--json',
-   ]);
-   expect(withoutFailOn.status).toBe(EXIT_ASSERTION);
-
-   const withFailOn = await runCli([
-      'audit',
-      `${baseUrl}/contrast-failure.html`,
-      '--fail-on',
-      'critical',
-      '--json',
-   ]);
-   expect(withFailOn.status).toBe(EXIT_SUCCESS);
-   const json = parseJsonOutput(withFailOn.stdout);
-   expect((json.result as unknown as AuditResult).verdict.passed).toBe(true);
-}
-
-/** --verbose shows every criterion as a table, not as stored field names. */
-async function assertAuditVerboseTable(baseUrl: string): Promise<void> {
-   const verbose = await runCli([
-      'audit',
-      `${baseUrl}/button-name-failure.html`,
-      '--verbose',
-   ]);
-   expect(verbose.stdout).toContain('Every criterion');
-   expect(verbose.stdout).toMatch(
-      /Criterion\s+Level\s+Outcome\s+Scanner checks\s+Applies here/,
+   writeFileSync(
+      file,
+      JSON.stringify({
+         results: packet.unit.criteria.map((criterion) => ({
+            criterion,
+            outcome: failing.has(criterion) ? 'fail' : 'pass',
+            note: 'Checked on the fixture page.',
+         })),
+         summary: 'Fixture unit.',
+      }),
    );
-   expect(verbose.stdout).toContain('failed');
-   expect(verbose.stdout).not.toContain('axe=fail');
-   expect(verbose.stdout).not.toContain('testMethod=automated');
+   return file;
 }
 
-/**
- * The text report is what a person reads, so it states the finding and the command that
- * follows it. The raw per-criterion values belong to --json and --verbose.
- */
-async function assertAuditTextStatesFindings(baseUrl: string): Promise<void> {
-   const failing = await runCli(['audit', `${baseUrl}/button-name-failure.html`]);
-   expect(failing.stdout).toContain('1 problem to fix');
-   expect(failing.stdout).toContain('4.1.2  Name, Role, Value');
-   expect(failing.stdout).toContain('Buttons must have discernible text');
-   expect(failing.stdout).toContain('1 failing element');
-   expect(failing.stdout).toContain('a1 wcag rule button-name');
-   expect(failing.stdout).not.toContain('axe=fail');
-   expect(failing.stdout).not.toContain('relevance=not-detected');
-}
-
-async function assertAuditTextWithoutFindings(baseUrl: string): Promise<void> {
-   const passing = await runCli(['audit', `${baseUrl}/basic-page.html`]);
-
-   expect(passing.stdout).toContain('Nothing failed the automated checks');
-   expect(passing.stdout).not.toContain('Problems');
-}
-
-async function assertAuditInlineHtml(): Promise<void> {
-   const result = await runCli(['audit', '--html', '<h1>Hi</h1>', '--json']);
-   const json = parseJsonOutput(result.stdout);
-   expect(result.status).toBe(EXIT_ASSERTION);
-   expect((json.target as { kind: string }).kind).toBe('html');
-   const audit = json.result as unknown as AuditResult;
-   expect(audit.tree.firstHeading).toBe('Hi');
-}
-
-describe('cli audit command', () => {
+describe('a1 audit, start to report', () => {
    it(
-      'exits 4 and lists next commands when axe finds violations',
+      'scans a page, hands out a unit with signals, accepts it, and reports',
       async () => {
-         await assertAuditFailsOnViolations(testServer.getBaseUrl());
+         const page = `${testServer.getBaseUrl()}/button-name-failure.html`;
+         await audit('init', page, '--id', 'e2e', '--page', '--criteria', '4.1.2,2.4.7');
+         const scan = await audit('scan', '--audit', 'e2e');
+         const next = await audit(
+            'next',
+            '--audit',
+            'e2e',
+            '--worker',
+            'w1',
+            '--pass',
+            'semantics',
+         );
+         const packet = next['packet'] as Packet;
+         const submitted = await audit(
+            'submit',
+            packet.unit.id,
+            '--audit',
+            'e2e',
+            '--worker',
+            'w1',
+            '--file',
+            writeSubmission(packet, 'semantics'),
+         );
+         const report = await audit('report', '--audit', 'e2e');
+         const html =
+            (report['files'] as string[]).find((file) => file.endsWith('.html')) ?? '';
+
+         expect(scan['pages']).toEqual([
+            expect.objectContaining({ pageId: 'P1', ok: true, findings: 1 }),
+         ]);
+         expect(packet.unit.id).toBe('P1.semantics');
+         expect(packet.knownFindings[0]?.criterion).toBe('4.1.2');
+         expect(packet.signals).toHaveProperty('axe');
+         expect(submitted['units']).toMatchObject({ done: 1, total: 2 });
+         expect(report).toMatchObject({ final: false, verdict: 'fails', findings: 1 });
+         expect(readFileSync(html, 'utf8')).toContain(
+            'Buttons must have discernible text',
+         );
       },
-      TEST_TIMEOUT_LONG,
+      TEST_TIMEOUT_VERY_LONG,
    );
 
    it(
-      'reports a tree summary and the relevant criteria',
+      'rejects an incomplete submission and names every problem',
       async () => {
-         await assertAuditReportsTreeAndRelevance(testServer.getBaseUrl());
-      },
-      TEST_TIMEOUT_LONG,
-   );
+         const file = join(root, 'bad.json');
+         writeFileSync(file, JSON.stringify({ results: [] }));
+         await audit('next', '--audit', 'e2e', '--worker', 'w2');
 
-   it('scans inline --html', assertAuditInlineHtml, TEST_TIMEOUT_LONG);
+         const result = await runCli([
+            'audit',
+            'submit',
+            'P1.keyboard',
+            '--audit',
+            'e2e',
+            '--worker',
+            'w2',
+            '--file',
+            file,
+         ]);
 
-   it(
-      'states each finding and its fix command in the text report',
-      async () => {
-         await assertAuditTextStatesFindings(testServer.getBaseUrl());
+         expect(result.status).toBe(EXIT_USAGE);
+         expect(result.stderr).toContain('submission-rejected');
+         expect(result.stderr).toContain('2.4.7 has no outcome');
       },
-      TEST_TIMEOUT_LONG,
-   );
-
-   it(
-      'states when the text report has no findings',
-      async () => {
-         await assertAuditTextWithoutFindings(testServer.getBaseUrl());
-      },
-      TEST_TIMEOUT_LONG,
-   );
-
-   it(
-      'shows criterion details in the verbose text report',
-      async () => {
-         await assertAuditVerboseTable(testServer.getBaseUrl());
-      },
-      TEST_TIMEOUT_LONG,
+      TEST_TIMEOUT_VERY_LONG,
    );
 
    it(
-      '--fail-on carries through to the audit verdict',
-      async () => {
-         await assertAuditFailOnRespected(testServer.getBaseUrl());
-      },
-      TEST_TIMEOUT_LONG,
-   );
-});
-
-describe('CLI audit conformance level', () => {
-   it(
-      'applies AA to automated rules and the criterion assessment',
+      'tells a worker to stop when no unit is left for it',
       async () => {
          const result = await runCli([
             'audit',
-            `${testServer.getBaseUrl()}/basic-page.html`,
-            '--level',
-            'AA',
-            '--json',
+            'next',
+            '--audit',
+            'e2e',
+            '--worker',
+            'w3',
          ]);
-         const json = parseJsonOutput(result.stdout);
 
          expect(result.status).toBe(EXIT_SUCCESS);
-         expect(json.result).toHaveProperty(
-            'axe.selection',
-            expect.objectContaining({ kind: 'level', level: 'AA' }),
-         );
-         expect(json.result).toHaveProperty(
-            'criteria',
-            expect.arrayContaining([
-               expect.objectContaining({ level: 'A' }),
-               expect.objectContaining({ level: 'AA' }),
-            ]),
-         );
-         expect(json.result).toHaveProperty(
-            'criteria',
-            expect.not.arrayContaining([expect.objectContaining({ level: 'AAA' })]),
-         );
+         expect(result.stdout).toContain('held by other workers');
       },
-      TEST_TIMEOUT_LONG,
+      TEST_TIMEOUT_VERY_LONG,
+   );
+});
+
+describe('a1 audit with parallel workers', () => {
+   it(
+      'gives every simultaneous worker a different unit',
+      async () => {
+         const workers = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'];
+         await audit(
+            'init',
+            'https://example.test',
+            '--id',
+            'parallel',
+            '--criteria',
+            '2.4.7',
+         );
+         for (const path of workers) {
+            // oxlint-disable-next-line no-await-in-loop -- pages are numbered in the order added
+            await audit(
+               'page',
+               'add',
+               `https://example.test/${path}`,
+               '--audit',
+               'parallel',
+            );
+         }
+
+         const claims = await Promise.all(
+            workers.map((worker) =>
+               audit('next', '--audit', 'parallel', '--worker', worker),
+            ),
+         );
+         const units = claims.map((claim) => (claim['packet'] as Packet).unit.id);
+
+         expect(new Set(units).size).toBe(workers.length);
+      },
+      TEST_TIMEOUT_VERY_LONG,
    );
 });

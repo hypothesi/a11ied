@@ -1,6 +1,6 @@
 # Screen reader tool registry (sr_action): implementation plan (2026-11-09)
 
-Source recommendation: `internal-docs/audit-performance-quality-review.md` P2-15. Updated 2026-11-09: the SR CLI is retained (see `a11ied-n4-sr-cli-reorganisation-plan.md`); this plan is its registry mechanism, not a removal plan.
+Source recommendation: the November 2026 audit performance review (removed; see git history), item P2-15. Updated 2026-11-09: the SR CLI is retained (see `a11ied-n4-sr-cli-reorganisation-plan.md`); this plan is its registry mechanism, not a removal plan.
 
 ## Summary
 

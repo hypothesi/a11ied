@@ -8,6 +8,8 @@ const EXPECTED_READY_COMMANDS = [
    'sr',
    'axe',
    'tree',
+   'check',
+   'capture',
    'audit',
    'doctor',
    'setup',

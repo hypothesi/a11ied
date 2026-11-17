@@ -19,10 +19,7 @@ const PRODUCTION_ROOTS = [
    'packages/mcp-server/src',
    'packages/knowledge/src',
    'packages/observe/src',
-   'packages/verdict/src',
-   'packages/report/src',
-   'packages/screen-reader/src',
-   'packages/review/src',
+   'packages/audit/src',
 ];
 const EXCLUDED_PRODUCTION_FILES = new Set([
    'packages/core/src/files/store.ts',
@@ -118,14 +115,7 @@ describe('release consistency guardrails', () => {
          .filter((entry) => entry.isDirectory())
          .map((entry) => entry.name);
 
-      const requiredPackages = [
-         '@a11ied/knowledge',
-         '@a11ied/observe',
-         '@a11ied/verdict',
-         '@a11ied/report',
-         '@a11ied/screen-reader',
-         '@a11ied/review',
-      ];
+      const requiredPackages = ['@a11ied/knowledge', '@a11ied/observe', '@a11ied/audit'];
 
       const packageNames = new Set<string>();
       const dependencies = new Map<string, string[]>();
@@ -149,7 +139,7 @@ describe('release consistency guardrails', () => {
          }
       }
 
-      // 1. Verify all 6 decomposed packages exist
+      // 1. Verify the decomposed packages exist
       for (const required of requiredPackages) {
          expect(packageNames.has(required)).toBe(true);
       }
@@ -177,38 +167,17 @@ describe('release consistency guardrails', () => {
          checkCycle(pkg);
       }
 
-      // Verify review dependencies DAG order
-      const reviewDeps = dependencies.get('@a11ied/review') ?? [];
-      expect(reviewDeps).toContain('@a11ied/verdict');
-      expect(reviewDeps).toContain('@a11ied/observe');
-      expect(reviewDeps).toContain('@a11ied/report');
-      expect(reviewDeps).toContain('@a11ied/screen-reader');
-
-      for (const child of [
-         '@a11ied/verdict',
-         '@a11ied/observe',
-         '@a11ied/report',
-         '@a11ied/screen-reader',
-      ]) {
-         const childDeps = dependencies.get(child) ?? [];
-         expect(childDeps).not.toContain('@a11ied/review');
-      }
+      // The audit package holds no browser code, so it must not depend on core.
+      expect(dependencies.get('@a11ied/audit') ?? []).not.toContain('@a11ied/core');
 
       // 3. Scans all packages/*/src/**/*.ts files and verifies no file imports another package's internal src/ path
-      const decomposedPackageNames = new Set([
-         'knowledge',
-         'observe',
-         'verdict',
-         'report',
-         'screen-reader',
-         'review',
-      ]);
+      const decomposedPackageNames = new Set(['knowledge', 'observe', 'audit']);
       const anyPkgSrcPattern =
          /(?:from\s+['"]|import\s*\(\s*['"])@a11ied\/[a-z-]+\/src\//u;
       const decomposedSiblingPattern =
          /(?:from\s+['"]|import\s*\(\s*['"])(?:\.\.\/)+[a-z-]+\/src\//u;
       const anyToDecomposedPattern =
-         /(?:from\s+['"]|import\s*\(\s*['"])(?:\.\.\/)+(?:knowledge|observe|verdict|report|screen-reader|review)\/src\//u;
+         /(?:from\s+['"]|import\s*\(\s*['"])(?:\.\.\/)+(?:knowledge|observe|audit)\/src\//u;
 
       const deepViolations: { file: string; match: string }[] = [];
 

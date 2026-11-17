@@ -5,6 +5,7 @@ import { writeAtomic } from '../files/store.js';
 import type { PageRecord } from '@a11ied/contracts';
 import type { Browser, BrowserContext, Page, Response } from 'playwright';
 
+import { gotoSettled } from '../browser/load.js';
 import { launchAutomationBrowser } from '../browser/policy.js';
 import { buildRobotsCheck, DISCOVERY_USER_AGENT } from './robots.js';
 
@@ -178,14 +179,13 @@ async function visitPage(
 ): Promise<PageVisitResult> {
    const page = await context.newPage();
    try {
-      const response = await page.goto(url, {
-         waitUntil: 'networkidle',
-         timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+      const response = await gotoSettled(page, url, {
+         timeoutMs: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
       });
       return await readPageSignals({
          page,
          requestedUrl: url,
-         response: response ?? undefined,
+         response,
          options,
       });
    } catch (error) {

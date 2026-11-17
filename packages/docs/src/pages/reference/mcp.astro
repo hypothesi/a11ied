@@ -7,8 +7,8 @@ const toc = [
    { id: 'tools', label: 'Tools' },
    { id: 'wcag', label: 'wcag_show, wcag_criteria, wcag_rule, search' },
    { id: 'pattern', label: 'pattern_show, pattern_find, pattern_check, pattern_record' },
-   { id: 'axe', label: 'run_axe, tree, audit' },
-   { id: 'assessment', label: 'audit_assessment' },
+   { id: 'axe', label: 'run_axe, tree, check' },
+   { id: 'audit', label: 'audit tools' },
    { id: 'sr', label: 'sr_session and sr_action' },
    { id: 'sr-checks', label: 'sr_list, sr_expect, sr_transcript' },
    { id: 'resources', label: 'Resources' },
@@ -66,8 +66,8 @@ const toc = [
          The <code>wcag_*</code> tools look up the Web Content Accessibility Guidelines (WCAG),
          the standard most accessibility requirements come from, by success criterion.
          <code>run_axe</code> runs axe-core (axe), an open-source rules engine that checks a page
-         against a set of automated accessibility rules. <code>tree</code> and <code>audit</code>
-         read the page too, and the <code>sr_*</code> tools drive a screen reader session.
+         against a set of automated accessibility rules. <code>tree</code> and <code>check</code>
+         read the page too, the <code>audit_*</code> tools run a tracked audit, and the <code>sr_*</code> tools drive a screen reader session.
       </p>
       <div class="route-list">
          <div class="route-row"><code>doctor</code><span>Return the a11ied, Node, and browser details and the setup state of each screen reader. Same as <code>a1 doctor</code>.</span></div>
@@ -79,7 +79,9 @@ const toc = [
          <div class="route-row"><code>pattern_find</code><span>The examples the APG files under one ARIA role or attribute. Same as <code>a1 pattern role</code> and <code>a1 pattern attribute</code>.</span></div>
          <div class="route-row"><code>run_axe</code><span>Run axe-core against a target. Same as <code>a1 axe</code>.</span></div>
          <div class="route-row"><code>tree</code><span>Print the accessibility tree for a target. Same as <code>a1 tree</code>.</span></div>
-         <div class="route-row"><code>audit</code><span>Run axe, the tree summary, and applicability together. Same as <code>a1 audit</code>.</span></div>
+         <div class="route-row"><code>check</code><span>Run axe, the tree summary, and applicability together on one page. Same as <code>a1 check</code>.</span></div>
+         <div class="route-row"><code>capture</code><span>Screenshot a page at a viewport, zoom, text spacing, focus stop, or opened state, and report focus and overflow facts. Same as <code>a1 capture</code>.</span></div>
+         <div class="route-row"><code>audit_*</code><span>Start, run, track, and report a WCAG audit. One tool per <code>a1 audit</code> subcommand; see <a href="#audit">audit tools</a>.</span></div>
          <div class="route-row"><code>sr_session</code><span>Start, open, stop, or check the one active screen reader session. Same as <code>a1 sr start</code>, <code>open</code>, <code>stop</code>, <code>status</code>.</span></div>
          <div class="route-row"><code>sr_action</code><span>Run one action against the active session. Covers every other <code>a1 sr</code> subcommand except <code>expect</code>, <code>list</code>, <code>batch</code>, and <code>walk</code>.</span></div>
          <div class="route-row"><code>sr_list</code><span>List the named commands <code>sr_action</code>'s <code>perform</code> action runs. Same as <code>a1 sr list</code>.</span></div>
@@ -115,7 +117,7 @@ const toc = [
    <section class="panel" id="axe">
       <div class="panel-head">
          <p class="panel-kicker">Page checks</p>
-         <h2>run_axe, tree, audit</h2>
+         <h2>run_axe, tree, check</h2>
       </div>
       <div class="route-list">
          <div class="route-row"><code>target</code><span>An http(s) URL or a local file path.</span></div>
@@ -129,13 +131,9 @@ const toc = [
          <code>a1 axe</code> with no filter.
       </p>
       <p>
-         <code>audit</code> takes <code>level</code> to select cumulative A, AA, or AAA
-         coverage, and <code>resultsFile</code> to read the current run's manual evidence.
-         Use the same evidence path on <code>record_result</code> and <code>pattern_record</code> calls. Supply <code>runFile</code> and <code>provenance</code> to validate the run, scoped check, states, actor, actions, and artifacts. A note alone stays unverified. For APG rows, pass the observed <code>subjectHash</code> and widget <code>pointer</code>. Keyboard rows require typed action evidence; attribute rows require scoped observations. <code>pattern_pending</code> requires the same run, pointer, and hash to count judgments across all queued states.
-      </p>
-      <p>
-         Provenance and non-image artifact envelopes include <code>attempt</code> from the
-         claimed check's <code>attempts</code>. Evidence from another attempt is rejected.
+         <code>check</code> takes <code>level</code> to select cumulative A, AA, or AAA
+         coverage. For APG rows, <code>pattern_record</code> stores a judgment with the widget's
+         <code>selector</code>; the judgment expires when the widget's accessibility tree changes.
       </p>
       <p>
          <code>tree</code> takes <code>role</code> and <code>name</code> to keep only matching
@@ -144,7 +142,7 @@ const toc = [
          which reaches a dialog or a menu the page renders only after a click.
       </p>
       <p>
-         <code>run_axe</code> and <code>audit</code> each return a <code>verdict</code> object and an
+         <code>run_axe</code> and <code>check</code> each return a <code>verdict</code> object and an
          <code>exitCode</code>. <code>exitCode</code> is 4, the CLI's assertion exit code, when a
          violation at or above <code>failOn</code> (default <code>minor</code>) is not covered by
          <code>baseline</code>, and 0 otherwise.
@@ -155,28 +153,27 @@ const toc = [
       </p>
    </section>
 
-   <section class="panel" id="assessment">
-      <h2>audit_assessment</h2>
+   <section class="panel" id="audit">
+      <h2>audit tools</h2>
       <p>
-         This tool uses the same validated coordinator as the CLI assessment commands.
-         <code>action</code> selects <code>start</code>, <code>state</code>, <code>journey</code>,
-         <code>queue</code>, <code>next</code>, <code>status</code>, <code>resume</code>,
-         <code>evaluate</code>, <code>block</code>, or <code>finalize</code>.
-         It sends no UI input. The host agent executes procedures and supplies observed evidence and judgments.
+         These tools read and write the same audit store as the <code>a1 audit</code> commands,
+         so CLI and MCP workers can share one audit. Each takes an optional <code>audit</code>
+         id or directory. See <a href="/guides/audit">run an audit</a> for the workflow.
       </p>
       <div class="route-list">
-         <div class="route-row"><code>start</code><span>Requires a structured <code>target</code> and observed <code>environment</code>. Accepts <code>profile</code>, <code>scope</code>, <code>file</code>, <code>runId</code>, <code>inventoryPath</code>, and <code>actionPolicy</code>. Defaults are WCAG 2.2 AA and site scope for web targets or app scope for desktop app targets.</span></div>
-         <div class="route-row"><code>state, journey, queue</code><span>Require <code>file</code> and the corresponding structured object. Return the saved identity and revision separately from status pagination. Invented procedures, obsolete versions, invalid scopes, and unknown APG rows are rejected before persistence.</span></div>
-         <div class="route-row"><code>next</code><span>Requires <code>file</code>. Returns one check, procedure, environment, journey, and bounded state context. Read additional status state pages by ID when needed. Concurrent claims or changed claim generations are rejected.</span></div>
-         <div class="route-row"><code>status</code><span>Requires <code>file</code>. Accepts <code>offset</code> and <code>limit</code>; defaults are 0 and 20, with a maximum of 100. Each list returns items, total, and an optional nextOffset.</span></div>
-         <div class="route-row"><code>evaluate, block</code><span>Require <code>file</code> and <code>checkId</code>. Evaluate requires <code>outcome</code> and saved <code>evidenceIds</code>. Block requires a recovery <code>reason</code>.</span></div>
-         <div class="route-row"><code>resume, finalize</code><span>Resume keeps interrupted checks blocked; <code>retryCheckIds</code> requests explicit safe retries. Finalize rejects incomplete coverage unless <code>allowPartial</code> is true, which preserves an active run.</span></div>
+         <div class="route-row"><code>audit_init</code>, <code>audit_list</code><span>Create an audit with <code>target</code>, <code>platform</code>, <code>level</code>, <code>criteria</code>, <code>passes</code>, <code>rules</code>, and <code>access</code>, or list the audits in the workspace.</span></div>
+         <div class="route-row"><code>audit_page</code><span><code>action</code> is <code>add</code>, <code>list</code>, <code>exclude</code>, or <code>include</code>.</span></div>
+         <div class="route-row"><code>audit_discover</code>, <code>audit_scan</code><span>Add a site's pages to the audit, then run the automated checks on every web page in parallel.</span></div>
+         <div class="route-row"><code>audit_next</code><span>Requires <code>worker</code>. Claims a unit and returns its work packet as text and structured content. Optional <code>passes</code>, <code>excludePasses</code>, <code>pageId</code>, <code>unitId</code>.</span></div>
+         <div class="route-row"><code>audit_submit</code><span>Requires <code>worker</code>, <code>unit</code>, and <code>submission</code>: <code>results</code>, <code>findings</code>, <code>dismiss</code>, <code>summary</code>. A rejection lists every problem.</span></div>
+         <div class="route-row"><code>audit_show</code>, <code>audit_note</code>, <code>audit_block</code>, <code>audit_reopen</code><span>Inspect a unit, keep a claim alive, park a unit that needs a person, or return one to the queue.</span></div>
+         <div class="route-row"><code>audit_status</code><span>Progress, workers, blocked units, and recent activity. Set <code>units</code> or <code>log</code> for more detail.</span></div>
+         <div class="route-row"><code>audit_findings</code>, <code>audit_finding</code><span>List or show findings, and dismiss, merge, or rewrite one.</span></div>
+         <div class="route-row"><code>audit_signals</code>, <code>audit_report</code><span>Read the scan's facts for a page, and write the report files.</span></div>
       </div>
-      <pre data-label="MCP INPUT"><code>{`{"action":"status","file":".a11ied/fireside/run.json","offset":0,"limit":20}`}</code></pre>
+      <pre data-label="MCP INPUT"><code>{`{"worker":"w1","passes":["keyboard"]}`}</code></pre>
       <p>
-         <code>record_result</code> saves validated evidence before <code>evaluate</code>.
-         <code>report_build</code> remains separate and consumes discovery and page artifacts.
-         A lifecycle receipt alone does not establish native reader or complete installed-audit verification.
+         <code>a1 audit dashboard</code> has no tool: it serves a page until interrupted.
       </p>
    </section>
 
@@ -294,7 +291,7 @@ const toc = [
       </div>
       <div class="route-list">
          <div class="route-row"><div class="route-terms"><code>wcag_show</code>, <code>wcag_criteria</code>, <code>wcag_rule</code>, <code>search</code>, <code>pattern_show</code>, <code>pattern_find</code></div><span>Read local files. <code>wcag_rule</code> also reads the installed axe-core package for help text.</span></div>
-         <div class="route-row"><div class="route-terms"><code>run_axe</code>, <code>tree</code>, <code>audit</code></div><span>Open the target in browser automation.</span></div>
+         <div class="route-row"><div class="route-terms"><code>run_axe</code>, <code>tree</code>, <code>check</code>, <code>audit_scan</code></div><span>Open the target in browser automation.</span></div>
          <div class="route-row"><code>doctor</code><span>Reads prerequisites for the requested task. Reader checks inspect settings; recording checks run only when requested.</span></div>
       </div>
       <p>

@@ -81,14 +81,6 @@ const EXPECTED_SR_ACTIONS = [
 const MAX_DESCRIPTION_LENGTH = 800;
 
 const MAX_SKILL_DOC_LINES = 300;
-const MAX_FORWARDING_STUB_LINES = 20;
-const REVIEW_WORKFLOW_TOOLS = [
-   'review.start',
-   'review.next',
-   'review.judge',
-   'review.report',
-   'review.run',
-];
 
 describe('Screen Reader Workflow / Verb Metadata Registry', () => {
    it('defines the 6 canonical N4 task groups and headings', () => {
@@ -218,20 +210,8 @@ describe('skill and docs parity with the registry', () => {
       }
    });
 
-   it('keeps SKILL.md under 300 lines and documents the review workflow', () => {
+   it('keeps SKILL.md under 300 lines and points audits at the audit skill', () => {
       expect(skillDoc.split('\n').length).toBeLessThan(MAX_SKILL_DOC_LINES);
-      for (const tool of REVIEW_WORKFLOW_TOOLS) {
-         expect(skillDoc.includes(tool), `SKILL.md should mention "${tool}"`).toBe(true);
-      }
-   });
-
-   it('keeps full-site-audit/SKILL.md as a forwarding stub pointing at a11ied', () => {
-      const stub = readFileSync(
-         resolve(repoRoot, 'packages/skills/full-site-audit/SKILL.md'),
-         'utf8',
-      );
-
-      expect(stub.split('\n').length).toBeLessThanOrEqual(MAX_FORWARDING_STUB_LINES);
-      expect(stub).toContain('../a11ied/SKILL.md');
+      expect(skillDoc).toContain('a11ied-audit');
    });
 });

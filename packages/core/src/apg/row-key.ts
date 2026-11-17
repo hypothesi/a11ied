@@ -1,11 +1,4 @@
-import type {
-   ApgAttributeRow,
-   ApgExample,
-   ApgKeyboardRow,
-   AuditRun,
-   EvidenceProvenance,
-   EvidenceRecord,
-} from '@a11ied/contracts';
+import type { ApgAttributeRow, ApgExample, ApgKeyboardRow } from '@a11ied/contracts';
 import { getApgExample } from '@a11ied/wcag-engine';
 
 const NO_TEST_ID = 'row';
@@ -80,36 +73,4 @@ export function getApgAssessmentRow(
       }
    }
    return undefined;
-}
-
-/** Pattern judgments must include the evidence and capability required by their APG row. */
-export function validatePatternRequirements({
-   record,
-   provenance,
-   run,
-}: {
-   record: EvidenceRecord;
-   provenance: EvidenceProvenance;
-   run: AuditRun;
-}): void {
-   const environment = run.environments.find(
-      (entry) => entry.environmentId === provenance.environmentId,
-   );
-   if (record.test.kind === 'patternRow') {
-      const row = getApgAssessmentRow(record.test.exampleId, record.test.rowKey);
-      const keyboard = row?.kind === 'keyboard';
-      const missingRowEvidence =
-         !provenance.artifacts.some((artifact) => artifact.kind === 'observation') ||
-         (keyboard &&
-            !provenance.artifacts.some((artifact) => artifact.kind === 'action-trace'));
-      if (
-         !row ||
-         missingRowEvidence ||
-         (keyboard && !environment?.capabilities.includes('keyboard'))
-      ) {
-         throw new Error(
-            'The APG row requires scoped observations and its documented keyboard capability and action evidence.',
-         );
-      }
-   }
 }

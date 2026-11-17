@@ -12,8 +12,11 @@ screen readers, on both wide and narrow displays.
 
 ## Product purpose
 
-a11ied combines automated checks with observed screen-reader and browser evidence.
-Its reports explain findings and show which assessments remain unfinished.
+a11ied gives developers and agents WCAG reference data, page checks, and real
+screen-reader sessions, and runs agent-driven WCAG audits at any scope. An audit
+tracks every unit of work durably, runs workers in parallel, shows live progress,
+and produces a report that states findings, results per criterion, and what was
+not verified.
 
 ## Voice
 

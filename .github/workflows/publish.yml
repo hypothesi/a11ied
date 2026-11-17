@@ -53,10 +53,7 @@ jobs:
                 packages/guidepup
                 packages/knowledge
                 packages/observe
-                packages/verdict
-                packages/report
-                packages/screen-reader
-                packages/review
+                packages/audit
                 packages/core
                 packages/mcp-server
                 packages/cli

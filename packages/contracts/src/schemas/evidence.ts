@@ -1,7 +1,4 @@
 import { z } from 'zod';
-import { assessmentEvidenceKindSchema } from './assessment.js';
-import { wcagVersionSchema } from './core.js';
-import { driverActionRequestSchema } from './driver-actions.js';
 
 /**
  * The outcomes a person or an agent can record. `untested` is missing on purpose: not
@@ -23,83 +20,8 @@ export type EvidenceOutcome = z.infer<typeof evidenceOutcomeSchema>;
 export const evidenceModeSchema = z.enum(['manual', 'semiAutomatic']);
 export type EvidenceMode = z.infer<typeof evidenceModeSchema>;
 
-/** Notes are bounded for readable reports. Filesystem locks protect complete records. */
+/** Notes are bounded so a judgments file stays readable. */
 export const EVIDENCE_NOTE_MAX_LENGTH = 2000;
-
-export const artifactProcedureAssessmentSchema = z.object({
-   version: z.string().min(1),
-   actions: z
-      .array(
-         z.object({
-            index: z.number().int().nonnegative(),
-            outcome: evidenceOutcomeSchema,
-            observation: z.string().trim().min(1).max(EVIDENCE_NOTE_MAX_LENGTH),
-            artifactIndices: z.array(z.number().int().nonnegative()).min(1),
-         }),
-      )
-      .min(1),
-});
-export type ArtifactProcedureAssessment = z.infer<
-   typeof artifactProcedureAssessmentSchema
->;
-
-export const evidenceFindingSchema = z.object({
-   title: z.string().trim().min(1).max(EVIDENCE_NOTE_MAX_LENGTH),
-   userImpact: z.string().trim().min(1).max(EVIDENCE_NOTE_MAX_LENGTH),
-   remediation: z.string().trim().min(1).max(EVIDENCE_NOTE_MAX_LENGTH).optional(),
-   impact: z.enum(['minor', 'moderate', 'serious', 'critical']).optional(),
-});
-export type EvidenceFinding = z.infer<typeof evidenceFindingSchema>;
-
-export const evidenceStateReferenceSchema = z.object({
-   stateId: z.string().min(1),
-   revision: z.number().int().positive(),
-   fingerprint: z.string().min(1),
-   observationDigest: z
-      .string()
-      .regex(/^[a-f0-9]{64}$/u)
-      .optional(),
-});
-
-export const evidenceSourceSchema = z.enum([
-   'browser',
-   'native',
-   'real-reader',
-   'virtual',
-   'user',
-]);
-
-export const evidenceArtifactSchema = z.object({
-   kind: assessmentEvidenceKindSchema,
-   path: z.string().min(1),
-   sha256: z.string().regex(/^[a-f0-9]{64}$/u),
-   capturedAt: z.string().datetime(),
-});
-
-export const evidenceProvenanceSchema = z.object({
-   version: z.literal('1'),
-   runId: z.string().min(1),
-   checkId: z.string().min(1),
-   attempt: z.number().int().positive(),
-   wcagVersion: wcagVersionSchema,
-   procedureVersion: z.string().min(1),
-   environmentId: z.string().min(1),
-   states: z.array(evidenceStateReferenceSchema).min(1),
-   actor: z.object({ kind: z.enum(['agent', 'human']), name: z.string().trim().min(1) }),
-   source: evidenceSourceSchema,
-   sessionId: z.string().min(1).optional(),
-   actions: z
-      .object({
-         start: z.number().int().nonnegative(),
-         end: z.number().int().nonnegative(),
-         checkpoint: z.string().min(1).optional(),
-      })
-      .refine((range) => range.end >= range.start, 'Action range must be ordered.')
-      .optional(),
-   artifacts: z.array(evidenceArtifactSchema).min(1),
-   rationale: z.string().trim().min(1).max(EVIDENCE_NOTE_MAX_LENGTH),
-});
-export type EvidenceProvenance = z.infer<typeof evidenceProvenanceSchema>;
 
 export const mediaInventorySchema = z.object({
    url: z.string().min(1),
@@ -113,161 +35,42 @@ export const mediaInventorySchema = z.object({
 });
 export type MediaInventory = z.infer<typeof mediaInventorySchema>;
 
-const nonemptyObservationSchema = z.union([
-   z.string().trim().min(1),
-   z.object({ text: z.string().trim().min(1) }),
-]);
-const artifactContentSchemas = {
-   observation: nonemptyObservationSchema,
-   speech: nonemptyObservationSchema,
-   'product-context': nonemptyObservationSchema,
-   measurement: z
-      .array(
-         z.object({
-            value: z.number().finite(),
-            unit: z.string().trim().min(1),
-            method: z.string().trim().min(1),
-         }),
-      )
-      .min(1),
-   media: z.object({
-      transcript: z.string().trim().min(1),
-      source: z.string().trim().min(1),
-   }),
-   'action-trace': z
-      .array(
-         z.object({
-            index: z.number().int().nonnegative(),
-            action: z.string().trim().min(1),
-            request: driverActionRequestSchema.optional(),
-            at: z.string().datetime(),
-            stateId: z.string().min(1),
-            checkpoint: z.string().min(1).optional(),
-         }),
-      )
-      .min(1),
-   screenshot: z.never(),
-};
-
-const ARTIFACT_CONTENT_HINTS = {
-   observation: 'Expected non-empty text or { "text": "..." }.',
-   speech: 'Expected non-empty text or { "text": "..." }.',
-   'product-context': 'Expected non-empty text or { "text": "..." }.',
-   measurement:
-      'Expected an array of { "value": number, "unit": string, "method": string }.',
-   media: 'Expected { "transcript": string, "source": string }.',
-   'action-trace':
-      'Expected an array of { "index", "action", "at", "stateId" } receipts, with an optional "checkpoint".',
-   screenshot: 'Screenshots are raw PNG files, not JSON envelopes.',
-} as const;
-
-/** Non-image artifacts identify the observations they contain, independently of notes. */
-export const assessmentArtifactEnvelopeSchema = z
-   .object({
-      version: z.literal('1'),
-      runId: z.string().min(1),
-      attempt: z.number().int().positive(),
-      environmentId: z.string().min(1),
-      states: z.array(evidenceStateReferenceSchema).min(1),
-      source: evidenceSourceSchema,
-      sessionId: z.string().min(1).optional(),
-      capturedAt: z.string().datetime(),
-      kind: assessmentEvidenceKindSchema,
-      content: z
-         .unknown()
-         .refine(
-            (value) => value !== undefined && value !== null,
-            'Artifact content is required.',
-         ),
-   })
-   .superRefine((artifact, context) => {
-      const content = artifactContentSchemas[artifact.kind].safeParse(artifact.content);
-      if (!content.success) {
-         context.addIssue({
-            code: 'custom',
-            path: ['content'],
-            message: `The ${artifact.kind} artifact has no usable evidence content. ${ARTIFACT_CONTENT_HINTS[artifact.kind]}`,
-         });
-      }
-   });
-
-export const evidenceVerificationSchema = z.object({
-   status: z.enum(['verified', 'unverified', 'stale']),
-   reasons: z.array(z.string().min(1)),
+/** The row of an ARIA Authoring Practices Guide example a judgment is about. */
+export const evidenceTestSchema = z.object({
+   exampleId: z.string().min(1),
+   rowKey: z.string().min(1),
 });
-
-/**
- * What a recorded result is about.
- *
- * A `criterion` result names the WCAG criterion and the procedure performed, drawn from
- * the `procedureIds` in the WCAG strategy artifact, because a criterion can need more
- * than one. A `patternRow` result names one row of one ARIA Authoring Practices Guide
- * example, so a person or an agent can record that a part of a pattern does not apply to
- * the component under test and have that judgment survive the next run.
- */
-export const evidenceTestSchema = z.discriminatedUnion('kind', [
-   z.object({
-      kind: z.literal('criterion'),
-      criterionId: z.string().min(1),
-      procedureId: z.string().min(1),
-   }),
-   z.object({
-      kind: z.literal('patternRow'),
-      exampleId: z.string().min(1),
-      rowKey: z.string().min(1),
-   }),
-]);
 export type EvidenceTest = z.infer<typeof evidenceTestSchema>;
 
 /**
- * One recorded result for a check a11ied cannot automate.
+ * One judgment recorded with `a1 pattern record`: whether a row of an APG example holds
+ * for a widget, or does not apply to it.
  *
  * `subject` is the canonical target string, so the same page recorded from different
  * spellings of its URL resolves to one row.
  */
 export const evidenceRecordSchema = z.object({
-   assessment: artifactProcedureAssessmentSchema.optional(),
-   finding: evidenceFindingSchema.optional(),
-   evidenceId: z.string().min(1).optional(),
    subject: z.string().min(1),
    test: evidenceTestSchema,
    outcome: evidenceOutcomeSchema,
    mode: evidenceModeSchema,
+   /** The selector of the widget the judgment is about. */
    pointer: z.string().min(1).optional(),
    note: z.string().max(EVIDENCE_NOTE_MAX_LENGTH).optional(),
    /** Who or what recorded it, such as an agent name or a person's initials. */
    assertedBy: z.string().min(1).optional(),
    recordedAt: z.string().min(1),
    /**
-    * A hash of the page's accessibility tree when the check was performed. The tree is
-    * used rather than the raw markup because a CSRF token or a timestamp changes the
-    * markup on every load, which would report every page as changed.
+    * A hash of the page's accessibility tree when the judgment was made. The tree is used
+    * rather than the raw markup because a CSRF token or a timestamp changes the markup on
+    * every load, which would report every page as changed.
     */
    subjectHash: z.string().min(1).optional(),
-   provenance: evidenceProvenanceSchema.optional(),
-   /** Derived again when consumed; an imported verification label is never trusted. */
-   verification: evidenceVerificationSchema.optional(),
 });
 export type EvidenceRecord = z.infer<typeof evidenceRecordSchema>;
 
-/**
- * The line shape written before a result could be about anything but a criterion. The
- * store reads it and lifts the two fields into `test`, so an existing results file keeps
- * working.
- */
-export const legacyEvidenceLineSchema = z
-   .object({
-      criterionId: z.string().min(1),
-      procedureId: z.string().min(1),
-   })
-   .passthrough();
-
-/** One criterion that applies to a target and has no recorded result yet. */
-export const pendingCriterionSchema = z.object({
-   criterionId: z.string().min(1),
-   title: z.string().min(1),
-   level: z.string().min(1),
-   evidenceMode: z.string().min(1),
-   procedureIds: z.array(z.string()),
+/** What `a1 pattern record` returns: the stored judgment and the file it was written to. */
+export const evidenceRecordResultSchema = z.object({
+   record: evidenceRecordSchema,
+   file: z.string().min(1),
 });
-export type PendingCriterion = z.infer<typeof pendingCriterionSchema>;

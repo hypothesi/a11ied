@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { auditProfileSchema } from './audit-run.js';
+import { wcagLevelSchema, wcagVersionSchema } from './core.js';
+
+const auditProfileSchema = z.object({
+   wcagVersion: wcagVersionSchema,
+   level: wcagLevelSchema,
+});
 
 const HTTP_MAX_STATUS = 599;
 const HTTP_MIN_STATUS = 100;

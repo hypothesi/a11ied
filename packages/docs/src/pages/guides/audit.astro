@@ -1,0 +1,170 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+
+const toc = [
+   { id: 'how', label: 'How an audit works' },
+   { id: 'start', label: 'Start one' },
+   { id: 'scope', label: 'Choose the scope' },
+   { id: 'split', label: 'Automated and judged' },
+   { id: 'workers', label: 'Run the workers' },
+   { id: 'track', label: 'Track progress' },
+   { id: 'stuck', label: 'When something is stuck' },
+   { id: 'report', label: 'The report' },
+   { id: 'mobile', label: 'Mobile apps' },
+];
+---
+
+<DocShell
+   title="Run an audit"
+   summary="a1 audit runs a WCAG audit of a website, a page, a feature, or a mobile app with AI agents doing the testing. It splits the work into small units that agents test in parallel, stores every result as it arrives, shows progress while it runs, and writes a report you can hand to a client."
+   links={docsLinks}
+   toc={toc}
+>
+   <section class="panel" id="how">
+      <h2>How an audit works</h2>
+      <div class="route-list">
+         <div class="route-row"><strong>Page</strong><span>One thing to test: a page, a screen, a state of one such as an open dialog, or a flow such as checkout.</span></div>
+         <div class="route-row"><strong>Test pass</strong><span>The criteria tested with one kind of interaction: <code>semantics</code>, <code>keyboard</code>, <code>visual</code>, <code>media</code>, <code>forms</code>, <code>pointer</code>, and <code>consistency</code> across pages. A page is loaded and exercised once per pass, not once per criterion.</span></div>
+         <div class="route-row"><strong>Unit</strong><span>One pass on one page, such as <code>P3.keyboard</code>. A worker claims a unit, tests it, and submits an outcome for each of its criteria.</span></div>
+         <div class="route-row"><strong>Finding</strong><span>One defect. The same defect on ten pages is one finding with ten occurrences.</span></div>
+      </div>
+      <p>
+         Everything lives in <code>.a11ied/audits/&lt;id&gt;/</code>: a SQLite database, an
+         <code>evidence/</code> folder of screenshots, and the report. An audit survives a
+         crashed agent, a closed terminal, or a restart, and any number of workers can use it
+         at once.
+      </p>
+   </section>
+
+   <section class="panel" id="start">
+      <h2>Start one</h2>
+      <p>
+         The quickest way is to ask an agent that has the
+         <a href="/guides/agent-skill"><code>a11ied-audit</code> skill</a>:
+      </p>
+      <pre data-label="AI AGENT PROMPT"><code>Audit https://example.com against WCAG 2.2 AA with a11ied.
+Do not submit the contact form. Use four workers.</code></pre>
+      <p>The agent runs these commands. You can run them yourself:</p>
+      <pre><code>a1 audit init https://example.com --rule "Do not submit the contact form"
+a1 audit discover          # add the site's pages to the audit
+a1 audit scan              # automated checks on every page, in parallel
+a1 audit status            # 0 of N units done</code></pre>
+      <p>
+         <code>--rule</code> states something workers must not do. Every work packet repeats the
+         rules. <code>--access</code> says how to reach the target, such as where the test
+         account is.
+      </p>
+   </section>
+
+   <section class="panel" id="scope">
+      <h2>Choose the scope</h2>
+      <div class="route-list">
+         <div class="route-row"><strong>A whole site</strong><span><code>a1 audit init &lt;url&gt;</code>, then <code>a1 audit discover</code>. Remove what is out of scope with <code>a1 audit page exclude &lt;id&gt; --reason "..."</code>. On a large site keep one page per template plus the pages in key tasks.</span></div>
+         <div class="route-row"><strong>One page</strong><span><code>a1 audit init &lt;url&gt; --page</code></span></div>
+         <div class="route-row"><strong>A state or a flow</strong><span><code>a1 audit page add &lt;url&gt; --kind state --name "Menu open" --notes "Activate the Menu button"</code>. Use <code>--kind flow</code> with the steps in <code>--notes</code> for a process that spans pages.</span></div>
+         <div class="route-row"><strong>Chosen criteria</strong><span><code>--criteria 1.4.3,2.4.7</code> audits only those. Only the passes that own them get units.</span></div>
+         <div class="route-row"><strong>One kind of testing</strong><span><code>--passes keyboard,forms</code></span></div>
+         <div class="route-row"><strong>Another level or version</strong><span><code>--level A</code>, <code>--level AAA</code>, <code>--wcag 2.1</code>. The default is WCAG 2.2 Level AA: 55 criteria.</span></div>
+      </div>
+      <p>
+         The criteria that compare pages, such as 3.2.3 Consistent Navigation, need at least two
+         pages. In a one-page audit the report lists them as not evaluated.
+      </p>
+   </section>
+
+   <section class="panel" id="split">
+      <h2>What is automated and what is judged</h2>
+      <div class="route-list">
+         <div class="route-row"><strong>Automated</strong><span>Finding pages. axe-core failures, which become findings directly. Measurements stored as signals: tab order, focus styles, overflow at 320 pixels and 200 percent zoom, target sizes, media and form inventories. Claims, recovery, progress, and assembling the report.</span></div>
+         <div class="route-row"><strong>Judged by a worker</strong><span>Every pass and every not-applicable. Whether an automated finding is real on this page. Everything a scanner cannot see: whether alt text describes the image, whether focus order makes sense, whether an error message helps. Severity, impact, and the fix.</span></div>
+      </div>
+      <p>
+         The scan never passes a criterion. Signals appear in a worker's packet as facts to
+         check, which saves the worker from collecting them, and nothing else.
+      </p>
+   </section>
+
+   <section class="panel" id="workers">
+      <h2>Run the workers</h2>
+      <p>
+         A worker is an agent in a loop: claim a unit, test it, submit, repeat. Start several
+         with different names and they take different units.
+      </p>
+      <pre><code>a1 audit next --worker w1
+a1 audit submit P1.keyboard --worker w1 --file result.json</code></pre>
+      <p>
+         <code>next</code> prints the work packet: the page, the rules, the procedure, each
+         criterion with what it applies to and when it fails, the scan's signals, findings
+         already recorded, and a submission template. <code>submit</code> takes one JSON
+         document and accepts or rejects it whole. A rejection lists every problem, such as a
+         criterion with no outcome or a failure with no finding.
+      </p>
+      <p>
+         A native screen reader and a physical device can serve one worker at a time. Give one
+         worker <code>--pass semantics</code> and the rest <code>--not-pass semantics</code>
+         when the audit uses VoiceOver or NVDA. The simulated reader runs in parallel.
+      </p>
+   </section>
+
+   <section class="panel" id="track">
+      <h2>Track progress</h2>
+      <pre><code>a1 audit status       # summary: units, workers, blocks, findings, recent activity
+a1 audit status --units
+a1 audit log --unit P3.forms
+a1 audit dashboard    # live page on localhost, refreshes every five seconds
+a1 audit findings</code></pre>
+      <p>
+         The dashboard shows a grid of pages by test pass, which worker holds what, how long
+         each has been working, what is blocked and why, the findings so far, and the activity
+         log. It links to a live interim report.
+      </p>
+   </section>
+
+   <section class="panel" id="stuck">
+      <h2>When something is stuck</h2>
+      <div class="route-list">
+         <div class="route-row"><strong>A worker died</strong><span>Nothing is lost. Its claim expires after 20 minutes without activity and the unit returns to the queue. A worker that asks for work under the same name gets its unit back.</span></div>
+         <div class="route-row"><strong>A unit is blocked</strong><span>A worker blocks a unit it cannot test at all, with the reason. Other units carry on. Fix the cause, then <code>a1 audit reopen &lt;unit&gt; --reason "..."</code>.</span></div>
+         <div class="route-row"><strong>One check cannot be done</strong><span>The worker submits the unit and records that criterion as <code>cannot-tell</code> with the reason, for example a form it is not allowed to submit. The report lists it under Not verified.</span></div>
+         <div class="route-row"><strong>A unit keeps failing</strong><span>After three abandoned attempts the unit blocks itself. Read <code>a1 audit log --unit &lt;id&gt;</code> to see why.</span></div>
+         <div class="route-row"><strong>A result looks wrong</strong><span><code>a1 audit reopen &lt;unit&gt;</code> queues it again. <code>a1 audit finding dismiss</code>, <code>merge</code>, and <code>update</code> correct findings.</span></div>
+      </div>
+   </section>
+
+   <section class="panel" id="report">
+      <h2>The report</h2>
+      <pre><code>a1 audit report</code></pre>
+      <p>
+         It writes <code>audit-report.html</code>, <code>audit-report.md</code>, and
+         <code>audit-report.json</code> to the audit's <code>report/</code> folder. The HTML
+         file is self-contained with screenshots embedded; print it from a browser for PDF.
+      </p>
+      <div class="route-list">
+         <div class="route-row"><strong>Summary</strong><span>One statement of the result, findings by severity, and criteria by outcome.</span></div>
+         <div class="route-row"><strong>What to fix first</strong><span>Findings ordered by severity, then by how many pages they affect.</span></div>
+         <div class="route-row"><strong>Findings</strong><span>Each with the problem, who it affects, how to fix it, where it occurs, and evidence.</span></div>
+         <div class="route-row"><strong>Results by success criterion</strong><span>Fails, Passes, Not applicable, Not verified, or Not evaluated for every criterion in scope.</span></div>
+         <div class="route-row"><strong>Not verified</strong><span>What could not be established, and why.</span></div>
+         <div class="route-row"><strong>Scope and method</strong><span>The pages audited, what was excluded, how the testing was done, and each decision's note for readers who want to check the work.</span></div>
+      </div>
+      <p>
+         A report built before every unit is done is marked interim and says what is
+         unfinished. A report never states conformance while a criterion is failing, unfinished,
+         or not verified.
+      </p>
+   </section>
+
+   <section class="panel" id="mobile">
+      <h2>Mobile apps</h2>
+      <pre><code>a1 audit init "Acme iOS 4.2" --platform ios --access "Simulator: iPhone 16"
+a1 audit page add "Tab bar > Search" --name "Search"</code></pre>
+      <p>
+         Tracking, parallel workers, findings, and the report work the same way. There is no
+         automated scan, and a1 does not drive devices: workers operate the app with the
+         platform's tools, such as <code>xcrun simctl</code>, <code>adb</code>, or an automation
+         server the agent already has. Give each worker its own simulator or device. Work
+         packets use the mobile wording of each procedure.
+      </p>
+   </section>
+</DocShell>

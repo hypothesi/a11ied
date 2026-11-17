@@ -57,11 +57,13 @@ export const SMALL_TARGETS_SCRIPT = [
 /** Describes the element that currently holds keyboard focus. */
 export const TAB_STOP_SCRIPT = [
    '(() => {',
-   '         const e = document.activeElement;',
+   '         let e = document.activeElement;',
+   '         while (e && e.shadowRoot && e.shadowRoot.activeElement) { e = e.shadowRoot.activeElement; }',
    '         if (!e || e === document.body) { return null; }',
    '         const cs = getComputedStyle(e), b = e.getBoundingClientRect();',
    '         const cx = Math.min(Math.max(b.left + b.width / 2, 0), innerWidth - 1), cy = Math.min(Math.max(b.top + b.height / 2, 0), innerHeight - 1);',
-   '         const top = document.elementFromPoint(cx, cy);',
+   '         let top = document.elementFromPoint(cx, cy);',
+   '         for (let inner = top && top.shadowRoot && top.shadowRoot.elementFromPoint(cx, cy); inner && inner !== top; inner = top.shadowRoot && top.shadowRoot.elementFromPoint(cx, cy)) { top = inner; }',
    "         const parentIndicator = (() => { for (let n = e.parentElement; n && n !== document.body; n = n.parentElement) { const c = getComputedStyle(n); if ((c.outlineStyle !== 'none' && parseFloat(c.outlineWidth) > 0) || c.boxShadow !== 'none') { return true; } } return false; })();",
    "         return { tag: e.tagName, label: (e.getAttribute('aria-label') || e.textContent || '').trim().slice(0, 40), outline: (cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0) || parentIndicator, shadow: cs.boxShadow !== 'none' || parentIndicator, bg: cs.backgroundColor, color: cs.color, deco: cs.textDecorationLine, border: cs.borderTopColor + cs.borderTopWidth, top: Math.round(b.top + scrollY), left: Math.round(b.left), inView: b.bottom > 0 && b.top < innerHeight, obscured: !!top && top !== e && !e.contains(top) && !top.contains(e), hiddenFocus: (() => { for (let n = e; n && n !== document.body; n = n.parentElement) { const c = getComputedStyle(n); if (n.clientHeight === 0 && c.overflow === 'hidden' && n.scrollHeight > 0) { return true; } } return false; })(), id: e.tagName + ':' + (e.id || (e.textContent || '').trim().slice(0, 20)) };",
    '',

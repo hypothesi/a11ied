@@ -20,8 +20,14 @@ const STOP_KEY_LENGTH = 20;
 const TRAILING_NULL_STOPS = 3;
 
 /** Opens an isolated page whose media and motion hooks load before the site's scripts. */
-export async function openProbePage(browser: Browser): Promise<Page> {
-   const context = await browser.newContext({ viewport: DESKTOP });
+export async function openProbePage(
+   browser: Browser,
+   options: { storageStatePath?: string | undefined } = {},
+): Promise<Page> {
+   const context = await browser.newContext({
+      viewport: DESKTOP,
+      ...(options.storageStatePath ? { storageState: options.storageStatePath } : {}),
+   });
    await context.addInitScript(INSTRUMENT_SCRIPT);
    return context.newPage();
 }
@@ -200,10 +206,4 @@ export async function collectLoadedPageFacts(
       skipLink,
       textSpacingClipped,
    };
-}
-
-/** Collects the observable facts for one page in a fresh, instrumented browser page. */
-export async function collectPageFacts(page: Page, url: string): Promise<PageFacts> {
-   await page.goto(url, { waitUntil: 'networkidle' });
-   return collectLoadedPageFacts(page, url);
 }

@@ -70,100 +70,50 @@ a1 axe http://localhost:3000/checkout
 a1 axe src/components/Dialog.html
 a1 axe --html '<button></button>'
 a1 tree http://localhost:3000/checkout --role button
-a1 audit http://localhost:3000/checkout
+a1 capture http://localhost:3000/checkout --viewport 320x800 --out reflow.png
+a1 check http://localhost:3000/checkout
 ```
 
 `<target>` is an http(s) URL, a local file path, `-` for HTML on stdin, or `--html
-'<markup>'`, on `axe`, `tree`, and `audit` alike.
+'<markup>'`, on `axe`, `tree`, and `check` alike.
 
 | Command          | MCP tool  | Arguments                                                                                                                                                                  |
 | ---------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `axe <target>`   | `run_axe` | `target`/`html`, `criterion`/`level`/`ruleIds` (at most one), `selector`, `exclude`, `waitFor`, `click`, `viewport`, `headers`, `cookies`, `failOn`, `baseline`, `version` |
 | `tree <target>`  | `tree`    | `target`/`html`, `role`, `name`, `click`                                                                                                                                   |
-| `audit <target>` | `audit`   | `target`/`html`, `failOn`, `baseline`, `version`                                                                                                                           |
+| `check <target>` | `check`   | `target`/`html`, `failOn`, `baseline`, `version`                                                                                                                           |
 
-`axe` and `audit` exit 4 on a violation at or above `--fail-on` (default `minor`) not
+`axe` and `check` exit 4 on a violation at or above `--fail-on` (default `minor`) not
 covered by `--baseline`. The MCP tools return the matching `verdict` and `exitCode`.
 
-## Saved reports
+## Audits
+
+A clean scan leaves criterion requirements unresolved. For judged outcomes, tracked
+progress, and a report, run an audit. The `a11ied-audit` skill describes the workflow.
 
 ```bash
-a1 report build \
-   --inventory .a11ied/audits/createdbyfireside-com/inventory.json \
-   --results-dir .a11ied/audits/createdbyfireside-com/pages \
-   --out .a11ied/audits/createdbyfireside-com/report --draft
+a1 audit init https://createdbyfireside.com --rule "Do not submit the contact form"
+a1 audit discover
+a1 audit scan
+a1 audit next --worker w1
+a1 audit submit P1.keyboard --worker w1 --file result.json
+a1 audit status
+a1 audit report
 ```
 
-Report builds stage and verify the selected files before replacing the published
-directory. `report.manifest.json` records file hashes, formats, and assessment
-completion separately. After interruption, repeat the command to recover the
-publication. Use a dedicated output directory outside audit inputs and the
-current working directory. The same behavior applies to MCP `report_build`.
+| Command                                     | MCP tool                                    |
+| ------------------------------------------- | ------------------------------------------- |
+| `audit init`, `audit list`                  | `audit_init`, `audit_list`                  |
+| `audit page add/list/exclude/include`       | `audit_page`                                |
+| `audit discover`, `audit scan`              | `audit_discover`, `audit_scan`              |
+| `audit next`, `audit show`, `audit submit`  | `audit_next`, `audit_show`, `audit_submit`  |
+| `audit note`, `audit block`, `audit reopen` | `audit_note`, `audit_block`, `audit_reopen` |
+| `audit status`, `audit log`                 | `audit_status`                              |
+| `audit findings`, `audit finding show`      | `audit_findings`                            |
+| `audit finding dismiss/merge/update`        | `audit_finding`                             |
+| `audit signals`, `audit report`             | `audit_signals`, `audit_report`             |
 
-## Assessment coordinator
-
-A clean axe scan leaves criterion requirements unresolved. For durable assessment,
-use the shared coordinator through CLI or MCP `audit_assessment`:
-
-```bash
-a1 audit run https://createdbyfireside.com --environment environment.json \
-   --inventory .a11ied/fireside/inventory.json --json
-a1 audit state <run-file> --input <observed-state-file> --json
-a1 audit journey <run-file> --input <observed-journey-file> --json
-a1 audit probe <run-file>
-a1 audit next <run-file> --count 5 --scope site,journey --json
-a1 audit status <run-file> --offset 0 --limit 20 --json
-a1 audit record <target> --run <run-file> --results <evidence-file> \
-   --wcag 2.2 --criterion <criterion-id> --procedure <procedure-id> \
-   --outcome <outcome> --provenance <provenance-file> --mode semiAutomatic --json
-a1 audit evaluate <run-file> --check <check-id> --outcome <outcome> \
-   --evidence <saved-evidence-id> --json
-a1 audit block <run-file> --check <check-id> --reason '<specific blocker>'
-a1 audit resume <run-file> --retry <check-id> --json
-a1 audit finalize <run-file> --json
-```
-
-Use the paths returned by startup. With an inventory, startup links its run ID
-without JSON edits. Use `next --count <n>` to claim a compatible batch; execute the returned
-procedures before recording. Omit `--scope` for all procedures or select the needed
-procedure scopes; the filter does not remove other obligations. Read paginated status through `nextOffset` when a complete
-inventory is needed; avoid repeatedly dumping unchanged status.
-
-MCP `audit_assessment` uses the corresponding `action` and `file`. Start supplies
-structured `target`, `environment`, optional `inventoryPath`, profile, and policy.
-State, journey, and queue actions supply their structured input. Evaluate supplies
-`checkId`, `outcome`, and `evidenceIds`. Resume accepts explicit `retryCheckIds`.
-Finalize accepts `allowPartial`; unresolved work keeps the run active.
-
-MCP `record_result` accepts `runFile`, explicit `resultsFile`, `criterionId`,
-`procedureId`, `outcome`, `mode`, `provenance`, and optional `finding`. `--run` alone
-does not select the coordinator's evidence log. Use its returned `evidenceFile`.
-
-For artifact identity, freshness, envelopes, and recovery details, read
-[run state and decisions](../../full-site-audit/resources/run-state-and-decisions.md).
-`audit pending` is a low-level criterion listing, not the coordinator's completion
-signal. `cantTell` remains unresolved. Do not drain that listing with guessed notes.
-
-Use `--finding finding.json` on `audit record` or `pattern record` to include a
-finding title, user impact, and remediation in the report. The MCP recording tools
-accept the same object as `finding`:
-
-```json
-{
-   "title": "Focus remains trapped in the navigation menu",
-   "userImpact": "Keyboard users cannot reach the page content after opening the menu.",
-   "remediation": "Let Tab leave the menu and restore focus to the trigger when it closes.",
-   "impact": "serious"
-}
-```
-
-`remediation` and `impact` are optional. Omitted severity is reported as not assessed.
-Record only details supported by the assessment. Completion still requires current run,
-state, action, and artifact provenance and an evaluated check that references the evidence.
-
-Record only actual observations. Structural evidence validation does not establish
-truth or correct WCAG judgment. A passing scan or an emptied queue cannot establish
-complete assessment coverage.
+`audit dashboard` serves a live progress page and has no MCP tool.
 
 ## Screen reader session
 

@@ -77,8 +77,6 @@ export {
    type GuidepupSetupStep,
    type GuidepupSetupStepResult,
 } from './doctor/setup.js';
-
-// Target resolution for page commands (axe, tree, audit).
 export {
    DEFAULT_TARGET_TIMEOUT_MS,
    describeResolvedTarget,
@@ -92,24 +90,13 @@ export {
 } from './axe/verdict.js';
 export { buildAxeSarifLog, type AxeSarifLog } from './axe/sarif.js';
 export {
-   appendEvidence,
    recordEvidence,
    clearEvidence,
    readEvidence,
    readEvidenceForSubject,
    type EvidenceStoreOptions,
 } from './evidence/store.js';
-export {
-   listPendingCriteria,
-   listRecordedCriterionIds,
-   type ListPendingCriteriaInput,
-} from './evidence/pending.js';
 export { EVIDENCE_FILE_ENV_VAR, resolveEvidenceFile } from './evidence/paths.js';
-export {
-   isVerifiedEvidence,
-   resolveEvidenceProcedure,
-   validateEvidenceRecord,
-} from './evidence/validation.js';
 export {
    buildSubjectKey,
    hashAccessibilityTree,
@@ -121,7 +108,7 @@ export {
    listAxeEarlAssertions,
    type AxeEarlReportOptions,
 } from './axe/earl.js';
-export { buildAuditEarlReport, type AuditEarlReportOptions } from './audit/earl.js';
+export { buildCheckEarlReport, type CheckEarlReportOptions } from './check/earl.js';
 export type { PageCookie } from './browser/page-setup.js';
 export {
    getAccessibilityTree,
@@ -154,62 +141,20 @@ export {
    listPendingApgRows,
    recordApgJudgment,
 } from './apg/runtime.js';
-export {
-   buildAuditReport,
-   type AuditReport,
-   type BuildAuditReportInput,
-} from './audit/runtime.js';
+export { runPageCheck, type PageCheck, type RunPageCheckInput } from './check/runtime.js';
 export {
    withLoadedPage,
    withInteractiveBrowserPage,
    type WithBrowserPageOptions,
 } from './browser/shared-browser.js';
-export { buildNextCommands } from './audit/next-commands.js';
+export { buildNextCommands } from './check/next-commands.js';
 export {
    getCriterionOutcome,
-   type AuditCriterionRollup,
-} from './audit/criteria-rollup.js';
-export type { AuditTreeSummary } from './audit/tree-summary.js';
-export {
-   createAuditRun,
-   readAuditRun,
-   updateAuditRun,
-   getAssessmentId,
-   getAuditRunPaths,
-   type CreateAuditRunOptions,
-} from './audit/run-store.js';
-export {
-   registerAuditState,
-   registerAuditJourney,
-   queueAssessmentCheck,
-   transitionAssessmentCheck,
-} from './audit/run-state.js';
-
+   type CheckCriterion,
+   type CheckOutcome,
+} from './check/criteria-rollup.js';
+export type { CheckTreeSummary } from './check/tree-summary.js';
 export { listCliCommands } from './command-catalog.js';
-export { migrateInventoryAuditRun } from './audit/run-inventory.js';
-export {
-   startAuditAssessment,
-   nextAuditAssessment,
-   getAuditAssessmentStatus,
-   getAuditAssessmentSnapshot,
-   withAuditAssessmentSnapshot,
-   resumeAuditAssessment,
-   finalizeAuditAssessment,
-} from './audit/run-lifecycle.js';
-export type {
-   AuditAssessmentStatus,
-   AuditAssessmentSnapshot,
-} from './audit/run-status.js';
-export {
-   executeAuditAssessment,
-   type AuditAssessmentResponse,
-} from './audit/assessment-command.js';
-export {
-   runAuditProbes,
-   type ProbeRunOptions,
-   type ProbeRunResult,
-} from './audit/probe/probe-run.js';
-
 export {
    showWcagAxeRule,
    showWcagTestMethodSummary,
@@ -348,87 +293,27 @@ export {
 export { discoverSitemapUrls, parseSitemap } from './discovery/sitemap.js';
 export { crawlSameOrigin, normalizeUrl } from './discovery/crawl.js';
 export {
-   buildAggregateEarlReport,
-   buildReportModel,
-   loadPageAuditReports,
-   type LoadedPageAudit,
-} from './report/aggregate.js';
-export { renderHtmlReport } from './report/render-html.js';
-export { renderPdfReport } from './report/render-pdf.js';
-export { buildReportBundle, type BuildReportBundleOptions } from './report/runtime.js';
-export {
    appendLine,
    withDirectoryCommit,
    withLockedFile,
    withPathLock,
    writeAtomic,
 } from './files/store.js';
-export {
-   computeObservationFingerprint,
-   getObservationBundlePath,
-   readCachedObservationBundle,
-   writeCachedObservationBundle,
-} from './observe/cache.js';
-export { observeState } from './observe/collector.js';
-export {
-   DEFAULT_OBSERVATION_CONCURRENCY,
-   mapWithConcurrency,
-   observeTargetsInParallel,
-   type ObserveTargetInput,
-   type ParallelObserveOptions,
-} from './observe/parallel.js';
-export {
-   computePageVerdicts,
-   computeVerdictId,
-   getVerdictStorePath,
-   readVerdicts,
-   recordVerdict,
-} from './verdict/store.js';
-export { scoreObservationBundle, WCAG_22_AA_CRITERIA } from './verdict/engine.js';
-export {
-   createBundleRef,
-   createScreenshotBundleRef,
-   recordBundleVerdicts,
-} from './verdict/bundle-refs.js';
-export {
-   createExclusionVerdict,
-   expandStateObligations,
-   matchScopeExclusion,
-   revokeStaleMemberObligations,
-   type ObligationKind,
-   type StateObligation,
-   type TemplateStateDescriptor,
-} from './verdict/template-dedupe.js';
-export {
-   compareClaimableWork,
-   DEFAULT_CRITERION_IMPACT,
-   getCriterionImpact,
-   IMPACT_RANK,
-} from './verdict/priority-queue.js';
-export {
-   buildVerdictAuditReport,
-   DEFAULT_WCAG_22_AA_CRITERIA,
-   getCriterionLevel,
-   renderVerdictAuditHtml,
-   renderVerdictAuditMarkdown,
-   writeVerdictAuditReportFiles,
-   type BuildVerdictAuditReportInput,
-   type MethodologyDisclosure,
-   type RemediationRoadmapItem,
-   type VerdictAuditReport,
-   type VpatConformanceLevel,
-   type VpatCriterionRow,
-} from './report/verdict-report.js';
-export {
-   validateCantTellBlockerCode,
-   verifyBundleInapplicability,
-   type InapplicabilityCheckResult,
-} from './evidence/inapplicability.js';
 export { launchAutomationBrowser } from './browser/runtime.js';
-
 export {
-   getAssessmentCatalog,
-   listAssessmentObligations,
-} from './audit/run-obligations.js';
-
-export { getCheckEvidenceError } from './audit/check-evidence.js';
+   scanAuditPages,
+   type ScanOptions,
+   type PageScanResult,
+} from './audit/scan/scan.js';
+export {
+   discoverAuditPages,
+   type DiscoveredPages,
+   type DiscoverPagesOptions,
+} from './audit/discover-pages.js';
+export {
+   capturePage,
+   expandKeys,
+   type CapturePageOptions,
+   type CaptureResult,
+   type FocusedElement,
+} from './capture/runtime.js';

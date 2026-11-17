@@ -1,4 +1,4 @@
-import type { Page } from 'playwright';
+import type { Page, Response } from 'playwright';
 
 import type { DocumentLoad } from '../targets/parse.js';
 
@@ -88,4 +88,30 @@ export async function loadDocumentIntoPage(
 
    await page.goto(load.url, loadOptions);
    await waitForDocumentSettled(page, options);
+}
+
+/**
+ * Navigates to a URL and waits for the page to settle without requiring it. Production
+ * pages with analytics, chat widgets, or long polling never reach network idle, and a
+ * slow third-party script can hold back the load event, so only the document itself must
+ * arrive within the timeout. The later waits are capped and their timeouts ignored.
+ */
+export async function gotoSettled(
+   page: Page,
+   url: string,
+   options?: LoadDocumentOptions,
+): Promise<Response | undefined> {
+   const timeout = options?.timeoutMs;
+   const response = await page.goto(url, {
+      waitUntil: 'domcontentloaded',
+      ...(timeout === undefined ? {} : { timeout }),
+   });
+   await page
+      .waitForLoadState('load', timeout === undefined ? {} : { timeout })
+      .catch(ignoreError);
+   await page
+      .waitForLoadState('networkidle', { timeout: SETTLE_TIMEOUT_MS })
+      .catch(ignoreError);
+   await waitForDocumentSettled(page, options);
+   return response ?? undefined;
 }

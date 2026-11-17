@@ -1,0 +1,29 @@
+{
+   "name": "@a11ied/audit",
+   "version": "0.1.0",
+   "description": "Durable tracking, work packets, and reports for agent-driven WCAG audits.",
+   "files": [
+      "dist"
+   ],
+   "type": "module",
+   "main": "./dist/index.js",
+   "types": "./dist/index.d.ts",
+   "exports": {
+      ".": {
+         "types": "./dist/index.d.ts",
+         "import": "./dist/index.js"
+      }
+   },
+   "publishConfig": {
+      "access": "public"
+   },
+   "scripts": {
+      "build": "tsup",
+      "prepack": "npm run build",
+      "typecheck": "tsc -p tsconfig.json --noEmit"
+   },
+   "dependencies": {
+      "@a11ied/wcag-engine": "0.1.0",
+      "zod": "^4.6.6"
+   }
+}

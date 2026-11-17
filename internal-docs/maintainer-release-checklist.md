@@ -35,15 +35,12 @@ The current release record lives in `internal-docs/releases/v0.1.0-readiness.md`
 5. Publish `@a11ied/guidepup`.
 6. Publish `@a11ied/knowledge`.
 7. Publish `@a11ied/observe`.
-8. Publish `@a11ied/verdict`.
-9. Publish `@a11ied/report`.
-10.   Publish `@a11ied/screen-reader`.
-11.   Publish `@a11ied/review`.
-12.   Publish `@a11ied/core`.
-13.   Publish `@a11ied/mcp-server`.
-14.   Publish `a11ied`.
-15.   Publish docs from `packages/docs/dist/`.
-16.   Ship `packages/skills/a11ied/` only after the skill text matches the released CLI and MCP behavior.
+8. Publish `@a11ied/audit`.
+9. Publish `@a11ied/core`.
+10.   Publish `@a11ied/mcp-server`.
+11.   Publish `a11ied`.
+12.   Publish docs from `packages/docs/dist/`.
+13.   Ship `packages/skills/a11ied/` and `packages/skills/a11ied-audit/` only after the skill text matches the released CLI and MCP behavior.
 
 Use the `publish-packages` GitHub Actions workflow for package publication after `npm run standards`, `npm test`, and `npm run pack:check` pass.
 

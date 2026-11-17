@@ -13,7 +13,7 @@ const toc = [
 
 <DocShell
    title="Relevant criteria"
-   summary="<p>Auditing every page against all 86 <abbr title='Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility'><a href='https://www.w3.org/WAI/standards-guidelines/wcag/' target='_blank' rel='noreferrer'>WCAG</a></abbr> criteria causes review fatigue. If a page has no video, evaluating audio descriptions is a distraction; if it has no form inputs, form validation rules are irrelevant.</p><p><code>a1 audit</code> inspects rendered page structure to build a <strong>Relevance Matrix</strong>—scoping your testing checklist down to the criteria that actually matter for the interface in front of you.</p>"
+   summary="<p>Auditing every page against all 86 <abbr title='Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility'><a href='https://www.w3.org/WAI/standards-guidelines/wcag/' target='_blank' rel='noreferrer'>WCAG</a></abbr> criteria causes review fatigue. If a page has no video, evaluating audio descriptions is a distraction; if it has no form inputs, form validation rules are irrelevant.</p><p><code>a1 check</code> inspects rendered page structure to build a <strong>Relevance Matrix</strong>—scoping your testing checklist down to the criteria that actually matter for the interface in front of you.</p>"
    links={docsLinks}
    toc={toc}
 >
@@ -23,7 +23,7 @@ const toc = [
          <h2>Structural signals & detection</h2>
       </div>
       <p>
-         When you run <code>a1 audit</code>, the engine scans the rendered DOM, accessibility tree,
+         When you run <code>a1 check</code>, the engine scans the rendered DOM, accessibility tree,
          and document metadata for 15 categories of interactive and structural patterns:
       </p>
       <div class="route-list">
@@ -104,12 +104,12 @@ const toc = [
             <h2>Running a relevance audit</h2>
          </div>
          <p>
-            The terminal output of <code>a1 audit</code> synthesizes automated violations with the relevance matrix.
+            The terminal output of <code>a1 check</code> synthesizes automated violations with the relevance matrix.
             Instead of presenting an intimidating list of all 50+ manual and hybrid WCAG criteria,
             the <strong>Check by hand</strong> section displays only the criteria that are <em>both</em> hybrid/manual
             and <em>applicable</em> to the page you are auditing:
          </p>
-         <pre><code>a1 audit http://localhost:3000/</code></pre>
+         <pre><code>a1 check http://localhost:3000/</code></pre>
          <pre data-label="OUTPUT"><code>audit  http://localhost:3000/
 
 ✓ Nothing failed the automated checks.
@@ -174,6 +174,6 @@ The page
       <p>
          To audit dynamic states that render after interaction, use the <code>--click</code> flag or drive a screen reader session:
       </p>
-      <pre><code>a1 audit http://localhost:3000/ --click "button#open-modal"</code></pre>
+      <pre><code>a1 check http://localhost:3000/ --click "button#open-modal"</code></pre>
    </section>
 </DocShell>

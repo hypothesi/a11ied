@@ -1,7 +1,6 @@
 import type { MediaInventory } from '@a11ied/contracts';
 import type { Page } from 'playwright';
 import { z } from 'zod';
-import { needsReview, notApplicable, type Judgement } from './probe-types.js';
 
 const instrumentationSchema = z.object({
    mediaPlays: z.number().int().nonnegative(),
@@ -56,24 +55,4 @@ export async function collectMediaInventory(page: Page): Promise<MediaInventory>
    } finally {
       await cdp.detach();
    }
-}
-
-export function judgeMediaInventory(inventory?: MediaInventory): Judgement {
-   if (
-      inventory &&
-      inventory.video +
-         inventory.audio +
-         inventory.embeds +
-         inventory.mediaPlays +
-         inventory.audioContexts +
-         inventory.uninspectedTrees ===
-         0
-   ) {
-      return notApplicable(
-         'No media elements, embedded media, media playback, audio contexts, or uninspected trees were observed in this state.',
-      );
-   }
-   return needsReview(
-      'Media is present or its absence is unproved; inspect reachable media and use audio capability when evaluating its alternatives.',
-   );
 }

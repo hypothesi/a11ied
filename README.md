@@ -1,6 +1,10 @@
 ![a11ied: automated screen reader and WCAG testing](.github/assets/header.png)
 
-`a11ied` is a CLI-first accessibility automation toolkit for real screen reader testing with VoiceOver and NVDA, built on Guidepup.
+`a11ied` is a CLI-first accessibility toolkit. It does three jobs:
+
+- **Look things up**: WCAG criteria, techniques, test methods, and ARIA patterns, pinned from the W3C sources.
+- **Check while you build**: axe scans, the accessibility tree, screenshots at a viewport or focus stop, and real screen reader sessions with VoiceOver and NVDA through Guidepup.
+- **Audit**: run an agent-driven WCAG audit of a site, page, feature, or mobile app, with durable progress, parallel workers, a live dashboard, and a client-ready report.
 
 ## install
 
@@ -16,8 +20,31 @@ a1 setup                     # run the Guidepup setup steps for VoiceOver or NVD
 a1 wcag 4.1.3                # one criterion: techniques, failures, test method, next command
 a1 wcag rule color-contrast  # an axe rule mapped back to its criteria and fixes
 a1 pattern combobox          # the ARIA pattern: its keyboard and attribute tables
+a1 check http://localhost:3000  # scan one page while you build
 a1 help-all
 ```
+
+## audit a site, page, or app
+
+```sh
+a1 audit init https://example.com --rule "Do not submit the contact form"
+a1 audit discover            # add the site's pages to the audit
+a1 audit scan                # automated checks on every page, in parallel
+a1 audit next --worker w1    # each parallel agent claims a unit, tests it, and submits
+a1 audit status              # progress at any time; a1 audit dashboard serves a live page
+a1 audit report              # HTML, Markdown, and JSON
+```
+
+An audit is a set of pages (pages, screens, states, flows) and the success criteria in
+scope. The work is split into units, one test pass on one page, that agents claim and
+test in parallel. Automated checks record the failures a scanner is certain of and collect
+facts for the agents. An agent decides every pass and every not-applicable. State lives in
+`.a11ied/audits/<id>/`, so an audit survives a crashed agent or a restart.
+
+Narrow the scope with `--page` (one page), `--criteria 1.4.3,2.4.7`, `--passes keyboard`,
+or `--platform ios`. The [audit guide](packages/docs/src/pages/guides/audit.astro) covers
+the workflow, and [internal-docs/audit-architecture.md](internal-docs/audit-architecture.md)
+explains the design. Agents use the `a11ied-audit` skill in `packages/skills/`.
 
 Use the runtime API:
 
@@ -46,7 +73,8 @@ sr.goTo({ role: 'button', name: 'Pay' })
 The repo is split into npm workspaces. `packages/cli` publishes the end-user `a11ied` package, and the scoped `@a11ied/*` libraries are publishable as standalone building blocks.
 
 - `packages/contracts`: shared schemas and result shapes (`@a11ied/contracts`)
-- `packages/core`: orchestration and product-level domain logic (`@a11ied/core`)
+- `packages/audit`: audit storage, work units, findings, progress, dashboard, and reports (`@a11ied/audit`)
+- `packages/core`: browser, axe, screen reader driver, audit scans, and page checks (`@a11ied/core`)
 - `packages/guidepup`: adapter layer for real and virtual screen reader automation (`@a11ied/guidepup`)
 - `packages/mcp-server`: MCP bridge around the core runtime (`@a11ied/mcp-server`)
 - `packages/wcag-data`: normalized WCAG data artifacts (`@a11ied/wcag-data`)
@@ -55,7 +83,8 @@ The repo is split into npm workspaces. `packages/cli` publishes the end-user `a1
 - `packages/cli`: end-user command line entrypoint (published as `a11ied`)
 - `packages/act-conformance`: runs a11ied against the W3C ACT test cases (not published)
 - `packages/docs`: Astro docs site
-- `packages/skills/a11ied`: Agent Skill scaffold
+- `packages/knowledge`, `packages/observe`: page signal extraction and page measurements used by scans
+- `packages/skills`: the `a11ied` (development checks) and `a11ied-audit` (audits) Agent Skills
 
 ## quick start
 

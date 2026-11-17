@@ -1,4 +1,4 @@
 interface:
-   display_name: 'a11ied accessibility reviews'
-   short_description: 'Check components or complete resumable WCAG site reviews.'
-   default_prompt: 'Use $a11ied for the requested scope. For a full-site review, follow its full-site execution policy, continue across batches, preserve evidence and authorization, and report completion only when required coverage is complete.'
+   display_name: 'a11ied accessibility checks'
+   short_description: 'Check a component or page with scans, lookups, and screen readers.'
+   default_prompt: 'Use $a11ied to check the requested component or page and report what to fix.'

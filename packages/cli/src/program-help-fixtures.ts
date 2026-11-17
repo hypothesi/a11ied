@@ -18,9 +18,10 @@ export const topLevelHelpCases: HelpCase[] = [
         -h, --help        display help for command
 
       Find and fix problems:
-        review            Review pages and states against WCAG 2.2 AA.
-        audit [target]    Scan a page and list what to fix.
-        report            Build a multi-page accessibility report.
+        audit             Run, track, and report a WCAG audit of a site, page, or app.
+        check [target]    Scan one page during development and list what to fix.
+        capture <url>     Screenshot a page at a viewport, zoom, focus stop, or opened
+                          state.
         axe [targets...]  Run axe-core against one or more targets.
         tree [target]     Print a page's accessibility tree.
 

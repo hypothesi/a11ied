@@ -1,17 +1,19 @@
 ---
 name: a11ied
-description: Check a desktop component or page during development, or run a full-site WCAG 2.2 A/AA review, with the a11ied CLI or MCP. This is the single merged skill for both quick component checks and complete site reviews. Use scanner rules, keyboard interactions, and VoiceOver, NVDA, or simulated observations.
+description: Check a component or page for accessibility during development with the a11ied CLI or MCP - axe scans, the accessibility tree, WCAG and ARIA pattern lookups, and VoiceOver, NVDA, or simulated screen reader sessions. For a WCAG audit with tracked progress and a report, use the a11ied-audit skill instead.
 ---
 
 # a11ied
 
-Use this skill when the task is about the `a11ied` toolchain: the `a1` CLI, the `@a11ied/mcp-server` MCP server, or the
-`a11ied` TypeScript package. It is the unified skill covering both workflows:
+Use this skill when the task is about checking or fixing a component or page with the `a11ied` toolchain: the `a1` CLI,
+the `@a11ied/mcp-server` MCP server, or the `a11ied` TypeScript package.
 
-- **Recipe 1 — Quick Page / Component Check**: `a1 audit <target>` -> `a1 wcag <id>` -> `a1 pattern check` -> `a1 sr start
-  --sr virtual <url>` -> `a1 sr walk` -> `a1 sr batch <steps.jsonl> --json` -> `a1 sr stop`.
-- **Recipe 2 — Full-Site WCAG 2.2 AA Review (4+1 Review Facade)**: `a1 review start` -> `a1 review next` -> `a1 review judge`
-  -> `a1 review report` (or initiation helper `a1 review run`). See "Full-site WCAG 2.2 AA review" below.
+The quick check: `a1 check <target>` -> `a1 wcag <id>` -> `a1 pattern check` -> `a1 sr start --sr virtual <url>` ->
+`a1 sr walk` -> `a1 sr batch <steps.jsonl> --json` -> `a1 sr stop`.
+
+A request to audit, assess conformance, or produce an accessibility report is a different job. Use the
+[`a11ied-audit`](../a11ied-audit/SKILL.md) skill: it tracks every criterion on every page, runs workers in parallel, and
+builds the report.
 
 Native sessions default to `nativeInput: guarded`. Observe the current item, foreground window, keyboard focus when
 available, and transcript before choosing an action. Commands check the observed target; typing checks between characters.
@@ -28,13 +30,13 @@ target checks. Virtual output cannot replace required real-reader evidence.
 Run this after changing a component or page, the way you would run a test suite.
 
 ```txt
-a1 audit http://localhost:3000/the/route/you/changed
+a1 check http://localhost:3000/the/route/you/changed
 ```
 
 A scan needs browser readiness, not screen reader or recording setup. Diagnose missing capabilities for the actual task.
 Before starting a reader, inspect its status and verify the intended desktop window and document.
 
-`audit <target>` runs axe against every mapped rule, prints an accessibility tree summary, lists the relevant criteria, and
+`check <target>` runs axe against every mapped rule, prints an accessibility tree summary, lists the relevant criteria, and
 rolls the result up by criterion. It exits 4 when an axe violation was found. Read the `nextCommands` field in its output: it
 lists the exact `a1 wcag rule <id>` and `a1 sr walk <target>` commands to run next.
 
@@ -165,7 +167,7 @@ Exit 4 means an expect failed. Exit 3 means the environment is not ready (run `a
 
 `a1 sr expect <text|/regex/>` checks the transcript for a phrase and exits 4 when it did not appear (or, with `--not`, when
 it did). `--since <checkpoint>` scopes the check to phrases after `a1 sr checkpoint <label>`. This is the same exit code `a1
-axe` and `a1 audit` use for a failing check, so a script or CI step can treat all three the same way:
+axe` and `a1 check` use for a failing check, so a script or CI step can treat all three the same way:
 
 ```txt
 a1 sr checkpoint before-menu
@@ -190,61 +192,7 @@ Starting a real VoiceOver session takes over speech on the machine running it: V
 and takes keyboard focus for its own commands until the session stops. Warn before starting one, and prefer running it on a
 machine nobody is using interactively at the time.
 
-## Full-site WCAG 2.2 AA review
-
-For a full-site request, read [full-site execution policy](resources/full-site-execution.md)
-once and follow it throughout the run. Continue across batches and beads; record local
-blockers while completing independent work. A quick component check does not imply a
-full-site review, and a full-site request must not fall back to the quick-check recipe.
-
-The review facade collects explicitly registered page states and coordinates evidence-backed assessments.
-It does not crawl a site, execute every procedure, or complete an audit from one URL. Inventory pages,
-interactive states, and complete processes first. Use the existing discovery and journey coordinator
-where needed; a single-state capture cannot establish site or journey conformance.
-
-```bash
-a1 review start https://example.com --run-dir ./review --json
-a1 review next --run-dir ./review --agent reviewer --count 5 --json
-a1 review observe initial --run-dir ./review --slice facts --json
-a1 review observe initial --run-dir ./review --refresh --json
-a1 review judge --run-dir ./review --agent reviewer --verdicts ./judgments.json --json
-a1 review report --run-dir ./review --draft --json
-a1 review observe initial --run-dir ./review --capture '{"condition":"reflow320","actions":[{"action":"press","key":"Tab"}]}' --json
-```
-
-`--capture` records immutable condition evidence without replacing the root. It does
-not assign outcomes. Follow the [full-site execution policy](resources/full-site-execution.md)
-for capture conditions, proof references, continuation and coordinated reporting.
-
-- Register additional states with `start --states <jsonOrFile>`. Every template member needs
-  independent collection and assessment. Do not copy whole-page judgments across templates.
-- `review run` starts collection, makes a draft report, and claims the first packet. It does not
-  perform the claimed assessments. Cached `observe` reads do not launch a browser; refresh or
-  explicit setup recollects. A new target needs its own state ID.
-- Inspect each packet's procedure ID, version, actions, required capabilities, and evidence kinds.
-  Perform each action and record its actual outcome and observation. Generic pass loops, invented
-  visual inspection, and treating setup replay as proof of procedure execution are prohibited.
-- Collector receipts bind immutable evidence to a target, setup and capture. They do not prove
-  that every criterion condition was tested. Inspect navigation identity, operation limits,
-  frames, and unresolved or truncated results. An empty sample is not verified absence.
-- Only rederived axe violations automatically establish failures. Other probe observations remain
-  unresolved; measurements and heuristic findings guide the procedure. Text-resize captures
-  verify applied scaling but do not alone establish usability, absence of overlap, or functionality.
-- Submit `procedureId`, `assessment.version`, action indices/outcomes/observations/evidence,
-  snapshot-bound evidence references, and any required collected measurements. Admission checks
-  the current scope and receipt. Rejected proposals remain recorded separately.
-- Claims expire after 15 minutes. Use the same agent ID when claiming and judging. Reclaim expired
-  work; another agent cannot judge an active claim. A valid batch is validated before appending,
-  but an interrupted append can preserve a valid prefix: inspect status and submit remaining work.
-- `cantTell` requires a blocker code and remains unresolved. Exclusions need a recorded scope
-  reason. Final reports require every expected procedure and current evidence, and no known scope
-  gaps. Draft output cannot establish full-site conformance. Known missing journeys must remain
-  disclosed in the coordinator and report scope gaps.
-- Preserve virtual provenance. Virtual DOM observations never establish VoiceOver/NVDA behavior.
-  Unsupported native, site, journey or sensory evidence remains unresolved.
-- Close a capability bead only with reproducible positive and rejection cases, versions, commands,
-  and artifact locations. Green builds alone do not establish an audit outcome. Handoffs distinguish
-  raw observations, proposed judgments, admitted results, and remaining obligations.
+## Before acting on a page
 
 Before activating or typing into a control, verify current target identity and reuse the user's applicable authorization. If
 the action requires missing permission, block that action. A diagnostic check does not authorize submission.
@@ -260,29 +208,22 @@ status` shows whether one is still active. `a1 doctor` also flags a stale sessio
 The MCP server exposes the same operations as the CLI, one tool per command family. Use the CLI name in the description above
 to find the tool:
 
-| CLI command                                                                                   | MCP tool           |
-| --------------------------------------------------------------------------------------------- | ------------------ |
-| `a1 wcag show`                                                                                | `wcag_show`        |
-| `a1 wcag criteria`                                                                            | `wcag_criteria`    |
-| `a1 search`                                                                                   | `search`           |
-| `a1 wcag rule`                                                                                | `wcag_rule`        |
-| `a1 axe`                                                                                      | `run_axe`          |
-| `a1 tree`                                                                                     | `tree`             |
-| `a1 audit`                                                                                    | `audit`            |
-| `a1 audit run` / `state` / `journey` / `next` / `status` / `resume` / `evaluate` / `finalize` | `audit_assessment` |
-| `a1 review start`                                                                             | `review.start`     |
-| `a1 review resume`                                                                            | `review.resume`    |
-| `a1 review next`                                                                              | `review.next`      |
-| `a1 review judge`                                                                             | `review.judge`     |
-| `a1 review report`                                                                            | `review.report`    |
-| `a1 review run`                                                                               | `review.run`       |
-| `a1 report build`                                                                             | `report_build`     |
-| `a1 sr start` / `open` / `stop` / `status`                                                    | `sr_session`       |
-| every other `a1 sr` action (`next`, `press`, `perform`, `goto`, `wait`, ...)                  | `sr_action`        |
-| `a1 sr list`                                                                                  | `sr_list`          |
-| `a1 sr expect`                                                                                | `sr_expect`        |
-| `a1 sr transcript`                                                                            | `sr_transcript`    |
-| `a1 doctor`                                                                                   | `doctor`           |
+| CLI command                                                                  | MCP tool                                |
+| ---------------------------------------------------------------------------- | --------------------------------------- |
+| `a1 wcag show`                                                               | `wcag_show`                             |
+| `a1 wcag criteria`                                                           | `wcag_criteria`                         |
+| `a1 search`                                                                  | `search`                                |
+| `a1 wcag rule`                                                               | `wcag_rule`                             |
+| `a1 axe`                                                                     | `run_axe`                               |
+| `a1 tree`                                                                    | `tree`                                  |
+| `a1 check`                                                                   | `check`                                 |
+| `a1 audit ...`                                                               | `audit_*`, see the `a11ied-audit` skill |
+| `a1 sr start` / `open` / `stop` / `status`                                   | `sr_session`                            |
+| every other `a1 sr` action (`next`, `press`, `perform`, `goto`, `wait`, ...) | `sr_action`                             |
+| `a1 sr list`                                                                 | `sr_list`                               |
+| `a1 sr expect`                                                               | `sr_expect`                             |
+| `a1 sr transcript`                                                           | `sr_transcript`                         |
+| `a1 doctor`                                                                  | `doctor`                                |
 
 The [command cheat sheet](resources/command-cheat-sheet.md) includes tool arguments and
 CLI-only operation equivalents.
@@ -293,6 +234,6 @@ CLI-only operation equivalents.
 - Do not claim full WCAG compliance from an automated result alone.
 - Do not confuse raw driver transcripts with WCAG claims. A transcript is what the reader said. A criterion pass or fail is a
   judgment made from it.
-- Do not skip the relevant criteria scan and jump straight from a target to a compliance claim. Run `a1 audit` or look up the
+- Do not skip the relevant criteria scan and jump straight from a target to a compliance claim. Run `a1 check` or look up the
   criterion's test method first.
 - State the test method (automated, hybrid, manual) next to every claim.

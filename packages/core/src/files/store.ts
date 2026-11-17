@@ -18,5 +18,3 @@ export {
    type LockedFileOptions,
    type WriteAtomicOptions,
 } from '@a11ied/observe';
-
-export { withRunTransaction, type RunTransaction } from '../audit/run-store.js';

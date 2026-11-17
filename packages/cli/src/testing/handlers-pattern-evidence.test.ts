@@ -79,6 +79,8 @@ async function pendingRows(results: string): Promise<string[]> {
       FIXTURE,
       '--pattern',
       'checkbox',
+      '--selector',
+      SELECTOR,
       '--results',
       results,
       '--json',
@@ -89,7 +91,7 @@ async function pendingRows(results: string): Promise<string[]> {
 
 describe('the pattern triage loop', () => {
    it(
-      'keeps a live failure after an unverified note calls it inapplicable',
+      'sets a dead key aside once someone records why it does not apply',
       async () => {
          const results = await createResultsFile();
 
@@ -99,8 +101,8 @@ describe('the pattern triage loop', () => {
 
          expect(before.status).toBe(EXIT_ASSERTION);
          expect(recorded.status).toBe(EXIT_SUCCESS);
-         expect(after.status).toBe(EXIT_ASSERTION);
-         expect(after.stdout).toContain('unverified or stale evidence');
+         expect(after.status).toBe(EXIT_SUCCESS);
+         expect(after.stdout).toContain('Already judged');
       },
       TEST_TIMEOUT_VERY_LONG,
    );
@@ -108,7 +110,7 @@ describe('the pattern triage loop', () => {
 
 describe('the pattern pending list', () => {
    it(
-      'keeps rows pending after an unverified judgment',
+      'drops a row once it has a judgment for the current widget',
       async () => {
          const results = await createResultsFile();
 
@@ -117,7 +119,7 @@ describe('the pattern pending list', () => {
          const after = await pendingRows(results);
 
          expect(before).toContain(DEAD_KEY_ROW);
-         expect(after).toContain(DEAD_KEY_ROW);
+         expect(after).not.toContain(DEAD_KEY_ROW);
       },
       TEST_TIMEOUT_VERY_LONG,
    );

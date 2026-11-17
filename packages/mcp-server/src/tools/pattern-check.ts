@@ -2,8 +2,6 @@ import {
    cliExitCodes,
    evidenceModeSchema,
    evidenceOutcomeSchema,
-   evidenceProvenanceSchema,
-   evidenceFindingSchema,
    type ApgCheckResult,
 } from '@a11ied/contracts';
 import {
@@ -113,9 +111,6 @@ export function registerPatternCheckTool(server: McpServer): void {
 }
 
 const patternRecordInputSchema = pageTargetInputSchema.extend({
-   finding: evidenceFindingSchema.optional(),
-   provenance: evidenceProvenanceSchema.optional(),
-   runFile: z.string().min(1).optional(),
    subjectHash: z.string().min(1).optional(),
    pattern: z.string().min(1).describe('The APG example the row belongs to.'),
    row: z.string().min(1).describe('The row key, such as combobox-key-home[5].'),
@@ -171,12 +166,10 @@ function registerPatternRecordTool(server: McpServer): void {
                mode: input.mode,
                note: input.note,
                pointer: input.pointer ?? input.selector,
-               provenance: input.provenance,
-               finding: input.finding,
                assertedBy: input.assertedBy,
                subjectHash:
                   input.subjectHash ?? (tree ? hashAccessibilityTree(tree) : undefined),
-               evidence: { file: input.resultsFile, runFile: input.runFile },
+               evidence: { file: input.resultsFile },
             }),
          );
       },
@@ -189,26 +182,32 @@ function registerPatternPendingTool(server: McpServer): void {
       {
          title: 'ARIA pattern pending',
          description:
-            'List the rows of one APG example that have no recorded result for this target yet. ' +
+            'List the rows of one APG example that have no current judgment for this widget. ' +
             'Matches the CLI pattern pending command.',
          inputSchema: pageTargetInputSchema.extend({
             pattern: z.string().min(1),
-            pointer: z.string().min(1).optional(),
-            subjectHash: z.string().min(1).optional(),
-            runFile: z.string().min(1).optional(),
+            selector: z
+               .string()
+               .min(1)
+               .describe('The same widget selector the check and record calls used.'),
+            click: z.string().min(1).optional(),
             resultsFile: z.string().optional(),
          }),
          annotations: readOnlyAnnotations,
       },
       async (input) => {
          const resolved = await resolvePageTarget(input, 'pattern pending');
+         const tree = await getAccessibilityTree(requireLoad(resolved), {
+            selector: input.selector,
+            click: input.click,
+         });
          return createToolResponse(
             await listPendingApgRows({
                subject: describePageReportTarget(resolved).value,
                exampleId: input.pattern,
-               pointer: input.pointer,
-               subjectHash: input.subjectHash,
-               evidence: { file: input.resultsFile, runFile: input.runFile },
+               pointer: input.selector,
+               subjectHash: hashAccessibilityTree(tree),
+               evidence: { file: input.resultsFile },
             }),
          );
       },

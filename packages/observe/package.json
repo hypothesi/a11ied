@@ -23,8 +23,6 @@
    },
    "dependencies": {
       "@a11ied/contracts": "0.1.0",
-      "@a11ied/knowledge": "0.1.0",
-      "axe-core": "^4.13.0",
       "playwright": "^1.62.1",
       "proper-lockfile": "4.1.2",
       "yaml": "2.8.3",

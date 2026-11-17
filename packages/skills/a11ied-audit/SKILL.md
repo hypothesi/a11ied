@@ -1,0 +1,155 @@
+---
+name: a11ied-audit
+description: Run a WCAG accessibility audit of a website, page, feature, or mobile app with the a1 CLI, from scoping to a client-ready report. Use for any request to audit, assess, or report on WCAG conformance, at any scope, from one criterion on one page to a whole site at Level AA. Tracks progress durably, runs workers in parallel, and resumes after interruption.
+---
+
+# a11ied audit
+
+You are the lead auditor. You scope the audit, start parallel workers, keep them moving, review
+their findings, and deliver the report. The `a1 audit` commands hold all state in
+`.a11ied/audits/<id>/`, so nothing depends on this conversation surviving.
+
+Workers follow [the worker guide](resources/worker.md). Read it once: you will hand it to each
+worker, and you follow it yourself when you cannot start workers. For a mobile app, also read
+[auditing a mobile app](resources/mobile.md).
+
+## The model
+
+- A **page** is one thing to test: a page, a screen, a state of one (a dialog open, an error
+  shown), or a flow (checkout from cart to confirmation).
+- A **test pass** groups the criteria tested with one kind of interaction: `semantics`,
+  `keyboard`, `visual`, `media`, `forms`, `pointer`, and the cross-page `consistency` pass.
+- A **unit** is one pass on one page, such as `P3.keyboard`. Units are what workers claim.
+  A worker decides every criterion in its unit: `pass`, `fail`, `not-applicable`, or
+  `cannot-tell`.
+- A **finding** is one defect. The same defect on ten pages is one finding with ten occurrences.
+
+## What is automated and what is judged
+
+| Automated, no agent needed                                                                                         | Judged by a worker                                                        |
+| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| Page discovery (`a1 audit discover`)                                                                               | Which pages, states, and flows are in scope                               |
+| axe-core failures, recorded as findings (`a1 audit scan`)                                                          | Whether each automated finding is real on this page                       |
+| Page measurements stored as signals: tab order, focus styles, reflow, target sizes, media inventory, form controls | Every `pass` and `not-applicable`, and every failure a scanner cannot see |
+| Claims, leases, recovery of abandoned work, progress, report assembly                                              | Severity, user impact, and the recommended fix                            |
+
+The scan never passes a criterion. A signal is a fact to verify, not a conclusion.
+
+## 1. Scope
+
+Take the scope from the request. Ask only for what is missing and cannot be defaulted:
+
+- **Target** and platform. A URL means web. An app needs a build and a device or simulator.
+- **Breadth**: whole site or app, a section, one page or screen, or one flow.
+- **Criteria**: WCAG 2.2 Level AA unless told otherwise. `--criteria` or `--passes` narrows it.
+- **Rules**: actions workers must not take. Ask about form submissions, purchases, account
+  changes, and third-party widgets before any worker touches them. With no answer, forbid them.
+- **Access**: test accounts, environments, feature flags.
+
+```bash
+a1 audit init https://example.com --name "Example site" \
+   --rule "Do not submit the contact form" --rule "Do not place orders" \
+   --access "Staging login in 1Password: Example QA"
+```
+
+One page: add `--page`. Chosen criteria: `--criteria 1.4.3,2.4.7`. Mobile: `--platform ios`.
+With more than one audit in the workspace, `export A11IED_AUDIT=<id>` first.
+
+## 2. Choose pages
+
+Web: `a1 audit discover` adds every reachable page. Then make the set deliberate:
+
+- Small site (up to about 30 pages): keep every page.
+- Larger site: keep the home page, each distinct template, every page with a form or custom
+  widget, the pages in key tasks, and a few others at random. Exclude the rest with the reason:
+  `a1 audit page exclude P14 --reason "Same template as P9"`. The report lists exclusions.
+- Add the states a page load does not show, and the flows that span pages:
+
+```bash
+a1 audit page add https://example.com/ --kind state --name "Home: menu open" \
+   --notes "Activate the Menu button in the header"
+a1 audit page add https://example.com/cart --kind flow --name "Checkout" \
+   --notes "Cart > shipping > payment > review. Stop before placing the order."
+```
+
+Mobile: add each screen and flow with `a1 audit page add "<how to reach it>" --name ...`.
+
+A `consistency` unit appears once the audit has two pages. It compares them all.
+
+## 3. Scan
+
+Web only: `a1 audit scan`. It runs every page in parallel, takes seconds per page, and is safe
+to repeat. A page that fails to load is reported and skipped.
+
+## 4. Run workers in parallel
+
+Start as many workers as you have subagent slots and browsers the machine can run, usually 3 to 6. More workers than units is waste. Give each one a unique name and this prompt:
+
+> You are an accessibility audit worker named `<wN>`. Audit: `<id>`. Work in `<repo dir>`.
+> Follow the worker guide at `<absolute path to resources/worker.md>` exactly. Loop: run
+> `a1 audit next --worker <wN>`, test the unit, submit it, repeat until the command says there
+> is no work. Report only the units you finished and anything you blocked.
+
+Resources that cannot be shared:
+
+- **A native screen reader** (VoiceOver, NVDA) owns the machine's speech and keyboard. Give one
+  worker `--pass semantics` and the others `--not-pass semantics`. The simulated reader
+  (`--sr virtual`) runs in parallel freely.
+- **A device or simulator** serves one worker. Give each mobile worker its own.
+
+If you cannot start subagents, run the worker loop yourself. The audit still completes; it is
+just serial.
+
+## 5. Keep it moving
+
+`a1 audit status` shows units done, active workers, blocked units with reasons, and recent
+activity. For the user, `a1 audit dashboard` serves a live page with the same picture and a
+link to the interim report.
+
+- A worker that dies loses nothing. Its claim expires after 20 minutes and the unit returns to
+  the queue. Start a replacement with a new name, or the same name to resume its unit.
+- A **blocked** unit needs a person. Blocks never stop other units. When the queue is otherwise
+  empty, collect every block, resolve what you can, and ask the user once for the rest. After a
+  fix: `a1 audit reopen <unit> --reason "<what changed>"`.
+- A unit blocked as "abandoned 3 times" defeated three workers. Read `a1 audit log --unit <id>`
+  before reopening it, and consider splitting the page.
+- Do not stop while units are queued or in progress. A finished tool call, a draft report, or a
+  saved checkpoint is not the end of the audit.
+
+## 6. Review the findings
+
+Before reporting, read `a1 audit findings` as an editor:
+
+- Merge duplicates: `a1 audit finding merge F3 F9 F12`.
+- Dismiss what is wrong, with the reason: `a1 audit finding dismiss F7 --reason "..."`.
+- Fix titles, severity, and wording that a developer could not act on:
+  `a1 audit finding update F4 --severity serious --recommendation "..."`.
+- Spot-check the critical and serious findings against their evidence. Reopen a unit whose work
+  looks thin.
+
+## 7. Report
+
+```bash
+a1 audit report
+```
+
+It writes `audit-report.html` (one self-contained file, printable to PDF), `.md`, and `.json`
+to `.a11ied/audits/<id>/report/`. An audit with unfinished units produces an interim report that
+says so. Tell the user: the verdict, the number of findings by severity, the top three issues,
+anything not verified and why, and the report path. Do not restate the report.
+
+## Resuming
+
+After any interruption, run `a1 audit status`. It is the whole truth. Do not rebuild progress
+from memory or chat history. Restart workers and continue from step 5.
+
+## Rules
+
+- A criterion passes only when a worker tested it on that page. Never copy a pass from one
+  page to another because they look alike.
+- Never report conformance while any criterion is failing, unfinished, or not verified. The
+  report states this for you; do not soften it.
+- Stay inside the audit rules. When a check needs a forbidden action, record `cannot-tell` with
+  what was not exercised.
+- Label simulated screen reader output as simulated. It does not establish VoiceOver or NVDA
+  behavior.
