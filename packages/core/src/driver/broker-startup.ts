@@ -1,7 +1,7 @@
 import { readFile, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { z } from 'zod';
-import { writeJsonAtomic } from '../files/atomic-json.js';
+import { writeAtomic } from '../files/store.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
 import { toBrokerError } from './broker-errors.js';
 import { resolveStateRoot } from './environment.js';
@@ -21,7 +21,7 @@ export async function recordBrokerStartupError(
    sessionId: string,
    error: unknown,
 ): Promise<void> {
-   await writeJsonAtomic(toBrokerError(error), getStartupErrorPath(sessionId));
+   await writeAtomic(getStartupErrorPath(sessionId), toBrokerError(error));
 }
 
 /** Consume the matching failure instead of waiting for a session that cannot start. */

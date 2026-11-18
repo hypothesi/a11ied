@@ -40,6 +40,7 @@
       "typecheck": "tsc -p tsconfig.json --noEmit"
    },
    "dependencies": {
+      "@a11ied/audit": "0.1.0",
       "@a11ied/contracts": "^0.1.0",
       "@a11ied/core": "0.1.0",
       "@a11ied/guidepup": "0.1.0",

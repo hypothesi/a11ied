@@ -248,7 +248,14 @@ test('announces the price', ({'{'} sr {'}'}) => {'{'}
       <p>
          Two methods are not available in browser mode. <code>open()</code> throws, because the
          page is the test's own. <code>perform()</code> throws too, because the command registry
-         that resolves names loads Guidepup's Node-only tables. Every typed method is available.
+         that resolves names loads Guidepup's Node-only tables.
+      </p>
+      <p>
+         Some generic component containers have no announced root in the virtual tree.
+         <code>top()</code>, <code>bottom()</code>, and operations that seek an edge then
+         reject with <code>virtual-tree-edge-unavailable</code> after one cursor cycle.
+         Use <code>readAll()</code> from the fresh reader's current position to inspect
+         such a container. Keep the component's actual semantics when testing it.
       </p>
    </section>
 

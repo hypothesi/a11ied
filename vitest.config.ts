@@ -13,6 +13,7 @@ export default defineConfig({
             import.meta.dirname,
             'packages/cli/src/bridges/mcp-server.ts',
          ),
+         '@a11ied/audit': resolve(import.meta.dirname, 'packages/audit/src/index.ts'),
          '@a11ied/contracts': resolve(
             import.meta.dirname,
             'packages/contracts/src/index.ts',
@@ -27,10 +28,15 @@ export default defineConfig({
             import.meta.dirname,
             'packages/guidepup/src/index.ts',
          ),
+         '@a11ied/knowledge': resolve(
+            import.meta.dirname,
+            'packages/knowledge/src/index.ts',
+         ),
          '@a11ied/mcp-server': resolve(
             import.meta.dirname,
             'packages/mcp-server/src/index.ts',
          ),
+         '@a11ied/observe': resolve(import.meta.dirname, 'packages/observe/src/index.ts'),
          '@a11ied/wcag-engine': resolve(
             import.meta.dirname,
             'packages/wcag-engine/src/index.ts',

@@ -1,12 +1,19 @@
-import { renderRecordText } from './audit-evidence.js';
 import {
    apgCheckResultSchema,
+   evidenceRecordResultSchema,
    type ApgCheckResult,
    type CliOutputEnvelope,
 } from '#contracts';
 
-import { code, count, dim, section, table } from '../lib/format.js';
+import { code, count, dim, section, symbols, table } from '../lib/format.js';
 import { apgAttribution, KEY_COLUMN_CAP, seeMoreLine } from './pattern.js';
+
+const OUTCOME_SYMBOLS = {
+   passed: symbols.pass,
+   failed: symbols.fail,
+   cantTell: symbols.warn,
+   inapplicable: symbols.warn,
+} as const;
 
 const CHECK_STATUS_LABELS: Record<string, string> = {
    absent: 'absent',
@@ -48,7 +55,7 @@ function judgedLines(result: ApgCheckResult): string[] {
       judged.map((row) => {
          const recorded = row.recorded;
          const stale = recorded?.stale
-            ? dim(' - unverified or stale evidence; this row still counts')
+            ? dim(' - recorded before this widget changed; this row counts again')
             : '';
          return `${code(row.rowKey)} ${recorded?.outcome ?? ''}${stale} ${dim(recorded?.note ?? '')}`;
       }),
@@ -149,7 +156,20 @@ export function renderPatternRecordText(
    envelope: CliOutputEnvelope,
    _options: { verbose: boolean },
 ): string {
-   return renderRecordText(envelope, _options);
+   const { record, file } = evidenceRecordResultSchema.parse(envelope.result);
+   const lines = [
+      `${OUTCOME_SYMBOLS[record.outcome]} ${record.test.exampleId} ${record.outcome}`,
+      dim(`  row        ${record.test.rowKey}`),
+      dim(`  target     ${record.subject}`),
+   ];
+   if (record.pointer) {
+      lines.push(dim(`  element    ${record.pointer}`));
+   }
+   if (record.note) {
+      lines.push(dim(`  note       ${record.note}`));
+   }
+   lines.push(dim(`  written to ${file}`));
+   return lines.join('\n');
 }
 
 /** Prints the rows of one example nobody has judged yet for this target. */

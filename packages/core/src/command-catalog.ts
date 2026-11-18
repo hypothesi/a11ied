@@ -19,6 +19,12 @@ const cliCommands: CliCommand[] = [
       maturity: 'ready',
    },
    {
+      name: 'talkback',
+      summary:
+         'Turn TalkBack on or off on an Android device over adb and record what it says.',
+      maturity: 'ready',
+   },
+   {
       name: 'axe',
       summary: 'Run axe-core accessibility scans.',
       maturity: 'ready',
@@ -29,9 +35,19 @@ const cliCommands: CliCommand[] = [
       maturity: 'ready',
    },
    {
-      name: 'audit',
+      name: 'check',
       summary:
-         'Run axe, the accessibility tree, and the relevant criteria scan against a target.',
+         'Run axe, the accessibility tree, and the relevant criteria scan against one page.',
+      maturity: 'ready',
+   },
+   {
+      name: 'capture',
+      summary: 'Screenshot a page at a viewport, zoom, focus stop, or opened state.',
+      maturity: 'ready',
+   },
+   {
+      name: 'audit',
+      summary: 'Run, track, and report an agent-driven WCAG audit.',
       maturity: 'ready',
    },
    {

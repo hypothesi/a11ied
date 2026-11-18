@@ -65,7 +65,7 @@ export function registerWaitCommand(driveCommand: Command): void {
       addJsonOption(
          driveCommand
             .command('wait')
-            .helpGroup(DRIVE_GROUPS.check)
+            .helpGroup(DRIVE_GROUPS.assert)
             .summary('Pause, or wait until the reader announces a phrase.')
             .description(
                'Pause, or wait for a new announcement. Use --since to include announcements after a checkpoint, including those between commands. Exits 4 on timeout.',
@@ -142,7 +142,7 @@ export function registerExpectCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('expect <text|/regex/>')
-         .helpGroup(DRIVE_GROUPS.check)
+         .helpGroup(DRIVE_GROUPS.assert)
          .summary('Check that the reader announced a phrase.')
          .description(
             'Check that the reader announced a phrase. Exits 4 when it did not, or with --not when it did.',

@@ -123,7 +123,7 @@ a1 sr walk http://localhost:3000/checkout --sr virtual --json</code></pre>
          it renders before trusting an empty <code>axe</code> or <code>tree</code> result.
       </p>
       <p>
-         The relevant criteria scan in <code>a1 audit</code> reports <code>not-detected</code>
+         The relevant criteria scan in <code>a1 check</code> reports <code>not-detected</code>
          for the same reason: it reads only the HTML the server returned, so content a client
          framework adds after load is not detected. See the
          <a href="/relevant-criteria#limits">limits of the relevant criteria scan</a>.

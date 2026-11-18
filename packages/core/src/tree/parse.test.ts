@@ -42,6 +42,34 @@ describe('parseAriaSnapshot', () => {
       ]);
    });
 
+   it('preserves quoted colon names, escaped names, scalar leaves and text values', () => {
+      const snapshot = [
+         '- main:',
+         `  - 'link "Created By: Fireside Development LLC"':`,
+         '    - /url: https://example.com',
+         '  - heading "Summary" [level=2]',
+         `  - 'button "Say \\"hello\\""'`,
+         '  - text: "Value: 42"',
+      ].join('\n');
+      const nodes = parseAriaSnapshot(snapshot);
+
+      expect(nodes).toEqual([
+         {
+            role: 'main',
+            children: [
+               {
+                  role: 'link',
+                  name: 'Created By: Fireside Development LLC',
+                  children: [],
+               },
+               { role: 'heading', name: 'Summary', level: 2, children: [] },
+               { role: 'button', name: 'Say "hello"', children: [] },
+               { role: 'text', text: 'Value: 42', children: [] },
+            ],
+         },
+      ]);
+   });
+
    it('nests children under their parent role and drops /url property lines', () => {
       const nodes = parseAriaSnapshot(NAV_MAIN_SNAPSHOT);
 

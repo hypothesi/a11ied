@@ -185,6 +185,17 @@ async function resolveStartTarget(target: Platform | undefined): Promise<Platfor
    return fallback.target;
 }
 
+function stopUnansweredBroker(brokerPid: number | undefined): void {
+   if (brokerPid === undefined || !isProcessRunning(brokerPid)) {
+      return;
+   }
+   try {
+      process.kill(brokerPid, 'SIGTERM');
+   } catch {
+      // The broker exited between the check and the signal.
+   }
+}
+
 async function launchSession(
    options: StartDriverSessionOptions,
    target: Platform,
@@ -205,17 +216,24 @@ async function launchSession(
    if ((options.mode ?? resolveDriverMode()) === 'in-process') {
       return startInProcessSession(shared);
    }
-   spawnBrokerProcess({
+   const brokerPid = spawnBrokerProcess({
       ...shared,
       metadataFile: getActiveSessionFile(),
       socketPath: getDriverSocketPath(sessionId),
       idleTimeoutMs: idleTimeoutMinutes * MS_PER_MINUTE,
    });
-   return waitForBroker({
-      sessionId,
-      readSession: readActiveSessionMetadata,
-      timeoutMs: options.timeoutMs ?? resolveBrokerReadyTimeoutMs(target),
-   });
+   try {
+      return await waitForBroker({
+         sessionId,
+         readSession: readActiveSessionMetadata,
+         timeoutMs: options.timeoutMs ?? resolveBrokerReadyTimeoutMs(target),
+      });
+   } catch (error) {
+      /* A broker that missed its startup deadline would otherwise keep the desktop lease
+         and the screen reader, with no session left to stop it. */
+      stopUnansweredBroker(brokerPid);
+      throw error;
+   }
 }
 
 /** Reads the active session's metadata and current reader state. */

@@ -63,11 +63,11 @@ describe('combobox component', () => {'{'}
       </div>
       <p>
          Audit local dev servers or staging URLs directly from your terminal or GitHub Actions with
-         <code>a1 audit</code>. Powered by <abbr title="Open-source automated accessibility testing engine for HTML and DOM structure from Deque Systems"><a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noreferrer">axe-core</a></abbr>,
+         <code>a1 check</code>. Powered by <abbr title="Open-source automated accessibility testing engine for HTML and DOM structure from Deque Systems"><a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noreferrer">axe-core</a></abbr>,
          every failure is mapped directly to its official <abbr title="Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility"><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG</a></abbr> success
          criterion, isolated to the offending element, and paired with clear instructions to fix it.
       </p>
-      <pre><code>a1 audit http://localhost:3000/checkout --level AA</code></pre>
+      <pre><code>a1 check http://localhost:3000/checkout --level AA</code></pre>
       <pre data-label="OUTPUT"><code>&#10007; 2 problems to fix.
 
 1.1.1  Non-text Content  [A]

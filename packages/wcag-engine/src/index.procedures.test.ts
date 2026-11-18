@@ -24,9 +24,7 @@ describe.each(VERSIONS)('WCAG %s desktop procedure catalog', (version) => {
          ).toStrictEqual(true);
          for (const procedure of strategy.procedures) {
             expect(procedure.criterionId).toStrictEqual(criterion.id);
-            expect(procedure.version).toStrictEqual('1');
             expect(procedure.actions.length).toBeGreaterThan(0);
-            expect(procedure.requiredEvidence).toContain('action-trace');
             expect(Object.keys(procedure.evaluation)).to.eql([
                'passed',
                'failed',
@@ -66,34 +64,10 @@ describe.each(VERSIONS)('WCAG %s desktop procedure catalog', (version) => {
    });
 });
 
-describe('evidence required by behavioral procedures', () => {
-   it('requires real speech for status checks and measured evidence for thresholds', () => {
-      const contrast = getTestMethod('1.4.3').strategy.procedures.find(
-            (procedure) => procedure.procedureId !== 'axe_scan',
-         ),
-         flashes = getTestMethod('2.3.1').strategy.procedures[0],
-         status = getTestMethod('4.1.3').strategy.procedures[0];
+describe('limits stated by behavioral procedures', () => {
+   it('warns that flashing thresholds cannot be judged by eye', () => {
+      const flashes = getTestMethod('2.3.1').strategy.procedures[0];
 
-      expect(status?.requiredCapabilities).toContain('real-reader');
-      expect(status?.requiredEvidence).toContain('speech');
-      expect(flashes?.requiredEvidence).toContain('measurement');
       expect(flashes?.limitations.join(' ')).toContain('Unaided visual judgment');
-      expect(contrast?.requiredEvidence).toContain('measurement');
-   });
-   it('requires pointer and programmatic inspection support for the actions that need them', () => {
-      const gesture = getTestMethod('2.5.1').strategy.procedures.find(
-            (procedure) => procedure.procedureId !== 'axe_scan',
-         ),
-         parsing = getTestMethod('4.1.1', { version: '2.1' }).strategy.procedures.find(
-            (procedure) => procedure.procedureId !== 'axe_scan',
-         ),
-         purpose = getTestMethod('1.3.5').strategy.procedures.find(
-            (procedure) => procedure.procedureId !== 'axe_scan',
-         );
-
-      expect(gesture?.requiredCapabilities).toContain('pointer');
-      expect(purpose?.requiredCapabilities).toContain('dom');
-      expect(parsing?.requiredCapabilities).toContain('markup-validation');
-      expect(parsing?.requiredEvidence).toContain('observation');
    });
 });

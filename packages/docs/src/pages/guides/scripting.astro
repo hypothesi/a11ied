@@ -67,7 +67,7 @@ const toc = [
          <div class="route-row"><strong>0</strong><span>The command ran and nothing it checked failed.</span></div>
          <div class="route-row"><strong>2</strong><span>Usage error: a bad flag, a missing required argument, a command the screen reader cannot run, or an <code>sr</code> command run with no active session.</span></div>
          <div class="route-row"><strong>3</strong><span>Environment error: the browser or the screen reader broker failed to start, a recording could not be written, or a required setup step is missing under <code>a1 doctor --strict</code>.</span></div>
-         <div class="route-row"><strong>4</strong><span>A check failed: an <code>a1 axe</code> or <code>a1 audit</code> violation past <code>--fail-on</code>, or a failed <code>sr find</code>, <code>sr goto</code>, <code>sr wait --for</code>, <code>sr expect</code>, or <code>sr batch</code> step.</span></div>
+         <div class="route-row"><strong>4</strong><span>A check failed: an <code>a1 axe</code> or <code>a1 check</code> violation past <code>--fail-on</code>, or a failed <code>sr find</code>, <code>sr goto</code>, <code>sr wait --for</code>, <code>sr expect</code>, or <code>sr batch</code> step.</span></div>
          <div class="route-row"><strong>5</strong><span>An internal error a11ied did not classify. Report it as a bug with the command and the output.</span></div>
       </div>
       <p>
@@ -113,7 +113,7 @@ a1 sr next --phrase</code></pre>
          <code>--fail-on</code> and <code>--baseline</code>. Read it instead of counting
          <code>violations</code> yourself when a baseline is in play.
       </p>
-      <pre><code>a1 audit http://localhost:3000 --json 2>/dev/null | jq -r '.result.nextCommands[]'</code></pre>
+      <pre><code>a1 check http://localhost:3000 --json 2>/dev/null | jq -r '.result.nextCommands[]'</code></pre>
       <pre data-label="OUTPUT"><code>a1 wcag rule button-name</code></pre>
    </section>
 

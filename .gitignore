@@ -9,6 +9,7 @@ output/
 .fallow
 *.tsbuildinfo
 .playwright-cli
+.playwright-mcp
 
 # Beads / Dolt files (added by bd init)
 .dolt/
@@ -30,3 +31,6 @@ output/
 # packages/skills/ai.json declares the a11ied skill and ships with the repo. A global
 # gitignore excludes every ai.json, so re-include this one.
 !packages/skills/ai.json
+
+# Internal planning docs stay local
+internal-docs/plans/

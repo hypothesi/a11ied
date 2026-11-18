@@ -11,6 +11,7 @@ import type {
 import type { DriverActionOptions, DriverAdapter } from '@a11ied/guidepup/browser';
 
 import type { ActionExecutionResult } from './broker-types.js';
+import { resolveLoopBudgetMs } from './loop-budget.js';
 
 interface LoopStop {
    item: DriverCurrentItem;
@@ -23,6 +24,27 @@ interface LoopState {
    first: string | undefined;
    previous: string | undefined;
    items: DriverLoopItem[];
+   /** When the loop runs out of time, as a `Date.now()` value. */
+   deadline: number;
+   /** How many steps in a row announced nothing new; see `isRepeat`. */
+   repeats: number;
+}
+
+/**
+ * A real reader whose cursor is stuck, for example on browser chrome outside the page,
+ * announces the same item after every step and never reports that it did not move.
+ */
+const STALLED_REPEAT_LIMIT = 5;
+const REPEAT_WINDOW = 2;
+
+/**
+ * Silence counts as a repeat, and so does either of the last two phrases, because
+ * VoiceOver at the end of a quick-nav list alternates "Last heading ..." with silence.
+ */
+function isRepeat(items: readonly DriverLoopItem[], phrase: string): boolean {
+   return (
+      phrase === '' || items.slice(-REPEAT_WINDOW).some((item) => item.phrase === phrase)
+   );
 }
 
 /** Only adapter movement and simulated node identities can confirm the end. */
@@ -58,6 +80,42 @@ interface LoopArgs {
    step: () => Promise<{ moved?: boolean }>;
    /** Ends the loop early with `match` when the item is the one wanted. */
    isMatch?: (item: DriverCurrentItem) => boolean;
+   /** Aborts the loop, even in the middle of a step, when the session starts stopping. */
+   signal?: AbortSignal | undefined;
+   /** Overrides the time the loop may run, which defaults to the target's budget. */
+   budgetMs?: number;
+}
+
+/** How a loop action talks to the adapter, and what cancels it. */
+export interface LoopRun {
+   options: DriverActionOptions;
+   /** Aborts the loop, even in the middle of a step, when the session starts stopping. */
+   signal?: AbortSignal | undefined;
+}
+
+/** Settles with the abort reason as soon as the signal aborts, leaving `work` running. */
+async function raceAbort<TResult>(
+   work: Promise<TResult>,
+   signal: AbortSignal | undefined,
+): Promise<TResult> {
+   if (!signal) {
+      return work;
+   }
+   signal.throwIfAborted();
+   let abort: (() => void) | undefined = undefined;
+   const aborted = new Promise<never>((_resolve, reject) => {
+      abort = (): void => {
+         reject(signal.reason);
+      };
+      signal.addEventListener('abort', abort, { once: true });
+   });
+   try {
+      return await Promise.race([work, aborted]);
+   } finally {
+      if (abort) {
+         signal.removeEventListener('abort', abort);
+      }
+   }
 }
 
 async function stepOnce(args: LoopArgs): Promise<LoopStop> {
@@ -75,15 +133,28 @@ async function runLoop(
    if (remaining <= 0) {
       return { items: state.items, stoppedAt: 'cap' };
    }
-   const stop = await stepOnce(args);
+   if (Date.now() >= state.deadline) {
+      return { items: state.items, stoppedAt: 'time' };
+   }
+   const stop = await raceAbort(stepOnce(args), args.signal);
    if (reachedEnd(state, stop, args.adapter.target)) {
       return { items: state.items, stoppedAt: 'end' };
+   }
+   const phrase = stop.item.phrase ?? '';
+   const repeats = isRepeat(state.items, phrase) ? state.repeats + 1 : 0;
+   if (repeats >= STALLED_REPEAT_LIMIT) {
+      return {
+         items: state.items.slice(0, -STALLED_REPEAT_LIMIT + 1),
+         stoppedAt: 'stalled',
+      };
    }
    const items = [...state.items, toLoopItem(state.items.length + 1, stop.item)];
    const next: LoopState = {
       first: state.first ?? stop.position,
       previous: stop.position,
       items,
+      deadline: state.deadline,
+      repeats,
    };
    if (args.isMatch?.(stop.item)) {
       return { items, stoppedAt: 'match' };
@@ -95,22 +166,33 @@ async function runLoop(
    return runLoop(args, next, remaining - 1);
 }
 
-/** Steps until the end detector fires, the cap is reached, or `isMatch` accepts an item. */
+/**
+ * Steps until the end detector fires, the cap is reached, the time budget runs out, or
+ * `isMatch` accepts an item.
+ */
 export async function runBoundedLoop(args: LoopArgs): Promise<{
    items: DriverLoopItem[];
    stoppedAt: DriverLoopStop;
    complete: boolean;
    limitations: string[];
 }> {
+   const deadline =
+      Date.now() + (args.budgetMs ?? resolveLoopBudgetMs(args.adapter.target, args.max));
    const start = await args.adapter.readCurrentItem();
    const result = await runLoop(
       args,
-      { first: undefined, previous: start.position, items: [] },
+      {
+         first: undefined,
+         previous: start.position,
+         items: [],
+         deadline,
+         repeats: 0,
+      },
       args.max,
    );
    return {
       ...result,
-      complete: result.stoppedAt !== 'cap',
+      complete: result.stoppedAt === 'end' || result.stoppedAt === 'match',
       limitations:
          args.adapter.target === 'virtual'
             ? []
@@ -125,13 +207,15 @@ export async function runBoundedLoop(args: LoopArgs): Promise<{
 export async function runElementsAction(
    adapter: DriverAdapter,
    payload: DriverElementsPayload,
-   options: DriverActionOptions,
+   run: LoopRun,
 ): Promise<ActionExecutionResult> {
-   await adapter.performPortable('top', options);
+   await adapter.performPortable('top', run.options);
    const loop = await runBoundedLoop({
       adapter,
+      signal: run.signal,
       max: payload.max,
-      step: () => adapter.navigate({ direction: 'next', kind: payload.kind }, options),
+      step: () =>
+         adapter.navigate({ direction: 'next', kind: payload.kind }, run.options),
    });
    return {
       details: {
@@ -147,12 +231,13 @@ export async function runElementsAction(
 export async function runReadAllAction(
    adapter: DriverAdapter,
    payload: DriverReadAllPayload,
-   options: DriverActionOptions,
+   run: LoopRun,
 ): Promise<ActionExecutionResult> {
    const loop = await runBoundedLoop({
       adapter,
+      signal: run.signal,
       max: payload.max,
-      step: () => adapter.navigate({ direction: 'next', kind: 'item' }, options),
+      step: () => adapter.navigate({ direction: 'next', kind: 'item' }, run.options),
    });
    return { details: { count: loop.items.length, ...loop, max: payload.max } };
 }
@@ -220,7 +305,7 @@ export function matchesItem(item: DriverCurrentItem, wanted: WantedItem): boolea
 export async function runGotoAction(
    adapter: DriverAdapter,
    payload: DriverGotoPayload,
-   options: DriverActionOptions,
+   run: LoopRun,
 ): Promise<ActionExecutionResult> {
    const kind = ROLE_KINDS[normalizeWords(payload.role ?? '')] ?? 'item';
    const start = await adapter.readCurrentItem();
@@ -229,8 +314,9 @@ export async function runGotoAction(
    }
    const loop = await runBoundedLoop({
       adapter,
+      signal: run.signal,
       max: payload.max,
-      step: () => adapter.navigate({ direction: 'next', kind }, options),
+      step: () => adapter.navigate({ direction: 'next', kind }, run.options),
       isMatch: (item) => matchesItem(item, payload),
    });
    return {

@@ -41,16 +41,16 @@ Examples:
 `;
 
 /**
- * The sr subcommands in the order `sr --help` lists them, grouped by what a reader wants
- * to do. registerNavigationCommands emits both "Move through the page" and "Act on it"
- * commands; each one carries its own .helpGroup(), so the two groups stay separated in
- * the listing even though they are registered together.
+ * The sr subcommands in the order `sr --help` lists them, grouped into the six N4 task
+ * groups: session, navigate, interact, assert, inspect, bulk.
  */
 const registrars: ReadonlyArray<(driveCommand: Command) => void> = [
+   // Session
    registerStartCommand,
    registerOpenCommand,
    registerStopCommand,
    registerStatusCommand,
+   // Navigate
    registerReadCommand,
    registerTitleCommand,
    registerNavigationCommands,
@@ -59,19 +59,23 @@ const registrars: ReadonlyArray<(driveCommand: Command) => void> = [
    registerGotoCommand,
    registerElementsCommand,
    registerReadAllCommand,
-   registerWalkCommand,
+   // Interact
    registerPressCommand,
    registerTypeCommand,
    registerDoCommand,
    registerFocusCommand,
+   // Assert
    registerWaitCommand,
    registerExpectCommand,
    registerCheckpointCommand,
+   // Inspect
    registerTranscriptCommand,
    registerTailCommand,
    registerScreenshotCommand,
-   registerBatchCommand,
    registerListCommand,
+   // Bulk
+   registerWalkCommand,
+   registerBatchCommand,
 ];
 
 function registerDriverCommands(program: Command, commandName: string): void {
@@ -82,7 +86,7 @@ function registerDriverCommands(program: Command, commandName: string): void {
       .description('Control a target screen reader through stable sessions.')
       .addHelpText('after', SR_EXAMPLES)
       // Realizes the help command now, so it lands in this group, not "Commands:".
-      .commandsGroup(DRIVE_GROUPS.other)
+      .commandsGroup(DRIVE_GROUPS.inspect)
       .helpCommand('help [command]', 'display help for command');
 
    for (const register of registrars) {

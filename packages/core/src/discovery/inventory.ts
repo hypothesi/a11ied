@@ -7,7 +7,7 @@ import {
    type SiteInventory,
 } from '@a11ied/contracts';
 import { normalizeUrl } from './crawl.js';
-import { getCanonicalPath, withFileLock, writeJsonAtomic } from '../files/atomic-json.js';
+import { getCanonicalPath, withPathLock, writeAtomic } from '../files/store.js';
 
 const DEFAULT_MAX_PAGES = 2000;
 const DEFAULT_MAX_SITEMAPS = 50;
@@ -148,13 +148,13 @@ export async function writeInventoryAtomic(
 ): Promise<void> {
    const canonicalPath = await getCanonicalPath(path),
       validated = siteInventorySchema.parse(inventory);
-   await withFileLock(canonicalPath, async () => {
+   await withPathLock(canonicalPath, async () => {
       const current = await readExistingInventory(canonicalPath);
       if (current?.run.runId === validated.run.runId) {
          validated.run.assessmentFile ??= current.run.assessmentFile;
          validated.run.profile ??= current.run.profile;
       }
-      await writeJsonAtomic(validated, canonicalPath);
+      await writeAtomic(canonicalPath, validated);
    });
 }
 
@@ -164,7 +164,7 @@ export async function updateInventoryAtomic(input: {
    change: (inventory: SiteInventory) => SiteInventory | Promise<SiteInventory>;
 }): Promise<SiteInventory> {
    const path = await getCanonicalPath(input.path);
-   return withFileLock(path, async () => {
+   return withPathLock(path, async () => {
       const current = await readInventory(path),
          next = siteInventorySchema.parse(await input.change(current));
       if (current.run.runId !== next.run.runId || current.startUrl !== next.startUrl) {
@@ -172,7 +172,7 @@ export async function updateInventoryAtomic(input: {
             'An inventory mutation cannot replace the run identity or target.',
          );
       }
-      await writeJsonAtomic(next, path);
+      await writeAtomic(path, next);
       return next;
    });
 }

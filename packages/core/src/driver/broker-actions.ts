@@ -10,6 +10,7 @@ import { DriverCommandError, type DriverActionOptions } from '@a11ied/guidepup/b
 import { CliUsageError } from '../errors/cli-errors.js';
 import { runElementsAction, runGotoAction, runReadAllAction } from './broker-loops.js';
 import { runWaitAction } from './broker-wait.js';
+import { getContextStopSignal } from './context-queue.js';
 import type { ActionContext, ActionExecutionResult } from './broker-types.js';
 
 /** Actions after which the broker waits for the reader to finish speaking. */
@@ -113,13 +114,14 @@ async function handleLoop(
    request: Extract<DriverActionRequest, { action: 'elements' | 'read-all' | 'goto' }>,
    options: DriverActionOptions,
 ): Promise<ActionExecutionResult> {
+   const run = { options, signal: getContextStopSignal(context) };
    if (request.action === 'elements') {
-      return runElementsAction(context.adapter, request.payload, options);
+      return runElementsAction(context.adapter, request.payload, run);
    }
    if (request.action === 'read-all') {
-      return runReadAllAction(context.adapter, request.payload, options);
+      return runReadAllAction(context.adapter, request.payload, run);
    }
-   return runGotoAction(context.adapter, request.payload, options);
+   return runGotoAction(context.adapter, request.payload, run);
 }
 
 /** Runs wait and screenshot, which observe the reader without moving its cursor. */

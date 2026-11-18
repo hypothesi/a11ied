@@ -117,3 +117,12 @@ export const screenReaderMatchers = {
       return toOutcome(checkCurrentItem(received, wanted));
    },
 };
+
+/**
+ * The names Vitest's `expect.extend` installs for a `ScreenReader` or
+ * `QueuedScreenReader`: `toHaveSpoken`, `toHaveSpokenInOrder`, and `toHaveCursorOn`.
+ * Parity tests assert this list equals the matchers the verb registry declares.
+ */
+export const SCREEN_READER_MATCHER_NAMES = Object.keys(
+   screenReaderMatchers,
+) as readonly (keyof typeof screenReaderMatchers)[];

@@ -206,7 +206,7 @@
       },
       {
          "fileName": "strategy.2.1.json",
-         "sha256": "aa44f9790b8b0c784172d57bb039127629804b73c54eb8b771f96cd8ea27b024",
+         "sha256": "b25c0550af0fcbfbb18405308036427ff073d01468dc2ba37ce55bbd020c60ff",
          "wcagVersion": "2.1",
          "sourceFileNames": [
             "wcag.2.1.json",
@@ -223,7 +223,7 @@
       },
       {
          "fileName": "strategy.2.2.json",
-         "sha256": "3e74d5b8f528cd20f671883c63903924ecfeb13cceae8d381db04e3f7c113435",
+         "sha256": "2ffa4e945a95dadf4139060d830f466671ceb48a9277caad9957ce71a50c6a29",
          "wcagVersion": "2.2",
          "sourceFileNames": [
             "wcag.2.2.json",

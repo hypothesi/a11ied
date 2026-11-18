@@ -89,11 +89,11 @@ Environment
             <h2>Run an automated accessibility audit</h2>
          </div>
          <p>
-            Start your local development server, then scan a route with <code>a1 audit</code>.
+            Start your local development server, then scan a route with <code>a1 check</code>.
             Powered by <abbr title="Open-source automated accessibility testing engine for HTML and DOM structure from Deque Systems"><a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noreferrer">axe-core</a></abbr>,
             it checks rendered DOM structure against official <abbr title="Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility"><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG</a></abbr> success criteria:
          </p>
-         <pre><code>a1 audit http://localhost:3000/checkout --level AA</code></pre>
+         <pre><code>a1 check http://localhost:3000/checkout --level AA</code></pre>
          <pre data-label="OUTPUT"><code>✗ 1 problem to fix.
 
 4.1.2  Name, Role, Value  [A]

@@ -78,7 +78,7 @@ export function registerElementsCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('elements <kind>')
-         .helpGroup(DRIVE_GROUPS.move)
+         .helpGroup(DRIVE_GROUPS.navigate)
          .summary('List every element of one kind as the reader announces it.')
          .description(
             `The rotor: move to the top, then list every element of one kind as the reader announces it. Kinds: ${ELEMENT_KINDS}. Needs an active session; run "a1 sr start --sr virtual" first for the simulated reader instead of the VoiceOver default.`,
@@ -109,7 +109,7 @@ export function registerReadAllCommand(driveCommand: Command): void {
    addDriveActionOptions(
       driveCommand
          .command('read-all')
-         .helpGroup(DRIVE_GROUPS.move)
+         .helpGroup(DRIVE_GROUPS.navigate)
          .summary('Read from the cursor to the end of the document.')
          .description(
             'Say-all as a transcript: step item by item from the cursor to the end of the document, bounded by --max. Needs an active session; run "a1 sr start --sr virtual" first for the simulated reader instead of the VoiceOver default.',
@@ -181,7 +181,7 @@ export function registerGotoCommand(driveCommand: Command): void {
    addDriveNavigationOptions(
       driveCommand
          .command('goto')
-         .helpGroup(DRIVE_GROUPS.move)
+         .helpGroup(DRIVE_GROUPS.navigate)
          .summary('Step forward to an item with a given role or name.')
          .description(
             'Step forward until the current item has the given role, name, or both. Exits 4 when nothing matches. Needs an active session; run "a1 sr start --sr virtual" first for the simulated reader instead of the VoiceOver default.',

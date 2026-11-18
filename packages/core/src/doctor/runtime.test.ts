@@ -51,15 +51,15 @@ describe('task-specific doctor checks', () => {
 });
 
 describe('requested reader environments', () => {
-   it('rejects simulated audit environments even when no setup command can fix them', () => {
+   it('accepts explicitly selected virtual audit environments', () => {
       const report = createDoctorReport(createDeps({ platform: 'darwin' }), {
          task: 'audit',
          target: 'virtual',
       });
 
-      expect(report.ready).toStrictEqual(false);
-      expect(report.targets[0]?.status).toStrictEqual('requires-setup');
-      expect(renderDoctorText(report)).toContain('Requested environment is unavailable');
+      expect(report.ready).toStrictEqual(true);
+      expect(report.targets[0]?.status).toStrictEqual('ready');
+      expect(renderDoctorText(report)).toContain('virtual-dom  ready');
    });
 
    it('rejects a requested real reader on the wrong host', () => {

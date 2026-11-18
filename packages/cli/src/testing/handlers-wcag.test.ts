@@ -261,8 +261,7 @@ async function assertTextShowSnapshot(): Promise<void> {
    expect(show.stdout).not.toMatch(/^Understanding$/mu);
    expect(show.stdout).not.toContain('Test method');
    expect(show.stdout).toContain('Testing it');
-   expect(show.stdout).toContain('Required evidence');
-   expect(show.stdout).toContain('speech');
+   expect(show.stdout).toContain('Applies to');
    expect(show.stdout).toContain('Evaluation');
    expect(show.stdout).toContain('If it fails');
    expect(show.stdout).toContain('ARIA22');

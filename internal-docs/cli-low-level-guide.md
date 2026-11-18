@@ -2,9 +2,9 @@
 
 This file described the CLI and MCP commands from an earlier milestone: `inspect`,
 `wcag levels`, and the `driver_session` and `driver_action` MCP tools. None of those exist
-in the current command set. `inspect` was retired into `a1 audit`, `wcag levels` was
+in the current command set. `inspect` was retired into `a1 check`, `wcag levels` was
 replaced by `wcag criteria` and `wcag criteria --summary`, and the MCP tools were renamed
-to `sr_session` and `sr_action` alongside `wcag_criteria`, `wcag_rule`, `tree`, `audit`,
+to `sr_session` and `sr_action` alongside `wcag_criteria`, `wcag_rule`, `tree`, `check`,
 `sr_list`, `sr_expect`, and `sr_transcript`.
 
 For the current command set, read:
@@ -13,5 +13,4 @@ For the current command set, read:
 - `packages/docs/src/pages/reference/mcp.astro`, the published [MCP reference](/reference/mcp)
 - `a1 help-all` for the full command tree in one response
 
-This file is kept for the history in `internal-docs/plans/a11ied-driver-command-sets-plan.md`
-and `internal-docs/plans/a11ied-cli-ergonomics-plan.md`, which cite it.
+This file is kept for history. Earlier planning documents and manual-run records cite it.

@@ -12,7 +12,7 @@ import {
 
 import { resolveStateRoot } from './environment.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
-import { withFileLock, writeJsonAtomic } from '../files/atomic-json.js';
+import { withPathLock, writeAtomic } from '../files/store.js';
 
 const SESSION_ID_BYTES = 6;
 const ACTIVE_SESSION_FILE = 'session.json';
@@ -60,8 +60,8 @@ export async function ensureStateDirectory(): Promise<void> {
 export async function writeSessionMetadata(
    session: AccessibilityDriverSession,
 ): Promise<void> {
-   await withFileLock(session.metadataFile, () =>
-      writeJsonAtomic(session, session.metadataFile),
+   await withPathLock(session.metadataFile, () =>
+      writeAtomic(session.metadataFile, session),
    );
 }
 
@@ -127,7 +127,7 @@ function isSessionOwner(raw: string, sessionId: string): boolean {
 export async function writeRecoveryMetadata(
    session: AccessibilityDriverSession,
 ): Promise<void> {
-   await withFileLock(session.metadataFile, async () => {
+   await withPathLock(session.metadataFile, async () => {
       try {
          const raw = await readFile(session.metadataFile, 'utf8');
          if (!isSessionOwner(raw, session.sessionId)) {
@@ -138,7 +138,7 @@ export async function writeRecoveryMetadata(
             throw error;
          }
       }
-      await writeJsonAtomic(session, session.metadataFile);
+      await writeAtomic(session.metadataFile, session);
    });
 }
 
@@ -161,7 +161,7 @@ function removeOwnedMetadataSync(
 export async function removeSessionArtifacts(
    session: Pick<AccessibilityDriverSession, 'sessionId' | 'metadataFile' | 'socketPath'>,
 ): Promise<void> {
-   await withFileLock(session.metadataFile, async () => {
+   await withPathLock(session.metadataFile, async () => {
       let raw = '';
       try {
          raw = await readFile(session.metadataFile, 'utf8');

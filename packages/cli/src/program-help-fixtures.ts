@@ -18,14 +18,18 @@ export const topLevelHelpCases: HelpCase[] = [
         -h, --help        display help for command
 
       Find and fix problems:
-        audit [target]    Scan a page and list what to fix.
-        report            Build a multi-page accessibility report.
+        audit             Run, track, and report a WCAG audit of a site, page, or app.
+        check [target]    Scan one page during development and list what to fix.
+        capture <url>     Screenshot a page at a viewport, zoom, focus stop, or opened
+                          state.
         axe [targets...]  Run axe-core against one or more targets.
         tree [target]     Print a page's accessibility tree.
 
       Drive a screen reader:
         sr                Read a page as VoiceOver, NVDA, or the simulated reader
                           does.
+        talkback          Turn TalkBack on or off on an Android device and record what
+                          it says.
 
       Look things up:
         wcag [criterion]  Criteria, techniques, axe rules, and the W3C guidance.
@@ -110,8 +114,8 @@ function resolvePressSrOption(): string {
    }
    if (process.platform !== 'darwin') {
       return [
-         '        --sr <reader>   Screen reader to drive: voiceover, nvda, or virtual. Defaults to',
-         '                        an available VoiceOver or NVDA target, then falls back to',
+         '        --sr <reader>   Screen reader to drive: voiceover, nvda, or virtual. Defaults',
+         '                        to an available VoiceOver or NVDA target, then falls back to',
          '                        virtual as a last resort.',
       ].join('\n');
    }
@@ -189,48 +193,48 @@ export const driveRunHelpCases: HelpCase[] = [
         stop                   Stop the active session.
         status                 Show the active session's target and state.
 
-      Read the current item:
+      Navigate through the page:
         read                   Read the current item without moving.
         title                  Read the page title.
-
-      Move through the page:
         next [kind]            Move to the next item, or jump by kind.
         previous [kind]        Move to the previous item, or jump by kind.
         top                    Move to the top of the current area or document.
         bottom                 Move to the bottom of the current area or document.
-        escape                 Press Escape to dismiss a menu, dialog, or interaction.
         find <text>            Move the cursor to the next place the text appears.
         table <move>           Move or read inside the table the cursor is in.
         goto                   Step forward to an item with a given role or name.
         elements <kind>        List every element of one kind as the reader announces
                                it.
         read-all               Read from the cursor to the end of the document.
-        walk [url]             Read a whole page, starting the session if needed.
 
-      Act on it:
+      Interact with controls:
         interact               Enter interaction mode for the current group or
                                control.
         stop-interacting       Leave interaction mode.
         activate               Activate the current item.
+        escape                 Press Escape to dismiss a menu, dialog, or interaction.
         press <chord...>       Press key chords in order, one chord per argument.
         type <text>            Type text through the active target.
         do <command>           Run a named screen reader command.
         focus                  Bring a window to the front.
 
-      Check what was said:
+      Assert spoken output:
         wait                   Pause, or wait until the reader announces a phrase.
         expect <text|/regex/>  Check that the reader announced a phrase.
         checkpoint <label>     Mark a named point in the transcript for --since.
+
+      Inspect transcript and state:
         transcript             Print what the reader said, with timestamps and
                                checkpoints.
         tail                   Continuously stream new screen reader announcements in
                                real time.
-
-      Other:
         screenshot <path>      Save a picture of what the VoiceOver cursor is on.
-        batch [file]           Run JSON lines of actions over one session.
         list                   List the named commands sr do accepts.
         help [command]         display help for command
+
+      Bulk and scripted runs:
+        walk [url]             Read a whole page, starting the session if needed.
+        batch [file]           Run JSON lines of actions over one session.
 
       Examples:
         a1 sr start --sr virtual

@@ -273,13 +273,13 @@ describe('tree tool', () => {
    );
 });
 
-describe('audit tool', () => {
+describe('check tool', () => {
    it(
       'runs axe, tree, and the relevant criteria scan, and matches the CLI exit meaning',
       async () => {
          await withHarness(async (harness) => {
             const result = await harness.client.callTool({
-               name: 'audit',
+               name: 'check',
                arguments: { target: BUTTON_NAME_FAILURE },
             });
 

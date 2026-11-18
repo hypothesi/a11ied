@@ -11,6 +11,8 @@ export const ONE_MINUTE_MS = 60_000;
 const FIXTURE_ROOT = resolve(import.meta.dirname, '../../../cli/test/fixtures');
 export const BUTTON_NAME_FAILURE = resolve(FIXTURE_ROOT, 'button-name-failure.html');
 export const BASIC_PAGE = resolve(FIXTURE_ROOT, 'basic-page.html');
+export const TITLE_PRESENT_PAGE = resolve(FIXTURE_ROOT, 'title-present.html');
+export const TITLE_MISSING_PAGE = resolve(FIXTURE_ROOT, 'title-missing.html');
 
 export function getInvalidContentText(content: unknown): string {
    if (!Array.isArray(content)) {

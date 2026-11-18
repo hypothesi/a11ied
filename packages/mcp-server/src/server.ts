@@ -1,9 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import { registerResources } from './resources/register.js';
-import { registerEvidenceTools } from './tools/evidence.js';
-import { registerAuditDiscoverTool } from './tools/audit-discover.js';
-import { registerReportBuildTool } from './tools/report-build.js';
+import { registerAuditTools } from './tools/audit.js';
 import { registerExecutionTools } from './tools/execution.js';
 import { registerKnowledgeTools } from './tools/knowledge.js';
 import {
@@ -15,6 +13,7 @@ import { registerSrActionTool } from './tools/sr-action.js';
 import { registerSrListTool } from './tools/sr-list.js';
 import { registerSrSessionTool } from './tools/sr-session.js';
 import { registerSrTranscriptTools } from './tools/sr-transcript.js';
+import { registerTalkBackTool } from './tools/talkback.js';
 
 /** Creates the MCP server with all shipped tools and read-only resources registered. */
 export function createMcpServer(): McpServer {
@@ -29,13 +28,12 @@ export function createMcpServer(): McpServer {
    registerPatternCheckTool(server);
    registerPatternEvidenceTools(server);
    registerExecutionTools(server);
-   registerEvidenceTools(server);
-   registerAuditDiscoverTool(server);
-   registerReportBuildTool(server);
+   registerAuditTools(server);
    registerSrSessionTool(server);
    registerSrActionTool(server);
    registerSrListTool(server);
    registerSrTranscriptTools(server);
+   registerTalkBackTool(server);
 
    return server;
 }

@@ -6,7 +6,6 @@ import type {
    EvidenceRecord,
    RecordedJudgment,
 } from '@a11ied/contracts';
-import { isVerifiedEvidence, listEvidenceObligations } from '../evidence/validation.js';
 
 const OUTCOME_PRIORITY = { failed: 3, cantTell: 2, passed: 1, inapplicable: 0 } as const;
 
@@ -53,35 +52,17 @@ export function attributeRowOutcome(
    return undefined;
 }
 
-/** A row covers every queued state and environment for the same widget and tree. */
+/**
+ * A judgment counts while the widget's accessibility tree is the one it was made against
+ * and the judgment is conclusive.
+ */
 export function isPatternEvidenceComplete(input: {
    record: EvidenceRecord;
-   records: EvidenceRecord[];
    subjectHash: string;
 }): boolean {
-   const { record, records, subjectHash } = input;
-   if (!isVerifiedEvidence(record) || record.subjectHash !== subjectHash) {
-      return false;
-   }
-   const candidates = records.filter(
-      (candidate) =>
-         isVerifiedEvidence(candidate) &&
-         candidate.subject === record.subject &&
-         candidate.pointer === record.pointer &&
-         candidate.subjectHash === subjectHash &&
-         candidate.provenance?.runId === record.provenance?.runId &&
-         candidate.test.kind === 'patternRow' &&
-         record.test.kind === 'patternRow' &&
-         candidate.test.exampleId === record.test.exampleId &&
-         candidate.test.rowKey === record.test.rowKey &&
-         candidate.outcome !== 'cantTell',
-   );
-   const obligations = listEvidenceObligations(record);
    return (
-      obligations.length > 0 &&
-      obligations.every((check) =>
-         candidates.some((candidate) => candidate.provenance?.checkId === check.checkId),
-      )
+      input.record.subjectHash === input.subjectHash &&
+      input.record.outcome !== 'cantTell'
    );
 }
 
@@ -93,9 +74,8 @@ function getPreferredPatternRecord(
    if (!previous) {
       return record;
    }
-   const current = isVerifiedEvidence(record) && record.subjectHash === subjectHash;
-   const previousCurrent =
-      isVerifiedEvidence(previous) && previous.subjectHash === subjectHash;
+   const current = record.subjectHash === subjectHash;
+   const previousCurrent = previous.subjectHash === subjectHash;
    if (
       current &&
       (!previousCurrent ||
@@ -106,19 +86,13 @@ function getPreferredPatternRecord(
    return previous;
 }
 
-function toJudgment(
-   record: EvidenceRecord,
-   input: {
-      records: EvidenceRecord[];
-      subjectHash: string;
-   },
-): RecordedJudgment {
+function toJudgment(record: EvidenceRecord, subjectHash: string): RecordedJudgment {
    return {
       outcome: record.outcome,
       ...(record.note === undefined ? {} : { note: record.note }),
       ...(record.assertedBy === undefined ? {} : { assertedBy: record.assertedBy }),
       recordedAt: record.recordedAt,
-      stale: !isPatternEvidenceComplete({ record, ...input }),
+      stale: record.subjectHash !== subjectHash,
    };
 }
 
@@ -136,7 +110,6 @@ export function attachRecordedJudgments(input: {
    const byRowKey = new Map<string, EvidenceRecord>();
    for (const record of input.records) {
       if (
-         record.test.kind === 'patternRow' &&
          record.pointer === input.result.selector &&
          record.test.exampleId === input.result.exampleId
       ) {
@@ -154,7 +127,7 @@ export function attachRecordedJudgments(input: {
 
    const attach = <TRow extends { rowKey: string }>(row: TRow): TRow => {
       const record = byRowKey.get(row.rowKey);
-      return record ? { ...row, recorded: toJudgment(record, input) } : row;
+      return record ? { ...row, recorded: toJudgment(record, input.subjectHash) } : row;
    };
 
    return {

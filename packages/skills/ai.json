@@ -4,8 +4,8 @@
       "a11ied": {
          "path": "./a11ied/"
       },
-      "full-site-audit": {
-         "path": "./full-site-audit/"
+      "a11ied-audit": {
+         "path": "./a11ied-audit/"
       }
    }
 }

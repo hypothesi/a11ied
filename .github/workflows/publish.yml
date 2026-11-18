@@ -51,6 +51,9 @@ jobs:
                 packages/wcag-engine
                 packages/earl
                 packages/guidepup
+                packages/knowledge
+                packages/observe
+                packages/audit
                 packages/core
                 packages/mcp-server
                 packages/cli

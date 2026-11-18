@@ -17,6 +17,7 @@ const nodeExternals = [
    'axe-core',
    'proper-lockfile',
    'pngjs',
+   'yaml',
    '@modelcontextprotocol/sdk',
    'vitest',
 ];

@@ -6,12 +6,14 @@ const toc = [
    { id: 'families', label: 'Command families' },
    { id: 'shared', label: 'Shared options' },
    { id: 'sr', label: 'a1 sr' },
+   { id: 'talkback', label: 'a1 talkback' },
    { id: 'keys', label: 'Key chords' },
    { id: 'wcag', label: 'a1 wcag' },
    { id: 'axe', label: 'a1 axe' },
    { id: 'tree', label: 'a1 tree' },
+   { id: 'check', label: 'a1 check' },
+   { id: 'capture', label: 'a1 capture' },
    { id: 'audit', label: 'a1 audit' },
-   { id: 'assessment', label: 'Agent-led assessment' },
    { id: 'doctor', label: 'a1 doctor and mcp' },
    { id: 'browser', label: 'Browser selection' },
 ];
@@ -38,7 +40,9 @@ const toc = [
          <div class="route-row"><code>a1 wcag</code><span>Look up criteria, techniques, axe rules, search results, and coverage.</span></div>
          <div class="route-row"><code>a1 axe</code><span>Run axe-core against one or more targets.</span></div>
          <div class="route-row"><code>a1 tree</code><span>Print a target's accessibility tree.</span></div>
-         <div class="route-row"><code>a1 audit</code><span>Run axe, the accessibility tree, and applicability together, with a criterion rollup.</span></div>
+         <div class="route-row"><code>a1 check</code><span>Scan one page during development: axe, the accessibility tree, and applicability together.</span></div>
+         <div class="route-row"><code>a1 capture</code><span>Screenshot a page at a viewport, zoom, focus stop, or opened state.</span></div>
+         <div class="route-row"><code>a1 audit</code><span>Run, track, and report a WCAG audit of a site, page, feature, or app.</span></div>
          <div class="route-row"><code>a1 mcp</code><span>Start the stdio MCP server.</span></div>
          <div class="route-row"><code>a1 doctor</code><span>Check the host and list the setup steps still needed.</span></div>
          <div class="route-row"><code>a1 setup</code><span>Run the Guidepup setup steps this host needs, then re-check.</span></div>
@@ -55,7 +59,7 @@ const toc = [
          <div class="route-list">
             <div class="route-row"><code>--json</code><span>Print one structured object instead of formatted text.</span></div>
             <div class="route-row"><code>--verbose</code><span>Add detail to the text output. No effect with <code>--json</code>.</span></div>
-            <div class="route-row"><code>--wcag &lt;version&gt;</code><span>WCAG version for <code>wcag</code>, <code>axe</code>, and <code>audit</code>. Accepts <code>2.1</code> or <code>2.2</code>. Defaults to <code>2.2</code>.</span></div>
+            <div class="route-row"><code>--wcag &lt;version&gt;</code><span>WCAG version for <code>wcag</code>, <code>axe</code>, and <code>check</code>. Accepts <code>2.1</code> or <code>2.2</code>. Defaults to <code>2.2</code>.</span></div>
          </div>
          <p>
             <code>-V</code> at the top level prints the package version. <code>--wcag</code> inside
@@ -142,6 +146,21 @@ const toc = [
          <code>press</code>, <code>type</code>, <code>do</code>, and <code>walk</code> start a
          session when none is active. The other verbs need one and exit 2 without it.
       </p>
+   </section>
+
+   <section class="panel" id="talkback">
+      <h2>a1 talkback</h2>
+      <p>
+         Drives TalkBack over adb on an Android phone or a Google Play emulator image, and prints
+         what TalkBack said. Google APIs emulator images do not include TalkBack. Set TalkBack
+         settings &gt; Advanced settings &gt; Developer settings &gt; Log output level to VERBOSE once
+         per device, since the speech is read from its log. Add <code>--serial</code> when more
+         than one device is attached.
+      </p>
+      <div class="route-list">
+         <div class="route-row"><code>on</code>, <code>off</code><span>Turn TalkBack on or off.</span></div>
+         <div class="route-row"><code>walk [--key] [--count]</code><span>Press a key repeatedly and print what TalkBack said after each press. Keys: <code>next</code> (Tab), <code>previous</code>, <code>activate</code> (Enter), <code>up</code>, <code>down</code>.</span></div>
+      </div>
    </section>
 
    <section class="split panel" id="keys">
@@ -368,127 +387,115 @@ a1 tree http://localhost:3000 --name "Sign in" --json</code></pre>
       </div>
    </section>
 
-   <section class="split panel" id="audit">
+   <section class="split panel" id="check">
       <div class="stack">
          <div class="panel-head">
-            <p class="panel-kicker">Page observations</p>
-            <h2>a1 audit</h2>
+            <p class="panel-kicker">One page, while you build</p>
+            <h2>a1 check</h2>
          </div>
          <div class="route-list">
             <div class="route-row"><code>&lt;target&gt;</code><span>An http(s) URL, a file path, - for HTML on stdin, or --html.</span></div>
             <div class="route-row"><code>--fail-on &lt;impact&gt;</code><span>Only count axe violations at or above this impact toward the exit code: minor, moderate, serious, or critical. Defaults to any violation.</span></div>
             <div class="route-row"><code>--baseline &lt;file&gt;</code><span>JSON file of accepted axe findings that do not count toward the exit code.</span></div>
             <div class="route-row"><code>--update-baseline</code><span>Write the current axe violations to <code>--baseline</code> instead of asserting against it.</span></div>
-            <div class="route-row"><code>--results &lt;file&gt;</code><span>Read recorded manual results from here. Defaults to <code>.a11ied/evidence.jsonl</code>, or <code>$A11IED_EVIDENCE</code>.</span></div>
             <div class="route-row"><code>--format &lt;format&gt;</code><span>text, json, or earl. Defaults to text, or json with <code>--json</code>.</span></div>
-            <div class="route-row"><code>--out &lt;file&gt;</code><span>Write the report to this file instead of stdout.</span></div>
+            <div class="route-row"><code>--out &lt;file&gt;</code><span>Write the result to this file instead of stdout.</span></div>
          </div>
-         <pre><code>a1 audit http://localhost:3000 --json
-a1 audit http://localhost:3000 --fail-on critical
-a1 audit http://localhost:3000 --format earl --out report.earl.json
-a1 audit --html '&lt;h1&gt;Hi&lt;/h1&gt;'</code></pre>
+         <pre><code>a1 check http://localhost:3000 --json
+a1 check http://localhost:3000 --fail-on critical
+a1 check http://localhost:3000 --format earl --out check.earl.json
+a1 check --html '&lt;h1&gt;Hi&lt;/h1&gt;'</code></pre>
          <p>
-            <code>audit</code> runs axe against every rule mapped in the WCAG version, reads the
+            <code>check</code> runs axe against every rule mapped in the WCAG version, reads the
             accessibility tree, and derives applicability from the target's HTML, all against one
             resolved target. The result includes these sections:
          </p>
          <div class="route-list">
             <div class="route-row"><code>axe</code><span>The full axe run.</span></div>
             <div class="route-row"><code>tree</code><span>Page title, first heading, and landmark, heading, link, button, and form counts.</span></div>
-            <div class="route-row"><code>applicability</code><span>The signal-backed matrix. See <a href="/relevant-criteria">applicability</a> for how the states are decided.</span></div>
-            <div class="route-row"><code>criteria</code><span>A per-criterion rollup of axe verdict, applicability state, coverage state, evidence mode, and whether the criterion is still <code>pending</code> a person.</span></div>
-            <div class="route-row"><code>recorded</code><span>The results a person or an agent recorded for this target.</span></div>
+            <div class="route-row"><code>relevance</code><span>The signal-backed matrix. See <a href="/relevant-criteria">applicability</a> for how the states are decided.</span></div>
+            <div class="route-row"><code>criteria</code><span>A per-criterion rollup of axe verdict, applicability state, test method, and <code>needsJudgment</code>, which is true unless axe found a failure.</span></div>
          </div>
          <p>
             <code>result.nextCommands</code> lists <code>a1 wcag rule</code> calls for every
             failing axe rule.
          </p>
          <p>
-            <code>audit</code> exits 4 when an axe violation remains after
+            <code>check</code> exits 4 when an axe violation remains after
             <code>--fail-on</code> and <code>--baseline</code> filtering, and 0 otherwise, the same
-            verdict rules as <code>a1 axe</code>.
-         </p>
-         <h3>Checks a11ied cannot automate</h3>
-         <p>
-            Axe checks specific conditions within selected criteria. Assessment procedures
-            cover the remaining behavior and content requirements. An agent records observed
-            results through these commands.
-         </p>
-         <div class="route-list">
-            <div class="route-row"><code>a1 audit pending &lt;target&gt;</code><span>List criteria with remaining manual procedures. Each returned procedure needs its own recorded result. Reads WCAG data and the evidence file without opening a browser.</span></div>
-            <div class="route-row"><code>a1 audit record &lt;target&gt;</code><span>Record one outcome. Takes <code>--criterion</code>, <code>--outcome</code>, and optionally <code>--pointer</code>, <code>--note</code>, <code>--procedure</code>, <code>--mode</code>, <code>--by</code>, <code>--run</code>, and <code>--provenance</code>. <code>--finding &lt;file&gt;</code> accepts a JSON title, userImpact, optional remediation, and optional impact. Notes without current run and artifact provenance remain unverified and do not complete a criterion.</span></div>
-            <div class="route-row"><code>a1 audit clear &lt;target&gt;</code><span>Drop recorded results for one target.</span></div>
-         </div>
-         <pre><code>a1 audit pending http://localhost:3000 --level AA
-a1 audit record http://localhost:3000 --criterion 2.4.4 --outcome failed \
-   --pointer 'nav &gt; a:nth-child(3)' --note "Four links read 'Learn more'."
-a1 audit http://localhost:3000 --format earl --out report.earl.json</code></pre>
-         <p>
-         Pass <code>--results &lt;run-dir&gt;/evidence.jsonl</code> on every audit, pending, and
-         record call in a site audit. Resume with the same file; use a fresh file for a new
-         run. A passing procedure does not erase a failure recorded for another procedure.
-      </p>
-      <p>
-            <code>--outcome</code> takes passed, failed, cantTell, or inapplicable. Results go to
-            <code>.a11ied/evidence.jsonl</code>, one JSON object per line, so several agent calls
-            can record at once. Recording the same procedure and element again replaces its earlier result.
-            Recording a result never stores it under the axe procedure, so a person's judgment
-            cannot appear in the report as an automated one.
-         </p>
-         <p>
-            <code>--format earl</code> then writes one report holding both. A recorded result
-            keeps <code>mode: earl:manual</code> or <code>earl:semiAutomatic</code>, so a reader
-            can tell it from an axe result.
+            verdict rules as <code>a1 axe</code>. Exit 0 means the scanner found nothing. It
+            does not mean a criterion passes.
          </p>
       </div>
       <div class="split-aside">
-         <div class="tag">One target, one report</div>
+         <div class="tag">One target, one scan</div>
          <p class="aside-note">
-            <code>audit</code> is the command to reach for first on a new page. Follow up with
-            <code>a1 axe</code>, <code>a1 tree</code>, or <code>a1 wcag show</code> once you know
-            what to look at.
+            <code>check</code> is the command to reach for first on a page you are building.
+            For judged outcomes on every criterion and a report, run <code>a1 audit</code>.
          </p>
       </div>
    </section>
 
-   <section class="panel" id="assessment">
-      <h2>Agent-led assessment</h2>
+   <section class="panel" id="capture">
+      <h2>a1 capture</h2>
       <p>
-         <code>audit run</code> creates durable work for a host agent. It sends no UI input.
-         The agent performs each procedure, saves observed evidence, and evaluates the result.
-         The environment JSON records its observed platform, OS, capabilities, and limitations.
-         Web scope defaults to site; <code>--app</code> selects an existing desktop app target and defaults to app scope.
+         <code>a1 capture &lt;url&gt; --out &lt;file.png&gt;</code> loads a page, puts it in a
+         condition, and saves a screenshot. It prints which element has keyboard focus, whether
+         that element is in view or covered by another, its outline and box shadow, and how many
+         pixels the page overflows sideways. Steps run in this order: wait, click, press keys,
+         hover, capture.
       </p>
-      <p>
-         With <code>--inventory</code>, startup uses the discovered run ID and links the
-         coordinator without editing JSON. Its default path is <code>run.json</code> beside
-         the inventory. A compatible coordinator can be attached after interrupted startup;
-         conflicting identity, profile, environment, policy, or inventory paths are rejected.
-      </p>
-      <p>
-         Evidence provenance and non-image artifact envelopes include the claimed check's
-         <code>attempts</code> value as <code>attempt</code>. A retry requires fresh proof for
-         that generation, even after a clock change. Raw screenshots retain their PNG format;
-         their provenance and companion artifacts identify the attempt.
-      </p>
-      <pre><code>a1 audit discover https://createdbyfireside.com --out .a11ied/fireside/inventory.json
-a1 audit run https://createdbyfireside.com --environment environment.json \
-  --inventory .a11ied/fireside/inventory.json --run .a11ied/fireside/run.json
-a1 audit next .a11ied/fireside/run.json --json
-a1 audit status .a11ied/fireside/run.json --limit 20 --json</code></pre>
       <div class="route-list">
-         <div class="route-row"><code>run [url]</code><span>Requires <code>--environment</code>. Accepts <code>--app</code>, <code>--scope</code>, <code>--wcag</code>, <code>--level</code>, <code>--inventory</code>, <code>--run</code>, <code>--id</code>, and <code>--policy</code>. Policy JSON declares allowed origins and approved submission or destructive actions; both action flags default to disabled.</span></div>
-         <div class="route-row"><code>state, journey, queue &lt;run&gt;</code><span>Register an observed state, ordered journey, or explicit obligation with <code>--input &lt;file&gt;</code>. Use <code>-</code> for stdin. Responses return the saved identity and revision even beyond the first status page.</span></div>
-         <div class="route-row"><code>next &lt;run&gt;</code><span>Claim one check with its procedure and observed scope context. Execute its setup and actions, preserve evidence, and supply the required agent judgment. A changed claim is rejected before any UI input.</span></div>
-         <div class="route-row"><code>evaluate &lt;run&gt;</code><span>Requires <code>--check</code>, <code>--outcome</code>, and saved <code>--evidence &lt;id...&gt;</code> from <code>audit record --run</code>. Missing, mismatched, or stale proof is rejected.</span></div>
-         <div class="route-row"><code>block, resume &lt;run&gt;</code><span>Block a check with <code>--check</code> and <code>--reason</code>. Resume preserves interrupted work as blocked. After restoring a safe state, pass explicit <code>--retry &lt;check...&gt;</code>; completed assessments cannot be replayed.</span></div>
-         <div class="route-row"><code>status, finalize &lt;run&gt;</code><span>Status revalidates coverage, artifacts, and scope. Lists use <code>--offset</code> and <code>--limit</code> (1 to 100; default 20). Finalize requires complete validated coverage; <code>--partial</code> returns unresolved work and keeps the run active.</span></div>
+         <div class="route-row"><code>--viewport &lt;WxH&gt;</code><span>Viewport in CSS pixels, such as <code>320x800</code> for a reflow check. Defaults to 1280x900.</span></div>
+         <div class="route-row"><code>--zoom &lt;factor&gt;</code><span>Browser zoom, such as <code>2</code> for 200 percent.</span></div>
+         <div class="route-row"><code>--text-spacing</code><span>Apply the WCAG 1.4.12 text spacing values.</span></div>
+         <div class="route-row"><code>--click &lt;selector&gt;</code>, <code>--hover &lt;selector&gt;</code><span>Open a state or trigger hover content first. <code>--click</code> is repeatable; clicks run in order.</span></div>
+         <div class="route-row"><code>--press &lt;key&gt;</code><span>Press a key. Repeatable. <code>"Tab*4"</code> presses Tab four times.</span></div>
+         <div class="route-row"><code>--selector &lt;selector&gt;</code>, <code>--full-page</code><span>Capture one element, outlined, with some of the page around it; or the whole scrollable page. Takes CSS or <code>role=button[name="Menu"]</code>, and reaches into open shadow roots.</span></div>
       </div>
+      <pre><code>a1 capture https://example.com --viewport 320x800 --full-page --out reflow.png
+a1 capture https://example.com --press "Tab*4" --out focus-4.png
+a1 capture https://example.com --click "#chat" --selector "role=textbox[name=\"Name\"]" --out chat-name.png</code></pre>
+   </section>
+
+   <section class="panel" id="audit">
+      <h2>a1 audit</h2>
       <p>
-         Finalization updates assessment status. Report building remains a separate operation
-         over discovery and page artifacts. Native reader binding and complete installed audits
-         still require their own runtime verification.
+         <code>a1 audit</code> runs an agent-driven WCAG audit and keeps its state in
+         <code>.a11ied/audits/&lt;id&gt;/</code>. See <a href="/guides/audit">run an audit</a>
+         for the workflow. Every subcommand takes <code>--audit &lt;id&gt;</code> and
+         <code>--json</code>. Without <code>--audit</code> a command uses
+         <code>$A11IED_AUDIT</code>, then the only audit in the workspace.
       </p>
+      <h3>Set up</h3>
+      <div class="route-list">
+         <div class="route-row"><code>init &lt;target&gt;</code><span>Create an audit. <code>--name</code>, <code>--id</code>, <code>--platform web|ios|android</code>, <code>--level</code>, <code>--wcag</code>, <code>--criteria &lt;list&gt;</code>, <code>--passes &lt;list&gt;</code>, repeatable <code>--rule &lt;text&gt;</code>, <code>--access &lt;text&gt;</code>, and <code>--page</code> to audit only the target page.</span></div>
+         <div class="route-row"><code>list</code><span>List the audits in the workspace with their progress.</span></div>
+         <div class="route-row"><code>page add &lt;locator&gt;</code><span>Add a page, screen, state, or flow. <code>--name</code>, <code>--kind</code>, <code>--notes</code>, <code>--group</code>, <code>--passes</code>.</span></div>
+         <div class="route-row"><code>page list</code>, <code>page exclude &lt;id&gt; --reason</code>, <code>page include &lt;id&gt;</code><span>Review and adjust what the audit covers. Exclusions appear in the report with their reason.</span></div>
+         <div class="route-row"><code>discover [url]</code><span>Read the sitemap, crawl same-origin links, and add each reachable page. <code>--max-pages</code>, <code>--include</code>, <code>--exclude</code>, <code>--storage-state</code>, <code>--dry-run</code>.</span></div>
+         <div class="route-row"><code>scan</code><span>Run axe and page measurements on every web page in parallel. <code>--page</code>, <code>--concurrency</code>, <code>--timeout</code>, <code>--storage-state</code>.</span></div>
+      </div>
+      <h3>Do the work</h3>
+      <div class="route-list">
+         <div class="route-row"><code>next --worker &lt;name&gt;</code><span>Claim a unit and print its work packet. <code>--pass</code>, <code>--not-pass</code>, <code>--page</code>, <code>--unit</code>, <code>--lease &lt;minutes&gt;</code>. A worker that already has a unit gets the same unit back.</span></div>
+         <div class="route-row"><code>show &lt;unit&gt;</code><span>Print a unit's packet without claiming it.</span></div>
+         <div class="route-row"><code>submit &lt;unit&gt; --worker &lt;name&gt; --file &lt;json&gt;</code><span>Hand in outcomes, findings, the states tested, and dismissals. A finding's <code>screenshot</code> spec (selector plus viewport, zoom, clicks, keys, or hover) becomes a cropped, outlined picture of the element. Accepted or rejected as a whole; a rejection lists every problem.</span></div>
+         <div class="route-row"><code>note &lt;unit&gt; --worker &lt;name&gt; [message]</code><span>Extend the claim and log progress.</span></div>
+         <div class="route-row"><code>block &lt;unit&gt; --reason</code><span>Park a unit that needs a person. Other units continue.</span></div>
+         <div class="route-row"><code>reopen &lt;unit&gt; --reason</code><span>Return a blocked or finished unit to the queue. Its earlier outcomes appear as prior results in the next worker's packet.</span></div>
+         <div class="route-row"><code>limitation [text] [--criterion] [--list] [--remove]</code><span>Record, list, or remove something the whole audit could not test. The report lists each one under Not verified.</span></div>
+      </div>
+      <h3>Watch, curate, report</h3>
+      <div class="route-list">
+         <div class="route-row"><code>status</code><span>Progress, active workers, blocked units, findings, and recent activity. <code>--units</code> lists every unit.</span></div>
+         <div class="route-row"><code>log</code><span>The activity log. <code>--unit</code>, <code>--limit</code>.</span></div>
+         <div class="route-row"><code>dashboard</code><span>Serve a live progress page on localhost. <code>--port</code>, or <code>--out &lt;file&gt;</code> for a static snapshot.</span></div>
+         <div class="route-row"><code>findings</code><span>List findings. <code>--criterion</code>, <code>--page</code>, <code>--all</code> to include dismissed ones.</span></div>
+         <div class="route-row"><code>finding show|dismiss|merge|update</code><span>Inspect and curate one finding before reporting.</span></div>
+         <div class="route-row"><code>signals &lt;page&gt;</code><span>The facts the scan collected. <code>--kind</code> selects one.</span></div>
+         <div class="route-row"><code>report</code><span>Write <code>audit-report.html</code>, <code>.md</code>, and <code>.json</code>. <code>--format</code>, <code>--out &lt;dir&gt;</code>, <code>--link-evidence</code>.</span></div>
+      </div>
    </section>
 
    <section class="panel" id="doctor">
@@ -515,8 +522,8 @@ a1 help-all</code></pre>
       <p>
          Use <code>--task scan</code> for browser scans, <code>--task reader</code> for reader sessions,
          or <code>--task audit</code> for desktop audit prerequisites. Use <code>--sr voiceover</code>
-         on macOS or <code>--sr nvda</code> on Windows to check one reader. A virtual reader cannot
-         satisfy audit prerequisites. These checks do not establish audit coverage.
+         on macOS, <code>--sr nvda</code> on Windows, or <code>--sr virtual</code> for a virtual-reader
+         production audit. Virtual evidence retains simulated provenance. These checks do not establish audit coverage.
       </p>
       <p>
          Recording permission is checked only with <code>--recording</code>. On macOS this captures

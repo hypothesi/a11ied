@@ -1,5 +1,5 @@
-import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname, extname, resolve } from 'node:path';
+import { writeAtomic } from '../files/store.js';
+import { extname, resolve } from 'node:path';
 
 import {
    driverTranscriptFormatSchema,
@@ -149,8 +149,7 @@ export async function writeDriverTranscript(args: {
 }): Promise<{ path: string; format: DriverTranscriptFormat }> {
    const format = resolveTranscriptFormat(args.outPath, args.format),
       path = resolve(args.cwd ?? process.cwd(), args.outPath);
-   await mkdir(dirname(path), { recursive: true });
-   await writeFile(path, formatTranscript(args.transcript, format), 'utf8');
+   await writeAtomic(path, formatTranscript(args.transcript, format));
    return { path, format };
 }
 

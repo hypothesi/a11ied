@@ -2,44 +2,9 @@ import { z } from 'zod';
 
 import { criterionIdSchema } from './criterion.js';
 
-export const assessmentCapabilitySchema = z.enum([
-   'rendered-ui',
-   'keyboard',
-   'real-reader',
-   'dom',
-   'native-tree',
-   'screenshot',
-   'speech',
-   'audio',
-   'product-context',
-   'pointer',
-   'viewport',
-   'style-overrides',
-   'measurement',
-   'markup-validation',
-   'motion-input',
-]);
-export type AssessmentCapability = z.infer<typeof assessmentCapabilitySchema>;
-
-export const assessmentScopeSchema = z.enum([
-   'site',
-   'journey',
-   'state',
-   'component',
-   'element',
-]);
+/** What a procedure is carried out on: one page state, an ordered journey, or the site. */
+export const assessmentScopeSchema = z.enum(['site', 'journey', 'state']);
 export type AssessmentScope = z.infer<typeof assessmentScopeSchema>;
-
-export const assessmentEvidenceKindSchema = z.enum([
-   'action-trace',
-   'observation',
-   'speech',
-   'screenshot',
-   'measurement',
-   'media',
-   'product-context',
-]);
-export type AssessmentEvidenceKind = z.infer<typeof assessmentEvidenceKindSchema>;
 
 export const procedureCoverageSchema = z.object({
    definedCriterionIds: z.array(criterionIdSchema),
@@ -47,24 +12,23 @@ export const procedureCoverageSchema = z.object({
 });
 export type ProcedureCoverage = z.infer<typeof procedureCoverageSchema>;
 
+/**
+ * How an auditor judges one success criterion: what it applies to, what to do, and what
+ * each outcome means. `a1 wcag` prints it and audit work packets quote it.
+ */
 export const assessmentProcedureSchema = z.object({
    procedureId: z.string().min(1),
    criterionId: criterionIdSchema,
-   version: z.string().min(1),
    title: z.string().min(1),
    scope: assessmentScopeSchema,
    applicability: z.string().min(1),
-   requiredCapabilities: z.array(assessmentCapabilitySchema),
-   setup: z.array(z.string().min(1)).min(1),
    actions: z.array(z.string().min(1)).min(1),
-   requiredEvidence: z.array(assessmentEvidenceKindSchema).min(1),
    evaluation: z.object({
       passed: z.string().min(1),
       failed: z.string().min(1),
       inapplicable: z.string().min(1),
       cantTell: z.string().min(1),
    }),
-   recovery: z.array(z.string().min(1)).min(1),
    limitations: z.array(z.string().min(1)).min(1),
    sources: z
       .array(

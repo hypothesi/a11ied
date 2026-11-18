@@ -78,3 +78,20 @@ export {
    encodeDriverCommandError,
 } from './driver-command-wire.js';
 export { isVoiceOverRunning, type VoiceOverLivenessCheck } from './voiceover-status.js';
+export {
+   generateSrActionDescription,
+   generateSrSessionDescription,
+   getSrActionMetadata,
+   getSrVerbMetadata,
+   getVerbsForGroup,
+   SR_ACTION_ENUM_VALUES,
+   SR_ACTION_METADATA,
+   SR_TASK_GROUPS,
+   SR_VERB_REGISTRY,
+   getRegisteredQueuedMethodNames,
+   getRegisteredVitestMatcherNames,
+   type SrActionEnumValue,
+   type SrActionMetadata,
+   type SrTaskGroup,
+   type SrVerbMetadata,
+} from './workflow-registry.js';

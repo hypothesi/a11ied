@@ -28,7 +28,7 @@ async function tryAcquire(lockFile: string): Promise<boolean> {
    try {
       // The `wx` flag fails when the file exists, so only one starter wins the create.
       const handle = await open(lockFile, 'wx');
-      await handle.writeFile(`${String(process.pid)}\n`, 'utf8');
+      await handle.write(`${String(process.pid)}\n`, 0, 'utf8');
       await handle.close();
       return true;
    } catch (error) {

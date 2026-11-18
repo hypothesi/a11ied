@@ -2,7 +2,9 @@ import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import { getSrActionMetadata, getVerbsForGroup, SR_TASK_GROUPS } from '@a11ied/guidepup';
 import { withHarness } from './testing/harness.js';
+import { SR_ACTION_DESCRIPTION, srActionInputSchema } from './tools/sr-action.js';
 
 const CLI_DIST = resolve(import.meta.dirname, '../../cli/dist/cli.js');
 const COMMAND_NAME_PATTERN = /^ {2}([a-z][a-z-]*)/u;
@@ -21,7 +23,10 @@ const INTENTIONALLY_UNCOVERED: ReadonlySet<string> = new Set([
    'help-all',
    'help',
    'sr help',
-   'report help',
+   'talkback help',
+   'audit help',
+   'audit page help',
+   'audit finding help',
    // Runs interactive OS permission prompts and downloads screen reader assets.
    'setup',
    // Reads a file of JSON-lines actions for shell scripting, not one call.
@@ -30,8 +35,8 @@ const INTENTIONALLY_UNCOVERED: ReadonlySet<string> = new Set([
    'sr walk',
    // Streams real-time announcements continuously; not an RPC tool call.
    'sr tail',
-   // Deletes recorded results. An agent records and reads; a person decides what to drop.
-   'audit clear',
+   // Serves a page until interrupted; a tool call cannot stay open.
+   'audit dashboard',
 ]);
 
 /** Every remaining CLI command path, mapped to the MCP tool name(s) that cover it. */
@@ -51,23 +56,40 @@ const TOOL_BY_COMMAND: Readonly<Record<string, readonly string[]>> = {
    'pattern pending': ['pattern_pending'],
    axe: ['run_axe'],
    tree: ['tree'],
-   audit: ['audit'],
-   'audit record': ['record_result'],
-   'audit pending': ['list_pending_results'],
+   check: ['check'],
+   capture: ['capture'],
+   audit: ['audit_status'],
+   'audit init': ['audit_init'],
+   'audit list': ['audit_list'],
+   'audit page': ['audit_page'],
+   'audit page add': ['audit_page'],
+   'audit page list': ['audit_page'],
+   'audit page exclude': ['audit_page'],
+   'audit page include': ['audit_page'],
    'audit discover': ['audit_discover'],
-   'audit run': ['audit_assessment'],
-   'audit state': ['audit_assessment'],
-   'audit journey': ['audit_assessment'],
-   'audit queue': ['audit_assessment'],
-   'audit next': ['audit_assessment'],
-   'audit status': ['audit_assessment'],
-   'audit resume': ['audit_assessment'],
-   'audit evaluate': ['audit_assessment'],
-   'audit block': ['audit_assessment'],
-   'audit finalize': ['audit_assessment'],
-   'report build': ['report_build'],
-   report: ['report_build'],
+   'audit scan': ['audit_scan'],
+   'audit next': ['audit_next'],
+   'audit show': ['audit_show'],
+   'audit submit': ['audit_submit'],
+   'audit note': ['audit_note'],
+   'audit block': ['audit_block'],
+   'audit reopen': ['audit_reopen'],
+   'audit limitation': ['audit_limitation'],
+   'audit status': ['audit_status'],
+   'audit log': ['audit_status'],
+   'audit findings': ['audit_findings'],
+   'audit finding': ['audit_finding'],
+   'audit finding show': ['audit_findings'],
+   'audit finding dismiss': ['audit_finding'],
+   'audit finding merge': ['audit_finding'],
+   'audit finding update': ['audit_finding'],
+   'audit signals': ['audit_signals'],
+   'audit report': ['audit_report'],
    doctor: ['doctor'],
+   talkback: ['talkback'],
+   'talkback on': ['talkback'],
+   'talkback off': ['talkback'],
+   'talkback walk': ['talkback'],
    sr: ['sr_session', 'sr_action', 'sr_list', 'sr_expect', 'sr_transcript'],
    'sr start': ['sr_session'],
    'sr open': ['sr_session'],
@@ -196,5 +218,46 @@ describe('MCP tool list against the CLI command registry', () => {
          stale,
          'tool mapping entries for a CLI command that no longer exists',
       ).toEqual([]);
+   });
+});
+
+describe('screen reader verb registry parity and MCP description budget (NFR-2)', () => {
+   it('every action in srActionInputSchema action enum is in the registry and in SR_ACTION_DESCRIPTION', () => {
+      const actions = srActionInputSchema.shape.action.options;
+      for (const action of actions) {
+         expect(getSrActionMetadata(action)).toBeDefined();
+         expect(SR_ACTION_DESCRIPTION).toContain(action);
+      }
+   });
+
+   it('all 6 N4 task groups and verbs are in the registry', () => {
+      const groups = [
+         'session',
+         'navigate',
+         'interact',
+         'assert',
+         'inspect',
+         'bulk',
+      ] as const;
+      expect([...SR_TASK_GROUPS].toSorted()).toEqual([...groups].toSorted());
+      for (const group of groups) {
+         expect(getVerbsForGroup(group).length).toBeGreaterThan(0);
+      }
+   });
+
+   it('every MCP screen reader tool description is <= 800 characters', async () => {
+      const maxDescriptionLength = 800;
+      const minSrToolsCount = 5;
+      expect(SR_ACTION_DESCRIPTION.length).toBeLessThanOrEqual(maxDescriptionLength);
+      await withHarness(async (harness) => {
+         const { tools } = await harness.client.listTools();
+         const srTools = tools.filter((tool) => tool.name.startsWith('sr_'));
+         expect(srTools.length).toBeGreaterThanOrEqual(minSrToolsCount);
+         for (const tool of srTools) {
+            expect(tool.description?.length ?? 0).toBeLessThanOrEqual(
+               maxDescriptionLength,
+            );
+         }
+      });
    });
 });

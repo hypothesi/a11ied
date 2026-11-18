@@ -65,14 +65,11 @@ function procedureLines(input: {
 }): string[] {
    const { procedure, width } = input;
    const lines = [
-      `${procedure.title} (${procedure.procedureId}, version ${procedure.version})`,
+      `${procedure.title} (${procedure.procedureId})`,
       ...fields([
          ['Scope', procedure.scope],
          ['Applies to', procedure.applicability],
-         ['Required capabilities', procedure.requiredCapabilities.join(', ')],
-         ['Required evidence', procedure.requiredEvidence.join(', ')],
       ]),
-      ...section('Setup', listItems(procedure.setup)),
       ...section('Actions', listItems(procedure.actions)),
       ...section(
          'Evaluation',
@@ -83,7 +80,6 @@ function procedureLines(input: {
             ['Uncertain', procedure.evaluation.cantTell],
          ]),
       ),
-      ...section('Recovery', listItems(procedure.recovery)),
       ...section('Limitations', listItems(procedure.limitations)),
       ...listItems(procedure.sources.map((source) => `${source.kind}: ${source.url}`)),
    ];

@@ -6,7 +6,9 @@ import {
    type DriverActionResult,
 } from '@a11ied/contracts';
 import { runDriverSessionAction } from '@a11ied/core';
+import { generateSrActionDescription, SR_ACTION_ENUM_VALUES } from '@a11ied/guidepup';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { z } from 'zod';
 
 import {
    activeAnnotations,
@@ -14,16 +16,38 @@ import {
    type ToolResponse,
 } from '../lib/shared.js';
 
+export const srActionEnum = z.enum(SR_ACTION_ENUM_VALUES);
+export type SrActionEnum = z.infer<typeof srActionEnum>;
+
+export const srActionInputSchema = z.object({
+   action: srActionEnum.describe(
+      'Screen reader action: next, previous, navigate, act, press, type, perform, click, interact, stopInteracting, takeSnapshot.',
+   ),
+   payload: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe(
+         'Optional action payload (e.g. kind, keys, text, command, role, name, max, path).',
+      ),
+});
+export type SrActionInput = z.infer<typeof srActionInputSchema>;
+
+export const srActionToolInputSchema = srActionInputSchema.or(driverActionRequestSchema);
+
+export const SR_ACTION_DESCRIPTION = generateSrActionDescription();
+
 /** Actions whose `details.found` or `details.matched` is a pass/fail check, per the CLI. */
-const VERDICT_ACTIONS = new Set(['find', 'goto', 'wait']);
+const VERDICT_ACTIONS = new Set(['find', 'goto', 'wait', 'navigate']);
+const DEFAULT_MAX_STEPS = 500;
 
 interface SrActionResult extends DriverActionResult {
    exitCode: number;
 }
 
 /**
- * Attaches the same exit code the CLI would use: `find`, `goto`, and `wait` fail with
- * `cliExitCodes.assertion` when their `details.found` or `details.matched` is false.
+ * Attaches the same exit code the CLI would use: `find`, `goto`, `wait`, and `navigate`
+ * fail with `cliExitCodes.assertion` when their `details.found` or `details.matched` is
+ * false.
  */
 function attachExitCode(action: string, result: DriverActionResult): SrActionResult {
    const failed =
@@ -32,32 +56,54 @@ function attachExitCode(action: string, result: DriverActionResult): SrActionRes
    return { ...result, exitCode: failed ? cliExitCodes.assertion : cliExitCodes.success };
 }
 
-async function handleSrAction(
-   input: DriverActionRequest,
-): Promise<ToolResponse<Record<string, unknown>>> {
-   const result = driverActionResultSchema.parse(await runDriverSessionAction(input));
-   return createToolResponse({ ...attachExitCode(input.action, result) });
+function normalizeActionInput(rawInput: unknown): DriverActionRequest {
+   const req = rawInput as { action: string; payload?: Record<string, unknown> };
+   switch (req.action) {
+      case 'navigate': {
+         const payload = (req.payload ?? {}) as {
+            role?: string;
+            name?: string;
+            max?: number;
+         };
+         return {
+            action: 'goto',
+            payload: {
+               role: payload.role,
+               name: payload.name,
+               max: payload.max ?? DEFAULT_MAX_STEPS,
+            },
+         };
+      }
+      case 'act':
+      case 'click': {
+         return { action: 'activate' };
+      }
+      case 'stopInteracting': {
+         return { action: 'stop-interacting' };
+      }
+      case 'takeSnapshot': {
+         const payload = (req.payload ?? {}) as { path?: string };
+         return {
+            action: 'screenshot',
+            payload: { path: payload.path ?? 'screenshot.png' },
+         };
+      }
+      default: {
+         return rawInput as DriverActionRequest;
+      }
+   }
 }
 
-const SR_ACTION_DESCRIPTION =
-   'Run one action against the active sr session, matching the CLI a1 sr subcommands. ' +
-   'Start a session first with sr_session action "start". No session id is needed. ' +
-   'Portable verbs (work on every target): next, previous, interact, stop-interacting, activate, ' +
-   'top, bottom, escape, read, transcript, title. next/previous take an optional payload ' +
-   '{ kind, level, times } to jump by kind: item (default), heading, link, landmark, control, ' +
-   'button, table, list, graphic, region, form-field (matches a1 sr next/previous [kind]). ' +
-   'press takes payload { keys }, one chord per entry, pressed in order (a1 sr press). ' +
-   'type takes payload { text } (a1 sr type). checkpoint takes payload { label } (a1 sr checkpoint). ' +
-   'perform takes payload { command, commandSet? } to run a named screen-reader command (a1 sr do). ' +
-   'Use sr_list to find command names. focus takes payload { appName | bundleId | processName | pid | windowTitle, match? } ' +
-   '(a1 sr focus). find takes payload { text } and moves to the next place it appears (a1 sr find). ' +
-   'table takes payload { move } (a1 sr table). elements takes payload { kind, max? }, the rotor for one kind ' +
-   '(a1 sr elements). read-all takes payload { max? }, say-all as a transcript (a1 sr read-all). ' +
-   'goto takes payload { role?, name?, max? } and steps forward until the item matches (a1 sr goto). ' +
-   'wait takes payload { for?, ms?, timeoutMs? } and polls the transcript for a phrase (a1 sr wait). ' +
-   'screenshot takes payload { path }, VoiceOver cursor only (a1 sr screenshot). ' +
-   'The result carries exitCode 4 (the CLI assertion exit code) when find, goto, or wait did not match, and 0 otherwise. ' +
-   'For real screen reader sessions the response state carries axFocusedElement (VoiceOver only) and the full transcript so far.';
+async function handleSrAction(
+   input: unknown,
+): Promise<ToolResponse<Record<string, unknown>>> {
+   const normalized = normalizeActionInput(input);
+   const result = driverActionResultSchema.parse(
+      await runDriverSessionAction(normalized),
+   );
+   const requestedAction = (input as { action?: string })?.action ?? normalized.action;
+   return createToolResponse({ ...attachExitCode(requestedAction, result) });
+}
 
 export function registerSrActionTool(server: McpServer): void {
    server.registerTool(
@@ -65,7 +111,7 @@ export function registerSrActionTool(server: McpServer): void {
       {
          title: 'Screen reader action',
          description: SR_ACTION_DESCRIPTION,
-         inputSchema: driverActionRequestSchema,
+         inputSchema: srActionToolInputSchema,
          annotations: activeAnnotations,
       },
       handleSrAction,

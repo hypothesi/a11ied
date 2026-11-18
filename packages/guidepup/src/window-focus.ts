@@ -11,6 +11,7 @@ const FOCUS_POLL_INTERVAL_MS = 100;
 /** How long `sr start` and `sr open` wait for the window to come to the front. */
 export const WINDOW_FOCUS_TIMEOUT_MS = 5000;
 const MAC_FIELD_SEPARATOR = '\u001E';
+const MAC_RECORD_SEPARATOR = '\u001D';
 
 /** What the operating system says is in front right now. */
 export interface FrontmostWindow {
@@ -39,8 +40,7 @@ function stripSuffix(name: string): string {
    return name.replace(/\.(app|exe)$/iu, '').toLowerCase();
 }
 
-/** Parses the record-separator-delimited output from mac-frontmost.applescript. */
-export function parseMacFrontmostOutput(stdout: string): FrontmostWindow {
+function parseMacWindowRecord(stdout: string): FrontmostWindow {
    const [appName = '', bundleId = '', pid = '', windowTitle = ''] = String(stdout)
       .trim()
       .split(MAC_FIELD_SEPARATOR);
@@ -50,6 +50,28 @@ export function parseMacFrontmostOutput(stdout: string): FrontmostWindow {
       pid: Number(pid) || undefined,
       windowTitle: windowTitle || undefined,
    };
+}
+
+function isReaderOverlay(target: FrontmostWindow): boolean {
+   return (
+      target.bundleId === 'com.apple.VoiceOver' ||
+      target.bundleId === 'com.apple.AccessibilityVisualsAgent'
+   );
+}
+
+/** Reader overlays can be frontmost while another process remains the OS input target. */
+export function parseMacFrontmostOutput(stdout: string): FrontmostWindow {
+   const [workspaceRecord = '', inputRecord] = String(stdout)
+      .trim()
+      .split(MAC_RECORD_SEPARATOR);
+   const workspace = parseMacWindowRecord(workspaceRecord);
+   if (isReaderOverlay(workspace) && inputRecord) {
+      const input = parseMacWindowRecord(inputRecord);
+      if (input.pid && input.bundleId && !isReaderOverlay(input)) {
+         return input;
+      }
+   }
+   return workspace;
 }
 
 async function readMacFrontmost(): Promise<FrontmostWindow> {

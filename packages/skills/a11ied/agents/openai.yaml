@@ -1,4 +1,4 @@
 interface:
-   display_name: 'a11ied development checks'
-   short_description: 'Check desktop component accessibility with a11ied.'
-   default_prompt: 'Use $a11ied to check the requested desktop component with scanner and interaction evidence.'
+   display_name: 'a11ied accessibility checks'
+   short_description: 'Check a component or page with scans, lookups, and screen readers.'
+   default_prompt: 'Use $a11ied to check the requested component or page and report what to fix.'

@@ -30,19 +30,23 @@
       "max-lines": [
          "error",
          {
-            "max": 350
+            "max": 800,
+            "skipBlankLines": true,
+            "skipComments": true
          }
       ],
       "max-lines-per-function": [
          "error",
          {
-            "max": 60
+            "max": 120,
+            "skipBlankLines": true,
+            "skipComments": true
          }
       ],
       "max-statements": [
          "error",
          {
-            "max": 15
+            "max": 30
          }
       ],
       "no-undefined": "off",

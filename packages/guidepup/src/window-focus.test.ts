@@ -42,6 +42,39 @@ describe('Windows foreground window parsing', () => {
    });
 });
 
+describe('macOS reader overlay input targets', () => {
+   const overlay = 'VoiceOver\u001Ecom.apple.VoiceOver\u001E718\u001ESpeech';
+   const input = 'Google Chrome\u001Ecom.google.Chrome\u001E717\u001ECase Studies';
+
+   it('uses the independently observed input process while preserving strict PID and window matching', () => {
+      const target = parseMacFrontmostOutput(`${overlay}\u001D${input}`);
+
+      expect(
+         isFrontmostMatch({ pid: 717, windowTitle: 'Case Studies' }, target),
+      ).toStrictEqual(true);
+      expect(
+         isFrontmostMatch({ pid: 719, windowTitle: 'Case Studies' }, target),
+      ).toStrictEqual(false);
+      expect(
+         isFrontmostMatch({ pid: 717, windowTitle: 'Other document' }, target),
+      ).toStrictEqual(false);
+   });
+
+   it('does not substitute a target for an unrelated foreground app or an unavailable input observation', () => {
+      const unrelated = 'Terminal\u001Ecom.apple.Terminal\u001E719\u001EWork';
+
+      expect(
+         parseMacFrontmostOutput(`${unrelated}\u001D${input}`).bundleId,
+      ).toStrictEqual('com.apple.Terminal');
+      expect(parseMacFrontmostOutput(overlay).bundleId).toStrictEqual(
+         'com.apple.VoiceOver',
+      );
+      expect(
+         parseMacFrontmostOutput(`${overlay}\u001DChrome\u001E\u001E\u001E`).bundleId,
+      ).toStrictEqual('com.apple.VoiceOver');
+   });
+});
+
 describe('combined foreground identities', () => {
    it('requires the requested window even when the process or bundle matches', () => {
       const frontmost = {

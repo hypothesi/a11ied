@@ -6,12 +6,12 @@ const toc = [
    { id: 'install', label: 'Install' },
    { id: 'test', label: 'Test API' },
    { id: 'driver', label: 'Driver sessions' },
-   { id: 'assessment', label: 'Assessment lifecycle' },
    { id: 'axe', label: 'axe' },
    { id: 'current-page', label: 'Shared browser state' },
    { id: 'wcag', label: 'WCAG lookup' },
    { id: 'inspect', label: 'Applicability' },
    { id: 'doctor', label: 'Diagnostics' },
+   { id: 'audit', label: 'Audits' },
    { id: 'exports', label: 'Export map' },
    { id: 'packages', label: 'Packages' },
 ];
@@ -223,7 +223,7 @@ await withInteractiveBrowserPage('https://createdbyfireside.com/', async (page) 
       <p>
          Complete sign-in or open the interaction state inside the callback before
          collecting observations. Pass the same <code>page</code> to <code>runAxe</code>,
-         <code>buildAuditReport</code>, and the core tree, title, and HTML readers.
+         <code>runPageCheck</code>, and the core tree, title, and HTML readers.
          Screenshots use that page's Playwright API. These reads preserve the document,
          cookies, and session storage. A new scan always inspects the current UI.
       </p>
@@ -329,32 +329,32 @@ const {'{'} target, targetType, warning {'}'} = await resolveAvailableDefaultTar
       </p>
    </section>
 
-   <section class="panel" id="assessment">
-      <h2>Assessment lifecycle</h2>
+   <section class="panel" id="audit">
+      <h2>Audits</h2>
       <p>
-         A host agent uses these shared operations to coordinate a desktop WCAG
-         assessment. The coordinator stores the work and validates proof. The
-         agent performs the procedure, captures observations, and evaluates the
-         result against the procedure's WCAG requirements.
+         The <code>a1 audit</code> commands and the <code>audit_*</code> MCP tools call these
+         functions from <code>@a11ied/audit</code>, re-exported by <code>a11ied</code>. An audit
+         lives in one directory with a SQLite database, so any number of processes can work on
+         it at once. Nothing here drives a browser except the two scan helpers.
       </p>
+      <pre><code>import {'{'} addPage, claimNext, startAudit, submitUnit, writeAuditReport {'}'} from 'a11ied';
+
+const audit = startAudit({'{'} target: 'https://example.com', criteria: ['2.4.7'] {'}'});
+addPage(audit, {'{'} locator: 'https://example.com/' {'}'});
+const unit = claimNext(audit, {'{'} worker: 'w1' {'}'});</code></pre>
       <div class="route-list">
-         <div class="route-row"><code>startAuditAssessment(options)</code><span>Create a durable run with a target, WCAG version and level, scope, and observed environment capabilities. An existing run file is never replaced.</span></div>
-         <div class="route-row"><code>executeAuditAssessment(request)</code><span>Use the same validated start, state, journey, queue, next, status, resume, evaluate, block, and finalize operations as CLI and MCP. Status lists include totals and nextOffset; offset defaults to 0 and limit to 20, with a maximum of 100.</span></div>
-         <div class="route-row"><code>registerAuditState(input)</code><span>Record the observed target, state fingerprint, environment, setup, and artifact references. Identical observations preserve their original timestamp. Changed observations invalidate affected proof while retaining a live claim until recovery.</span></div>
-         <div class="route-row"><code>registerAuditJourney(input)</code><span>Record ordered states for a process that may span pages. Its assessment progress comes from validated checks. A saved completed flag cannot establish coverage.</span></div>
-         <div class="route-row"><code>nextAuditAssessment(file)</code><span>Claim one required check and return its procedure, including setup, actions, evidence requirements, evaluation rules, and recovery instructions. Concurrent callers cannot claim a second check. Unsupported capabilities remain visible.</span></div>
-         <div class="route-row"><code>recordEvidence(record, options)</code><span>Validate and save traceable observations and artifacts. Pass the run file and its evidence file. Provenance and non-image envelopes use <code>attempt</code> from the claimed check's <code>attempts</code>. Save the returned evidence ID for the result transition.</span></div>
-         <div class="route-row"><code>transitionAssessmentCheck(input)</code><span>Complete the claimed check with an outcome and saved evidence IDs, or record a specific blocker. Completion rejects missing, mismatched, conflicting, and obsolete proof.</span></div>
-         <div class="route-row"><code>getAuditAssessmentStatus(file)</code><span>Revalidate catalog obligations, saved artifacts, and discovery scope. Returns global coverage, progress for states, pages, and journeys, and explicit unresolved issues.</span></div>
-         <div class="route-row"><code>resumeAuditAssessment(input)</code><span>Keep interrupted work blocked without replaying actions. After inspecting saved proof and restoring a safe state, supply retryCheckIds in a separate call. Invalidated proof may be retried; valid completed checks cannot be replayed.</span></div>
-         <div class="route-row"><code>finalizeAuditAssessment(input)</code><span>Complete only a fully covered run. allowPartial preserves an active run and its unresolved issues for partial reporting. Discovery page flags and inconclusive outcomes cannot satisfy completion.</span></div>
+         <div class="route-row"><code>startAudit(input)</code>, <code>openAudit(dir)</code>, <code>closeAudit(audit)</code><span>Create or open an audit. <code>resolveAuditDir(selection?)</code> finds one by id, <code>$A11IED_AUDIT</code>, or as the only audit in the workspace.</span></div>
+         <div class="route-row"><code>addPage</code>, <code>excludePage</code>, <code>includePage</code>, <code>listPages</code><span>Decide what is audited. Adding a page creates its work units.</span></div>
+         <div class="route-row"><code>claimNext(audit, request)</code><span>Claim a unit for a worker under a lease, or return the unit the worker already holds. Returns undefined when nothing is available.</span></div>
+         <div class="route-row"><code>buildWorkPacket</code>, <code>renderWorkPacket</code><span>Everything a worker needs for a unit, as data and as text.</span></div>
+         <div class="route-row"><code>submitUnit(audit, input)</code><span>Validate and store a unit's outcomes, findings, and dismissals in one transaction. Throws <code>AuditError</code> with every problem in <code>problems</code>.</span></div>
+         <div class="route-row"><code>reportProgress</code>, <code>blockUnit</code>, <code>reopenUnit</code><span>Extend a claim, park a unit for a person, or return one to the queue.</span></div>
+         <div class="route-row"><code>recordAutomatedFinding</code>, <code>putSignal</code><span>How a programmatic check contributes: a failure it is certain of, or a fact for workers.</span></div>
+         <div class="route-row"><code>listFindings</code>, <code>dismissFinding</code>, <code>mergeFindings</code>, <code>updateFinding</code><span>Read and curate findings.</span></div>
+         <div class="route-row"><code>getAuditStatus</code>, <code>listCriterionRollups</code>, <code>listEvents</code><span>Progress, the standing of each criterion, and the activity log.</span></div>
+         <div class="route-row"><code>buildAuditReport</code>, <code>writeAuditReport</code>, <code>renderDashboardHtml</code>, <code>startDashboardServer</code><span>The report model, the report files, and the live progress page.</span></div>
+         <div class="route-row"><code>scanAuditPages</code>, <code>discoverAuditPages</code><span>From <code>@a11ied/core</code>: run axe and page measurements on every web page, and add a site's pages to the audit.</span></div>
       </div>
-      <p>
-         These operations perform no target input themselves. Real reader
-         evidence still requires a runtime receipt that verifies the target and
-         session binding. Current native binding limitations remain unresolved;
-         virtual or mocked checks cannot establish a complete native audit.
-      </p>
    </section>
 
    <section class="ledger" id="exports">
@@ -366,7 +366,8 @@ const {'{'} target, targetType, warning {'}'} = await resolveAvailableDefaultTar
          <div class="route-row"><strong>Tests</strong><span><code>a11ied/test</code>: <code>screenReader</code>, <code>queuedScreenReader</code>, <code>queueScreenReader</code>, <code>ScreenReader</code>, <code>ScreenReaderAssertionError</code>. <code>a11ied/vitest</code> and <code>a11ied/browser</code>: <code>test</code>, <code>it</code>, <code>screenReaderMatchers</code></span></div>
          <div class="route-row"><strong>Sessions</strong><span><code>startDriverSession</code>, <code>getDriverSessionStatus</code>, <code>runDriverSessionAction</code>, <code>runEphemeralDriverAction</code>, <code>stopDriverSession</code>, <code>attachDocumentToDriverSession</code>, <code>cleanupStaleDriverSessions</code></span></div>
          <div class="route-row"><strong>Commands</strong><span><code>listDriverCommands</code>, <code>resolveDriverCommand</code>, <code>driverCommandSets</code>, <code>isDriverCommandSet</code>, <code>parseDriverCommandSet</code></span></div>
-         <div class="route-row"><strong>axe</strong><span><code>runAxe</code></span></div>
+         <div class="route-row"><strong>axe</strong><span><code>runAxe</code>, <code>runPageCheck</code></span></div>
+         <div class="route-row"><strong>Audits</strong><span>Everything <code>@a11ied/audit</code> exports, plus <code>scanAuditPages</code> and <code>discoverAuditPages</code></span></div>
          <div class="route-row"><strong>WCAG</strong><span><code>listWcagCriteria</code>, <code>showWcagCriterion</code>, <code>searchWcagCriteria</code>, <code>showWcagTestMethod</code>, <code>showWcagTestMethodSummary</code>, <code>showWcagTechnique</code>, <code>showWcagAxeRule</code></span></div>
          <div class="route-row"><strong>Relevant criteria</strong><span><code>inspectRelevantCriteriaTarget</code>, <code>inspectRelevantCriteriaUrl</code>, <code>inspectCriterionTarget</code>, <code>inspectCriterionUrl</code></span></div>
          <div class="route-row"><strong>Page and screen reader selection</strong><span><code>resolveDocumentTarget</code>, <code>openUrlInSystemAutomationBrowser</code>, <code>resolveDefaultTarget</code>, <code>resolveAvailableDefaultTarget</code>, <code>resolveTargetType</code>, <code>listSupportedTargets</code></span></div>
@@ -393,7 +394,8 @@ const {'{'} target, targetType, warning {'}'} = await resolveAvailableDefaultTar
       </p>
       <div class="route-list">
          <div class="route-row"><code>@a11ied/contracts</code><span>Zod schemas and result types shared across the runtime.</span></div>
-         <div class="route-row"><code>@a11ied/core</code><span>WCAG lookup, target resolution, driver orchestration, axe runs, doctor reports.</span></div>
+         <div class="route-row"><code>@a11ied/audit</code><span>Audit storage, work units, findings, progress, and reports. No browser dependency.</span></div>
+         <div class="route-row"><code>@a11ied/core</code><span>WCAG lookup, target resolution, driver orchestration, axe runs, audit scans, doctor reports.</span></div>
          <div class="route-row"><code>@a11ied/guidepup</code><span>Platform adapters for VoiceOver, NVDA, and the virtual reader.</span></div>
          <div class="route-row"><code>@a11ied/wcag-data</code><span>Upstream data sync and the generated artifacts.</span></div>
          <div class="route-row"><code>@a11ied/wcag-engine</code><span>Lookup, search, coverage, and applicability over those artifacts.</span></div>

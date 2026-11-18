@@ -88,6 +88,29 @@ describe('VoiceOver environment checks', () => {
       ).toBe('pass');
    });
 
+   it('fails with a Full Disk Access diagnostic when macOS blocks access to the VoiceOver group container', () => {
+      const groupContainer = `${HOME}/Library/Group Containers/group.com.apple.VoiceOver/Library/Preferences`;
+      const checks = checkVoiceOverEnvironment(
+         createDeps({
+            existsSync: (path) =>
+               path === groupContainer ||
+               path === `${groupContainer}/com.apple.VoiceOver4.local.plist`,
+            probeDirectoryWriteAccess: () => ({
+               writable: false,
+               error: 'EPERM: operation not permitted',
+            }),
+         }),
+      );
+      const prefCheck = checks.find(
+         (check) => check.id === 'voiceover-local-preferences',
+      );
+
+      expect(prefCheck?.status).toBe('fail');
+      expect(prefCheck?.detail).toContain('Full Disk Access');
+      expect(prefCheck?.detail).toContain('EPERM: operation not permitted');
+      expect(prefCheck?.action).toBeUndefined();
+   });
+
    it('fails when Guidepup ships no bundle for the running macOS version', () => {
       const checks = checkVoiceOverEnvironment(createDeps({ osRelease: '30.0.0' }));
       const bundle = checks.find((check) => check.id === 'voiceover-preferences-bundle');

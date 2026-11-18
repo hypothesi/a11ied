@@ -3,9 +3,11 @@ import { cliExitCodes, doctorRequestSchema } from '#contracts';
 import { registerSessionCommands } from './commands/drive.js';
 import { registerAxeCommand } from './commands/axe.js';
 import { registerTreeCommand } from './commands/tree.js';
-import { registerAuditCommand } from './commands/audit.js';
-import { registerReportCommand } from './commands/report.js';
+import { registerAuditCommand } from './commands/audit/index.js';
+import { registerCaptureCommand } from './commands/capture.js';
+import { registerCheckCommand } from './commands/check.js';
 import { registerSetupCommand } from './commands/setup.js';
+import { registerTalkBackCommand } from './commands/talkback.js';
 import { registerPatternCommands } from './commands/pattern.js';
 import { registerSearchCommand } from './commands/search.js';
 import { registerWcagCommands } from './commands/wcag.js';
@@ -117,10 +119,12 @@ function registerHelpAllCommand(program: Command): void {
 /** Registers every top-level command, in the order its group is listed in `a1 --help`. */
 function registerAllCommands(program: Command): void {
    registerAuditCommand(program);
-   registerReportCommand(program);
+   registerCheckCommand(program);
+   registerCaptureCommand(program);
    registerAxeCommand(program);
    registerTreeCommand(program);
    registerSessionCommands(program);
+   registerTalkBackCommand(program);
    registerWcagCommands(program);
    registerPatternCommands(program);
    registerSearchCommand(program);

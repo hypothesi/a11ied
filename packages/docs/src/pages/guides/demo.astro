@@ -55,12 +55,12 @@ const toc = [
    <section class="panel" id="axe">
       <h2>Run the audit</h2>
       <p>
-         <code>a1 audit</code> runs axe, reads the accessibility tree, and works out which WCAG
+         <code>a1 check</code> runs axe, reads the accessibility tree, and works out which WCAG
          success criteria the page triggers. A success criterion is one testable requirement in
          the Web Content Accessibility Guidelines, the standard most accessibility requirements
          come from. Start here on any page you have not checked before.
       </p>
-      <pre><code>a1 audit http://localhost:4321/demo/team</code></pre>
+      <pre><code>a1 check http://localhost:4321/demo/team</code></pre>
       <pre data-label="OUTPUT"><code>audit  http://localhost:4321/demo/team
 
 ✗ 10 problems to fix.
@@ -98,7 +98,7 @@ Problems
          That is the fourth problem, and no rule in the default run reported it. The next section
          gets axe to.
       </p>
-      <pre><code>a1 audit http://localhost:4321/demo/team/fixed</code></pre>
+      <pre><code>a1 check http://localhost:4321/demo/team/fixed</code></pre>
       <pre data-label="OUTPUT"><code>audit  http://localhost:4321/demo/team/fixed
 
 ✓ Nothing failed the automated checks.</code></pre>
@@ -256,7 +256,7 @@ a1 sr read --phrase</code></pre>
       </p>
       <p>
          <code>a1 wcag 2.4.3</code> and <code>a1 wcag 2.1.2</code> are the criteria this fails.
-         <code>a1 audit</code> already listed both under <strong>Check by hand</strong>.
+         <code>a1 check</code> already listed both under <strong>Check by hand</strong>.
       </p>
    </section>
 
@@ -305,7 +305,7 @@ If it fails
          The filter field on the broken page is
          <code>&lt;input type="search" placeholder="Filter members"&gt;</code> and nothing else.
          axe's <code>label</code> rule accepts a non-empty placeholder as a name, so it passes,
-         and <code>a1 audit --json</code> records criterion 3.3.2 Labels or Instructions with
+         and <code>a1 check --json</code> records criterion 3.3.2 Labels or Instructions with
          <code>axeVerdict: "pass"</code>.
       </p>
       <p>The reader disagrees:</p>
@@ -317,7 +317,7 @@ If it fails
          placeholder or drop it, but do not let it be the label.
       </p>
       <p>
-         Criterion 4.1.3 goes the other way. <code>a1 audit --json</code> records it as
+         Criterion 4.1.3 goes the other way. <code>a1 check --json</code> records it as
          <code>applicability: "not-detected"</code> on the broken page, because a missing live
          region leaves nothing to detect. A criterion no tool claims is one to check by hand.
       </p>
@@ -450,7 +450,7 @@ http://localhost:4321/demo/team/fixed.</code></pre>
          </div>
       </div>
       <p>
-         Point the same commands at your own app next. <code>a1 audit</code> first, then
+         Point the same commands at your own app next. <code>a1 check</code> first, then
          <code>a1 tree</code> for the names and roles, then <code>a1 sr</code> for the five
          things neither of them can report.
       </p>
