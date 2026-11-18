@@ -87,6 +87,7 @@ const toc = [
          <div class="route-row"><code>sr_list</code><span>List the named commands <code>sr_action</code>'s <code>perform</code> action runs. Same as <code>a1 sr list</code>.</span></div>
          <div class="route-row"><code>sr_expect</code><span>Check that the session announced a phrase. Same as <code>a1 sr expect</code>.</span></div>
          <div class="route-row"><code>sr_transcript</code><span>Print the session transcript, or write it to a file. Same as <code>a1 sr transcript</code>.</span></div>
+         <div class="route-row"><code>talkback</code><span>Turn TalkBack on or off on an Android device, or walk the screen and return what TalkBack said at each stop. Same as <code>a1 talkback</code>.</span></div>
       </div>
       <p>
          <code>a1 sr batch</code> and <code>a1 sr walk</code> have no matching tool. <code>batch</code>
@@ -165,8 +166,8 @@ const toc = [
          <div class="route-row"><code>audit_page</code><span><code>action</code> is <code>add</code>, <code>list</code>, <code>exclude</code>, or <code>include</code>.</span></div>
          <div class="route-row"><code>audit_discover</code>, <code>audit_scan</code><span>Add a site's pages to the audit, then run the automated checks on every web page in parallel.</span></div>
          <div class="route-row"><code>audit_next</code><span>Requires <code>worker</code>. Claims a unit and returns its work packet as text and structured content. Optional <code>passes</code>, <code>excludePasses</code>, <code>pageId</code>, <code>unitId</code>.</span></div>
-         <div class="route-row"><code>audit_submit</code><span>Requires <code>worker</code>, <code>unit</code>, and <code>submission</code>: <code>results</code>, <code>findings</code>, <code>dismiss</code>, <code>summary</code>. A rejection lists every problem.</span></div>
-         <div class="route-row"><code>audit_show</code>, <code>audit_note</code>, <code>audit_block</code>, <code>audit_reopen</code><span>Inspect a unit, keep a claim alive, park a unit that needs a person, or return one to the queue.</span></div>
+         <div class="route-row"><code>audit_submit</code><span>Requires <code>worker</code>, <code>unit</code>, and <code>submission</code>: <code>results</code>, <code>findings</code> (each with a <code>screenshot</code> spec or <code>evidence</code> on web pages), <code>states</code>, <code>dismiss</code>, <code>summary</code>. Screenshot specs become cropped, outlined pictures of the element. A rejection lists every problem.</span></div>
+         <div class="route-row"><code>audit_show</code>, <code>audit_note</code>, <code>audit_block</code>, <code>audit_reopen</code>, <code>audit_limitation</code><span>Inspect a unit, keep a claim alive, park a unit that needs a person, return one to the queue, or record something the whole audit could not test.</span></div>
          <div class="route-row"><code>audit_status</code><span>Progress, workers, blocked units, and recent activity. Set <code>units</code> or <code>log</code> for more detail.</span></div>
          <div class="route-row"><code>audit_findings</code>, <code>audit_finding</code><span>List or show findings, and dismiss, merge, or rewrite one.</span></div>
          <div class="route-row"><code>audit_signals</code>, <code>audit_report</code><span>Read the scan's facts for a page, and write the report files.</span></div>

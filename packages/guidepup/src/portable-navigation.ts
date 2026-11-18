@@ -151,11 +151,11 @@ export const navigationKindTable: readonly NavigationKindEntry[] = [
    {
       kind: 'region',
       description:
-         'Jump by named region. NVDA treats a named region as a landmark, so it uses the landmark key.',
+         'Jump by named region. VoiceOver and NVDA both treat a named region as a landmark, so both use the landmark command.',
       voiceover: {
-         next: voiceOverCommanderStep(VoiceOverCommanderCommands.FIND_NEXT_LIVE_REGION),
+         next: voiceOverCommanderStep(VoiceOverCommanderCommands.FIND_NEXT_LANDMARK),
          previous: voiceOverCommanderStep(
-            VoiceOverCommanderCommands.FIND_PREVIOUS_REGION,
+            VoiceOverCommanderCommands.FIND_PREVIOUS_LANDMARK,
          ),
       },
       nvda: {
@@ -167,10 +167,10 @@ export const navigationKindTable: readonly NavigationKindEntry[] = [
    {
       kind: 'form-field',
       description:
-         'Jump by text entry field. Use control for every kind of form control.',
+         'Jump by text entry field. Use control for every kind of form control. VoiceOver has no text-field jump that moves inside web content, so it jumps by control and also stops on buttons.',
       voiceover: {
-         next: voiceOverCommanderStep(VoiceOverCommanderCommands.FIND_NEXT_TEXT_FIELD),
-         previous: voiceOverCommanderStep(VoiceOverCommanderCommands.FIND_PREVIOUS_FIELD),
+         next: voiceOverKeyCodeStep('findNextControl'),
+         previous: voiceOverKeyCodeStep('findPreviousControl'),
       },
       nvda: {
          next: nvdaKeyCodeStep('moveToNextEditField'),

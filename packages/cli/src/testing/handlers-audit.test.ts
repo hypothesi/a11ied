@@ -18,8 +18,48 @@ const root = mkdtempSync(join(tmpdir(), 'a11ied-audit-cli-'));
 
 interface Packet {
    unit: { id: string; criteria: string[] };
-   knownFindings: Array<{ id: string; criterion: string; locationHere?: string }>;
+   knownFindings: { criterion: string; here: boolean }[];
    signals: Record<string, unknown>;
+   stateIds: string[];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function readRecord(value: unknown): Record<string, unknown> {
+   if (!isRecord(value)) {
+      throw new TypeError(`Expected an object, got ${JSON.stringify(value)}`);
+   }
+   return value;
+}
+
+function readStrings(value: unknown): string[] {
+   return Array.isArray(value)
+      ? value.filter((item): item is string => typeof item === 'string')
+      : [];
+}
+
+/** Reads the parts of a work packet these tests use, failing loudly on a wrong shape. */
+function readPacket(value: unknown): Packet {
+   const packet = readRecord(value);
+   const unit = readRecord(packet['unit']);
+   const findings = Array.isArray(packet['knownFindings']) ? packet['knownFindings'] : [];
+   const inventory = isRecord(packet['stateInventory']) ? packet['stateInventory'] : {};
+   const triggers = Array.isArray(inventory['triggers']) ? inventory['triggers'] : [];
+   return {
+      unit: { id: String(unit['id']), criteria: readStrings(unit['criteria']) },
+      knownFindings: findings
+         .filter((finding) => isRecord(finding))
+         .map((finding) => ({
+            criterion: String(finding['criterion']),
+            here: finding['locationHere'] !== undefined,
+         })),
+      signals: readRecord(packet['signals']),
+      stateIds: triggers
+         .filter((trigger) => isRecord(trigger))
+         .map((trigger) => String(trigger['id'])),
+   };
 }
 
 beforeAll(async () => {
@@ -37,14 +77,14 @@ async function audit(...args: string[]): Promise<Record<string, unknown>> {
    const result = await runCli(['audit', ...args, '--json']);
    expect(result.status, result.stderr).toBe(EXIT_SUCCESS);
    const { result: payload } = parseJsonOutput(result.stdout);
-   return payload as Record<string, unknown>;
+   return readRecord(payload);
 }
 
 function writeSubmission(packet: Packet, name: string): string {
    const file = join(root, `${name}.json`);
    const failing = new Set(
       packet.knownFindings
-         .filter((finding) => finding.locationHere !== undefined)
+         .filter((finding) => finding.here)
          .map((finding) => finding.criterion),
    );
    writeFileSync(
@@ -55,6 +95,14 @@ function writeSubmission(packet: Packet, name: string): string {
             outcome: failing.has(criterion) ? 'fail' : 'pass',
             note: 'Checked on the fixture page.',
          })),
+         states: [
+            {
+               name: 'Every control used',
+               covers: packet.stateIds,
+               tested: true,
+               note: 'Operated each control on the fixture page.',
+            },
+         ],
          summary: 'Fixture unit.',
       }),
    );
@@ -77,7 +125,7 @@ describe('a1 audit, start to report', () => {
             '--pass',
             'semantics',
          );
-         const packet = next['packet'] as Packet;
+         const packet = readPacket(next['packet']);
          const submitted = await audit(
             'submit',
             packet.unit.id,
@@ -90,7 +138,7 @@ describe('a1 audit, start to report', () => {
          );
          const report = await audit('report', '--audit', 'e2e');
          const html =
-            (report['files'] as string[]).find((file) => file.endsWith('.html')) ?? '';
+            readStrings(report['files']).find((file) => file.endsWith('.html')) ?? '';
 
          expect(scan['pages']).toEqual([
             expect.objectContaining({ pageId: 'P1', ok: true, findings: 1 }),
@@ -181,7 +229,7 @@ describe('a1 audit with parallel workers', () => {
                audit('next', '--audit', 'parallel', '--worker', worker),
             ),
          );
-         const units = claims.map((claim) => (claim['packet'] as Packet).unit.id);
+         const units = claims.map((claim) => readPacket(claim['packet']).unit.id);
 
          expect(new Set(units).size).toBe(workers.length);
       },

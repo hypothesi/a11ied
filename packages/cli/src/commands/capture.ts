@@ -13,7 +13,7 @@ interface CaptureOptions {
    viewport?: string;
    zoom?: string;
    textSpacing?: boolean;
-   click?: string;
+   click: string[];
    press: string[];
    hover?: string;
    selector?: string;
@@ -86,7 +86,12 @@ export function registerCaptureCommand(program: Command): void {
                )
                .option('--zoom <factor>', 'Browser zoom, such as 2 for 200 percent.')
                .option('--text-spacing', 'Apply the WCAG 1.4.12 text spacing values.')
-               .option('--click <selector>', 'Click this element first.')
+               .option(
+                  '--click <selector>',
+                  'Click this element first. Repeatable; clicks run in order.',
+                  collect,
+                  [],
+               )
                .option(
                   '--press <key>',
                   'Press a key. Repeatable. "Tab*5" presses Tab five times.',
@@ -94,7 +99,10 @@ export function registerCaptureCommand(program: Command): void {
                   [],
                )
                .option('--hover <selector>', 'Hover this element before capturing.')
-               .option('--selector <css>', 'Capture only this element.')
+               .option(
+                  '--selector <selector>',
+                  'Capture this element, outlined, with some of the page around it.',
+               )
                .option('--full-page', 'Capture the whole scrollable page.')
                .option('--timeout <ms>', 'Timeout for each step. Defaults to 30000.'),
          ),

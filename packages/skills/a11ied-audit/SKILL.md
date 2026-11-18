@@ -29,7 +29,9 @@ worker, and you follow it yourself when you cannot start workers. For a mobile a
 | Automated, no agent needed                                                                                         | Judged by a worker                                                        |
 | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
 | Page discovery (`a1 audit discover`)                                                                               | Which pages, states, and flows are in scope                               |
-| axe-core failures, recorded as findings (`a1 audit scan`)                                                          | Whether each automated finding is real on this page                       |
+| axe-core failures, recorded as findings with a cropped screenshot of the element (`a1 audit scan`)                 | Whether each automated finding is real on this page                       |
+| A list of the controls on each page that open or change a state                                                    | Testing every state, including ones the list misses                       |
+| Cropped, outlined screenshots of failing elements from a worker's `screenshot` spec                                | Which element fails and the steps that show it                            |
 | Page measurements stored as signals: tab order, focus styles, reflow, target sizes, media inventory, form controls | Every `pass` and `not-applicable`, and every failure a scanner cannot see |
 | Claims, leases, recovery of abandoned work, progress, report assembly                                              | Severity, user impact, and the recommended fix                            |
 
@@ -111,6 +113,9 @@ link to the interim report.
 - A **blocked** unit needs a person. Blocks never stop other units. When the queue is otherwise
   empty, collect every block, resolve what you can, and ask the user once for the rest. After a
   fix: `a1 audit reopen <unit> --reason "<what changed>"`.
+- When a tool or device the audit needs is unavailable for every page, such as a screen reader
+  or a physical phone, record it once: `a1 audit limitation "<what was not possible>"
+  --criterion <id>`. The report lists it under Not verified.
 - A unit blocked as "abandoned 3 times" defeated three workers. Read `a1 audit log --unit <id>`
   before reopening it, and consider splitting the page.
 - Do not stop while units are queued or in progress. A finished tool call, a draft report, or a
@@ -149,7 +154,10 @@ from memory or chat history. Restart workers and continue from step 5.
   page to another because they look alike.
 - Never report conformance while any criterion is failing, unfinished, or not verified. The
   report states this for you; do not soften it.
-- Stay inside the audit rules. When a check needs a forbidden action, record `cannot-tell` with
-  what was not exercised.
+- Stay inside the audit rules. A rule forbids an effect, such as sending a message, not the
+  steps before it: client-side validation, confirmation steps, and cancel paths are still
+  tested. Record `cannot-tell` only for what lies past the forbidden effect.
+- A page includes every state it can reach. Workers account for each state the scan lists
+  and add the ones it misses; an untested state shows in the report as not verified.
 - Label simulated screen reader output as simulated. It does not establish VoiceOver or NVDA
   behavior.

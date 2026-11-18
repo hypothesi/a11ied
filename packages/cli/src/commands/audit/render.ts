@@ -47,7 +47,7 @@ export function renderStatus(status: AuditStatus): string {
          ['Target', `${config.target} (${config.platform})`],
          [
             'Scope',
-            `WCAG ${config.wcagVersion} ${config.level}, ${String(criteria.total)} criteria, ${String(status.pages.active)} pages`,
+            `WCAG ${config.wcagVersion} ${config.level}, ${String(criteria.total)} criteria, ${String(status.pages.active)} ${config.platform === 'web' ? 'pages' : 'screens'}`,
          ],
          ['Phase', PHASE_TEXT[status.phase]],
          [

@@ -1,5 +1,6 @@
 import { getConfig, type Audit } from '../db.js';
 import { listFindings, SEVERITY_ORDER, type FindingRecord } from '../findings.js';
+import { listLimitations } from '../limitations.js';
 import { getTestPass } from '../passes.js';
 import type { AuditConfig, AuditPage, Unit } from '../schema.js';
 import { getCriterionInfo, type CriterionInfo } from '../scope.js';
@@ -11,6 +12,7 @@ import {
    type PageOutcome,
 } from '../status.js';
 import { listPages } from '../pages.js';
+import { listPageStates, type PageState } from '../states.js';
 import { listUnits } from '../units.js';
 
 export interface ReportOccurrence {
@@ -52,6 +54,8 @@ export interface ReportGap {
 }
 
 export interface ReportPage extends AuditPage {
+   /** Names of the states some test pass put this page in and judged. */
+   statesTested: string[];
    unitsDone: number;
    unitsTotal: number;
    findingCount: number;
@@ -165,14 +169,53 @@ function listGaps(
    return [...unverified, ...blocked, ...unfinished, ...uncovered];
 }
 
+/** A state no test pass judged, with the first reason given for leaving it out. */
+function listUntestedStateGaps(
+   states: readonly PageState[],
+   names: ReadonlyMap<string, string>,
+): ReportGap[] {
+   const tested = new Set(
+      states
+         .filter((state) => state.tested)
+         .map((state) => `${state.pageId}:${state.name}`),
+   );
+   const seen = new Set<string>();
+   return states.flatMap((state) => {
+      const key = `${state.pageId}:${state.name}`;
+      if (state.tested || tested.has(key) || seen.has(key)) {
+         return [];
+      }
+      seen.add(key);
+      return [
+         {
+            criterion: undefined,
+            pageId: state.pageId,
+            pageName: names.get(state.pageId) ?? state.pageId,
+            reason: `State "${state.name}" was not tested: ${state.note}`,
+         },
+      ];
+   });
+}
+
 function toReportPage(
    page: AuditPage,
-   units: readonly Unit[],
-   findings: readonly ReportFinding[],
+   context: {
+      units: readonly Unit[];
+      findings: readonly ReportFinding[];
+      states: readonly PageState[];
+   },
 ): ReportPage {
+   const { units, findings, states } = context;
    const own = units.filter((unit) => unit.pageId === page.id);
    return {
       ...page,
+      statesTested: [
+         ...new Set(
+            states
+               .filter((state) => state.pageId === page.id && state.tested)
+               .map((state) => state.name),
+         ),
+      ],
       unitsDone: own.filter((unit) => unit.status === 'done').length,
       unitsTotal: own.length,
       findingCount: findings.filter((finding) =>
@@ -193,12 +236,24 @@ function resolveVerdict(status: AuditStatus): ReportVerdict {
 }
 
 /** Collects everything a report shows into one plain structure. */
+const WHOLE_AUDIT = 'All pages and screens';
+
+function listLimitationGaps(audit: Audit): ReportGap[] {
+   return listLimitations(audit).map((limitation) => ({
+      criterion: limitation.criterion,
+      pageId: 'audit',
+      pageName: WHOLE_AUDIT,
+      reason: limitation.text,
+   }));
+}
+
 export function buildAuditReport(audit: Audit): AuditReport {
    const config = getConfig(audit);
    const all = listPages(audit);
    const names = new Map(all.map((page) => [page.id, page.name]));
    const units = listUnits(audit);
    const status = getAuditStatus(audit);
+   const states = listPageStates(audit);
    const findings = listFindings(audit)
       .map((finding) => toReportFinding(finding, config, names))
       .toSorted(byPriority);
@@ -216,10 +271,14 @@ export function buildAuditReport(audit: Audit): AuditReport {
       status,
       findings,
       criteria,
-      gaps: listGaps(criteria, units, names),
+      gaps: [
+         ...listLimitationGaps(audit),
+         ...listGaps(criteria, units, names),
+         ...listUntestedStateGaps(states, names),
+      ],
       pages: all
          .filter((page) => page.status === 'active' && page.kind !== 'site')
-         .map((page) => toReportPage(page, units, findings)),
+         .map((page) => toReportPage(page, { units, findings, states })),
       excluded: all.filter((page) => page.status === 'excluded'),
    };
 }

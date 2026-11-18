@@ -108,6 +108,7 @@ a1 audit report
 | `audit discover`, `audit scan`              | `audit_discover`, `audit_scan`              |
 | `audit next`, `audit show`, `audit submit`  | `audit_next`, `audit_show`, `audit_submit`  |
 | `audit note`, `audit block`, `audit reopen` | `audit_note`, `audit_block`, `audit_reopen` |
+| `audit limitation`                          | `audit_limitation`                          |
 | `audit status`, `audit log`                 | `audit_status`                              |
 | `audit findings`, `audit finding show`      | `audit_findings`                            |
 | `audit finding dismiss/merge/update`        | `audit_finding`                             |

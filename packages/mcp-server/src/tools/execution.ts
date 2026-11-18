@@ -349,10 +349,20 @@ function registerCaptureTool(server: McpServer): void {
             viewport: z.string().optional().describe('WIDTHxHEIGHT, such as 320x800.'),
             zoom: z.number().positive().optional(),
             textSpacing: z.boolean().optional(),
-            click: z.string().optional(),
+            click: z
+               .array(z.string())
+               .optional()
+               .describe(
+                  'Elements to click in order, to open a menu, dialog, or widget.',
+               ),
             press: z.array(z.string()).optional(),
             hover: z.string().optional(),
-            selector: z.string().optional(),
+            selector: z
+               .string()
+               .optional()
+               .describe(
+                  'Capture this element, outlined, with some of the page around it.',
+               ),
             fullPage: z.boolean().optional(),
             waitFor: z.string().optional(),
             storageStatePath: z.string().optional(),

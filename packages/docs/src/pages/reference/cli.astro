@@ -6,6 +6,7 @@ const toc = [
    { id: 'families', label: 'Command families' },
    { id: 'shared', label: 'Shared options' },
    { id: 'sr', label: 'a1 sr' },
+   { id: 'talkback', label: 'a1 talkback' },
    { id: 'keys', label: 'Key chords' },
    { id: 'wcag', label: 'a1 wcag' },
    { id: 'axe', label: 'a1 axe' },
@@ -145,6 +146,21 @@ const toc = [
          <code>press</code>, <code>type</code>, <code>do</code>, and <code>walk</code> start a
          session when none is active. The other verbs need one and exit 2 without it.
       </p>
+   </section>
+
+   <section class="panel" id="talkback">
+      <h2>a1 talkback</h2>
+      <p>
+         Drives TalkBack over adb on an Android phone or a Google Play emulator image, and prints
+         what TalkBack said. Google APIs emulator images do not include TalkBack. Set TalkBack
+         settings &gt; Advanced settings &gt; Developer settings &gt; Log output level to VERBOSE once
+         per device, since the speech is read from its log. Add <code>--serial</code> when more
+         than one device is attached.
+      </p>
+      <div class="route-list">
+         <div class="route-row"><code>on</code>, <code>off</code><span>Turn TalkBack on or off.</span></div>
+         <div class="route-row"><code>walk [--key] [--count]</code><span>Press a key repeatedly and print what TalkBack said after each press. Keys: <code>next</code> (Tab), <code>previous</code>, <code>activate</code> (Enter), <code>up</code>, <code>down</code>.</span></div>
+      </div>
    </section>
 
    <section class="split panel" id="keys">
@@ -433,12 +449,13 @@ a1 check --html '&lt;h1&gt;Hi&lt;/h1&gt;'</code></pre>
          <div class="route-row"><code>--viewport &lt;WxH&gt;</code><span>Viewport in CSS pixels, such as <code>320x800</code> for a reflow check. Defaults to 1280x900.</span></div>
          <div class="route-row"><code>--zoom &lt;factor&gt;</code><span>Browser zoom, such as <code>2</code> for 200 percent.</span></div>
          <div class="route-row"><code>--text-spacing</code><span>Apply the WCAG 1.4.12 text spacing values.</span></div>
-         <div class="route-row"><code>--click &lt;selector&gt;</code>, <code>--hover &lt;selector&gt;</code><span>Open a state or trigger hover content first.</span></div>
+         <div class="route-row"><code>--click &lt;selector&gt;</code>, <code>--hover &lt;selector&gt;</code><span>Open a state or trigger hover content first. <code>--click</code> is repeatable; clicks run in order.</span></div>
          <div class="route-row"><code>--press &lt;key&gt;</code><span>Press a key. Repeatable. <code>"Tab*4"</code> presses Tab four times.</span></div>
-         <div class="route-row"><code>--selector &lt;css&gt;</code>, <code>--full-page</code><span>Capture one element, or the whole scrollable page.</span></div>
+         <div class="route-row"><code>--selector &lt;selector&gt;</code>, <code>--full-page</code><span>Capture one element, outlined, with some of the page around it; or the whole scrollable page. Takes CSS or <code>role=button[name="Menu"]</code>, and reaches into open shadow roots.</span></div>
       </div>
       <pre><code>a1 capture https://example.com --viewport 320x800 --full-page --out reflow.png
-a1 capture https://example.com --press "Tab*4" --out focus-4.png</code></pre>
+a1 capture https://example.com --press "Tab*4" --out focus-4.png
+a1 capture https://example.com --click "#chat" --selector "role=textbox[name=\"Name\"]" --out chat-name.png</code></pre>
    </section>
 
    <section class="panel" id="audit">
@@ -463,10 +480,11 @@ a1 capture https://example.com --press "Tab*4" --out focus-4.png</code></pre>
       <div class="route-list">
          <div class="route-row"><code>next --worker &lt;name&gt;</code><span>Claim a unit and print its work packet. <code>--pass</code>, <code>--not-pass</code>, <code>--page</code>, <code>--unit</code>, <code>--lease &lt;minutes&gt;</code>. A worker that already has a unit gets the same unit back.</span></div>
          <div class="route-row"><code>show &lt;unit&gt;</code><span>Print a unit's packet without claiming it.</span></div>
-         <div class="route-row"><code>submit &lt;unit&gt; --worker &lt;name&gt; --file &lt;json&gt;</code><span>Hand in outcomes, findings, and dismissals. Accepted or rejected as a whole; a rejection lists every problem.</span></div>
+         <div class="route-row"><code>submit &lt;unit&gt; --worker &lt;name&gt; --file &lt;json&gt;</code><span>Hand in outcomes, findings, the states tested, and dismissals. A finding's <code>screenshot</code> spec (selector plus viewport, zoom, clicks, keys, or hover) becomes a cropped, outlined picture of the element. Accepted or rejected as a whole; a rejection lists every problem.</span></div>
          <div class="route-row"><code>note &lt;unit&gt; --worker &lt;name&gt; [message]</code><span>Extend the claim and log progress.</span></div>
          <div class="route-row"><code>block &lt;unit&gt; --reason</code><span>Park a unit that needs a person. Other units continue.</span></div>
-         <div class="route-row"><code>reopen &lt;unit&gt; --reason</code><span>Return a blocked or finished unit to the queue.</span></div>
+         <div class="route-row"><code>reopen &lt;unit&gt; --reason</code><span>Return a blocked or finished unit to the queue. Its earlier outcomes appear as prior results in the next worker's packet.</span></div>
+         <div class="route-row"><code>limitation [text] [--criterion] [--list] [--remove]</code><span>Record, list, or remove something the whole audit could not test. The report lists each one under Not verified.</span></div>
       </div>
       <h3>Watch, curate, report</h3>
       <div class="route-list">

@@ -63,6 +63,26 @@ CREATE TABLE IF NOT EXISTS results (
  , recordedAt TEXT NOT NULL
  , PRIMARY KEY (pageId, criterion)
 );
+CREATE TABLE IF NOT EXISTS states (
+   unitId TEXT NOT NULL
+ , pageId TEXT NOT NULL REFERENCES pages (id)
+ , position INTEGER NOT NULL
+ , name TEXT NOT NULL
+ , covers TEXT NOT NULL DEFAULT '[]'
+ , tested INTEGER NOT NULL
+ , note TEXT NOT NULL
+ , PRIMARY KEY (unitId, position)
+);
+CREATE TABLE IF NOT EXISTS priorResults (
+   unitId TEXT NOT NULL
+ , criterion TEXT NOT NULL
+ , outcome TEXT NOT NULL
+ , note TEXT NOT NULL
+ , worker TEXT NOT NULL
+ , recordedAt TEXT NOT NULL
+ , reopenReason TEXT NOT NULL
+ , PRIMARY KEY (unitId, criterion)
+);
 CREATE TABLE IF NOT EXISTS findings (
    id TEXT PRIMARY KEY
  , seq INTEGER NOT NULL

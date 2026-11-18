@@ -1,10 +1,11 @@
 import { mkdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { withTextSpacing } from '@a11ied/observe';
-import type { Page } from 'playwright';
+import type { Browser, Page } from 'playwright';
 import { gotoSettled } from '../browser/load.js';
 import { launchAutomationBrowser } from '../browser/runtime.js';
 import { CliUsageError } from '../errors/cli-errors.js';
+import { screenshotElement } from './element.js';
 import { parseHttpUrl } from '../targets/parse.js';
 
 const DEFAULT_VIEWPORT = { width: 1280, height: 900 };
@@ -23,13 +24,13 @@ export interface CapturePageOptions {
    zoom?: number | undefined;
    /** Apply the WCAG 1.4.12 text spacing values before capturing. */
    textSpacing?: boolean | undefined;
-   /** Click this element first, to open a menu or dialog. */
-   click?: string | undefined;
+   /** Click these elements in order first, to open a menu, dialog, or widget. */
+   click?: readonly string[] | undefined;
    /** Keys to press in order, such as `Tab`, `Shift+Tab`, or `Tab*5` for five presses. */
    press?: readonly string[] | undefined;
    /** Hover this element before capturing. */
    hover?: string | undefined;
-   /** Capture only this element. */
+   /** Capture this element, outlined, with some of the page around it. */
    selector?: string | undefined;
    /** Capture the whole scrollable page instead of the viewport. */
    fullPage?: boolean | undefined;
@@ -174,17 +175,30 @@ async function readPageState(
    return { horizontalOverflowPx, focused: await readFocusedElement(page) };
 }
 
+/** Runs steps one after another, since each acts on the state the last one left. */
+export async function runInOrder<TItem>(
+   items: readonly TItem[],
+   step: (item: TItem) => Promise<void>,
+): Promise<void> {
+   const [first, ...rest] = items;
+   if (first === undefined) {
+      return;
+   }
+   await step(first);
+   await runInOrder(rest, step);
+}
+
 async function preparePage(page: Page, options: CapturePageOptions): Promise<void> {
    if (options.waitFor) {
       await page.waitForSelector(options.waitFor);
    }
-   if (options.click) {
-      await page.locator(options.click).first().click();
-   }
-   for (const key of expandKeys(options.press ?? [])) {
-      // oxlint-disable-next-line no-await-in-loop -- each key acts on the focus the last one left
+   await runInOrder(options.click ?? [], async (selector) => {
+      await page.locator(selector).first().click();
+      await page.waitForTimeout(SETTLE_MS);
+   });
+   await runInOrder(expandKeys(options.press ?? []), async (key) => {
       await page.keyboard.press(key);
-   }
+   });
    if (options.hover) {
       await page.locator(options.hover).first().hover();
    }
@@ -192,35 +206,33 @@ async function preparePage(page: Page, options: CapturePageOptions): Promise<voi
 }
 
 async function takeScreenshot(page: Page, options: CapturePageOptions): Promise<void> {
+   if (options.selector) {
+      await screenshotElement(page, options.selector, options.out);
+      return;
+   }
    const path = resolve(options.out);
    await mkdir(dirname(path), { recursive: true });
-   await (options.selector
-      ? page.locator(options.selector).first().screenshot({ path })
-      : page.screenshot({ path, fullPage: options.fullPage ?? false }));
+   await page.screenshot({ path, fullPage: options.fullPage ?? false });
 }
 
-/**
- * Loads a page, puts it in the requested condition, and saves a screenshot together with
- * facts about focus and overflow. It is how an auditor gets visual evidence for a narrow
- * viewport, 200 percent zoom, text spacing, a focused control, or an opened state.
- */
-export async function capturePage(
+/** `capturePage` in a fresh context of a browser the caller owns and closes. */
+export async function captureWithBrowser(
+   browser: Browser,
    url: string,
    options: CapturePageOptions,
 ): Promise<CaptureResult> {
    const viewport = parseViewport(options.viewport);
    const zoom = options.zoom ?? 1;
-   const { browser } = await launchAutomationBrowser();
+   // Browser zoom is a narrower layout viewport drawn at a higher pixel density.
+   const context = await browser.newContext({
+      viewport: {
+         width: Math.round(viewport.width / zoom),
+         height: Math.round(viewport.height / zoom),
+      },
+      deviceScaleFactor: zoom,
+      ...(options.storageStatePath ? { storageState: options.storageStatePath } : {}),
+   });
    try {
-      // Browser zoom is a narrower layout viewport drawn at a higher pixel density.
-      const context = await browser.newContext({
-         viewport: {
-            width: Math.round(viewport.width / zoom),
-            height: Math.round(viewport.height / zoom),
-         },
-         deviceScaleFactor: zoom,
-         ...(options.storageStatePath ? { storageState: options.storageStatePath } : {}),
-      });
       const page = await context.newPage();
       page.setDefaultTimeout(options.timeoutMs ?? DEFAULT_TIMEOUT_MS);
       await gotoSettled(page, parseHttpUrl(url).href, {
@@ -244,6 +256,23 @@ export async function capturePage(
          zoom,
          ...state,
       };
+   } finally {
+      await context.close();
+   }
+}
+
+/**
+ * Loads a page, puts it in the requested condition, and saves a screenshot together with
+ * facts about focus and overflow. It is how an auditor gets visual evidence for a narrow
+ * viewport, 200 percent zoom, text spacing, a focused control, or an opened state.
+ */
+export async function capturePage(
+   url: string,
+   options: CapturePageOptions,
+): Promise<CaptureResult> {
+   const { browser } = await launchAutomationBrowser();
+   try {
+      return await captureWithBrowser(browser, url, options);
    } finally {
       await browser.close();
    }

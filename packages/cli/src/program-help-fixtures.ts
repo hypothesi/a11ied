@@ -28,6 +28,8 @@ export const topLevelHelpCases: HelpCase[] = [
       Drive a screen reader:
         sr                Read a page as VoiceOver, NVDA, or the simulated reader
                           does.
+        talkback          Turn TalkBack on or off on an Android device and record what
+                          it says.
 
       Look things up:
         wcag [criterion]  Criteria, techniques, axe rules, and the W3C guidance.

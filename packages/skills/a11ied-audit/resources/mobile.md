@@ -42,7 +42,10 @@ code or screenshots alone when the criterion is about behavior.
 ## What each pass needs
 
 - **semantics**: the element list with labels, roles, and states, then a real pass with
-  VoiceOver or TalkBack when the tooling allows it. Otherwise record what the element list
+  VoiceOver or TalkBack when the tooling allows it. On Android, `a1 talkback on` and
+  `a1 talkback walk --count <n>` print what TalkBack said at each focus stop; it needs a phone
+  or a Google Play emulator image (Google APIs images have no TalkBack) and TalkBack's
+  Developer settings > Log output level set to VERBOSE. Otherwise record what the element list
   shows and mark behavior you could not hear as `cannot-tell`.
 - **keyboard**: a hardware keyboard or Switch Control and Switch Access. Many apps fail here
   completely. Record that as findings, not as not-applicable.

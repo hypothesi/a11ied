@@ -13,6 +13,7 @@ import { registerSrActionTool } from './tools/sr-action.js';
 import { registerSrListTool } from './tools/sr-list.js';
 import { registerSrSessionTool } from './tools/sr-session.js';
 import { registerSrTranscriptTools } from './tools/sr-transcript.js';
+import { registerTalkBackTool } from './tools/talkback.js';
 
 /** Creates the MCP server with all shipped tools and read-only resources registered. */
 export function createMcpServer(): McpServer {
@@ -32,6 +33,7 @@ export function createMcpServer(): McpServer {
    registerSrActionTool(server);
    registerSrListTool(server);
    registerSrTranscriptTools(server);
+   registerTalkBackTool(server);
 
    return server;
 }

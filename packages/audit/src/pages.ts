@@ -15,7 +15,8 @@ import {
    listTestPassIds,
    TEST_PASSES,
 } from './passes.js';
-import { countRowSchema, pageRowSchema } from './rows.js';
+import { countRowSchema, idRowSchema, pageRowSchema } from './rows.js';
+import { resetUnit } from './reopen.js';
 import type { AuditPage, PageKind } from './schema.js';
 
 /** The pseudo-page that carries checks made across the whole audited set. */
@@ -170,6 +171,22 @@ export function syncUnits(audit: Audit): void {
    }
 }
 
+/**
+ * Puts finished or blocked site-wide units back in the queue. Their checks compare pages
+ * with each other, so a result recorded for one set of pages says nothing about another.
+ */
+function reopenSiteUnits(audit: Audit, input: { actor: string; reason: string }): void {
+   const unitIDs = selectAll(
+      audit,
+      idRowSchema,
+      "SELECT id FROM units WHERE pageId = ? AND status IN ('done', 'blocked')",
+      SITE_PAGE_ID,
+   ).map((row) => row.id);
+   for (const unitID of unitIDs) {
+      resetUnit(audit, { unitId: unitID, actor: input.actor, reason: input.reason });
+   }
+}
+
 function assertPasses(passes: readonly string[]): void {
    const unknown = passes.filter((passId) => getTestPass(passId) === undefined);
    if (unknown.length > 0) {
@@ -211,6 +228,7 @@ export function addPage(audit: Audit, input: PageInput, actor = 'lead'): AuditPa
          passes: input.passes && input.passes.length > 0 ? input.passes : undefined,
       });
       syncUnits(audit);
+      reopenSiteUnits(audit, { actor, reason: `the page set changed (added ${id})` });
       addEvent(audit, {
          actor,
          type: 'page-added',
@@ -235,6 +253,10 @@ export function excludePage(
          reason,
          pageId,
       );
+      reopenSiteUnits(audit, {
+         actor,
+         reason: `the page set changed (excluded ${pageId})`,
+      });
       addEvent(audit, {
          actor,
          type: 'page-excluded',
@@ -253,6 +275,10 @@ export function includePage(audit: Audit, pageId: string, actor = 'lead'): Audit
          pageId,
       );
       syncUnits(audit);
+      reopenSiteUnits(audit, {
+         actor,
+         reason: `the page set changed (included ${pageId})`,
+      });
       addEvent(audit, {
          actor,
          type: 'page-included',

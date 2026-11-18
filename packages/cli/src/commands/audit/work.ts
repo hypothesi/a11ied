@@ -1,6 +1,10 @@
 import { readFileSync } from 'node:fs';
 import {
+   addLimitation,
    AuditError,
+   listLimitations,
+   removeLimitation,
+   type AuditLimitation,
    blockUnit,
    buildWorkPacket,
    claimNext,
@@ -139,8 +143,10 @@ function registerSubmit(parent: Command): void {
          .summary("Hand in a unit's results and findings.")
          .description(
             'Submit one JSON document with an outcome for every criterion in the unit, any ' +
-               'findings, and any dismissals. The submission is accepted or rejected as a whole. ' +
-               'A rejection lists every problem; fix them and submit again.',
+               'findings, the states tested, and any dismissals. For a finding with a ' +
+               'screenshot spec, the page is put in that state and a cropped picture of the ' +
+               'element is saved as its evidence. The submission is accepted or rejected as a ' +
+               'whole. A rejection lists every problem; fix them and submit again.',
          )
          .requiredOption('--worker <name>', 'The worker that holds the unit.')
          .requiredOption(
@@ -151,11 +157,17 @@ function registerSubmit(parent: Command): void {
       await runAuditCommand({
          subcommand: 'submit',
          options,
-         work: (audit) => {
+         work: async (audit) => {
+            const { captureSubmissionEvidence } = await import('#core');
+            const { submission, problems } = await captureSubmissionEvidence(audit, {
+               unitId,
+               submission: readSubmission(options.file),
+            });
             const receipt = submitUnit(audit, {
                unitId,
                worker: options.worker,
-               submission: readSubmission(options.file),
+               submission,
+               problems,
             });
             return { receipt, units: getAuditStatus(audit, 1).units };
          },
@@ -256,7 +268,66 @@ function registerReopen(parent: Command): void {
          work: (audit) => ({
             unit: reopenUnit(audit, { unitId, actor: 'lead', reason: options.reason }),
          }),
-         text: (result) => `Reopened ${result.unit.id}. It is back in the queue.`,
+         text: (result) =>
+            `Reopened ${result.unit.id}. It is back in the queue, and its earlier outcomes are kept as prior results.`,
+      });
+   });
+}
+
+interface LimitationOptions extends AuditBaseOptions {
+   criterion?: string;
+   list?: boolean;
+   remove?: string;
+}
+
+function describeLimitation(limitation: AuditLimitation): string {
+   return limitation.criterion === undefined
+      ? limitation.text
+      : `${limitation.criterion}: ${limitation.text}`;
+}
+
+function runLimitation(
+   audit: Audit,
+   text: string | undefined,
+   options: LimitationOptions,
+): string {
+   if (options.list === true) {
+      const lines = listLimitations(audit).map(
+         (limitation, index) => `${String(index + 1)}. ${describeLimitation(limitation)}`,
+      );
+      return lines.length === 0 ? 'No limitations recorded.' : lines.join('\n');
+   }
+   if (options.remove !== undefined) {
+      const removed = removeLimitation(audit, { position: Number(options.remove) });
+      return `Removed limitation: ${describeLimitation(removed)}`;
+   }
+   if (text === undefined) {
+      throw new AuditError('invalid-limitation', 'Describe what could not be tested.');
+   }
+   const added = addLimitation(audit, { text, criterion: options.criterion });
+   return `Recorded limitation${added.criterion === undefined ? '' : ` on ${added.criterion}`}. It appears under Not verified in the report.`;
+}
+
+function registerLimitation(parent: Command): void {
+   addAuditOptions(
+      parent
+         .command('limitation [text]')
+         .summary('Record, list, or remove something the whole audit could not test.')
+         .description(
+            'Use this for a gap that applies to every page or screen, such as no screen ' +
+               'reader or no physical device being available. The report lists it under Not ' +
+               'verified. For a gap on one page, record the criterion as cannot-tell instead. ' +
+               'Remove a limitation once the testing it describes has been done.',
+         )
+         .option('--criterion <id>', 'The criterion the gap weakens, such as 4.1.2.')
+         .option('--list', 'List the recorded limitations with their numbers.')
+         .option('--remove <number>', 'Remove the limitation with this number.'),
+   ).action(async (text: string | undefined, options: LimitationOptions) => {
+      await runAuditCommand({
+         subcommand: 'limitation',
+         options,
+         work: (audit) => ({ message: runLimitation(audit, text, options) }),
+         text: (result) => result.message,
       });
    });
 }
@@ -269,4 +340,5 @@ export function registerWorkCommands(parent: Command): void {
    registerNote(parent);
    registerBlock(parent);
    registerReopen(parent);
+   registerLimitation(parent);
 }

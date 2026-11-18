@@ -9,6 +9,12 @@ export {
    type Audit,
    type OpenAuditOptions,
 } from './db.js';
+export {
+   addLimitation,
+   listLimitations,
+   removeLimitation,
+   type AuditLimitation,
+} from './limitations.js';
 export { startAudit, type StartAuditInput } from './init.js';
 export * from './schema.js';
 export {
@@ -60,6 +66,12 @@ export {
 } from './findings.js';
 export { parseSubmission, submitUnit, type SubmitReceipt } from './submit.js';
 export { listSignals, putSignal } from './signals.js';
+export {
+   getStateInventory,
+   listPageStates,
+   STATE_SIGNAL_KIND,
+   type PageState,
+} from './states.js';
 export {
    getAuditStatus,
    listCriterionRollups,

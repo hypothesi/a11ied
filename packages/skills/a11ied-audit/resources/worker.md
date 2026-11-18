@@ -17,7 +17,7 @@ unit returns the same unit, so it is safe after losing context.
 
 The work packet contains everything for the unit: the page and how to reach it, the audit
 rules, the procedure, each criterion with what it applies to and when it fails, signals from the
-automated scan, findings already recorded, and the submission template.
+automated scan, the states to cover, findings already recorded, and the submission template.
 
 ## Testing
 
@@ -33,6 +33,20 @@ needs. Useful tools for web:
 | Scan facts for this page                                                  | `a1 audit signals <page> --kind keyboard`                                                                                                                                                                                                                  |
 | Screenshot at a viewport, zoom, text spacing, focus stop, or opened state | `a1 capture <url> --out <file.png>` with `--viewport 320x800`, `--zoom 2`, `--text-spacing`, `--press "Tab*4"`, `--click <selector>`, `--hover <selector>`. It also prints the focused element, whether it is in view or covered, and horizontal overflow. |
 | Anything else in a browser                                                | Your own browser automation tool, if you have one                                                                                                                                                                                                          |
+
+## States
+
+A page is every state it can reach, not just how it looks on load. A menu, dialog, chat widget,
+tab, accordion, or a form with its errors showing is part of the page, and every criterion in
+your unit applies to it. Work through each state you can reach and judge your criteria there
+too.
+
+The packet lists what the scan found under "States to cover", each with an id such as `S3` and
+a selector. Every id must appear in the `covers` of some entry in `states`, or the submission is
+rejected. The list comes from markup (buttons, `aria-expanded`, `aria-haspopup`, tabs, `summary`,
+frames, web components, and forms), so it misses things like hover content and controls built
+from plain `div`s. Add any state you find with empty `covers`. A state you cannot reach goes in
+with `tested: false` and the reason, and it appears under "Not verified" in the report.
 
 Before any `a1 sr` command, run the `export A11IED_STATE_DIR=...` line from the packet. It gives
 you a private session; without it you will collide with other workers. Stop your session with
@@ -55,9 +69,12 @@ shows in the progress log. A claim with no activity for 20 minutes returns to th
   not an observation.
 - An empty signal is not proof of absence. "No video elements" in the media inventory still needs
   a look at the page for embedded players and animated images.
-- When a check needs an action the audit rules forbid, do the parts you can and record
-  `cannot-tell` for the rest. Example: "Field labels and required markers checked. Error messages
-  not exercised: submitting the form is not authorized."
+- An audit rule forbids an effect, not the steps before it. "Do not submit the contact form"
+  forbids sending a message. Submitting an empty or invalid form that the browser or page stops
+  before sending is still a test you must run, and so are confirmation steps and cancel paths.
+  Record `cannot-tell` only for what lies past the forbidden effect. Example: "Errors checked
+  with an empty and an invalid submit, which the page blocked. The success message was not
+  seen: sending the form is not authorized."
 - Keep notes to one or two sentences. Detail belongs in a finding.
 
 ## Findings
@@ -82,8 +99,14 @@ A new finding needs:
 - **impact**: who is affected and what they cannot do.
 - **recommendation**: the specific change. Say which attribute, element, or style to change.
 - **location**: the visible label plus a selector, such as `Header > Menu (button.nav-toggle)`.
-- **evidence**: a screenshot for anything visual, saved under the evidence directory in the
-  packet and referenced by its path. A transcript excerpt can go in `detail`.
+- **screenshot**: how to photograph the failing element. Give a `selector` (CSS, or
+  `role=button[name="Menu"]`; both reach into shadow roots) and whatever puts the page in the
+  failing state: `viewport` such as `320x800`, `zoom`, `textSpacing`, `click` (a list, in order),
+  `press` such as `["Tab*4"]`, and `hover`. On submit, a1 loads the page, does those steps, and
+  saves a crop of the element with an outline around it. On a web page every occurrence needs
+  this or an `evidence` image.
+- **evidence**: images you saved yourself under the packet's evidence directory, for states the
+  screenshot steps cannot reach. A transcript excerpt can go in `detail`.
 
 A defect you notice against a criterion outside your unit still goes in `findings`, as long as
 the criterion is in the audit's scope.
@@ -96,6 +119,9 @@ rejected whole. A rejection lists every problem: fix them all and submit again. 
 - A criterion has no outcome. Every criterion in the unit needs one.
 - `fail` with no finding, or `pass` while a finding is open on this page.
 - A new finding is missing a field, or an evidence file does not exist.
+- A finding on a web page has neither `screenshot` nor `evidence`, or its screenshot could not
+  be taken (the selector matched nothing, or the element was hidden in that state).
+- A state from "States to cover" is not in any state's `covers`.
 
 ## When you cannot do the unit
 

@@ -19,6 +19,12 @@ const cliCommands: CliCommand[] = [
       maturity: 'ready',
    },
    {
+      name: 'talkback',
+      summary:
+         'Turn TalkBack on or off on an Android device over adb and record what it says.',
+      maturity: 'ready',
+   },
+   {
       name: 'axe',
       summary: 'Run axe-core accessibility scans.',
       maturity: 'ready',

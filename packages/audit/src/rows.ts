@@ -68,6 +68,24 @@ export const resultRowSchema = z.object({
    recordedAt: z.string(),
 });
 
+export const stateRowSchema = z.object({
+   unitId: z.string(),
+   pageId: z.string(),
+   name: z.string(),
+   covers: jsonText(stringList),
+   tested: z.number().transform((value) => value === 1),
+   note: z.string(),
+});
+
+export const priorResultRowSchema = z.object({
+   criterion: z.string(),
+   outcome: outcomeSchema,
+   note: z.string(),
+   worker: z.string(),
+   recordedAt: z.string(),
+   reopenReason: z.string(),
+});
+
 export const findingRowSchema = z.object({
    id: z.string(),
    criterion: z.string(),
@@ -113,3 +131,4 @@ export const signalRowSchema = z.object({
 });
 
 export const countRowSchema = z.object({ count: z.number() });
+export const idRowSchema = z.object({ id: z.string() });

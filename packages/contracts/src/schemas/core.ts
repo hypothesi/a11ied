@@ -99,6 +99,7 @@ export const cliCommandFamilySchema = z.enum([
    'pattern',
    'search',
    'sr',
+   'talkback',
    'axe',
    'tree',
    'check',

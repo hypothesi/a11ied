@@ -3,6 +3,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
+   addLimitation,
+   buildAuditReport,
+   removeLimitation,
    addPage,
    AuditError,
    blockUnit,
@@ -16,10 +19,12 @@ import {
    listFindings,
    listUnits,
    openAudit,
+   putSignal,
    recordAutomatedFinding,
    renderWorkPacket,
    reopenUnit,
    startAudit,
+   STATE_SIGNAL_KIND,
    submitUnit,
    type Audit,
    type SubmissionInput,
@@ -58,6 +63,13 @@ function passAll(unit: Unit): SubmissionInput {
          note: 'Checked and found no problem.',
       })),
    };
+}
+
+/** Writes a stand-in screenshot, since findings on web pages need evidence. */
+function saveEvidence(store: Audit): string {
+   mkdirSync(join(store.dir, 'evidence'), { recursive: true });
+   writeFileSync(join(store.dir, 'evidence', 'shot.png'), 'x');
+   return 'evidence/shot.png';
 }
 
 function claim(store: Audit, worker: string, unitId?: string): Unit {
@@ -112,7 +124,10 @@ describe('audit scope', () => {
    });
 
    it('limits units to the passes that own the requested criteria', () => {
-      const store = start({ target: 'x', criteria: ['1.4.3', 'focus-visible'] });
+      const store = start({
+         target: 'x',
+         criteria: ['1.4.3', 'focus-visible'],
+      });
       addPage(store, { locator: 'https://example.test/' });
 
       expect(listUnits(store).map((unit) => [unit.id, unit.criteria])).toEqual([
@@ -224,7 +239,11 @@ describe('submitting a unit', () => {
       addPage(store, { locator: 'https://example.test/' });
       const unit = claim(store, 'w1');
 
-      submitUnit(store, { unitId: unit.id, worker: 'w1', submission: passAll(unit) });
+      submitUnit(store, {
+         unitId: unit.id,
+         worker: 'w1',
+         submission: passAll(unit),
+      });
       const status = getAuditStatus(store);
 
       expect(status.phase).toBe('complete');
@@ -267,7 +286,9 @@ describe('submitting a unit', () => {
       const store = start({ target: 'x', criteria: ['2.4.7'] });
       addPage(store, { locator: 'https://example.test/' });
       addPage(store, { locator: 'https://example.test/about' });
-      mkdirSync(join(store.dir, 'evidence', 'P1.keyboard'), { recursive: true });
+      mkdirSync(join(store.dir, 'evidence', 'P1.keyboard'), {
+         recursive: true,
+      });
       writeFileSync(join(store.dir, 'evidence', 'P1.keyboard', 'menu.png'), 'x');
       const finding = {
          criterion: '2.4.7',
@@ -277,6 +298,7 @@ describe('submitting a unit', () => {
          impact: 'Keyboard users cannot tell where focus is.',
          recommendation: 'Add a visible :focus-visible outline.',
          location: 'Header > Menu (button.nav-toggle)',
+         evidence: ['evidence/P1.keyboard/menu.png'],
       } as const;
 
       for (const worker of ['w1', 'w2']) {
@@ -285,11 +307,23 @@ describe('submitting a unit', () => {
             unitId: unit.id,
             worker,
             submission: {
-               results: [{ criterion: '2.4.7', outcome: 'fail', note: 'No indicator.' }],
+               results: [
+                  {
+                     criterion: '2.4.7',
+                     outcome: 'fail',
+                     note: 'No indicator.',
+                  },
+               ],
                findings: [
                   worker === 'w1'
-                     ? { ...finding, evidence: ['evidence/P1.keyboard/menu.png'] }
-                     : { ...finding, title: 'Menu button has no focus indicator.' },
+                     ? {
+                          ...finding,
+                          evidence: ['evidence/P1.keyboard/menu.png'],
+                       }
+                     : {
+                          ...finding,
+                          title: 'Menu button has no focus indicator.',
+                       },
                ],
             },
          });
@@ -322,7 +356,11 @@ describe('automated findings', () => {
       const unit = claim(store, 'w1');
 
       const problems = getProblems(() =>
-         submitUnit(store, { unitId: unit.id, worker: 'w1', submission: passAll(unit) }),
+         submitUnit(store, {
+            unitId: unit.id,
+            worker: 'w1',
+            submission: passAll(unit),
+         }),
       );
       submitUnit(store, {
          unitId: unit.id,
@@ -368,7 +406,11 @@ describe('stale workers', () => {
       claim(store, 'w2');
 
       expect(() =>
-         submitUnit(store, { unitId: unit.id, worker: 'w1', submission: passAll(unit) }),
+         submitUnit(store, {
+            unitId: unit.id,
+            worker: 'w1',
+            submission: passAll(unit),
+         }),
       ).toThrow(/claimed by w2, not claimed by w1/u);
    });
 });
@@ -378,10 +420,18 @@ describe('recovering and changing scope', () => {
       const store = start({ target: 'x', criteria: ['2.4.7', '3.3.1'] });
       addPage(store, { locator: 'https://example.test/' });
       const first = claim(store, 'w1');
-      blockUnit(store, { unitId: first.id, actor: 'w1', reason: 'Needs a login.' });
+      blockUnit(store, {
+         unitId: first.id,
+         actor: 'w1',
+         reason: 'Needs a login.',
+      });
 
       const second = claim(store, 'w1');
-      reopenUnit(store, { unitId: first.id, actor: 'lead', reason: 'Login provided.' });
+      reopenUnit(store, {
+         unitId: first.id,
+         actor: 'lead',
+         reason: 'Login provided.',
+      });
       const third = claim(store, 'w2');
 
       expect(second.id).not.toBe(first.id);
@@ -399,6 +449,49 @@ describe('recovering and changing scope', () => {
       expect(getAuditStatus(store).pages).toEqual({ active: 1, excluded: 1 });
    });
 
+   it('reopens finished site-wide units when the page set changes', () => {
+      const store = start({ target: 'x', criteria: ['3.2.3'] });
+      addPage(store, { locator: 'https://example.test/' });
+      addPage(store, { locator: 'https://example.test/about' });
+      const unit = claim(store, 'w1', 'site.consistency');
+      submitUnit(store, {
+         unitId: unit.id,
+         worker: 'w1',
+         submission: passAll(unit),
+      });
+
+      addPage(store, { locator: 'https://example.test/contact' });
+      const reopened = listUnits(store).find(
+         (candidate) => candidate.id === 'site.consistency',
+      );
+
+      expect(reopened?.status).toBe('pending');
+      expect(getAuditStatus(store).criteria.pass).toBe(0);
+   });
+
+   it('keeps the outcomes of a reopened unit for the next worker', () => {
+      const store = start({ target: 'x', criteria: ['2.4.7'] });
+      addPage(store, { locator: 'https://example.test/' });
+      const unit = claim(store, 'w1');
+      submitUnit(store, {
+         unitId: unit.id,
+         worker: 'w1',
+         submission: passAll(unit),
+      });
+
+      reopenUnit(store, {
+         unitId: unit.id,
+         actor: 'lead',
+         reason: 'Screen reader disagreed',
+      });
+      const packet = buildWorkPacket(store, claim(store, 'w2'));
+
+      expect(packet.priorResults.map((result) => result.criterion)).toEqual(['2.4.7']);
+      expect(packet.priorResults[0]?.reopenReason).toBe('Screen reader disagreed');
+      expect(renderWorkPacket(packet)).toContain('## Prior results');
+      expect(getAuditStatus(store).criteria.pass).toBe(0);
+   });
+
    it('survives a restart: a new process sees the same state', () => {
       const store = start({ target: 'x', criteria: ['2.4.7'] });
       addPage(store, { locator: 'https://example.test/' });
@@ -412,6 +505,54 @@ describe('recovering and changing scope', () => {
 
       expect(resumed.id).toBe('P1.keyboard');
       expect(resumed.attempts).toBe(1);
+   });
+});
+
+describe('audit-wide limitations', () => {
+   it('lists a limitation as not verified in the report, even when every unit passes', () => {
+      const store = start({ target: 'x', criteria: ['2.4.7'] });
+      addPage(store, { locator: 'https://example.test/' });
+      const unit = claim(store, 'w1');
+      submitUnit(store, {
+         unitId: unit.id,
+         worker: 'w1',
+         submission: passAll(unit),
+      });
+
+      addLimitation(store, {
+         criterion: '2.4.7',
+         text: 'No physical device was available.',
+      });
+
+      expect(buildAuditReport(store).gaps).toEqual([
+         {
+            criterion: '2.4.7',
+            pageId: 'audit',
+            pageName: 'All pages and screens',
+            reason: 'No physical device was available.',
+         },
+      ]);
+   });
+
+   it('drops a limitation from the report once it is removed', () => {
+      const store = start({ target: 'x', criteria: ['2.4.7'] });
+      addLimitation(store, { text: 'No screen reader.' });
+      addLimitation(store, { text: 'No physical device.' });
+
+      removeLimitation(store, { position: 1 });
+      const auditWide = buildAuditReport(store).gaps.filter(
+         (gap) => gap.pageId === 'audit',
+      );
+
+      expect(auditWide.map((gap) => gap.reason)).toEqual(['No physical device.']);
+   });
+
+   it('rejects a limitation on a criterion outside the scope', () => {
+      const store = start({ target: 'x', criteria: ['2.4.7'] });
+
+      expect(() =>
+         addLimitation(store, { criterion: '1.4.3', text: 'Not tested.' }),
+      ).toThrow('not in this audit');
    });
 });
 
@@ -436,7 +577,10 @@ describe('work packet', () => {
 
 describe('one defect that fails several criteria', () => {
    it('is filed once and fails every criterion it names', () => {
-      const store = start({ target: 'x', criteria: ['2.4.3', '2.4.7', '2.4.11'] });
+      const store = start({
+         target: 'x',
+         criteria: ['2.4.3', '2.4.7', '2.4.11'],
+      });
       addPage(store, { locator: 'https://example.test/' });
       const unit = claim(store, 'w1');
 
@@ -459,6 +603,7 @@ describe('one defect that fails several criteria', () => {
                   impact: 'i',
                   recommendation: 'r',
                   location: 'nav a',
+                  evidence: [saveEvidence(store)],
                },
             ],
          },
@@ -495,10 +640,122 @@ describe('one defect that fails several criteria', () => {
          worker: 'w1',
          submission: {
             results: [{ criterion: '2.4.7', outcome: 'fail', note: 'Same button.' }],
-            findings: [{ criterion: '2.4.7', sameAs: findingId, location: 'button.nav' }],
+            findings: [
+               {
+                  criterion: '2.4.7',
+                  sameAs: findingId,
+                  location: 'button.nav',
+                  evidence: [saveEvidence(store)],
+               },
+            ],
          },
       });
 
       expect(listFindings(store, { criterion: '2.4.7' })[0]?.id).toBe(findingId);
+   });
+});
+
+describe('page states', () => {
+   const inventory = {
+      triggers: [
+         { id: 'S1', kind: 'disclosure', label: 'Menu', selector: '#menu' },
+         { id: 'S2', kind: 'embedded', label: 'Chat', selector: 'chat-widget' },
+      ],
+      omitted: 0,
+   };
+
+   function startWithInventory(): { store: Audit; unit: Unit } {
+      const store = start({ target: 'x', criteria: ['2.4.7'] });
+      addPage(store, { locator: 'https://example.test/' });
+      putSignal(store, { pageId: 'P1', kind: STATE_SIGNAL_KIND, data: inventory });
+      return { store, unit: claim(store, 'w1') };
+   }
+
+   it('rejects a submission that leaves a state the scan found unaccounted for', () => {
+      const { store, unit } = startWithInventory();
+
+      const problems = getProblems(() =>
+         submitUnit(store, {
+            unitId: unit.id,
+            worker: 'w1',
+            submission: {
+               ...passAll(unit),
+               states: [
+                  { name: 'Menu open', covers: ['S1'], tested: true, note: 'Opened it.' },
+               ],
+            },
+         }),
+      );
+
+      expect(problems).toHaveLength(1);
+      expect(problems[0]).toContain('S2');
+   });
+
+   it('lists tested states per page and reports untested ones as not verified', () => {
+      const { store, unit } = startWithInventory();
+
+      submitUnit(store, {
+         unitId: unit.id,
+         worker: 'w1',
+         submission: {
+            ...passAll(unit),
+            states: [
+               { name: 'Menu open', covers: ['S1'], tested: true, note: 'Opened it.' },
+               {
+                  name: 'Chat open',
+                  covers: ['S2'],
+                  tested: false,
+                  note: 'Widget would not load.',
+               },
+            ],
+         },
+      });
+      const report = buildAuditReport(store);
+
+      expect(report.pages[0]?.statesTested).toEqual(['Menu open']);
+      expect(report.gaps.map((gap) => gap.reason)).toContain(
+         'State "Chat open" was not tested: Widget would not load.',
+      );
+   });
+
+   it('shows the states to cover in the work packet', () => {
+      const { store, unit } = startWithInventory();
+
+      const text = renderWorkPacket(buildWorkPacket(store, unit));
+
+      expect(text).toContain('## States to cover');
+      expect(text).toContain('S2 embedded: "Chat" (chat-widget)');
+   });
+});
+
+describe('finding evidence', () => {
+   it('rejects a finding on a web page that has no picture', () => {
+      const store = start({ target: 'x', criteria: ['2.4.7'] });
+      addPage(store, { locator: 'https://example.test/' });
+      const unit = claim(store, 'w1');
+
+      const problems = getProblems(() =>
+         submitUnit(store, {
+            unitId: unit.id,
+            worker: 'w1',
+            submission: {
+               results: [{ criterion: '2.4.7', outcome: 'fail', note: 'No ring.' }],
+               findings: [
+                  {
+                     criterion: '2.4.7',
+                     title: 'No focus ring',
+                     severity: 'serious',
+                     description: 'd',
+                     impact: 'i',
+                     recommendation: 'r',
+                     location: 'button.nav',
+                  },
+               ],
+            },
+         }),
+      );
+
+      expect(problems).toHaveLength(1);
+      expect(problems[0]).toContain('screenshot');
    });
 });

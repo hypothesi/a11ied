@@ -36,6 +36,11 @@ function stopLine(details: Record<string, unknown>): string {
    if (stoppedAt.success && stoppedAt.data === 'time') {
       return dim('Stopped at the time limit; run the command again to continue.');
    }
+   if (stoppedAt.success && stoppedAt.data === 'stalled') {
+      return dim(
+         'Stopped because the reader repeated the same item; its cursor is probably outside the page. Move it into the page and run again.',
+      );
+   }
    if (stoppedAt.success && stoppedAt.data === 'match') {
       return dim('Stopped at the match.');
    }

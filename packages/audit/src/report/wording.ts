@@ -67,6 +67,7 @@ export function describeScope(report: AuditReport): string {
 export const METHOD_PARAGRAPHS: readonly string[] = [
    'Each page or screen was tested in passes that group related success criteria: names and structure as assistive technology receives them, keyboard operation, visual presentation, media and motion, forms, and pointer input. Checks that compare pages were run once across the whole set.',
    'An automated scan (axe-core and page measurements) ran first. A failure the scanner is certain of is reported directly. Scanner output is never used to pass a criterion: every pass, not-applicable, and remaining failure was decided by an auditing agent that operated the page and inspected the result.',
+   'Each page was judged in every state it can reach that the auditor found, such as open menus, dialogs, and forms showing errors; the scan lists the controls that open them so none is skipped by accident. The scope table names the states tested. A state left untested appears under "Not verified".',
    'A criterion fails when at least one audited page or screen fails it. "Not verified" marks checks that could not be completed, with the reason. Results apply to the audited scope on the audit dates and do not cover pages, states, or content outside it.',
 ];
 

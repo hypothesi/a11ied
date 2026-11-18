@@ -12,6 +12,7 @@ import { TEST_PASSES } from './passes.js';
 import { unitRowSchema } from './rows.js';
 import type { Unit } from './schema.js';
 import { SITE_PAGE_ID } from './pages.js';
+import { resetUnit } from './reopen.js';
 
 /** How long a claim lasts without any sign of life from its worker. */
 export const DEFAULT_LEASE_MINUTES = 20;
@@ -275,8 +276,8 @@ export function blockUnit(
 }
 
 /**
- * Puts a unit back in the queue with a fresh attempt count. Reopening a finished unit
- * discards its recorded outcomes; its findings stay for the next worker to confirm.
+ * Puts a unit back in the queue. Its findings stay for the next worker to confirm, and
+ * its outcomes are kept as prior results; see `resetUnit`.
  */
 export function reopenUnit(
    audit: Audit,
@@ -284,18 +285,7 @@ export function reopenUnit(
 ): Unit {
    return transact(audit, () => {
       const unit = getUnit(audit, input.unitId);
-      run(audit, 'DELETE FROM results WHERE unitId = ?', unit.id);
-      run(
-         audit,
-         "UPDATE units SET status = 'pending', worker = NULL, leaseExpiresAt = NULL, attempts = 0, finishedAt = NULL, reason = '', summary = '' WHERE id = ?",
-         unit.id,
-      );
-      addEvent(audit, {
-         actor: input.actor,
-         type: 'unit-reopened',
-         unitId: unit.id,
-         message: `Reopened ${unit.id}: ${input.reason}`,
-      });
+      resetUnit(audit, { unitId: unit.id, actor: input.actor, reason: input.reason });
       return getUnit(audit, unit.id);
    });
 }

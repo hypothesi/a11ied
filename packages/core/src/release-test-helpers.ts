@@ -6,6 +6,7 @@ const EXPECTED_READY_COMMANDS = [
    'wcag',
    'pattern',
    'sr',
+   'talkback',
    'axe',
    'tree',
    'check',

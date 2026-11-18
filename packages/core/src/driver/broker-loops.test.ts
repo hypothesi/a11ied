@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { createVirtualContextFixture } from './test-fixtures.js';
 import { runBoundedLoop } from './broker-loops.js';
 
-const MAX_STEPS = 3;
+const MAX_STEPS = 3,
+   STUCK_MAX_STEPS = 50;
 
 describe('bounded reader navigation', () => {
    it.each(['Same label', 'No more results'])(
@@ -16,7 +17,11 @@ describe('bounded reader navigation', () => {
          });
          const step = vi.fn(async () => ({}));
          try {
-            const result = await runBoundedLoop({ adapter, max: MAX_STEPS, step });
+            const result = await runBoundedLoop({
+               adapter,
+               max: MAX_STEPS,
+               step,
+            });
 
             expect(result.stoppedAt).toStrictEqual('cap');
             expect(result.complete).toStrictEqual(false);
@@ -28,6 +33,62 @@ describe('bounded reader navigation', () => {
          }
       },
    );
+
+   it('stops a real reader that keeps announcing the same item, and marks it incomplete', async () => {
+      const { adapter } = await createVirtualContextFixture('stuck-cursor');
+      adapter.target = 'voiceover';
+      vi.spyOn(adapter, 'readCurrentItem').mockResolvedValue({
+         item: { phrase: 'Sign in button', states: [], source: 'speech' },
+         position: 'Sign in button',
+      });
+      try {
+         const result = await runBoundedLoop({
+            adapter,
+            max: STUCK_MAX_STEPS,
+            step: async () => ({}),
+         });
+
+         expect(result.stoppedAt).toStrictEqual('stalled');
+         expect(result.complete).toStrictEqual(false);
+         expect(result.items).toHaveLength(1);
+      } finally {
+         await adapter.stop();
+      }
+   });
+
+   it('stops a real reader that alternates its last item with silence', async () => {
+      const { adapter } = await createVirtualContextFixture('alternating-end');
+      adapter.target = 'voiceover';
+      vi.spyOn(adapter, 'readCurrentItem')
+         .mockResolvedValueOnce({
+            item: { phrase: 'start', states: [], source: 'speech' },
+            position: 'start',
+         })
+         .mockResolvedValueOnce({
+            item: {
+               phrase: 'heading level 1 Title',
+               states: [],
+               source: 'speech',
+            },
+            position: 'a',
+         })
+         .mockResolvedValue({
+            item: { phrase: '', states: [], source: 'speech' },
+            position: '',
+         });
+      try {
+         const result = await runBoundedLoop({
+            adapter,
+            max: STUCK_MAX_STEPS,
+            step: async () => ({}),
+         });
+
+         expect(result.stoppedAt).toStrictEqual('stalled');
+         expect(result.items.length).toBeLessThan(STUCK_MAX_STEPS);
+      } finally {
+         await adapter.stop();
+      }
+   });
 
    it('accepts confirmed adapter movement limits', async () => {
       const { adapter } = await createVirtualContextFixture('confirmed-end');

@@ -139,7 +139,7 @@ export type DriverLoopItem = z.infer<typeof driverLoopItemSchema>;
  * Why a bounded loop stopped: it reached the end of the page, hit its step cap, found its
  * match, or ran out of time. Another run from the cursor continues after a `time` stop.
  */
-export const driverLoopStopSchema = z.enum(['end', 'cap', 'match', 'time']);
+export const driverLoopStopSchema = z.enum(['end', 'cap', 'match', 'time', 'stalled']);
 export type DriverLoopStop = z.infer<typeof driverLoopStopSchema>;
 
 /** The action-request variants that carry a navigation or structure payload. */

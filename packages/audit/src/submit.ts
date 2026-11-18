@@ -19,6 +19,8 @@ import {
    type Submission,
    type Unit,
 } from './schema.js';
+import { SITE_PAGE_ID } from './pages.js';
+import { checkStates, storeStates } from './states.js';
 import { assertHeldBy, getUnit } from './units.js';
 
 const NEW_FINDING_FIELDS = [
@@ -122,6 +124,24 @@ function checkFindings({ audit, submission }: SubmitContext): string[] {
          );
       return [...outOfScope, ...checkSameAs(audit, finding, at), ...missingEvidence];
    });
+}
+
+/**
+ * On a web page, every occurrence needs a picture a reader can check: a screenshot spec,
+ * which the submit command turns into a cropped image of the element, or a saved image.
+ */
+function checkVisualEvidence({ audit, unit, submission }: SubmitContext): string[] {
+   if (getConfig(audit).platform !== 'web' || unit.pageId === SITE_PAGE_ID) {
+      return [];
+   }
+   // A screenshot spec that could not be taken is reported by the caller that tried.
+   return submission.findings.flatMap((finding, index) =>
+      finding.evidence.length > 0 || finding.screenshot !== undefined
+         ? []
+         : [
+              `findings[${String(index)}]: no evidence. Add screenshot: {"selector": "..."} with any viewport, click, press, or hover needed to show the defect, and a1 audit submit saves a cropped picture of the element. Or save an image under evidence/${unit.id}/ and list it.`,
+           ],
+   );
 }
 
 function checkDismissals({ unit, submission, openOnPage }: SubmitContext): string[] {
@@ -286,7 +306,13 @@ function summarize({ unit, submission }: SubmitContext): string {
  */
 export function submitUnit(
    audit: Audit,
-   input: { unitId: string; worker: string; submission: unknown },
+   input: {
+      unitId: string;
+      worker: string;
+      submission: unknown;
+      /** Problems found before this call, such as screenshots that could not be taken. */
+      problems?: readonly string[] | undefined;
+   },
 ): SubmitReceipt {
    const submission = parseSubmission(input.submission);
    return transact(audit, () => {
@@ -300,10 +326,13 @@ export function submitUnit(
          openOnPage: listFindings(audit, { pageId: unit.pageId }),
       };
       const problems = [
+         ...(input.problems ?? []),
          ...checkCoverage(context),
          ...checkFindings(context),
          ...checkDismissals(context),
          ...checkConsistency(context),
+         ...checkVisualEvidence(context),
+         ...checkStates(audit, unit, submission.states),
       ];
       if (problems.length > 0) {
          throw new AuditError(
@@ -321,6 +350,7 @@ export function submitUnit(
       }
       const applied = applyFindings(context);
       applyResults(context);
+      storeStates(audit, unit, submission.states);
       addEvent(audit, {
          actor: input.worker,
          type: 'unit-done',

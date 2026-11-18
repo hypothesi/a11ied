@@ -111,11 +111,11 @@ function renderScope(report: AuditReport): string[] {
    return [
       '## Scope and method',
       '',
-      '| ID | Page or screen | Location | Findings |',
-      '| --- | --- | --- | --- |',
+      '| ID | Page or screen | Location | States tested | Findings |',
+      '| --- | --- | --- | --- | --- |',
       ...report.pages.map(
          (page) =>
-            `| ${page.id} | ${cell(page.name)} | ${cell(page.locator)} | ${String(page.findingCount)} |`,
+            `| ${page.id} | ${cell(page.name)} | ${cell(page.locator)} | ${cell(page.statesTested.join(', ') || 'As loaded')} | ${String(page.findingCount)} |`,
       ),
       '',
       ...groupExclusions(report).flatMap((group) => renderExclusionGroup(group)),

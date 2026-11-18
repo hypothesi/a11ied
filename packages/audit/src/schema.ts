@@ -67,6 +67,35 @@ export const criterionResultInputSchema = z.object({
 });
 export type CriterionResultInput = z.infer<typeof criterionResultInputSchema>;
 
+/**
+ * How to photograph one occurrence: the element, and the condition the page must be in.
+ * `a1 audit submit` takes the picture, crops it to the element with some context, and
+ * outlines the element, then adds the file to the finding's evidence.
+ */
+export const screenshotSpecSchema = z.object({
+   /**
+    * A Playwright selector: CSS, or `role=button[name="Menu"]`. Both reach open shadow
+    * roots.
+    */
+   selector: z.string().trim().min(1),
+   /** CSS pixels as `320x800`. Defaults to 1280x900. */
+   viewport: z
+      .string()
+      .regex(/^\d+x\d+$/u, 'Use WIDTHxHEIGHT, such as 320x800.')
+      .optional(),
+   /** Browser zoom factor, such as 2 for 200 percent. */
+   zoom: z.number().positive().optional(),
+   /** Apply the WCAG 1.4.12 text spacing values first. */
+   textSpacing: z.boolean().optional(),
+   /** Click these elements in order first, to open a menu, dialog, or widget. */
+   click: z.array(z.string().min(1)).default([]),
+   /** Keys to press in order after clicking, such as `Tab*5`. */
+   press: z.array(z.string().min(1)).default([]),
+   /** Hover this element last, to show hover content. */
+   hover: z.string().min(1).optional(),
+});
+export type ScreenshotSpec = z.infer<typeof screenshotSpecSchema>;
+
 export const findingInputSchema = z.object({
    criterion: criterionIdSchema,
    /**
@@ -91,6 +120,8 @@ export const findingInputSchema = z.object({
    detail: z.string().trim().max(MAX_TEXT_LENGTH).optional(),
    /** Evidence file paths, relative to the audit directory or absolute. */
    evidence: z.array(z.string().min(1)).default([]),
+   /** A picture of this occurrence for the tool to take. See `screenshotSpecSchema`. */
+   screenshot: screenshotSpecSchema.optional(),
 });
 export type FindingInput = z.infer<typeof findingInputSchema>;
 
@@ -100,17 +131,55 @@ export const dismissalInputSchema = z.object({
 });
 export type DismissalInput = z.infer<typeof dismissalInputSchema>;
 
+/**
+ * One condition of the page that the worker put it in and judged, such as "Menu open" or
+ * "Contact form after an empty submit". `covers` lists the ids of the scan's state
+ * inventory items it accounts for.
+ */
+export const stateInputSchema = z.object({
+   name: z.string().trim().min(1).max(MAX_TITLE_LENGTH),
+   covers: z.array(z.string().min(1)).default([]),
+   tested: z.boolean(),
+   /** How the state was reached and what was checked, or why it was not tested. */
+   note: z.string().trim().min(1).max(MAX_NOTE_LENGTH),
+});
+export type StateInput = z.infer<typeof stateInputSchema>;
+
 /** Everything a worker hands back for one unit. Accepted or rejected as a whole. */
 export const submissionSchema = z.object({
    results: z.array(criterionResultInputSchema),
    findings: z.array(findingInputSchema).default([]),
    /** Automated or earlier findings that are wrong for this page, with the reason. */
    dismiss: z.array(dismissalInputSchema).default([]),
+   /** Every state of the page the worker tested or deliberately left out. */
+   states: z.array(stateInputSchema).default([]),
    /** One sentence on how the unit went, shown in the activity log. */
    summary: z.string().trim().max(MAX_NOTE_LENGTH).default(''),
 });
 export type Submission = z.infer<typeof submissionSchema>;
 export type SubmissionInput = z.input<typeof submissionSchema>;
+
+/**
+ * A control or region the scan found that can change what the page presents: something
+ * that expands, opens, or switches content, an embedded frame or web component, or a form
+ * with validation. It is a starting list for the worker, not a complete one.
+ */
+export const stateTriggerSchema = z.object({
+   id: z.string(),
+   kind: z.enum(['disclosure', 'popup', 'dialog', 'tabs', 'control', 'embedded', 'form']),
+   /** What a person would call it: its accessible name or visible text. */
+   label: z.string(),
+   /** A Playwright selector that finds it. */
+   selector: z.string(),
+});
+export type StateTrigger = z.infer<typeof stateTriggerSchema>;
+
+export const stateInventorySchema = z.object({
+   triggers: z.array(stateTriggerSchema),
+   /** How many more were found than listed. */
+   omitted: z.number().int().nonnegative().default(0),
+});
+export type StateInventory = z.infer<typeof stateInventorySchema>;
 
 export interface AuditPage {
    id: string;

@@ -310,10 +310,24 @@ export {
    type DiscoveredPages,
    type DiscoverPagesOptions,
 } from './audit/discover-pages.js';
+export { captureSubmissionEvidence } from './audit/evidence.js';
+export { screenshotElement } from './capture/element.js';
 export {
    capturePage,
+   captureWithBrowser,
    expandKeys,
    type CapturePageOptions,
    type CaptureResult,
    type FocusedElement,
 } from './capture/runtime.js';
+export {
+   disableTalkBack,
+   enableTalkBack,
+   isTalkBackKey,
+   parseTalkBackSpeech,
+   TALKBACK_KEY_NAMES,
+   TALKBACK_KEYS,
+   walkWithTalkBack,
+   type TalkBackKey,
+   type TalkBackStep,
+} from './android/talkback.js';

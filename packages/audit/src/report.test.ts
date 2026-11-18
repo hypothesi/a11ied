@@ -32,8 +32,11 @@ function start(criteria: string[]): Audit {
    return audit;
 }
 
-function failFocus(audit: Audit, worker: string, evidence: string[] = []): void {
+function failFocus(audit: Audit, worker: string, evidence?: string[]): void {
    const unit = claimNext(audit, { worker });
+   const shot = join('evidence', `${unit?.id ?? 'unit'}.png`);
+   mkdirSync(join(audit.dir, 'evidence'), { recursive: true });
+   writeFileSync(join(audit.dir, shot), 'x');
    submitUnit(audit, {
       unitId: unit?.id ?? '',
       worker,
@@ -48,7 +51,7 @@ function failFocus(audit: Audit, worker: string, evidence: string[] = []): void 
                impact: 'Keyboard users lose their place.',
                recommendation: 'Add a :focus-visible outline.',
                location: 'Header > Menu (button.nav)',
-               evidence,
+               evidence: evidence ?? [shot],
             },
          ],
       },
@@ -117,7 +120,21 @@ describe('audit report', () => {
       expect(html).toContain('The &lt;Menu&gt; button shows no change on focus.');
       expect(html).toContain('src="data:image/png;base64,');
       expect(html).toContain('alt="Screenshot: Header &gt; Menu (button.nav)"');
-      expect(html).not.toContain('<script');
+      expect(html).toContain('data-report-shot');
+   });
+
+   it('includes a screenshot viewer for pictures too tall to show in a thumbnail', () => {
+      const audit = start(['2.4.7']);
+      addPage(audit, { locator: 'https://example.test/', name: 'Home' });
+      failFocus(audit, 'w1');
+
+      const { files } = writeAuditReport(audit, { formats: ['html'] });
+      const html = readFileSync(files[0] ?? '', 'utf8');
+
+      expect(html).toContain('<dialog class="report-viewer"');
+      expect(html).toContain('Show full screenshot');
+      expect(html).toContain('aria-label="Position in screenshot"');
+      expect(html.slice(html.indexOf('<script'))).toContain('showModal');
    });
 });
 

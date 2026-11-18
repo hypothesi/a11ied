@@ -233,7 +233,12 @@ export function dismissOnPage(
  */
 export function recordAutomatedFinding(
    audit: Audit,
-   input: NewFinding & { pageId: string; location: string; detail: string },
+   input: NewFinding & {
+      pageId: string;
+      location: string;
+      detail: string;
+      evidence?: readonly string[] | undefined;
+   },
 ): string {
    return transact(audit, () => {
       const findingId =
@@ -260,7 +265,7 @@ export function recordAutomatedFinding(
          unitId: SQL_NULL,
          location: input.location,
          detail: input.detail,
-         evidence: [],
+         evidence: [...(input.evidence ?? [])],
          worker: input.source,
       });
       return findingId;

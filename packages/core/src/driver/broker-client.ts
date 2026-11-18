@@ -336,11 +336,13 @@ function brokerSpawnArgs(options: BrokerSpawnOptions): string[] {
 }
 
 /** Spawns the detached broker process that owns the screen reader for one session. */
-export function spawnBrokerProcess(options: BrokerSpawnOptions): void {
+/** Starts the broker in the background and returns its process ID. */
+export function spawnBrokerProcess(options: BrokerSpawnOptions): number | undefined {
    const child = spawn(process.execPath, brokerSpawnArgs(options), {
       cwd: getProjectRoot(),
       detached: true,
       stdio: 'ignore',
    });
    child.unref();
+   return child.pid;
 }

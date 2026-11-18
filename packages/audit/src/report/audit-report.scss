@@ -270,12 +270,223 @@ thead th {
    margin-block-start: 0.4rem;
 }
 
-.report-evidence img {
-   display: block;
-   max-inline-size: min(100%, 22rem);
-   max-block-size: 14rem;
+.report-shot {
+   position: relative;
+   overflow: hidden;
+   inline-size: min(100%, 22rem);
    border: 1px solid var(--a1-report-borderColor);
    border-radius: 0.25rem;
+   margin: 0;
+}
+
+.report-shot img {
+   display: block;
+   /* A fixed width keeps a tall capture from shrinking to a sliver; its top shows here. */
+   inline-size: 100%;
+   block-size: auto;
+   max-block-size: 14rem;
+   object-fit: cover;
+   object-position: top;
+}
+
+.report-shot a {
+   display: block;
+   cursor: zoom-in;
+}
+
+/* Fades the bottom of a cut-off screenshot so it reads as continuing. */
+.report-shot--tall::after {
+   position: absolute;
+   inset-inline: 0;
+   inset-block-end: 0;
+   block-size: 6rem;
+   background: linear-gradient(to bottom, transparent, var(--a1-report-bgColor) 85%);
+   content: '';
+   pointer-events: none;
+}
+
+.report-shot-more {
+   position: absolute;
+   z-index: 1;
+   inset-inline: 0;
+   inset-block-end: 1rem;
+   display: flex;
+   justify-content: center;
+}
+
+.report-shot-more button,
+.report-viewer button {
+   padding: 0.4rem 0.8rem;
+   border: 1px solid var(--a1-report-borderColor);
+   border-radius: 999px;
+   background: var(--a1-report-bgColor);
+   color: var(--a1-report-color);
+   font: inherit;
+   font-size: 0.85rem;
+   font-weight: 600;
+   cursor: pointer;
+   user-select: none;
+}
+
+@media (hover: hover) {
+   .report-shot-more button:hover,
+   .report-viewer button:hover {
+      border-color: var(--a1-report-link-color);
+   }
+}
+
+.report-shot-more span {
+   color: var(--a1-report-muted-color);
+   font-weight: 400;
+}
+
+.report-shot-more span::before {
+   content: '(';
+}
+
+.report-shot-more span::after {
+   content: ')';
+}
+
+.report-shot a:focus-visible,
+.report-shot-more button:focus-visible,
+.report-viewer button:focus-visible,
+.report-viewer-body:focus-visible {
+   outline: 3px solid var(--a1-report-link-color);
+   outline-offset: 2px;
+}
+
+.report-viewer {
+   display: none;
+   inline-size: min(96vw, 80rem);
+   block-size: 92vh;
+   padding: 0;
+   border: 1px solid var(--a1-report-borderColor);
+   border-radius: 0.5rem;
+   background: var(--a1-report-bgColor);
+   color: var(--a1-report-color);
+}
+
+.report-viewer[open] {
+   display: flex;
+   flex-direction: column;
+}
+
+.report-viewer::backdrop {
+   background: rgb(0 0 0 / 70%);
+}
+
+.report-viewer-bar {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   justify-content: space-between;
+   gap: 0.75rem;
+   padding: 0.75rem 1rem;
+   border-block-end: 1px solid var(--a1-report-borderColor);
+}
+
+.report-viewer-bar h2 {
+   padding: 0;
+   border: 0;
+   margin: 0;
+   font-size: 1rem;
+}
+
+.report-viewer-meta {
+   margin: 0.15rem 0 0;
+   color: var(--a1-report-muted-color);
+   font-size: 0.85rem;
+}
+
+.report-viewer-meta span + span::before {
+   content: ' \00b7  ';
+}
+
+.report-viewer-main {
+   display: flex;
+   overflow: hidden;
+   flex: 1;
+}
+
+.report-viewer-actions {
+   display: flex;
+   gap: 0.5rem;
+}
+
+.report-viewer-body {
+   overflow: auto;
+   flex: 1;
+   min-inline-size: 0;
+   padding: 1rem;
+   background: var(--a1-report-page-bgColor);
+}
+
+/* Fit to width by default: a tall page scrolls down, a wide one never scrolls sideways. */
+.report-viewer-body img {
+   display: block;
+   max-inline-size: 100%;
+   margin-inline: auto;
+}
+
+.report-viewer--actual .report-viewer-body img {
+   max-inline-size: none;
+}
+
+/* The whole screenshot shrunk to the strip's height, with a window over the part on screen. */
+.report-viewer-map {
+   display: flex;
+   flex: none;
+   justify-content: center;
+   min-inline-size: 3.5rem;
+   padding: 0.5rem;
+   border-inline-start: 1px solid var(--a1-report-borderColor);
+}
+
+.report-viewer-map-track {
+   position: relative;
+   display: flex;
+   justify-content: center;
+   min-inline-size: 2.5rem;
+   block-size: 100%;
+}
+
+.report-viewer-map[hidden] {
+   display: none;
+}
+
+.report-viewer-map img {
+   display: block;
+   block-size: 100%;
+   inline-size: auto;
+   max-inline-size: 6rem;
+}
+
+.report-viewer-map-window {
+   position: absolute;
+   inset-inline: 0;
+   min-block-size: 4px;
+   border: 2px solid var(--a1-report-link-color);
+   border-radius: 0.2rem;
+   background: color-mix(in srgb, var(--a1-report-link-color) 15%, transparent);
+   pointer-events: none;
+}
+
+/* The slider covers the strip, so dragging anywhere on it moves through the screenshot. */
+.report-viewer-map input {
+   position: absolute;
+   inset: 0;
+   inline-size: 100%;
+   block-size: 100%;
+   margin: 0;
+   opacity: 0;
+   cursor: pointer;
+   writing-mode: vertical-lr;
+}
+
+.report-viewer-map-track:has(input:focus-visible) {
+   outline: 3px solid var(--a1-report-link-color);
+   outline-offset: 2px;
 }
 
 code {

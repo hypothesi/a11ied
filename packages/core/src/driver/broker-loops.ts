@@ -26,6 +26,25 @@ interface LoopState {
    items: DriverLoopItem[];
    /** When the loop runs out of time, as a `Date.now()` value. */
    deadline: number;
+   /** How many steps in a row announced nothing new; see `isRepeat`. */
+   repeats: number;
+}
+
+/**
+ * A real reader whose cursor is stuck, for example on browser chrome outside the page,
+ * announces the same item after every step and never reports that it did not move.
+ */
+const STALLED_REPEAT_LIMIT = 5;
+const REPEAT_WINDOW = 2;
+
+/**
+ * Silence counts as a repeat, and so does either of the last two phrases, because
+ * VoiceOver at the end of a quick-nav list alternates "Last heading ..." with silence.
+ */
+function isRepeat(items: readonly DriverLoopItem[], phrase: string): boolean {
+   return (
+      phrase === '' || items.slice(-REPEAT_WINDOW).some((item) => item.phrase === phrase)
+   );
 }
 
 /** Only adapter movement and simulated node identities can confirm the end. */
@@ -121,12 +140,21 @@ async function runLoop(
    if (reachedEnd(state, stop, args.adapter.target)) {
       return { items: state.items, stoppedAt: 'end' };
    }
+   const phrase = stop.item.phrase ?? '';
+   const repeats = isRepeat(state.items, phrase) ? state.repeats + 1 : 0;
+   if (repeats >= STALLED_REPEAT_LIMIT) {
+      return {
+         items: state.items.slice(0, -STALLED_REPEAT_LIMIT + 1),
+         stoppedAt: 'stalled',
+      };
+   }
    const items = [...state.items, toLoopItem(state.items.length + 1, stop.item)];
    const next: LoopState = {
       first: state.first ?? stop.position,
       previous: stop.position,
       items,
       deadline: state.deadline,
+      repeats,
    };
    if (args.isMatch?.(stop.item)) {
       return { items, stoppedAt: 'match' };
@@ -153,12 +181,18 @@ export async function runBoundedLoop(args: LoopArgs): Promise<{
    const start = await args.adapter.readCurrentItem();
    const result = await runLoop(
       args,
-      { first: undefined, previous: start.position, items: [], deadline },
+      {
+         first: undefined,
+         previous: start.position,
+         items: [],
+         deadline,
+         repeats: 0,
+      },
       args.max,
    );
    return {
       ...result,
-      complete: result.stoppedAt !== 'cap' && result.stoppedAt !== 'time',
+      complete: result.stoppedAt === 'end' || result.stoppedAt === 'match',
       limitations:
          args.adapter.target === 'virtual'
             ? []

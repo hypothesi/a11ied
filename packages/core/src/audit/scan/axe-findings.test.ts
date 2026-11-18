@@ -58,11 +58,38 @@ describe('axe findings for an audit', () => {
       expect(rest).toHaveLength(0);
       expect(finding).toMatchObject({
          criterion: '1.4.3',
-         key: 'axe:color-contrast',
+         key: 'axe:color-contrast:p',
+         title: 'Elements must meet minimum color contrast ratio thresholds (<p>)',
          severity: 'serious',
          detail: '7 elements; 2 more not listed',
       });
       expect(finding?.recommendation).toContain('Increase the contrast');
+   });
+
+   it('files a separate finding for each type of failing element', () => {
+      const run = buildRun();
+      const [contrast] = run.violations;
+      const mixed = {
+         ...run,
+         violations: contrast
+            ? [
+                 {
+                    ...contrast,
+                    nodes: [
+                       { target: ['a.button--cta'], html: '<a class="button--cta">' },
+                       {
+                          target: ['figcaption'],
+                          html: '<FIGCAPTION>Services</FIGCAPTION>',
+                       },
+                    ],
+                 },
+              ]
+            : [],
+      };
+
+      const keys = listAxeFindings(mixed, ['1.4.3']).map((finding) => finding.key);
+
+      expect(keys).toEqual(['axe:color-contrast:a', 'axe:color-contrast:figcaption']);
    });
 
    it('ignores violations outside the audit scope and rules with no criterion', () => {

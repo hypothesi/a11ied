@@ -1,4 +1,7 @@
 import {
+   addLimitation,
+   listLimitations,
+   removeLimitation,
    addPage,
    AuditError,
    blockUnit,
@@ -35,7 +38,11 @@ import {
    writeAuditReport,
    type Audit,
 } from '@a11ied/audit';
-import { discoverAuditPages, scanAuditPages } from '@a11ied/core';
+import {
+   captureSubmissionEvidence,
+   discoverAuditPages,
+   scanAuditPages,
+} from '@a11ied/core';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
@@ -320,21 +327,29 @@ function registerWorkTools(server: McpServer): void {
       {
          title: 'Submit an audit unit',
          description:
-            'Hand in a unit: an outcome and note for every criterion, any findings, and any dismissals. Accepted or ' +
+            'Hand in a unit: an outcome and note for every criterion, any findings, the states tested, and any ' +
+            'dismissals. A finding with a screenshot spec gets a cropped picture of its element as evidence. Accepted or ' +
             'rejected as a whole; a rejection lists every problem. Matches the CLI audit submit command.',
          inputSchema: { ...workerRef, ...unitRef, submission: submissionSchema },
          annotations: activeAnnotations,
       },
       async (input) =>
          createToolResponse(
-            await withAudit(input.audit, (audit) => ({
-               receipt: submitUnit(audit, {
+            await withAudit(input.audit, async (audit) => {
+               const { submission, problems } = await captureSubmissionEvidence(audit, {
                   unitId: input.unit,
-                  worker: input.worker,
                   submission: input.submission,
-               }),
-               units: getAuditStatus(audit, 1).units,
-            })),
+               });
+               return {
+                  receipt: submitUnit(audit, {
+                     unitId: input.unit,
+                     worker: input.worker,
+                     submission,
+                     problems,
+                  }),
+                  units: getAuditStatus(audit, 1).units,
+               };
+            }),
          ),
    );
 }
@@ -382,6 +397,36 @@ function registerUnitStateTools(server: McpServer): void {
                   actor: input.worker ?? 'lead',
                   reason: input.reason,
                }),
+            })),
+         ),
+   );
+   server.registerTool(
+      'audit_limitation',
+      {
+         title: 'Record an audit limitation',
+         description:
+            'Record something the whole audit could not test, such as no screen reader or no physical device. ' +
+            'The report lists it under Not verified. For a gap on one page, submit the criterion as cannot-tell instead. ' +
+            'Pass remove (a 1-based position) instead of text to drop a limitation once that testing is done.',
+         inputSchema: {
+            ...auditRef,
+            text: z.string().min(1).optional(),
+            criterion: z.string().optional(),
+            remove: z.number().int().positive().optional(),
+         },
+         annotations: activeAnnotations,
+      },
+      async (input) =>
+         createToolResponse(
+            await withAudit(input.audit, (audit) => ({
+               limitation:
+                  input.remove === undefined
+                     ? addLimitation(audit, {
+                          text: input.text ?? '',
+                          criterion: input.criterion,
+                       })
+                     : removeLimitation(audit, { position: input.remove }),
+               limitations: listLimitations(audit),
             })),
          ),
    );
