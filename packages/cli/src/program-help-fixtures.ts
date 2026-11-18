@@ -114,8 +114,8 @@ function resolvePressSrOption(): string {
    }
    if (process.platform !== 'darwin') {
       return [
-         '        --sr <reader>   Screen reader to drive: voiceover, nvda, or virtual. Defaults to',
-         '                        an available VoiceOver or NVDA target, then falls back to',
+         '        --sr <reader>   Screen reader to drive: voiceover, nvda, or virtual. Defaults',
+         '                        to an available VoiceOver or NVDA target, then falls back to',
          '                        virtual as a last resort.',
       ].join('\n');
    }
