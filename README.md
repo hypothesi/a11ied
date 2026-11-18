@@ -3,7 +3,7 @@
 `a11ied` is a CLI-first accessibility toolkit. It does three jobs:
 
 - **Look things up**: WCAG criteria, techniques, test methods, and ARIA patterns, pinned from the W3C sources.
-- **Check while you build**: axe scans, the accessibility tree, screenshots at a viewport or focus stop, and real screen reader sessions with VoiceOver and NVDA through Guidepup.
+- **Check while you build**: axe scans, the accessibility tree, screenshots at a viewport or focus stop, real screen reader sessions with VoiceOver and NVDA through Guidepup, and TalkBack on Android over adb.
 - **Audit**: run an agent-driven WCAG audit of a site, page, feature, or mobile app, with durable progress, parallel workers, a live dashboard, and a client-ready report.
 
 ## install
@@ -42,8 +42,11 @@ facts for the agents. An agent decides every pass and every not-applicable. Stat
 `.a11ied/audits/<id>/`, so an audit survives a crashed agent or a restart.
 
 Narrow the scope with `--page` (one page), `--criteria 1.4.3,2.4.7`, `--passes keyboard`,
-or `--platform ios`. The [audit guide](packages/docs/src/pages/guides/audit.astro) covers
-the workflow, and [internal-docs/audit-architecture.md](internal-docs/audit-architecture.md)
+or `--platform ios`. On web, the scan lists the controls on each page that open a menu,
+dialog, tab, or section, and a submission must account for every one. A finding gives a
+selector for the failing element, and `a1` takes an outlined screenshot of it for the
+report. The [audit guide](packages/docs/src/pages/guides/audit.astro) covers the workflow,
+and [internal-docs/audit-architecture.md](internal-docs/audit-architecture.md)
 explains the design. Agents use the `a11ied-audit` skill in `packages/skills/`.
 
 Use the runtime API:

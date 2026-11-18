@@ -96,8 +96,10 @@ a1 audit submit P1.keyboard --worker w1 --file result.json</code></pre>
       <p>
          <code>next</code> prints the work packet: the page, the rules, the procedure, each
          criterion with what it applies to and when it fails, the scan's signals, findings
-         already recorded, and a submission template. <code>submit</code> takes one JSON
-         document and accepts or rejects it whole. A rejection lists every problem, such as a
+         already recorded, the page's states to cover, and a submission template. A finding on
+         a web page gives a selector for its element and the state to put the page in, and
+         <code>submit</code> takes the outlined screenshot itself. <code>submit</code> takes
+         one JSON document and accepts or rejects it whole. A rejection lists every problem, such as a
          criterion with no outcome or a failure with no finding.
       </p>
       <p>
@@ -163,10 +165,16 @@ a1 audit findings</code></pre>
 a1 audit page add "Tab bar > Search" --name "Search"</code></pre>
       <p>
          Tracking, parallel workers, findings, and the report work the same way. There is no
-         automated scan, and a1 does not drive devices: workers operate the app with the
+         automated scan, and a1 does not drive the app: workers operate it with the
          platform's tools, such as <code>xcrun simctl</code>, <code>adb</code>, or an automation
          server the agent already has. Give each worker its own simulator or device. Work
          packets use the mobile wording of each procedure.
+      </p>
+      <p>
+         On Android, <code>a1 talkback on</code> and <code>a1 talkback walk --count 20</code>
+         print what TalkBack said at each focus stop. It needs a phone or a Google Play
+         emulator image, and TalkBack's log output level set to verbose once per device. See
+         <a href="/reference/cli#talkback"><code>a1 talkback</code></a>.
       </p>
    </section>
 </DocShell>

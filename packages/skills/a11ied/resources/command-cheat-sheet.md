@@ -201,6 +201,21 @@ a1 sr transcript --since before-submit --tail 5
 | `sr transcript [--since c] [--tail n] [--out path]`          | `sr_transcript` | `since`, `tail`, `out`, `format`                 |
 | `sr tail [--lines n] [--since c] [--interval ms] [--phrase]` | CLI only        | stream live announcements (NDJSON with `--json`) |
 
+## TalkBack on Android
+
+```txt
+a1 talkback on
+a1 talkback walk --count 20
+a1 talkback off
+```
+
+| Command                                    | MCP tool   | Arguments                                     |
+| ------------------------------------------ | ---------- | --------------------------------------------- |
+| `talkback on\|off\|walk [--key] [--count]` | `talkback` | `action` (required), `key`, `count`, `serial` |
+
+`walk` needs a phone or a Google Play emulator image, with TalkBack's log output level set
+to verbose. Add `--serial` when more than one device is attached.
+
 ## Not exposed over MCP
 
 `a1 sr batch <file>` runs JSON-lines actions from a file in one process. Call `sr_action`
