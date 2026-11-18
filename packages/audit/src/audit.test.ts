@@ -482,13 +482,13 @@ describe('recovering and changing scope', () => {
       reopenUnit(store, {
          unitId: unit.id,
          actor: 'lead',
-         reason: 'Screen reader disagreed',
+         reason: 'Screen reader disagreed.',
       });
       const packet = buildWorkPacket(store, claim(store, 'w2'));
 
       expect(packet.priorResults.map((result) => result.criterion)).toEqual(['2.4.7']);
-      expect(packet.priorResults[0]?.reopenReason).toBe('Screen reader disagreed');
-      expect(renderWorkPacket(packet)).toContain('## Prior results');
+      expect(packet.priorResults[0]?.reopenReason).toBe('Screen reader disagreed.');
+      expect(renderWorkPacket(packet)).toContain('Reason: Screen reader disagreed.\n');
       expect(getAuditStatus(store).criteria.pass).toBe(0);
    });
 

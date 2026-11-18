@@ -238,7 +238,8 @@ function renderPriorResults(packet: WorkPacket): string[] {
    return [
       '',
       '## Prior results',
-      `This unit was reopened: ${first.reopenReason}. Its earlier outcomes are below. Re-test what the reason calls into question, and carry over notes that still hold.`,
+      `This unit was reopened. Reason: ${first.reopenReason}`,
+      'Its earlier outcomes are below. Re-test what the reason calls into question, and carry over notes that still hold.',
       ...packet.priorResults.map(
          (result) =>
             `- ${result.criterion} ${result.outcome} (${result.worker}): ${result.note}`,
