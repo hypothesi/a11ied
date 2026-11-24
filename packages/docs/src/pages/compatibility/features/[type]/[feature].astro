@@ -156,9 +156,9 @@ const toc = [
    toc={toc}
 >
    <nav class="srFeature-breadcrumb" aria-label="Breadcrumb" data-support-page>
-      <a href="/support">Screen reader compatibility</a>
+      <a href="/compatibility">Screen reader compatibility</a>
       <span class="srFeature-separator" aria-hidden="true">/</span>
-      <a href="/support/#feature-directory">Features</a>
+      <a href="/compatibility/#feature-directory">Features</a>
       <span class="srFeature-separator" aria-hidden="true">/</span>
       <span aria-current="page">
          {feature.type.toUpperCase()} / {feature.refId}
@@ -359,7 +359,7 @@ const toc = [
                                        <div class="srRow-drilldownItem srRow-drilldownItem--single">
                                           <div class="srRow-drilldownHeader">
                                              <a
-                                                href={`/support/tests/${singleLocalItem.testSlug}/`}
+                                                href={`/compatibility/tests/${singleLocalItem.testSlug}/`}
                                                 class="srRow-drilldownTitle"
                                              >
                                                 {singleLocalItem.testTitle}
@@ -399,7 +399,7 @@ const toc = [
                                                       <div class="srRow-drilldownItem">
                                                          <div class="srRow-drilldownHeader">
                                                             <a
-                                                               href={`/support/tests/${item.testSlug}/`}
+                                                               href={`/compatibility/tests/${item.testSlug}/`}
                                                                class="srRow-drilldownTitle"
                                                             >
                                                                {item.testTitle}
@@ -443,7 +443,7 @@ const toc = [
                                                             </span>
                                                          </div>
                                                          <div class="srRow-drilldownLinks">
-                                                            <a href={`/support/aria-at/${item.planSlug}/`}>
+                                                            <a href={`/compatibility/aria-at/${item.planSlug}/`}>
                                                                Full plan report
                                                             </a>
                                                             <a
@@ -488,7 +488,7 @@ const toc = [
                   <ul class="srFeature-relatedList">
                      {feature.localCases.map((testCase) => (
                         <li>
-                           <a href={`/support/tests/${testCase.slug}/`}>
+                           <a href={`/compatibility/tests/${testCase.slug}/`}>
                               {testCase.title}
                            </a>
                         </li>
@@ -503,7 +503,7 @@ const toc = [
                   <ul class="srFeature-relatedList">
                      {feature.ariaAtPlans.map((plan) => (
                         <li>
-                           <a href={`/support/aria-at/${plan.slug}/`}>
+                           <a href={`/compatibility/aria-at/${plan.slug}/`}>
                               {plan.title}
                            </a>
                            <span class="srFeature-relatedMeta">

@@ -64,8 +64,8 @@ const environmentFiles = listEnvironmentFiles();
 const resolvedAssertions = resolveCaseAssertions(testCase);
 const featureReport = listFeatureSummaryForTestAttribute(testCase.attribute);
 const featureURL = featureReport
-   ? `/support/features/${featureReport.type}/${featureReport.refId}/`
-   : `/support/features/aria/${testCase.attribute}/`;
+   ? `/compatibility/features/${featureReport.type}/${featureReport.refId}/`
+   : `/compatibility/features/aria/${testCase.attribute}/`;
 const ariaAtEnvironments = (featureReport?.versionedEnvironments ?? []).filter(
    (env) => env.source === 'w3c-aria-at',
 );
@@ -107,7 +107,7 @@ const toc = [
    toc={toc}
 >
    <nav class="srDetail-breadcrumb" aria-label="Breadcrumb" data-support-page>
-      <a href="/support">Screen reader compatibility</a>
+      <a href="/compatibility">Screen reader compatibility</a>
       <span class="srDetail-separator" aria-hidden="true">/</span>
       <span aria-current="page">{testCase.slug}</span>
    </nav>
@@ -284,7 +284,7 @@ const toc = [
          <ul class="srDetail-ariaAtList">
             {featureReport.ariaAtPlans.map((plan) => (
                <li class="srDetail-ariaAtPlan">
-                  <a href={`/support/aria-at/${plan.slug}/`} class="srDetail-ariaAtLink">
+                  <a href={`/compatibility/aria-at/${plan.slug}/`} class="srDetail-ariaAtLink">
                      <span>{plan.title}</span>
                      <span class="srDetail-ariaAtPlanMeta">
                         {plan.phase} · {plan.versionString}
@@ -300,7 +300,7 @@ const toc = [
    <nav class="srDetail-pager" aria-label="Adjacent test cases">
       <div class="srDetail-pagerSlot">
          {props.prevTest && (
-            <a href={`/support/tests/${props.prevTest.slug}/`} class="srDetail-pagerLink">
+            <a href={`/compatibility/tests/${props.prevTest.slug}/`} class="srDetail-pagerLink">
                <ArrowLeft size={16} aria-hidden="true" focusable="false" />
                <span>Previous: {props.prevTest.title}</span>
             </a>
@@ -308,7 +308,7 @@ const toc = [
       </div>
       <div class="srDetail-pagerSlot srDetail-pagerSlot--end">
          {props.nextTest && (
-            <a href={`/support/tests/${props.nextTest.slug}/`} class="srDetail-pagerLink">
+            <a href={`/compatibility/tests/${props.nextTest.slug}/`} class="srDetail-pagerLink">
                <span>Next: {props.nextTest.title}</span>
                <ArrowRight size={16} aria-hidden="true" focusable="false" />
             </a>

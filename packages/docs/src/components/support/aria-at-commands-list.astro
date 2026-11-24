@@ -71,7 +71,7 @@ function formatVerdictLabel(verdict: AssertionVerdict): string {
                         <span class="srCommands-assertionStatement">{assertion.statement}</span>
                         {showFeatureLinks && assertion.featureType && assertion.featureRef && (
                            <a
-                              href={`/support/features/${assertion.featureType}/${assertion.featureRef}/`}
+                              href={`/compatibility/features/${assertion.featureType}/${assertion.featureRef}/`}
                               class="srCommands-featureChip"
                            >
                               <code>{assertion.featureRef}</code>

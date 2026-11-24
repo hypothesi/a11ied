@@ -81,7 +81,7 @@ function delay(ms) {
 
 async function probePrefix(url, basePrefix) {
    try {
-      const response = await fetch(`${url}${basePrefix}/support/`);
+      const response = await fetch(`${url}${basePrefix}/compatibility/`);
       return response.ok ? `${url}${basePrefix}` : '';
    } catch {
       return '';

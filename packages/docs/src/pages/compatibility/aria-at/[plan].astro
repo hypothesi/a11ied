@@ -85,9 +85,9 @@ const toc = [
    toc={toc}
 >
    <nav class="srPlan-breadcrumb" aria-label="Breadcrumb" data-support-page>
-      <a href="/support">Screen reader compatibility</a>
+      <a href="/compatibility">Screen reader compatibility</a>
       <span class="srPlan-separator" aria-hidden="true">/</span>
-      <a href="/support/#aria-at-plans">W3C ARIA-AT</a>
+      <a href="/compatibility/#aria-at-plans">W3C ARIA-AT</a>
       <span class="srPlan-separator" aria-hidden="true">/</span>
       <span aria-current="page">{plan.slug}</span>
    </nav>
@@ -106,7 +106,7 @@ const toc = [
             {plan.featureRefs.map((ref) => (
                <li>
                   <a
-                     href={`/support/features/${ref.type}/${ref.refId}/`}
+                     href={`/compatibility/features/${ref.type}/${ref.refId}/`}
                      class="srPlan-featurePill"
                   >
                      <span class="srPlan-featureType">{ref.type.toUpperCase()}</span>

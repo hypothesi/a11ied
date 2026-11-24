@@ -54,7 +54,7 @@ function toTranscriptEntries(items, commandLabel) {
 }
 
 async function runSingleCase({ sr, testCase, baseURL }) {
-   const url = `${baseURL}/support/cases/${testCase.slug}/`;
+   const url = `${baseURL}/compatibility/cases/${testCase.slug}/`;
    await sr.open(url);
    const maxSteps = testCase.evaluation.maxSteps ?? DEFAULT_MAX_STEPS;
    const walkedItems = await sr.walk({ max: maxSteps });
@@ -163,7 +163,7 @@ export async function runVirtualTarget({ testCases, baseURL, buildEnvironmentKey
    };
    const environmentKey = buildEnvironmentKey(environment);
 
-   const firstURL = `${baseURL}/support/cases/${testCases[0].slug}/`;
+   const firstURL = `${baseURL}/compatibility/cases/${testCases[0].slug}/`;
    const sr = await screenReader({
       sr: 'virtual',
       engine: 'browser',

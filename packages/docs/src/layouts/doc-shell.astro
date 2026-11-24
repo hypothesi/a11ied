@@ -32,8 +32,8 @@ function normalizePath(value: string): string {
 
 function isLinkActive(href: string, currentPath: string): boolean {
    const target = normalizePath(href);
-   if (target === '/support') {
-      return currentPath === '/support' || currentPath.startsWith('/support/');
+   if (target === '/compatibility') {
+      return currentPath === '/compatibility' || currentPath.startsWith('/compatibility/');
    }
    return target === currentPath;
 }

@@ -61,7 +61,7 @@ export const docsLinks: DocSection[] = [
          { href: '/reference/mcp', label: 'MCP tools' },
          { href: '/reference/api', label: 'TypeScript API' },
          { href: '/reference/wcag-data', label: 'WCAG data' },
-         { href: '/support', label: 'Screen reader compatibility' },
+         { href: '/compatibility', label: 'Screen reader compatibility' },
       ],
    },
 ];

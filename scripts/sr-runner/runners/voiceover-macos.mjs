@@ -452,7 +452,7 @@ async function runVoiceOverCasesSequentially({ context, runs, index = 0 }) {
       return;
    }
    const testCase = context.testCases[index];
-   const url = `${context.baseURL}/support/cases/${testCase.slug}/`;
+   const url = `${context.baseURL}/compatibility/cases/${testCase.slug}/`;
    process.stdout.write(`[voiceover-${context.browser}] Running ${testCase.slug}...\n`);
    await context.browserSession.openCase(url, testCase.isolatedTitle);
    await moveCursorIntoWebArea(context.voiceOver, { browser: context.browser });

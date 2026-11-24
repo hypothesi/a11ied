@@ -289,7 +289,7 @@ async function runInteractSequence({ ctx, state, url, fullEntries }) {
 }
 
 async function runCaseWithTalkBack(ctx) {
-   const url = `${ctx.baseURL}/support/cases/${ctx.testCase.slug}/`;
+   const url = `${ctx.baseURL}/compatibility/cases/${ctx.testCase.slug}/`;
    await openUrlOnAndroid(ctx.serial, ctx.browser, url);
 
    const state = {
@@ -412,7 +412,7 @@ async function prepareAndroidBrowserSession({
 async function disableChromeAndPrepare(serial, baseURL, firstSlug) {
    const { disableTalkBack } = await import(resolveA11iedPaths().coreEntry);
    await disableTalkBack({ serial }).catch(ignoreError);
-   await dismissChromeOnboarding(serial, `${baseURL}/support/cases/${firstSlug}/`);
+   await dismissChromeOnboarding(serial, `${baseURL}/compatibility/cases/${firstSlug}/`);
 }
 
 export async function runAndroidTalkBackTarget({

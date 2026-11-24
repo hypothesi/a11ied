@@ -439,7 +439,7 @@ function buildTileDetail(
       meta,
       verdict: parts.join(' · '),
       state,
-      href: `/support/features/${feature.type}/${feature.refId}/`,
+      href: `/compatibility/features/${feature.type}/${feature.refId}/`,
    };
 }
 
@@ -724,7 +724,7 @@ const toc = [
                   <div class="ciuCard-intro">
                      <div class="ciuCard-titleRow">
                         <h2 class="ciuCard-title">
-                           <a href={`/support/features/${feature.type}/${feature.refId}/`}>
+                           <a href={`/compatibility/features/${feature.type}/${feature.refId}/`}>
                               {feature.title}
                            </a>
                         </h2>
@@ -769,7 +769,7 @@ const toc = [
                         </div>
                      )}
                      <a
-                        href={`/support/features/${feature.type}/${feature.refId}/`}
+                        href={`/compatibility/features/${feature.type}/${feature.refId}/`}
                         class="ciuCard-reportLink"
                      >
                         Full report →
@@ -806,7 +806,7 @@ const toc = [
                            </div>
                            {column.extraCount > 0 && (
                               <a
-                                 href={`/support/features/${feature.type}/${feature.refId}/`}
+                                 href={`/compatibility/features/${feature.type}/${feature.refId}/`}
                                  class="ciuCol-more"
                               >
                                  +{column.extraCount} more
@@ -827,7 +827,7 @@ const toc = [
                   <p class="ciuDetailDrawer-meta" data-ciu-detail-meta></p>
                   <div class="ciuDetailDrawer-foot">
                      <span class="ciuDetailDrawer-verdict" data-ciu-detail-verdict></span>
-                     <a href={`/support/features/${feature.type}/${feature.refId}/`} data-ciu-detail-link>
+                     <a href={`/compatibility/features/${feature.type}/${feature.refId}/`} data-ciu-detail-link>
                         Inspect assertions &amp; speech transcript →
                      </a>
                   </div>
@@ -845,9 +845,9 @@ const toc = [
                               <ul>
                                  {feature.localCases.map((testCase) => (
                                     <li>
-                                       <a href={`/support/tests/${testCase.slug}/`}>{testCase.title}</a>
+                                       <a href={`/compatibility/tests/${testCase.slug}/`}>{testCase.title}</a>
                                        {' · '}
-                                       <a href={`/support/cases/${testCase.slug}/`} class="ciuBareLink">
+                                       <a href={`/compatibility/cases/${testCase.slug}/`} class="ciuBareLink">
                                           bare HTML
                                        </a>
                                     </li>
@@ -862,7 +862,7 @@ const toc = [
                               <ul>
                                  {feature.ariaAtPlans.map((plan) => (
                                     <li>
-                                       <a href={`/support/aria-at/${plan.slug}/`}>
+                                       <a href={`/compatibility/aria-at/${plan.slug}/`}>
                                           {plan.title} ({plan.versionString})
                                        </a>
                                     </li>
@@ -1030,7 +1030,7 @@ const toc = [
                      >
                         <th scope="row" class="srIndex-scenarioCell">
                            <a
-                              href={`/support/tests/${testCase.slug}/`}
+                              href={`/compatibility/tests/${testCase.slug}/`}
                               class="srIndex-scenarioLink"
                            >
                               {testCase.title}
@@ -1042,7 +1042,7 @@ const toc = [
                               {formatCategoryLabel(testCase.category)}
                            </span>
                            {featureMatch ? (
-                              <a href={`/support/features/${featureMatch.type}/${featureMatch.refId}/`}>
+                              <a href={`/compatibility/features/${featureMatch.type}/${featureMatch.refId}/`}>
                                  <code>{testCase.attribute}</code>
                               </a>
                            ) : (
@@ -1061,7 +1061,7 @@ const toc = [
                            );
                         })}
                         <td class="srIndex-caseCell" data-col-label="Standalone">
-                           <a href={`/support/cases/${testCase.slug}/`}>Bare HTML ↗</a>
+                           <a href={`/compatibility/cases/${testCase.slug}/`}>Bare HTML ↗</a>
                         </td>
                      </tr>
                   );
@@ -1099,14 +1099,14 @@ const toc = [
                   </span>
                </div>
                <h3 class="srIndex-planTitle">
-                  <a href={`/support/aria-at/${plan.slug}/`}>{plan.title}</a>
+                  <a href={`/compatibility/aria-at/${plan.slug}/`}>{plan.title}</a>
                </h3>
                {plan.featureRefs.length > 0 && (
                   <p class="srIndex-planFeatures">
                      {plan.featureRefs.map((ref, index) => (
                         <>
                            {index > 0 && ' · '}
-                           <a href={`/support/features/${ref.type}/${ref.refId}/`}>
+                           <a href={`/compatibility/features/${ref.type}/${ref.refId}/`}>
                               <code>{ref.refId}</code>
                            </a>
                         </>

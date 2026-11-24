@@ -291,7 +291,7 @@ function checkResolvedUsage(
       feature,
       featureKey: feature.key,
       status: determineFeatureStatus(matched.matchedEnvironments),
-      docsPath: `/support/features/${feature.type}/${feature.refId}/`,
+      docsPath: `/compatibility/features/${feature.type}/${feature.refId}/`,
       ...(feature.specURL ? { specURL: feature.specURL } : {}),
       matchedEnvironments: matched.matchedEnvironments,
       untestedTargets: matched.untestedTargets,
