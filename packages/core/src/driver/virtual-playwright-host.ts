@@ -13,11 +13,12 @@ import { launchAutomationBrowser } from '../browser/policy.js';
 import { withCurrentBrowserPage } from '../browser/current-page.js';
 import { CliEnvironmentError, CliUsageError } from '../errors/cli-errors.js';
 
+import { VIRTUAL_ACTIVATION_BUDGET_MS } from './loop-budget.js';
+import { withPageReaction } from './page-reaction.js';
 import { ownVirtualPage } from './virtual-page-owner.js';
 import { isNavigationError, withDecodedErrors } from './virtual-browser-errors.js';
 
 const PAGE_URL_PATTERN = /^(?:https?|file):/iu;
-const BROWSER_ACTIVATION_TIMEOUT_MS = 10_000;
 
 /** Whether a document URL names a page a browser can open, rather than a placeholder. */
 export function isPageUrl(url: string): boolean {
@@ -129,7 +130,9 @@ async function activateBrowserCursor(
       if (!element) {
          return { moved: false };
       }
-      await element.click({ noWaitAfter: false, timeout: BROWSER_ACTIVATION_TIMEOUT_MS });
+      await withPageReaction(page, VIRTUAL_ACTIVATION_BUDGET_MS, () =>
+         element.click({ noWaitAfter: false, timeout: VIRTUAL_ACTIVATION_BUDGET_MS }),
+      );
       const sameDocument = await prepared.document
          .evaluate((document) => document === globalThis.document)
          .catch((error: unknown) => {

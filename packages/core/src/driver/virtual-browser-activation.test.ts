@@ -1,9 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import type { VirtualHost } from '@a11ied/guidepup';
+import { delay, type VirtualHost } from '@a11ied/guidepup';
 import type { Page } from 'playwright';
 import { createTestServer } from '../../../cli/src/testing/fixtures.js';
 import { withLoadedPage } from '../browser/shared-browser.js';
 import { createPlaywrightVirtualHost } from './virtual-playwright-host.js';
+
+/** Long enough that the click returns well before the next document arrives. */
+const SLOW_RESPONSE_MS = 750;
 
 const server = createTestServer(),
    timeoutMs = 30_000;
@@ -19,9 +22,10 @@ afterAll(async () => {
 async function withReader(
    run: (page: Page, host: VirtualHost) => Promise<void>,
    html = '',
+   fixture = 'link-navigation.html',
 ): Promise<void> {
    await withLoadedPage(
-      { kind: 'goto', url: `${server.getBaseUrl()}/link-navigation.html` },
+      { kind: 'goto', url: `${server.getBaseUrl()}/${fixture}` },
       async (page) => {
          if (html) {
             await page.setContent(html);
@@ -35,6 +39,14 @@ async function withReader(
          }
       },
    );
+}
+
+/** Holds back the linked page the way a slow public server does. */
+async function answerSlowly(page: Page): Promise<void> {
+   await page.route('**/basic-page.html', async (route) => {
+      await delay(SLOW_RESPONSE_MS);
+      await route.continue();
+   });
 }
 
 describe('browser virtual cursor activation', () => {
@@ -61,6 +73,53 @@ describe('browser virtual cursor activation', () => {
             ).toBe('1');
             expect(current.item.role).toBe('document');
          });
+      },
+      timeoutMs,
+   );
+
+   it(
+      'reads the new document when the server answers the link slowly',
+      async () => {
+         await withReader(async (page, host) => {
+            await answerSlowly(page);
+            await host.navigate({ direction: 'next', kind: 'link' });
+
+            const outcome = await host.runPortable('activate'),
+               title = await host.readTitle();
+
+            expect(outcome.moved).toStrictEqual(true);
+            expect(title.title).toBe('Basic page');
+         });
+      },
+      timeoutMs,
+   );
+
+   it(
+      'reads the content a client-side router swaps in after a slow fetch',
+      async () => {
+         await withReader(
+            async (page, host) => {
+               await answerSlowly(page);
+               await host.navigate({ direction: 'next', kind: 'link' });
+
+               const outcome = await host.runPortable('activate');
+               const title = await host.readTitle();
+               const heading = await host.navigate({
+                     direction: 'next',
+                     kind: 'heading',
+                  }),
+                  speech = await host.readSpeech();
+
+               expect(outcome.moved).toStrictEqual(true);
+               expect(title.title).toBe('Basic page');
+               expect(heading.moved).toStrictEqual(true);
+               expect(speech.lastSpokenPhrase).toBe(
+                  'heading, Basic content page, level 1',
+               );
+            },
+            '',
+            'client-router.html',
+         );
       },
       timeoutMs,
    );

@@ -16,7 +16,11 @@ import { getDriverSocketPath } from './session-utils.js';
 
 import type { BrokerRequest, BrokerResponse } from './broker-types.js';
 import { delay } from './delay.js';
-import { LOOP_ACTIONS, resolveLoopBudgetMs } from './loop-budget.js';
+import {
+   LOOP_ACTIONS,
+   resolveLoopBudgetMs,
+   VIRTUAL_ACTIVATION_BUDGET_MS,
+} from './loop-budget.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
 import { throwIfBrokerStartupFailed } from './broker-startup.js';
 
@@ -129,6 +133,9 @@ export function resolveBrokerSocketTimeoutMs(
    const base = isReal ? REAL_TARGET_SOCKET_TIMEOUT_MS : VIRTUAL_SOCKET_TIMEOUT_MS;
    if (request.action === 'wait') {
       return base + readWaitBudget(request.payload);
+   }
+   if (request.action === 'activate' && !isReal) {
+      return base + VIRTUAL_ACTIVATION_BUDGET_MS;
    }
    const max = readPayloadMax(request.payload);
    if (

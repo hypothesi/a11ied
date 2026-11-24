@@ -17,6 +17,7 @@ const VIRTUAL_SOCKET_TIMEOUT_MS = 2000;
 const VIRTUAL_STOP_SOCKET_TIMEOUT_MS = 7000;
 const REAL_TARGET_SOCKET_TIMEOUT_MS = 30_000;
 const REAL_TARGET_STOP_SOCKET_TIMEOUT_MS = 30_000;
+const VIRTUAL_ACTIVATION_BUDGET_MS = 10_000;
 const CALLER_TIMEOUT_MS = 1500;
 const RESPONSE_GRACE_MS = 6000;
 
@@ -77,6 +78,17 @@ describe('broker startup timing', () => {
       );
       expect(resolveBrokerSocketTimeoutMs({ command: 'status' }, 'virtual')).toBe(
          VIRTUAL_SOCKET_TIMEOUT_MS,
+      );
+   });
+
+   it('waits for the page to react when the simulated reader activates a control', () => {
+      const request = { command: 'action', action: 'activate' } as const;
+
+      expect(resolveBrokerSocketTimeoutMs(request)).toBe(
+         VIRTUAL_SOCKET_TIMEOUT_MS + VIRTUAL_ACTIVATION_BUDGET_MS,
+      );
+      expect(resolveBrokerSocketTimeoutMs(request, 'voiceover')).toBe(
+         REAL_TARGET_SOCKET_TIMEOUT_MS,
       );
    });
 

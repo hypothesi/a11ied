@@ -7,6 +7,12 @@ export const LOOP_ACTIONS: ReadonlySet<string> = new Set([
    'goto',
 ]);
 
+/**
+ * How long the simulated reader's activation may take: the click, then the page's
+ * reaction to it. The client waits this long on top of its base timeout.
+ */
+export const VIRTUAL_ACTIVATION_BUDGET_MS = 10_000;
+
 const REAL_TARGET_LOOP_STEP_MS = 1500;
 const VIRTUAL_LOOP_STEP_MS = 50;
 
