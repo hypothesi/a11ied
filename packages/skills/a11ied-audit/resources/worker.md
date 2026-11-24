@@ -12,6 +12,11 @@ a1 audit next --worker <name>          # claim a unit and print its work packet
 a1 audit submit <unit> --worker <name> --file <result.json>
 ```
 
+With no shell, use the a11ied MCP tools in place of the commands: `audit_next` with your `worker` name, then
+`audit_submit` with the unit and the result as its `submission` argument. Every `a1` command in this guide has a tool:
+`a1 audit note` is `audit_note`, `a1 tree` is `tree`, `a1 capture` is `capture`, `a1 sr ...` is `sr_session` and
+`sr_action`, and so on.
+
 Repeat until `next` says there is no work, then stop. Running `next` again while you have a
 unit returns the same unit, so it is safe after losing context.
 
@@ -50,7 +55,8 @@ with `tested: false` and the reason, and it appears under "Not verified" in the 
 
 Before any `a1 sr` command, run the `export A11IED_STATE_DIR=...` line from the packet. It gives
 you a private session; without it you will collide with other workers. Stop your session with
-`a1 sr stop` before you submit.
+`a1 sr stop` before you submit. The `sr_*` MCP tools cannot do this: every worker on one MCP
+server shares one session. Use them only if your lead said the screen reader is yours.
 
 During work that takes more than a few minutes, run
 `a1 audit note <unit> --worker <name> "<what you are doing>"`. It keeps your claim alive and
@@ -113,7 +119,8 @@ the criterion is in the audit's scope.
 
 ## Submitting
 
-Write the JSON from the packet's template to a file and submit it. The submission is accepted or
+Write the JSON from the packet's template to a file and submit it, or pass it to `audit_submit`
+as `submission`. The submission is accepted or
 rejected whole. A rejection lists every problem: fix them all and submit again. Common ones:
 
 - A criterion has no outcome. Every criterion in the unit needs one.

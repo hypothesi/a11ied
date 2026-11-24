@@ -8,6 +8,19 @@ description: Check a component or page for accessibility during development with
 Use this skill when the task is about checking or fixing a component or page with the `a11ied` toolchain: the `a1` CLI,
 the `@a11ied/mcp-server` MCP server, or the `a11ied` TypeScript package.
 
+## CLI or MCP
+
+Everything in this skill works two ways. Use whichever you have. Neither needs the other.
+
+- **CLI.** Run `a1` in a shell. When `a1` is not on the PATH, run `npx -y a11ied <command>`.
+- **MCP.** When the a11ied MCP server is connected, your tool list has `check`, `run_axe`, `sr_session`, and the other
+  tools in the table under [MCP tool names](#mcp-tool-names). Call the tool in place of the command. A tool that checks
+  something returns the `exitCode` the command would have exited with.
+
+This skill writes each step as a CLI command. Read it as the matching tool call when you work over MCP. Three commands
+have no single tool, and the [command cheat sheet](resources/command-cheat-sheet.md) gives the tool calls that replace
+each: `a1 sr walk`, `a1 sr batch`, and `a1 sr tail`.
+
 The quick check: `a1 check <target>` -> `a1 wcag <id>` -> `a1 pattern check` -> `a1 sr start --sr virtual <url>` ->
 `a1 sr walk` -> `a1 sr batch <steps.jsonl> --json` -> `a1 sr stop`.
 
@@ -208,22 +221,27 @@ status` shows whether one is still active. `a1 doctor` also flags a stale sessio
 The MCP server exposes the same operations as the CLI, one tool per command family. Use the CLI name in the description above
 to find the tool:
 
-| CLI command                                                                  | MCP tool                                |
-| ---------------------------------------------------------------------------- | --------------------------------------- |
-| `a1 wcag show`                                                               | `wcag_show`                             |
-| `a1 wcag criteria`                                                           | `wcag_criteria`                         |
-| `a1 search`                                                                  | `search`                                |
-| `a1 wcag rule`                                                               | `wcag_rule`                             |
-| `a1 axe`                                                                     | `run_axe`                               |
-| `a1 tree`                                                                    | `tree`                                  |
-| `a1 check`                                                                   | `check`                                 |
-| `a1 audit ...`                                                               | `audit_*`, see the `a11ied-audit` skill |
-| `a1 sr start` / `open` / `stop` / `status`                                   | `sr_session`                            |
-| every other `a1 sr` action (`next`, `press`, `perform`, `goto`, `wait`, ...) | `sr_action`                             |
-| `a1 sr list`                                                                 | `sr_list`                               |
-| `a1 sr expect`                                                               | `sr_expect`                             |
-| `a1 sr transcript`                                                           | `sr_transcript`                         |
-| `a1 doctor`                                                                  | `doctor`                                |
+| CLI command                                                                  | MCP tool                                             |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `a1 wcag show`                                                               | `wcag_show`                                          |
+| `a1 wcag criteria`                                                           | `wcag_criteria`                                      |
+| `a1 search`                                                                  | `search`                                             |
+| `a1 wcag rule`                                                               | `wcag_rule`                                          |
+| `a1 pattern <id>`, `a1 pattern list`                                         | `pattern_show`                                       |
+| `a1 pattern role`, `a1 pattern attribute`                                    | `pattern_find`                                       |
+| `a1 pattern check`, `a1 pattern record`, `a1 pattern pending`                | `pattern_check`, `pattern_record`, `pattern_pending` |
+| `a1 axe`                                                                     | `run_axe`                                            |
+| `a1 tree`                                                                    | `tree`                                               |
+| `a1 check`                                                                   | `check`                                              |
+| `a1 capture`                                                                 | `capture`                                            |
+| `a1 audit ...`                                                               | `audit_*`, see the `a11ied-audit` skill              |
+| `a1 sr start` / `open` / `stop` / `status`                                   | `sr_session`                                         |
+| every other `a1 sr` action (`next`, `press`, `perform`, `goto`, `wait`, ...) | `sr_action`                                          |
+| `a1 sr list`                                                                 | `sr_list`                                            |
+| `a1 sr expect`                                                               | `sr_expect`                                          |
+| `a1 sr transcript`                                                           | `sr_transcript`                                      |
+| `a1 talkback`                                                                | `talkback`                                           |
+| `a1 doctor`                                                                  | `doctor`                                             |
 
 The [command cheat sheet](resources/command-cheat-sheet.md) includes tool arguments and
 CLI-only operation equivalents.
