@@ -103,10 +103,11 @@ const toc = [
    title={testCase.title}
    summary={`<p>${testCase.summary}</p>`}
    links={docsLinks}
+   variant="wide"
    toc={toc}
 >
    <nav class="srDetail-breadcrumb" aria-label="Breadcrumb" data-support-page>
-      <a href="/support">Screen reader support</a>
+      <a href="/support">Feature support</a>
       <span class="srDetail-separator" aria-hidden="true">/</span>
       <span aria-current="page">{testCase.slug}</span>
    </nav>
@@ -367,10 +368,6 @@ const toc = [
    min-inline-size: 0;
    transform: none;
    gap: 1rem;
-}
-
-.srDetail-section > h2 {
-   font-size: clamp(1.7rem, 3vw, 2.35rem);
 }
 
 .srDetail-expected,

@@ -48,6 +48,8 @@ export interface ScreenReaderEnvironmentGroup<TItem> {
    readonly osGroups: readonly OsEnvironmentGroup<TItem>[];
 }
 
+const SIMULATED_SCREEN_READER = 'Simulated screen reader';
+
 export function isVirtualScreenReader(raw: string): boolean {
    const lower = raw.trim().toLowerCase();
    return lower.includes('virtual') || lower.includes('guidepup');
@@ -56,7 +58,7 @@ export function isVirtualScreenReader(raw: string): boolean {
 export function normalizeScreenReaderType(raw: string): string {
    const trimmed = raw.trim();
    if (isVirtualScreenReader(trimmed)) {
-      return 'Virtual Screen Reader';
+      return SIMULATED_SCREEN_READER;
    }
    const lower = trimmed.toLowerCase();
    if (lower.includes('voiceover')) {
@@ -93,7 +95,7 @@ export function normalizeOsName(raw: string): string {
 }
 
 function getScreenReaderRank(screenReaderType: string): number {
-   if (screenReaderType === 'Virtual Screen Reader') {
+   if (screenReaderType === SIMULATED_SCREEN_READER) {
       return SR_VIRTUAL_RANK;
    }
    return SR_ORDER[screenReaderType] ?? SR_OTHER_RANK;
@@ -240,7 +242,7 @@ export function groupByScreenReaderAndOs<TItem>(
 
       return {
          screenReaderType,
-         isVirtual: screenReaderType === 'Virtual Screen Reader',
+         isVirtual: screenReaderType === SIMULATED_SCREEN_READER,
          totalCount,
          testedCount,
          osGroups,

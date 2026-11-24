@@ -152,10 +152,11 @@ const toc = [
    title={feature.title}
    summary={featureSummaryHtml}
    links={docsLinks}
+   variant="wide"
    toc={toc}
 >
    <nav class="srFeature-breadcrumb" aria-label="Breadcrumb" data-support-page>
-      <a href="/support">Screen reader support</a>
+      <a href="/support">Feature support</a>
       <span class="srFeature-separator" aria-hidden="true">/</span>
       <a href="/support/#feature-directory">Features</a>
       <span class="srFeature-separator" aria-hidden="true">/</span>
@@ -186,7 +187,7 @@ const toc = [
    <div class="srFeature-overview">
       <div class="srFeature-overviewTop">
          <strong>{formatOverviewHeadline()}</strong>
-         <span class="srFeature-overviewSub">Excludes Virtual SR</span>
+         <span class="srFeature-overviewSub">Excludes the simulated screen reader</span>
       </div>
       {realTotal > 0 && (
          <div class="srFeature-overviewBar" aria-hidden="true">
@@ -628,10 +629,6 @@ const toc = [
    min-inline-size: 0;
    transform: none;
    gap: 1rem;
-}
-
-.srFeature-section > h2 {
-   font-size: clamp(1.7rem, 3vw, 2.35rem);
 }
 
 .srFeature-filters {

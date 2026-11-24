@@ -57,7 +57,7 @@ const COLUMN_DEFS = [
    { id: 'win-nvda', label: 'Windows NVDA' },
    { id: 'win-jaws', label: 'Windows JAWS' },
    { id: 'ios-vo', label: 'iOS VoiceOver' },
-   { id: 'virtual', label: 'Virtual SR' },
+   { id: 'virtual', label: 'Simulated' },
 ] as const;
 
 type ColumnId = (typeof COLUMN_DEFS)[number]['id'];
@@ -284,7 +284,7 @@ function formatShortTileSub(env: FeatureEnvironmentResult, colID: ColumnId): str
             : `iOS ${env.osVersion}`;
       }
       case 'virtual': {
-         return `a11ied ${env.screenReaderVersion}`;
+         return `Guidepup virtual ${env.screenReaderVersion}`;
       }
       default: {
          return `${env.os} ${env.osVersion}`;
@@ -559,9 +559,10 @@ const toc = [
 ---
 
 <DocShell
-   title="Screen reader support"
-   summary="<p>Screen reader support for ARIA and HTML features across browsers and operating systems. Filter by <code>browserslist</code> target or select any browser block for speech details.</p>"
+   title="Feature support"
+   summary="<p>What each screen reader says for ARIA and HTML features, by browser and operating system. Search for a feature, then pick a result to read the recorded speech.</p>"
    links={docsLinks}
+   variant="wide"
    toc={toc}
 >
    <section id="ciu-search-panel" class="ciuHero" aria-label="Search feature compatibility">
@@ -578,7 +579,7 @@ const toc = [
             <span class="ciuSearch-qmark" aria-hidden="true">?</span>
          </div>
 
-         <div class="ciuSearch-examples" aria-label="Suggested searches">
+         <div class="ciuSearch-examples" role="group" aria-label="Suggested searches">
             <span class="ciuSearch-examplesLabel">Examples:</span>
             {EXAMPLE_SEARCHES.map((term, index) => (
                <>
@@ -1127,13 +1128,12 @@ const toc = [
    >
       <div class="ciuApiGrid">
          <div class="ciuFlatPanel">
-            <p class="panel-kicker">Programmatic API · @a11ied/compat</p>
-            <h2 class="ciuPanelHeading">Query compatibility by Browserslist target</h2>
+            <h2 class="ciuPanelHeading">Query this data from code</h2>
             <p>
-               Use <code>@a11ied/compat</code> and <code>@a11ied/support-data</code> inside
-               VS Code extensions, ESLint/oxlint rules, or bundler plugins to catch unsupported
-               ARIA, HTML, CSS, or JS patterns for your project’s exact <code>browserslist</code>
-               targets.
+               <code>@a11ied/compat</code> and <code>@a11ied/support-data</code> answer the
+               same question in code. Use them in a lint rule or an editor extension to flag a
+               feature that a screen reader in your <code>browserslist</code> targets does
+               not support.
             </p>
             <div class="ciuCodeWrap" data-no-decorate="true">
                <Code code={compatExampleCode} lang="ts" theme="github-dark" />
@@ -1141,31 +1141,30 @@ const toc = [
          </div>
 
          <div class="ciuFlatPanel">
-            <p class="panel-kicker">Automated with a11ied</p>
-            <h2 class="ciuPanelHeading">Automated screen reader runs</h2>
+            <h2 class="ciuPanelHeading">Where the results come from</h2>
             <p>
-               Local runs execute directly with VoiceOver, Android TalkBack, and Virtual
-               Chromium via <code>a11ied</code>. See the <a href="/quickstart">quickstart</a> or{' '}
-               <a href="/guides/screen-reader">screen reader guide</a>.
+               a11ied ran the local tests with VoiceOver, TalkBack, and the simulated screen
+               reader, and recorded what each one said. The rest are W3C ARIA-AT reports. See{' '}
+               <a href="/guides/screen-reader">test with a screen reader</a> to run your own.
             </p>
             <dl class="ciuStatsList">
                <div>
-                  <dt>Tracked local environments</dt>
+                  <dt>Environments</dt>
                   <dd>{summaryCounts.testedEnvironments} tested / {summaryCounts.trackedEnvironments} tracked</dd>
                </div>
                <div>
-                  <dt>Local verbatim runs</dt>
+                  <dt>Recorded runs</dt>
                   <dd>{summaryCounts.totalRuns}</dd>
                </div>
                <div>
-                  <dt>W3C ARIA-AT finalized reports</dt>
+                  <dt>W3C ARIA-AT reports</dt>
                   <dd>{ariaAtSummary.reportsCount} across {ariaAtEnvironments.length} environments</dd>
                </div>
             </dl>
          </div>
       </div>
 
-      <h3 class="srIndex-subHeading">Local Automated Environments</h3>
+      <h3 class="srIndex-subHeading">Environments a11ied tested</h3>
       <div class="srIndex-envGrid">
          {environmentFiles.map((envFile) => {
             const env = envFile.environment;
@@ -1206,7 +1205,7 @@ const toc = [
       </div>
 
       <h3 class="srIndex-subHeading srIndex-subHeading--spaced">
-         W3C ARIA-AT Environments
+         W3C ARIA-AT environments
       </h3>
       <div class="srIndex-envGrid">
          {ariaAtEnvironments.map((env) => (
@@ -1244,7 +1243,7 @@ const toc = [
 
    <footer class="srIndex-attribution">
       <p>
-         W3C ARIA-AT test plans and community reports are synchronized from{' '}
+         W3C ARIA-AT test plans and reports come from{' '}
          <a href={ariaAtSummary.upstreamURL} target="_blank" rel="noopener noreferrer">
             aria-at.w3.org
          </a>{' '}
@@ -1258,42 +1257,6 @@ const toc = [
 </script>
 
 <style>
-:global(.content-frame > header) {
-   padding-top: 0.4rem;
-   gap: 0.7rem;
-}
-
-:global(.content-frame > header::before),
-:global(.content-frame > header::after) {
-   display: none;
-}
-
-:global(.content-frame > header h1) {
-   max-width: none;
-   font-size: clamp(2.1rem, 4.2vw, 3.35rem);
-   line-height: 0.94;
-   text-shadow: 2px 2px 0 var(--yellow);
-}
-
-:global(.content-frame > header .summary) {
-   margin-top: 0.55rem;
-   padding-top: 0.55rem;
-   border-top: 1px solid color-mix(in oklch, var(--ink) 20%, transparent);
-   font-size: 1rem;
-   line-height: 1.5;
-   max-width: 70ch;
-}
-
-:global(.content-frame) {
-   gap: 1.65rem;
-}
-
-:global(.content-frame > article) {
-   grid-template-columns: minmax(0, 1fr);
-   gap: 1.35rem;
-   min-inline-size: 0;
-}
-
 section.ciuHero,
 section.ciuTabPanel,
 .ciuViewSwitch {
@@ -1765,10 +1728,6 @@ section.ciuTabPanel,
    display: flex;
    flex-direction: column;
    gap: 0.3rem;
-}
-
-.ciuCol--virtual {
-   opacity: 0.85;
 }
 
 .ciuCol-head {

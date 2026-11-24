@@ -1,39 +1,3 @@
-.content-frame:has([data-support-page]) > header {
-   padding-top: 0.4rem;
-   gap: 0.7rem;
-}
-
-.content-frame:has([data-support-page]) > header::before,
-.content-frame:has([data-support-page]) > header::after {
-   display: none;
-}
-
-.content-frame:has([data-support-page]) > header h1 {
-   max-width: none;
-   font-size: clamp(2.1rem, 4.2vw, 3.35rem);
-   line-height: 0.94;
-   text-shadow: 2px 2px 0 var(--yellow);
-}
-
-.content-frame:has([data-support-page]) > header .summary {
-   margin-top: 0.55rem;
-   padding-top: 0.55rem;
-   border-top: 1px solid color-mix(in oklch, var(--ink) 20%, transparent);
-   font-size: 1rem;
-   line-height: 1.5;
-   max-width: 70ch;
-}
-
-.content-frame:has([data-support-page]) {
-   gap: 1.45rem;
-}
-
-.content-frame:has([data-support-page]) > article {
-   grid-template-columns: minmax(0, 1fr);
-   gap: 1.35rem;
-   min-inline-size: 0;
-}
-
 .srGroups {
    display: flex;
    flex-direction: column;
@@ -221,6 +185,7 @@ details.srRow:not([open])::details-content {
 }
 
 .srRow-webviewTag {
+   display: inline-block;
    padding-block: 0.12rem;
    padding-inline: 0.36rem;
    border-radius: 3px;

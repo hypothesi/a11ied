@@ -42,7 +42,7 @@ const groupedCards = groupByScreenReaderAndOs(cards, ({ envFile }) => ({
 }));
 ---
 
-<div class="srGroups" aria-labelledby="outcomes-heading">
+<div class="srGroups" role="group" aria-labelledby="outcomes-heading">
    {groupedCards.map((group) => (
       <div class="srGroup">
          <div class="srGroup-head">

@@ -81,10 +81,11 @@ const toc = [
    title={plan.title}
    summary={planSummaryHtml}
    links={docsLinks}
+   variant="wide"
    toc={toc}
 >
    <nav class="srPlan-breadcrumb" aria-label="Breadcrumb" data-support-page>
-      <a href="/support">Screen reader support</a>
+      <a href="/support">Feature support</a>
       <span class="srPlan-separator" aria-hidden="true">/</span>
       <a href="/support/#aria-at-plans">W3C ARIA-AT</a>
       <span class="srPlan-separator" aria-hidden="true">/</span>
@@ -409,10 +410,6 @@ const toc = [
    min-inline-size: 0;
    transform: none;
    gap: 1rem;
-}
-
-.srPlan-section > h2 {
-   font-size: clamp(1.7rem, 3vw, 2.35rem);
 }
 
 .srPlan-upstreamReportLink {
