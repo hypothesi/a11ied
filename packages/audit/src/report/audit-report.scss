@@ -227,6 +227,11 @@ thead th {
    white-space: nowrap;
 }
 
+/* A finding ID such as F10 stays on one line in a narrow column. */
+td a[href^='#'] {
+   white-space: nowrap;
+}
+
 .report-badge {
    display: inline-block;
    padding: 0.05rem 0.5rem;
