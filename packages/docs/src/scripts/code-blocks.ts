@@ -11,6 +11,8 @@ const KEYWORD_PATTERN = /^(import|from|const|await)$/;
 
 const COPY_RESET_MS = 1600;
 
+const COPY_PREVIEW_LENGTH = 48;
+
 const COPY_KINDS: Record<string, string> = {
    'AI AGENT PROMPT': 'prompt',
    CONFIG: 'config',
@@ -86,12 +88,27 @@ function setButtonState(button: HTMLButtonElement, text: string, label: string):
    button.setAttribute('aria-label', label);
 }
 
+/**
+ * Names the button after what it copies. A page has many of these, and "Copy command" on
+ * every one tells a screen reader user nothing about which is which.
+ */
+function describeCopy(source: string, kind: string): string {
+   const [firstLine = ''] = source.trim().split('\n'),
+      preview =
+         firstLine.length > COPY_PREVIEW_LENGTH
+            ? `${firstLine.slice(0, COPY_PREVIEW_LENGTH)}...`
+            : firstLine;
+
+   return `Copy ${kind}: ${preview}`;
+}
+
 function createCopyButton(source: string, kind: string): HTMLButtonElement {
-   const button = document.createElement('button');
+   const button = document.createElement('button'),
+      label = describeCopy(source, kind);
 
    button.type = 'button';
    button.className = 'copy-button';
-   button.setAttribute('aria-label', `Copy ${kind}`);
+   button.setAttribute('aria-label', label);
    button.append(createClipboardIcon(), document.createTextNode('COPY'));
 
    button.addEventListener('click', async () => {
@@ -99,7 +116,7 @@ function createCopyButton(source: string, kind: string): HTMLButtonElement {
          await navigator.clipboard.writeText(source);
          setButtonState(button, 'COPIED', `Copied ${kind}`);
          globalThis.setTimeout(() => {
-            setButtonState(button, 'COPY', `Copy ${kind}`);
+            setButtonState(button, 'COPY', label);
          }, COPY_RESET_MS);
       } catch {
          setButtonState(button, 'RETRY', 'Copy failed. Try again');

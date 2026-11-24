@@ -5,6 +5,7 @@ import ArrowRight from '@lucide/astro/icons/arrow-right';
 import Minus from '@lucide/astro/icons/minus';
 import Plus from '@lucide/astro/icons/plus';
 import logo from '../assets/logo.png';
+import SiteHead from '../components/site-head.astro';
 import { REPOSITORY_URL } from '../lib/nav';
 
 interface LinkItem { href: string; label: string; }
@@ -15,8 +16,8 @@ interface Props {
    summary: string;
    links: LinkSection[];
    toc?: TocItem[];
-   /** `home` gives the overview its poster headline. `wide` lets a data page use the full width. */
-   variant?: 'page' | 'home' | 'wide';
+   /** `wide` lets a data page use the full width. */
+   variant?: 'page' | 'wide';
 }
 
 const { title, summary, links, toc = [], variant = 'page' } = Astro.props;
@@ -44,11 +45,10 @@ const activeSection = links.find((section) => section.links.some((link) => isLin
 const previousLink = activeIndex > 0 ? flatLinks[activeIndex - 1] : undefined;
 const nextLink = activeIndex === -1 ? undefined : flatLinks[activeIndex + 1];
 const description = summary.replaceAll(/<[^>]+>/g, '').replaceAll(/\s+/g, ' ').trim();
-const pageTitle = variant === 'home' ? 'a11ied: screen reader and WCAG testing' : `${title} | a11ied`;
 /*
- * Pagefind writes the search bundle into the built site, so search exists only there. The
- * triggers hide the shortcut hint because, with it, the button's visible text is no longer
- * part of its accessible name (WCAG 2.5.3). Ctrl+K and Command+K still open search.
+ * Search exists only in the built site. The triggers hide the shortcut hint because, with
+ * it, the button's visible text is no longer part of its accessible name (WCAG 2.5.3).
+ * Ctrl+K and Command+K still open search.
  */
 const hasSearch = import.meta.env.PROD;
 const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
@@ -56,62 +56,10 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
 
 <html lang="en">
    <head>
-      <meta charset="utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <meta name="theme-color" content="#f2e9d5" />
-      <meta name="description" content={description} />
-      <link
-         rel="icon"
-         href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23ec4933'/%3E%3Cpath d='M4 4h56v56H4z' fill='none' stroke='%2317213b' stroke-width='5'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-family='Arial' font-weight='700' font-size='36' fill='%23fff9ec'%3Ea!%3C/text%3E%3C/svg%3E"
-      />
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-      <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;600;700&family=Atkinson+Hyperlegible+Next:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-      <title>{pageTitle}</title>
-      {hasSearch ? <link rel="stylesheet" href={`${basePath}pagefind/pagefind-component-ui.css`} /> : null}
-      {hasSearch ? <script is:inline type="module" src={`${basePath}pagefind/pagefind-component-ui.js`}></script> : null}
+      <SiteHead title={`${title} | a11ied`} description={description} />
       <style is:global>
-         :root {
-            color-scheme: light;
-            --paper: oklch(94% 0.025 84);
-            --paper-light: oklch(97% 0.014 84);
-            --ink: oklch(24% 0.055 266);
-            --ink-soft: oklch(38% 0.04 266);
-            --rule: color-mix(in oklch, var(--ink) 22%, transparent);
-            --red: oklch(62% 0.2 30);
-            --red-dark: oklch(39% 0.15 28);
-            --yellow: oklch(87% 0.17 92);
-            --yellow-soft: color-mix(in oklch, var(--yellow) 42%, var(--paper-light));
-            --blue: oklch(57% 0.17 250);
-            --blue-dark: oklch(43% 0.16 250);
-            --display: "Archivo Narrow", "Arial Narrow", sans-serif;
-            --body: "Atkinson Hyperlegible Next", Verdana, sans-serif;
-            --code: "SFMono-Regular", "SF Mono", Consolas, monospace;
-            --xs: 0.5rem;
-            --sm: 0.75rem;
-            --md: 1rem;
-            --lg: 1.5rem;
-            --xl: 2rem;
-            --2xl: 3rem;
-            --3xl: 4.5rem;
-            --rail: 17rem;
-            --prose: 46rem;
-         }
-
-         * { box-sizing: border-box; }
-         html { min-height: 100%; background: var(--paper); scroll-padding-top: var(--lg); }
-         body { margin: 0; min-height: 100vh; font-family: var(--body); color: var(--ink); background: var(--paper); }
-         ::selection { background: var(--yellow); color: var(--ink); }
-         a { color: var(--red-dark); font-weight: 600; text-decoration-thickness: 0.08em; text-underline-offset: 0.18em; }
-         a:hover { text-decoration-thickness: 0.16em; }
-         :is(a, summary, button, select, input, [tabindex]):focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
-         abbr[title] { text-decoration: underline dotted 0.1em; text-underline-offset: 0.2em; cursor: help; }
-
-         .skip-link { position: absolute; top: var(--xs); left: var(--xs); z-index: 10; padding: var(--xs) var(--sm); background: var(--ink); color: var(--yellow); font-weight: 700; transform: translateY(-200%); }
-         .skip-link:focus { transform: none; }
-
          /* Layout */
-         .shell { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); align-items: start; }
+         .shell { --halftone: 9.5rem; display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); align-items: start; }
          .rail { position: sticky; top: 0; display: flex; flex-direction: column; gap: var(--lg); height: 100vh; overflow-y: auto; padding: var(--lg) var(--lg) var(--xl); background: var(--yellow); border-right: 3px solid var(--ink); }
          .mobile-bar { display: none; }
          .content { min-width: 0; padding: var(--2xl) clamp(1.25rem, 5vw, 4.5rem) var(--3xl); }
@@ -119,11 +67,6 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
          .shell--wide .content-frame { width: min(100%, 76rem); }
          .toc-rail { display: none; }
 
-         /* Rail */
-         .brand { display: flex; align-items: center; gap: var(--sm); color: inherit; text-decoration: none; }
-         .mark { display: block; width: 3.5rem; height: 3.5rem; object-fit: contain; }
-         .brand-title { font: 700 2.1rem/0.9 var(--display); letter-spacing: -0.04em; }
-         .brand-title-accent { color: var(--red-dark); }
          .rail-nav, .route-drawer-nav { display: grid; gap: 1.1rem; }
          .nav-section { display: grid; gap: 0.3rem; }
          .nav-title { margin: 0; font: 700 0.74rem/1 var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
@@ -136,28 +79,21 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
          .rail-foot a { color: inherit; }
 
          /* Page head */
-         .page-head { display: grid; gap: var(--md); margin-bottom: var(--2xl); }
+         .page-head { position: relative; isolation: isolate; display: grid; gap: var(--md); margin-bottom: var(--2xl); }
+         /*
+          * The halftone circle is its own element, and the text stops short of it. Drawn as a
+          * pseudo-element, or behind the text, it leaves contrast checkers unable to measure
+          * the heading.
+          */
+         .halftone { position: absolute; z-index: -1; top: -1.25rem; right: 0; width: var(--halftone); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, var(--red) 1.5px, transparent 1.8px) 0 0 / 8px 8px; transform: rotate(7deg); }
+         .page-head > :is(.crumb, h1, .summary) { max-width: calc(100% - var(--halftone) - var(--md)); }
          .crumb { margin: 0; color: var(--red-dark); font: 700 0.8rem/1 var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
          /* The offset shadow is a filter, not a text-shadow, so that contrast checkers can still measure the heading. */
          h1 { margin: 0; font: 700 clamp(2.3rem, 5.2vw, 3.4rem)/0.98 var(--display); letter-spacing: -0.03em; text-transform: uppercase; text-wrap: balance; filter: drop-shadow(3px 3px 0 var(--yellow)); }
          .summary { margin: 0; color: var(--ink-soft); font-size: 1.2rem; line-height: 1.55; }
          .summary > p { margin: 0; font-size: inherit; line-height: inherit; }
          .summary > p + p { margin-top: var(--sm); }
-         .shell--home h1 { max-width: 12ch; font-size: clamp(3rem, 8.5vw, 5.6rem); line-height: 0.9; letter-spacing: -0.05em; filter: drop-shadow(4px 4px 0 var(--yellow)) drop-shadow(3px 3px 0 color-mix(in oklch, var(--red) 62%, transparent)); }
-         .shell--home .page-head { gap: var(--lg); }
-         .shell--home .summary { font-size: 1.3rem; }
 
-         /* Prose */
-         section[id], :is(h2, h3)[id] { scroll-margin-top: var(--lg); }
-         h2, h3 { margin: 0; font-family: var(--display); font-weight: 700; text-wrap: balance; }
-         h2 { padding-top: var(--md); border-top: 3px solid var(--ink); font-size: 1.75rem; line-height: 1.05; letter-spacing: -0.01em; text-transform: uppercase; }
-         h3 { font-size: 1.3rem; line-height: 1.15; }
-         p, li, dd, td, th { font-size: 1.04rem; line-height: 1.65; }
-         p { margin: 0; }
-         ul, ol { margin: 0; padding-left: 1.3rem; }
-         li + li { margin-top: var(--xs); }
-         strong { font-weight: 700; }
-         .steps > li::marker { font-family: var(--display); font-weight: 700; }
          /* Vertical rhythm comes last so it wins over the zero margins above. */
          .shell:not(.shell--wide) article > section + section { margin-top: var(--3xl); }
          .shell:not(.shell--wide) article > section > * + * { margin-top: var(--md); }
@@ -167,59 +103,9 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
          .shell--wide article { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--lg); min-inline-size: 0; }
          :where(.shell--wide) article > section { display: grid; gap: var(--md); }
          .shell--wide .page-head { margin-bottom: var(--xl); }
+         .shell--wide .page-head > :is(h1, .summary) { max-width: min(100% - var(--halftone) - var(--md), 60rem); }
 
-         /* Code */
-         code, pre, samp, kbd { font-family: var(--code); }
-         code, kbd { overflow-wrap: break-word; font-size: 0.86em; }
-         :not(pre) > code { padding: 0.1em 0.3em; background: var(--yellow-soft); box-decoration-break: clone; }
-         kbd { padding: 0.1em 0.4em; background: var(--paper-light); border: 1px solid var(--ink); border-bottom-width: 2px; }
-         pre { position: relative; overflow-x: auto; margin: 0; padding: 2.5rem var(--md) var(--md); background: var(--ink); color: var(--paper-light); border: 2px solid var(--ink); font-size: 0.86rem; line-height: 1.65; tab-size: 3; }
-         pre code { overflow-wrap: normal; font-size: inherit; }
-         .code-block-tools { position: absolute; inset: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: var(--md); padding: 0.4rem 0.4rem 0 var(--md); color: var(--yellow); font: 700 0.72rem/1 var(--display); letter-spacing: 0.12em; }
-         .copy-button { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 1.6rem; margin: 0; padding: 0.2rem 0.5rem; background: transparent; color: inherit; border: 1px solid currentColor; border-radius: 0; font: inherit; cursor: pointer; }
-         .copy-button:hover { background: var(--yellow); color: var(--ink); border-color: var(--yellow); }
-         .copy-button svg { width: 0.9rem; height: 0.9rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
-         .token-command { color: var(--yellow); font-weight: 700; }
-         .token-option { color: oklch(84% 0.1 235); }
-         .token-string { color: oklch(84% 0.12 60); }
-         .token-variable { color: oklch(87% 0.11 100); font-style: italic; }
-         .token-keyword { color: oklch(82% 0.12 330); font-weight: 700; }
-         .token-url { color: oklch(86% 0.1 165); }
-
-         /* What the tool prints, and what you tell an agent, are light so they read apart from what you type. */
-         pre:is([data-label="OUTPUT"], [data-label="AI AGENT PROMPT"]) { background: var(--paper-light); color: var(--ink); border-color: var(--rule); border-left: 4px solid var(--ink); }
-         pre:is([data-label="OUTPUT"], [data-label="AI AGENT PROMPT"]) .code-block-tools { color: var(--ink-soft); }
-         pre:is([data-label="OUTPUT"], [data-label="AI AGENT PROMPT"]) .copy-button:hover { background: var(--ink); color: var(--paper-light); border-color: var(--ink); }
-         pre[data-label="AI AGENT PROMPT"] { border-left-color: var(--blue-dark); font-family: var(--body); font-size: 1rem; white-space: pre-wrap; }
-         pre[data-label="AI AGENT PROMPT"] code { font-family: inherit; }
          .shell:not(.shell--wide) article > section > pre + pre[data-label="OUTPUT"] { margin-top: 0; border-top: 0; }
-
-         /* Terms and their descriptions */
-         dl.defs { display: grid; grid-template-columns: minmax(9rem, 0.42fr) minmax(0, 1fr); margin-block-end: 0; border-bottom: 1px solid var(--rule); }
-         dl.defs > :is(dt, dd) { margin: 0; padding-block: var(--sm); border-top: 1px solid var(--rule); }
-         dl.defs > dt { padding-right: var(--lg); font-weight: 700; line-height: 1.5; }
-         dl.defs > dt code { font-weight: 400; }
-         dl.defs > dd { color: var(--ink-soft); }
-         dl.defs--wide { grid-template-columns: minmax(12rem, 0.75fr) minmax(0, 1fr); }
-
-         .table-wrap { overflow-x: auto; }
-         table { width: 100%; border-collapse: collapse; }
-         th, td { padding: var(--sm) var(--lg) var(--sm) 0; border-top: 1px solid var(--rule); text-align: start; vertical-align: top; }
-         thead th { border-top: 0; border-bottom: 2px solid var(--ink); font: 700 0.8rem/1.2 var(--display); letter-spacing: 0.1em; text-transform: uppercase; }
-         tbody th { font-weight: 700; }
-         td { color: var(--ink-soft); }
-
-         .note { padding: var(--md) var(--lg); background: var(--paper-light); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--yellow); }
-         .note > * + * { margin-top: var(--xs); }
-         .note-title { color: var(--red-dark); font: 700 0.8rem/1 var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
-         .panel-kicker { margin: 0; color: var(--red-dark); font: 700 0.76rem/1 var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
-
-         /* Search, drawn by Pagefind's components */
-         :root { --pf-font: var(--body); --pf-text: var(--ink); --pf-text-secondary: var(--ink-soft); --pf-text-muted: var(--ink-soft); --pf-background: var(--paper-light); --pf-border: var(--ink); --pf-border-focus: var(--blue); --pf-border-radius: 0; --pf-hover: var(--yellow-soft); --pf-mark: var(--yellow); --pf-outline-focus: var(--blue); }
-         .search-trigger { display: block; }
-
-         .heading-link { color: inherit; font-weight: inherit; text-decoration: none; }
-         .heading-link:hover { text-decoration: underline; text-decoration-thickness: 0.08em; }
 
          /* On this page */
          .toc-nav { display: grid; gap: 0.1rem; }
@@ -261,16 +147,15 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
          }
 
          @media (max-width: 640px) {
+            .shell { --halftone: 5.5rem; }
             .shell:not(.shell--wide) article > section + section { margin-top: var(--2xl); }
-            .summary, .shell--home .summary { font-size: 1.1rem; }
-            dl.defs, dl.defs--wide { grid-template-columns: minmax(0, 1fr); }
-            dl.defs > dt { padding-bottom: 0; }
-            dl.defs > dd { padding-top: 0.2rem; border-top: 0; }
+            .summary { font-size: 1.1rem; }
+            /* On a phone the circle moves up beside the section name, and the text takes the full width. */
+            .halftone { top: -2.25rem; opacity: 0.7; }
+            .page-head > :is(h1, .summary), .shell--wide .page-head > :is(h1, .summary) { max-width: none; }
             .route-drawer-nav, .page-nav { grid-template-columns: 1fr; }
             .page-nav-link--next { text-align: start; }
             .page-nav-link--next .page-nav-kicker { justify-content: flex-start; }
-            /* On a phone, commands wrap so nothing is cut off, and output scrolls so its columns stay aligned. */
-            pre:not([data-label="OUTPUT"]), pre:not([data-label="OUTPUT"]) code { white-space: pre-wrap; overflow-wrap: anywhere; }
          }
       </style>
    </head>
@@ -279,7 +164,7 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
       {hasSearch ? <pagefind-config bundle-path={`${basePath}pagefind/`} base-url={basePath}></pagefind-config> : null}
       <div class:list={['shell', `shell--${variant}`, { 'shell--with-toc': toc.length > 0 }]}>
          <div class="rail">
-            <a class="brand" href="/" aria-label="a11ied docs home">
+            <a class="brand" href="/" aria-label="a11ied home">
                <Image src={logo} alt="" class="mark" width={112} height={112} />
                <span class="brand-title">a<span class="brand-title-accent">11</span>ied</span>
             </a>
@@ -320,7 +205,8 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
          <main class="content" id="content">
             <div class="content-frame" data-pagefind-body data-pagefind-weight={variant === 'wide' ? '0.2' : '2'}>
                <header class="page-head">
-                  {activeSection && variant !== 'home' ? <p class="crumb" data-pagefind-ignore>{activeSection.title}</p> : null}
+                  <span class="halftone" aria-hidden="true"></span>
+                  {activeSection ? <p class="crumb" data-pagefind-ignore>{activeSection.title}</p> : null}
                   <h1>{title}</h1>
                   <div class="summary" set:html={summary} />
                </header>
@@ -331,7 +217,7 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
                      {nextLink ? <a class="page-nav-link page-nav-link--next" href={nextLink.href}><span class="page-nav-kicker">Next<ArrowRight size={14} aria-hidden="true" focusable="false" /></span><span class="page-nav-label">{nextLink.label}</span></a> : <span />}
                   </nav>
                ) : null}
-               <footer class="main-footer">a11ied is open source. <a href={REPOSITORY_URL}>Read the code or report a problem on GitHub</a>.</footer>
+               <footer class="main-footer"><a href={REPOSITORY_URL}>Read the code or report a problem on GitHub</a>.</footer>
             </div>
          </main>
          {toc.length > 0 ? (
