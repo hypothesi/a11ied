@@ -157,6 +157,46 @@ p {
    font-size: 0.9rem;
 }
 
+.report-tiles li[class] {
+   border-color: var(--a1-report-tile-color);
+   background: color-mix(
+      in srgb,
+      var(--a1-report-tile-color) 12%,
+      var(--a1-report-bgColor)
+   );
+}
+
+.report-tiles li[class] strong {
+   color: var(--a1-report-tile-color);
+}
+
+.report-tiles li[class] span {
+   color: var(--a1-report-color);
+}
+
+.report-tile--critical,
+.report-tile--fail {
+   --a1-report-tile-color: var(--a1-report-critical-color);
+}
+
+.report-tile--serious {
+   --a1-report-tile-color: var(--a1-report-serious-color);
+}
+
+.report-tile--moderate,
+.report-tile--cannot-tell {
+   --a1-report-tile-color: var(--a1-report-moderate-color);
+}
+
+.report-tile--minor,
+.report-tile--not-applicable {
+   --a1-report-tile-color: var(--a1-report-minor-color);
+}
+
+.report-tile--pass {
+   --a1-report-tile-color: var(--a1-report-pass-color);
+}
+
 .report-tableWrap {
    overflow-x: auto;
 }

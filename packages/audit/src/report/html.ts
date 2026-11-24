@@ -81,8 +81,10 @@ function renderMeta(report: AuditReport): string {
       .join('')}</dl>`;
 }
 
-function tile(count: number, label: string): string {
-   return `<li><strong>${String(count)}</strong><span>${escapeHtml(label)}</span></li>`;
+/** A tile takes the color of its kind only when it counts something. */
+function tile(count: number, label: string, kind: string): string {
+   const tone = count > 0 ? ` class="report-tile--${kind}"` : '';
+   return `<li${tone}><strong>${String(count)}</strong><span>${escapeHtml(label)}</span></li>`;
 }
 
 function renderSummary(report: AuditReport): string {
@@ -93,13 +95,13 @@ function renderSummary(report: AuditReport): string {
       `<p class="report-verdict report-verdict--${report.verdict}">${escapeHtml(describeVerdict(report))}</p>`,
       '<h3>Findings by severity</h3><ul class="report-tiles">',
       ...SEVERITY_ORDER.map((severity) =>
-         tile(findings[severity], SEVERITY_LABELS[severity]),
+         tile(findings[severity], SEVERITY_LABELS[severity], severity),
       ),
       '</ul><h3>Success criteria</h3><ul class="report-tiles">',
-      tile(criteria.fail, 'Fail'),
-      tile(criteria.pass, 'Pass'),
-      tile(criteria['not-applicable'], 'Not applicable'),
-      tile(open, 'Not verified or unfinished'),
+      tile(criteria.fail, 'Fail', 'fail'),
+      tile(criteria.pass, 'Pass', 'pass'),
+      tile(criteria['not-applicable'], 'Not applicable', 'not-applicable'),
+      tile(open, 'Not verified or unfinished', 'cannot-tell'),
       '</ul></section>',
    ].join('');
 }

@@ -123,6 +123,18 @@ describe('audit report', () => {
       expect(html).toContain('data-report-shot');
    });
 
+   it('colors a summary tile only when it counts something', () => {
+      const audit = start(['2.4.7']);
+      addPage(audit, { locator: 'https://example.test/', name: 'Home' });
+      failFocus(audit, 'w1');
+
+      const { files } = writeAuditReport(audit, { formats: ['html'] });
+      const html = readFileSync(files[0] ?? '', 'utf8');
+
+      expect(html).toContain('<li class="report-tile--fail"><strong>1</strong>');
+      expect(html).toContain('<li><strong>0</strong><span>Pass</span>');
+   });
+
    it('includes a screenshot viewer for pictures too tall to show in a thumbnail', () => {
       const audit = start(['2.4.7']);
       addPage(audit, { locator: 'https://example.test/', name: 'Home' });
