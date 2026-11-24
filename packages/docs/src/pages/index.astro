@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import reportSummary from '../assets/audit-report-summary.png';
 import logo from '../assets/logo.png';
+import Balloon from '../components/home/balloon.astro';
 import SiteHead from '../components/site-head.astro';
 import { REPOSITORY_URL } from '../lib/nav';
 import { getPracticeURL, withPracticeURL } from '../lib/practice';
@@ -192,6 +193,7 @@ const reportAlt =
                         then focus moves to its first field.
                      </p>
                      <p><a href="/guides/screen-reader">Test with a screen reader</a></p>
+                     <Balloon kind="speech">Dialog, Invite member</Balloon>
                   </div>
                   <div class="feature-show">
                      <pre><code>a1 sr transcript --since opened</code></pre>
@@ -213,6 +215,7 @@ const reportAlt =
                         announced.
                      </p>
                      <p><a href="/guides/vitest">Test with Vitest</a></p>
+                     <Balloon kind="whisper" mirror>...</Balloon>
                   </div>
                   <div class="feature-show">
                      <pre data-label="invite.test.ts"><code>{withPracticeURL(testSample, practiceURL)}</code></pre>
@@ -234,6 +237,7 @@ const reportAlt =
                         that it is not, so the agent can fix the dialog and check again.
                      </p>
                      <p><a href="/guides/agents">Connect an AI agent</a></p>
+                     <Balloon kind="thought">Was the dialog announced?</Balloon>
                   </div>
                   <div class="feature-show">
                      <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
@@ -254,6 +258,7 @@ const reportAlt =
                         manual test, so you know what to check next.
                      </p>
                      <p><a href="/guides/violations">Fix what a scan found</a></p>
+                     <Balloon kind="shout" mirror>10 problems to fix</Balloon>
                   </div>
                   <div class="feature-show">
                      <pre><code>a1 check {practiceURL}</code></pre>
@@ -436,6 +441,9 @@ const reportAlt =
    .feature--flip .feature-copy { order: 2; }
    .feature-copy > * + *, .feature-show > * + * { margin-top: var(--md); }
    .feature-copy p { color: var(--ink-soft); }
+   /* Each balloon sits under the copy, on the side nearer the code it quotes. */
+   .feature-copy > :global(.balloon) { margin-top: var(--2xl); margin-inline-start: auto; }
+   .feature--flip .feature-copy > :global(.balloon) { margin-inline: 0 auto; }
    .feature-show { min-width: 0; }
 
    /* Audit */
