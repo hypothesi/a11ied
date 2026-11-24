@@ -3,12 +3,12 @@ import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
 
 const toc = [
-   { id: 'how', label: 'How an audit works' },
-   { id: 'start', label: 'Start one' },
+   { id: 'start', label: 'Start an audit' },
+   { id: 'how', label: 'How the work is divided' },
    { id: 'scope', label: 'Choose the scope' },
-   { id: 'split', label: 'Automated and judged' },
+   { id: 'split', label: 'What is automated' },
    { id: 'workers', label: 'Run the workers' },
-   { id: 'track', label: 'Track progress' },
+   { id: 'track', label: 'Watch progress' },
    { id: 'stuck', label: 'When something is stuck' },
    { id: 'report', label: 'The report' },
    { id: 'mobile', label: 'Mobile apps' },
@@ -17,164 +17,189 @@ const toc = [
 
 <DocShell
    title="Run an audit"
-   summary="a1 audit runs a WCAG audit of a website, a page, a feature, or a mobile app with AI agents doing the testing. It splits the work into small units that agents test in parallel, stores every result as it arrives, shows progress while it runs, and writes a report you can hand to a client."
+   summary="<p><code>a1 audit</code> runs a WCAG audit of a site, a page, a feature, or a mobile app, with AI agents doing the testing. It splits the work into small units, lets several agents test in parallel, saves every result as it arrives, and writes a report you can hand to a client.</p>"
    links={docsLinks}
    toc={toc}
 >
-   <section class="panel" id="how">
-      <h2>How an audit works</h2>
-      <div class="route-list">
-         <div class="route-row"><strong>Page</strong><span>One thing to test: a page, a screen, a state of one such as an open dialog, or a flow such as checkout.</span></div>
-         <div class="route-row"><strong>Test pass</strong><span>The criteria tested with one kind of interaction: <code>semantics</code>, <code>keyboard</code>, <code>visual</code>, <code>media</code>, <code>forms</code>, <code>pointer</code>, and <code>consistency</code> across pages. A page is loaded and exercised once per pass, not once per criterion.</span></div>
-         <div class="route-row"><strong>Unit</strong><span>One pass on one page, such as <code>P3.keyboard</code>. A worker claims a unit, tests it, and submits an outcome for each of its criteria.</span></div>
-         <div class="route-row"><strong>Finding</strong><span>One defect. The same defect on ten pages is one finding with ten occurrences.</span></div>
-      </div>
-      <p>
-         Everything lives in <code>.a11ied/audits/&lt;id&gt;/</code>: a SQLite database, an
-         <code>evidence/</code> folder of screenshots, and the report. An audit survives a
-         crashed agent, a closed terminal, or a restart, and any number of workers can use it
-         at once.
-      </p>
-   </section>
-
-   <section class="panel" id="start">
-      <h2>Start one</h2>
+   <section>
+      <h2 id="start">Start an audit</h2>
       <p>
          The quickest way is to ask an agent that has the
-         <a href="/guides/agent-skill"><code>a11ied-audit</code> skill</a>:
+         <a href="/guides/agent-skill"><code>a11ied-audit</code> skill</a>.
       </p>
-      <pre data-label="AI AGENT PROMPT"><code>Audit https://example.com against WCAG 2.2 AA with a11ied.
-Do not submit the contact form. Use four workers.</code></pre>
-      <p>The agent runs these commands. You can run them yourself:</p>
+      <pre data-label="AI AGENT PROMPT"><code>Audit https://example.com against WCAG 2.2 AA with a11ied. Do not submit the contact form. Use four workers.</code></pre>
+      <p>The agent runs these commands. You can run them yourself.</p>
       <pre><code>a1 audit init https://example.com --rule "Do not submit the contact form"
-a1 audit discover          # add the site's pages to the audit
-a1 audit scan              # automated checks on every page, in parallel
-a1 audit status            # 0 of N units done</code></pre>
+a1 audit discover
+a1 audit scan
+a1 audit status</code></pre>
+      <dl class="defs">
+         <dt><code>init</code></dt>
+         <dd>Creates the audit. <code>--rule</code> states something workers must not do, and every unit of work repeats it. <code>--access</code> says how to reach the target, such as where the test account is.</dd>
+         <dt><code>discover</code></dt>
+         <dd>Finds the site's pages and adds them.</dd>
+         <dt><code>scan</code></dt>
+         <dd>Runs the automated checks on every page.</dd>
+         <dt><code>status</code></dt>
+         <dd>Shows how much is done.</dd>
+      </dl>
       <p>
-         <code>--rule</code> states something workers must not do. Every work packet repeats the
-         rules. <code>--access</code> says how to reach the target, such as where the test
-         account is.
+         An audit lives in <code>.a11ied/audits/&lt;id&gt;/</code>: a database, a folder of
+         screenshots, and the report. It survives a crashed agent, a closed terminal, and a
+         restart.
       </p>
    </section>
 
-   <section class="panel" id="scope">
-      <h2>Choose the scope</h2>
-      <div class="route-list">
-         <div class="route-row"><strong>A whole site</strong><span><code>a1 audit init &lt;url&gt;</code>, then <code>a1 audit discover</code>. Remove what is out of scope with <code>a1 audit page exclude &lt;id&gt; --reason "..."</code>. On a large site keep one page per template plus the pages in key tasks.</span></div>
-         <div class="route-row"><strong>One page</strong><span><code>a1 audit init &lt;url&gt; --page</code></span></div>
-         <div class="route-row"><strong>A state or a flow</strong><span><code>a1 audit page add &lt;url&gt; --kind state --name "Menu open" --notes "Activate the Menu button"</code>. Use <code>--kind flow</code> with the steps in <code>--notes</code> for a process that spans pages.</span></div>
-         <div class="route-row"><strong>Chosen criteria</strong><span><code>--criteria 1.4.3,2.4.7</code> audits only those. Only the passes that own them get units.</span></div>
-         <div class="route-row"><strong>One kind of testing</strong><span><code>--passes keyboard,forms</code></span></div>
-         <div class="route-row"><strong>Another level or version</strong><span><code>--level A</code>, <code>--level AAA</code>, <code>--wcag 2.1</code>. The default is WCAG 2.2 Level AA: 55 criteria.</span></div>
-      </div>
+   <section>
+      <h2 id="how">How the work is divided</h2>
+      <dl class="defs">
+         <dt>Page</dt>
+         <dd>One thing to test: a page, a screen, a state of one such as an open dialog, or a flow such as checkout.</dd>
+         <dt>Test pass</dt>
+         <dd>The criteria tested with one kind of interaction: <code>semantics</code>, <code>keyboard</code>, <code>visual</code>, <code>media</code>, <code>forms</code>, <code>pointer</code>, and <code>consistency</code> across pages.</dd>
+         <dt>Unit</dt>
+         <dd>One pass on one page, such as <code>P3.keyboard</code>. A worker claims a unit, tests it, and submits an outcome for each of its criteria.</dd>
+         <dt>Finding</dt>
+         <dd>One defect. The same defect on ten pages is one finding with ten occurrences.</dd>
+      </dl>
+      <p>A page is loaded and exercised once per pass, not once per criterion.</p>
+   </section>
+
+   <section>
+      <h2 id="scope">Choose the scope</h2>
+      <p>The default is WCAG 2.2 Level AA: 55 criteria.</p>
+      <dl class="defs">
+         <dt>A whole site</dt>
+         <dd><code>a1 audit init &lt;url&gt;</code>, then <code>a1 audit discover</code>. Remove pages with <code>a1 audit page exclude &lt;id&gt; --reason "..."</code>. On a large site, keep one page per template plus the pages in key tasks.</dd>
+         <dt>One page</dt>
+         <dd><code>a1 audit init &lt;url&gt; --page</code></dd>
+         <dt>A state</dt>
+         <dd><code>a1 audit page add &lt;url&gt; --kind state --name "Menu open" --notes "Activate the Menu button"</code></dd>
+         <dt>A flow</dt>
+         <dd><code>--kind flow</code>, with the steps in <code>--notes</code>.</dd>
+         <dt>Chosen criteria</dt>
+         <dd><code>--criteria 1.4.3,2.4.7</code></dd>
+         <dt>One kind of testing</dt>
+         <dd><code>--passes keyboard,forms</code></dd>
+         <dt>Another level or version</dt>
+         <dd><code>--level A</code>, <code>--level AAA</code>, <code>--wcag 2.1</code></dd>
+      </dl>
       <p>
-         The criteria that compare pages, such as 3.2.3 Consistent Navigation, need at least two
-         pages. In a one-page audit the report lists them as not evaluated.
+         Criteria that compare pages, such as 3.2.3 Consistent Navigation, need at least two
+         pages. A one-page audit reports them as not evaluated.
       </p>
    </section>
 
-   <section class="panel" id="split">
-      <h2>What is automated and what is judged</h2>
-      <div class="route-list">
-         <div class="route-row"><strong>Automated</strong><span>Finding pages. axe-core failures, which become findings directly. Measurements stored as signals: tab order, focus styles, overflow at 320 pixels and 200 percent zoom, target sizes, media and form inventories. Claims, recovery, progress, and assembling the report.</span></div>
-         <div class="route-row"><strong>Judged by a worker</strong><span>Every pass and every not-applicable. Whether an automated finding is real on this page. Everything a scanner cannot see: whether alt text describes the image, whether focus order makes sense, whether an error message helps. Severity, impact, and the fix.</span></div>
-      </div>
+   <section>
+      <h2 id="split">What is automated</h2>
+      <dl class="defs">
+         <dt>Automated</dt>
+         <dd>Finding pages. axe failures, which become findings. Measurements: tab order, focus styles, overflow at 320 pixels wide and at 200 percent zoom, target sizes, and lists of media and forms. Claims, progress, and the report.</dd>
+         <dt>Judged by a worker</dt>
+         <dd>Every pass and every "not applicable". Whether an automated finding is real. Everything a scanner cannot see, such as whether alt text describes the image or an error message helps. Severity and the fix.</dd>
+      </dl>
       <p>
-         The scan never passes a criterion. Signals appear in a worker's packet as facts to
-         check, which saves the worker from collecting them, and nothing else.
+         The scan never passes a criterion. Its measurements reach workers as facts to check.
       </p>
    </section>
 
-   <section class="panel" id="workers">
-      <h2>Run the workers</h2>
+   <section>
+      <h2 id="workers">Run the workers</h2>
       <p>
          A worker is an agent in a loop: claim a unit, test it, submit, repeat. Start several
          with different names and they take different units.
       </p>
       <pre><code>a1 audit next --worker w1
 a1 audit submit P1.keyboard --worker w1 --file result.json</code></pre>
+      <dl class="defs">
+         <dt><code>next</code></dt>
+         <dd>Prints the work packet: the page, the rules, the procedure, each criterion with when it fails, the scan's measurements, findings already recorded, and a template for the submission.</dd>
+         <dt><code>submit</code></dt>
+         <dd>Takes one JSON document and accepts or rejects it whole. A rejection lists every problem, such as a criterion with no outcome. For a finding on a web page, the worker gives a selector and <code>submit</code> takes the screenshot.</dd>
+      </dl>
       <p>
-         <code>next</code> prints the work packet: the page, the rules, the procedure, each
-         criterion with what it applies to and when it fails, the scan's signals, findings
-         already recorded, the page's states to cover, and a submission template. A finding on
-         a web page gives a selector for its element and the state to put the page in, and
-         <code>submit</code> takes the outlined screenshot itself. <code>submit</code> takes
-         one JSON document and accepts or rejects it whole. A rejection lists every problem, such as a
-         criterion with no outcome or a failure with no finding.
-      </p>
-      <p>
-         A native screen reader and a physical device can serve one worker at a time. Give one
-         worker <code>--pass semantics</code> and the rest <code>--not-pass semantics</code>
-         when the audit uses VoiceOver or NVDA. The simulated reader runs in parallel.
+         VoiceOver, NVDA, and a physical device can each serve one worker at a time. When the
+         audit uses one, give one worker <code>--pass semantics</code> and the others
+         <code>--not-pass semantics</code>. The simulated screen reader runs in parallel.
       </p>
    </section>
 
-   <section class="panel" id="track">
-      <h2>Track progress</h2>
-      <pre><code>a1 audit status       # summary: units, workers, blocks, findings, recent activity
-a1 audit status --units
-a1 audit log --unit P3.forms
-a1 audit dashboard    # live page on localhost, refreshes every five seconds
-a1 audit findings</code></pre>
+   <section>
+      <h2 id="track">Watch progress</h2>
+      <pre><code>a1 audit status
+a1 audit dashboard
+a1 audit findings
+a1 audit log --unit P3.forms</code></pre>
       <p>
-         The dashboard shows a grid of pages by test pass, which worker holds what, how long
-         each has been working, what is blocked and why, the findings so far, and the activity
-         log. It links to a live interim report.
+         <code>dashboard</code> serves a live page on your machine: pages by test pass, which
+         worker holds what, what is blocked and why, the findings so far, and a link to the
+         report in progress.
       </p>
    </section>
 
-   <section class="panel" id="stuck">
-      <h2>When something is stuck</h2>
-      <div class="route-list">
-         <div class="route-row"><strong>A worker died</strong><span>Nothing is lost. Its claim expires after 20 minutes without activity and the unit returns to the queue. A worker that asks for work under the same name gets its unit back.</span></div>
-         <div class="route-row"><strong>A unit is blocked</strong><span>A worker blocks a unit it cannot test at all, with the reason. Other units carry on. Fix the cause, then <code>a1 audit reopen &lt;unit&gt; --reason "..."</code>.</span></div>
-         <div class="route-row"><strong>One check cannot be done</strong><span>The worker submits the unit and records that criterion as <code>cannot-tell</code> with the reason. A rule against sending a form still lets workers test its validation and error messages; only what lies past the forbidden effect, such as the success message, is <code>cannot-tell</code>. The report lists it under Not verified.</span></div>
-         <div class="route-row"><strong>A state could not be reached</strong><span>The scan lists the controls on each page that open a menu, dialog, widget, tab, or section, and every submission must account for each one. A state a worker could not reach is recorded as not tested with the reason, and the report lists it under Not verified.</span></div>
-         <div class="route-row"><strong>A tool or device is missing</strong><span>When something affects the whole audit, such as no screen reader or no physical phone, record it with <code>a1 audit limitation "..." --criterion 4.1.2</code>. The report lists it under Not verified, and a reader can see which passes rest on weaker testing.</span></div>
-         <div class="route-row"><strong>A unit keeps failing</strong><span>After three abandoned attempts the unit blocks itself. Read <code>a1 audit log --unit &lt;id&gt;</code> to see why.</span></div>
-         <div class="route-row"><strong>A result looks wrong</strong><span><code>a1 audit reopen &lt;unit&gt;</code> queues it again, and the next worker sees its earlier outcomes and the reason. <code>a1 audit finding dismiss</code>, <code>merge</code>, and <code>update</code> correct findings.</span></div>
-      </div>
+   <section>
+      <h2 id="stuck">When something is stuck</h2>
+      <dl class="defs defs--wide">
+         <dt>A worker died</dt>
+         <dd>Nothing is lost. Its claim ends after 20 minutes without activity and the unit returns to the queue. A worker that returns under the same name gets its unit back.</dd>
+         <dt>A unit cannot be tested</dt>
+         <dd>The worker blocks it with a reason, and work on other units continues. Fix the cause, then <code>a1 audit reopen &lt;unit&gt; --reason "..."</code>.</dd>
+         <dt>One criterion cannot be decided</dt>
+         <dd>The worker records it as <code>cannot-tell</code> with the reason. The report lists it under Not verified.</dd>
+         <dt>A rule forbids part of a test</dt>
+         <dd>A rule against sending a form still lets workers test its validation. Only what lies past the forbidden step, such as the success message, is <code>cannot-tell</code>.</dd>
+         <dt>A state could not be reached</dt>
+         <dd>The scan lists the controls that open a menu, dialog, or tab, and every submission accounts for each. One a worker could not reach is recorded as not tested.</dd>
+         <dt>A tool or device is missing</dt>
+         <dd>Record it for the whole audit with <code>a1 audit limitation "..." --criterion 4.1.2</code>. The report lists it under Not verified.</dd>
+         <dt>A unit keeps failing</dt>
+         <dd>After three abandoned attempts it blocks itself. Read <code>a1 audit log --unit &lt;id&gt;</code>.</dd>
+         <dt>A result looks wrong</dt>
+         <dd><code>a1 audit reopen &lt;unit&gt;</code> queues it again. <code>a1 audit finding dismiss</code>, <code>merge</code>, and <code>update</code> correct findings.</dd>
+      </dl>
    </section>
 
-   <section class="panel" id="report">
-      <h2>The report</h2>
+   <section>
+      <h2 id="report">The report</h2>
       <pre><code>a1 audit report</code></pre>
       <p>
-         It writes <code>audit-report.html</code>, <code>audit-report.md</code>, and
-         <code>audit-report.json</code> to the audit's <code>report/</code> folder. The HTML
-         file is self-contained with screenshots embedded; print it from a browser for PDF.
+         This writes <code>audit-report.html</code>, <code>.md</code>, and <code>.json</code>
+         to the audit's <code>report/</code> folder. The HTML file is self-contained, with
+         screenshots inside it. Print it from a browser for a PDF.
       </p>
-      <div class="route-list">
-         <div class="route-row"><strong>Summary</strong><span>One statement of the result, findings by severity, and criteria by outcome.</span></div>
-         <div class="route-row"><strong>What to fix first</strong><span>Findings ordered by severity, then by how many pages they affect.</span></div>
-         <div class="route-row"><strong>Findings</strong><span>Each with the problem, who it affects, how to fix it, where it occurs, and a cropped screenshot of the failing element with an outline around it. Any screenshot opens in a viewer; one too tall for its thumbnail fades out at the bottom with a button to see all of it.</span></div>
-         <div class="route-row"><strong>Results by success criterion</strong><span>Fails, Passes, Not applicable, Not verified, or Not evaluated for every criterion in scope.</span></div>
-         <div class="route-row"><strong>Not verified</strong><span>What could not be established, and why.</span></div>
-         <div class="route-row"><strong>Scope and method</strong><span>The pages audited and the states tested on each, what was excluded, how the testing was done, and each decision's note for readers who want to check the work.</span></div>
-      </div>
+      <dl class="defs">
+         <dt>Summary</dt>
+         <dd>The result in one statement, findings by severity, and criteria by outcome.</dd>
+         <dt>What to fix first</dt>
+         <dd>Findings ordered by severity, then by how many pages they affect.</dd>
+         <dt>Findings</dt>
+         <dd>For each: the problem, who it affects, the fix, where it occurs, and a screenshot of the element with an outline around it.</dd>
+         <dt>Results by criterion</dt>
+         <dd>Fails, Passes, Not applicable, Not verified, or Not evaluated, for every criterion in scope.</dd>
+         <dt>Not verified</dt>
+         <dd>What could not be established, and why.</dd>
+         <dt>Scope and method</dt>
+         <dd>The pages and states tested, what was excluded, and how the testing was done.</dd>
+      </dl>
       <p>
-         A report built before every unit is done is marked interim and says what is
-         unfinished. A report never states conformance while a criterion is failing, unfinished,
-         or not verified.
+         A report written before every unit is done is marked interim. A report never states
+         conformance while a criterion is failing, unfinished, or not verified.
       </p>
    </section>
 
-   <section class="panel" id="mobile">
-      <h2>Mobile apps</h2>
+   <section>
+      <h2 id="mobile">Mobile apps</h2>
       <pre><code>a1 audit init "Acme iOS 4.2" --platform ios --access "Simulator: iPhone 16"
 a1 audit page add "Tab bar > Search" --name "Search"</code></pre>
       <p>
-         Tracking, parallel workers, findings, and the report work the same way. There is no
-         automated scan, and a1 does not drive the app: workers operate it with the
-         platform's tools, such as <code>xcrun simctl</code>, <code>adb</code>, or an automation
-         server the agent already has. Give each worker its own simulator or device. Work
-         packets use the mobile wording of each procedure.
+         Tracking, workers, findings, and the report work the same way. There is no automated
+         scan, and a1 does not drive the app. Workers operate it with the platform's own
+         tools, such as <code>xcrun simctl</code> or <code>adb</code>. Give each worker its
+         own simulator or device.
       </p>
       <p>
-         On Android, <code>a1 talkback on</code> and <code>a1 talkback walk --count 20</code>
-         print what TalkBack said at each focus stop. It needs a phone or a Google Play
-         emulator image, and TalkBack's log output level set to verbose once per device. See
-         <a href="/reference/cli#talkback"><code>a1 talkback</code></a>.
+         On Android, <a href="/reference/cli#talkback"><code>a1 talkback</code></a> prints
+         what TalkBack says at each stop.
       </p>
    </section>
 </DocShell>

@@ -1,0 +1,22 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+---
+
+<DocShell
+   title="Page not found"
+   summary="<p>Nothing lives at this address. The page may have moved.</p>"
+   links={docsLinks}
+>
+   <section>
+      <h2>Start here</h2>
+      <dl class="defs">
+         <dt><a href="/">Overview</a></dt>
+         <dd>What a11ied does.</dd>
+         <dt><a href="/quickstart">Quickstart</a></dt>
+         <dd>Install it and test a page.</dd>
+         <dt><a href="/reference/cli">CLI reference</a></dt>
+         <dd>Every command and option.</dd>
+      </dl>
+   </section>
+</DocShell>

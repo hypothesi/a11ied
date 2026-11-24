@@ -1,199 +1,189 @@
 ---
 import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
+import { getPracticeURL, withPracticeURL } from '../../lib/practice';
+import testExample from '../../samples/test-example.ts.txt?raw';
+import testFailure from '../../samples/test-failure.txt?raw';
 
+const practiceURL = getPracticeURL(Astro);
+const startSample = [
+   `import { screenReader } from 'a11ied/test';`,
+   '',
+   `await using sr = await screenReader({ url: 'http://localhost:3000/checkout' });`,
+   '',
+   `await sr.next('heading');`,
+   `await sr.expectSpoken('heading, Checkout, level 1');`,
+].join('\n');
+const assertSample = [
+   `sr.checkpoint('opened');`,
+   'sr.activate();',
+   `sr.expectSpoken('dialog, Invite member', { since: 'opened' });`,
+   `sr.expectSpoken(/error/iu, { not: true });`,
+   `sr.expectCursorOn({ role: 'textbox', name: 'Email address' });`,
+   `sr.expectSpokenInOrder(['dialog, Invite member', 'textbox, Email address'], { since: 'opened' });`,
+].join('\n');
 const toc = [
    { id: 'install', label: 'Install' },
-   { id: 'session', label: 'Start a screen reader' },
+   { id: 'example', label: 'A first test' },
+   { id: 'start', label: 'Start and stop a reader' },
+   { id: 'queue', label: 'Queued or awaited' },
    { id: 'methods', label: 'Move, type, and read' },
-   { id: 'checks', label: 'Assertions' },
-   { id: 'example', label: 'Example test file' },
+   { id: 'assert', label: 'Assertions' },
    { id: 'real', label: 'VoiceOver and NVDA' },
 ];
 ---
 
 <DocShell
    title="Write screen reader tests"
-   summary="Start a screen reader from a test, move through the page one element at a time, and assert on what the screen reader announced. a11ied/test depends on no test runner and works under Vitest, Jest, Mocha, Playwright Test, or a script. a11ied/vitest and a11ied/browser have their own guide."
+   summary="<p>Drive a screen reader from a test and assert on what it announced. <code>a11ied/test</code> works with any test runner: Jest, Mocha, Playwright Test, Vitest, or a plain script.</p>"
    links={docsLinks}
    toc={toc}
 >
-   <section class="panel" id="install">
-      <h2>Install</h2>
+   <section>
+      <h2 id="install">Install</h2>
       <pre><code>npm install --save-dev a11ied</code></pre>
-      <div class="route-list">
-         <div class="route-row"><code>a11ied/test</code><span><code>screenReader()</code>, <code>queuedScreenReader()</code>, and the <code>ScreenReader</code> class. It depends on no test runner and works under Vitest, Jest, Mocha, Playwright Test, or a script.</span></div>
-         <div class="route-row"><code>a11ied/vitest</code><span>The same, plus <code>expect</code> matchers and a <code>test</code> whose <code>sr</code> fixture is a queued screen reader. See <a href="/guides/vitest">Test with Vitest</a>.</span></div>
-         <div class="route-row"><code>a11ied/browser</code><span>The same again, for a component the test mounted in Vitest browser mode. See <a href="/guides/vitest">Test with Vitest</a>.</span></div>
-      </div>
+      <dl class="defs">
+         <dt><code>a11ied/test</code></dt>
+         <dd>The screen reader API. Use it with any runner. This page covers it.</dd>
+         <dt><code>a11ied/vitest</code></dt>
+         <dd>The same API as a Vitest fixture, plus matchers. See <a href="/guides/vitest">test with Vitest</a>.</dd>
+         <dt><code>a11ied/browser</code></dt>
+         <dd>The same again for components mounted in Vitest browser mode.</dd>
+      </dl>
       <p>
-         A test that opens a URL runs the simulated screen reader inside a headless Chromium page,
-         so the page's scripts run. Chrome, Edge, Brave, or Chromium on the machine is used first, and
-         <code>npx playwright install chromium</code> adds one when none is installed. Inline
-         HTML runs in jsdom and needs no browser.
+         Tests use the simulated screen reader unless you ask for another. A test that opens
+         a URL needs Chrome, Edge, Brave, or Chromium on the machine.
+         <code>npx playwright install chromium</code> adds one.
       </p>
    </section>
 
-   <section class="panel" id="session">
-      <h2>Start a screen reader</h2>
-      <pre><code>import {'{'} screenReader {'}'} from 'a11ied/test';
-
-await using sr = await screenReader({'{'} url: 'http://localhost:3000/checkout' {'}'});</code></pre>
+   <section>
+      <h2 id="example">A first test</h2>
       <p>
-         <code>screenReader</code> takes <code>sr</code> (<code>virtual</code> by default,
-         <code>voiceover</code>, or <code>nvda</code>), a <code>url</code> or inline
-         <code>html</code>, and <code>mode</code>. The default mode, <code>in-process</code>, runs
-         the screen reader inside the test process and never touches the per-user state directory, so
-         tests in parallel workers do not compete for the one active <code>a1 sr</code> session.
-         <code>mode: 'broker'</code> starts the detached process that <code>a1 sr</code> shares
-         instead, so <code>a1 sr transcript</code> in another terminal reads the same session.
+         This test opens a dialog on the <a href="/guides/demo">practice page</a> and checks
+         that the dialog announces its name and that focus moves into it.
+      </p>
+      <pre data-label="invite.test.ts"><code>{withPracticeURL(testExample, practiceURL)}</code></pre>
+      <p>
+         Run it against the broken practice page and it fails with what the screen reader
+         said:
+      </p>
+      <pre data-label="OUTPUT"><code>{testFailure.trimEnd()}</code></pre>
+   </section>
+
+   <section>
+      <h2 id="start">Start and stop a reader</h2>
+      <pre data-label="TypeScript"><code>{startSample}</code></pre>
+      <p><code>screenReader()</code> takes these options.</p>
+      <dl class="defs">
+         <dt><code>url</code> or <code>html</code></dt>
+         <dd>The page to read. Inline <code>html</code> runs in jsdom and needs no browser, and page scripts do not run.</dd>
+         <dt><code>sr</code></dt>
+         <dd><code>'virtual'</code> by default, or <code>'voiceover'</code> or <code>'nvda'</code>.</dd>
+         <dt><code>mode</code></dt>
+         <dd><code>'in-process'</code> by default: the reader lives inside the test, so tests in parallel workers do not share one. <code>'broker'</code> starts the session <code>a1 sr</code> uses, so you can inspect it from a terminal.</dd>
+         <dt><code>timeoutMs</code></dt>
+         <dd>A limit for each command.</dd>
+      </dl>
+      <p>
+         <code>await using</code> stops the reader when the block ends, whether the test
+         passed or threw. In a runner without <code>await using</code>, call
+         <code>await sr.stop()</code> in the cleanup hook.
       </p>
       <p>
-         The <code>ScreenReader</code> object implements <code>Symbol.asyncDispose</code>. With <code>await using</code>, the
-         session stops when the block ends, whether the test passed or threw. A runner without
-         explicit resource management calls <code>await sr.stop()</code> in its cleanup hook
-         instead. Every call after a stop throws <code>session-stopped</code>.
-      </p>
-      <p>
-         <code>sr.session</code> reports what you got: <code>sr</code>, <code>mode</code>,
-         <code>url</code>, and for the simulated screen reader the <code>engine</code>, which is
-         <code>browser</code> for a Playwright page and <code>jsdom</code> for inline HTML or a
-         machine with no Chromium.
-      </p>
-      <p>
-         <code>queuedScreenReader</code> takes the same options and returns a
-         <code>QueuedScreenReader</code>. One <code>await</code> starts it. After that a method
-         call queues a command and returns at once, and the queued commands run one at a time in
-         the order they were queued. Await a call only when the test needs its value.
-      </p>
-      <pre><code>import {'{'} queuedScreenReader {'}'} from 'a11ied/test';
-
-await using sr = await queuedScreenReader({'{'} url: 'http://localhost:3000/checkout' {'}'});
-
-sr.goTo({'{'} role: 'button', name: 'Pay' {'}'});
-sr.activate();
-sr.expectSpoken(/order placed/iu);
-
-const item = await sr.read();</code></pre>
-      <p>
-         <code>await using</code> calls <code>sr.stop()</code>, which runs every queued command,
-         stops the reader even when one of them threw, and then rethrows that error.
-         <code>sr.drain()</code> waits for the queued commands without stopping the reader.
-         <code>sr.session</code> is a plain property on a queued reader and needs no
-         <code>await</code>. <code>sr.reader</code> is the underlying <code>ScreenReader</code>,
-         for a call that has to run before the queue empties.
+         <code>sr.session</code> says what you got: <code>sr</code>, <code>mode</code>,
+         <code>url</code>, and <code>engine</code>, which is <code>browser</code> or
+         <code>jsdom</code>.
       </p>
    </section>
 
-   <section class="panel" id="methods">
-      <h2>Move, type, and read</h2>
+   <section>
+      <h2 id="queue">Queued or awaited</h2>
+      <p>There are two ways to call the same methods.</p>
+      <dl class="defs">
+         <dt><code>screenReader()</code></dt>
+         <dd>Every method returns a promise. Await each call.</dd>
+         <dt><code>queuedScreenReader()</code></dt>
+         <dd>A call queues a command and returns at once. Commands run in order. Await a call only when you need its value, as in <code>const item = await sr.read()</code>.</dd>
+      </dl>
       <p>
-         The methods mirror the <code>sr</code> subcommands. A screen reader moves through a page
-         one element at a time: a heading, a link, a button, a form field, a paragraph, a
-         landmark (a section such as <code>main</code> or <code>navigation</code>). Every method
-         that moves the cursor or sends input returns the announcement, the text the screen
-         reader spoke when it reached the element.
-      </p>
-      <div class="route-list">
-         <div class="route-row"><div class="route-terms"><code>next(kind?, options?)</code>, <code>previous(kind?, options?)</code></div><span>The next or previous element, or a jump by <code>heading</code>, <code>link</code>, <code>landmark</code>, <code>control</code>, <code>button</code>, <code>table</code>, <code>list</code>, <code>graphic</code>, <code>region</code>, or <code>form-field</code>. Options: <code>level</code> for headings, <code>times</code>.</span></div>
-         <div class="route-row"><div class="route-terms"><code>top()</code>, <code>bottom()</code>, <code>interact()</code>, <code>stopInteracting()</code>, <code>activate()</code>, <code>escape()</code></div><span>The portable verbs.</span></div>
-         <div class="route-row"><div class="route-terms"><code>press(...chords)</code>, <code>type(text)</code></div><span><code>press('Tab', 'Enter')</code> sends two chords in order.</span></div>
-         <div class="route-row"><code>read()</code><span>The element under the cursor: <code>role</code>, <code>name</code>, <code>value</code>, <code>states</code>, <code>level</code>, <code>phrase</code>, and <code>source</code>, which says where each field came from.</span></div>
-         <div class="route-row"><code>title()</code><span>The page title, or the window summary on VoiceOver and the window title on NVDA.</span></div>
-         <div class="route-row"><div class="route-terms"><code>find(text)</code>, <code>goTo({'{'} role, name {'}'})</code></div><span>Move the cursor to the next element whose text contains <code>text</code>, or forward until the current element has the role, the name, or both. Both throw when nothing matches.</span></div>
-         <div class="route-row"><div class="route-terms"><code>elements(kind)</code>, <code>readAll()</code>, <code>walk()</code></div><span>Every element of one kind from the top of the page, every element from the cursor to the end, and the same from the top. Each returns the elements announced, capped by <code>max</code>.</span></div>
-         <div class="route-row"><code>table(move)</code><span><code>next-cell</code> and the other moves return the announcement. <code>row-header</code> and <code>column-header</code> return the header text.</span></div>
-         <div class="route-row"><div class="route-terms"><code>open(url)</code>, <code>open({'{'} html {'}'})</code></div><span>Another page in the same session.</span></div>
-         <div class="route-row"><div class="route-terms"><code>checkpoint(label)</code>, <code>transcript({'{'} since, tail {'}'})</code></div><span>Mark a point, and read the timestamped entries since it.</span></div>
-         <div class="route-row"><code>wait({'{'} for, timeoutMs {'}'})</code><span>Polls the transcript for an announcement made after the call and returns it, or throws at the timeout, 5000 ms by default. <code>wait({'{'} ms {'}'})</code> pauses.</span></div>
-         <div class="route-row"><div class="route-terms"><code>perform(command)</code>, <code>screenshot(path)</code>, <code>focus()</code></div><span>A named command from <code>a1 sr list</code>, a VoiceOver cursor screenshot, and a refocus of the session's window.</span></div>
-      </div>
-      <p>
-         A <code>QueuedScreenReader</code> has every one of these methods, with the same
-         parameters. Each returns a thenable instead of a promise, and the command runs after
-         the ones queued before it.
+         A queued reader keeps a test free of <code>await</code>. When the block ends,
+         <code>await using</code> runs whatever is still queued, stops the reader, and
+         rethrows the first failure. <code>sr.drain()</code> runs the queue without stopping.
       </p>
    </section>
 
-   <section class="panel" id="checks">
-      <h2>Assertions</h2>
-      <pre><code>await sr.checkpoint('opened');
-await sr.activate();
-await sr.expectSpoken('dialog, Preferences', {'{'} since: 'opened' {'}'});
-await sr.expectSpoken(/error/iu, {'{'} not: true {'}'});
-await sr.expectCursorOn({'{'} role: 'textbox', name: 'Nickname' {'}'});
-await sr.expectSpokenInOrder(['dialog, Preferences', 'textbox, Nickname'], {'{'} since: 'opened' {'}'});</code></pre>
+   <section>
+      <h2 id="methods">Move, type, and read</h2>
       <p>
-         <code>expectSpoken</code> takes text, matched without regard to case, or a
-         <code>RegExp</code>. <code>since</code> searches only the announcements after that
-         checkpoint, and <code>not</code> passes when nothing matches. On failure it throws a
-         <code>ScreenReaderAssertionError</code> whose message says what was expected, how many
-         announcements were searched, and what the screen reader said:
+         The methods match the <a href="/guides/screen-reader"><code>a1 sr</code>
+         commands</a>. A method that moves the cursor or sends input returns the
+         announcement.
       </p>
-      <pre data-label="OUTPUT"><code>ScreenReaderAssertionError: "button, Pay now" was not announced in the transcript (3 phrases checked).
-The reader said:
-  "document"
-  "heading, Sign up, level 1"
-  "button, Create account"</code></pre>
+      <dl class="defs defs--wide">
+         <dt><code>next(kind?)</code>, <code>previous(kind?)</code></dt>
+         <dd>Move one element, or jump by kind: <code>'heading'</code>, <code>'link'</code>, <code>'button'</code>, and the rest. Options: <code>level</code>, <code>times</code>.</dd>
+         <dt><code>goTo(&#123; role, name &#125;)</code>, <code>find(text)</code></dt>
+         <dd>Move forward to a matching element. Both throw when nothing matches.</dd>
+         <dt><code>top()</code>, <code>bottom()</code></dt>
+         <dd>Move to the first or last element.</dd>
+         <dt><code>activate()</code>, <code>press(...chords)</code>, <code>type(text)</code>, <code>escape()</code></dt>
+         <dd>Use a control. <code>press('Tab', 'Enter')</code> sends two chords in order.</dd>
+         <dt><code>read()</code></dt>
+         <dd>The element under the cursor: <code>role</code>, <code>name</code>, <code>value</code>, <code>states</code>, <code>level</code>, <code>phrase</code>.</dd>
+         <dt><code>elements(kind)</code>, <code>readAll()</code>, <code>walk()</code></dt>
+         <dd>Every element of one kind, everything from the cursor on, and everything from the top.</dd>
+         <dt><code>checkpoint(label)</code>, <code>transcript(&#123; since &#125;)</code></dt>
+         <dd>Mark a point, and read what was announced since.</dd>
+         <dt><code>wait(&#123; for &#125;)</code></dt>
+         <dd>Wait for an announcement that has not happened yet. Throws after 5000 ms.</dd>
+         <dt><code>open(url)</code></dt>
+         <dd>Load another page in the same reader.</dd>
+      </dl>
       <p>
-         The error has <code>exitCode: 4</code>, the CLI's assertion code, plus
-         <code>expected</code> and <code>phrases</code>. A script can set
-         <code>process.exitCode</code> from it.
-      </p>
-      <p>
-         <code>expectCursorOn({'{'} role, name {'}'})</code> throws when the element under the cursor does not have
-         the role or the name given. The message says which element the cursor is on, the same
-         text the <code>toHaveCursorOn</code> matcher prints. <code>expectSpokenInOrder([a, b, c], {'{'} since {'}'})</code>
-         throws when a match is not found after the previous one, with the same text the
-         <code>toHaveSpokenInOrder</code> matcher prints. Both throw
-         <code>ScreenReaderAssertionError</code>.
-      </p>
-      <p>
-         Each check waits. It reads the reader again every 100 ms until it passes or
-         <code>timeoutMs</code> runs out, 5000 ms by default, so an announcement that lands a
-         moment after the key that caused it still counts. Pass <code>timeoutMs: 0</code> to
-         check once. A check with <code>not</code> never waits.
+         <code>title()</code>, <code>table(move)</code>, <code>interact()</code>,
+         <code>stopInteracting()</code>, <code>perform(command)</code>,
+         <code>screenshot(path)</code>, and <code>focus()</code> complete the set. See the
+         <a href="/reference/api#test">API reference</a>.
       </p>
    </section>
 
-   <section class="panel" id="example">
-      <h2>Example test file</h2>
+   <section>
+      <h2 id="assert">Assertions</h2>
+      <pre data-label="TypeScript"><code>{assertSample}</code></pre>
+      <dl class="defs defs--wide">
+         <dt><code>expectSpoken(match, options?)</code></dt>
+         <dd>An announcement contains the text, ignoring case, or matches the <code>RegExp</code>. <code>since</code> limits it to what came after a checkpoint. <code>not</code> passes when nothing matches.</dd>
+         <dt><code>expectCursorOn(&#123; role, name &#125;)</code></dt>
+         <dd>The element under the cursor has that role, that name, or both.</dd>
+         <dt><code>expectSpokenInOrder([a, b, c])</code></dt>
+         <dd>Each match comes after the one before it. Other announcements may come between.</dd>
+      </dl>
       <p>
-         The page is a combobox labeled Select country with three options, Canada first. Arrow
-         Down from the collapsed combobox expands it and moves to the first option. The dev
-         server runs on port 3000.
+         An assertion waits. It checks again every 100 ms until it passes or 5000 ms have
+         gone by, so an announcement that arrives a moment after the key press still counts.
+         Change the limit with <code>timeoutMs</code>. An assertion with <code>not</code>
+         checks once.
       </p>
-      <pre><code>import {'{'} queuedScreenReader {'}'} from 'a11ied/test';
-
-it('announces active option and expanded state', async () => {'{'}
-   await using sr = await queuedScreenReader({'{'}
-      url: 'http://localhost:3000/components/combobox',
-   {'}'});
-
-   sr.press('Tab');
-   sr.expectSpoken('combobox, Select country, collapsed');
-
-   sr.press('ArrowDown');
-   sr.expectSpoken('combobox, Select country, expanded');
-   sr.expectSpoken('option, Canada, 1 of 3');
-{'}'});</code></pre>
       <p>
-         Under Vitest the same test drops <code>queuedScreenReader</code> and
-         <code>await using</code> for the <code>sr</code> fixture. See
-         <a href="/guides/vitest">Test with Vitest</a>.
+         A failure throws <code>ScreenReaderAssertionError</code>. Its message says what was
+         expected and what the screen reader said. It also has <code>expected</code>,
+         <code>phrases</code>, and <code>exitCode: 4</code>.
       </p>
    </section>
 
-   <section class="field-note" id="real">
-      <h2>VoiceOver and NVDA</h2>
+   <section>
+      <h2 id="real">VoiceOver and NVDA</h2>
       <p>
-         <code>screenReader({'{'} sr: 'voiceover', url {'}'})</code> opens the URL in the system browser,
-         waits for that window to come to the front, starts VoiceOver, and refocuses the window,
-         the same steps <code>a1 sr start</code> takes. VoiceOver needs the one-time
-         <code>a1 setup</code> on the machine, takes over the screen while the test runs, and
-         reads whatever is in front, so run these tests one at a time and never in a worker pool.
-         Prefer <code>mode: 'broker'</code> there: a session that outlives a crashed test can
-         be stopped with <code>a1 sr stop</code>.
+         <code>screenReader(&#123; sr: 'voiceover', url &#125;)</code> opens the URL in a browser
+         and starts VoiceOver, as <code>a1 sr start</code> does. The machine needs
+         <code>a1 setup</code> once.
+      </p>
+      <p>
+         A real screen reader takes over the screen and reads whatever is in front. Run
+         these tests one at a time, never in parallel workers. Use
+         <code>mode: 'broker'</code>, so that a session left behind by a crashed test can be
+         stopped with <code>a1 sr stop</code>.
       </p>
    </section>
 </DocShell>

@@ -1,0 +1,24 @@
+! No session was active, so one was started.
+# Transcript: virtual on PRACTICE_URL
+
+Started 2026-11-24T14:17:34.346Z. Exported 2026-11-24T14:17:35.015Z. 96 phrases.
+
+1. [14:17:34.998] banner
+2. [14:17:34.998] Northwind
+3. [14:17:34.998] navigation, Workspace settings (Workspace settings)
+...
+14. [14:17:34.998] heading, Members, level 3 (Members)
+15. [14:17:34.998] searchbox, placeholder Filter members
+16. [14:17:34.998] button, All (All)
+17. [14:17:34.998] button, Active (Active)
+18. [14:17:34.998] button, Pending (Pending)
+19. [14:17:34.998] button, Invite member (Invite member)
+...
+44. [14:17:34.998] cell, 2 hours ago (2 hours ago)
+45. [14:17:34.998] cell
+46. [14:17:34.998] button
+47. [14:17:34.998] end of cell
+...
+96. [14:17:34.998] end of document
+
+Stopped at the end of the document.

@@ -1,199 +1,134 @@
 ---
 import DocShell from '../layouts/doc-shell.astro';
 import { docsLinks } from '../lib/nav';
+import { getPracticeURL, withPracticeURL } from '../lib/practice';
+import checkSample from '../samples/check-broken-short.txt?raw';
+import mcpConfig from '../samples/mcp-config.json.txt?raw';
+import walkSample from '../samples/sr-walk-broken.txt?raw';
+import testSample from '../samples/vitest-home.ts.txt?raw';
 
+const practiceURL = getPracticeURL(Astro);
 const toc = [
-   { id: 'components', label: 'Component testing' },
-   { id: 'audits', label: 'Terminal & CI audits' },
-   { id: 'agents', label: 'AI coding agents' },
-   { id: 'targets', label: 'Execution targets' },
-   { id: 'next', label: 'Where to start' },
+   { id: 'install', label: 'Install' },
+   { id: 'check', label: 'Scan a page' },
+   { id: 'listen', label: 'Read it with a screen reader' },
+   { id: 'test', label: 'Keep it fixed with a test' },
+   { id: 'agent', label: 'Give the tools to an AI agent' },
+   { id: 'results', label: 'What the results mean' },
+   { id: 'next', label: 'Where to go next' },
 ];
 ---
 
 <DocShell
-   title="Automated screen reader and WCAG testing"
-   summary="<p><strong>a11ied</strong> is a CLI, testing library, and MCP server for automated screen reader and WCAG testing.</p><p>Let AI coding agents verify their own fixes, catch <abbr title='Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility'><a href='https://www.w3.org/WAI/standards-guidelines/wcag/' target='_blank' rel='noreferrer'>WCAG</a></abbr> violations in CI, and assert what your UI announces to a <abbr title='Assistive technology software that speaks on-screen text and UI controls to blind and low-vision users'>screen reader</abbr> in your Vitest suite.</p>"
+   title="Test what a screen reader says"
+   summary="<p>a11ied scans a web page for accessibility problems and shows you what a screen reader announces on it. Use it from the terminal, in your test suite, or through an AI coding agent.</p>"
    links={docsLinks}
    toc={toc}
+   variant="home"
 >
-   <section class="panel" id="components">
-      <div class="panel-head">
-         <p class="panel-kicker">Interactive testing</p>
-         <h2>Assert what users hear, not just DOM attributes</h2>
-      </div>
+   <section>
+      <h2 id="install">Install</h2>
+      <pre><code>npm install --global a11ied</code></pre>
       <p>
-         Static linters catch missing <code>alt</code> attributes, but they can't tell you if a custom
-         combobox traps focus, announces its collapsed state, or reads the active option when a user
-         presses ArrowDown. With <code>a11ied/vitest</code>, you can drive a virtual screen reader
-         directly inside your test suite—with zero browser setup or operating system permissions.
-      </p>
-      <pre><code>import {'{'} describe {'}'} from 'vitest';
-import {'{'} test {'}'} from 'a11ied/vitest';
-
-const combobox = test.extend({'{'}
-   srOptions: {'{'} url: 'http://localhost:3000/components/combobox' {'}'},
-{'}'});
-
-describe('combobox component', () => {'{'}
-   combobox('announces active option and expanded state', ({'{'} sr {'}'}) => {'{'}
-      sr.press('Tab')
-         .expect.spoken('combobox, Select country, collapsed')
-         .press('ArrowDown')
-         .expect.spoken('combobox, Select country, expanded')
-         .and.spoken('option, Canada, 1 of 3');
-   {'}'});
-{'}'});</code></pre>
-      <p>
-         Chained commands queue and execute in sequence without littering tests with <code>await</code> boilerplate.
-         The in-process virtual screen reader computes the full <abbr title="Accessible Rich Internet Applications: W3C specification of attributes that define accessible UI roles, states, and properties"><a href="https://www.w3.org/TR/wai-aria/" target="_blank" rel="noreferrer">ARIA</a></abbr> accessibility tree
-         and speech queue in milliseconds, asserting against <strong><abbr title="WCAG 4.1.2: Name, Role, Value requires that UI components have accessible names, roles, and states"><a href="https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html" target="_blank" rel="noreferrer">WCAG 4.1.2 (Name, Role, Value)</a></abbr></strong> and <strong><abbr title="WCAG 2.4.3: Focus Order requires that interactive components receive focus in an order that preserves meaning and operability"><a href="https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html" target="_blank" rel="noreferrer">2.4.3 (Focus Order)</a></abbr></strong> as fast as standard unit tests.
-      </p>
-      <p>
-         Building a custom widget from scratch? Query official keyboard shortcuts and expected <abbr title="Accessible Rich Internet Applications: W3C specification of attributes that define accessible UI roles, states, and properties"><a href="https://www.w3.org/TR/wai-aria/" target="_blank" rel="noreferrer">ARIA</a></abbr> attributes
-         from the <abbr title="W3C ARIA Authoring Practices Guide: official design patterns and keyboard interaction standards for custom web widgets"><a href="https://www.w3.org/WAI/ARIA/apg/" target="_blank" rel="noreferrer">W3C ARIA Authoring Practices Guide (APG)</a></abbr> directly from your terminal:
-      </p>
-      <pre><code>a1 pattern combobox</code></pre>
-   </section>
-
-   <section class="panel" id="audits">
-      <div class="panel-head">
-         <p class="panel-kicker">Auditing & CI</p>
-         <h2>Full-page audits with actionable remediation</h2>
-      </div>
-      <p>
-         Audit local dev servers or staging URLs directly from your terminal or GitHub Actions with
-         <code>a1 check</code>. Powered by <abbr title="Open-source automated accessibility testing engine for HTML and DOM structure from Deque Systems"><a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noreferrer">axe-core</a></abbr>,
-         every failure is mapped directly to its official <abbr title="Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility"><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG</a></abbr> success
-         criterion, isolated to the offending element, and paired with clear instructions to fix it.
-      </p>
-      <pre><code>a1 check http://localhost:3000/checkout --level AA</code></pre>
-      <pre data-label="OUTPUT"><code>&#10007; 2 problems to fix.
-
-1.1.1  Non-text Content  [A]
-  button[type="button"] > img
-  Fix: Provide an alt attribute or aria-label for the icon button.
-
-3.3.1  Error Identification  [A]
-  input#card-number
-  Fix: Reference the error message element using aria-describedby.</code></pre>
-      <p>
-         Need deeper context on a criterion? Query official <abbr title="Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility"><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG</a></abbr> requirements,
-         failure scenarios, and test methods without leaving your terminal:
-      </p>
-      <pre><code>a1 wcag 3.3.1</code></pre>
-      <p>
-         <code>a1 check</code> also lists the criteria that apply to the page and still need a check by hand
-         (see <a href="/relevant-criteria">relevant criteria</a> and <a href="/test-methods">test methods</a>).
+         The command is <code>a1</code>. The examples below run against a
+         <a href="/demo/team">practice page</a> with ten accessibility problems in it, so you
+         can copy and run them unchanged.
       </p>
    </section>
 
-   <section class="field-note" id="agents">
-      <div class="panel-head">
-         <p class="panel-kicker">Agentic workflows</p>
-         <h2>A real feedback loop for AI coding agents</h2>
-      </div>
+   <section>
+      <h2 id="check">Scan a page</h2>
       <p>
-         AI coding assistants generate UI components rapidly, but they have no way to verify whether
-         assistive technology actually works with what they write. Without runtime feedback, agents guess
-         at <abbr title="Accessible Rich Internet Applications: W3C specification of attributes that define accessible UI roles, states, and properties"><a href="https://www.w3.org/TR/wai-aria/" target="_blank" rel="noreferrer">ARIA</a></abbr> attributes
-         and frequently introduce accessibility regressions in dynamic interfaces.
+         <code>a1 check</code> runs <a href="https://github.com/dequelabs/axe-core">axe-core</a>,
+         the open-source rule engine behind most accessibility scanners, in a real browser.
       </p>
+      <pre><code>a1 check {practiceURL}</code></pre>
+      <pre data-label="OUTPUT"><code>{withPracticeURL(checkSample, practiceURL)}</code></pre>
       <p>
-         <code>a11ied</code> provides a local <abbr title="Model Context Protocol: open standard for connecting AI coding assistants to external tools"><a href="https://modelcontextprotocol.io/" target="_blank" rel="noreferrer">Model Context Protocol (MCP)</a></abbr> server
-         that gives Claude Code, Cursor, Windsurf, and other agents native tools to inspect accessibility trees,
-         drive <abbr title="Apple's built-in screen reader for macOS"><a href="https://support.apple.com/guide/voiceover/welcome/mac" target="_blank" rel="noreferrer">VoiceOver</a></abbr> or <abbr title="NonVisual Desktop Access: the open-source screen reader for Windows"><a href="https://www.nvaccess.org/" target="_blank" rel="noreferrer">NVDA</a></abbr>,
-         and verify their own fixes against <abbr title="Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility"><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG</a></abbr> criteria.
-      </p>
-      <pre data-label="CONFIG"><code>{`{\n  "mcpServers": {\n    "a11ied": {\n      "command": "npx",\n      "args": ["-y", "a11ied", "mcp"]\n    }\n  }\n}`}</code></pre>
-      <p>
-         Give your coding agent tasks that require verifying real interaction, not just inspecting static HTML:
-      </p>
-      <pre data-label="AI AGENT PROMPT"><code>Review the checkout dialog on http://localhost:3000/checkout.
-Start a screen reader session, open the modal, and verify:
-1. Focus moves to the first field inside the dialog.
-2. VoiceOver announces the dialog title and modal role upon opening.
-3. Pressing Escape closes the dialog and restores focus to the trigger.</code></pre>
-      <p>
-         The agent runs keyboard navigation commands, inspects the spoken phrase log, diagnoses failures against
-         <abbr title="Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility"><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG</a></abbr> criteria,
-         and iterates on the code until the test passes.
+         Each problem names the <abbr title="Web Content Accessibility Guidelines">WCAG</abbr>
+         criterion it fails, the element, and a command that explains the fix. Below the
+         problems is the part most scanners leave out: the criteria this page triggers that
+         no scanner can decide.
       </p>
    </section>
 
-   <section class="split panel" id="targets">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Architecture</p>
-            <h2>Simulation speed vs. real OS fidelity</h2>
-         </div>
-         <p>
-            <code>a11ied</code> provides two distinct execution targets so you can balance instantaneous testing
-            speed in CI with full real-world operating system fidelity:
-         </p>
-         <div class="route-list">
-            <div class="route-row">
-               <strong>Virtual screen reader</strong>
-               <span>
-                  A lightweight, headless JavaScript engine that computes the <abbr title="Accessible Rich Internet Applications: W3C specification of attributes that define accessible UI roles, states, and properties"><a href="https://www.w3.org/TR/wai-aria/" target="_blank" rel="noreferrer">ARIA</a></abbr> accessibility
-                  tree and speech queue in memory. Runs in milliseconds in Node.js or Linux CI containers with zero
-                  browser windows, system permissions, or audio hardware required. Ideal for component tests,
-                  unit suites, and fast pull request checks.
-               </span>
-            </div>
-            <div class="route-row">
-               <strong>VoiceOver & NVDA</strong>
-               <span>
-                  Real operating system assistive technologies automated via <abbr title="Open-source library for driving VoiceOver and NVDA with code"><a href="https://guidepup.dev/" target="_blank" rel="noreferrer">Guidepup</a></abbr>—using
-                  AppleScript on macOS for <abbr title="Apple's built-in screen reader for macOS"><a href="https://support.apple.com/guide/voiceover/welcome/mac" target="_blank" rel="noreferrer">VoiceOver</a></abbr> and native accessibility APIs
-                  on Windows for <abbr title="NonVisual Desktop Access: the open-source screen reader for Windows"><a href="https://www.nvaccess.org/" target="_blank" rel="noreferrer">NVDA</a></abbr>.
-                  Ideal for end-to-end integration tests, validating platform-specific speech synthesis, and catching OS quirks before release. See the
-                  <a href="/screen-readers">screen readers guide</a>.
-               </span>
-            </div>
-         </div>
-      </div>
-      <div class="split-aside">
-         <div class="tag">Environment check</div>
-         <p class="aside-note">
-            Run <code>a1 doctor</code> in your terminal to check which browsers, permissions, and screen readers
-            are configured and ready on your machine.
-         </p>
-      </div>
+   <section>
+      <h2 id="listen">Read it with a screen reader</h2>
+      <p>
+         <code>a1 sr</code> drives a screen reader and prints what it announces.
+         <code>sr walk</code> reads a whole page.
+      </p>
+      <pre><code>a1 sr walk {practiceURL} --sr virtual</code></pre>
+      <pre data-label="OUTPUT"><code>{withPracticeURL(walkSample, practiceURL)}</code></pre>
+      <p>
+         Line 46 is a button that says only "button". Line 15 is a search field with no label.
+         A scanner reported the first and passed the second.
+      </p>
+      <p>
+         <code>sr walk</code> leaves the screen reader running for more commands. Stop it with
+         <code>a1 sr stop</code>.
+      </p>
+      <p>
+         <code>--sr virtual</code> is a simulated screen reader that needs no setup and runs
+         anywhere. <code>--sr voiceover</code> on macOS and <code>--sr nvda</code> on Windows
+         drive the real ones with the same commands. See
+         <a href="/screen-readers">screen readers</a>.
+      </p>
    </section>
 
-   <section class="feature-block" id="next">
-      <h2>Where to start</h2>
-      <div class="feature-grid">
-         <section class="feature-card">
-            <h3>Quickstart</h3>
-            <p>Install the package, check your machine, and run your first virtual screen reader session in under two minutes.</p>
-            <p class="feature-link"><a href="/quickstart">Get started</a></p>
-         </section>
+   <section>
+      <h2 id="test">Keep it fixed with a test</h2>
+      <p>
+         The same screen reader runs inside a test. This one opens a dialog and checks that
+         the dialog announces its name and that focus moves into it.
+      </p>
+      <pre data-label="team.test.ts"><code>{withPracticeURL(testSample, practiceURL)}</code></pre>
+      <p>
+         See <a href="/guides/vitest">test with Vitest</a>, or
+         <a href="/guides/testing">write screen reader tests</a> for Jest, Mocha, and
+         Playwright Test.
+      </p>
+   </section>
 
-         <section class="feature-card">
-            <h3>Component testing</h3>
-            <p>Add screen reader assertions to your Vitest suite with the <code>a11ied/vitest</code> fixture, or use <code>a11ied/test</code> with Jest.</p>
-            <p class="feature-link"><a href="/guides/vitest">Vitest guide</a></p>
-         </section>
+   <section>
+      <h2 id="agent">Give the tools to an AI agent</h2>
+      <p>
+         A coding agent can write a dialog but cannot hear it. a11ied includes an
+         <abbr title="Model Context Protocol">MCP</abbr> server that gives the agent every
+         command above as a tool, so it can check its own work.
+      </p>
+      <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
+      <p>
+         See <a href="/guides/agents">use with an AI agent</a>. To have agents run a full
+         WCAG audit and write the report, see <a href="/guides/audit">run an audit</a>.
+      </p>
+   </section>
 
-         <section class="feature-card">
-            <h3>AI agent setup</h3>
-            <p>Connect the MCP server to Cursor, Claude Code, or Windsurf to give your coding assistant accessibility testing tools.</p>
-            <p class="feature-link"><a href="/guides/agents">Agent guide</a></p>
-         </section>
+   <section>
+      <h2 id="results">What the results mean</h2>
+      <p>a11ied keeps three kinds of evidence apart, and so should your reports.</p>
+      <dl class="defs">
+         <dt>A scan</dt>
+         <dd>Finds failures. A clean scan does not mean a criterion passes, because no criterion can be decided by a scanner alone.</dd>
+         <dt>A transcript</dt>
+         <dd>Shows what a screen reader announced. A transcript from the simulated screen reader is not evidence of what VoiceOver or NVDA does.</dd>
+         <dt>A judgment</dt>
+         <dd>Decides the rest: whether alt text describes the image, whether focus order makes sense. A person or an agent makes it, and <code>a1 audit</code> records it.</dd>
+      </dl>
+      <p>See <a href="/test-methods">test methods</a> for the numbers behind this.</p>
+   </section>
 
-         <section class="feature-card">
-            <h3>Interactive demo</h3>
-            <p>Walk through auditing and fixing real accessibility violations on a sample team settings app.</p>
-            <p class="feature-link"><a href="/guides/demo">Practice on demo</a></p>
-         </section>
-
-         <section class="feature-card">
-            <h3>Screen reader support</h3>
-            <p>Browse live speech logs from VoiceOver, TalkBack, and W3C ARIA-AT reports across browsers and OS versions.</p>
-            <p class="feature-link"><a href="/support">View support data</a></p>
-         </section>
-      </div>
+   <section>
+      <h2 id="next">Where to go next</h2>
+      <dl class="defs">
+         <dt><a href="/quickstart">Quickstart</a></dt>
+         <dd>Install, scan a page, and read it with a screen reader. Five minutes.</dd>
+         <dt><a href="/guides/demo">Practice on a broken page</a></dt>
+         <dd>Find all ten problems on the practice page. A scan reports three of them.</dd>
+         <dt><a href="/guides/screen-reader">Test with a screen reader</a></dt>
+         <dd>Every <code>a1 sr</code> command, with VoiceOver, NVDA, or the simulated screen reader.</dd>
+         <dt><a href="/reference/cli">CLI reference</a></dt>
+         <dd>Every command and option.</dd>
+      </dl>
    </section>
 </DocShell>

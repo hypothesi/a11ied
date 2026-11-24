@@ -1,0 +1,8 @@
+button-name  Buttons must have discernible text
+
+Criteria (1)
+  4.1.2  Name, Role, Value  [A]
+
+Fix
+  Ensure buttons have discernible text
+  https://dequeuniversity.com/rules/axe/4.13/button-name?application=axeAPI

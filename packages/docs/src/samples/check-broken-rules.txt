@@ -1,0 +1,22 @@
+check  PRACTICE_URL
+
+✗ 10 problems to fix.
+
+Problems
+  1.1.1  Non-text Content  [A]
+      Images must have alternative text  critical
+      3 failing elements:
+        ...
+  4.1.2  Name, Role, Value  [A]
+      Buttons must have discernible text  critical
+      3 failing elements:
+        ...
+  1.4.3  Contrast (Minimum)  [AA]
+      Elements must meet minimum color contrast ratio thresholds  serious
+      4 failing elements:
+        ...
+...
+
+The page
+  Titled Team | Northwind, opening with Team.
+  It has 4 landmarks, 2 headings (level 1, 3), 6 links, 7 buttons, 1 form control.

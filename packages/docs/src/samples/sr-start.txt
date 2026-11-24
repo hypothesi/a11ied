@@ -1,0 +1,9 @@
+Session ready
+
+  Target:        virtual
+  Engine:        browser (a headless Chromium page; the page scripts run)
+  URL:           PRACTICE_URL
+  Recording:     none
+  Idle timeout:  30 min
+
+Every sr command now uses this session. Stop it with: a1 sr stop

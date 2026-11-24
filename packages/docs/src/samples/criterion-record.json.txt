@@ -1,0 +1,21 @@
+"result": {
+  "lookupKey": "1.4.3",
+  "criterion": {
+    "id": "1.4.3",
+    "slug": "contrast-minimum",
+    "title": "Contrast (Minimum)",
+    "level": "AA",
+    "wcagVersion": "2.2",
+    "understandingUrl": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum",
+    "versions": ["2.0", "2.1", "2.2"],
+    "tags": ["buttons", "color", "content", "contrast", "errors", "focus", "forms", "images-of-text", "messaging", "navigation", "text"],
+    "principle": { "id": "perceivable", "number": "1", "title": "Perceivable" },
+    "guideline": { "id": "distinguishable", "number": "1.4", "title": "Distinguishable" },
+    ...
+  },
+  "testMethod": { "criterionId": "1.4.3", "method": "hybrid", "axeRuleIds": ["color-contrast"], ... },
+  "strategy": { ... },
+  "mobileGuidance": { ... },
+  "understandingExcerpt": "...",
+  ...
+}

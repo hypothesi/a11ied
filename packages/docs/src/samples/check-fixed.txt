@@ -1,0 +1,9 @@
+check  PRACTICE_URLfixed/
+
+✓ Nothing failed the automated checks.
+
+Check by hand
+  68 criteria this page triggers need a person:
+    • 1.1.1  Non-text Content
+    • 1.2.1  Audio-only and Video-only (Prerecorded)
+    ...

@@ -1,0 +1,5 @@
+sr expect
+  Expected:  "dialog"
+  Checked:   2 phrases since "opened"
+  Matched:   dialog, Invite member
+  Result:    pass

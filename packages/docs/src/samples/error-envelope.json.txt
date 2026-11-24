@@ -1,0 +1,13 @@
+{
+  "ok": false,
+  "command": { "family": "wcag", "subcommand": "show", "version": "0.1.0", "wcagVersion": "2.2" },
+  "warnings": [],
+  "errors": [
+    {
+      "code": "criterion-not-found",
+      "message": "Criterion lookup failed for \"9.9.9\".",
+      "details": { "lookupKey": "9.9.9" }
+    }
+  ],
+  "meta": { "schemaVersion": "1", "startedAt": "2026-11-24T13:04:57.167Z", "completedAt": "2026-11-24T13:04:57.199Z", "durationMs": 32 }
+}

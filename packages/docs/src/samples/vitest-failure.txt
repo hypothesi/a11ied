@@ -1,0 +1,11 @@
+ FAIL  invite.test.ts > invite dialog > opens with its name and moves focus to the first field
+ScreenReaderAssertionError: "dialog, Invite member" was not announced in the transcript since "opened" (0 phrases checked).
+The reader said nothing.
+Waited 5000 ms.
+ ❯ invite.test.ts:13:18
+     11|          .checkpoint('opened')
+     12|          .activate()
+     13|          .expect.spoken('dialog, Invite member', { since: 'opened' })
+       |                  ^
+     14|          .and.cursorOn({ role: 'textbox', name: 'Email address' });
+     15|    });

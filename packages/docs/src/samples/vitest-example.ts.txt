@@ -1,0 +1,34 @@
+import { describe, expect } from 'vitest';
+import { test } from 'a11ied/vitest';
+
+const team = test.extend({
+   srOptions: { url: 'PRACTICE_URLfixed/' },
+});
+
+describe('invite dialog', () => {
+   team('opens with its name and moves focus to the first field', ({ sr }) => {
+      sr.goTo({ role: 'button', name: 'Invite member' })
+         .checkpoint('opened')
+         .activate()
+         .expect.spoken('dialog, Invite member', { since: 'opened' })
+         .and.cursorOn({ role: 'textbox', name: 'Email address' });
+   });
+
+   team('announces the confirmation', ({ sr }) => {
+      sr.goTo({ role: 'button', name: 'Invite member' });
+      sr.activate();
+      sr.type('sam@northwind.test');
+      sr.checkpoint('sent');
+      sr.goTo({ role: 'button', name: 'Send invitation' });
+      sr.activate();
+      sr.expectSpoken('Invitation sent', { since: 'sent' });
+   });
+
+   team('reports the element under the cursor', async ({ sr }) => {
+      sr.next('heading');
+
+      const item = await sr.read();
+
+      expect(item).toMatchObject({ role: 'heading', name: 'Team', level: 1 });
+   });
+});

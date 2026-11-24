@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "command": { "family": "axe", "subcommand": "axe", "version": "0.1.0", "wcagVersion": "2.2" },
+  "target": { "kind": "url", "value": "PRACTICE_URL", "resolvedUrl": "PRACTICE_URL" },
+  "result": {
+    "violations": [ ... ],
+    "passes": [ ... ],
+    "incomplete": [ ... ],
+    "inapplicable": [ ... ],
+    "verdict": { "passed": false, "failOn": "minor", "totalViolationNodes": 10, "baselinedCount": 0, ... },
+    ...
+  },
+  "warnings": [],
+  "errors": [],
+  "meta": { "schemaVersion": "1", "startedAt": "2026-11-24T13:05:10.837Z", "completedAt": "2026-11-24T13:05:11.795Z", "durationMs": 958 }
+}

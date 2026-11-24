@@ -1,0 +1,14 @@
+import { it } from 'vitest';
+import { queuedScreenReader } from 'a11ied/test';
+
+it('opens the invite dialog with its name', async () => {
+   await using sr = await queuedScreenReader({
+      url: 'PRACTICE_URLfixed/',
+   });
+
+   sr.goTo({ role: 'button', name: 'Invite member' });
+   sr.checkpoint('opened');
+   sr.activate();
+   sr.expectSpoken('dialog, Invite member', { since: 'opened' });
+   sr.expectCursorOn({ role: 'textbox', name: 'Email address' });
+});

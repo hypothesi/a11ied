@@ -1,156 +1,107 @@
 ---
 import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
+import record from '../../samples/criterion-record.json.txt?raw';
 
 const toc = [
-   { id: 'sources', label: 'Upstream sources' },
-   { id: 'artifacts', label: 'Generated artifacts' },
-   { id: 'criterion', label: 'A criterion record' },
-   { id: 'refresh', label: 'Refreshing the data' },
+   { id: 'sources', label: 'Where the data comes from' },
+   { id: 'record', label: 'A criterion record' },
+   { id: 'files', label: 'The data files' },
+   { id: 'license', label: 'W3C text and its license' },
+   { id: 'refresh', label: 'Refresh the data' },
 ];
 ---
 
 <DocShell
    title="WCAG data"
-   summary="a11ied ships WCAG 2.1 and 2.2 as generated artifacts inside the package. Criterion lookup, search, coverage, and applicability all read those files, so none of them makes a network request at runtime."
+   summary="<p>a11ied ships WCAG 2.1 and 2.2 inside the package: every criterion, its techniques, the W3C's guidance, and how to test it. Lookups read those files, so they work offline and return the same answer every time.</p>"
    links={docsLinks}
    toc={toc}
 >
-   <section class="ledger" id="sources">
-      <div class="panel-head">
-         <p class="panel-kicker">Upstream</p>
-         <h2>Upstream sources</h2>
-      </div>
-      <p>
-         The Web Content Accessibility Guidelines (WCAG) are the standard most accessibility
-         requirements come from. WCAG states its rules as success criteria: numbered, testable
-         requirements such as 1.4.3, each assigned a conformance level of A, AA, or AAA that says
-         how strict the requirement is. a11ied pins four upstream sources for WCAG 2.1 and 2.2
-         and merges them into one record per criterion.
-      </p>
-      <div class="route-list">
-         <div class="route-row">
-            <strong>W3C WCAG 2.1 and 2.2</strong>
-            <span>Criterion IDs, titles, levels, normative text, techniques, and failures.</span>
-         </div>
-         <div class="route-row">
-            <strong>W3C ACT rule mapping</strong>
-            <span>Machine-readable rule to criterion coverage from the Accessibility Conformance Testing (ACT) rules.</span>
-         </div>
-         <div class="route-row">
-            <strong>W3C Quickref tags</strong>
-            <span>Topic tags per criterion. Applicability matches page signals against these.</span>
-         </div>
-         <div class="route-row">
-            <strong>axe-core</strong>
-            <span>Rule IDs, WCAG tags, and ACT rule IDs read from the installed package. axe-core (axe) is an open-source rules engine, not something this project built. It runs inside the page and checks it against a set of automated accessibility rules.</span>
-         </div>
-      </div>
-      <p>
-         Coverage says how much of a criterion a11ied's own checks can resolve without a person,
-         from <code>automated</code> to <code>manual</code>. See <a href="/test-methods">coverage</a>
-         for the four states. Each record lists the sources that produced it under
-         <code>sourceAttribution</code>, so you can tell an ACT mapping from a heuristic.
-      </p>
+   <section>
+      <h2 id="sources">Where the data comes from</h2>
+      <p>a11ied pins these sources and merges them into one record per criterion.</p>
+      <dl class="defs">
+         <dt>W3C WCAG 2.1 and 2.2</dt>
+         <dd>Criterion numbers, titles, levels, the normative text, techniques, and failures.</dd>
+         <dt>W3C Understanding documents</dt>
+         <dd>The W3C's explanation of each criterion.</dd>
+         <dt>W3C ACT rules</dt>
+         <dd>Which test rule covers which criterion.</dd>
+         <dt>W3C quick reference tags</dt>
+         <dd>Topic tags per criterion, which <a href="/relevant-criteria">relevance</a> matches against.</dd>
+         <dt>axe-core</dt>
+         <dd>Rule IDs and the criteria each rule is tagged with, read from the installed package.</dd>
+         <dt>W3C ARIA Authoring Practices Guide</dt>
+         <dd>The patterns and examples <code>a1 pattern</code> prints.</dd>
+         <dt>WCAG2Mobile</dt>
+         <dd>The W3C task force's guidance on applying WCAG to mobile apps. It is an Editor's Draft, not a W3C Recommendation.</dd>
+      </dl>
    </section>
 
-   <section class="panel" id="artifacts">
-      <h2>Generated artifacts</h2>
-      <p>
-         The sync step fetches the raw upstream payloads into an ignored directory, then
-         generates normalized artifacts per version. The generated set is committed and ships
-         in the package, so a build never reaches the network.
-      </p>
-      <div class="route-list">
-         <div class="route-row"><code>criteria</code><span>Full criterion records with techniques and failures.</span></div>
-         <div class="route-row"><code>criteria-by-level</code><span>Criterion IDs grouped by A, AA, and AAA.</span></div>
-         <div class="route-row"><code>test-methods</code><span>Test method (<code>method</code>) and mapped rule IDs per criterion.</span></div>
-         <div class="route-row"><code>test-method-summary</code><span>Count of automated, hybrid, and manual criteria per level, source counts, and representative IDs.</span></div>
-         <div class="route-row"><code>strategy</code><span>Preferred test method, procedure IDs, and whether the page must be open in a browser or screen reader (<code>requiresRealTarget</code>).</span></div>
-         <div class="route-row"><code>slug-index</code><span>Slug to criterion ID. Every lookup by slug reads it.</span></div>
-         <div class="route-row"><div class="route-terms"><code>technique-index</code>, <code>failure-index</code></div><span>Technique or failure ID to its title, W3C page URL, and the criteria that list it. <code>a1 wcag G18</code> reads them.</span></div>
-         <div class="route-row"><code>axe-rules</code><span>axe rule ID to its tags, ACT rule IDs, and the criteria it maps to. <code>a1 wcag rule</code> reads it.</span></div>
-         <div class="route-row"><code>understanding</code><span>Each criterion's Understanding document, converted to Markdown, with its title, URL, and status. <code>a1 wcag understanding</code> reads it.</span></div>
-         <div class="route-row"><code>technique-bodies</code><span>Each technique and failure's page body, converted to Markdown. <code>a1 wcag G18</code> reads it when one was synced.</span></div>
-         <div class="route-row"><code>documents-content</code><span>The converted document bodies, one copy per distinct body, shared by <code>understanding</code> and <code>technique-bodies</code>.</span></div>
-         <div class="route-row"><code>mobile-guidance</code><span>What WCAG2Mobile says about each criterion it covers, with the document's own notes and examples. <code>a1 wcag show</code> reads it. Not version-scoped: one file serves 2.1 and 2.2.</span></div>
-      </div>
-   </section>
-
-   <section class="panel" id="criterion">
-      <div class="panel-head">
-         <p class="panel-kicker">Shape</p>
-         <h2>A criterion record</h2>
-      </div>
+   <section>
+      <h2 id="record">A criterion record</h2>
       <pre><code>a1 wcag show 1.4.3 --json</code></pre>
-      <pre data-label="OUTPUT"><code>"result": &#123;
-  "lookupKey": "1.4.3",
-  "criterion": &#123;
-    "id": "1.4.3",
-    "slug": "contrast-minimum",
-    "title": "Contrast (Minimum)",
-    "level": "AA",
-    "wcagVersion": "2.2",
-    "summary": "The visual presentation of text and images of text has a contrast ratio of at least 4.5:1, except for the following:",
-    "understandingUrl": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum",
-    "versions": ["2.0", "2.1", "2.2"],
-    "tags": ["buttons", "color", "content", "contrast", "errors", "focus", "forms", "images-of-text", "messaging", "navigation", "text"],
-    "principle": &#123; "id": "perceivable", "number": "1", "title": "Perceivable" &#125;,
-    "guideline": &#123; "id": "distinguishable", "number": "1.4", "title": "Distinguishable" &#125;
-  &#125;,
-  "testMethod": &#123; "criterionId": "1.4.3", "method": "automated", "..." : "..." &#125;,
-  "strategy": &#123; "criterionId": "1.4.3", "preferredEvidenceMode": "hybrid", "..." : "..." &#125;
-&#125;</code></pre>
+      <pre data-label="OUTPUT"><code>{record.trimEnd()}</code></pre>
+      <dl class="defs">
+         <dt><code>criterion</code></dt>
+         <dd>The requirement. Beyond what is shown: <code>normativeText</code> as HTML, <code>details</code> for the exceptions, and <code>techniques</code>, <code>advisoryTechniques</code>, and <code>failures</code>, each with an <code>id</code>, <code>title</code>, and <code>url</code>.</dd>
+         <dt><code>versions</code></dt>
+         <dd>The WCAG releases that contain the criterion.</dd>
+         <dt><code>testMethod</code>, <code>strategy</code></dt>
+         <dd>How the criterion has to be tested. See <a href="/test-methods">test methods</a>.</dd>
+         <dt><code>mobileGuidance</code></dt>
+         <dd>What WCAG2Mobile says about the criterion. It covers Levels A and AA. An entry whose <code>state</code> is <code>placeholder</code> has not been written by the task force yet.</dd>
+         <dt><code>understandingExcerpt</code></dt>
+         <dd>The opening of the Understanding document. <code>a1 wcag understanding 1.4.3</code> prints all of it.</dd>
+      </dl>
+   </section>
+
+   <section>
+      <h2 id="files">The data files</h2>
       <p>
-         <code>result.criterion</code> also includes <code>normativeText</code> as HTML, a parsed
-         <code>details</code> list for the exceptions, <code>altIds</code> for older slugs, and
-         the resolved <code>techniques</code>, <code>advisoryTechniques</code>, and
-         <code>failures</code>. Each technique has an <code>id</code>, a <code>title</code>, a
-         <code>technology</code>, and a <code>url</code> to its W3C page.
+         The files are in the <code>@a11ied/wcag-data</code> package, one set per WCAG
+         version. Use the <a href="/reference/api#wcag">API</a> or the CLI to read them. The
+         file layout can change between releases.
       </p>
+      <dl class="defs">
+         <dt><code>criteria</code>, <code>criteria-by-level</code>, <code>slug-index</code></dt>
+         <dd>The criterion records, and indexes by level and by slug.</dd>
+         <dt><code>test-methods</code>, <code>test-method-summary</code>, <code>strategy</code></dt>
+         <dd>The test method of each criterion, the counts per level, and the testing strategy.</dd>
+         <dt><code>technique-index</code>, <code>failure-index</code>, <code>technique-bodies</code></dt>
+         <dd>Techniques and failures: their titles, the criteria that list them, and their text.</dd>
+         <dt><code>axe-rules</code>, <code>act-rules</code></dt>
+         <dd>Each rule and the criteria it maps to.</dd>
+         <dt><code>understanding</code>, <code>documents-content</code></dt>
+         <dd>The Understanding documents, converted to Markdown.</dd>
+         <dt><code>apg-patterns</code>, <code>mobile-guidance</code></dt>
+         <dd>The ARIA patterns and the mobile guidance. One file each, for both versions.</dd>
+      </dl>
+   </section>
+
+   <section>
+      <h2 id="license">W3C text and its license</h2>
       <p>
-         <code>versions</code> says which WCAG releases contain the criterion. See
-         <a href="/test-methods">test methods</a> for what <code>result.testMethod</code> and
-         <code>result.strategy</code> hold.
-      </p>
-      <p>
-         The Understanding document and the technique body are in the data too, converted from
-         HTML to Markdown and stored under <code>understanding.&lt;version&gt;.json</code> and
-         <code>technique-bodies.&lt;version&gt;.json</code>. <code>a1 wcag understanding 1.4.3</code>
-         prints the full document, and <code>a1 wcag show 1.4.3</code> prints its In Brief or
-         Intent opening with a link to the rest.
-      </p>
-      <p>
-         <code>result.mobileGuidance</code> holds what WCAG2Mobile, the Mobile Accessibility
-         Task Force's guidance on applying WCAG 2.2 to mobile applications, says about the
-         criterion: whether it applies as written, which web terms mobile substitutes, and the
-         document's notes and examples. It covers Level A and AA, so a Level AAA criterion has
-         no entry, and a criterion the task force has not written up yet has an entry whose
-         <code>state</code> is <code>placeholder</code> with a link to the open issue.
-         WCAG2Mobile is an Editor's Draft: informative guidance, not a W3C Recommendation.
-      </p>
-      <p>
-         <code>understandingUrl</code> and a technique's <code>url</code> still go to the
-         original W3C page. The W3C Document License permits this conversion to help
-         implementation, and the package ships a <code>NOTICE.md</code> with the required W3C
-         attribution. Every command that prints this material also prints a line that gives the
-         source document's title and URL.
+         The Understanding documents and technique pages are W3C text, converted from HTML to
+         Markdown under the W3C Document License. The package includes a
+         <code>NOTICE.md</code> with the attribution. Every command that prints this text
+         also prints the title and URL of the document it came from.
       </p>
    </section>
 
-   <section class="field-note" id="refresh">
-      <div class="panel-head">
-         <p class="panel-kicker">Maintenance</p>
-         <h2>Refreshing the data</h2>
-      </div>
+   <section>
+      <h2 id="refresh">Refresh the data</h2>
       <p>
-         From the repository root, <code>npm run wcag:sync</code> pulls the upstream payloads and
-         regenerates the artifacts. <code>npm run wcag:validate</code> checks them against the
-         provenance manifests and the regression fixtures.
+         This is for maintainers. Nothing in normal use fetches data. From the repository
+         root:
       </p>
+      <pre><code>npm run wcag:sync
+npm run wcag:validate</code></pre>
       <p>
-         Review the generated diff before committing. Both commands are for maintainers. Nothing in
-         normal use of the CLI, MCP server, or API triggers a sync.
+         <code>wcag:sync</code> downloads the sources and regenerates the files.
+         <code>wcag:validate</code> checks them against the recorded sources. Review the diff
+         before you commit it.
       </p>
    </section>
 </DocShell>

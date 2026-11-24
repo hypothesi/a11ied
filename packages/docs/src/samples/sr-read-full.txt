@@ -1,0 +1,9 @@
+sr read  virtual
+  Phrase:                  heading, Team, level 1
+  Item:                    Team
+  Role:                    heading level 1
+  Name:                    Team
+  Source:                  virtual: role and name from the active node (dom-accessibility-api), states from its attributes
+  Keyboard focus:          unsupported (virtual-model): The virtual adapter does not observe native keyboard focus.
+  Reader cursor identity:  unavailable (virtual-model): This snapshot does not include a model cursor position token.
+  Target identity:         unsupported (virtual-model): The virtual adapter has no native desktop window.

@@ -1,185 +1,112 @@
 ---
 import DocShell from '../layouts/doc-shell.astro';
 import { docsLinks } from '../lib/nav';
+import contrastTesting from '../samples/wcag-143-testing.txt?raw';
+import statusMethod from '../samples/wcag-413-method.json.txt?raw';
+import summary from '../samples/wcag-summary.txt?raw';
 
 const toc = [
-   { id: 'methods', label: 'Automated, hybrid, and manual' },
-   { id: 'numbers', label: 'WCAG 2.2 criteria distribution' },
-   { id: 'strategy', label: 'Testing hybrid criteria' },
-   { id: 'lookup', label: 'Querying criteria & rules from the CLI' },
-   { id: 'claims', label: 'Making credible accessibility claims' },
+   { id: 'methods', label: 'Three test methods' },
+   { id: 'numbers', label: 'The numbers' },
+   { id: 'one', label: 'How to test one criterion' },
+   { id: 'data', label: 'The method as data' },
+   { id: 'claims', label: 'What you can claim' },
 ];
 ---
 
 <DocShell
    title="Test methods"
-   summary="<p>Accessibility compliance is not binary. In the <abbr title='Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility'><a href='https://www.w3.org/WAI/standards-guidelines/wcag/' target='_blank' rel='noreferrer'>Web Content Accessibility Guidelines (WCAG)</a></abbr>, every success criterion has an assigned <strong>test method</strong>: automated, hybrid, or manual.</p><p>Understanding this taxonomy is the difference between blindly assuming a clean automated scan means full compliance, and actually verifying real user experiences.</p>"
+   summary="<p>WCAG has 86 success criteria. A scanner cannot decide a single one of them alone. a11ied labels each criterion with how it has to be tested, so you know what a clean scan leaves undone.</p>"
    links={docsLinks}
    toc={toc}
 >
-   <section class="ledger" id="methods">
-      <div class="panel-head">
-         <p class="panel-kicker">Methodology</p>
-         <h2>Automated, hybrid, and manual test methods</h2>
-      </div>
+   <section>
+      <h2 id="methods">Three test methods</h2>
       <p>
-         WCAG is organized into numbered success criteria, such as <strong>4.1.2 (Name, Role, Value)</strong> or
-         <strong>1.4.3 (Contrast Minimum)</strong>. <code>a11ied</code> classifies every criterion into one of three
-         actionable test methods, derived from the official W3C Accessibility Conformance Testing (ACT) rules
-         and Deque <abbr title="Open-source automated accessibility testing engine for HTML and DOM structure from Deque Systems"><a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noreferrer">axe-core</a></abbr> rule tags:
+         WCAG, the Web Content Accessibility Guidelines, states its requirements as numbered
+         success criteria, such as 1.4.3 Contrast (Minimum). a11ied gives each one a test
+         method.
       </p>
-      <div class="route-list">
-         <div class="route-row">
-            <code>automated</code>
-            <span>
-               <strong>Direct rule evaluation</strong>. Software algorithms can definitively decide pass or fail
-               by inspecting the DOM, styles, and computed values. For example, <strong>1.4.3 (Contrast)</strong>
-               and missing image <code>alt</code> attributes in <strong>1.1.1 (Non-text Content)</strong> have automated checks for some requirements.
-               Passing these checks still requires assessment of the remaining criterion requirements.
-            </span>
-         </div>
-         <div class="route-row">
-            <code>hybrid</code>
-            <span>
-               <strong>Automated execution with human or agent verification</strong>. Static analysis can check
-               syntactic prerequisites, but cannot verify whether interactive behavior is correct. For example,
-               <strong>2.4.3 (Focus Order)</strong> and <strong>4.1.3 (Status Messages)</strong> require driving
-               keyboard navigation or triggering dynamic updates to inspect spoken screen reader announcements.
-            </span>
-         </div>
-         <div class="route-row">
-            <code>manual</code>
-            <span>
-               <strong>Human review required</strong>. Subjective or semantic requirements where no algorithmic
-               heuristic exists. For example, <strong>1.3.3 (Sensory Characteristics)</strong> evaluates whether instructions
-               rely solely on shape, size, or sound, and <strong>2.4.6 (Headings and Labels)</strong> evaluates whether
-               descriptions are clear and helpful.
-            </span>
-         </div>
-      </div>
+      <dl class="defs">
+         <dt><code>automated</code></dt>
+         <dd>A tool decides pass or fail alone. No criterion in WCAG 2.2 has this method.</dd>
+         <dt><code>hybrid</code></dt>
+         <dd>A tool produces evidence and a person judges it. The evidence is a scan result for part of the criterion, or a screen reader transcript. Example: 1.4.3 Contrast. axe measures the text it can, and a person checks text over images and gradients.</dd>
+         <dt><code>manual</code></dt>
+         <dd>A person reads and decides. Example: 1.3.3 Sensory Characteristics asks whether instructions rely on shape or position alone. No tool measures that.</dd>
+      </dl>
+      <p>
+         Reports print these in plain words: "scan and a person" for hybrid, "a person" for
+         manual. The person can be an AI agent that has the criterion and the evidence. What
+         matters is that something judges.
+      </p>
    </section>
 
-   <section class="panel" id="numbers">
-      <div class="panel-head">
-         <p class="panel-kicker">Coverage reality</p>
-         <h2>WCAG 2.2 criteria distribution</h2>
-      </div>
-      <p>
-         Teams often assume automated scanners catch the vast majority of accessibility issues.
-         Querying <code>a11ied</code>'s bundled WCAG data reveals the real numbers:
-      </p>
+   <section>
+      <h2 id="numbers">The numbers</h2>
       <pre><code>a1 wcag criteria --summary</code></pre>
-      <pre data-label="OUTPUT"><code>WCAG 2.2 test methods  updated 2026-09-05
-  Level      Criteria   Automated  Hybrid     Manual     Unknown
-  A          31         0          18         13         0
-  AA         24         0          11         13         0
-  AAA        31         0          7          24         0
-  All        86         0          36         50         0
-
-  28 criteria have an axe rule, 21 have an ACT rule, 19 have both.</code></pre>
+      <pre data-label="OUTPUT"><code>{summary.trimEnd()}</code></pre>
       <p>
-         At the standard <strong>Level AA</strong> compliance baseline (55 total criteria across Level A and AA):
+         Meeting Level AA, the level most policies require, means meeting Levels A and AA
+         together: 55 criteria, 29 hybrid and 26 manual. axe
+         has a rule for 28 of the 86. A rule covers part of its criterion. Passing every rule
+         means no rule found a failure, and each criterion still needs its other part
+         checked.
       </p>
-      <ul>
-         <li>Scanner rules cover parts of the criteria; no whole criterion passes on a clean scan alone.</li>
-         <li>Criterion assessments require interactive keyboard testing, screen reader observation, or semantic review.</li>
-      </ul>
       <p>
-         This is why <code>a11ied</code> combines axe-core scanning with virtual and native screen reader automation:
-         you can test the hybrid criteria that traditional CI linters miss entirely.
+         The methods come from the WCAG tags on axe-core's rules and from the W3C's
+         <abbr title="Accessibility Conformance Testing">ACT</abbr> rules. Where neither has a
+         rule, a11ied assigns the method itself. Each record says which under
+         <code>sourceAttribution</code>.
       </p>
    </section>
 
-   <section class="split panel" id="strategy">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Actionable remediation</p>
-            <h2>Testing hybrid criteria</h2>
-         </div>
-         <p>
-            For hybrid criteria, <code>a11ied</code> provides concrete testing strategies that specify
-            whether an interactive session is required:
-         </p>
-         <pre><code>a1 wcag 4.1.3 --json</code></pre>
-         <pre data-label="OUTPUT"><code>\"testMethod\": &#123;
-  \"method\": \"hybrid\",
-  \"axeRuleIds\": [],
-  \"actRuleIds\": [],
-  \"sourceAttribution\": [\"strategy-heuristic\"]
-&#125;,
-\"strategy\": &#123;
-  \"preferredEvidenceMode\": \"hybrid\",
-  \"procedureIds\": [\"status_message_probe\"],
-  \"requiresRealTarget\": true,
-  \"notes\": [
-    \"Status messages need announcement evidence from assistive technology without forced focus changes.\"
-  ]
-&#125;</code></pre>
-         <p>
-            When <code>requiresRealTarget: true</code> is returned, verifying HTML strings in isolation is insufficient.
-            The test requires an active runtime session where you trigger an action (such as saving a form or updating a cart)
-            and assert against the resulting speech queue:
-         </p>
-         <pre><code>a1 sr start --sr virtual http://localhost:3000/settings
-# Trigger update button...
-a1 sr transcript --since 5s</code></pre>
-      </div>
-      <div class="split-aside">
-         <div class="tag">AI agent feedback</div>
-         <p class="aside-note">
-            When an AI coding agent fixes an issue, it inspects <code>strategy.procedureIds</code> to know
-            which tool to invoke (e.g. running <code>sr_action</code> to test keyboard navigation instead of just re-running <code>axe</code>).
-         </p>
-      </div>
-   </section>
-
-   <section class="panel" id="lookup">
-      <div class="panel-head">
-         <p class="panel-kicker">Developer toolkit</p>
-         <h2>Querying criteria & rules from the CLI</h2>
-      </div>
+   <section>
+      <h2 id="one">How to test one criterion</h2>
       <p>
-         All WCAG specifications, Understanding documents, techniques, and rule mappings are bundled
-         offline directly in the <code>a11ied</code> package. Queries run instantaneously without network requests:
+         <code>a1 wcag &lt;criterion&gt;</code> prints the requirement, then a
+         <strong>Testing it</strong> section: what a scan covers, what to do by hand, and
+         what counts as a pass or a fail.
       </p>
-      <pre><code>a1 wcag                                  # Interactive terminal finder
-a1 wcag 2.4.3                            # Inspect requirement text, techniques, and test methods
-a1 wcag G18                              # Query a specific WCAG technique
-a1 wcag rule button-name                 # Map an axe violation to its WCAG criteria and fixes
-a1 search "keyboard trap"                # Full-text search across all criteria and techniques
-a1 pattern combobox                      # Query ARIA Authoring Practices Guide (APG) specifications</code></pre>
+      <pre><code>a1 wcag 1.4.3</code></pre>
+      <pre data-label="OUTPUT"><code>{contrastTesting.trimEnd()}</code></pre>
       <p>
-         The CLI supports both <strong>WCAG 2.1</strong> and <strong>WCAG 2.2</strong> (default).
-         Use <code>a1 search</code> when you know what behavior you need to verify but don't know the exact criterion number.
+         When you do not know the number, search for the behavior:
+         <code>a1 search "keyboard trap"</code>.
       </p>
    </section>
 
-   <section class="field-note" id="claims">
-      <div class="panel-head">
-         <p class="panel-kicker">Audit integrity</p>
-         <h2>Making credible accessibility claims</h2>
-      </div>
+   <section>
+      <h2 id="data">The method as data</h2>
+      <p>With <code>--json</code>, a script or an agent gets the same answer as two objects.</p>
+      <pre><code>a1 wcag 4.1.3 --json</code></pre>
+      <pre data-label="OUTPUT"><code>{statusMethod.trimEnd()}</code></pre>
+      <dl class="defs">
+         <dt><code>testMethod.method</code></dt>
+         <dd><code>hybrid</code> or <code>manual</code>.</dd>
+         <dt><code>axeRuleIds</code>, <code>actRuleIds</code></dt>
+         <dd>The rules that cover part of the criterion. Both are empty here: no rule tests status messages.</dd>
+         <dt><code>strategy.requiresRealTarget</code></dt>
+         <dd><code>true</code> when the test needs a running page, because markup alone cannot show it. A status message has to be triggered and heard.</dd>
+         <dt><code>strategy.procedureIds</code></dt>
+         <dd>The named procedure that <strong>Testing it</strong> prints.</dd>
+      </dl>
+   </section>
+
+   <section>
+      <h2 id="claims">What you can claim</h2>
+      <p>For each statement you make, say which kind of evidence supports it.</p>
+      <dl class="defs">
+         <dt>A scan</dt>
+         <dd>"No axe rule failed on this page." It does not support "this page meets WCAG".</dd>
+         <dt>A transcript</dt>
+         <dd>"The screen reader announced the dialog and its name." Say which screen reader, and whether it was simulated.</dd>
+         <dt>A judgment</dt>
+         <dd>"The alt text describes the image." Say who decided, and on what.</dd>
+      </dl>
       <p>
-         A clean report from an automated scanner means that the elements on your page did not violate
-         the subset of rules that automated algorithms can check. It does not prove that a user who relies
-         on a screen reader or keyboard can successfully navigate your application.
+         <a href="/guides/audit"><code>a1 audit</code></a> records all three for every
+         criterion and writes them into a report.
       </p>
-      <p>
-         When reporting accessibility status to stakeholders or in compliance audits, distinguish between your evidence sources:
-      </p>
-      <div class="route-list">
-         <div class="route-row">
-            <strong>Automated axe scan:</strong>
-            <span>Reports mapped scanner results and leaves interaction and semantic requirements pending.</span>
-         </div>
-         <div class="route-row">
-            <strong>Screen reader test suite:</strong>
-            <span>Proves correct focus ordering, widget state announcements, and live region behavior across hybrid criteria.</span>
-         </div>
-         <div class="route-row">
-            <strong>Manual evaluation:</strong>
-            <span>Verifies cognitive, sensory, and content readability requirements that require human judgment.</span>
-         </div>
-      </div>
    </section>
 </DocShell>

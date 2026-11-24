@@ -1,0 +1,12 @@
+Accessibility tree
+- main:
+  - button "All"
+  - button "Active"
+  - button "Pending"
+  - button "Invite member"
+  - table "3 members in this workspace":
+    - rowgroup:
+      - row "Dana Whitfield dana@northwind.test Admin Active 2 hours ago":
+        - cell:
+          - button
+      ...

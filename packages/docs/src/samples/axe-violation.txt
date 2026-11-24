@@ -1,0 +1,19 @@
+axe scan
+  URL:        PRACTICE_URL
+  Selection:  all mapped axe rules
+  Result:     10 failing elements, 0 elements to check by hand, 145 passing elements
+  Verdict:    ✗ 10 problems to fix
+
+Violations (3)
+  ✗ button-name  critical  WCAG 4.1.2 (A)
+      Buttons must have discernible text
+      https://dequeuniversity.com/rules/axe/4.13/button-name?application=axeAPI
+      3 failing elements
+        tr[data-status="active"][data-member-row=""]:nth-child(1) > td:nth-child(5) > .icon-button[type="button"]
+          <button type="button" class="icon-button"> <svg viewBox="0 0 24 24" focusable="false"> <path d="M4 7...
+          Fix any of the following:
+          • Element does not have inner text that is visible to screen readers
+          • aria-label attribute does not exist or is empty
+          • aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+          • Element has no title attribute
+          ...

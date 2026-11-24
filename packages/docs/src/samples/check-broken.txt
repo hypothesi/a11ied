@@ -1,0 +1,47 @@
+check  PRACTICE_URL
+
+✗ 10 problems to fix.
+
+Problems
+  1.1.1  Non-text Content  [A]
+      Images must have alternative text  critical
+      3 failing elements:
+        tr[data-status="active"][data-member-row=""]:nth-child(1) > td:nth-child(1) > .member > img
+        tr[data-status="active"][data-member-row=""]:nth-child(2) > td:nth-child(1) > .member > img
+        tr[data-status="pending"] > td:nth-child(1) > .member > img
+      Fix it:  a1 wcag rule image-alt
+  4.1.2  Name, Role, Value  [A]
+      Buttons must have discernible text  critical
+      3 failing elements:
+        tr[data-status="active"][data-member-row=""]:nth-child(1) > td:nth-child(5) > .icon-button[type="button"]
+        tr[data-status="active"][data-member-row=""]:nth-child(2) > td:nth-child(5) > .icon-button[type="button"]
+        tr[data-status="pending"] > td:nth-child(5) > .icon-button[type="button"]
+      Fix it:  a1 wcag rule button-name
+  1.4.3  Contrast (Minimum)  [AA]
+      Elements must meet minimum color contrast ratio thresholds  serious
+      4 failing elements:
+        tr[data-status="active"][data-member-row=""]:nth-child(1) > .faint
+        tr[data-status="active"][data-member-row=""]:nth-child(2) > .faint
+        .pill--pending
+        and 1 more element
+      Fix it:  a1 wcag rule color-contrast
+  1.4.6  Contrast (Enhanced)  [AAA]
+
+Check by hand
+  38 criteria this page triggers need a person:
+    • 1.3.1  Info and Relationships
+    • 1.3.2  Meaningful Sequence
+    • 1.3.3  Sensory Characteristics
+    • 1.4.1  Use of Color
+    • 2.1.1  Keyboard
+    • 2.1.2  No Keyboard Trap
+    ...
+
+  Read the page as a screen reader does:  a1 sr walk PRACTICE_URL
+  Judge these criteria and get a report:  a1 audit init PRACTICE_URL --page
+
+The page
+  Titled Team | Northwind, opening with Team.
+  It has 4 landmarks, 2 headings (level 1, 3), 6 links, 7 buttons, 1 form control.
+
+86 criteria were considered. Add --verbose for every one, or --json for the full report.

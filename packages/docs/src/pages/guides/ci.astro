@@ -1,124 +1,94 @@
 ---
 import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
+import workflow from '../../samples/github-workflow.yml.txt?raw';
 
 const toc = [
-   { id: 'target', label: 'The simulated screen reader in CI' },
-   { id: 'browser', label: 'Install a browser' },
-   { id: 'preflight', label: 'Check the runner with doctor' },
-   { id: 'workflow', label: 'GitHub Actions example' },
-   { id: 'baseline', label: 'Baselines for existing sites' },
-   { id: 'sr', label: 'Screen reader checks' },
+   { id: 'needs', label: 'What a runner needs' },
+   { id: 'workflow', label: 'A GitHub Actions job' },
+   { id: 'fail', label: 'What fails the build' },
+   { id: 'baseline', label: 'Start on a site with existing problems' },
+   { id: 'sr', label: 'Check an announcement' },
+   { id: 'tests', label: 'Run a test suite' },
 ];
 ---
 
 <DocShell
    title="Run in CI"
-   summary="A CI runner has no VoiceOver or NVDA, so every a1 command that starts a screen reader needs --sr virtual. axe, tree, and check need Chrome, Edge, Brave, or Chromium. --fail-on sets which impact level fails the build, and --baseline lets CI ignore existing violations while still failing on new ones."
+   summary="<p>A CI runner needs a browser and one flag: <code>--sr virtual</code> on every screen reader command. After that, a failed check fails the build.</p>"
    links={docsLinks}
    toc={toc}
 >
-   <section class="panel" id="target">
-      <h2>The simulated screen reader in CI</h2>
+   <section>
+      <h2 id="needs">What a runner needs</h2>
+      <dl class="defs">
+         <dt>A browser</dt>
+         <dd>Scans and the simulated screen reader run in Chrome, Edge, Brave, or Chromium. An image without one needs <code>npx playwright install chromium</code>.</dd>
+         <dt><code>--sr virtual</code></dt>
+         <dd>VoiceOver and NVDA do not run unattended. Pass <code>--sr virtual</code> to <code>sr start</code> and <code>sr walk</code>, or a macOS runner may try to start VoiceOver.</dd>
+         <dt>A running app</dt>
+         <dd>Start your server before the checks, or test files directly with a path.</dd>
+      </dl>
       <p>
-         <code>voiceover</code> only exists on macOS and <code>nvda</code> only on Windows, and
-         neither runs unattended on a CI runner. Pass <code>--sr virtual</code>
-         on every <code>sr start</code> or <code>sr walk</code> call in CI. Without
-         <code>--sr</code>, <code>sr start</code> and <code>sr walk</code> start the platform's
-         own screen reader, which on a macOS runner means VoiceOver.
-      </p>
-      <pre><code>a1 sr walk http://localhost:3000/checkout --sr virtual --json</code></pre>
-   </section>
-
-   <section class="panel" id="browser">
-      <h2>Install a browser</h2>
-      <p>
-         <code>axe</code>, <code>tree</code>, and <code>check</code> load the page in a headless
-         browser. A CI image with no browser installed needs one added before the job runs them.
-      </p>
-      <pre><code>npx playwright install chromium</code></pre>
-      <p>
-         The simulated screen reader also needs this browser when a session opens a URL, because
-         it runs inside a headless Chromium page, which is what makes page scripts, live
-         regions, and dialogs work. With no Chromium-family browser, the simulated screen reader
-         falls back to jsdom and page scripts do not run, which changes what a walk or an axe
-         run can see.
-      </p>
-      <p>
-         <code>a1 wcag</code> reads data bundled with the package. It starts no browser and
-         makes no network request, so it needs no setup step in CI.
+         <code>a1 wcag</code>, <code>a1 pattern</code>, and <code>a1 search</code> read data
+         that ships in the package. They need no browser and no network.
       </p>
    </section>
 
-   <section class="panel" id="preflight">
-      <h2>Check the runner with doctor</h2>
-      <p>
-         <code>a1 doctor --strict</code> exits 3 while a required step is missing, and prints
-         the exact command for each one under Action items. Run it as an early step so a missing
-         browser fails that step with the command to fix it, instead of a timeout in a later step.
-      </p>
-      <pre><code>a1 doctor --strict</code></pre>
+   <section>
+      <h2 id="workflow">A GitHub Actions job</h2>
+      <pre data-label=".github/workflows/accessibility.yml"><code>{workflow.trimEnd()}</code></pre>
+      <dl class="defs defs--wide">
+         <dt><code>a1 doctor --strict</code></dt>
+         <dd>Exits 3 when something is missing and prints the command that fixes it. Run it first, so a missing browser fails here with a clear message.</dd>
+         <dt><code>a1 axe ... --fail-on serious</code></dt>
+         <dd>Exits 4 on a serious or critical violation, which fails the job.</dd>
+         <dt><code>a1 sr walk ... --out walk.md</code></dt>
+         <dd>Saves what the screen reader said on the page. <code>if: always()</code> uploads it even when the scan failed.</dd>
+      </dl>
    </section>
 
-   <section class="panel" id="workflow">
-      <h2>GitHub Actions example</h2>
-      <pre><code>jobs:
-  accessibility:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - run: npm ci
-      - run: npx playwright install chromium
-
-      - name: Start the app
-        run: npm run start &
-
-      - run: npx a1 doctor --strict
-      - run: npx a1 axe http://localhost:3000/checkout --level AA --fail-on serious
-      - run: npx a1 sr walk http://localhost:3000/checkout --sr virtual --out walk.md
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: a11y-walk
-          path: walk.md</code></pre>
+   <section>
+      <h2 id="fail">What fails the build</h2>
       <p>
-         <code>axe</code> exits 4 on a violation at or above <code>--fail-on</code>'s
-         <a href="/guides/violations#impact">impact level</a>, which fails the step and the
-         job. <code>sr walk --out</code> writes the transcript either way, and
-         <code>if: always()</code> uploads it, so a failed job includes every announcement in
-         order as well as the axe result.
+         Any step that exits with a code other than 0. A failed check exits 4. See
+         <a href="/guides/scripting#exit-codes">exit codes</a>.
+      </p>
+      <p>
+         A passing scan does not mean the page is accessible. It means no rule failed. Keep
+         a screen reader check or a <a href="/guides/vitest">test</a> for the behavior a scan
+         cannot see.
       </p>
    </section>
 
-   <section class="panel" id="baseline">
-      <h2>Baselines for existing sites</h2>
+   <section>
+      <h2 id="baseline">Start on a site with existing problems</h2>
       <p>
-         Adding <code>a1 axe</code> to CI on a site with existing violations means the first
-         run fails on all of them. <a href="/guides/scripting#baseline">Commit a baseline</a>
-         once, so CI only fails on a new violation, and fix the accepted ones over time.
+         Commit a <a href="/guides/scripting#baseline">baseline</a> of the current
+         violations. CI then fails only on a new one, and you fix the old ones over time.
       </p>
       <pre><code>a1 axe http://localhost:3000/checkout --level AA --baseline a11y-baseline.json</code></pre>
    </section>
 
-   <section class="field-note" id="sr">
-      <h2>Screen reader checks</h2>
+   <section>
+      <h2 id="sr">Check an announcement</h2>
       <p>
-         <code>sr goto</code>, <code>sr find</code>, and <code>sr expect</code> all exit 4 when
-         nothing matches, so a step that checks one announcement fails the job the same way a
-         failed axe run does.
+         <code>sr goto</code> and <code>sr expect</code> exit 4 when nothing matches, so these
+         lines fail the job when the button loses its name.
       </p>
-      <pre><code>a1 sr start http://localhost:3000/checkout --sr virtual --json
+      <pre><code>a1 sr start --sr virtual http://localhost:3000/checkout
 a1 sr goto --role button --name "Pay now"
 a1 sr expect "button, Pay now"
-a1 sr stop --json</code></pre>
+a1 sr stop</code></pre>
+   </section>
+
+   <section>
+      <h2 id="tests">Run a test suite</h2>
       <p>
-         For a test suite instead of shell steps, <a href="/guides/testing">write screen reader
-         tests</a> with <code>a11ied/test</code> or <code>a11ied/vitest</code> and run them
-         through the same <code>npm test</code> step as the rest of the suite.
+         For more than a few checks, write them as tests with
+         <a href="/guides/vitest"><code>a11ied/vitest</code></a> or
+         <a href="/guides/testing"><code>a11ied/test</code></a>. They run in the same
+         <code>npm test</code> step as the rest of your suite and need the same browser.
       </p>
    </section>
 </DocShell>

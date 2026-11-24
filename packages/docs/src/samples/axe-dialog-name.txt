@@ -1,0 +1,18 @@
+axe scan
+  URL:        PRACTICE_URL#invite
+  Selection:  chosen rules: aria-dialog-name
+  Result:     1 failing element, 0 elements to check by hand, 0 passing elements
+  Verdict:    ✗ 1 problem to fix
+
+Violations (1)
+  ✗ aria-dialog-name  serious
+      ARIA dialog and alertdialog nodes should have an accessible name
+      https://dequeuniversity.com/rules/axe/4.13/aria-dialog-name?application=axeAPI
+      1 failing element
+        .modal
+          <div class="modal" role="dialog" aria-modal="true" data-invite-dialog="">
+          Fix any of the following:
+          • aria-label attribute does not exist or is empty
+          • aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty
+          • Element has no title attribute
+...

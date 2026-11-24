@@ -1,0 +1,10 @@
+"4.1.3": {
+  "criterionId": "4.1.3",
+  "title": "Status Messages",
+  "state": "relevant",
+  "reasons": [
+    "Detected live region signals (role=status) and matching criterion tags (messaging, errors, forms, progress-steps, visual-cues, and content)."
+  ],
+  "matchedSignalCategories": ["live-region", "heading", "form", "validation"],
+  ...
+}

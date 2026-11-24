@@ -1,323 +1,287 @@
 ---
 import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
+import mcpConfig from '../../samples/mcp-config.json.txt?raw';
 
 const toc = [
-   { id: 'start', label: 'Starting the server' },
-   { id: 'tools', label: 'Tools' },
-   { id: 'wcag', label: 'wcag_show, wcag_criteria, wcag_rule, search' },
-   { id: 'pattern', label: 'pattern tools' },
-   { id: 'axe', label: 'run_axe, tree, check' },
-   { id: 'audit', label: 'audit tools' },
-   { id: 'sr', label: 'sr_session and sr_action' },
-   { id: 'sr-checks', label: 'sr_list, sr_expect, sr_transcript' },
+   { id: 'start', label: 'Start the server' },
+   { id: 'tools', label: 'All tools' },
+   { id: 'page', label: 'Page tools' },
+   { id: 'lookup', label: 'Lookup tools' },
+   { id: 'pattern', label: 'Pattern tools' },
+   { id: 'sr', label: 'Screen reader tools' },
+   { id: 'audit', label: 'Audit tools' },
+   { id: 'other', label: 'doctor and talkback' },
    { id: 'resources', label: 'Resources' },
-   { id: 'effects', label: 'Side effects' },
+   { id: 'effects', label: 'What each tool touches' },
 ];
 ---
 
 <DocShell
    title="MCP reference"
-   summary="Tool inputs, resources, and side effects for the MCP server. Assessment operations share validation and durable progress with the CLI."
+   summary="<p>The tools and resources of the a11ied MCP server. Each tool calls the same function as the CLI command it is named after, so results match.</p>"
    links={docsLinks}
    toc={toc}
 >
-   <section class="split panel" id="start">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Startup</p>
-            <h2>Starting the server</h2>
-         </div>
-         <pre><code>npx -y a11ied mcp</code></pre>
-         <p>
-            Configure your client to run that command over stdio. The server opens no network port
-            and takes no options.
-         </p>
-         <pre data-label="CONFIG"><code>{`{
-  "mcpServers": {
-    "a11ied": {
-      "command": "npx",
-      "args": ["-y", "a11ied", "mcp"]
-    }
-  }
-}`}</code></pre>
-      </div>
-      <div class="split-aside">
-         <p>
-            For a source checkout, build the workspace and copy the root
-            <code>mcp.example.json</code> entry into your client's configuration.
-            Set the client's working directory to the repository root, or use an absolute
-            path to <code>packages/cli/dist/cli.js</code>.
-         </p>
-         <div class="tag">Defaults</div>
-         <p class="aside-note">
-            Every tool that takes <code>version</code> defaults to <code>2.2</code>. The other
-            supported value is <code>2.1</code>.
-         </p>
-      </div>
-   </section>
-
-   <section class="ledger" id="tools">
-      <div class="panel-head">
-         <p class="panel-kicker">Tools</p>
-         <h2>MCP tools</h2>
-      </div>
+   <section>
+      <h2 id="start">Start the server</h2>
+      <pre><code>npx -y a11ied mcp</code></pre>
       <p>
-         The <code>wcag_*</code> tools look up the Web Content Accessibility Guidelines (WCAG),
-         the standard most accessibility requirements come from, by success criterion.
-         <code>run_axe</code> runs axe-core (axe), an open-source rules engine that checks a page
-         against a set of automated accessibility rules. <code>tree</code> and <code>check</code>
-         read the page too, the <code>audit_*</code> tools run a tracked audit, and the <code>sr_*</code> tools drive a screen reader session.
+         The server speaks MCP over standard input and output. It takes no options and opens
+         no network port. Most clients start it from a configuration block:
       </p>
-      <div class="route-list">
-         <div class="route-row"><code>doctor</code><span>Return the a11ied, Node, and browser details and the setup state of each screen reader. Same as <code>a1 doctor</code>.</span></div>
-         <div class="route-row"><code>wcag_show</code><span>Return one criterion with its techniques, failures, <a href="/test-methods">test method</a> (the <code>testMethod</code> object), and strategy. Set <code>includeUnderstanding</code> for the full Understanding document text. A technique or failure id also returns its body. Same as <code>a1 wcag show</code> and <code>a1 wcag understanding</code>.</span></div>
-         <div class="route-row"><code>wcag_criteria</code><span>List criteria, filtered by level or summarized. Same as <code>a1 wcag criteria</code>.</span></div>
-         <div class="route-row"><code>search</code><span>Search the WCAG corpus and the ARIA Authoring Practices Guide together, ranked, each row labeled by <code>kind</code>. Same as <code>a1 search</code>.</span></div>
-         <div class="route-row"><code>wcag_rule</code><span>Map an axe-core rule id to its criteria and fix guidance. Same as <code>a1 wcag rule</code>.</span></div>
-         <div class="route-row"><code>pattern_show</code><span>One ARIA pattern from the Authoring Practices Guide, with the guide's own text for it and its examples, or one example with its keyboard and attribute tables. Omit <code>name</code> to list every pattern. Same as <code>a1 pattern</code>.</span></div>
-         <div class="route-row"><code>pattern_find</code><span>The examples the APG files under one ARIA role or attribute. Same as <code>a1 pattern role</code> and <code>a1 pattern attribute</code>.</span></div>
-         <div class="route-row"><code>pattern_check</code>, <code>pattern_record</code>, <code>pattern_pending</code><span>Check one widget against an APG example, record a judgment on a row the check could not decide, and list the rows still undecided. See <a href="#pattern">pattern tools</a>.</span></div>
-         <div class="route-row"><code>run_axe</code><span>Run axe-core against a target. Same as <code>a1 axe</code>.</span></div>
-         <div class="route-row"><code>tree</code><span>Print the accessibility tree for a target. Same as <code>a1 tree</code>.</span></div>
-         <div class="route-row"><code>check</code><span>Run axe, the tree summary, and applicability together on one page. Same as <code>a1 check</code>.</span></div>
-         <div class="route-row"><code>capture</code><span>Screenshot a page at a viewport, zoom, text spacing, focus stop, or opened state, and report focus and overflow facts. Same as <code>a1 capture</code>.</span></div>
-         <div class="route-row"><code>audit_*</code><span>Start, run, track, and report a WCAG audit. One tool per <code>a1 audit</code> subcommand; see <a href="#audit">audit tools</a>.</span></div>
-         <div class="route-row"><code>sr_session</code><span>Start, open, stop, or check the one active screen reader session. Same as <code>a1 sr start</code>, <code>open</code>, <code>stop</code>, <code>status</code>.</span></div>
-         <div class="route-row"><code>sr_action</code><span>Run one action against the active session. Covers every other <code>a1 sr</code> subcommand except <code>expect</code>, <code>list</code>, <code>batch</code>, and <code>walk</code>.</span></div>
-         <div class="route-row"><code>sr_list</code><span>List the named commands <code>sr_action</code>'s <code>perform</code> action runs. Same as <code>a1 sr list</code>.</span></div>
-         <div class="route-row"><code>sr_expect</code><span>Check that the session announced a phrase. Same as <code>a1 sr expect</code>.</span></div>
-         <div class="route-row"><code>sr_transcript</code><span>Print the session transcript, or write it to a file. Same as <code>a1 sr transcript</code>.</span></div>
-         <div class="route-row"><code>talkback</code><span>Turn TalkBack on or off on an Android device, or walk the screen and return what TalkBack said at each stop. Same as <code>a1 talkback</code>.</span></div>
-      </div>
+      <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
       <p>
-         <code>a1 sr batch</code> and <code>a1 sr walk</code> have no matching tool. <code>batch</code>
-         reads a file of actions for shell scripting. Call <code>sr_action</code> once per step
-         instead. <code>walk</code> composes <code>sr_session</code> (action <code>start</code>) with
-         <code>sr_action</code> (action <code>read-all</code>) and <code>sr_transcript</code>. Call
-         those three tools in that order.
+         See <a href="/guides/agents">use with an AI agent</a> for setup in specific agents.
+         In a checkout of the repository, copy the entry in <code>mcp.example.json</code>.
       </p>
    </section>
 
-   <section class="panel" id="wcag">
-      <div class="panel-head">
-         <p class="panel-kicker">Standards</p>
-         <h2>wcag_show, wcag_criteria, wcag_rule, search</h2>
-      </div>
-      <div class="route-list">
-         <div class="route-row"><code>wcag_show</code><span><code>criterion</code> required, an id such as <code>1.4.3</code>, a slug such as <code>contrast-minimum</code>, or a technique id such as <code>G18</code>. Always returns the <code>testMethod</code> and <code>strategy</code> objects alongside the criterion. Set <code>includeUnderstanding: true</code> for the full Understanding document text and its source, the primary reference for fixing a violation.</span></div>
-         <div class="route-row"><code>wcag_criteria</code><span><code>level</code> optional: <code>A</code>, <code>AA</code>, or <code>AAA</code>. Omit it to list every criterion. Set <code>summary: true</code> for the count of automated, hybrid, and manual criteria per level instead of the list.</span></div>
-         <div class="route-row"><code>search</code><span><code>query</code> required. <code>kind</code> scopes it to one corpus. <code>limit</code> defaults to 10 and caps at 50.</span></div>
-         <div class="route-row"><code>wcag_rule</code><span><code>ruleId</code> required, an axe-core rule id such as <code>color-contrast</code>. Returns the criteria it covers and axe's help text and help URL.</span></div>
+   <section>
+      <h2 id="tools">All tools</h2>
+      <div class="table-wrap">
+         <table>
+            <thead>
+               <tr><th scope="col">Tool</th><th scope="col">What it does</th><th scope="col">CLI command</th></tr>
+            </thead>
+            <tbody>
+               <tr><th scope="row"><code>check</code></th><td>Scan a page and list what applies to it</td><td><code>a1 check</code></td></tr>
+               <tr><th scope="row"><code>run_axe</code></th><td>Run axe-core</td><td><code>a1 axe</code></td></tr>
+               <tr><th scope="row"><code>tree</code></th><td>Return the accessibility tree</td><td><code>a1 tree</code></td></tr>
+               <tr><th scope="row"><code>capture</code></th><td>Screenshot a page in a chosen state</td><td><code>a1 capture</code></td></tr>
+               <tr><th scope="row"><code>wcag_show</code></th><td>One criterion or technique</td><td><code>a1 wcag &lt;criterion&gt;</code></td></tr>
+               <tr><th scope="row"><code>wcag_criteria</code></th><td>List or count criteria</td><td><code>a1 wcag criteria</code></td></tr>
+               <tr><th scope="row"><code>wcag_rule</code></th><td>The criteria an axe rule tests</td><td><code>a1 wcag rule</code></td></tr>
+               <tr><th scope="row"><code>search</code></th><td>Search criteria and patterns</td><td><code>a1 search</code></td></tr>
+               <tr><th scope="row"><code>pattern_show</code>, <code>pattern_find</code></th><td>Look up ARIA patterns</td><td><code>a1 pattern</code>, <code>pattern role</code>, <code>pattern attribute</code></td></tr>
+               <tr><th scope="row"><code>pattern_check</code>, <code>pattern_record</code>, <code>pattern_pending</code></th><td>Check a widget against a pattern</td><td><code>a1 pattern check</code>, <code>record</code>, <code>pending</code></td></tr>
+               <tr><th scope="row"><code>sr_session</code></th><td>Start, open, stop, or inspect the session</td><td><code>a1 sr start</code>, <code>open</code>, <code>stop</code>, <code>status</code></td></tr>
+               <tr><th scope="row"><code>sr_action</code></th><td>One screen reader step</td><td>The other <code>a1 sr</code> commands</td></tr>
+               <tr><th scope="row"><code>sr_expect</code></th><td>Check an announcement</td><td><code>a1 sr expect</code></td></tr>
+               <tr><th scope="row"><code>sr_transcript</code></th><td>Return or save the transcript</td><td><code>a1 sr transcript</code></td></tr>
+               <tr><th scope="row"><code>sr_list</code></th><td>List named screen reader commands</td><td><code>a1 sr list</code></td></tr>
+               <tr><th scope="row"><code>talkback</code></th><td>Drive TalkBack on Android</td><td><code>a1 talkback</code></td></tr>
+               <tr><th scope="row"><code>audit_*</code></th><td>Run and report a WCAG audit</td><td><code>a1 audit</code></td></tr>
+               <tr><th scope="row"><code>doctor</code></th><td>Report what is set up on the machine</td><td><code>a1 doctor</code></td></tr>
+            </tbody>
+         </table>
       </div>
       <p>
-         All four read bundled data. They make no network request and start no browser, so they are
-         safe for an agent to call freely.
+         A few CLI commands have no tool. For <code>a1 sr walk</code>, call
+         <code>sr_session</code> to start, <code>sr_action</code> with
+         <code>read-all</code>, then <code>sr_transcript</code>. For <code>a1 sr batch</code>,
+         call <code>sr_action</code> once per step. <code>a1 sr tail</code>,
+         <code>a1 setup</code>, and <code>a1 audit dashboard</code> run until stopped or
+         change the machine, so they stay in the terminal.
+      </p>
+      <p>
+         Tools that take <code>version</code> default to WCAG <code>2.2</code>. The other value
+         is <code>2.1</code>.
       </p>
    </section>
 
-   <section class="panel" id="pattern">
-      <div class="panel-head">
-         <p class="panel-kicker">ARIA patterns</p>
-         <h2>pattern_show, pattern_find, pattern_check, pattern_record, pattern_pending</h2>
-      </div>
-      <div class="route-list">
-         <div class="route-row"><code>pattern_show</code><span><code>name</code> optional: a pattern id such as <code>combobox</code>, or an example id such as <code>combobox-select-only</code>. Omit it to list every pattern.</span></div>
-         <div class="route-row"><code>pattern_find</code><span>Give exactly one of <code>role</code>, such as <code>combobox</code>, or <code>attribute</code>, such as <code>aria-expanded</code>.</span></div>
-         <div class="route-row"><code>pattern_check</code><span><code>pattern</code> and <code>selector</code> required: the APG example id and a CSS selector for the one widget to check. Give the page as <code>target</code> or <code>html</code>. <code>click</code> opens a widget the page renders only after a click, <code>setup</code> presses chords first, and <code>table</code> picks a later keyboard table. Returns <code>exitCode</code> 4 for a declared key that changed nothing or an attribute pointing at an id the document does not have.</span></div>
-         <div class="route-row"><code>pattern_record</code><span><code>pattern</code>, <code>row</code>, <code>selector</code>, and <code>outcome</code> required. <code>outcome</code> is <code>passed</code>, <code>failed</code>, <code>cantTell</code>, or <code>inapplicable</code>. Use the same <code>selector</code> and <code>click</code> the check used, and give the reason in <code>note</code>.</span></div>
-         <div class="route-row"><code>pattern_pending</code><span><code>pattern</code> and <code>selector</code> required. Lists the rows of the example that have no current judgment for this widget.</span></div>
-      </div>
+   <section>
+      <h2 id="page">Page tools</h2>
       <p>
-         <code>pattern_show</code> and <code>pattern_find</code> read bundled data. The other three
-         load the page in a browser, and <code>pattern_check</code> presses keys in it.
+         <code>check</code>, <code>run_axe</code>, and <code>tree</code> take the page as
+         <code>target</code>, a URL or file path, or as <code>html</code>, inline markup.
+      </p>
+      <dl class="defs">
+         <dt><code>check</code></dt>
+         <dd><code>level</code>, <code>failOn</code>, <code>baseline</code>, <code>storageStatePath</code>, <code>timeoutMs</code>.</dd>
+         <dt><code>run_axe</code></dt>
+         <dd>One of <code>level</code>, <code>criterion</code>, or <code>ruleIds</code> to choose rules. Also <code>selector</code>, <code>exclude</code>, <code>waitFor</code>, <code>click</code>, <code>viewport</code>, <code>headers</code>, <code>cookies</code>, <code>failOn</code>, <code>baseline</code>.</dd>
+         <dt><code>tree</code></dt>
+         <dd><code>role</code> and <code>name</code> keep matching nodes and their ancestors. <code>click</code> opens a state first.</dd>
+         <dt><code>capture</code></dt>
+         <dd><code>url</code> and <code>out</code> are required. Also <code>viewport</code>, <code>zoom</code>, <code>textSpacing</code>, <code>click</code>, <code>press</code>, <code>hover</code>, <code>selector</code>, <code>fullPage</code>, <code>waitFor</code>, <code>storageStatePath</code>, <code>timeoutMs</code>.</dd>
+      </dl>
+      <p>
+         <code>check</code> and <code>run_axe</code> return <code>verdict</code> and
+         <code>exitCode</code>: 4 when a violation at or above <code>failOn</code> is not in
+         <code>baseline</code>, otherwise 0. <code>baseline</code> is
+         <code>&#123; acceptedFindings: [...] &#125;</code>, the content of a CLI baseline file.
       </p>
    </section>
 
-   <section class="panel" id="axe">
-      <div class="panel-head">
-         <p class="panel-kicker">Page checks</p>
-         <h2>run_axe, tree, check</h2>
-      </div>
-      <div class="route-list">
-         <div class="route-row"><code>target</code><span>An http(s) URL or a local file path.</span></div>
-         <div class="route-row"><code>html</code><span>Inline HTML markup to load instead of <code>target</code>.</span></div>
-      </div>
-      <p>
-         All three take one page target, exactly like the CLI's positional <code>&lt;target&gt;</code>
-         and <code>--html</code>. <code>run_axe</code> also takes <code>criterion</code>,
-         <code>level</code>, or <code>ruleIds</code> to narrow the run, and rejects more than one of
-         them. Omit all three, and <code>run_axe</code> runs every mapped rule, matching
-         <code>a1 axe</code> with no filter.
-      </p>
-      <p>
-         <code>check</code> takes <code>level</code> to select cumulative A, AA, or AAA
-         coverage. For APG rows, <code>pattern_record</code> stores a judgment with the widget's
-         <code>selector</code>; the judgment expires when the widget's accessibility tree changes.
-      </p>
-      <p>
-         <code>tree</code> takes <code>role</code> and <code>name</code> to keep only matching
-         nodes and their ancestors. <code>run_axe</code> and <code>tree</code> take
-         <code>click</code>, a selector for the one element to click after the page loads,
-         which reaches a dialog or a menu the page renders only after a click.
-      </p>
-      <p>
-         <code>run_axe</code> and <code>check</code> each return a <code>verdict</code> object and an
-         <code>exitCode</code>. <code>exitCode</code> is 4, the CLI's assertion exit code, when a
-         violation at or above <code>failOn</code> (default <code>minor</code>) is not covered by
-         <code>baseline</code>, and 0 otherwise.
-      </p>
-      <p>
-         Pass <code>baseline</code> as <code>{`{ acceptedFindings: [...] }`}</code> to accept known
-         findings, the same list the CLI reads from a <code>--baseline</code> file.
-      </p>
+   <section>
+      <h2 id="lookup">Lookup tools</h2>
+      <dl class="defs">
+         <dt><code>wcag_show</code></dt>
+         <dd><code>criterion</code>, required: a number such as <code>1.4.3</code>, a slug such as <code>contrast-minimum</code>, or a technique ID such as <code>G18</code>. Returns the criterion with its <code>testMethod</code> and <code>strategy</code>. <code>includeUnderstanding: true</code> adds the W3C's Understanding document.</dd>
+         <dt><code>wcag_criteria</code></dt>
+         <dd><code>level</code> narrows the list. <code>summary: true</code> returns counts by test method.</dd>
+         <dt><code>wcag_rule</code></dt>
+         <dd><code>ruleId</code>, required: an axe rule such as <code>color-contrast</code>.</dd>
+         <dt><code>search</code></dt>
+         <dd><code>query</code>, required. <code>kind</code> keeps one kind of result. <code>limit</code> defaults to 10, with a maximum of 50.</dd>
+      </dl>
+      <p>These read data that ships in the package. An agent can call them freely.</p>
    </section>
 
-   <section class="panel" id="audit">
-      <h2>audit tools</h2>
-      <p>
-         These tools read and write the same audit store as the <code>a1 audit</code> commands,
-         so CLI and MCP workers can share one audit. Each takes an optional <code>audit</code>
-         id or directory. See <a href="/guides/audit">run an audit</a> for the workflow.
-      </p>
-      <div class="route-list">
-         <div class="route-row"><code>audit_init</code>, <code>audit_list</code><span>Create an audit with <code>target</code>, <code>platform</code>, <code>level</code>, <code>criteria</code>, <code>passes</code>, <code>rules</code>, and <code>access</code>, or list the audits in the workspace.</span></div>
-         <div class="route-row"><code>audit_page</code><span><code>action</code> is <code>add</code>, <code>list</code>, <code>exclude</code>, or <code>include</code>.</span></div>
-         <div class="route-row"><code>audit_discover</code>, <code>audit_scan</code><span>Add a site's pages to the audit, then run the automated checks on every web page in parallel.</span></div>
-         <div class="route-row"><code>audit_next</code><span>Requires <code>worker</code>. Claims a unit and returns its work packet as text and structured content. Optional <code>passes</code>, <code>excludePasses</code>, <code>pageId</code>, <code>unitId</code>.</span></div>
-         <div class="route-row"><code>audit_submit</code><span>Requires <code>worker</code>, <code>unit</code>, and <code>submission</code>: <code>results</code>, <code>findings</code> (each with a <code>screenshot</code> spec or <code>evidence</code> on web pages), <code>states</code>, <code>dismiss</code>, <code>summary</code>. Screenshot specs become cropped, outlined pictures of the element. A rejection lists every problem.</span></div>
-         <div class="route-row"><code>audit_show</code>, <code>audit_note</code>, <code>audit_block</code>, <code>audit_reopen</code>, <code>audit_limitation</code><span>Inspect a unit, keep a claim alive, park a unit that needs a person, return one to the queue, or record something the whole audit could not test.</span></div>
-         <div class="route-row"><code>audit_status</code><span>Progress, workers, blocked units, and recent activity. Set <code>units</code> or <code>log</code> for more detail.</span></div>
-         <div class="route-row"><code>audit_findings</code>, <code>audit_finding</code><span>List or show findings, and dismiss, merge, or rewrite one.</span></div>
-         <div class="route-row"><code>audit_signals</code>, <code>audit_report</code><span>Read the scan's facts for a page, and write the report files.</span></div>
-      </div>
-      <pre data-label="MCP INPUT"><code>{`{"worker":"w1","passes":["keyboard"]}`}</code></pre>
-      <p>
-         <code>a1 audit dashboard</code> has no tool: it serves a page until interrupted.
-      </p>
+   <section>
+      <h2 id="pattern">Pattern tools</h2>
+      <dl class="defs">
+         <dt><code>pattern_show</code></dt>
+         <dd><code>name</code>: a pattern such as <code>combobox</code> or an example such as <code>combobox-select-only</code>. Leave it out to list every pattern.</dd>
+         <dt><code>pattern_find</code></dt>
+         <dd>One of <code>role</code> or <code>attribute</code>.</dd>
+         <dt><code>pattern_check</code></dt>
+         <dd><code>pattern</code> and <code>selector</code>, required, plus <code>target</code> or <code>html</code>. <code>click</code> opens the widget first. <code>setup</code> and <code>table</code> reach a later state. Returns <code>exitCode</code> 4 for a documented key that did nothing or a missing attribute.</dd>
+         <dt><code>pattern_record</code></dt>
+         <dd><code>pattern</code>, <code>row</code>, <code>selector</code>, and <code>outcome</code>, required. <code>outcome</code> is <code>passed</code>, <code>failed</code>, <code>cantTell</code>, or <code>inapplicable</code>. Give the reason in <code>note</code>.</dd>
+         <dt><code>pattern_pending</code></dt>
+         <dd><code>pattern</code> and <code>selector</code>, required. Returns the rows with no judgment yet.</dd>
+      </dl>
    </section>
 
-   <section class="panel" id="sr">
-      <div class="panel-head">
-         <p class="panel-kicker">Screen reader</p>
-         <h2>sr_session and sr_action</h2>
-      </div>
+   <section>
+      <h2 id="sr">Screen reader tools</h2>
       <h3>sr_session</h3>
-      <div class="route-list">
-         <div class="route-row"><code>action</code><span><code>start</code>, <code>open</code>, <code>stop</code>, or <code>status</code>. Required.</span></div>
-         <div class="route-row"><code>target</code><span>(<code>start</code> only) <code>voiceover</code>, <code>nvda</code>, or <code>virtual</code>.</span></div>
-         <div class="route-row"><code>allowVirtual</code><span>(<code>start</code> only) Set to <code>true</code> to accept the simulated reader when a real one is available.</span></div>
-         <div class="route-row"><code>url</code><span>(<code>start</code> and <code>open</code>) The page to load. Virtual loads it directly. VoiceOver and NVDA open it in a system browser and refocus it.</span></div>
-         <div class="route-row"><code>app</code><span>(<code>start</code> only) A native app that is already open, to read instead of a page.</span></div>
-         <div class="route-row"><code>nativeInput</code><span>(<code>start</code> only) Defaults to <code>guarded</code>: commands check the observed foreground target. Inspect returned state and speech after actions. <code>require-binding</code> refuses unavailable native binding; <code>development</code> bypasses target checks.</span></div>
-      </div>
+      <dl class="defs">
+         <dt><code>action</code></dt>
+         <dd>Required: <code>start</code>, <code>open</code>, <code>stop</code>, or <code>status</code>.</dd>
+         <dt><code>target</code></dt>
+         <dd>On <code>start</code>: <code>voiceover</code>, <code>nvda</code>, or <code>virtual</code>.</dd>
+         <dt><code>allowVirtual</code></dt>
+         <dd>On <code>start</code>: must be <code>true</code> to use <code>virtual</code> on a machine where VoiceOver or NVDA is the default. It makes the agent state that it accepts a simulation.</dd>
+         <dt><code>url</code></dt>
+         <dd>On <code>start</code> and <code>open</code>: the page to load.</dd>
+         <dt><code>app</code>, <code>browser</code>, <code>recording</code>, <code>idleTimeoutMinutes</code>, <code>nativeInput</code></dt>
+         <dd>On <code>start</code>: as the <a href="/reference/cli#sr"><code>a1 sr start</code></a> options.</dd>
+         <dt><code>out</code>, <code>format</code>, <code>sessionId</code></dt>
+         <dd>On <code>stop</code>: write the transcript, or retry a stop that failed.</dd>
+      </dl>
       <p>
-         One session is active at a time, and <code>start</code>
-         stops any session already active. The start response includes <code>session</code>, which
-         has <code>sessionId</code>, <code>target</code>, and <code>targetType</code>.
-         Pass <code>sessionId</code> to <code>stop</code> to retry a recovery owner named
-         in an error, even when active-session metadata could not be published.
-         <code>targetType</code> is <code>real</code> for VoiceOver and NVDA, and
-         <code>simulated</code> for virtual. <code>status</code> returns
-         <code>{`{ noSession: true }`}</code> instead of throwing when no session is active.
+         One session is active at a time, and <code>start</code> replaces it. The response's
+         <code>session</code> has <code>target</code> and <code>targetType</code>:
+         <code>real</code> or <code>simulated</code>. <code>status</code> returns
+         <code>&#123; noSession: true &#125;</code> when there is none.
       </p>
       <h3>sr_action</h3>
       <p>
-         Takes the same <code>action</code> and <code>payload</code> shapes the CLI's driver runtime
-         takes, one action per call. The portable verbs need no payload and work on every target:
-         <code>next</code>, <code>previous</code>, <code>interact</code>, <code>stop-interacting</code>,
-         <code>activate</code>, <code>top</code>, <code>bottom</code>, <code>escape</code>,
-         <code>read</code>, <code>transcript</code>, and <code>title</code>.
+         Takes an <code>action</code> and, for some actions, a <code>payload</code>. These
+         need no payload: <code>next</code>, <code>previous</code>, <code>top</code>,
+         <code>bottom</code>, <code>activate</code>, <code>interact</code>,
+         <code>stop-interacting</code>, <code>escape</code>, <code>read</code>,
+         <code>title</code>, <code>transcript</code>. <code>next</code> and
+         <code>previous</code> take <code>&#123; kind, level?, times? &#125;</code> to jump by
+         heading, link, and so on.
       </p>
+      <dl class="defs">
+         <dt><code>press</code></dt>
+         <dd><code>&#123; keys &#125;</code>, one chord per entry: <code>["Tab", "Tab"]</code>.</dd>
+         <dt><code>type</code></dt>
+         <dd><code>&#123; text &#125;</code></dd>
+         <dt><code>goto</code></dt>
+         <dd><code>&#123; role?, name?, max? &#125;</code></dd>
+         <dt><code>find</code></dt>
+         <dd><code>&#123; text &#125;</code></dd>
+         <dt><code>elements</code></dt>
+         <dd><code>&#123; kind, max? &#125;</code></dd>
+         <dt><code>read-all</code></dt>
+         <dd><code>&#123; max? &#125;</code></dd>
+         <dt><code>table</code></dt>
+         <dd><code>&#123; move &#125;</code>, such as <code>next-cell</code>.</dd>
+         <dt><code>checkpoint</code></dt>
+         <dd><code>&#123; label &#125;</code></dd>
+         <dt><code>wait</code></dt>
+         <dd><code>&#123; for?, since?, ms?, timeoutMs? &#125;</code></dd>
+         <dt><code>perform</code></dt>
+         <dd><code>&#123; command, commandSet? &#125;</code>. Names come from <code>sr_list</code>.</dd>
+         <dt><code>focus</code></dt>
+         <dd>One of <code>appName</code>, <code>bundleId</code>, <code>processName</code>, <code>pid</code>, <code>windowTitle</code>.</dd>
+         <dt><code>screenshot</code></dt>
+         <dd><code>&#123; path &#125;</code>. VoiceOver only.</dd>
+      </dl>
       <p>
-         <code>next</code> and <code>previous</code> take an optional payload to jump by kind:
-         heading, link, landmark (a named region such as banner, navigation, or main), control,
-         button, table, list, graphic, region, or form-field.
+         Every response has <code>state</code>, with the announcement, the current element,
+         and the transcript so far. A VoiceOver session adds <code>axFocusedElement</code>,
+         the element that has keyboard focus. <code>goto</code>, <code>find</code>, and
+         <code>wait</code> add <code>exitCode</code>: 4 when nothing matched.
       </p>
-      <div class="route-list">
-         <div class="route-row"><code>press</code><span>Payload <code>{`{ keys }`}</code>, one chord per entry, pressed in order, such as <code>["Tab", "Tab"]</code>.</span></div>
-         <div class="route-row"><code>type</code><span>Payload <code>{`{ text }`}</code>.</span></div>
-         <div class="route-row"><code>checkpoint</code><span>Payload <code>{`{ label }`}</code>, a named point in the transcript for the <code>since</code> parameter for expectations and waits.</span></div>
-         <div class="route-row"><code>perform</code><span>Payload <code>{`{ command, commandSet? }`}</code>. Runs a named screen reader command. Call <code>sr_list</code> for the names.</span></div>
-         <div class="route-row"><code>focus</code><span>Payload with one of <code>appName</code>, <code>bundleId</code>, <code>processName</code>, <code>pid</code>, or <code>windowTitle</code>.</span></div>
-         <div class="route-row"><code>find</code><span>Payload <code>{`{ text }`}</code>. Moves to the next place the text appears.</span></div>
-         <div class="route-row"><code>table</code><span>Payload <code>{`{ move }`}</code>: <code>next-cell</code>, <code>row-header</code>, and the other table moves.</span></div>
-         <div class="route-row"><code>elements</code><span>Payload <code>{`{ kind, max? }`}</code>. The rotor for one kind, from the top of the page.</span></div>
-         <div class="route-row"><code>read-all</code><span>Payload <code>{`{ max? }`}</code>. Say-all as a transcript from the cursor.</span></div>
-         <div class="route-row"><code>goto</code><span>Payload <code>{`{ role?, name?, max? }`}</code>. Steps forward until the item matches.</span></div>
-         <div class="route-row"><code>wait</code><span>Payload <code>{`{ for?, since?, ms?, timeoutMs? }`}</code>. Polls the transcript for a phrase.</span></div>
-         <div class="route-row"><code>screenshot</code><span>Payload <code>{`{ path }`}</code>. VoiceOver cursor only.</span></div>
-      </div>
-      <p>
-         <code>find</code>, <code>goto</code>, and <code>wait</code> add <code>exitCode</code> to the
-         result: 4 when the search or wait did not match, matching <code>a1 sr find</code>,
-         <code>goto</code>, and <code>wait</code>, and 0 otherwise.
-      </p>
-      <p>
-         Every response's <code>state</code> includes the timestamped <code>transcript</code> so
-         far. A VoiceOver session's state also includes <code>axFocusedElement</code>: the
-         accessibility role, subrole, title, description, value, and enabled state of the element
-         system keyboard focus is on.
-      </p>
+      <h3>sr_expect, sr_transcript, sr_list</h3>
+      <dl class="defs">
+         <dt><code>sr_expect</code></dt>
+         <dd><code>pattern</code>, required: text, matched without regard to case, or <code>/regex/flags</code>. <code>since</code> limits it to what came after a checkpoint. <code>not</code> passes when nothing matches. Returns <code>exitCode</code> 4 and a <code>message</code> on failure.</dd>
+         <dt><code>sr_transcript</code></dt>
+         <dd><code>since</code>, <code>tail</code>, <code>afterIndex</code>, <code>limit</code>, and <code>out</code> to write a <code>.json</code> or <code>.md</code> file. <code>format</code> overrides the file type.</dd>
+         <dt><code>sr_list</code></dt>
+         <dd><code>query</code>, <code>sr</code>, <code>commandSet</code>. Pass <code>query</code>: the full list has several hundred entries.</dd>
+      </dl>
    </section>
 
-   <section class="split panel" id="sr-checks">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Checks</p>
-            <h2>sr_list, sr_expect, sr_transcript</h2>
-         </div>
-         <div class="route-list">
-            <div class="route-row"><code>sr_list</code><span><code>query</code>, <code>sr</code>, and <code>commandSet</code> all optional. Start with <code>query</code>. The unfiltered list is over 400 entries.</span></div>
-            <div class="route-row"><code>sr_expect</code><span><code>pattern</code> required, text (case-insensitive) or <code>/regex/flags</code>. <code>since</code> limits the check to phrases after a checkpoint. <code>not</code> passes when the phrase was NOT announced.</span></div>
-            <div class="route-row"><code>sr_transcript</code><span><code>since</code>, <code>tail</code>, <code>afterIndex</code>, <code>limit</code>, <code>out</code>, and <code>format</code> are optional. Index paging defaults to 200 entries. <code>transcript.window</code> reports omitted entries and the next index. <code>out</code> also writes the transcript to a <code>.json</code> or <code>.md</code> path.</span></div>
-         </div>
-         <p>
-            <code>sr_expect</code> returns <code>exitCode</code> 4 (the CLI assertion exit code) and a
-            <code>message</code> when the phrase did not match, and 0 when it did.
-         </p>
-      </div>
-      <div class="split-aside">
-         <div class="tag">Assertion pattern</div>
-         <p class="aside-note">
-            Move the session with <code>sr_action</code>, then call <code>sr_expect</code> to check
-            what was announced. This is the same pattern the agent skill's screen reader recipe uses.
-         </p>
-      </div>
+   <section>
+      <h2 id="audit">Audit tools</h2>
+      <p>
+         These read and write the same audit as the <code>a1 audit</code> commands, so CLI
+         and MCP workers can share one. Each takes an optional <code>audit</code> ID, except
+         <code>audit_init</code> and <code>audit_list</code>. See
+         <a href="/guides/audit">run an audit</a>.
+      </p>
+      <dl class="defs defs--wide">
+         <dt><code>audit_init</code>, <code>audit_list</code></dt>
+         <dd>Create an audit, or list the audits in the workspace.</dd>
+         <dt><code>audit_page</code></dt>
+         <dd><code>action</code>: <code>add</code>, <code>list</code>, <code>exclude</code>, or <code>include</code>.</dd>
+         <dt><code>audit_discover</code>, <code>audit_scan</code></dt>
+         <dd>Add a site's pages, then run the automated checks on them.</dd>
+         <dt><code>audit_next</code></dt>
+         <dd><code>worker</code>, required. Claims a unit and returns its work packet. <code>passes</code> and <code>excludePasses</code> choose the kind of work.</dd>
+         <dt><code>audit_submit</code></dt>
+         <dd><code>worker</code>, <code>unit</code>, and <code>submission</code>, required. A rejection lists every problem.</dd>
+         <dt><code>audit_show</code>, <code>audit_note</code>, <code>audit_block</code>, <code>audit_reopen</code></dt>
+         <dd>Inspect a unit, keep a claim alive, set a unit aside, or queue it again.</dd>
+         <dt><code>audit_limitation</code></dt>
+         <dd>Record something the whole audit could not test.</dd>
+         <dt><code>audit_status</code>, <code>audit_signals</code></dt>
+         <dd>Progress, and the scan's measurements for a page.</dd>
+         <dt><code>audit_findings</code>, <code>audit_finding</code></dt>
+         <dd>List findings, and dismiss, merge, or rewrite one.</dd>
+         <dt><code>audit_report</code></dt>
+         <dd>Write the report files.</dd>
+      </dl>
    </section>
 
-   <section class="ledger" id="resources">
-      <div class="panel-head">
-         <p class="panel-kicker">Resources</p>
-         <h2>Read-only resource URIs</h2>
-      </div>
-      <div class="route-list">
-         <div class="route-row"><code>a11ied://targets</code><span>The supported target list.</span></div>
-         <div class="route-row"><code>a11ied://wcag/criteria/2.2</code><span>The criteria index for a version.</span></div>
-         <div class="route-row"><code>a11ied://wcag/levels/2.2</code><span>Level to criteria lists for a version.</span></div>
-         <div class="route-row"><code>a11ied://wcag/test-methods/2.2</code><span>The test method (<code>method</code>) and mapped rule ids for every criterion in a version.</span></div>
-      </div>
-      <p>
-         The three versioned resources are registered for both <code>2.1</code> and
-         <code>2.2</code>, which makes seven resources in total. All return
-         <code>application/json</code>.
-      </p>
+   <section>
+      <h2 id="other">doctor and talkback</h2>
+      <dl class="defs">
+         <dt><code>doctor</code></dt>
+         <dd><code>task</code>: <code>all</code>, <code>scan</code>, <code>reader</code>, or <code>audit</code>. <code>target</code>: the screen reader to check. <code>recording: true</code> also checks screen recording.</dd>
+         <dt><code>talkback</code></dt>
+         <dd><code>action</code>, required: <code>on</code>, <code>off</code>, or <code>walk</code>. For <code>walk</code>, <code>key</code> and <code>count</code>. <code>serial</code> picks a device.</dd>
+      </dl>
    </section>
 
-   <section class="field-note" id="effects">
-      <div class="panel-head">
-         <p class="panel-kicker">Side effects</p>
-         <h2>Side effects by tool</h2>
-      </div>
-      <div class="route-list">
-         <div class="route-row"><div class="route-terms"><code>wcag_show</code>, <code>wcag_criteria</code>, <code>wcag_rule</code>, <code>search</code>, <code>pattern_show</code>, <code>pattern_find</code></div><span>Read local files. <code>wcag_rule</code> also reads the installed axe-core package for help text.</span></div>
-         <div class="route-row"><div class="route-terms"><code>run_axe</code>, <code>tree</code>, <code>check</code>, <code>audit_scan</code></div><span>Open the target in browser automation.</span></div>
-         <div class="route-row"><code>doctor</code><span>Reads prerequisites for the requested task. Reader checks inspect settings; recording checks run only when requested.</span></div>
-      </div>
-      <p>
-         The <code>sr_*</code> tools change the state of the machine. A real session puts VoiceOver
-         or NVDA under automation control until the client calls <code>sr_session</code> with
-         <code>action: "stop"</code>.
-      </p>
+   <section>
+      <h2 id="resources">Resources</h2>
+      <p>The server offers seven read-only resources, all JSON.</p>
+      <dl class="defs defs--wide">
+         <dt><code>a11ied://targets</code></dt>
+         <dd>The screen readers a11ied supports.</dd>
+         <dt><code>a11ied://wcag/criteria/2.2</code></dt>
+         <dd>Every criterion.</dd>
+         <dt><code>a11ied://wcag/levels/2.2</code></dt>
+         <dd>The criteria at each level.</dd>
+         <dt><code>a11ied://wcag/test-methods/2.2</code></dt>
+         <dd>The test method and mapped rules for each criterion.</dd>
+      </dl>
+      <p>The three WCAG resources also exist for <code>2.1</code>.</p>
+   </section>
+
+   <section>
+      <h2 id="effects">What each tool touches</h2>
+      <dl class="defs">
+         <dt>Lookup tools, <code>pattern_show</code>, <code>pattern_find</code></dt>
+         <dd>Read files in the package. Nothing else.</dd>
+         <dt>Page tools, <code>pattern_check</code>, <code>audit_scan</code></dt>
+         <dd>Open the page in a headless browser. <code>pattern_check</code> presses keys in it. <code>capture</code> writes an image file.</dd>
+         <dt><code>sr_*</code> with <code>virtual</code></dt>
+         <dd>Run a headless browser until the session stops.</dd>
+         <dt><code>sr_*</code> with <code>voiceover</code> or <code>nvda</code></dt>
+         <dd>Take control of the screen reader and a browser window on this machine, until <code>sr_session</code> is called with <code>stop</code>.</dd>
+         <dt><code>audit_*</code>, <code>pattern_record</code></dt>
+         <dd>Write to the <code>.a11ied</code> folder in the working directory.</dd>
+      </dl>
    </section>
 </DocShell>

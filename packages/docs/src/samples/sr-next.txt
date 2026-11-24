@@ -1,0 +1,10 @@
+sr next  virtual
+  Phrase:  banner
+  Item:    none
+  Role:    banner
+
+sr next heading  virtual
+  Phrase:  heading, Team, level 1
+  Item:    Team
+  Role:    heading level 1
+  Name:    Team
