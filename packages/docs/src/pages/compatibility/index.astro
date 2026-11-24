@@ -26,7 +26,7 @@ import {
 import OutcomeBadge from '../../components/support/outcome-badge.astro';
 import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
-import { formatFeatureSummary } from '../../lib/support-grouping';
+import { formatFeatureSummary, parseLicense } from '../../lib/support-grouping';
 
 const MAX_CELLS_PER_COL = 4;
 const MAX_TARGETS_PREVIEW = 8;
@@ -68,6 +68,7 @@ const categories = listCategories();
 const summaryCounts = getSummaryCounts();
 const features = listFeatures();
 const ariaAtSummary = getAriaAtSummary();
+const license = parseLicense(ariaAtSummary.license);
 const ariaAtPlans = listAriaAtPlans();
 const ariaAtEnvironments = listAriaAtEnvironments();
 
@@ -375,21 +376,9 @@ function computeRealSrOverview(feature: FeatureReport): RealSrOverview {
    };
 }
 
-function formatCoverageLabel(coverage: FeatureReport['sourceCoverage']): string {
-   switch (coverage) {
-      case 'both': {
-         return 'a11ied + ARIA-AT';
-      }
-      case 'local': {
-         return 'a11ied Local';
-      }
-      case 'w3c-aria-at': {
-         return 'W3C ARIA-AT';
-      }
-      default: {
-         return String(coverage);
-      }
-   }
+/** A version of "Pending" or "Not recorded ..." is a gap in the data, so only the name is shown. */
+function joinVersion(name: string, version: string): string {
+   return /^(pending|not recorded)/i.test(version.trim()) ? name : `${name} ${version}`.trim();
 }
 
 interface PresetVerdictPayload {
@@ -565,94 +554,6 @@ const toc = [
    variant="wide"
    toc={toc}
 >
-   <section id="ciu-search-panel" class="ciuHero" aria-label="Search feature compatibility">
-      <search class="ciuHero-box">
-         <div class="ciuSearch-sentence">
-            <label for="ciu-search" class="ciuSearch-prompt">Can I use</label>
-            <input
-               id="ciu-search"
-               type="search"
-               class="ciuSearch-input"
-               placeholder="aria-labelledby, role=alert, @checked, dialog..."
-               autocomplete="off"
-            />
-            <span class="ciuSearch-qmark" aria-hidden="true">?</span>
-         </div>
-
-         <div class="ciuSearch-examples" role="group" aria-label="Suggested searches">
-            <span class="ciuSearch-examplesLabel">Examples:</span>
-            {EXAMPLE_SEARCHES.map((term, index) => (
-               <>
-                  {index > 0 && <span class="ciuSearch-sep" aria-hidden="true">·</span>}
-                  <button type="button" class="ciuExampleLink" data-ciu-example={term}>
-                     {term}
-                  </button>
-               </>
-            ))}
-         </div>
-
-         <div class="ciuFilters">
-            <div class="ciuFilter">
-               <label for="ciu-browserslist">Browserslist target</label>
-               <select id="ciu-browserslist">
-                  <option value="all">All tested environments</option>
-                  {BROWSERSLIST_PRESETS.map((preset) => (
-                     <option value={preset.id}>{preset.label}</option>
-                  ))}
-               </select>
-            </div>
-
-            <div class="ciuFilter">
-               <label for="ciu-type">Spec</label>
-               <select id="ciu-type">
-                  <option value="all">All ({features.length})</option>
-                  <option value="aria">ARIA</option>
-                  <option value="html">HTML</option>
-               </select>
-            </div>
-
-            <div class="ciuFilter">
-               <label for="ciu-source">Source</label>
-               <select id="ciu-source">
-                  <option value="all">All sources</option>
-                  <option value="both">a11ied + ARIA-AT</option>
-                  <option value="local">a11ied Local</option>
-                  <option value="w3c-aria-at">W3C ARIA-AT</option>
-               </select>
-            </div>
-
-            <div class="ciuFilter ciuFilter--action">
-               <button id="ciu-reset" type="button" class="ciuResetBtn">
-                  <RotateCcw size={14} aria-hidden="true" focusable="false" />
-                  <span>Reset</span>
-               </button>
-            </div>
-         </div>
-
-         <div
-            id="ciu-bl-banner"
-            class="ciuBlBanner"
-            data-preset-summaries={JSON.stringify(presetSummaries)}
-            hidden
-         >
-            <strong>Targets:</strong>
-            <span id="ciu-bl-banner-text"></span>
-         </div>
-
-         <div class="ciuHero-footer">
-            <p id="ciu-status" class="ciuHero-status" role="status" aria-live="polite">
-               Showing {features.length} of {features.length} features.
-            </p>
-            <ul class="ciuLegend" aria-label="Compatibility legend">
-               <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--pass" aria-hidden="true"></span>Supported</li>
-               <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--partial" aria-hidden="true"></span>Partial</li>
-               <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--fail" aria-hidden="true"></span>Fails MUST</li>
-               <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--untested" aria-hidden="true"></span>Untested</li>
-            </ul>
-         </div>
-      </search>
-   </section>
-
    <div class="ciuViewSwitch">
       <div id="ciu-tablist" class="ciuTablist" role="tablist" aria-label="Compatibility views">
          <button
@@ -673,9 +574,9 @@ const toc = [
             class="ciuTab"
             aria-selected="false"
             tabindex="-1"
-            data-panel-target="isolated-cases"
+            data-panel-target="test-cases"
          >
-            Isolated tests ({screenReaderTests.length})
+            Test cases ({screenReaderTests.length})
          </button>
          <button
             type="button"
@@ -709,29 +610,101 @@ const toc = [
       aria-labelledby="ciu-tab-features"
       data-ciu-panel
    >
+      <div id="ciu-search-panel" class="ciuHero">
+         <search class="ciuHero-box" aria-label="Search feature compatibility">
+            <div class="ciuSearch-sentence">
+               <label for="ciu-search" class="ciuSearch-prompt">Can I use</label>
+               <input
+                  id="ciu-search"
+                  type="search"
+                  class="ciuSearch-input"
+                  placeholder="aria-labelledby, role=alert, @checked, dialog..."
+                  autocomplete="off"
+               />
+               <span class="ciuSearch-qmark" aria-hidden="true">?</span>
+            </div>
+
+            <div class="ciuSearch-examples" role="group" aria-label="Suggested searches">
+               <span class="ciuSearch-examplesLabel">Examples:</span>
+               {EXAMPLE_SEARCHES.map((term, index) => (
+                  <>
+                     {index > 0 && <span class="ciuSearch-sep" aria-hidden="true">·</span>}
+                     <button type="button" class="ciuExampleLink" data-ciu-example={term}>
+                        {term}
+                     </button>
+                  </>
+               ))}
+            </div>
+
+            <div class="ciuFilters">
+               <div class="ciuFilter">
+                  <label for="ciu-browserslist">Browserslist target</label>
+                  <select id="ciu-browserslist">
+                     <option value="all">All tested environments</option>
+                     {BROWSERSLIST_PRESETS.map((preset) => (
+                        <option value={preset.id}>{preset.label}</option>
+                     ))}
+                  </select>
+               </div>
+
+               <div class="ciuFilter">
+                  <label for="ciu-type">Feature type</label>
+                  <select id="ciu-type">
+                     <option value="all">All ({features.length})</option>
+                     <option value="aria">ARIA</option>
+                     <option value="html">HTML</option>
+                  </select>
+               </div>
+
+               <div class="ciuFilter ciuFilter--action">
+                  <button id="ciu-reset" type="button" class="ciuResetBtn">
+                     <RotateCcw size={14} aria-hidden="true" focusable="false" />
+                     <span>Reset</span>
+                  </button>
+               </div>
+            </div>
+
+            <div
+               id="ciu-bl-banner"
+               class="ciuBlBanner"
+               data-preset-summaries={JSON.stringify(presetSummaries)}
+               hidden
+            >
+               <strong>Targets:</strong>
+               <span id="ciu-bl-banner-text"></span>
+            </div>
+
+            <div class="ciuHero-footer">
+               <p id="ciu-status" class="ciuHero-status" role="status" aria-live="polite">
+                  Showing {features.length} of {features.length} features.
+               </p>
+               <ul class="ciuLegend" aria-label="Compatibility legend">
+                  <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--pass" aria-hidden="true"></span>Supported</li>
+                  <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--partial" aria-hidden="true"></span>Partial</li>
+                  <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--fail" aria-hidden="true"></span>Fails MUST</li>
+                  <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--untested" aria-hidden="true"></span>Untested</li>
+               </ul>
+            </div>
+         </search>
+      </div>
+
       <ul class="ciuCards">
          {preparedFeatures.map(({ feature, summaryLine, overview, columns, presetVerdicts, searchBlob }) => (
             <li
                class={`ciuCard ciuCard--${overview.accentState}`}
                data-ciu-card="true"
                data-type={feature.type}
-               data-source={feature.sourceCoverage}
                data-search={searchBlob}
                data-browserslist={JSON.stringify(presetVerdicts)}
                data-default-verdict={overview.verdictText}
             >
                <div class="ciuCard-top">
                   <div class="ciuCard-intro">
-                     <div class="ciuCard-titleRow">
-                        <h2 class="ciuCard-title">
-                           <a href={`/compatibility/features/${feature.type}/${feature.refId}/`}>
-                              {feature.title}
-                           </a>
-                        </h2>
-                        <span class="ciuMetaLine">
-                           {feature.type.toUpperCase()} · {formatCoverageLabel(feature.sourceCoverage)}
-                        </span>
-                     </div>
+                     <h2 class="ciuCard-title">
+                        <a href={`/compatibility/features/${feature.type}/${feature.refId}/`}>
+                           {feature.title}
+                        </a>
+                     </h2>
                      <p class="ciuCard-desc">{summaryLine}</p>
                   </div>
 
@@ -836,12 +809,12 @@ const toc = [
                <div class="ciuCard-foot">
                   <details class="ciuCard-more">
                      <summary>
-                        {feature.localCases.length} isolated {feature.localCases.length === 1 ? 'case' : 'cases'} · {feature.ariaAtPlans.length} ARIA-AT {feature.ariaAtPlans.length === 1 ? 'plan' : 'plans'}
+                        {feature.localCases.length} test {feature.localCases.length === 1 ? 'case' : 'cases'} · {feature.ariaAtPlans.length} ARIA-AT {feature.ariaAtPlans.length === 1 ? 'plan' : 'plans'}
                      </summary>
                      <div class="ciuCard-moreBody">
                         {feature.localCases.length > 0 && (
                            <div class="ciuCard-linksGroup">
-                              <h4>Isolated cases</h4>
+                              <h4>Test cases</h4>
                               <ul>
                                  {feature.localCases.map((testCase) => (
                                     <li>
@@ -902,7 +875,7 @@ const toc = [
    </section>
 
    <section
-      id="isolated-cases"
+      id="test-cases"
       class="ciuTabPanel"
       role="tabpanel"
       aria-labelledby="ciu-tab-cases"
@@ -913,7 +886,7 @@ const toc = [
          Single-feature HTML test cases run directly against real screen readers with <code>a11ied</code>.
       </p>
 
-      <search aria-label="Filter isolated test cases" class="srIndex-searchBox">
+      <search aria-label="Filter test cases" class="srIndex-searchBox">
          <div class="srIndex-controls">
             <div class="srIndex-control srIndex-control--search">
                <label for="sr-search">Search scenarios</label>
@@ -998,12 +971,12 @@ const toc = [
          class="srIndex-tableWrap"
          tabindex="0"
          role="region"
-         aria-label="Isolated test cases table"
+         aria-label="Test cases table"
          data-env-types={JSON.stringify(environmentTypes)}
       >
          <table class="srIndex-table">
             <caption class="srIndex-caption">
-               Searchable and filterable table of isolated screen reader test cases
+               Searchable and filterable table of screen reader test cases
             </caption>
             <thead>
                <tr>
@@ -1165,89 +1138,76 @@ const toc = [
       </div>
 
       <h3 class="srIndex-subHeading">Environments a11ied tested</h3>
-      <div class="srIndex-envGrid">
-         {environmentFiles.map((envFile) => {
-            const env = envFile.environment;
-            return (
-               <div class="srIndex-envCard">
-                  <div class="srIndex-envTop">
-                     <h4>
-                        {env.shortLabel}
-                        {env.browserType === 'webview' ? ' · WebView' : ''}
-                     </h4>
-                     <OutcomeBadge
-                        outcome={envFile.status === 'tested' ? 'pass' : 'untested'}
-                        compact={true}
-                     />
-                  </div>
-                  <dl class="srIndex-envMeta">
-                     <div>
-                        <dt>Device</dt>
-                        <dd>{env.device}</dd>
-                     </div>
-                     <div>
-                        <dt>OS</dt>
-                        <dd>{env.os} {env.osVersion}</dd>
-                     </div>
-                     <div>
-                        <dt>Browser</dt>
-                        <dd>{env.browser} {env.browserVersion}</dd>
-                     </div>
-                     <div>
-                        <dt>Screen Reader</dt>
-                        <dd>{env.screenReader} {env.screenReaderVersion}</dd>
-                     </div>
-                  </dl>
-                  {envFile.statusNote && <p class="srIndex-envNote">{envFile.statusNote}</p>}
-               </div>
-            );
-         })}
+      <div class="srIndex-tableWrap" tabindex="0" role="region" aria-label="Environments a11ied tested">
+         <table class="srIndex-table">
+            <thead>
+               <tr>
+                  <th scope="col">Screen reader</th>
+                  <th scope="col">Browser</th>
+                  <th scope="col">Operating system</th>
+                  <th scope="col">Device</th>
+                  <th scope="col">Status</th>
+               </tr>
+            </thead>
+            <tbody>
+               {environmentFiles.map((envFile) => {
+                  const env = envFile.environment;
+                  return (
+                     <tr>
+                        <th scope="row">{joinVersion(env.screenReader, env.screenReaderVersion)}</th>
+                        <td>
+                           {joinVersion(env.browser, env.browserVersion)}
+                           {env.browserType === 'webview' ? ' (WebView)' : ''}
+                        </td>
+                        <td>{joinVersion(env.os, env.osVersion)}</td>
+                        <td>{env.device}</td>
+                        <td>{envFile.status === 'tested' ? 'Tested' : (envFile.statusNote ?? 'Not yet tested')}</td>
+                     </tr>
+                  );
+               })}
+            </tbody>
+         </table>
       </div>
 
       <h3 class="srIndex-subHeading srIndex-subHeading--spaced">
-         W3C ARIA-AT environments
+         Environments in W3C ARIA-AT reports
       </h3>
-      <div class="srIndex-envGrid">
-         {ariaAtEnvironments.map((env) => (
-            <div class="srIndex-envCard">
-               <div class="srIndex-envTop">
-                  <h4>
-                     {env.screenReader} {env.screenReaderVersion} · {env.browser} {env.browserVersion}
-                  </h4>
-                  <span class="srIndex-planMeta">ARIA-AT</span>
-               </div>
-               <dl class="srIndex-envMeta">
-                  <div>
-                     <dt>OS</dt>
-                     <dd>{env.os} {env.osVersion}</dd>
-                  </div>
-                  <div>
-                     <dt>Device</dt>
-                     <dd>{env.device}</dd>
-                  </div>
-                  <div>
-                     <dt>Coverage</dt>
-                     <dd>{env.planCount} {env.planCount === 1 ? 'plan' : 'plans'}</dd>
-                  </div>
-                  {env.latestTestedAt && (
-                     <div>
-                        <dt>Latest</dt>
-                        <dd>{env.latestTestedAt.slice(0, DATE_PREFIX_LEN)}</dd>
-                     </div>
-                  )}
-               </dl>
-            </div>
-         ))}
+      <div
+         class="srIndex-tableWrap"
+         tabindex="0"
+         role="region"
+         aria-label="Environments in W3C ARIA-AT reports"
+      >
+         <table class="srIndex-table">
+            <thead>
+               <tr>
+                  <th scope="col">Screen reader</th>
+                  <th scope="col">Browser</th>
+                  <th scope="col">Operating system</th>
+                  <th scope="col">Test plans</th>
+                  <th scope="col">Latest report</th>
+               </tr>
+            </thead>
+            <tbody>
+               {ariaAtEnvironments.map((env) => (
+                  <tr>
+                     <th scope="row">{joinVersion(env.screenReader, env.screenReaderVersion)}</th>
+                     <td>{joinVersion(env.browser, env.browserVersion)}</td>
+                     <td>{joinVersion(env.os, env.osVersion)}</td>
+                     <td>{env.planCount}</td>
+                     <td>{env.latestTestedAt ? env.latestTestedAt.slice(0, DATE_PREFIX_LEN) : ''}</td>
+                  </tr>
+               ))}
+            </tbody>
+         </table>
       </div>
    </section>
 
    <footer class="srIndex-attribution">
       <p>
          W3C ARIA-AT test plans and reports come from{' '}
-         <a href={ariaAtSummary.upstreamURL} target="_blank" rel="noopener noreferrer">
-            aria-at.w3.org
-         </a>{' '}
-         ({ariaAtSummary.license}).
+         <a href={ariaAtSummary.upstreamURL} target="_blank" rel="noopener noreferrer">aria-at.w3.org</a>, under the{' '}
+         <a href={license.url} target="_blank" rel="noopener noreferrer">{license.name}</a>.
       </p>
    </footer>
 </DocShell>
@@ -1595,26 +1555,13 @@ section.ciuTabPanel,
    flex: 1 1 320px;
 }
 
-.ciuCard-titleRow {
-   display: flex;
-   flex-wrap: wrap;
-   align-items: baseline;
-   gap: 0.5rem 0.7rem;
-}
-
 .ciuCard-title {
+   /* The card's colored top edge is the only rule above the title. */
+   padding-top: 0;
+   border-top: 0;
    margin: 0;
    font-size: 1.42rem;
    line-height: 1.1;
-}
-
-.ciuMetaLine {
-   font-family: var(--display);
-   font-size: 0.74rem;
-   font-weight: 700;
-   letter-spacing: 0.06em;
-   text-transform: uppercase;
-   color: var(--ink-soft);
 }
 
 .ciuCard-desc {
@@ -2247,65 +2194,9 @@ section.ciuTabPanel,
    margin-block-start: 0.9rem;
 }
 
-.srIndex-envGrid {
-   display: grid;
-   grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
-   gap: 0.85rem;
-}
-
-.srIndex-envCard {
-   padding: 0.85rem 0.95rem;
-   border: 1px solid color-mix(in oklch, var(--ink) 18%, transparent);
-   border-radius: 4px;
-   background: var(--paper-light);
-   min-inline-size: 0;
-}
-
-.srIndex-envTop {
-   display: flex;
-   align-items: center;
-   justify-content: space-between;
-   gap: 0.5rem;
-   margin-block-end: 0.6rem;
-}
-
-.srIndex-envTop h4 {
-   margin: 0;
-   font-family: var(--display);
-   font-size: 0.92rem;
-   line-height: 1.1;
-   text-transform: uppercase;
-}
-
-.srIndex-envMeta {
-   margin: 0;
-   display: flex;
-   flex-direction: column;
-   gap: 0.25rem;
-   font-size: 0.82rem;
-}
-
-.srIndex-envMeta div {
-   display: flex;
-   justify-content: space-between;
-   gap: 0.5rem;
-}
-
-.srIndex-envMeta dt {
-   color: var(--ink-soft);
+/* Row headers in the environment tables read as data, not as column headings. */
+.srIndex-table tbody th {
    font-weight: 700;
-}
-
-.srIndex-envMeta dd {
-   margin: 0;
-   text-align: end;
-   word-break: break-word;
-}
-
-.srIndex-envNote {
-   margin-block: 0.55rem 0;
-   font-size: 0.78rem;
-   color: var(--ink-soft);
 }
 
 .srIndex-attribution {

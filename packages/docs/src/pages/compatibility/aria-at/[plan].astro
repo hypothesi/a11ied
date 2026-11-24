@@ -21,6 +21,7 @@ import {
    formatRowOsVersion,
    formatShortDate,
    groupByScreenReaderAndOs,
+   parseLicense,
 } from '../../../lib/support-grouping';
 import '../../../styles/support-rows.css';
 
@@ -40,6 +41,7 @@ export interface Props {
 
 const { plan } = Astro.props;
 const ariaAtSummary = getAriaAtSummary();
+const license = parseLicense(ariaAtSummary.license);
 
 function getReportOutcome(
    report: AriaAtEnvironmentReport,
@@ -150,7 +152,7 @@ const toc = [
    </div>
 
    <section class="srPlan-section" aria-labelledby="reports-heading">
-      <h2 id="reports-heading">Screen Reader Reports</h2>
+      <h2 id="reports-heading">Screen reader reports</h2>
 
       <div class="srGroups">
          {groupedReports.map((group) => (
@@ -285,11 +287,9 @@ const toc = [
 
    <footer class="srPlan-attribution">
       <p>
-         W3C ARIA-AT report data synchronized from{' '}
-         <a href={ariaAtSummary.upstreamURL} target="_blank" rel="noopener noreferrer">
-            aria-at.w3.org
-         </a>{' '}
-         ({ariaAtSummary.license}).
+         The W3C ARIA-AT report data comes from{' '}
+         <a href={ariaAtSummary.upstreamURL} target="_blank" rel="noopener noreferrer">aria-at.w3.org</a>, under the{' '}
+         <a href={license.url} target="_blank" rel="noopener noreferrer">{license.name}</a>.
       </p>
    </footer>
 </DocShell>

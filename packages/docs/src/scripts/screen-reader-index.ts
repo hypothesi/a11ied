@@ -10,7 +10,6 @@ interface ParsedFeatureCard {
    readonly element: HTMLElement;
    readonly searchText: string;
    readonly type: string;
-   readonly source: string;
    readonly defaultVerdict: string;
    readonly browserslistMap: Readonly<Record<string, ParsedFeatureVerdict>>;
    readonly verdictEl: HTMLElement | undefined;
@@ -22,7 +21,6 @@ interface FeatureFilterState {
    readonly query: string;
    readonly preset: string;
    readonly type: string;
-   readonly source: string;
 }
 
 interface ParsedTestRow {
@@ -349,7 +347,6 @@ interface HeroElements {
    readonly searchInput: HTMLInputElement;
    readonly presetSelect: HTMLSelectElement;
    readonly typeSelect: HTMLSelectElement;
-   readonly sourceSelect: HTMLSelectElement;
    readonly resetBtn: HTMLButtonElement;
    readonly statusEl: HTMLElement | undefined;
    readonly emptyEl: HTMLElement | undefined;
@@ -364,14 +361,12 @@ function queryHeroElements(): HeroElements | undefined {
    const searchInput = document.querySelector('#ciu-search');
    const presetSelect = document.querySelector('#ciu-browserslist');
    const typeSelect = document.querySelector('#ciu-type');
-   const sourceSelect = document.querySelector('#ciu-source');
    const resetBtn = document.querySelector('#ciu-reset');
 
    if (
       !(searchInput instanceof HTMLInputElement) ||
       !(presetSelect instanceof HTMLSelectElement) ||
       !(typeSelect instanceof HTMLSelectElement) ||
-      !(sourceSelect instanceof HTMLSelectElement) ||
       !(resetBtn instanceof HTMLButtonElement)
    ) {
       return undefined;
@@ -393,7 +388,6 @@ function queryHeroElements(): HeroElements | undefined {
          element,
          searchText: (element.dataset.search ?? '').toLowerCase(),
          type: element.dataset.type ?? '',
-         source: element.dataset.source ?? '',
          defaultVerdict: element.dataset.defaultVerdict ?? '',
          browserslistMap: parseFeatureVerdicts(element.dataset.browserslist),
          verdictEl: verdictEl instanceof HTMLElement ? verdictEl : undefined,
@@ -406,7 +400,6 @@ function queryHeroElements(): HeroElements | undefined {
       searchInput,
       presetSelect,
       typeSelect,
-      sourceSelect,
       resetBtn,
       statusEl: statusEl instanceof HTMLElement ? statusEl : undefined,
       emptyEl: emptyEl instanceof HTMLElement ? emptyEl : undefined,
@@ -456,9 +449,6 @@ function matchesFeatureCard(card: ParsedFeatureCard, state: FeatureFilterState):
    if (state.type !== 'all' && card.type !== state.type) {
       return false;
    }
-   if (state.source !== 'all' && card.source !== state.source) {
-      return false;
-   }
    if (state.query !== '' && !card.searchText.includes(state.query)) {
       return false;
    }
@@ -485,7 +475,6 @@ function readHeroFilterState(elements: HeroElements): FeatureFilterState {
       query: elements.searchInput.value.trim().toLowerCase(),
       preset: elements.presetSelect.value,
       type: elements.typeSelect.value,
-      source: elements.sourceSelect.value,
    };
 }
 
@@ -499,7 +488,6 @@ function initFeatureSearch(): void {
    restoreControlValue(elements.searchInput, 'q');
    restoreControlValue(elements.presetSelect, 'bl');
    restoreControlValue(elements.typeSelect, 'ftype');
-   restoreControlValue(elements.sourceSelect, 'fsource');
 
    let statusTimer: ReturnType<typeof globalThis.setTimeout> | undefined = undefined;
 
@@ -546,7 +534,6 @@ function initFeatureSearch(): void {
             ['q', state.query],
             ['bl', state.preset === 'all' ? '' : state.preset],
             ['ftype', state.type === 'all' ? '' : state.type],
-            ['fsource', state.source === 'all' ? '' : state.source],
          ]);
       }
 
@@ -554,11 +541,7 @@ function initFeatureSearch(): void {
    };
 
    elements.searchInput.addEventListener('input', () => applyFilters(false, true));
-   for (const selectEl of [
-      elements.presetSelect,
-      elements.typeSelect,
-      elements.sourceSelect,
-   ]) {
+   for (const selectEl of [elements.presetSelect, elements.typeSelect]) {
       selectEl.addEventListener('change', () => applyFilters(true, true));
    }
 
@@ -574,7 +557,6 @@ function initFeatureSearch(): void {
       elements.searchInput.value = '';
       elements.presetSelect.value = 'all';
       elements.typeSelect.value = 'all';
-      elements.sourceSelect.value = 'all';
       applyFilters(true, true);
       elements.searchInput.focus();
    });
@@ -669,7 +651,7 @@ function matchesTestRow(
    return true;
 }
 
-function initIsolatedCasesFilters(): void {
+function initTestCaseFilters(): void {
    const queried = queryTestTableElements();
    if (!queried) {
       return;
@@ -782,7 +764,7 @@ function initSupportPage(): void {
    initViewTabs();
    initTileDetails();
    initFeatureSearch();
-   initIsolatedCasesFilters();
+   initTestCaseFilters();
 }
 
 initSupportPage();

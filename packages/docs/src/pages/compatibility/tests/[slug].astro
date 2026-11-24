@@ -126,7 +126,7 @@ const toc = [
    </div>
 
    <section class="srDetail-section" aria-labelledby="expected-heading">
-      <h2 id="expected-heading">Expected Behavior &amp; Spec Guidance</h2>
+      <h2 id="expected-heading">Expected behavior and spec guidance</h2>
       <p class="srDetail-expected">{testCase.expectedBehavior}</p>
       <ul class="srDetail-specs">
          {testCase.specReferences.map((spec) => (
@@ -144,7 +144,7 @@ const toc = [
       {resolvedAssertions.length > 0 && (
          <div class="srDetail-assertionsBlock">
             <div class="srDetail-assertionsHeader">
-               <h3 class="srDetail-subHeading">Spec Requirements (RFC 2119)</h3>
+               <h3 class="srDetail-subHeading">Spec requirements (RFC 2119)</h3>
                <a href={featureURL} class="srDetail-featureLink">
                   <span>View full feature report for <code>{testCase.attribute}</code></span>
                   <ArrowRight size={14} aria-hidden="true" focusable="false" />
@@ -163,7 +163,7 @@ const toc = [
    </section>
 
    <section class="srDetail-section" aria-labelledby="testcase-heading">
-      <h2 id="testcase-heading">Test Case</h2>
+      <h2 id="testcase-heading">Test case</h2>
       <TestCaseViewer
          slug={testCase.slug}
          title={testCase.title}
@@ -174,14 +174,14 @@ const toc = [
    </section>
 
    <section class="srDetail-section" aria-labelledby="outcomes-heading">
-      <h2 id="outcomes-heading">Screen Reader Test Outcomes</h2>
+      <h2 id="outcomes-heading">Screen reader outcomes</h2>
       <TestOutcomes testSlug={testCase.slug} environmentFiles={environmentFiles} />
    </section>
 
    {featureReport && featureReport.ariaAtPlans.length > 0 && (
       <section class="srDetail-section" aria-labelledby="aria-at-community-heading">
          <div class="srDetail-sectionHeader">
-            <h2 id="aria-at-community-heading">W3C ARIA-AT Community Data</h2>
+            <h2 id="aria-at-community-heading">W3C ARIA-AT data</h2>
             <a href={featureURL} class="srDetail-featureLink">
                <span>Compare all environments for <code>{featureReport.refId}</code></span>
                <ArrowRight size={14} aria-hidden="true" focusable="false" />

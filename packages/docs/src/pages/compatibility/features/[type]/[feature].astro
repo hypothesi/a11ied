@@ -25,6 +25,7 @@ import {
    formatShortDate,
    groupByScreenReaderAndOs,
    isVirtualScreenReader,
+   parseLicense,
 } from '../../../../lib/support-grouping';
 import '../../../../styles/support-rows.css';
 
@@ -58,23 +59,7 @@ export interface Props {
 
 const { feature } = Astro.props;
 const ariaAtSummary = getAriaAtSummary();
-
-function formatSourceLabel(coverage: FeatureReport['sourceCoverage']): string {
-   switch (coverage) {
-      case 'both': {
-         return 'Local + W3C ARIA-AT';
-      }
-      case 'local': {
-         return 'a11ied Local';
-      }
-      case 'w3c-aria-at': {
-         return 'W3C ARIA-AT';
-      }
-      default: {
-         return String(coverage);
-      }
-   }
-}
+const license = parseLicense(ariaAtSummary.license);
 
 function getEnvOutcome(
    env: FeatureEnvironmentResult,
@@ -126,15 +111,15 @@ const failPct = realTotal > 0 ? Math.max(0, PERCENT_MULTIPLIER - passPct - parti
 
 function formatOverviewHeadline(): string {
    if (realTotal === 0) {
-      return 'Untested on real assistive technology';
+      return 'Not tested with a real screen reader';
    }
    if (failEnvsCount === realTotal) {
-      return `0 of ${String(realTotal)} real screen reader combinations pass (fails MUST requirements)`;
+      return `0 of ${String(realTotal)} pass · each fails a MUST check`;
    }
    if (failEnvsCount > 0 || partialEnvsCount > 0) {
-      return `${String(passEnvsCount)} of ${String(realTotal)} pass · ${String(partialEnvsCount)} partial · ${String(failEnvsCount)} fail MUST`;
+      return `${String(passEnvsCount)} of ${String(realTotal)} pass · ${String(partialEnvsCount)} partial · ${String(failEnvsCount)} fail a MUST check`;
    }
-   return `All ${String(realTotal)} tested real screen reader combinations pass`;
+   return `All ${String(realTotal)} pass`;
 }
 
 const featureSummaryHtml = `<p>${escapeHtml(formatFeatureSummary(feature))}</p>`;
@@ -143,7 +128,7 @@ const totalResultsCount = feature.versionedEnvironments.length;
 const toc = [
    { id: 'env-support-heading', label: 'Support by screen reader' },
    ...(feature.localCases.length > 0 || feature.ariaAtPlans.length > 0
-      ? [ { id: 'related-heading', label: 'Related tests & plans' } ]
+      ? [ { id: 'related-heading', label: 'Related tests and plans' } ]
       : []),
 ];
 ---
@@ -171,9 +156,7 @@ const toc = [
          <span aria-hidden="true">·</span>
          <code>{feature.refId}</code>
          <span aria-hidden="true">·</span>
-         <span>{formatSourceLabel(feature.sourceCoverage)}</span>
-         <span aria-hidden="true">·</span>
-         <span>{feature.localEnvironmentCount} local / {feature.ariaAtEnvironmentCount} W3C ARIA-AT tested</span>
+         <span>{feature.localEnvironmentCount} tested by a11ied, {feature.ariaAtEnvironmentCount} by W3C ARIA-AT</span>
       </p>
 
       {feature.specURL && (
@@ -187,7 +170,7 @@ const toc = [
    <div class="srFeature-overview">
       <div class="srFeature-overviewTop">
          <strong>{formatOverviewHeadline()}</strong>
-         <span class="srFeature-overviewSub">Excludes the simulated screen reader</span>
+         <span class="srFeature-overviewSub">Counts each tested screen reader and browser pair. The simulated screen reader is left out.</span>
       </div>
       {realTotal > 0 && (
          <div class="srFeature-overviewBar" aria-hidden="true">
@@ -199,18 +182,9 @@ const toc = [
    </div>
 
    <section class="srFeature-section" aria-labelledby="env-support-heading">
-      <h2 id="env-support-heading">Support by Screen Reader</h2>
+      <h2 id="env-support-heading">Support by screen reader</h2>
 
       <div class="srFeature-filters" role="region" aria-label="Filter support results">
-         <div class="srFeature-filterField">
-            <label for="sr-feature-source">Source</label>
-            <select id="sr-feature-source">
-               <option value="all">All sources</option>
-               <option value="local">Local Only</option>
-               <option value="w3c-aria-at">W3C ARIA-AT Only</option>
-            </select>
-         </div>
-
          <div class="srFeature-filterField">
             <label for="sr-feature-sr">Screen Reader</label>
             <select id="sr-feature-sr">
@@ -283,7 +257,6 @@ const toc = [
                               <details
                                  class={`srRow srRow--${envOutcome}`}
                                  data-env-row
-                                 data-source={env.source}
                                  data-sr-group={group.screenReaderType}
                                  data-os-group={osGroup.os}
                                  data-browser-type={env.browserType}
@@ -339,7 +312,7 @@ const toc = [
                                        </span>
                                        <span aria-hidden="true">·</span>
                                        <span>
-                                          <strong>Source:</strong> {env.source === 'local' ? 'a11ied Local' : 'W3C ARIA-AT'}
+                                          <strong>Source:</strong> {env.source === 'local' ? 'a11ied' : 'W3C ARIA-AT'}
                                        </span>
                                        <span aria-hidden="true">·</span>
                                        <span>
@@ -480,11 +453,11 @@ const toc = [
 
    {(feature.localCases.length > 0 || feature.ariaAtPlans.length > 0) && (
       <section class="srFeature-section srFeature-related" aria-labelledby="related-heading">
-         <h2 id="related-heading">Related Test Cases &amp; Plans</h2>
+         <h2 id="related-heading">Related tests and plans</h2>
          <div class="srFeature-relatedGrid">
             {feature.localCases.length > 0 && (
                <div class="srFeature-relatedPanel">
-                  <h3>Related Local Scenarios</h3>
+                  <h3>Test cases</h3>
                   <ul class="srFeature-relatedList">
                      {feature.localCases.map((testCase) => (
                         <li>
@@ -499,7 +472,7 @@ const toc = [
 
             {feature.ariaAtPlans.length > 0 && (
                <div class="srFeature-relatedPanel">
-                  <h3>Related W3C ARIA-AT Test Plans</h3>
+                  <h3>W3C ARIA-AT test plans</h3>
                   <ul class="srFeature-relatedList">
                      {feature.ariaAtPlans.map((plan) => (
                         <li>
@@ -521,11 +494,9 @@ const toc = [
    {feature.ariaAtEnvironmentCount > 0 && (
       <footer class="srFeature-attribution">
          <p>
-            W3C ARIA-AT community test results are sourced from{' '}
-            <a href={ariaAtSummary.upstreamURL} target="_blank" rel="noopener noreferrer">
-               aria-at.w3.org
-            </a>{' '}
-            ({ariaAtSummary.license}).
+            The W3C ARIA-AT results come from{' '}
+            <a href={ariaAtSummary.upstreamURL} target="_blank" rel="noopener noreferrer">aria-at.w3.org</a>, under the{' '}
+            <a href={license.url} target="_blank" rel="noopener noreferrer">{license.name}</a>.
          </p>
       </footer>
    )}

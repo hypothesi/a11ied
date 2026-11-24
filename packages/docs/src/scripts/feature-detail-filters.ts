@@ -1,5 +1,4 @@
 interface FeatureFilterElements {
-   readonly sourceSelect: HTMLSelectElement | undefined;
    readonly srSelect: HTMLSelectElement | undefined;
    readonly osSelect: HTMLSelectElement | undefined;
    readonly browserTypeSelect: HTMLSelectElement | undefined;
@@ -34,7 +33,6 @@ function getElements(): FeatureFilterElements {
    ].filter((el): el is HTMLDetailsElement => el instanceof HTMLDetailsElement);
 
    return {
-      sourceSelect: querySelectElement('#sr-feature-source'),
       srSelect: querySelectElement('#sr-feature-sr'),
       osSelect: querySelectElement('#sr-feature-os'),
       browserTypeSelect: querySelectElement('#sr-feature-browser-type'),
@@ -60,7 +58,6 @@ function restoreSelectFromParam(
 }
 
 interface ActiveFeatureFilters {
-   readonly source: string;
    readonly sr: string;
    readonly os: string;
    readonly browserType: string;
@@ -68,7 +65,6 @@ interface ActiveFeatureFilters {
 
 function readFiltersFromURL(elements: FeatureFilterElements): void {
    const params = new URLSearchParams(globalThis.location.search);
-   restoreSelectFromParam(elements.sourceSelect, params.get('source') ?? undefined);
    restoreSelectFromParam(elements.srSelect, params.get('sr') ?? undefined);
    restoreSelectFromParam(elements.osSelect, params.get('os') ?? undefined);
    restoreSelectFromParam(
@@ -87,7 +83,6 @@ function setOrDeleteParam(url: URL, key: string, value: string): void {
 
 function syncFiltersToURL(filters: ActiveFeatureFilters): void {
    const url = new URL(globalThis.location.href);
-   setOrDeleteParam(url, 'source', filters.source);
    setOrDeleteParam(url, 'sr', filters.sr);
    setOrDeleteParam(url, 'os', filters.os);
    setOrDeleteParam(url, 'browserType', filters.browserType);
@@ -95,16 +90,14 @@ function syncFiltersToURL(filters: ActiveFeatureFilters): void {
 }
 
 function matchesRow(row: HTMLDetailsElement, filters: ActiveFeatureFilters): boolean {
-   const rowSource = row.dataset.source || '';
    const rowSR = row.dataset.srGroup || '';
    const rowOS = row.dataset.osGroup || '';
    const rowBrowserType = row.dataset.browserType || '';
-   const matchesSource = filters.source === 'all' || rowSource === filters.source;
    const matchesSR = filters.sr === 'all' || rowSR === filters.sr;
    const matchesOS = filters.os === 'all' || rowOS === filters.os;
    const matchesBrowserType =
       filters.browserType === 'all' || rowBrowserType === filters.browserType;
-   return matchesSource && matchesSR && matchesOS && matchesBrowserType;
+   return matchesSR && matchesOS && matchesBrowserType;
 }
 
 function updateGroupVisibility(groupEl: HTMLElement): number {
@@ -135,7 +128,6 @@ function updateGroupVisibility(groupEl: HTMLElement): number {
 
 function applyFeatureFilters(elements: FeatureFilterElements, updateURL: boolean): void {
    const filters: ActiveFeatureFilters = {
-      source: elements.sourceSelect?.value || 'all',
       sr: elements.srSelect?.value || 'all',
       os: elements.osSelect?.value || 'all',
       browserType: elements.browserTypeSelect?.value || 'all',
@@ -178,15 +170,11 @@ export function initFeatureDetailFilters(): void {
       applyFeatureFilters(elements, true);
    };
 
-   elements.sourceSelect?.addEventListener('change', handleChange);
    elements.srSelect?.addEventListener('change', handleChange);
    elements.osSelect?.addEventListener('change', handleChange);
    elements.browserTypeSelect?.addEventListener('change', handleChange);
 
    elements.resetButton?.addEventListener('click', () => {
-      if (elements.sourceSelect) {
-         elements.sourceSelect.value = 'all';
-      }
       if (elements.srSelect) {
          elements.srSelect.value = 'all';
       }

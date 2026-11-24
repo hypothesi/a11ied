@@ -306,6 +306,14 @@ export function formatFeatureSummary(feature: FeatureReport): string {
    return `Screen reader support for ${feature.title}.`;
 }
 
+const LICENSE_NAME_AND_URL = /^(?<name>.+?)\s*\((?<url>https?:\/\/[^)\s]+)\)$/;
+
+/** Splits a license recorded as "Name (address)" so a page can link the name. */
+export function parseLicense(license: string): { name: string; url: string | undefined } {
+   const parts = LICENSE_NAME_AND_URL.exec(license)?.groups;
+   return { name: parts?.name ?? license, url: parts?.url };
+}
+
 export function escapeHtml(text: string): string {
    return text
       .replaceAll('&', '&amp;')
