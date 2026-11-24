@@ -8,11 +8,15 @@ The feature files are grouped by product layer:
 - `02-wcag-engine-query.feature`
 - `03-wcag-applicability.feature`
 - `04-cli-wcag.feature`
-- `05-cli-inspect.feature`
 - `06-cli-sr.feature`
 - `07-cli-axe.feature`
 - `11-mcp.feature`
 - `12-docs-and-release.feature`
+- `13-post-v0.3-docs-api-recording.feature`
+- `14-cli-ergonomics.feature`
+- `15-docs-ux-remediation.feature`
+- `16-browser-policy.feature`
+- `17-test-command-queue.feature`
 
 ## Shared fixture assumptions
 

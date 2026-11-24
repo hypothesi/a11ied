@@ -9,30 +9,31 @@ Feature: CLI axe execution commands
     And the internal browser helper can load URL fixtures and inject axe-core
 
   Scenario: Run axe by criterion on a failing fixture
-    When I run `a11ied axe --url http://127.0.0.1:4173/button-name-failure.html --criterion 4.1.2 --json`
-    Then the command exits with code 0
+    When I run `a11ied axe http://127.0.0.1:4173/button-name-failure.html --criterion 4.1.2 --json`
+    Then the command exits with code 4
     And the result includes one or more violation rows
+    And the verdict lists each failing finding
     And every reported rule id appears in the coverage mapping for criterion "4.1.2"
     And the result preserves raw rule ids, target nodes, and help URLs
 
   Scenario: Run axe by level on a contrast failure page
-    When I run `a11ied axe --url http://127.0.0.1:4173/contrast-failure.html --level AA --json`
-    Then the command exits with code 0
+    When I run `a11ied axe http://127.0.0.1:4173/contrast-failure.html --level AA --json`
+    Then the command exits with code 4
     And the result includes violations relevant to AA coverage
     And the result includes passes, violations, and incomplete collections when available
 
   Scenario: Run axe by explicit rule ids limits execution to those rules
-    When I run `a11ied axe --url http://127.0.0.1:4173/basic-page.html --rule color-contrast --json`
+    When I run `a11ied axe http://127.0.0.1:4173/basic-page.html --rule color-contrast --json`
     Then the command exits with code 0
     And the result includes only the requested rule ids
 
-  Scenario: Run axe rejects missing URL input
+  Scenario: Run axe rejects a missing target
     When I run `a11ied axe --criterion 4.1.2 --json`
     Then the command exits with code 2
-    And the first error explains that a URL target is required
+    And the first error explains that a target is required
 
   Scenario: Run axe preserves incomplete findings
     Given the page under test produces one or more axe incomplete results
-    When I run `a11ied axe --url http://127.0.0.1:4173/basic-page.html --rule frame-tested --json`
+    When I run `a11ied axe http://127.0.0.1:4173/basic-page.html --rule frame-tested --json`
     Then the result includes an "incomplete" collection
     And incomplete rows are not dropped from the normalized output
