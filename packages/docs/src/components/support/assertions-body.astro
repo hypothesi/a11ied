@@ -1,0 +1,197 @@
+---
+import PriorityBadge from './priority-badge.astro';
+import type { AssertionResultRecord, AssertionVerdict } from '@a11ied/support-data/types';
+
+export interface Props {
+   assertions: readonly AssertionResultRecord[];
+}
+
+const { assertions } = Astro.props;
+
+function formatVerdictLabel(verdict: AssertionVerdict): string {
+   switch (verdict) {
+      case 'pass': {
+         return 'Passed';
+      }
+      case 'fail': {
+         return 'Failed';
+      }
+      case 'untestable': {
+         return 'Untestable';
+      }
+      case 'unsupported': {
+         return 'Unsupported';
+      }
+      default: {
+         return String(verdict);
+      }
+   }
+}
+---
+
+<div class="srAssert-body">
+   {assertions.length === 0 ? (
+      <p class="srAssert-empty">No individual assertion records captured for this run.</p>
+   ) : (
+      <ul class="srAssert-list">
+         {assertions.map((item) => (
+            <li class="srAssert-item">
+               <div class="srAssert-priority">
+                  <PriorityBadge priority={item.priority} />
+               </div>
+               <div class="srAssert-statementWrap">
+                  <span class="srAssert-statement">{item.statement}</span>
+                  {item.evidence && (
+                     <p class="srAssert-detail">
+                        <strong>Matched:</strong> <code>{item.evidence}</code>
+                     </p>
+                  )}
+                  {item.notes && <p class="srAssert-detail">{item.notes}</p>}
+                  {item.bugs && item.bugs.length > 0 && (
+                     <ul class="srAssert-bugs">
+                        {item.bugs.map((bug) => (
+                           <li>
+                              <a href={bug.url} target="_blank" rel="noopener noreferrer">
+                                 AT Bug: {bug.title}
+                              </a>
+                           </li>
+                        ))}
+                     </ul>
+                  )}
+               </div>
+               <div class="srAssert-verdictWrap">
+                  <span class={`srAssert-verdict srAssert-verdict--${item.verdict}`}>
+                     {formatVerdictLabel(item.verdict)}
+                  </span>
+               </div>
+            </li>
+         ))}
+      </ul>
+   )}
+</div>
+
+<style>
+.srAssert-body {
+   container-type: inline-size;
+   min-inline-size: 0;
+   padding-block: 0.55rem 0.2rem;
+   padding-inline: 0.1rem;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 12%, transparent);
+   font-size: 0.86rem;
+}
+
+.srAssert-empty {
+   margin: 0;
+   color: var(--ink-soft);
+   font-style: italic;
+}
+
+.srAssert-list {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   flex-direction: column;
+   gap: 0.55rem;
+}
+
+.srAssert-item {
+   min-inline-size: 0;
+   margin: 0;
+   display: grid;
+   grid-template-columns: auto minmax(0, 1fr);
+   gap: 0.35rem 0.6rem;
+   padding-block-end: 0.55rem;
+   border-bottom: 1px dashed color-mix(in oklch, var(--ink) 25%, transparent);
+}
+
+.srAssert-item:last-child {
+   padding-block-end: 0;
+   border-bottom: none;
+}
+
+.srAssert-statementWrap {
+   grid-column: 1 / -1;
+   min-inline-size: 0;
+}
+
+.srAssert-statement {
+   font-weight: 600;
+   color: var(--ink);
+   overflow-wrap: anywhere;
+}
+
+.srAssert-detail {
+   margin-block: 0.25rem 0;
+   margin-inline: 0;
+   font-size: 0.8rem;
+   color: var(--ink-soft);
+   overflow-wrap: anywhere;
+}
+
+.srAssert-detail code {
+   padding: 0.1em 0.35em;
+   border-radius: 3px;
+   background: var(--paper);
+   color: var(--ink);
+}
+
+.srAssert-bugs {
+   list-style: disc;
+   margin-block: 0.3rem 0;
+   margin-inline: 0;
+   padding-inline-start: 1.1rem;
+   font-size: 0.8rem;
+}
+
+.srAssert-bugs li + li {
+   margin-top: 0.2rem;
+}
+
+.srAssert-verdictWrap {
+   justify-self: end;
+}
+
+.srAssert-verdict {
+   display: inline-block;
+   padding-block: 0.18rem;
+   padding-inline: 0.45rem;
+   border: none;
+   border-radius: 3px;
+   font-family: var(--display);
+   font-size: 0.72rem;
+   font-weight: 700;
+   text-transform: uppercase;
+   letter-spacing: 0.04em;
+   line-height: 1;
+   white-space: nowrap;
+}
+
+.srAssert-verdict--pass {
+   background: #e3f4ea;
+   color: #134e2c;
+}
+
+.srAssert-verdict--fail {
+   background: #fde8e8;
+   color: #7f1d1d;
+}
+
+.srAssert-verdict--untestable,
+.srAssert-verdict--unsupported {
+   background: var(--paper);
+   color: var(--ink-soft);
+}
+
+@container (width >= 540px) {
+   .srAssert-item {
+      grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+      align-items: start;
+      gap: 0.75rem;
+   }
+
+   .srAssert-statementWrap {
+      grid-column: auto;
+   }
+}
+</style>

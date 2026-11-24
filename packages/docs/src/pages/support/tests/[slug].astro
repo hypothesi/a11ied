@@ -1,0 +1,510 @@
+---
+import ArrowLeft from '@lucide/astro/icons/arrow-left';
+import ArrowRight from '@lucide/astro/icons/arrow-right';
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+import AssertionSummaryBar from '../../../components/support/assertion-summary-bar.astro';
+import OutcomeBadge from '../../../components/support/outcome-badge.astro';
+import PriorityBadge from '../../../components/support/priority-badge.astro';
+import TestCaseViewer from '../../../components/support/test-case-viewer.astro';
+import TestOutcomes from '../../../components/support/test-outcomes.astro';
+import {
+   deriveOutcomeFromSummary,
+   formatCategoryLabel,
+   getTestCaseBySlug,
+   listEnvironmentFiles,
+   listFeatureSummaryForTestAttribute,
+   resolveCaseAssertions,
+   screenReaderTests,
+   type FeatureEnvironmentResult,
+   type ScreenReaderTestCase,
+} from '@a11ied/support-data';
+import DocShell from '../../../layouts/doc-shell.astro';
+import { docsLinks } from '../../../lib/nav';
+import {
+   formatCompactRatio,
+   formatRowBrowser,
+   formatRowOsVersion,
+   formatShortDate,
+   groupByScreenReaderAndOs,
+} from '../../../lib/support-grouping';
+import '../../../styles/support-rows.css';
+
+export function getStaticPaths(): readonly {
+   readonly params: { readonly slug: string };
+   readonly props: {
+      readonly testCase: ScreenReaderTestCase;
+      readonly prevTest: ScreenReaderTestCase | undefined;
+      readonly nextTest: ScreenReaderTestCase | undefined;
+   };
+}[] {
+   return screenReaderTests.map((testCase, index) => ({
+      params: { slug: testCase.slug },
+      props: {
+         testCase,
+         prevTest: index > 0 ? screenReaderTests[index - 1] : undefined,
+         nextTest:
+            index < screenReaderTests.length - 1 ? screenReaderTests[index + 1] : undefined,
+      },
+   }));
+}
+
+export interface Props {
+   testCase?: ScreenReaderTestCase;
+   prevTest?: ScreenReaderTestCase;
+   nextTest?: ScreenReaderTestCase;
+}
+
+const props = Astro.props;
+const testCase = props.testCase ?? getTestCaseBySlug(String(Astro.params.slug));
+if (!testCase) {
+   throw new Error(`Unknown screen reader test case slug: ${String(Astro.params.slug)}`);
+}
+
+const environmentFiles = listEnvironmentFiles();
+const resolvedAssertions = resolveCaseAssertions(testCase);
+const featureReport = listFeatureSummaryForTestAttribute(testCase.attribute);
+const featureURL = featureReport
+   ? `/support/features/${featureReport.type}/${featureReport.refId}/`
+   : `/support/features/aria/${testCase.attribute}/`;
+const ariaAtEnvironments = (featureReport?.versionedEnvironments ?? []).filter(
+   (env) => env.source === 'w3c-aria-at',
+);
+const groupedAriaAt = groupByScreenReaderAndOs(ariaAtEnvironments, (env) => ({
+   screenReader: env.screenReader,
+   screenReaderVersion: env.screenReaderVersion,
+   os: env.os,
+   osVersion: env.osVersion,
+   browser: env.browser,
+   browserVersion: env.browserVersion,
+   status: env.status,
+}));
+
+function getEnvOutcome(
+   env: FeatureEnvironmentResult,
+): 'pass' | 'partial' | 'fail' | 'untested' {
+   if (env.status === 'untested') {
+      return 'untested';
+   }
+   const derived = deriveOutcomeFromSummary(env.summary);
+   return derived === 'fail' || derived === 'partial' ? derived : 'pass';
+}
+
+const toc = [
+   { id: 'expected-heading', label: 'Expected behavior' },
+   { id: 'testcase-heading', label: 'Test case' },
+   { id: 'outcomes-heading', label: 'Screen reader outcomes' },
+   ...(featureReport && featureReport.ariaAtPlans.length > 0
+      ? [ { id: 'aria-at-community-heading', label: 'W3C ARIA-AT data' } ]
+      : []),
+];
+---
+
+<DocShell
+   title={testCase.title}
+   summary={`<p>${testCase.summary}</p>`}
+   links={docsLinks}
+   toc={toc}
+>
+   <nav class="srDetail-breadcrumb" aria-label="Breadcrumb" data-support-page>
+      <a href="/support">Screen reader support</a>
+      <span class="srDetail-separator" aria-hidden="true">/</span>
+      <span aria-current="page">{testCase.slug}</span>
+   </nav>
+
+   <div class="srDetail-metaBadges">
+      <span class="srDetail-badge srDetail-badge--category">
+         {formatCategoryLabel(testCase.category)}
+      </span>
+      <span class="srDetail-badge">
+         <code>{testCase.attribute}</code>
+      </span>
+      <span class="srDetail-badge">{testCase.featureGroup}</span>
+      <span class="srDetail-badge">
+         {testCase.evaluation.mode === 'interact' ? 'Interactive' : 'Read / Walk'}
+      </span>
+   </div>
+
+   <section class="srDetail-section" aria-labelledby="expected-heading">
+      <h2 id="expected-heading">Expected Behavior &amp; Spec Guidance</h2>
+      <p class="srDetail-expected">{testCase.expectedBehavior}</p>
+      <ul class="srDetail-specs">
+         {testCase.specReferences.map((spec) => (
+            <li>
+               <a href={spec.url} target="_blank" rel="noopener noreferrer">
+                  <span>{spec.title}</span>
+                  {spec.section && (
+                     <span class="srDetail-specSection"> ({spec.section})</span>
+                  )}
+               </a>
+            </li>
+         ))}
+      </ul>
+
+      {resolvedAssertions.length > 0 && (
+         <div class="srDetail-assertionsBlock">
+            <div class="srDetail-assertionsHeader">
+               <h3 class="srDetail-subHeading">Spec Requirements (RFC 2119)</h3>
+               <a href={featureURL} class="srDetail-featureLink">
+                  <span>View full feature report for <code>{testCase.attribute}</code></span>
+                  <ArrowRight size={14} aria-hidden="true" focusable="false" />
+               </a>
+            </div>
+            <ul class="srDetail-assertionList">
+               {resolvedAssertions.map((assertion) => (
+                  <li class="srDetail-assertionItem">
+                     <PriorityBadge priority={assertion.priority} />
+                     <span class="srDetail-assertionStatement">{assertion.statement}</span>
+                  </li>
+               ))}
+            </ul>
+         </div>
+      )}
+   </section>
+
+   <section class="srDetail-section" aria-labelledby="testcase-heading">
+      <h2 id="testcase-heading">Test Case</h2>
+      <TestCaseViewer
+         slug={testCase.slug}
+         title={testCase.title}
+         html={testCase.html}
+         css={testCase.css}
+         js={testCase.js}
+      />
+   </section>
+
+   <section class="srDetail-section" aria-labelledby="outcomes-heading">
+      <h2 id="outcomes-heading">Screen Reader Test Outcomes</h2>
+      <TestOutcomes testSlug={testCase.slug} environmentFiles={environmentFiles} />
+   </section>
+
+   {featureReport && featureReport.ariaAtPlans.length > 0 && (
+      <section class="srDetail-section" aria-labelledby="aria-at-community-heading">
+         <div class="srDetail-sectionHeader">
+            <h2 id="aria-at-community-heading">W3C ARIA-AT Community Data</h2>
+            <a href={featureURL} class="srDetail-featureLink">
+               <span>Compare all environments for <code>{featureReport.refId}</code></span>
+               <ArrowRight size={14} aria-hidden="true" focusable="false" />
+            </a>
+         </div>
+         <p class="srDetail-outcomesNote">
+            Reports from the W3C ARIA-AT Community Group covering <code>{featureReport.refId}</code>.
+         </p>
+
+         {groupedAriaAt.length > 0 && (
+            <div class="srGroups">
+               {groupedAriaAt.map((group) => (
+                  <div class="srGroup">
+                     <div class="srGroup-head">
+                        <h3 class="srGroup-title">{group.screenReaderType}</h3>
+                        <span class="srGroup-count">
+                           {group.totalCount} {group.totalCount === 1 ? 'result' : 'results'}
+                        </span>
+                     </div>
+
+                     {group.osGroups.map((osGroup) => (
+                        <div class="srOsGroup">
+                           <h4 class="srOsGroup-title">{osGroup.os}</h4>
+                           <div class="srRowList">
+                              {osGroup.items.map((env) => {
+                                 const outcome = getEnvOutcome(env);
+                                 const ratioText = formatCompactRatio(
+                                    env.summary,
+                                    env.status === 'tested',
+                                 );
+
+                                 return (
+                                    <details class={`srRow srRow--${outcome}`}>
+                                       <summary class="srRow-summary">
+                                          <ChevronDown
+                                             class="srRow-marker"
+                                             size={16}
+                                             aria-hidden="true"
+                                             focusable="false"
+                                          />
+                                          <span class="srRow-main">
+                                             <span class="srRow-primary">
+                                                <strong class="srRow-osVer">
+                                                   {formatRowOsVersion(env.os, env.osVersion)}
+                                                </strong>
+                                                <span class="srRow-sep" aria-hidden="true">·</span>
+                                                <span class="srRow-browser">
+                                                   {formatRowBrowser(env.browser, env.browserVersion)}
+                                                </span>
+                                             </span>
+                                             <span class="srRow-secondary">
+                                                <span>{group.screenReaderType} {env.screenReaderVersion}</span>
+                                             </span>
+                                          </span>
+                                          <span class="srRow-verdictGroup">
+                                             {ratioText && <span class="srRow-ratio">{ratioText}</span>}
+                                             <OutcomeBadge outcome={outcome} compact />
+                                          </span>
+                                       </summary>
+                                       <div class="srRow-body">
+                                          <div class="srRow-metaStrip">
+                                             <span>
+                                                <strong>Screen reader:</strong> {env.screenReader} {env.screenReaderVersion}
+                                             </span>
+                                             <span aria-hidden="true">·</span>
+                                             <span>
+                                                <strong>Browser:</strong> {env.browser} {env.browserVersion}
+                                             </span>
+                                             <span aria-hidden="true">·</span>
+                                             <span>
+                                                <strong>OS:</strong> {env.os} {env.osVersion}
+                                             </span>
+                                             <span aria-hidden="true">·</span>
+                                             <span>
+                                                <strong>Device:</strong> {env.device}
+                                             </span>
+                                             <span aria-hidden="true">·</span>
+                                             <span>
+                                                <strong>Date:</strong> {formatShortDate(env.testedAt)}
+                                             </span>
+                                          </div>
+                                          <AssertionSummaryBar summary={env.summary} compact />
+                                          <div class="srRow-drilldownLinks">
+                                             <a href={featureURL}>
+                                                Inspect command results for <code>{featureReport.refId}</code> →
+                                             </a>
+                                          </div>
+                                       </div>
+                                    </details>
+                                 );
+                              })}
+                           </div>
+                        </div>
+                     ))}
+                  </div>
+               ))}
+            </div>
+         )}
+
+         <ul class="srDetail-ariaAtList">
+            {featureReport.ariaAtPlans.map((plan) => (
+               <li class="srDetail-ariaAtPlan">
+                  <a href={`/support/aria-at/${plan.slug}/`} class="srDetail-ariaAtLink">
+                     <span>{plan.title}</span>
+                     <span class="srDetail-ariaAtPlanMeta">
+                        {plan.phase} · {plan.versionString}
+                     </span>
+                     <ArrowRight size={14} aria-hidden="true" focusable="false" />
+                  </a>
+               </li>
+            ))}
+         </ul>
+      </section>
+   )}
+
+   <nav class="srDetail-pager" aria-label="Adjacent test cases">
+      <div class="srDetail-pagerSlot">
+         {props.prevTest && (
+            <a href={`/support/tests/${props.prevTest.slug}/`} class="srDetail-pagerLink">
+               <ArrowLeft size={16} aria-hidden="true" focusable="false" />
+               <span>Previous: {props.prevTest.title}</span>
+            </a>
+         )}
+      </div>
+      <div class="srDetail-pagerSlot srDetail-pagerSlot--end">
+         {props.nextTest && (
+            <a href={`/support/tests/${props.nextTest.slug}/`} class="srDetail-pagerLink">
+               <span>Next: {props.nextTest.title}</span>
+               <ArrowRight size={16} aria-hidden="true" focusable="false" />
+            </a>
+         )}
+      </div>
+   </nav>
+</DocShell>
+
+<style>
+.srDetail-breadcrumb {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 0.45rem;
+   font-size: 0.92rem;
+}
+
+.srDetail-separator,
+.srDetail-breadcrumb span[aria-current="page"] {
+   color: var(--ink-soft);
+}
+
+.srDetail-metaBadges {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.45rem;
+}
+
+.srDetail-badge {
+   display: inline-flex;
+   align-items: center;
+   padding-block: 0.28rem;
+   padding-inline: 0.6rem;
+   border: none;
+   border-radius: 3px;
+   background: var(--paper-light);
+   font-family: var(--display);
+   font-size: 0.8rem;
+   font-weight: 700;
+   letter-spacing: 0.04em;
+   text-transform: uppercase;
+   line-height: 1;
+}
+
+.srDetail-badge code {
+   background: transparent;
+   padding: 0;
+}
+
+.srDetail-badge--category {
+   background: var(--ink);
+   color: var(--yellow);
+}
+
+.srDetail-section {
+   max-width: none;
+   min-inline-size: 0;
+   transform: none;
+   gap: 1rem;
+}
+
+.srDetail-section > h2 {
+   font-size: clamp(1.7rem, 3vw, 2.35rem);
+}
+
+.srDetail-expected,
+.srDetail-outcomesNote {
+   margin: 0;
+   max-width: 72ch;
+}
+
+.srDetail-specs {
+   margin: 0;
+   padding-inline-start: 1.25rem;
+   display: flex;
+   flex-direction: column;
+   gap: 0.4rem;
+}
+
+.srDetail-specs li {
+   margin: 0;
+}
+
+.srDetail-specSection {
+   color: var(--ink-soft);
+   font-weight: 400;
+}
+
+.srDetail-assertionsBlock {
+   padding: 0.95rem 1.05rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 18%, transparent);
+   border-radius: 4px;
+   background: var(--paper-light);
+}
+
+.srDetail-assertionsHeader,
+.srDetail-sectionHeader {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: baseline;
+   justify-content: space-between;
+   gap: 0.75rem;
+}
+
+.srDetail-subHeading {
+   margin: 0;
+   font-size: 1.05rem;
+   color: var(--ink);
+}
+
+.srDetail-featureLink {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.35rem;
+   font-size: 0.9rem;
+   font-weight: 700;
+}
+
+.srDetail-assertionList {
+   list-style: none;
+   margin: 0.75rem 0 0;
+   padding: 0;
+   display: flex;
+   flex-direction: column;
+   gap: 0.55rem;
+}
+
+.srDetail-assertionItem {
+   margin: 0;
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 0.55rem;
+}
+
+.srDetail-assertionStatement {
+   font-size: 0.94rem;
+   color: var(--ink);
+}
+
+.srDetail-ariaAtList {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.6rem;
+}
+
+.srDetail-ariaAtPlan {
+   margin: 0;
+}
+
+.srDetail-ariaAtLink {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.45rem;
+   padding-block: 0.45rem;
+   padding-inline: 0.8rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
+   border-radius: 4px;
+   background: var(--paper-light);
+   font-size: 0.9rem;
+   font-weight: 700;
+}
+
+.srDetail-ariaAtLink:hover {
+   background: var(--yellow);
+}
+
+.srDetail-ariaAtPlanMeta {
+   font-weight: 400;
+   font-size: 0.84rem;
+   color: var(--ink-soft);
+}
+
+.srDetail-pager {
+   display: flex;
+   flex-wrap: wrap;
+   justify-content: space-between;
+   gap: 1rem;
+   padding-block-start: 1.25rem;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
+}
+
+.srDetail-pagerSlot {
+   min-inline-size: 0;
+}
+
+.srDetail-pagerSlot--end {
+   margin-inline-start: auto;
+}
+
+.srDetail-pagerLink {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.4rem;
+   min-block-size: 36px;
+}
+</style>

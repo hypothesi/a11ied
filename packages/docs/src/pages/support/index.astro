@@ -1,0 +1,2425 @@
+---
+import { Code } from 'astro:components';
+import RotateCcw from '@lucide/astro/icons/rotate-ccw';
+import Search from '@lucide/astro/icons/search';
+import {
+   checkFeatureSupport,
+   resolveBrowserslistTargets,
+} from '@a11ied/compat';
+import {
+   formatCategoryLabel,
+   getAriaAtSummary,
+   getRunForTestAndEnvironment,
+   getSummaryCounts,
+   listAriaAtEnvironments,
+   listAriaAtPlans,
+   listAttributes,
+   listCategories,
+   listEnvironmentFiles,
+   listFeatures,
+   listFeatureSummaryForTestAttribute,
+   screenReaderTests,
+   type FeatureEnvironmentResult,
+   type FeatureReport,
+   type TestOutcome,
+} from '@a11ied/support-data';
+import OutcomeBadge from '../../components/support/outcome-badge.astro';
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+import { formatFeatureSummary } from '../../lib/support-grouping';
+
+const MAX_CELLS_PER_COL = 4;
+const MAX_TARGETS_PREVIEW = 8;
+const MAJOR_MINOR_PARTS = 2;
+const DATE_PREFIX_LEN = 10;
+const PERCENT_MULTIPLIER = 100;
+
+const BROWSERSLIST_PRESETS = [
+   { id: 'defaults', label: 'defaults', query: 'defaults' },
+   { id: 'last-2', label: 'last 2 versions', query: 'last 2 versions' },
+   { id: 'wide', label: '> 0.5%, not dead', query: '> 0.5%, not dead' },
+   { id: 'safari-17', label: 'safari >= 17', query: 'safari >= 17' },
+   { id: 'android-chr', label: 'and_chr >= 109', query: 'and_chr >= 109' },
+] as const;
+
+const EXAMPLE_SEARCHES = [
+   'aria-labelledby',
+   'alert',
+   'aria-expanded',
+   'aria-live',
+   '@checked',
+   'dialog',
+] as const;
+
+const COLUMN_DEFS = [
+   { id: 'macos-vo', label: 'macOS VoiceOver' },
+   { id: 'android-tb', label: 'Android TalkBack' },
+   { id: 'win-nvda', label: 'Windows NVDA' },
+   { id: 'win-jaws', label: 'Windows JAWS' },
+   { id: 'ios-vo', label: 'iOS VoiceOver' },
+   { id: 'virtual', label: 'Virtual SR' },
+] as const;
+
+type ColumnId = (typeof COLUMN_DEFS)[number]['id'];
+
+const environmentFiles = listEnvironmentFiles();
+const attributes = listAttributes();
+const categories = listCategories();
+const summaryCounts = getSummaryCounts();
+const features = listFeatures();
+const ariaAtSummary = getAriaAtSummary();
+const ariaAtPlans = listAriaAtPlans();
+const ariaAtEnvironments = listAriaAtEnvironments();
+
+const presetSummaries: Record<string, string> = {};
+for (const preset of BROWSERSLIST_PRESETS) {
+   const resolved = resolveBrowserslistTargets({ browserslist: preset.query });
+   const headTargets = resolved.rawTargets.slice(0, MAX_TARGETS_PREVIEW).join(', ');
+   const extraCount = resolved.rawTargets.length - MAX_TARGETS_PREVIEW;
+   const targetSuffix = extraCount > 0 ? `, +${String(extraCount)} more` : '';
+   presetSummaries[preset.id] = `${preset.query} → ${headTargets}${targetSuffix}`;
+}
+
+const environmentTypes: Readonly<Record<string, 'browser' | 'webview'>> = Object.fromEntries(
+   environmentFiles.map((envFile) => [
+      envFile.environment.id,
+      envFile.environment.browserType === 'webview' ? 'webview' : 'browser',
+   ]),
+);
+
+function classifyColumn(env: FeatureEnvironmentResult): ColumnId {
+   const osLower = env.os.toLowerCase();
+   const srLower = env.screenReader.toLowerCase();
+   if (srLower.includes('virtual') || srLower.includes('guidepup')) {
+      return 'virtual';
+   }
+   if (osLower.includes('mac') && srLower.includes('voiceover')) {
+      return 'macos-vo';
+   }
+   if (osLower.includes('ios') && srLower.includes('voiceover')) {
+      return 'ios-vo';
+   }
+   if (osLower.includes('android') && srLower.includes('talkback')) {
+      return 'android-tb';
+   }
+   if (srLower.includes('nvda')) {
+      return 'win-nvda';
+   }
+   if (srLower.includes('jaws')) {
+      return 'win-jaws';
+   }
+   return 'macos-vo';
+}
+
+function compareEnvRecency(
+   left: FeatureEnvironmentResult,
+   right: FeatureEnvironmentResult,
+   presetKeys: ReadonlySet<string>,
+): number {
+   if (left.status !== right.status) {
+      return left.status === 'tested' ? -1 : 1;
+   }
+   const leftMatched = presetKeys.has(left.environmentKey);
+   const rightMatched = presetKeys.has(right.environmentKey);
+   if (leftMatched !== rightMatched) {
+      return leftMatched ? -1 : 1;
+   }
+   if (left.source !== right.source) {
+      return left.source === 'local' ? -1 : 1;
+   }
+   return right.browserVersion.localeCompare(left.browserVersion, undefined, {
+      numeric: true,
+   });
+}
+
+function buildFeatureColumns(
+   feature: FeatureReport,
+   presetKeys: ReadonlySet<string>,
+): readonly {
+   readonly id: ColumnId;
+   readonly label: string;
+   readonly cells: readonly FeatureEnvironmentResult[];
+   readonly extraCount: number;
+}[] {
+   const buckets = new Map<ColumnId, FeatureEnvironmentResult[]>();
+   for (const col of COLUMN_DEFS) {
+      buckets.set(col.id, []);
+   }
+   for (const env of feature.versionedEnvironments) {
+      const colID = classifyColumn(env);
+      const list = buckets.get(colID) ?? [];
+      list.push(env);
+      buckets.set(colID, list);
+   }
+
+   const columns: {
+      readonly id: ColumnId;
+      readonly label: string;
+      readonly cells: readonly FeatureEnvironmentResult[];
+      readonly extraCount: number;
+   }[] = [];
+
+   for (const col of COLUMN_DEFS) {
+      const entries = (buckets.get(col.id) ?? []).toSorted((left, right) =>
+         compareEnvRecency(left, right, presetKeys),
+      );
+      if (entries.length === 0) {
+         continue;
+      }
+      const cells = entries.slice(0, MAX_CELLS_PER_COL);
+      columns.push({
+         id: col.id,
+         label: col.label,
+         cells,
+         extraCount: Math.max(0, entries.length - cells.length),
+      });
+   }
+
+   return columns;
+}
+
+type CellState = 'pass' | 'partial' | 'fail' | 'untested';
+
+function resolveCellState(env: FeatureEnvironmentResult): {
+   readonly state: CellState;
+   readonly verdictGlyph: string;
+   readonly ratioText: string;
+} {
+   if (env.status === 'untested') {
+      return { state: 'untested', verdictGlyph: '—', ratioText: 'Untested' };
+   }
+   const { must, should, severeSideEffects, moderateSideEffects } = env.summary;
+   if (must.failed > 0 || severeSideEffects > 0) {
+      const ratio = must.total > 0 ? `${must.passed}/${must.total}` : 'Severe';
+      return { state: 'fail', verdictGlyph: `✕ ${ratio}`, ratioText: `MUST ${ratio}` };
+   }
+   if (should.failed > 0 || moderateSideEffects > 0 || must.untestable > 0) {
+      const ratio =
+         must.total > 0
+            ? `${must.passed}/${must.total}`
+            : `${should.passed}/${should.total}`;
+      return {
+         state: 'partial',
+         verdictGlyph: `◐ ${ratio}`,
+         ratioText: must.total > 0 ? `Partial · MUST ${ratio}` : `SHOULD ${ratio}`,
+      };
+   }
+   if (must.total > 0) {
+      const ratio = `${must.passed}/${must.total}`;
+      return { state: 'pass', verdictGlyph: `✓ ${ratio}`, ratioText: `MUST ${ratio}` };
+   }
+   const ratio = should.total > 0 ? `${should.passed}/${should.total}` : 'Pass';
+   return {
+      state: 'pass',
+      verdictGlyph: `✓ ${ratio}`,
+      ratioText: should.total > 0 ? `SHOULD ${ratio}` : 'Pass',
+   };
+}
+
+function extractMajorVersion(rawVersion: string): string {
+   if (!rawVersion || rawVersion.toLowerCase() === 'pending') {
+      return '';
+   }
+   return rawVersion.split('.')[0] ?? rawVersion;
+}
+
+function extractMajorMinorVersion(rawVersion: string): string {
+   if (!rawVersion || rawVersion.toLowerCase() === 'pending') {
+      return '';
+   }
+   const clean = rawVersion.replace(/\s*\(.*\)$/u, '').trim();
+   const parts = clean.split('.');
+   return parts.length >= MAJOR_MINOR_PARTS
+      ? `${parts[0]}.${parts[1]}`
+      : (parts[0] ?? clean);
+}
+
+function formatShortBrowser(env: FeatureEnvironmentResult): string {
+   const lower = env.browser.toLowerCase();
+   const isPending = env.browserVersion.toLowerCase() === 'pending';
+   let name = env.browser;
+   if (lower.includes('headless')) {
+      name = 'Headless Chrome';
+   } else if (lower.includes('google chrome') || lower === 'chrome') {
+      name = 'Chrome';
+   } else if (lower.includes('android system webview')) {
+      name = 'WebView';
+   } else if (lower.includes('wkwebview')) {
+      name = 'WKWebView';
+   }
+
+   if (isPending) {
+      return `${name} · Pending`;
+   }
+   if (name === 'WKWebView') {
+      return 'WKWebView';
+   }
+   if (name === 'Safari') {
+      return `${name} ${extractMajorMinorVersion(env.browserVersion)}`;
+   }
+   return `${name} ${extractMajorVersion(env.browserVersion)}`;
+}
+
+function formatShortTileSub(env: FeatureEnvironmentResult, colID: ColumnId): string {
+   const sourceTag = env.source === 'w3c-aria-at' ? ' · ARIA-AT' : '';
+   switch (colID) {
+      case 'macos-vo': {
+         const osVer = extractMajorMinorVersion(env.osVersion);
+         return `macOS ${osVer}${sourceTag}`;
+      }
+      case 'android-tb': {
+         const srVer = extractMajorMinorVersion(env.screenReaderVersion);
+         const osVer = extractMajorVersion(env.osVersion);
+         return `TB ${srVer} · Android ${osVer}`;
+      }
+      case 'win-nvda': {
+         return `NVDA ${env.screenReaderVersion}${sourceTag}`;
+      }
+      case 'win-jaws': {
+         return `JAWS ${extractMajorVersion(env.screenReaderVersion)}${sourceTag}`;
+      }
+      case 'ios-vo': {
+         return env.osVersion.toLowerCase() === 'pending'
+            ? 'iOS · Pending'
+            : `iOS ${env.osVersion}`;
+      }
+      case 'virtual': {
+         return `a11ied ${env.screenReaderVersion}`;
+      }
+      default: {
+         return `${env.os} ${env.osVersion}`;
+      }
+   }
+}
+
+function formatCompactOS(os: string, osVersion: string): string {
+   if (!osVersion || osVersion.toLowerCase().startsWith('not recorded')) {
+      return os;
+   }
+   return `${os} ${osVersion}`;
+}
+
+interface RealSrOverview {
+   readonly accentState: CellState;
+   readonly verdictText: string;
+   readonly passPct: number;
+   readonly partialPct: number;
+   readonly failPct: number;
+   readonly testedCount: number;
+}
+
+function computeRealSrOverview(feature: FeatureReport): RealSrOverview {
+   const testedReal = feature.versionedEnvironments.filter((env) => {
+      if (env.status !== 'tested') {
+         return false;
+      }
+      const srLower = env.screenReader.toLowerCase();
+      return !srLower.includes('virtual') && !srLower.includes('guidepup');
+   });
+
+   if (testedReal.length === 0) {
+      return {
+         accentState: 'untested',
+         verdictText: 'Untested on real AT',
+         passPct: 0,
+         partialPct: 0,
+         failPct: 0,
+         testedCount: 0,
+      };
+   }
+
+   let passCount = 0;
+   let partialCount = 0;
+   let failCount = 0;
+
+   for (const env of testedReal) {
+      const { state } = resolveCellState(env);
+      if (state === 'pass') {
+         passCount += 1;
+      } else if (state === 'partial') {
+         partialCount += 1;
+      } else if (state === 'fail') {
+         failCount += 1;
+      }
+   }
+
+   const total = testedReal.length;
+   const passPct = Math.round((passCount / total) * PERCENT_MULTIPLIER);
+   const partialPct = Math.round((partialCount / total) * PERCENT_MULTIPLIER);
+   const failPct = Math.max(0, PERCENT_MULTIPLIER - passPct - partialPct);
+
+   let accentState: CellState = 'pass';
+   let verdictText = `All ${String(total)} tested pass`;
+   if (failCount === total) {
+      accentState = 'fail';
+      verdictText = `0/${String(total)} pass · Fails MUST`;
+   } else if (failCount > 0 || partialCount > 0) {
+      accentState = 'partial';
+      const detailParts: string[] = [];
+      if (failCount > 0) {
+         detailParts.push(`${String(failCount)} fail`);
+      }
+      if (partialCount > 0) {
+         detailParts.push(`${String(partialCount)} partial`);
+      }
+      verdictText = `${String(passCount)}/${String(total)} pass · ${detailParts.join(', ')}`;
+   }
+
+   return {
+      accentState,
+      verdictText,
+      passPct,
+      partialPct,
+      failPct,
+      testedCount: total,
+   };
+}
+
+function formatCoverageLabel(coverage: FeatureReport['sourceCoverage']): string {
+   switch (coverage) {
+      case 'both': {
+         return 'a11ied + ARIA-AT';
+      }
+      case 'local': {
+         return 'a11ied Local';
+      }
+      case 'w3c-aria-at': {
+         return 'W3C ARIA-AT';
+      }
+      default: {
+         return String(coverage);
+      }
+   }
+}
+
+interface PresetVerdictPayload {
+   readonly status: string;
+   readonly matchedKeys: readonly string[];
+   readonly untestedCount: number;
+}
+
+interface TileDetailPayload {
+   readonly title: string;
+   readonly meta: string;
+   readonly verdict: string;
+   readonly state: CellState;
+   readonly href: string;
+}
+
+function buildTileDetail(
+   feature: FeatureReport,
+   env: FeatureEnvironmentResult,
+   state: CellState,
+): TileDetailPayload {
+   const webviewLabel = env.browserType === 'webview' ? ' · WebView' : '';
+   const sourceLabel = env.source === 'local' ? 'a11ied Local' : 'W3C ARIA-AT';
+   const title = `${env.screenReader} ${env.screenReaderVersion} on ${env.browser} ${env.browserVersion}${webviewLabel}`;
+   const recorded = env.testedAt ? env.testedAt.slice(0, DATE_PREFIX_LEN) : 'Pending';
+   const meta = `OS: ${formatCompactOS(env.os, env.osVersion)} · Device: ${env.device} · Source: ${sourceLabel} · Recorded: ${recorded}`;
+
+   const { must, should, may, severeSideEffects, moderateSideEffects } = env.summary;
+   const parts: string[] = [];
+   if (env.status === 'untested') {
+      parts.push(env.statusNote ?? 'Not yet tested in this environment.');
+   } else {
+      if (must.total > 0) {
+         parts.push(`MUST ${String(must.passed)}/${String(must.total)}`);
+      }
+      if (should.total > 0) {
+         parts.push(`SHOULD ${String(should.passed)}/${String(should.total)}`);
+      }
+      if (may.total > 0) {
+         parts.push(`MAY ${String(may.passed)}/${String(may.total)}`);
+      }
+      parts.push(`${String(severeSideEffects + moderateSideEffects)} side effects`);
+   }
+
+   return {
+      title,
+      meta,
+      verdict: parts.join(' · '),
+      state,
+      href: `/support/features/${feature.type}/${feature.refId}/`,
+   };
+}
+
+const RADIX_BASE36 = 36;
+const envTokenMap = new Map<string, string>();
+
+function getEnvToken(envKey: string): string {
+   let token = envTokenMap.get(envKey);
+   if (!token) {
+      token = envTokenMap.size.toString(RADIX_BASE36);
+      envTokenMap.set(envKey, token);
+   }
+   return token;
+}
+
+interface PreparedFeature {
+   readonly feature: FeatureReport;
+   readonly summaryLine: string;
+   readonly overview: RealSrOverview;
+   readonly columns: ReturnType<typeof buildFeatureColumns>;
+   readonly presetVerdicts: Readonly<Record<string, PresetVerdictPayload>>;
+   readonly searchBlob: string;
+}
+
+const preparedFeatures: PreparedFeature[] = features.map((feature) => {
+   const presetVerdicts: Record<string, PresetVerdictPayload> = {};
+   const matchedKeyUnion = new Set<string>();
+
+   for (const preset of BROWSERSLIST_PRESETS) {
+      const check = checkFeatureSupport(feature.key, { browserslist: preset.query });
+      const matchedTokens: string[] = [];
+      for (const match of check.matchedEnvironments) {
+         const envKey = match.environment.environmentKey;
+         matchedKeyUnion.add(envKey);
+         matchedTokens.push(getEnvToken(envKey));
+      }
+      presetVerdicts[preset.id] = {
+         status: check.status,
+         matchedKeys: matchedTokens,
+         untestedCount: check.untestedTargets.length,
+      };
+   }
+
+   const searchBlob = [
+      feature.title,
+      feature.refId,
+      feature.type,
+      ...feature.localCases.map((testCase) => `${testCase.title} ${testCase.slug} ${testCase.summary}`),
+      ...feature.ariaAtPlans.map((plan) => `${plan.title} ${plan.slug}`),
+   ]
+      .join(' ')
+      .toLowerCase();
+
+   return {
+      feature,
+      summaryLine: formatFeatureSummary(feature),
+      overview: computeRealSrOverview(feature),
+      columns: buildFeatureColumns(feature, matchedKeyUnion),
+      presetVerdicts,
+      searchBlob,
+   };
+});
+
+interface PreparedRow {
+   readonly testCase: (typeof screenReaderTests)[number];
+   readonly outcomesByEnv: Readonly<Record<string, TestOutcome>>;
+   readonly searchBlob: string;
+}
+
+const preparedRows: PreparedRow[] = screenReaderTests.map((testCase) => {
+   const outcomesByEnv: Record<string, TestOutcome> = {};
+   for (const envFile of environmentFiles) {
+      const run = getRunForTestAndEnvironment(
+         testCase.slug,
+         envFile.environmentKey,
+      );
+      outcomesByEnv[envFile.environment.id] = run ? run.outcome : 'untested';
+   }
+   const searchBlob = [
+      testCase.title,
+      testCase.slug,
+      testCase.attribute,
+      testCase.featureGroup,
+      testCase.summary,
+      testCase.expectedBehavior,
+      ...testCase.tags,
+   ]
+      .join(' ')
+      .toLowerCase();
+   return { testCase, outcomesByEnv, searchBlob };
+});
+
+const compatExampleCode = `import { checkCompatibility } from '@a11ied/compat';
+
+const report = checkCompatibility({
+   browserslist: 'defaults', // or load from .browserslistrc / package.json
+   usages: [
+      {
+         type: 'aria',
+         feature: 'aria-live',
+         element: '<div aria-live="polite">',
+         location: { file: 'src/toast.tsx', line: 12, column: 8 },
+      },
+      'aria:alert',
+      '@checked',
+   ],
+});
+
+for (const diagnostic of report.diagnostics) {
+   console.log(diagnostic.severity, diagnostic.code, diagnostic.message);
+}`;
+
+const toc = [
+   { id: 'ciu-search-panel', label: 'Can I use search' },
+   { id: 'ciu-tablist', label: 'Compatibility tables' },
+];
+---
+
+<DocShell
+   title="Screen reader support"
+   summary="<p>Screen reader support for ARIA and HTML features across browsers and operating systems. Filter by <code>browserslist</code> target or select any browser block for speech details.</p>"
+   links={docsLinks}
+   toc={toc}
+>
+   <section id="ciu-search-panel" class="ciuHero" aria-label="Search feature compatibility">
+      <search class="ciuHero-box">
+         <div class="ciuSearch-sentence">
+            <label for="ciu-search" class="ciuSearch-prompt">Can I use</label>
+            <input
+               id="ciu-search"
+               type="search"
+               class="ciuSearch-input"
+               placeholder="aria-labelledby, role=alert, @checked, dialog..."
+               autocomplete="off"
+            />
+            <span class="ciuSearch-qmark" aria-hidden="true">?</span>
+         </div>
+
+         <div class="ciuSearch-examples" aria-label="Suggested searches">
+            <span class="ciuSearch-examplesLabel">Examples:</span>
+            {EXAMPLE_SEARCHES.map((term, index) => (
+               <>
+                  {index > 0 && <span class="ciuSearch-sep" aria-hidden="true">·</span>}
+                  <button type="button" class="ciuExampleLink" data-ciu-example={term}>
+                     {term}
+                  </button>
+               </>
+            ))}
+         </div>
+
+         <div class="ciuFilters">
+            <div class="ciuFilter">
+               <label for="ciu-browserslist">Browserslist target</label>
+               <select id="ciu-browserslist">
+                  <option value="all">All tested environments</option>
+                  {BROWSERSLIST_PRESETS.map((preset) => (
+                     <option value={preset.id}>{preset.label}</option>
+                  ))}
+               </select>
+            </div>
+
+            <div class="ciuFilter">
+               <label for="ciu-type">Spec</label>
+               <select id="ciu-type">
+                  <option value="all">All ({features.length})</option>
+                  <option value="aria">ARIA</option>
+                  <option value="html">HTML</option>
+               </select>
+            </div>
+
+            <div class="ciuFilter">
+               <label for="ciu-source">Source</label>
+               <select id="ciu-source">
+                  <option value="all">All sources</option>
+                  <option value="both">a11ied + ARIA-AT</option>
+                  <option value="local">a11ied Local</option>
+                  <option value="w3c-aria-at">W3C ARIA-AT</option>
+               </select>
+            </div>
+
+            <div class="ciuFilter ciuFilter--action">
+               <button id="ciu-reset" type="button" class="ciuResetBtn">
+                  <RotateCcw size={14} aria-hidden="true" focusable="false" />
+                  <span>Reset</span>
+               </button>
+            </div>
+         </div>
+
+         <div
+            id="ciu-bl-banner"
+            class="ciuBlBanner"
+            data-preset-summaries={JSON.stringify(presetSummaries)}
+            hidden
+         >
+            <strong>Targets:</strong>
+            <span id="ciu-bl-banner-text"></span>
+         </div>
+
+         <div class="ciuHero-footer">
+            <p id="ciu-status" class="ciuHero-status" role="status" aria-live="polite">
+               Showing {features.length} of {features.length} features.
+            </p>
+            <ul class="ciuLegend" aria-label="Compatibility legend">
+               <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--pass" aria-hidden="true"></span>Supported</li>
+               <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--partial" aria-hidden="true"></span>Partial</li>
+               <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--fail" aria-hidden="true"></span>Fails MUST</li>
+               <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--untested" aria-hidden="true"></span>Untested</li>
+            </ul>
+         </div>
+      </search>
+   </section>
+
+   <div class="ciuViewSwitch">
+      <div id="ciu-tablist" class="ciuTablist" role="tablist" aria-label="Compatibility views">
+         <button
+            type="button"
+            role="tab"
+            id="ciu-tab-features"
+            class="ciuTab"
+            aria-selected="true"
+            tabindex="0"
+            data-panel-target="feature-directory"
+         >
+            Features ({features.length})
+         </button>
+         <button
+            type="button"
+            role="tab"
+            id="ciu-tab-cases"
+            class="ciuTab"
+            aria-selected="false"
+            tabindex="-1"
+            data-panel-target="isolated-cases"
+         >
+            Isolated tests ({screenReaderTests.length})
+         </button>
+         <button
+            type="button"
+            role="tab"
+            id="ciu-tab-plans"
+            class="ciuTab"
+            aria-selected="false"
+            tabindex="-1"
+            data-panel-target="aria-at-plans"
+         >
+            W3C ARIA-AT plans ({ariaAtPlans.length})
+         </button>
+         <button
+            type="button"
+            role="tab"
+            id="ciu-tab-api"
+            class="ciuTab"
+            aria-selected="false"
+            tabindex="-1"
+            data-panel-target="environments"
+         >
+            API &amp; environments ({summaryCounts.testedEnvironments + ariaAtEnvironments.length})
+         </button>
+      </div>
+   </div>
+
+   <section
+      id="feature-directory"
+      class="ciuTabPanel"
+      role="tabpanel"
+      aria-labelledby="ciu-tab-features"
+      data-ciu-panel
+   >
+      <ul class="ciuCards">
+         {preparedFeatures.map(({ feature, summaryLine, overview, columns, presetVerdicts, searchBlob }) => (
+            <li
+               class={`ciuCard ciuCard--${overview.accentState}`}
+               data-ciu-card="true"
+               data-type={feature.type}
+               data-source={feature.sourceCoverage}
+               data-search={searchBlob}
+               data-browserslist={JSON.stringify(presetVerdicts)}
+               data-default-verdict={overview.verdictText}
+            >
+               <div class="ciuCard-top">
+                  <div class="ciuCard-intro">
+                     <div class="ciuCard-titleRow">
+                        <h2 class="ciuCard-title">
+                           <a href={`/support/features/${feature.type}/${feature.refId}/`}>
+                              {feature.title}
+                           </a>
+                        </h2>
+                        <span class="ciuMetaLine">
+                           {feature.type.toUpperCase()} · {formatCoverageLabel(feature.sourceCoverage)}
+                        </span>
+                     </div>
+                     <p class="ciuCard-desc">{summaryLine}</p>
+                  </div>
+
+                  <div class="ciuCard-support">
+                     <div class="ciuCard-verdictRow">
+                        <span
+                           class={`ciuVerdictDot ciuVerdictDot--${overview.accentState}`}
+                           data-ciu-verdict-dot
+                           aria-hidden="true"
+                        ></span>
+                        <strong class="ciuCard-verdictText" data-ciu-verdict>
+                           {overview.verdictText}
+                        </strong>
+                     </div>
+                     {overview.testedCount > 0 && (
+                        <div class="ciuSupportBar" aria-hidden="true">
+                           {overview.passPct > 0 && (
+                              <span
+                                 class="ciuSupportBar-seg ciuSupportBar-seg--pass"
+                                 style={`width: ${String(overview.passPct)}%`}
+                              ></span>
+                           )}
+                           {overview.partialPct > 0 && (
+                              <span
+                                 class="ciuSupportBar-seg ciuSupportBar-seg--partial"
+                                 style={`width: ${String(overview.partialPct)}%`}
+                              ></span>
+                           )}
+                           {overview.failPct > 0 && (
+                              <span
+                                 class="ciuSupportBar-seg ciuSupportBar-seg--fail"
+                                 style={`width: ${String(overview.failPct)}%`}
+                              ></span>
+                           )}
+                        </div>
+                     )}
+                     <a
+                        href={`/support/features/${feature.type}/${feature.refId}/`}
+                        class="ciuCard-reportLink"
+                     >
+                        Full report →
+                     </a>
+                  </div>
+               </div>
+
+               {columns.length > 0 && (
+                  <div class="ciuColumns">
+                     {columns.map((column) => (
+                        <div class={`ciuCol${column.id === 'virtual' ? ' ciuCol--virtual' : ''}`}>
+                           <h3 class="ciuCol-head">{column.label}</h3>
+                           <div class="ciuCol-stack">
+                              {column.cells.map((env) => {
+                                 const verdict = resolveCellState(env);
+                                 const detailPayload = buildTileDetail(feature, env, verdict.state);
+                                 return (
+                                    <button
+                                       type="button"
+                                       class={`ciuTile ciuTile--${verdict.state}`}
+                                       aria-expanded="false"
+                                       data-env-key={getEnvToken(env.environmentKey)}
+                                       data-tile-detail={JSON.stringify(detailPayload)}
+                                       title="Click to inspect exact OS, device, screen reader, and assertion details"
+                                    >
+                                       <span class="ciuTile-row">
+                                          <span class="ciuTile-browser">{formatShortBrowser(env)}</span>
+                                          <span class="ciuTile-ratio">{verdict.verdictGlyph}</span>
+                                       </span>
+                                       <span class="ciuTile-sub">{formatShortTileSub(env, column.id)}</span>
+                                    </button>
+                                 );
+                              })}
+                           </div>
+                           {column.extraCount > 0 && (
+                              <a
+                                 href={`/support/features/${feature.type}/${feature.refId}/`}
+                                 class="ciuCol-more"
+                              >
+                                 +{column.extraCount} more
+                              </a>
+                           )}
+                        </div>
+                     ))}
+                  </div>
+               )}
+
+               <div class="ciuDetailDrawer" data-ciu-detail hidden>
+                  <div class="ciuDetailDrawer-head">
+                     <strong data-ciu-detail-title></strong>
+                     <button type="button" class="ciuDetailDrawer-close" data-ciu-detail-close>
+                        Close
+                     </button>
+                  </div>
+                  <p class="ciuDetailDrawer-meta" data-ciu-detail-meta></p>
+                  <div class="ciuDetailDrawer-foot">
+                     <span class="ciuDetailDrawer-verdict" data-ciu-detail-verdict></span>
+                     <a href={`/support/features/${feature.type}/${feature.refId}/`} data-ciu-detail-link>
+                        Inspect assertions &amp; speech transcript →
+                     </a>
+                  </div>
+               </div>
+
+               <div class="ciuCard-foot">
+                  <details class="ciuCard-more">
+                     <summary>
+                        {feature.localCases.length} isolated {feature.localCases.length === 1 ? 'case' : 'cases'} · {feature.ariaAtPlans.length} ARIA-AT {feature.ariaAtPlans.length === 1 ? 'plan' : 'plans'}
+                     </summary>
+                     <div class="ciuCard-moreBody">
+                        {feature.localCases.length > 0 && (
+                           <div class="ciuCard-linksGroup">
+                              <h4>Isolated cases</h4>
+                              <ul>
+                                 {feature.localCases.map((testCase) => (
+                                    <li>
+                                       <a href={`/support/tests/${testCase.slug}/`}>{testCase.title}</a>
+                                       {' · '}
+                                       <a href={`/support/cases/${testCase.slug}/`} class="ciuBareLink">
+                                          bare HTML
+                                       </a>
+                                    </li>
+                                 ))}
+                              </ul>
+                           </div>
+                        )}
+
+                        {feature.ariaAtPlans.length > 0 && (
+                           <div class="ciuCard-linksGroup">
+                              <h4>W3C ARIA-AT plans</h4>
+                              <ul>
+                                 {feature.ariaAtPlans.map((plan) => (
+                                    <li>
+                                       <a href={`/support/aria-at/${plan.slug}/`}>
+                                          {plan.title} ({plan.versionString})
+                                       </a>
+                                    </li>
+                                 ))}
+                              </ul>
+                           </div>
+                        )}
+
+                        {feature.specURL && (
+                           <p class="ciuCard-specLink">
+                              <a href={feature.specURL} target="_blank" rel="noopener noreferrer">
+                                 {feature.linkText || 'Specification reference'} ↗
+                              </a>
+                           </p>
+                        )}
+                     </div>
+                  </details>
+
+                  {feature.specURL && (
+                     <a
+                        href={feature.specURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="ciuCard-footSpec"
+                     >
+                        W3C Spec ↗
+                     </a>
+                  )}
+               </div>
+            </li>
+         ))}
+      </ul>
+
+      <p id="ciu-empty" class="srIndex-emptyState" hidden>
+         No specification features match the active search or filters.
+      </p>
+   </section>
+
+   <section
+      id="isolated-cases"
+      class="ciuTabPanel"
+      role="tabpanel"
+      aria-labelledby="ciu-tab-cases"
+      data-ciu-panel
+      hidden
+   >
+      <p class="srIndex-sectionIntro">
+         Single-feature HTML test cases run directly against real screen readers with <code>a11ied</code>.
+      </p>
+
+      <search aria-label="Filter isolated test cases" class="srIndex-searchBox">
+         <div class="srIndex-controls">
+            <div class="srIndex-control srIndex-control--search">
+               <label for="sr-search">Search scenarios</label>
+               <div class="srIndex-inputWrap">
+                  <Search class="srIndex-inputIcon" size={16} aria-hidden="true" focusable="false" />
+                  <input
+                     id="sr-search"
+                     type="search"
+                     placeholder="Search attribute, slug, behavior, tag..."
+                     autocomplete="off"
+                  />
+               </div>
+            </div>
+
+            <div class="srIndex-control">
+               <label for="sr-category">Category</label>
+               <select id="sr-category">
+                  <option value="all">All categories</option>
+                  {categories.map((category) => (
+                     <option value={category}>{formatCategoryLabel(category)}</option>
+                  ))}
+               </select>
+            </div>
+
+            <div class="srIndex-control">
+               <label for="sr-attribute">Attribute</label>
+               <select id="sr-attribute">
+                  <option value="all">All attributes</option>
+                  {attributes.map((attribute) => (
+                     <option value={attribute}>{attribute}</option>
+                  ))}
+               </select>
+            </div>
+
+            <div class="srIndex-control">
+               <label for="sr-browser-type">Browser Type</label>
+               <select id="sr-browser-type">
+                  <option value="all">All types</option>
+                  <option value="browser">Userland Browsers</option>
+                  <option value="webview">System WebViews</option>
+               </select>
+            </div>
+
+            <div class="srIndex-control">
+               <label for="sr-environment">Environment</label>
+               <select id="sr-environment">
+                  <option value="all">All environments</option>
+                  {environmentFiles.map((envFile) => (
+                     <option value={envFile.environment.id}>
+                        {envFile.environment.label}
+                     </option>
+                  ))}
+               </select>
+            </div>
+
+            <div class="srIndex-control">
+               <label for="sr-outcome">Outcome</label>
+               <select id="sr-outcome">
+                  <option value="all">All outcomes</option>
+                  <option value="pass">Pass</option>
+                  <option value="partial">Partial</option>
+                  <option value="fail">Fail</option>
+                  <option value="not-applicable">N/A</option>
+                  <option value="untested">Untested</option>
+               </select>
+            </div>
+
+            <div class="srIndex-control srIndex-control--reset">
+               <button id="sr-reset" type="button" class="ciuResetBtn">
+                  <RotateCcw size={14} aria-hidden="true" focusable="false" />
+                  <span>Reset</span>
+               </button>
+            </div>
+         </div>
+
+         <p id="sr-filter-status" class="srIndex-filterStatus" role="status" aria-live="polite">
+            Showing {screenReaderTests.length} of {screenReaderTests.length} tests.
+         </p>
+      </search>
+
+      <div
+         class="srIndex-tableWrap"
+         tabindex="0"
+         role="region"
+         aria-label="Isolated test cases table"
+         data-env-types={JSON.stringify(environmentTypes)}
+      >
+         <table class="srIndex-table">
+            <caption class="srIndex-caption">
+               Searchable and filterable table of isolated screen reader test cases
+            </caption>
+            <thead>
+               <tr>
+                  <th scope="col">Scenario</th>
+                  <th scope="col">Attribute</th>
+                  {environmentFiles.map((envFile) => (
+                     <th scope="col">{envFile.environment.shortLabel}</th>
+                  ))}
+                  <th scope="col">Standalone</th>
+               </tr>
+            </thead>
+            <tbody>
+               {preparedRows.map(({ testCase, outcomesByEnv, searchBlob }) => {
+                  const featureMatch = listFeatureSummaryForTestAttribute(
+                     testCase.attribute,
+                  );
+                  return (
+                     <tr
+                        data-sr-row="true"
+                        data-search={searchBlob}
+                        data-category={testCase.category}
+                        data-attribute={testCase.attribute}
+                        data-outcomes={JSON.stringify(outcomesByEnv)}
+                     >
+                        <th scope="row" class="srIndex-scenarioCell">
+                           <a
+                              href={`/support/tests/${testCase.slug}/`}
+                              class="srIndex-scenarioLink"
+                           >
+                              {testCase.title}
+                           </a>
+                           <p class="srIndex-scenarioSummary">{testCase.summary}</p>
+                        </th>
+                        <td class="srIndex-attrCell">
+                           <span class="ciuInlineTag">
+                              {formatCategoryLabel(testCase.category)}
+                           </span>
+                           {featureMatch ? (
+                              <a href={`/support/features/${featureMatch.type}/${featureMatch.refId}/`}>
+                                 <code>{testCase.attribute}</code>
+                              </a>
+                           ) : (
+                              <code>{testCase.attribute}</code>
+                           )}
+                        </td>
+                        {environmentFiles.map((envFile) => {
+                           const outcome = outcomesByEnv[envFile.environment.id] ?? 'untested';
+                           return (
+                              <td
+                                 class="srIndex-outcomeCell"
+                                 data-col-label={envFile.environment.shortLabel}
+                              >
+                                 <OutcomeBadge outcome={outcome} compact={true} />
+                              </td>
+                           );
+                        })}
+                        <td class="srIndex-caseCell" data-col-label="Standalone">
+                           <a href={`/support/cases/${testCase.slug}/`}>Bare HTML ↗</a>
+                        </td>
+                     </tr>
+                  );
+               })}
+            </tbody>
+         </table>
+      </div>
+
+      <p id="sr-empty-state" class="srIndex-emptyState" hidden>
+         No screen reader test cases match the active filters.
+      </p>
+   </section>
+
+   <section
+      id="aria-at-plans"
+      class="ciuTabPanel"
+      role="tabpanel"
+      aria-labelledby="ciu-tab-plans"
+      data-ciu-panel
+      hidden
+   >
+      <p class="srIndex-sectionIntro">
+         Candidate and Recommended APG test plans synchronized from the W3C ARIA-AT Community
+         Group ({ariaAtSummary.reportsCount} finalized reports with command-by-command speech
+         outputs and RFC 2119 assertions).
+      </p>
+
+      <ul class="srIndex-planGrid">
+         {ariaAtPlans.map((plan) => (
+            <li class="srIndex-planCard">
+               <div class="srIndex-planHeader">
+                  <span class="srIndex-planMeta">{plan.phase}</span>
+                  <span class="srIndex-planMeta">
+                     {plan.versionString} · {plan.reports.length} {plan.reports.length === 1 ? 'report' : 'reports'}
+                  </span>
+               </div>
+               <h3 class="srIndex-planTitle">
+                  <a href={`/support/aria-at/${plan.slug}/`}>{plan.title}</a>
+               </h3>
+               {plan.featureRefs.length > 0 && (
+                  <p class="srIndex-planFeatures">
+                     {plan.featureRefs.map((ref, index) => (
+                        <>
+                           {index > 0 && ' · '}
+                           <a href={`/support/features/${ref.type}/${ref.refId}/`}>
+                              <code>{ref.refId}</code>
+                           </a>
+                        </>
+                     ))}
+                  </p>
+               )}
+            </li>
+         ))}
+      </ul>
+   </section>
+
+   <section
+      id="environments"
+      class="ciuTabPanel"
+      role="tabpanel"
+      aria-labelledby="ciu-tab-api"
+      data-ciu-panel
+      hidden
+   >
+      <div class="ciuApiGrid">
+         <div class="ciuFlatPanel">
+            <p class="panel-kicker">Programmatic API · @a11ied/compat</p>
+            <h2 class="ciuPanelHeading">Query compatibility by Browserslist target</h2>
+            <p>
+               Use <code>@a11ied/compat</code> and <code>@a11ied/support-data</code> inside
+               VS Code extensions, ESLint/oxlint rules, or bundler plugins to catch unsupported
+               ARIA, HTML, CSS, or JS patterns for your project’s exact <code>browserslist</code>
+               targets.
+            </p>
+            <div class="ciuCodeWrap" data-no-decorate="true">
+               <Code code={compatExampleCode} lang="ts" theme="github-dark" />
+            </div>
+         </div>
+
+         <div class="ciuFlatPanel">
+            <p class="panel-kicker">Automated with a11ied</p>
+            <h2 class="ciuPanelHeading">Automated screen reader runs</h2>
+            <p>
+               Local runs execute directly with VoiceOver, Android TalkBack, and Virtual
+               Chromium via <code>a11ied</code>. See the <a href="/quickstart">quickstart</a> or{' '}
+               <a href="/guides/screen-reader">screen reader guide</a>.
+            </p>
+            <dl class="ciuStatsList">
+               <div>
+                  <dt>Tracked local environments</dt>
+                  <dd>{summaryCounts.testedEnvironments} tested / {summaryCounts.trackedEnvironments} tracked</dd>
+               </div>
+               <div>
+                  <dt>Local verbatim runs</dt>
+                  <dd>{summaryCounts.totalRuns}</dd>
+               </div>
+               <div>
+                  <dt>W3C ARIA-AT finalized reports</dt>
+                  <dd>{ariaAtSummary.reportsCount} across {ariaAtEnvironments.length} environments</dd>
+               </div>
+            </dl>
+         </div>
+      </div>
+
+      <h3 class="srIndex-subHeading">Local Automated Environments</h3>
+      <div class="srIndex-envGrid">
+         {environmentFiles.map((envFile) => {
+            const env = envFile.environment;
+            return (
+               <div class="srIndex-envCard">
+                  <div class="srIndex-envTop">
+                     <h4>
+                        {env.shortLabel}
+                        {env.browserType === 'webview' ? ' · WebView' : ''}
+                     </h4>
+                     <OutcomeBadge
+                        outcome={envFile.status === 'tested' ? 'pass' : 'untested'}
+                        compact={true}
+                     />
+                  </div>
+                  <dl class="srIndex-envMeta">
+                     <div>
+                        <dt>Device</dt>
+                        <dd>{env.device}</dd>
+                     </div>
+                     <div>
+                        <dt>OS</dt>
+                        <dd>{env.os} {env.osVersion}</dd>
+                     </div>
+                     <div>
+                        <dt>Browser</dt>
+                        <dd>{env.browser} {env.browserVersion}</dd>
+                     </div>
+                     <div>
+                        <dt>Screen Reader</dt>
+                        <dd>{env.screenReader} {env.screenReaderVersion}</dd>
+                     </div>
+                  </dl>
+                  {envFile.statusNote && <p class="srIndex-envNote">{envFile.statusNote}</p>}
+               </div>
+            );
+         })}
+      </div>
+
+      <h3 class="srIndex-subHeading srIndex-subHeading--spaced">
+         W3C ARIA-AT Environments
+      </h3>
+      <div class="srIndex-envGrid">
+         {ariaAtEnvironments.map((env) => (
+            <div class="srIndex-envCard">
+               <div class="srIndex-envTop">
+                  <h4>
+                     {env.screenReader} {env.screenReaderVersion} · {env.browser} {env.browserVersion}
+                  </h4>
+                  <span class="srIndex-planMeta">ARIA-AT</span>
+               </div>
+               <dl class="srIndex-envMeta">
+                  <div>
+                     <dt>OS</dt>
+                     <dd>{env.os} {env.osVersion}</dd>
+                  </div>
+                  <div>
+                     <dt>Device</dt>
+                     <dd>{env.device}</dd>
+                  </div>
+                  <div>
+                     <dt>Coverage</dt>
+                     <dd>{env.planCount} {env.planCount === 1 ? 'plan' : 'plans'}</dd>
+                  </div>
+                  {env.latestTestedAt && (
+                     <div>
+                        <dt>Latest</dt>
+                        <dd>{env.latestTestedAt.slice(0, DATE_PREFIX_LEN)}</dd>
+                     </div>
+                  )}
+               </dl>
+            </div>
+         ))}
+      </div>
+   </section>
+
+   <footer class="srIndex-attribution">
+      <p>
+         W3C ARIA-AT test plans and community reports are synchronized from{' '}
+         <a href={ariaAtSummary.upstreamURL} target="_blank" rel="noopener noreferrer">
+            aria-at.w3.org
+         </a>{' '}
+         ({ariaAtSummary.license}).
+      </p>
+   </footer>
+</DocShell>
+
+<script>
+   import '../../scripts/screen-reader-index';
+</script>
+
+<style>
+:global(.content-frame > header) {
+   padding-top: 0.4rem;
+   gap: 0.7rem;
+}
+
+:global(.content-frame > header::before),
+:global(.content-frame > header::after) {
+   display: none;
+}
+
+:global(.content-frame > header h1) {
+   max-width: none;
+   font-size: clamp(2.1rem, 4.2vw, 3.35rem);
+   line-height: 0.94;
+   text-shadow: 2px 2px 0 var(--yellow);
+}
+
+:global(.content-frame > header .summary) {
+   margin-top: 0.55rem;
+   padding-top: 0.55rem;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 20%, transparent);
+   font-size: 1rem;
+   line-height: 1.5;
+   max-width: 70ch;
+}
+
+:global(.content-frame) {
+   gap: 1.65rem;
+}
+
+:global(.content-frame > article) {
+   grid-template-columns: minmax(0, 1fr);
+   gap: 1.35rem;
+   min-inline-size: 0;
+}
+
+section.ciuHero,
+section.ciuTabPanel,
+.ciuViewSwitch {
+   max-width: none;
+   min-inline-size: 0;
+   transform: none;
+}
+
+.ciuHero-box {
+   display: block;
+   padding: 1rem 1.15rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 20%, transparent);
+   border-radius: 6px;
+   background: var(--paper-light);
+}
+
+.ciuSearch-sentence {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 0.65rem;
+}
+
+.ciuSearch-prompt,
+.ciuSearch-qmark {
+   font-family: var(--display);
+   font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+   font-weight: 700;
+   line-height: 1;
+   color: var(--ink);
+}
+
+.ciuSearch-input {
+   flex: 1 1 240px;
+   min-inline-size: 0;
+   min-block-size: 42px;
+   padding-block: 0.45rem;
+   padding-inline: 0.75rem;
+   border: 2px solid var(--ink);
+   border-radius: 4px;
+   background: var(--paper);
+   color: var(--ink);
+   font: inherit;
+   font-size: 1rem;
+   font-weight: 600;
+}
+
+.ciuSearch-input:focus-visible {
+   outline: 3px solid var(--blue);
+   outline-offset: 2px;
+}
+
+.ciuSearch-examples {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 0.35rem;
+   margin-block-start: 0.55rem;
+   font-size: 0.84rem;
+   color: var(--ink-soft);
+}
+
+.ciuSearch-examplesLabel {
+   font-family: var(--display);
+   font-size: 0.76rem;
+   font-weight: 700;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+}
+
+.ciuExampleLink {
+   padding: 0;
+   border: none;
+   background: transparent;
+   color: var(--red-dark);
+   font-family: var(--code);
+   font-size: 0.82rem;
+   font-weight: 600;
+   text-decoration: underline;
+   text-underline-offset: 2px;
+   cursor: pointer;
+}
+
+.ciuExampleLink:hover {
+   color: var(--red);
+}
+
+.ciuFilters {
+   margin-block-start: 0.75rem;
+   padding-block-start: 0.75rem;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 14%, transparent);
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(min(155px, 100%), 1fr));
+   gap: 0.65rem;
+   align-items: end;
+}
+
+.ciuFilter,
+.srIndex-control {
+   min-inline-size: 0;
+   display: flex;
+   flex-direction: column;
+   gap: 0.25rem;
+}
+
+.ciuFilter label,
+.srIndex-control label {
+   font-family: var(--display);
+   font-size: 0.72rem;
+   font-weight: 700;
+   text-transform: uppercase;
+   letter-spacing: 0.06em;
+   color: var(--ink-soft);
+}
+
+.ciuFilter select,
+.srIndex-control input,
+.srIndex-control select {
+   inline-size: 100%;
+   min-inline-size: 0;
+   min-block-size: 36px;
+   padding-block: 0.3rem;
+   padding-inline: 0.55rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 28%, transparent);
+   border-radius: 4px;
+   background: var(--paper);
+   color: var(--ink);
+   font: inherit;
+   font-size: 0.88rem;
+}
+
+.ciuResetBtn {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   gap: 0.35rem;
+   min-block-size: 36px;
+   padding-block: 0.3rem;
+   padding-inline: 0.75rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 28%, transparent);
+   border-radius: 4px;
+   background: var(--paper);
+   color: var(--ink);
+   font-family: var(--display);
+   font-size: 0.82rem;
+   font-weight: 700;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+   line-height: 1;
+   cursor: pointer;
+}
+
+.ciuResetBtn:hover {
+   background: var(--yellow);
+}
+
+.ciuBlBanner {
+   margin-block-start: 0.75rem;
+   padding: 0.5rem 0.75rem;
+   border-radius: 4px;
+   background: color-mix(in oklch, var(--blue) 12%, var(--paper-light));
+   color: var(--ink);
+   font-size: 0.84rem;
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.4rem;
+   align-items: baseline;
+}
+
+.ciuBlBanner[hidden] {
+   display: none;
+}
+
+.ciuHero-footer {
+   margin-block-start: 0.75rem;
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   justify-content: space-between;
+   gap: 0.65rem;
+}
+
+.ciuHero-status,
+.srIndex-filterStatus {
+   margin: 0;
+   font-size: 0.84rem;
+   font-weight: 700;
+   color: var(--ink-soft);
+}
+
+.ciuLegend {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.9rem;
+}
+
+.ciuLegend-item {
+   margin: 0;
+   display: inline-flex;
+   align-items: center;
+   gap: 0.38rem;
+   font-size: 0.8rem;
+   font-weight: 600;
+   color: var(--ink-soft);
+}
+
+.ciuSwatch {
+   inline-size: 11px;
+   block-size: 11px;
+   border-radius: 2px;
+   display: inline-block;
+}
+
+.ciuSwatch--pass {
+   background: #1e7a46;
+}
+
+.ciuSwatch--partial {
+   background: #a15c00;
+}
+
+.ciuSwatch--fail {
+   background: #bd2b26;
+}
+
+.ciuSwatch--untested {
+   background: #e7e0d3;
+   border: 1px solid #9ca3af;
+}
+
+.ciuViewSwitch {
+   border-bottom: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
+}
+
+.ciuTablist {
+   display: flex;
+   flex-wrap: nowrap;
+   overflow-x: auto;
+   gap: 0.25rem;
+}
+
+.ciuTab {
+   position: relative;
+   flex: none;
+   padding-block: 0.6rem;
+   padding-inline: 0.85rem;
+   border: none;
+   background: transparent;
+   color: var(--ink-soft);
+   font-family: var(--display);
+   font-size: 0.88rem;
+   font-weight: 700;
+   text-transform: uppercase;
+   letter-spacing: 0.04em;
+   line-height: 1;
+   cursor: pointer;
+   white-space: nowrap;
+}
+
+.ciuTab[aria-selected='true'] {
+   color: var(--ink);
+}
+
+.ciuTab[aria-selected='true']::after {
+   content: '';
+   position: absolute;
+   inset: auto 0 0;
+   border-block-end: 3px solid var(--red);
+}
+
+.ciuTabPanel {
+   display: flex;
+   flex-direction: column;
+   gap: 1rem;
+}
+
+.ciuTabPanel[hidden] {
+   display: none;
+}
+
+.ciuCards {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   flex-direction: column;
+   gap: 1.1rem;
+}
+
+.ciuCard {
+   margin: 0;
+   padding: 1rem 1.15rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 18%, transparent);
+   border-top-width: 4px;
+   border-radius: 4px;
+   background: var(--paper-light);
+   display: flex;
+   flex-direction: column;
+   gap: 0.8rem;
+   min-inline-size: 0;
+}
+
+.ciuCard--pass {
+   border-top-color: #1e7a46;
+}
+
+.ciuCard--partial {
+   border-top-color: #a15c00;
+}
+
+.ciuCard--fail {
+   border-top-color: #bd2b26;
+}
+
+.ciuCard--untested {
+   border-top-color: #9ca3af;
+}
+
+.ciuCard[hidden] {
+   display: none;
+}
+
+.ciuCard-top {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: flex-start;
+   justify-content: space-between;
+   gap: 0.65rem 1.25rem;
+}
+
+.ciuCard-intro {
+   min-inline-size: 0;
+   flex: 1 1 320px;
+}
+
+.ciuCard-titleRow {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: baseline;
+   gap: 0.5rem 0.7rem;
+}
+
+.ciuCard-title {
+   margin: 0;
+   font-size: 1.42rem;
+   line-height: 1.1;
+}
+
+.ciuMetaLine {
+   font-family: var(--display);
+   font-size: 0.74rem;
+   font-weight: 700;
+   letter-spacing: 0.06em;
+   text-transform: uppercase;
+   color: var(--ink-soft);
+}
+
+.ciuCard-desc {
+   margin: 0.25rem 0 0;
+   font-size: 0.92rem;
+   line-height: 1.45;
+   color: var(--ink-soft);
+}
+
+.ciuCard-support {
+   display: flex;
+   flex-direction: column;
+   align-items: flex-end;
+   gap: 0.3rem;
+   flex: 0 0 auto;
+}
+
+@media (max-width: 680px) {
+   .ciuCard-support {
+      align-items: flex-start;
+   }
+}
+
+.ciuCard-verdictRow {
+   display: flex;
+   align-items: center;
+   gap: 0.4rem;
+}
+
+.ciuVerdictDot {
+   inline-size: 9px;
+   block-size: 9px;
+   border-radius: 50%;
+   flex-shrink: 0;
+}
+
+.ciuVerdictDot--pass,
+.ciuVerdictDot--supported {
+   background: #1e7a46;
+}
+
+.ciuVerdictDot--partial {
+   background: #a15c00;
+}
+
+.ciuVerdictDot--fail,
+.ciuVerdictDot--unsupported {
+   background: #bd2b26;
+}
+
+.ciuVerdictDot--untested {
+   background: #9ca3af;
+}
+
+.ciuCard-verdictText {
+   font-family: var(--display);
+   font-size: 0.9rem;
+   font-weight: 700;
+   letter-spacing: 0.02em;
+   color: var(--ink);
+}
+
+.ciuSupportBar {
+   inline-size: 140px;
+   block-size: 7px;
+   border-radius: 99px;
+   overflow: hidden;
+   display: flex;
+   background: #e7e0d3;
+}
+
+.ciuSupportBar-seg {
+   block-size: 100%;
+   display: block;
+}
+
+.ciuSupportBar-seg--pass {
+   background: #1e7a46;
+}
+
+.ciuSupportBar-seg--partial {
+   background: #d97706;
+}
+
+.ciuSupportBar-seg--fail {
+   background: #bd2b26;
+}
+
+.ciuCard-reportLink {
+   font-family: var(--display);
+   font-size: 0.78rem;
+   font-weight: 700;
+   letter-spacing: 0.04em;
+   text-transform: uppercase;
+}
+
+.ciuColumns {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(min(142px, 100%), 1fr));
+   gap: 0.75rem 0.55rem;
+}
+
+@media (max-width: 480px) {
+   .ciuColumns {
+      grid-template-columns: minmax(0, 1fr);
+   }
+}
+
+.ciuCol {
+   min-inline-size: 0;
+   display: flex;
+   flex-direction: column;
+   gap: 0.3rem;
+}
+
+.ciuCol--virtual {
+   opacity: 0.85;
+}
+
+.ciuCol-head {
+   margin: 0;
+   padding-block-end: 0.25rem;
+   border-bottom: 1px solid color-mix(in oklch, var(--ink) 20%, transparent);
+   font-family: var(--display);
+   font-size: 0.74rem;
+   font-weight: 700;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+   color: var(--ink-soft);
+   line-height: 1.1;
+}
+
+.ciuCol-stack {
+   display: flex;
+   flex-direction: column;
+   gap: 3px;
+}
+
+.ciuTile {
+   inline-size: 100%;
+   padding: 0.4rem 0.55rem;
+   border: none;
+   border-radius: 3px;
+   display: flex;
+   flex-direction: column;
+   gap: 0.1rem;
+   text-align: start;
+   font: inherit;
+   cursor: pointer;
+   transition: opacity 0.14s ease, filter 0.12s ease;
+}
+
+.ciuTile:hover {
+   filter: brightness(0.95);
+}
+
+.ciuTile:focus-visible {
+   outline: 3px solid var(--blue);
+   outline-offset: 2px;
+}
+
+.ciuTile[aria-expanded='true'] {
+   outline: 2px solid var(--ink);
+   outline-offset: 1px;
+}
+
+.ciuTile--dim {
+   opacity: 0.24;
+}
+
+.ciuTile--pass {
+   background: #1e7a46;
+   color: #ffffff;
+}
+
+.ciuTile--partial {
+   background: #a15c00;
+   color: #ffffff;
+}
+
+.ciuTile--fail {
+   background: #bd2b26;
+   color: #ffffff;
+}
+
+.ciuTile--untested {
+   background: #e7e0d3;
+   color: #474c5c;
+}
+
+.ciuTile-row {
+   display: flex;
+   align-items: baseline;
+   justify-content: space-between;
+   gap: 0.35rem;
+   font-size: 0.83rem;
+   font-weight: 700;
+   line-height: 1.2;
+}
+
+.ciuTile-browser {
+   min-inline-size: 0;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+}
+
+.ciuTile-ratio {
+   flex-shrink: 0;
+   font-size: 0.76rem;
+   font-variant-numeric: tabular-nums;
+}
+
+.ciuTile-sub {
+   font-size: 0.72rem;
+   line-height: 1.2;
+   opacity: 0.9;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+}
+
+.ciuCol-more {
+   font-size: 0.76rem;
+   font-weight: 700;
+   padding-inline-start: 0.15rem;
+}
+
+.ciuDetailDrawer {
+   padding: 0.75rem 0.9rem;
+   border-radius: 3px;
+   border-left: 4px solid var(--ink);
+   background: var(--paper);
+   display: flex;
+   flex-direction: column;
+   gap: 0.3rem;
+   font-size: 0.86rem;
+}
+
+.ciuDetailDrawer[hidden] {
+   display: none;
+}
+
+.ciuDetailDrawer[data-state='pass'] {
+   border-left-color: #1e7a46;
+}
+
+.ciuDetailDrawer[data-state='partial'] {
+   border-left-color: #a15c00;
+}
+
+.ciuDetailDrawer[data-state='fail'] {
+   border-left-color: #bd2b26;
+}
+
+.ciuDetailDrawer[data-state='untested'] {
+   border-left-color: #9ca3af;
+}
+
+.ciuDetailDrawer-head,
+.ciuDetailDrawer-foot {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: baseline;
+   justify-content: space-between;
+   gap: 0.5rem 1rem;
+}
+
+.ciuDetailDrawer-close {
+   padding: 0.15rem 0.45rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 25%, transparent);
+   border-radius: 3px;
+   background: var(--paper-light);
+   color: var(--ink);
+   font-family: var(--display);
+   font-size: 0.74rem;
+   font-weight: 700;
+   text-transform: uppercase;
+   cursor: pointer;
+}
+
+.ciuDetailDrawer-meta {
+   margin: 0;
+   color: var(--ink-soft);
+}
+
+.ciuDetailDrawer-verdict {
+   font-weight: 700;
+   color: var(--ink);
+}
+
+.ciuCard-foot {
+   padding-block-start: 0.5rem;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 14%, transparent);
+   display: flex;
+   flex-wrap: wrap;
+   align-items: flex-start;
+   justify-content: space-between;
+   gap: 0.5rem 1rem;
+   font-size: 0.82rem;
+}
+
+.ciuCard-more {
+   flex: 1 1 auto;
+}
+
+.ciuCard-more summary {
+   cursor: pointer;
+   font-weight: 700;
+   color: var(--ink-soft);
+}
+
+.ciuCard-moreBody {
+   margin-block-start: 0.55rem;
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+   gap: 0.75rem;
+}
+
+.ciuCard-linksGroup h4 {
+   margin: 0 0 0.25rem;
+   font-family: var(--display);
+   font-size: 0.74rem;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+   color: var(--ink-soft);
+}
+
+.ciuCard-linksGroup ul {
+   margin: 0;
+   padding-inline-start: 1.1rem;
+}
+
+.ciuCard-linksGroup li + li {
+   margin-top: 0.2rem;
+}
+
+.ciuBareLink {
+   font-size: 0.78rem;
+}
+
+.ciuCard-specLink {
+   margin: 0;
+   align-self: end;
+}
+
+.ciuCard-footSpec {
+   flex: 0 0 auto;
+   font-size: 0.8rem;
+   font-weight: 700;
+}
+
+.srIndex-sectionIntro {
+   margin: 0;
+   max-width: 72ch;
+   color: var(--ink-soft);
+}
+
+.srIndex-searchBox {
+   display: block;
+   padding: 0.9rem 1rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 20%, transparent);
+   border-radius: 6px;
+   background: var(--paper-light);
+}
+
+.srIndex-controls {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr));
+   gap: 0.75rem;
+   align-items: end;
+}
+
+.srIndex-control--search {
+   grid-column: span 2;
+}
+
+@media (max-width: 640px) {
+   .srIndex-control--search {
+      grid-column: span 1;
+   }
+}
+
+.srIndex-inputWrap {
+   position: relative;
+   display: flex;
+   align-items: center;
+}
+
+.srIndex-inputWrap input {
+   width: 100%;
+   padding-inline-start: 2.1rem;
+}
+
+.srIndex-inputIcon {
+   position: absolute;
+   inset-inline-start: 0.65rem;
+   color: var(--ink-soft);
+   pointer-events: none;
+}
+
+.srIndex-filterStatus {
+   margin-block-start: 0.7rem;
+}
+
+.srIndex-tableWrap {
+   overflow: auto;
+   max-inline-size: 100%;
+   border: 1px solid color-mix(in oklch, var(--ink) 20%, transparent);
+   border-radius: 4px;
+   background: var(--paper-light);
+   container-type: inline-size;
+}
+
+.srIndex-caption {
+   position: absolute;
+   clip-path: inset(50%);
+   overflow: hidden;
+   width: 1px;
+   height: 1px;
+   margin: -1px;
+   padding: 0;
+   border: 0;
+   white-space: nowrap;
+}
+
+.srIndex-table {
+   width: 100%;
+   border-collapse: separate;
+   border-spacing: 0;
+   text-align: start;
+   font-size: 0.88rem;
+}
+
+.srIndex-table thead {
+   position: sticky;
+   inset-block-start: 0;
+   z-index: 2;
+   background: var(--paper);
+}
+
+.srIndex-table th,
+.srIndex-table td {
+   padding-block: 0.7rem;
+   padding-inline: 0.75rem;
+   border-bottom: 1px solid color-mix(in oklch, var(--ink) 16%, transparent);
+   vertical-align: top;
+   text-align: start;
+}
+
+.srIndex-table thead th {
+   font-family: var(--display);
+   font-size: 0.74rem;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+   color: var(--ink);
+   border-bottom: 2px solid color-mix(in oklch, var(--ink) 26%, transparent);
+   white-space: nowrap;
+}
+
+.srIndex-table tbody tr:last-child th,
+.srIndex-table tbody tr:last-child td {
+   border-bottom: none;
+}
+
+.srIndex-scenarioCell {
+   position: sticky;
+   inset-inline-start: 0;
+   z-index: 1;
+   background: var(--paper-light);
+   min-inline-size: 220px;
+   font-weight: 400;
+}
+
+.srIndex-scenarioLink {
+   display: inline-block;
+   margin-block-end: 0.2rem;
+   font-size: 0.96rem;
+}
+
+.srIndex-scenarioSummary {
+   margin: 0;
+   font-size: 0.82rem;
+   color: var(--ink-soft);
+}
+
+.srIndex-attrCell {
+   white-space: nowrap;
+}
+
+.ciuInlineTag {
+   margin-inline-end: 0.35rem;
+   font-family: var(--display);
+   font-size: 0.74rem;
+   font-weight: 700;
+   color: var(--ink-soft);
+   text-transform: uppercase;
+}
+
+.srIndex-caseCell a {
+   white-space: nowrap;
+   font-size: 0.84rem;
+}
+
+.srIndex-emptyState {
+   padding-block: 1.25rem;
+   padding-inline: 1rem;
+   border: 1px dashed color-mix(in oklch, var(--ink) 30%, transparent);
+   text-align: center;
+   color: var(--ink-soft);
+}
+
+.srIndex-planGrid {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(min(270px, 100%), 1fr));
+   gap: 0.85rem;
+}
+
+.srIndex-planCard {
+   display: flex;
+   flex-direction: column;
+   gap: 0.45rem;
+   margin: 0;
+   padding: 0.9rem 1rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 18%, transparent);
+   border-radius: 4px;
+   background: var(--paper-light);
+   min-inline-size: 0;
+}
+
+.srIndex-planHeader {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   justify-content: space-between;
+   gap: 0.4rem;
+}
+
+.srIndex-planMeta {
+   font-family: var(--display);
+   font-size: 0.74rem;
+   color: var(--ink-soft);
+   font-weight: 700;
+   letter-spacing: 0.04em;
+   text-transform: uppercase;
+}
+
+.srIndex-planTitle {
+   margin: 0;
+   font-size: 1.15rem;
+   line-height: 1.1;
+}
+
+.srIndex-planFeatures {
+   margin: 0;
+   font-size: 0.84rem;
+   color: var(--ink-soft);
+   line-height: 1.5;
+}
+
+.ciuApiGrid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
+   gap: 1rem;
+}
+
+.ciuFlatPanel {
+   min-inline-size: 0;
+   padding: 1rem 1.15rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 18%, transparent);
+   border-radius: 4px;
+   background: var(--paper-light);
+   display: flex;
+   flex-direction: column;
+   gap: 0.65rem;
+}
+
+.ciuPanelHeading {
+   margin: 0;
+   font-size: 1.35rem;
+   line-height: 1.1;
+}
+
+.ciuCodeWrap {
+   min-inline-size: 0;
+   overflow-x: auto;
+   border-radius: 4px;
+}
+
+.ciuCodeWrap :global(pre.astro-code) {
+   margin: 0;
+   padding: 0.85rem;
+   border: none;
+   box-shadow: none;
+   font-size: 0.8rem;
+}
+
+.ciuStatsList {
+   margin: 0.4rem 0 0;
+   display: flex;
+   flex-direction: column;
+   gap: 0.4rem;
+}
+
+.ciuStatsList div {
+   display: flex;
+   justify-content: space-between;
+   gap: 0.5rem;
+   padding-block-end: 0.35rem;
+   border-bottom: 1px solid color-mix(in oklch, var(--ink) 14%, transparent);
+}
+
+.ciuStatsList dt {
+   color: var(--ink-soft);
+   font-weight: 700;
+}
+
+.ciuStatsList dd {
+   margin: 0;
+   font-weight: 700;
+   text-align: end;
+}
+
+.srIndex-subHeading {
+   margin: 0.35rem 0 0;
+   font-size: 1.2rem;
+   color: var(--ink);
+}
+
+.srIndex-subHeading--spaced {
+   margin-block-start: 0.9rem;
+}
+
+.srIndex-envGrid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
+   gap: 0.85rem;
+}
+
+.srIndex-envCard {
+   padding: 0.85rem 0.95rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 18%, transparent);
+   border-radius: 4px;
+   background: var(--paper-light);
+   min-inline-size: 0;
+}
+
+.srIndex-envTop {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   gap: 0.5rem;
+   margin-block-end: 0.6rem;
+}
+
+.srIndex-envTop h4 {
+   margin: 0;
+   font-family: var(--display);
+   font-size: 0.92rem;
+   line-height: 1.1;
+   text-transform: uppercase;
+}
+
+.srIndex-envMeta {
+   margin: 0;
+   display: flex;
+   flex-direction: column;
+   gap: 0.25rem;
+   font-size: 0.82rem;
+}
+
+.srIndex-envMeta div {
+   display: flex;
+   justify-content: space-between;
+   gap: 0.5rem;
+}
+
+.srIndex-envMeta dt {
+   color: var(--ink-soft);
+   font-weight: 700;
+}
+
+.srIndex-envMeta dd {
+   margin: 0;
+   text-align: end;
+   word-break: break-word;
+}
+
+.srIndex-envNote {
+   margin-block: 0.55rem 0;
+   font-size: 0.78rem;
+   color: var(--ink-soft);
+}
+
+.srIndex-attribution {
+   padding-block-start: 1rem;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 20%, transparent);
+   font-size: 0.88rem;
+   color: var(--ink-soft);
+}
+
+.srIndex-attribution p {
+   margin: 0;
+   overflow-wrap: anywhere;
+}
+
+@container (width < 760px) {
+   .srIndex-table {
+      display: block;
+   }
+
+   .srIndex-table thead {
+      display: none;
+   }
+
+   .srIndex-table tbody,
+   .srIndex-table tr,
+   .srIndex-table th,
+   .srIndex-table td {
+      display: block;
+   }
+
+   .srIndex-table tr {
+      border-bottom: 2px solid color-mix(in oklch, var(--ink) 24%, transparent);
+      padding-block: 0.45rem;
+   }
+
+   .srIndex-table tr:last-child {
+      border-bottom: none;
+   }
+
+   .srIndex-table th,
+   .srIndex-table td {
+      border-bottom: 1px dashed color-mix(in oklch, var(--ink) 20%, transparent);
+      padding-block: 0.45rem;
+      padding-inline: 0.75rem;
+      min-inline-size: 0;
+   }
+
+   .srIndex-table td:last-child {
+      border-bottom: none;
+   }
+
+   .srIndex-table td::before {
+      display: block;
+      margin-block-end: 0.2rem;
+      font-family: var(--display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-soft);
+   }
+
+   .srIndex-table td:nth-child(2)::before {
+      content: 'Attribute';
+   }
+
+   .srIndex-table td[data-col-label]::before {
+      content: attr(data-col-label);
+   }
+
+   .srIndex-scenarioCell {
+      position: static;
+      border-bottom: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
+   }
+}
+</style>

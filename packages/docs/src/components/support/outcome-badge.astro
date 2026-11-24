@@ -1,0 +1,75 @@
+---
+import CircleAlert from '@lucide/astro/icons/circle-alert';
+import CircleCheck from '@lucide/astro/icons/circle-check';
+import CircleMinus from '@lucide/astro/icons/circle-minus';
+import CircleQuestionMark from '@lucide/astro/icons/circle-question-mark';
+import CircleX from '@lucide/astro/icons/circle-x';
+import { formatOutcomeLabel, type TestOutcome } from '@a11ied/support-data/types';
+
+export interface Props {
+   outcome: TestOutcome;
+   compact?: boolean;
+}
+
+const { outcome, compact = false } = Astro.props;
+const label = formatOutcomeLabel(outcome);
+---
+
+<span class:list={[ 'srOutcomeBadge', `srOutcomeBadge--${outcome}`, { 'srOutcomeBadge--compact': compact } ]}>
+   {outcome === 'pass' && <CircleCheck class="srOutcomeBadge-icon" size={compact ? 13 : 15} aria-hidden="true" focusable="false" />}
+   {outcome === 'partial' && <CircleAlert class="srOutcomeBadge-icon" size={compact ? 13 : 15} aria-hidden="true" focusable="false" />}
+   {outcome === 'fail' && <CircleX class="srOutcomeBadge-icon" size={compact ? 13 : 15} aria-hidden="true" focusable="false" />}
+   {outcome === 'not-applicable' && <CircleMinus class="srOutcomeBadge-icon" size={compact ? 13 : 15} aria-hidden="true" focusable="false" />}
+   {outcome === 'untested' && <CircleQuestionMark class="srOutcomeBadge-icon" size={compact ? 13 : 15} aria-hidden="true" focusable="false" />}
+   <span class="srOutcomeBadge-text">{label}</span>
+</span>
+
+<style>
+.srOutcomeBadge {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.35rem;
+   padding-block: 0.28rem;
+   padding-inline: 0.6rem;
+   border: none;
+   border-radius: 3px;
+   font-family: var(--display);
+   font-size: 0.78rem;
+   font-weight: 700;
+   letter-spacing: 0.05em;
+   text-transform: uppercase;
+   line-height: 1;
+   white-space: nowrap;
+}
+
+.srOutcomeBadge--compact {
+   padding-block: 0.2rem;
+   padding-inline: 0.48rem;
+   font-size: 0.72rem;
+}
+
+.srOutcomeBadge-icon {
+   flex-shrink: 0;
+}
+
+.srOutcomeBadge--pass {
+   background: #1e7a46;
+   color: #ffffff;
+}
+
+.srOutcomeBadge--partial {
+   background: #a15c00;
+   color: #ffffff;
+}
+
+.srOutcomeBadge--fail {
+   background: #bd2b26;
+   color: #ffffff;
+}
+
+.srOutcomeBadge--not-applicable,
+.srOutcomeBadge--untested {
+   background: #e7e0d3;
+   color: #474c5c;
+}
+</style>

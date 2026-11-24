@@ -107,6 +107,10 @@ function createCopyButton(source: string, kind: string): HTMLButtonElement {
 }
 
 function decorate(pre: HTMLPreElement): void {
+   if (pre.classList.contains('astro-code') || Object.hasOwn(pre.dataset, 'noDecorate')) {
+      return;
+   }
+
    const code = pre.querySelector(':scope > code');
 
    if (!code) {

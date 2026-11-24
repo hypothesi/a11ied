@@ -1,0 +1,134 @@
+---
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+import AssertionsBody from './assertions-body.astro';
+import type { AssertionResultRecord, AssertionSummary } from '@a11ied/support-data/types';
+
+export interface Props {
+   assertions: readonly AssertionResultRecord[];
+   summary?: AssertionSummary;
+   label?: string;
+   mode?: 'disclosure' | 'inline';
+}
+
+const {
+   assertions,
+   summary,
+   label = 'Spec assertions',
+   mode = 'disclosure',
+} = Astro.props;
+
+const summaryText = summary
+   ? [
+        summary.must.total > 0 ? `${summary.must.passed}/${summary.must.total} MUST` : '',
+        summary.should.total > 0 ? `${summary.should.passed}/${summary.should.total} SHOULD` : '',
+        summary.may.total > 0 ? `${summary.may.passed}/${summary.may.total} MAY` : '',
+     ]
+        .filter(Boolean)
+        .join(' · ')
+   : `${String(assertions.length)} checks`;
+---
+
+{mode === 'inline' ? (
+   <div class="srAssert srAssert--inline">
+      <div class="srAssert-inlineHead">
+         <span class="srAssert-summaryText">{label}</span>
+         <span class="srAssert-count">{summaryText}</span>
+      </div>
+      <AssertionsBody assertions={assertions} />
+   </div>
+) : (
+   <details class="srAssert">
+      <summary class="srAssert-summary">
+         <ChevronDown class="srAssert-marker" size={16} aria-hidden="true" focusable="false" />
+         <span class="srAssert-summaryText">{label}</span>
+         <span class="srAssert-count">{summaryText}</span>
+      </summary>
+      <AssertionsBody assertions={assertions} />
+   </details>
+)}
+
+<style>
+.srAssert {
+   margin-block-start: 0.55rem;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 16%, transparent);
+   background: transparent;
+}
+
+.srAssert--inline {
+   margin-block-start: 0.7rem;
+}
+
+.srAssert-inlineHead,
+.srAssert-summary {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 0.45rem;
+   min-block-size: 32px;
+   padding-block: 0.4rem;
+   padding-inline: 0.1rem;
+   font-size: 0.86rem;
+   font-weight: 700;
+   color: var(--ink);
+}
+
+.srAssert-inlineHead {
+   font-family: var(--display);
+   font-size: 0.8rem;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+   color: var(--ink-soft);
+}
+
+.srAssert-summary {
+   list-style: none;
+   cursor: pointer;
+   user-select: none;
+}
+
+.srAssert-summary::-webkit-details-marker {
+   display: none;
+}
+
+.srAssert-marker {
+   flex-shrink: 0;
+   transform: rotate(-90deg);
+}
+
+.srAssert[open] .srAssert-marker {
+   transform: rotate(0deg);
+}
+
+details.srAssert::details-content {
+   interpolate-size: allow-keywords;
+   overflow: clip;
+   contain: layout;
+}
+
+details.srAssert:not([open])::details-content {
+   block-size: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+   .srAssert-marker {
+      transition: transform 0.2s ease;
+   }
+
+   details.srAssert::details-content {
+      transition: block-size, content-visibility, display;
+      transition-duration: 0.22s;
+      transition-timing-function: ease-in-out;
+      transition-behavior: allow-discrete;
+   }
+}
+
+.srAssert-count {
+   margin-inline-start: auto;
+   font-family: var(--display);
+   font-size: 0.76rem;
+   font-weight: 700;
+   line-height: 1;
+   font-variant-numeric: tabular-nums;
+   color: var(--ink-soft);
+}
+</style>

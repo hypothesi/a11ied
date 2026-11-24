@@ -1,0 +1,126 @@
+---
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+import TranscriptBody from './transcript-body.astro';
+import type { TranscriptEntry } from '@a11ied/support-data/types';
+
+export interface Props {
+   transcript: readonly TranscriptEntry[];
+   driver: string;
+   runAt: string;
+   mode?: 'disclosure' | 'inline';
+   label?: string;
+}
+
+const {
+   transcript,
+   driver,
+   runAt,
+   mode = 'disclosure',
+   label = 'Screen reader log',
+} = Astro.props;
+const entryCountLabel = `${String(transcript.length)} ${transcript.length === 1 ? 'announcement' : 'announcements'}`;
+---
+
+{mode === 'inline' ? (
+   <div class="srTranscript srTranscript--inline">
+      <div class="srTranscript-inlineHead">
+         <span class="srTranscript-summaryText">{label}</span>
+         <span class="srTranscript-count">{entryCountLabel}</span>
+      </div>
+      <TranscriptBody transcript={transcript} driver={driver} runAt={runAt} />
+   </div>
+) : (
+   <details class="srTranscript">
+      <summary class="srTranscript-summary">
+         <ChevronDown class="srTranscript-marker" size={16} aria-hidden="true" focusable="false" />
+         <span class="srTranscript-summaryText">{label}</span>
+         <span class="srTranscript-count">{entryCountLabel}</span>
+      </summary>
+      <TranscriptBody transcript={transcript} driver={driver} runAt={runAt} />
+   </details>
+)}
+
+<style>
+.srTranscript {
+   margin-block-start: 0.45rem;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 16%, transparent);
+   background: transparent;
+}
+
+.srTranscript--inline {
+   margin-block-start: 0.7rem;
+}
+
+.srTranscript-inlineHead,
+.srTranscript-summary {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 0.45rem;
+   min-block-size: 32px;
+   padding-block: 0.4rem;
+   padding-inline: 0.1rem;
+   font-size: 0.86rem;
+   font-weight: 700;
+   color: var(--ink);
+}
+
+.srTranscript-inlineHead {
+   font-family: var(--display);
+   font-size: 0.8rem;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+   color: var(--ink-soft);
+}
+
+.srTranscript-summary {
+   list-style: none;
+   cursor: pointer;
+   user-select: none;
+}
+
+.srTranscript-summary::-webkit-details-marker {
+   display: none;
+}
+
+.srTranscript-marker {
+   flex-shrink: 0;
+   transform: rotate(-90deg);
+}
+
+.srTranscript[open] .srTranscript-marker {
+   transform: rotate(0deg);
+}
+
+details.srTranscript::details-content {
+   interpolate-size: allow-keywords;
+   overflow: clip;
+   contain: layout;
+}
+
+details.srTranscript:not([open])::details-content {
+   block-size: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+   .srTranscript-marker {
+      transition: transform 0.2s ease;
+   }
+
+   details.srTranscript::details-content {
+      transition: block-size, content-visibility, display;
+      transition-duration: 0.22s;
+      transition-timing-function: ease-in-out;
+      transition-behavior: allow-discrete;
+   }
+}
+
+.srTranscript-count {
+   margin-inline-start: auto;
+   font-family: var(--display);
+   font-size: 0.76rem;
+   font-weight: 700;
+   line-height: 1;
+   color: var(--ink-soft);
+}
+</style>

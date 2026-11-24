@@ -15,14 +15,25 @@ interface Props { title: string; summary: string; links: LinkSection[]; toc?: To
 const { title, summary, links, toc = [] } = Astro.props;
 
 function normalizePath(value: string): string {
-   const trimmed = value.replace(/\/+$/, '');
+   const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
+   const withoutBase =
+      base && base !== '' && value.startsWith(base) ? value.slice(base.length) : value;
+   const trimmed = withoutBase.replace(/\/+$/, '');
    return trimmed === '' ? '/' : trimmed;
+}
+
+function isLinkActive(href: string, currentPath: string): boolean {
+   const target = normalizePath(href);
+   if (target === '/support') {
+      return currentPath === '/support' || currentPath.startsWith('/support/');
+   }
+   return target === currentPath;
 }
 
 const pathname = normalizePath(Astro.url.pathname);
 const flatLinks = links.flatMap((section) => section.links);
-const activeIndex = flatLinks.findIndex((link) => normalizePath(link.href) === pathname);
-const activeSection = links.find((section) => section.links.some((link) => normalizePath(link.href) === pathname));
+const activeIndex = flatLinks.findIndex((link) => isLinkActive(link.href, pathname));
+const activeSection = links.find((section) => section.links.some((link) => isLinkActive(link.href, pathname)));
 const previousLink = activeIndex > 0 ? flatLinks[activeIndex - 1] : undefined;
 const nextLink = activeIndex === -1 ? undefined : flatLinks[activeIndex + 1];
 const pageNumber = Math.max(1, activeIndex + 1);
@@ -327,7 +338,7 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH || title.split(/\s+/).some(
                   <div class="nav-section">
                      <div class="nav-title">{section.title}</div>
                      <div class="nav-links">
-                        {section.links.map((link) => <a class:list={['nav-link', { active: normalizePath(link.href) === pathname }]} href={link.href} aria-current={normalizePath(link.href) === pathname ? 'page' : undefined}><ArrowUpRight class="nav-link-icon" size={16} aria-hidden="true" focusable="false" /><span>{link.label}</span></a>)}
+                        {section.links.map((link) => <a class:list={['nav-link', { active: isLinkActive(link.href, pathname) }]} href={link.href} aria-current={normalizePath(link.href) === pathname ? 'page' : undefined}><ArrowUpRight class="nav-link-icon" size={16} aria-hidden="true" focusable="false" /><span>{link.label}</span></a>)}
                      </div>
                   </div>
                ))}
@@ -347,7 +358,7 @@ const isLongTitle = title.length > LONG_TITLE_LENGTH || title.split(/\s+/).some(
                      <div class="route-drawer-panel">
                         <nav class="route-drawer-nav" aria-label="Documentation">
                            {links.map((section) => (
-                              <div class="nav-section"><div class="nav-title">{section.title}</div><div class="nav-links">{section.links.map((link) => <a class:list={['nav-link', { active: normalizePath(link.href) === pathname }]} href={link.href} aria-current={normalizePath(link.href) === pathname ? 'page' : undefined}><ArrowUpRight class="nav-link-icon" size={16} aria-hidden="true" focusable="false" /><span>{link.label}</span></a>)}</div></div>
+                              <div class="nav-section"><div class="nav-title">{section.title}</div><div class="nav-links">{section.links.map((link) => <a class:list={['nav-link', { active: isLinkActive(link.href, pathname) }]} href={link.href} aria-current={normalizePath(link.href) === pathname ? 'page' : undefined}><ArrowUpRight class="nav-link-icon" size={16} aria-hidden="true" focusable="false" /><span>{link.label}</span></a>)}</div></div>
                            ))}
                         </nav>
                      </div>

@@ -1,0 +1,44 @@
+---
+import type { AssertionPriority } from '@a11ied/support-data/types';
+
+export interface Props {
+   priority: AssertionPriority;
+}
+
+const { priority } = Astro.props;
+---
+
+<span class={`srPriority srPriority--${priority.toLowerCase()}`}>{priority}</span>
+
+<style>
+.srPriority {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   padding-block: 0.18rem;
+   padding-inline: 0.42rem;
+   border: none;
+   border-radius: 3px;
+   font-family: var(--display);
+   font-size: 0.72rem;
+   font-weight: 700;
+   letter-spacing: 0.05em;
+   line-height: 1;
+   text-transform: uppercase;
+}
+
+.srPriority--must {
+   background: #dbeafe;
+   color: #1e3a8a;
+}
+
+.srPriority--should {
+   background: #fef3c7;
+   color: #78350f;
+}
+
+.srPriority--may {
+   background: var(--paper);
+   color: var(--ink-soft);
+}
+</style>

@@ -25,6 +25,10 @@ export const docsLinks: DocSection[] = [
       ],
    },
    {
+      title: 'Compatibility',
+      links: [{ href: '/support', label: 'Screen reader support' }],
+   },
+   {
       title: 'Guides',
       links: [
          { href: '/guides/demo', label: 'Practice on a broken page' },

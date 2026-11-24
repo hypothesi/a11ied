@@ -1,0 +1,168 @@
+---
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+import AssertionsDisclosure from './assertions-disclosure.astro';
+import AssertionSummaryBar from './assertion-summary-bar.astro';
+import OutcomeBadge from './outcome-badge.astro';
+import TranscriptDisclosure from './transcript-disclosure.astro';
+import {
+   formatCompactRatio,
+   formatRowBrowser,
+   formatRowOsVersion,
+   formatShortDate,
+   groupByScreenReaderAndOs,
+} from '../../lib/support-grouping';
+import '../../styles/support-rows.css';
+import type { EnvironmentResultFile, TestRunRecord } from '@a11ied/support-data/types';
+
+export interface Props {
+   testSlug: string;
+   environmentFiles: readonly EnvironmentResultFile[];
+}
+
+const { testSlug, environmentFiles } = Astro.props;
+
+interface OutcomeCard {
+   readonly envFile: EnvironmentResultFile;
+   readonly run?: TestRunRecord;
+}
+
+const cards: OutcomeCard[] = environmentFiles.map((envFile) => {
+   const matchedRun = envFile.runs.find((run) => run.testSlug === testSlug);
+   return matchedRun ? { envFile, run: matchedRun } : { envFile };
+});
+
+const groupedCards = groupByScreenReaderAndOs(cards, ({ envFile }) => ({
+   screenReader: envFile.environment.screenReader,
+   screenReaderVersion: envFile.environment.screenReaderVersion,
+   os: envFile.environment.os,
+   osVersion: envFile.environment.osVersion,
+   browser: envFile.environment.browser,
+   browserVersion: envFile.environment.browserVersion,
+   status: envFile.status,
+}));
+---
+
+<div class="srGroups" aria-labelledby="outcomes-heading">
+   {groupedCards.map((group) => (
+      <div class="srGroup">
+         <div class="srGroup-head">
+            <h3 class="srGroup-title">{group.screenReaderType}</h3>
+            <span class="srGroup-count">
+               {group.totalCount} {group.totalCount === 1 ? 'result' : 'results'}
+            </span>
+         </div>
+
+         {group.osGroups.map((osGroup) => (
+            <div class="srOsGroup">
+               <h4 class="srOsGroup-title">{osGroup.os}</h4>
+               <div class="srRowList">
+                  {osGroup.items.map(({ envFile, run }) => {
+                     const env = envFile.environment;
+                     const outcome = run ? run.outcome : 'untested';
+                     const ratioText = run?.assertionSummary
+                        ? formatCompactRatio(run.assertionSummary, true)
+                        : '';
+
+                     return (
+                        <details class={`srRow srRow--${outcome}`}>
+                           <summary class="srRow-summary">
+                              <ChevronDown
+                                 class="srRow-marker"
+                                 size={16}
+                                 aria-hidden="true"
+                                 focusable="false"
+                              />
+                              <span class="srRow-main">
+                                 <span class="srRow-primary">
+                                    <strong class="srRow-osVer">
+                                       {formatRowOsVersion(env.os, env.osVersion)}
+                                    </strong>
+                                    <span class="srRow-sep" aria-hidden="true">·</span>
+                                    <span class="srRow-browser">
+                                       {formatRowBrowser(env.browser, env.browserVersion)}
+                                    </span>
+                                    {env.browserType === 'webview' && (
+                                       <span class="srRow-webviewTag">WebView</span>
+                                    )}
+                                 </span>
+                                 <span class="srRow-secondary">
+                                    <span>{group.screenReaderType} {env.screenReaderVersion}</span>
+                                 </span>
+                              </span>
+                              <span class="srRow-verdictGroup">
+                                 {ratioText && <span class="srRow-ratio">{ratioText}</span>}
+                                 <OutcomeBadge outcome={outcome} compact />
+                              </span>
+                           </summary>
+
+                           <div class="srRow-body">
+                              <div class="srRow-metaStrip">
+                                 <span>
+                                    <strong>Screen reader:</strong> {env.screenReader} {env.screenReaderVersion}
+                                 </span>
+                                 <span aria-hidden="true">·</span>
+                                 <span>
+                                    <strong>Browser:</strong> {env.browser} {env.browserVersion}{env.browserType === 'webview' ? ' (WebView)' : ''}
+                                 </span>
+                                 <span aria-hidden="true">·</span>
+                                 <span>
+                                    <strong>OS:</strong> {env.os} {env.osVersion}
+                                 </span>
+                                 <span aria-hidden="true">·</span>
+                                 <span>
+                                    <strong>Device:</strong> {env.device}
+                                 </span>
+                                 {run && (
+                                    <>
+                                       <span aria-hidden="true">·</span>
+                                       <span>
+                                          <strong>Recorded:</strong> {formatShortDate(run.runAt)}
+                                       </span>
+                                    </>
+                                 )}
+                              </div>
+
+                              {run ? (
+                                 <>
+                                    {run.assertionSummary && (
+                                       <AssertionSummaryBar summary={run.assertionSummary} />
+                                    )}
+                                    <div class="srRow-spoken">
+                                       <span class="srRow-spokenLabel">Key output</span>
+                                       <code class="srRow-spokenCode">
+                                          {run.keyAnnouncement || '(none captured)'}
+                                       </code>
+                                    </div>
+                                    {run.outcome !== 'pass' && run.notes && (
+                                       <p class="srRow-itemNotes">{run.notes}</p>
+                                    )}
+                                    <TranscriptDisclosure
+                                       transcript={run.transcript}
+                                       driver={run.driver}
+                                       runAt={run.runAt}
+                                       mode="inline"
+                                    />
+                                    {run.assertionResults && run.assertionResults.length > 0 && (
+                                       <AssertionsDisclosure
+                                          assertions={run.assertionResults}
+                                          summary={run.assertionSummary}
+                                          label={`Spec assertions (${run.assertionResults.length})`}
+                                          mode="inline"
+                                       />
+                                    )}
+                                 </>
+                              ) : (
+                                 <p class="srRow-statusNote">
+                                    {envFile.statusNote ?? 'Not yet tested in this environment.'}
+                                 </p>
+                              )}
+                           </div>
+                        </details>
+                     );
+                  })}
+               </div>
+            </div>
+         ))}
+      </div>
+   ))}
+</div>

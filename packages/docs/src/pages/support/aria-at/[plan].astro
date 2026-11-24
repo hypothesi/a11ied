@@ -1,0 +1,534 @@
+---
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+import ExternalLink from '@lucide/astro/icons/external-link';
+import AriaAtCommandsList from '../../../components/support/aria-at-commands-list.astro';
+import AssertionSummaryBar from '../../../components/support/assertion-summary-bar.astro';
+import OutcomeBadge from '../../../components/support/outcome-badge.astro';
+import {
+   deriveOutcomeFromSummary,
+   getAriaAtSummary,
+   listAriaAtPlans,
+   type AriaAtEnvironmentReport,
+   type AriaAtPlanFile,
+   type AriaAtTestResult,
+} from '@a11ied/support-data';
+import DocShell from '../../../layouts/doc-shell.astro';
+import { docsLinks } from '../../../lib/nav';
+import {
+   escapeHtml,
+   formatCompactRatio,
+   formatRowBrowser,
+   formatRowOsVersion,
+   formatShortDate,
+   groupByScreenReaderAndOs,
+} from '../../../lib/support-grouping';
+import '../../../styles/support-rows.css';
+
+export function getStaticPaths(): readonly {
+   readonly params: { readonly plan: string };
+   readonly props: { readonly plan: AriaAtPlanFile };
+}[] {
+   return listAriaAtPlans().map((plan) => ({
+      params: { plan: plan.slug },
+      props: { plan },
+   }));
+}
+
+export interface Props {
+   plan: AriaAtPlanFile;
+}
+
+const { plan } = Astro.props;
+const ariaAtSummary = getAriaAtSummary();
+
+function getReportOutcome(
+   report: AriaAtEnvironmentReport,
+): 'pass' | 'partial' | 'fail' {
+   const derived = deriveOutcomeFromSummary(report.summary);
+   return derived === 'fail' || derived === 'partial' ? derived : 'pass';
+}
+
+function getTestFailureCount(test: AriaAtTestResult): number {
+   let failed = 0;
+   for (const cmd of test.commandResults) {
+      for (const assertion of cmd.assertions) {
+         if (assertion.verdict === 'fail') {
+            failed += 1;
+         }
+      }
+   }
+   return failed;
+}
+
+const groupedReports = groupByScreenReaderAndOs(plan.reports, (report) => ({
+   screenReader: report.atName,
+   screenReaderVersion: report.atVersion,
+   os: report.os,
+   osVersion: report.osVersion,
+   browser: report.browserName,
+   browserVersion: report.browserVersion,
+   status: 'tested',
+}));
+
+const planSummaryHtml = `<p>W3C ARIA-AT Community Group test plan (${escapeHtml(plan.phase)}, ${escapeHtml(plan.versionString)}).</p>`;
+
+const toc = [
+   { id: 'reports-heading', label: 'Screen reader reports' },
+];
+---
+
+<DocShell
+   title={plan.title}
+   summary={planSummaryHtml}
+   links={docsLinks}
+   toc={toc}
+>
+   <nav class="srPlan-breadcrumb" aria-label="Breadcrumb" data-support-page>
+      <a href="/support">Screen reader support</a>
+      <span class="srPlan-separator" aria-hidden="true">/</span>
+      <a href="/support/#aria-at-plans">W3C ARIA-AT</a>
+      <span class="srPlan-separator" aria-hidden="true">/</span>
+      <span aria-current="page">{plan.slug}</span>
+   </nav>
+
+   <div class="srPlan-metaSection">
+      <div class="srPlan-badges">
+         <span class="srPlan-badge srPlan-badge--phase">{plan.phase}</span>
+         <span class="srPlan-badge">{plan.versionString}</span>
+         <span class="srPlan-badge">
+            {plan.reports.length} finalized {plan.reports.length === 1 ? 'report' : 'reports'}
+         </span>
+      </div>
+
+      {plan.featureRefs.length > 0 && (
+         <ul class="srPlan-featureList" aria-label="Covered specification features">
+            {plan.featureRefs.map((ref) => (
+               <li>
+                  <a
+                     href={`/support/features/${ref.type}/${ref.refId}/`}
+                     class="srPlan-featurePill"
+                  >
+                     <span class="srPlan-featureType">{ref.type.toUpperCase()}</span>
+                     <code>{ref.refId}</code>
+                  </a>
+               </li>
+            ))}
+         </ul>
+      )}
+
+      <ul class="srPlan-links">
+         <li>
+            <a href={plan.upstreamURL} target="_blank" rel="noopener noreferrer">
+               <span>Upstream ARIA-AT test plan</span>
+               <ExternalLink size={15} aria-hidden="true" focusable="false" />
+            </a>
+         </li>
+         {plan.exampleURL && (
+            <li>
+               <a href={plan.exampleURL} target="_blank" rel="noopener noreferrer">
+                  <span>APG example under test</span>
+                  <ExternalLink size={15} aria-hidden="true" focusable="false" />
+               </a>
+            </li>
+         )}
+         {plan.designPatternURL && (
+            <li>
+               <a href={plan.designPatternURL} target="_blank" rel="noopener noreferrer">
+                  <span>APG design pattern</span>
+                  <ExternalLink size={15} aria-hidden="true" focusable="false" />
+               </a>
+            </li>
+         )}
+         <li>
+            <a href="https://github.com/w3c-cg/aria-at" target="_blank" rel="noopener noreferrer">
+               <span>w3c-cg/aria-at repository</span>
+               <ExternalLink size={15} aria-hidden="true" focusable="false" />
+            </a>
+         </li>
+      </ul>
+   </div>
+
+   <section class="srPlan-section" aria-labelledby="reports-heading">
+      <h2 id="reports-heading">Screen Reader Reports</h2>
+
+      <div class="srGroups">
+         {groupedReports.map((group) => (
+            <div class="srGroup">
+               <div class="srGroup-head">
+                  <h3 class="srGroup-title">{group.screenReaderType}</h3>
+                  <span class="srGroup-count">
+                     {group.totalCount} {group.totalCount === 1 ? 'report' : 'reports'}
+                  </span>
+               </div>
+
+               {group.osGroups.map((osGroup) => (
+                  <div class="srOsGroup">
+                     <h4 class="srOsGroup-title">{osGroup.os}</h4>
+                     <div class="srRowList">
+                        {osGroup.items.map((report) => {
+                           const outcome = getReportOutcome(report);
+                           const ratioText = formatCompactRatio(report.summary, true);
+
+                           return (
+                              <details class={`srRow srRow--${outcome}`}>
+                                 <summary class="srRow-summary">
+                                    <ChevronDown
+                                       class="srRow-marker"
+                                       size={16}
+                                       aria-hidden="true"
+                                       focusable="false"
+                                    />
+                                    <span class="srRow-main">
+                                       <span class="srRow-primary">
+                                          <strong class="srRow-osVer">
+                                             {formatRowOsVersion(report.os, report.osVersion)}
+                                          </strong>
+                                          <span class="srRow-sep" aria-hidden="true">·</span>
+                                          <span class="srRow-browser">
+                                             {formatRowBrowser(report.browserName, report.browserVersion)}
+                                          </span>
+                                       </span>
+                                       <span class="srRow-secondary">
+                                          <span>{group.screenReaderType} {report.atVersion}</span>
+                                          <span aria-hidden="true">·</span>
+                                          <span>{report.tests.length} {report.tests.length === 1 ? 'test' : 'tests'}</span>
+                                       </span>
+                                    </span>
+                                    <span class="srRow-verdictGroup">
+                                       {ratioText && <span class="srRow-ratio">{ratioText}</span>}
+                                       <OutcomeBadge outcome={outcome} compact />
+                                    </span>
+                                 </summary>
+
+                                 <div class="srRow-body">
+                                    <div class="srRow-metaStrip">
+                                       <span>
+                                          <strong>Screen reader:</strong> {report.atName} {report.atVersion}
+                                       </span>
+                                       <span aria-hidden="true">·</span>
+                                       <span>
+                                          <strong>Browser:</strong> {report.browserName} {report.browserVersion}
+                                       </span>
+                                       <span aria-hidden="true">·</span>
+                                       <span>
+                                          <strong>OS:</strong> {report.os} {report.osVersion}
+                                       </span>
+                                       <span aria-hidden="true">·</span>
+                                       <span>
+                                          <strong>Device:</strong> {report.device}
+                                       </span>
+                                       <span aria-hidden="true">·</span>
+                                       <span>
+                                          <strong>Finalized:</strong> {formatShortDate(report.markedFinalAt)}
+                                       </span>
+                                       <span aria-hidden="true">·</span>
+                                       <a
+                                          href={`${plan.upstreamURL.replace('/test-plan/', '/report/')}/targets/${report.reportID}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          class="srPlan-upstreamReportLink"
+                                       >
+                                          <span>Report #{report.reportID}</span>
+                                          <ExternalLink size={13} aria-hidden="true" focusable="false" />
+                                       </a>
+                                    </div>
+
+                                    <AssertionSummaryBar summary={report.summary} />
+
+                                    <div class="srPlan-tests">
+                                       {report.tests.map((test) => {
+                                          const failCount = getTestFailureCount(test);
+
+                                          return (
+                                             <details class="srPlan-testDetails">
+                                                <summary class="srPlan-testSummary">
+                                                   <ChevronDown
+                                                      class="srPlan-testMarker"
+                                                      size={15}
+                                                      aria-hidden="true"
+                                                      focusable="false"
+                                                   />
+                                                   <span class="srPlan-testLabel">
+                                                      <strong>#{test.rowNumber}</strong> · {test.testTitle}
+                                                   </span>
+                                                   <span class="srPlan-testMeta">
+                                                      <span>
+                                                         {test.commandResults.length} {test.commandResults.length === 1 ? 'command' : 'commands'}
+                                                      </span>
+                                                      {failCount > 0 && (
+                                                         <span class="srPlan-failCount">
+                                                            {failCount} {failCount === 1 ? 'failure' : 'failures'}
+                                                         </span>
+                                                      )}
+                                                   </span>
+                                                </summary>
+                                                <AriaAtCommandsList
+                                                   commandResults={test.commandResults}
+                                                   showFeatureLinks
+                                                />
+                                             </details>
+                                          );
+                                       })}
+                                    </div>
+                                 </div>
+                              </details>
+                           );
+                        })}
+                     </div>
+                  </div>
+               ))}
+            </div>
+         ))}
+      </div>
+   </section>
+
+   <footer class="srPlan-attribution">
+      <p>
+         W3C ARIA-AT report data synchronized from{' '}
+         <a href={ariaAtSummary.upstreamURL} target="_blank" rel="noopener noreferrer">
+            aria-at.w3.org
+         </a>{' '}
+         ({ariaAtSummary.license}).
+      </p>
+   </footer>
+</DocShell>
+
+<style>
+.srPlan-breadcrumb {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 0.45rem;
+   font-size: 0.92rem;
+}
+
+.srPlan-separator,
+.srPlan-breadcrumb span[aria-current="page"] {
+   color: var(--ink-soft);
+}
+
+.srPlan-metaSection {
+   display: flex;
+   flex-direction: column;
+   gap: 0.85rem;
+}
+
+.srPlan-badges {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.45rem;
+}
+
+.srPlan-badge {
+   display: inline-flex;
+   align-items: center;
+   padding-block: 0.28rem;
+   padding-inline: 0.6rem;
+   border: none;
+   border-radius: 3px;
+   background: var(--paper-light);
+   font-family: var(--display);
+   font-size: 0.8rem;
+   font-weight: 700;
+   letter-spacing: 0.04em;
+   text-transform: uppercase;
+   line-height: 1;
+}
+
+.srPlan-badge--phase {
+   background: var(--ink);
+   color: var(--yellow);
+}
+
+.srPlan-featureList {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.45rem;
+}
+
+.srPlan-featureList li {
+   margin: 0;
+}
+
+.srPlan-featurePill {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.35rem;
+   padding-block: 0.25rem;
+   padding-inline: 0.6rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 20%, transparent);
+   border-radius: 3px;
+   background: var(--paper-light);
+   font-size: 0.84rem;
+   line-height: 1;
+   text-decoration: none;
+}
+
+.srPlan-featurePill:hover {
+   background: var(--yellow);
+}
+
+.srPlan-featurePill code {
+   background: transparent;
+   padding: 0;
+}
+
+.srPlan-featureType {
+   font-family: var(--display);
+   font-size: 0.74rem;
+   font-weight: 700;
+   color: var(--ink-soft);
+}
+
+.srPlan-links {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.5rem 1.2rem;
+}
+
+.srPlan-links li {
+   margin: 0;
+}
+
+.srPlan-links a {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.35rem;
+   font-size: 0.9rem;
+   font-weight: 700;
+}
+
+.srPlan-section {
+   max-width: none;
+   min-inline-size: 0;
+   transform: none;
+   gap: 1rem;
+}
+
+.srPlan-section > h2 {
+   font-size: clamp(1.7rem, 3vw, 2.35rem);
+}
+
+.srPlan-upstreamReportLink {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.25rem;
+   font-weight: 700;
+}
+
+.srPlan-tests {
+   display: flex;
+   flex-direction: column;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 14%, transparent);
+}
+
+.srPlan-testDetails {
+   border-bottom: 1px solid color-mix(in oklch, var(--ink) 12%, transparent);
+}
+
+.srPlan-testDetails:last-child {
+   border-bottom: none;
+}
+
+.srPlan-testSummary {
+   list-style: none;
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 0.45rem 0.75rem;
+   min-block-size: 40px;
+   padding-block: 0.45rem;
+   padding-inline: 0.1rem;
+   cursor: pointer;
+   font-size: 0.92rem;
+   font-weight: 700;
+   color: var(--ink);
+   user-select: none;
+}
+
+.srPlan-testSummary::-webkit-details-marker {
+   display: none;
+}
+
+.srPlan-testMarker {
+   flex-shrink: 0;
+   color: var(--ink-soft);
+   transform: rotate(-90deg);
+}
+
+.srPlan-testDetails[open] > .srPlan-testSummary .srPlan-testMarker {
+   transform: rotate(0deg);
+}
+
+details.srPlan-testDetails::details-content {
+   interpolate-size: allow-keywords;
+   overflow: clip;
+   contain: layout;
+}
+
+details.srPlan-testDetails:not([open])::details-content {
+   block-size: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+   .srPlan-testMarker {
+      transition: transform 0.2s ease;
+   }
+
+   details.srPlan-testDetails::details-content {
+      transition: block-size, content-visibility, display;
+      transition-duration: 0.22s;
+      transition-timing-function: ease-in-out;
+      transition-behavior: allow-discrete;
+   }
+}
+
+.srPlan-testLabel {
+   flex: 1 1 240px;
+   min-inline-size: 0;
+}
+
+.srPlan-testMeta {
+   margin-inline-start: auto;
+   display: inline-flex;
+   align-items: center;
+   gap: 0.5rem;
+   font-size: 0.82rem;
+   font-weight: 400;
+   color: var(--ink-soft);
+}
+
+.srPlan-failCount {
+   display: inline-flex;
+   align-items: center;
+   padding-block: 0.16rem;
+   padding-inline: 0.45rem;
+   border: none;
+   border-radius: 3px;
+   background: #fde8e8;
+   color: #7f1d1d;
+   font-family: var(--display);
+   font-size: 0.74rem;
+   font-weight: 700;
+   text-transform: uppercase;
+   line-height: 1;
+}
+
+.srPlan-attribution {
+   padding-block-start: 1.25rem;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 20%, transparent);
+   font-size: 0.9rem;
+   color: var(--ink-soft);
+}
+
+.srPlan-attribution p {
+   margin: 0;
+   overflow-wrap: anywhere;
+}
+</style>

@@ -1,0 +1,768 @@
+---
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+import ExternalLink from '@lucide/astro/icons/external-link';
+import AriaAtCommandsList from '../../../../components/support/aria-at-commands-list.astro';
+import AssertionsDisclosure from '../../../../components/support/assertions-disclosure.astro';
+import AssertionSummaryBar from '../../../../components/support/assertion-summary-bar.astro';
+import OutcomeBadge from '../../../../components/support/outcome-badge.astro';
+import TranscriptDisclosure from '../../../../components/support/transcript-disclosure.astro';
+import {
+   deriveOutcomeFromSummary,
+   getAriaAtSummary,
+   listFeatures,
+   type FeatureEnvironmentResult,
+   type FeatureReport,
+   type FeatureType,
+} from '@a11ied/support-data';
+import DocShell from '../../../../layouts/doc-shell.astro';
+import { docsLinks } from '../../../../lib/nav';
+import {
+   escapeHtml,
+   formatCompactRatio,
+   formatFeatureSummary,
+   formatRowBrowser,
+   formatRowOsVersion,
+   formatShortDate,
+   groupByScreenReaderAndOs,
+   isVirtualScreenReader,
+} from '../../../../lib/support-grouping';
+import '../../../../styles/support-rows.css';
+
+const PERCENT_MULTIPLIER = 100;
+const OS_ORDER: Readonly<Record<string, number>> = {
+   macOS: 0,
+   iOS: 1,
+   Android: 2,
+   Windows: 3,
+};
+const OS_OTHER_RANK = 4;
+
+export function getStaticPaths(): readonly {
+   readonly params: { readonly type: FeatureType; readonly feature: string };
+   readonly props: { readonly feature: FeatureReport };
+}[] {
+   return listFeatures().map((feature) => ({
+      params: {
+         type: feature.type,
+         feature: feature.refId,
+      },
+      props: {
+         feature,
+      },
+   }));
+}
+
+export interface Props {
+   feature: FeatureReport;
+}
+
+const { feature } = Astro.props;
+const ariaAtSummary = getAriaAtSummary();
+
+function formatSourceLabel(coverage: FeatureReport['sourceCoverage']): string {
+   switch (coverage) {
+      case 'both': {
+         return 'Local + W3C ARIA-AT';
+      }
+      case 'local': {
+         return 'a11ied Local';
+      }
+      case 'w3c-aria-at': {
+         return 'W3C ARIA-AT';
+      }
+      default: {
+         return String(coverage);
+      }
+   }
+}
+
+function getEnvOutcome(
+   env: FeatureEnvironmentResult,
+): 'pass' | 'partial' | 'fail' | 'untested' {
+   if (env.status === 'untested') {
+      return 'untested';
+   }
+   const derived = deriveOutcomeFromSummary(env.summary);
+   return derived === 'fail' || derived === 'partial' ? derived : 'pass';
+}
+
+const groupedEnvs = groupByScreenReaderAndOs(feature.versionedEnvironments, (env) => ({
+   screenReader: env.screenReader,
+   screenReaderVersion: env.screenReaderVersion,
+   os: env.os,
+   osVersion: env.osVersion,
+   browser: env.browser,
+   browserVersion: env.browserVersion,
+   status: env.status,
+}));
+
+const screenReaderOptions = groupedEnvs.map((group) => group.screenReaderType);
+const osSet = new Set<string>();
+for (const group of groupedEnvs) {
+   for (const osGroup of group.osGroups) {
+      osSet.add(osGroup.os);
+   }
+}
+const osOptions = [...osSet].toSorted((left, right) => {
+   const leftRank = OS_ORDER[left] ?? OS_OTHER_RANK;
+   const rightRank = OS_ORDER[right] ?? OS_OTHER_RANK;
+   if (leftRank !== rightRank) {
+      return leftRank - rightRank;
+   }
+   return left.localeCompare(right);
+});
+
+const realTestedEnvs = feature.versionedEnvironments.filter(
+   (env) => env.status === 'tested' && !isVirtualScreenReader(env.screenReader),
+);
+
+const passEnvsCount = realTestedEnvs.filter((env) => getEnvOutcome(env) === 'pass').length;
+const partialEnvsCount = realTestedEnvs.filter((env) => getEnvOutcome(env) === 'partial').length;
+const failEnvsCount = realTestedEnvs.filter((env) => getEnvOutcome(env) === 'fail').length;
+const realTotal = realTestedEnvs.length;
+const passPct = realTotal > 0 ? Math.round((passEnvsCount / realTotal) * PERCENT_MULTIPLIER) : 0;
+const partialPct = realTotal > 0 ? Math.round((partialEnvsCount / realTotal) * PERCENT_MULTIPLIER) : 0;
+const failPct = realTotal > 0 ? Math.max(0, PERCENT_MULTIPLIER - passPct - partialPct) : 0;
+
+function formatOverviewHeadline(): string {
+   if (realTotal === 0) {
+      return 'Untested on real assistive technology';
+   }
+   if (failEnvsCount === realTotal) {
+      return `0 of ${String(realTotal)} real screen reader combinations pass (fails MUST requirements)`;
+   }
+   if (failEnvsCount > 0 || partialEnvsCount > 0) {
+      return `${String(passEnvsCount)} of ${String(realTotal)} pass · ${String(partialEnvsCount)} partial · ${String(failEnvsCount)} fail MUST`;
+   }
+   return `All ${String(realTotal)} tested real screen reader combinations pass`;
+}
+
+const featureSummaryHtml = `<p>${escapeHtml(formatFeatureSummary(feature))}</p>`;
+const totalResultsCount = feature.versionedEnvironments.length;
+
+const toc = [
+   { id: 'env-support-heading', label: 'Support by screen reader' },
+   ...(feature.localCases.length > 0 || feature.ariaAtPlans.length > 0
+      ? [ { id: 'related-heading', label: 'Related tests & plans' } ]
+      : []),
+];
+---
+
+<DocShell
+   title={feature.title}
+   summary={featureSummaryHtml}
+   links={docsLinks}
+   toc={toc}
+>
+   <nav class="srFeature-breadcrumb" aria-label="Breadcrumb" data-support-page>
+      <a href="/support">Screen reader support</a>
+      <span class="srFeature-separator" aria-hidden="true">/</span>
+      <a href="/support/#feature-directory">Features</a>
+      <span class="srFeature-separator" aria-hidden="true">/</span>
+      <span aria-current="page">
+         {feature.type.toUpperCase()} / {feature.refId}
+      </span>
+   </nav>
+
+   <div class="srFeature-metaRow">
+      <p class="srFeature-metaLine">
+         <strong>{feature.type.toUpperCase()}</strong>
+         <span aria-hidden="true">·</span>
+         <code>{feature.refId}</code>
+         <span aria-hidden="true">·</span>
+         <span>{formatSourceLabel(feature.sourceCoverage)}</span>
+         <span aria-hidden="true">·</span>
+         <span>{feature.localEnvironmentCount} local / {feature.ariaAtEnvironmentCount} W3C ARIA-AT tested</span>
+      </p>
+
+      {feature.specURL && (
+         <a href={feature.specURL} target="_blank" rel="noopener noreferrer" class="srFeature-specLink">
+            <span>{feature.linkText}</span>
+            <ExternalLink size={15} aria-hidden="true" focusable="false" />
+         </a>
+      )}
+   </div>
+
+   <div class="srFeature-overview">
+      <div class="srFeature-overviewTop">
+         <strong>{formatOverviewHeadline()}</strong>
+         <span class="srFeature-overviewSub">Excludes Virtual SR</span>
+      </div>
+      {realTotal > 0 && (
+         <div class="srFeature-overviewBar" aria-hidden="true">
+            {passPct > 0 && <span class="srFeature-seg srFeature-seg--pass" style={`width: ${String(passPct)}%`}></span>}
+            {partialPct > 0 && <span class="srFeature-seg srFeature-seg--partial" style={`width: ${String(partialPct)}%`}></span>}
+            {failPct > 0 && <span class="srFeature-seg srFeature-seg--fail" style={`width: ${String(failPct)}%`}></span>}
+         </div>
+      )}
+   </div>
+
+   <section class="srFeature-section" aria-labelledby="env-support-heading">
+      <h2 id="env-support-heading">Support by Screen Reader</h2>
+
+      <div class="srFeature-filters" role="region" aria-label="Filter support results">
+         <div class="srFeature-filterField">
+            <label for="sr-feature-source">Source</label>
+            <select id="sr-feature-source">
+               <option value="all">All sources</option>
+               <option value="local">Local Only</option>
+               <option value="w3c-aria-at">W3C ARIA-AT Only</option>
+            </select>
+         </div>
+
+         <div class="srFeature-filterField">
+            <label for="sr-feature-sr">Screen Reader</label>
+            <select id="sr-feature-sr">
+               <option value="all">All screen readers</option>
+               {screenReaderOptions.map((sr) => (
+                  <option value={sr}>{sr}</option>
+               ))}
+            </select>
+         </div>
+
+         <div class="srFeature-filterField">
+            <label for="sr-feature-os">Operating System</label>
+            <select id="sr-feature-os">
+               <option value="all">All OSes</option>
+               {osOptions.map((os) => (
+                  <option value={os}>{os}</option>
+               ))}
+            </select>
+         </div>
+
+         <div class="srFeature-filterField">
+            <label for="sr-feature-browser-type">Browser Type</label>
+            <select id="sr-feature-browser-type">
+               <option value="all">All types</option>
+               <option value="browser">Browsers only</option>
+               <option value="webview">WebViews only</option>
+            </select>
+         </div>
+
+         <div class="srFeature-filterActions">
+            <button type="button" id="sr-feature-reset" class="srFeature-resetBtn">
+               Reset filters
+            </button>
+            <p id="sr-feature-count" class="srFeature-count" role="status" aria-live="polite">
+               Showing {totalResultsCount} of {totalResultsCount} {totalResultsCount === 1 ? 'result' : 'results'}
+            </p>
+         </div>
+      </div>
+
+      <div id="sr-feature-groups" class="srGroups">
+         {groupedEnvs.map((group) => (
+            <div class="srGroup" data-sr-group-block data-sr-group={group.screenReaderType}>
+               <div class="srGroup-head">
+                  <h3 class="srGroup-title">{group.screenReaderType}</h3>
+                  <span
+                     class="srGroup-count"
+                     data-sr-group-count
+                     data-total={String(group.totalCount)}
+                  >
+                     {group.totalCount} {group.totalCount === 1 ? 'result' : 'results'}
+                  </span>
+               </div>
+
+               {group.osGroups.map((osGroup) => (
+                  <div class="srOsGroup" data-os-group-block data-os-group={osGroup.os}>
+                     <h4 class="srOsGroup-title">{osGroup.os}</h4>
+                     <div class="srRowList">
+                        {osGroup.items.map((env) => {
+                           const hasAssertions = env.summary.must.total
+                              + env.summary.should.total
+                              + env.summary.may.total > 0;
+                           const envOutcome = getEnvOutcome(env);
+                           const ratioText = formatCompactRatio(env.summary, env.status === 'tested');
+                           const singleLocalItem =
+                              env.items.length === 1 && env.items[0]?.kind === 'local'
+                                 ? env.items[0]
+                                 : undefined;
+
+                           return (
+                              <details
+                                 class={`srRow srRow--${envOutcome}`}
+                                 data-env-row
+                                 data-source={env.source}
+                                 data-sr-group={group.screenReaderType}
+                                 data-os-group={osGroup.os}
+                                 data-browser-type={env.browserType}
+                              >
+                                 <summary class="srRow-summary">
+                                    <ChevronDown
+                                       class="srRow-marker"
+                                       size={16}
+                                       aria-hidden="true"
+                                       focusable="false"
+                                    />
+                                    <span class="srRow-main">
+                                       <span class="srRow-primary">
+                                          <strong class="srRow-osVer">
+                                             {formatRowOsVersion(env.os, env.osVersion)}
+                                          </strong>
+                                          <span class="srRow-sep" aria-hidden="true">·</span>
+                                          <span class="srRow-browser">
+                                             {formatRowBrowser(env.browser, env.browserVersion)}
+                                          </span>
+                                          {env.browserType === 'webview' && (
+                                             <span class="srRow-webviewTag">WebView</span>
+                                          )}
+                                       </span>
+                                       <span class="srRow-secondary">
+                                          <span>{group.screenReaderType} {env.screenReaderVersion}</span>
+                                          <span aria-hidden="true">·</span>
+                                          <span>{env.source === 'local' ? 'a11ied' : 'ARIA-AT'}</span>
+                                       </span>
+                                    </span>
+                                    <span class="srRow-verdictGroup">
+                                       {ratioText && <span class="srRow-ratio">{ratioText}</span>}
+                                       <OutcomeBadge outcome={envOutcome} compact />
+                                    </span>
+                                 </summary>
+
+                                 <div class="srRow-body">
+                                    <div class="srRow-metaStrip">
+                                       <span>
+                                          <strong>Screen reader:</strong> {env.screenReader} {env.screenReaderVersion}
+                                       </span>
+                                       <span aria-hidden="true">·</span>
+                                       <span>
+                                          <strong>Browser:</strong> {env.browser} {env.browserVersion}{env.browserType === 'webview' ? ' (WebView)' : ''}
+                                       </span>
+                                       <span aria-hidden="true">·</span>
+                                       <span>
+                                          <strong>OS:</strong> {env.os} {env.osVersion}
+                                       </span>
+                                       <span aria-hidden="true">·</span>
+                                       <span>
+                                          <strong>Device:</strong> {env.device}
+                                       </span>
+                                       <span aria-hidden="true">·</span>
+                                       <span>
+                                          <strong>Source:</strong> {env.source === 'local' ? 'a11ied Local' : 'W3C ARIA-AT'}
+                                       </span>
+                                       <span aria-hidden="true">·</span>
+                                       <span>
+                                          <strong>Date:</strong> {formatShortDate(env.testedAt)}
+                                       </span>
+                                    </div>
+
+                                    {env.status === 'untested' && env.statusNote && (
+                                       <p class="srRow-statusNote">{env.statusNote}</p>
+                                    )}
+
+                                    {hasAssertions && (
+                                       <AssertionSummaryBar summary={env.summary} />
+                                    )}
+
+                                    {singleLocalItem ? (
+                                       <div class="srRow-drilldownItem srRow-drilldownItem--single">
+                                          <div class="srRow-drilldownHeader">
+                                             <a
+                                                href={`/support/tests/${singleLocalItem.testSlug}/`}
+                                                class="srRow-drilldownTitle"
+                                             >
+                                                {singleLocalItem.testTitle}
+                                             </a>
+                                             <OutcomeBadge outcome={singleLocalItem.outcome} compact />
+                                          </div>
+                                          {singleLocalItem.keyAnnouncement && (
+                                             <div class="srRow-spoken">
+                                                <span class="srRow-spokenLabel">Key speech</span>
+                                                <code class="srRow-spokenCode">{singleLocalItem.keyAnnouncement}</code>
+                                             </div>
+                                          )}
+                                          {singleLocalItem.notes && (
+                                             <p class="srRow-itemNotes">{singleLocalItem.notes}</p>
+                                          )}
+                                          <TranscriptDisclosure
+                                             transcript={singleLocalItem.transcript}
+                                             driver={singleLocalItem.driver}
+                                             runAt={singleLocalItem.runAt}
+                                             mode="inline"
+                                          />
+                                          {singleLocalItem.assertions.length > 0 && (
+                                             <AssertionsDisclosure
+                                                assertions={singleLocalItem.assertions}
+                                                summary={singleLocalItem.summary}
+                                                label={`Spec assertions (${singleLocalItem.assertions.length})`}
+                                                mode="inline"
+                                             />
+                                          )}
+                                       </div>
+                                    ) : (
+                                       env.items.length > 0 && (
+                                          <div class="srRow-drilldownList">
+                                             {env.items.map((item) => {
+                                                if (item.kind === 'local') {
+                                                   return (
+                                                      <div class="srRow-drilldownItem">
+                                                         <div class="srRow-drilldownHeader">
+                                                            <a
+                                                               href={`/support/tests/${item.testSlug}/`}
+                                                               class="srRow-drilldownTitle"
+                                                            >
+                                                               {item.testTitle}
+                                                            </a>
+                                                            <OutcomeBadge outcome={item.outcome} compact />
+                                                         </div>
+                                                         {item.keyAnnouncement && (
+                                                            <div class="srRow-spoken">
+                                                               <span class="srRow-spokenLabel">Key speech</span>
+                                                               <code class="srRow-spokenCode">{item.keyAnnouncement}</code>
+                                                            </div>
+                                                         )}
+                                                         {item.notes && (
+                                                            <p class="srRow-itemNotes">{item.notes}</p>
+                                                         )}
+                                                         {item.assertions.length > 0 && (
+                                                            <AssertionsDisclosure
+                                                               assertions={item.assertions}
+                                                               summary={item.summary}
+                                                               label={`Spec assertions (${item.assertions.length})`}
+                                                            />
+                                                         )}
+                                                         <TranscriptDisclosure
+                                                            transcript={item.transcript}
+                                                            driver={item.driver}
+                                                            runAt={item.runAt}
+                                                         />
+                                                      </div>
+                                                   );
+                                                }
+
+                                                return (
+                                                   <div class="srRow-drilldownItem">
+                                                      <div class="srRow-drilldownHeader">
+                                                         <div class="srRow-drilldownTitles">
+                                                            <strong class="srRow-drilldownHeading">
+                                                               {item.testTitle}
+                                                            </strong>
+                                                            <span class="srRow-drilldownSub">
+                                                               {item.planTitle} ({item.planVersionString} · {item.planPhase})
+                                                            </span>
+                                                         </div>
+                                                         <div class="srRow-drilldownLinks">
+                                                            <a href={`/support/aria-at/${item.planSlug}/`}>
+                                                               Full plan report
+                                                            </a>
+                                                            <a
+                                                               href={item.upstreamReportURL}
+                                                               target="_blank"
+                                                               rel="noopener noreferrer"
+                                                            >
+                                                               W3C report #{item.reportID}
+                                                            </a>
+                                                         </div>
+                                                      </div>
+                                                      <AriaAtCommandsList commandResults={item.commandResults} />
+                                                   </div>
+                                                );
+                                             })}
+                                          </div>
+                                       )
+                                    )}
+                                 </div>
+                              </details>
+                           );
+                        })}
+                     </div>
+                  </div>
+               ))}
+            </div>
+         ))}
+      </div>
+
+      <p id="sr-feature-empty" class="srFeature-empty" hidden>
+         No results match the selected filters.
+      </p>
+   </section>
+
+   {(feature.localCases.length > 0 || feature.ariaAtPlans.length > 0) && (
+      <section class="srFeature-section srFeature-related" aria-labelledby="related-heading">
+         <h2 id="related-heading">Related Test Cases &amp; Plans</h2>
+         <div class="srFeature-relatedGrid">
+            {feature.localCases.length > 0 && (
+               <div class="srFeature-relatedPanel">
+                  <h3>Related Local Scenarios</h3>
+                  <ul class="srFeature-relatedList">
+                     {feature.localCases.map((testCase) => (
+                        <li>
+                           <a href={`/support/tests/${testCase.slug}/`}>
+                              {testCase.title}
+                           </a>
+                        </li>
+                     ))}
+                  </ul>
+               </div>
+            )}
+
+            {feature.ariaAtPlans.length > 0 && (
+               <div class="srFeature-relatedPanel">
+                  <h3>Related W3C ARIA-AT Test Plans</h3>
+                  <ul class="srFeature-relatedList">
+                     {feature.ariaAtPlans.map((plan) => (
+                        <li>
+                           <a href={`/support/aria-at/${plan.slug}/`}>
+                              {plan.title}
+                           </a>
+                           <span class="srFeature-relatedMeta">
+                              ({plan.phase} · {plan.versionString})
+                           </span>
+                        </li>
+                     ))}
+                  </ul>
+               </div>
+            )}
+         </div>
+      </section>
+   )}
+
+   {feature.ariaAtEnvironmentCount > 0 && (
+      <footer class="srFeature-attribution">
+         <p>
+            W3C ARIA-AT community test results are sourced from{' '}
+            <a href={ariaAtSummary.upstreamURL} target="_blank" rel="noopener noreferrer">
+               aria-at.w3.org
+            </a>{' '}
+            ({ariaAtSummary.license}).
+         </p>
+      </footer>
+   )}
+</DocShell>
+
+<script>
+   import '../../../../scripts/feature-detail-filters';
+</script>
+
+<style>
+.srFeature-breadcrumb {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 0.45rem;
+   font-size: 0.92rem;
+}
+
+.srFeature-separator,
+.srFeature-breadcrumb span[aria-current="page"] {
+   color: var(--ink-soft);
+}
+
+.srFeature-metaRow {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: baseline;
+   justify-content: space-between;
+   gap: 0.65rem 1.25rem;
+}
+
+.srFeature-metaLine {
+   margin: 0;
+   display: flex;
+   flex-wrap: wrap;
+   align-items: baseline;
+   gap: 0.4rem;
+   font-size: 0.92rem;
+   color: var(--ink-soft);
+}
+
+.srFeature-specLink {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.35rem;
+   font-weight: 700;
+}
+
+.srFeature-overview {
+   padding: 0.85rem 1rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 18%, transparent);
+   border-radius: 4px;
+   background: var(--paper-light);
+   display: flex;
+   flex-direction: column;
+   gap: 0.5rem;
+}
+
+.srFeature-overviewTop {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: baseline;
+   justify-content: space-between;
+   gap: 0.45rem 1rem;
+}
+
+.srFeature-overviewSub {
+   font-size: 0.8rem;
+   color: var(--ink-soft);
+}
+
+.srFeature-overviewBar {
+   inline-size: 100%;
+   max-inline-size: 420px;
+   block-size: 10px;
+   border-radius: 99px;
+   overflow: hidden;
+   display: flex;
+   background: #e7e0d3;
+}
+
+.srFeature-seg {
+   block-size: 100%;
+   display: block;
+}
+
+.srFeature-seg--pass {
+   background: #1e7a46;
+}
+
+.srFeature-seg--partial {
+   background: #d97706;
+}
+
+.srFeature-seg--fail {
+   background: #bd2b26;
+}
+
+.srFeature-section {
+   max-width: none;
+   min-inline-size: 0;
+   transform: none;
+   gap: 1rem;
+}
+
+.srFeature-section > h2 {
+   font-size: clamp(1.7rem, 3vw, 2.35rem);
+}
+
+.srFeature-filters {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(min(165px, 100%), 1fr));
+   gap: 0.75rem;
+   padding: 0.85rem 1rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 18%, transparent);
+   border-radius: 4px;
+   background: var(--paper-light);
+}
+
+.srFeature-filterField {
+   display: flex;
+   flex-direction: column;
+   gap: 0.25rem;
+   min-inline-size: 0;
+}
+
+.srFeature-filterField label {
+   font-family: var(--display);
+   font-size: 0.74rem;
+   font-weight: 700;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+   color: var(--ink-soft);
+}
+
+.srFeature-filterField select {
+   inline-size: 100%;
+   min-block-size: 36px;
+   padding-inline: 0.55rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 28%, transparent);
+   border-radius: 4px;
+   background: var(--paper);
+   color: var(--ink);
+   font: inherit;
+   font-size: 0.88rem;
+}
+
+.srFeature-filterActions {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   justify-content: space-between;
+   gap: 0.65rem;
+   grid-column: 1 / -1;
+   padding-block-start: 0.55rem;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 14%, transparent);
+}
+
+.srFeature-resetBtn {
+   min-block-size: 34px;
+   padding-block: 0.3rem;
+   padding-inline: 0.75rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 28%, transparent);
+   border-radius: 4px;
+   background: var(--paper);
+   color: var(--ink);
+   font-family: var(--display);
+   font-size: 0.8rem;
+   font-weight: 700;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+   line-height: 1;
+   cursor: pointer;
+}
+
+.srFeature-resetBtn:hover {
+   background: var(--yellow);
+}
+
+.srFeature-count {
+   margin: 0;
+   font-size: 0.84rem;
+   font-weight: 700;
+   color: var(--ink-soft);
+}
+
+.srFeature-empty {
+   padding: 1.25rem;
+   text-align: center;
+   border: 1px dashed color-mix(in oklch, var(--ink) 28%, transparent);
+   border-radius: 4px;
+   color: var(--ink-soft);
+}
+
+.srFeature-relatedGrid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+   gap: 0.85rem;
+}
+
+.srFeature-relatedPanel {
+   padding: 0.95rem 1.05rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 18%, transparent);
+   border-radius: 4px;
+   background: var(--paper-light);
+}
+
+.srFeature-relatedPanel h3 {
+   margin: 0 0 0.65rem;
+   font-size: 1.1rem;
+}
+
+.srFeature-relatedList {
+   margin: 0;
+   padding-inline-start: 1.2rem;
+   display: flex;
+   flex-direction: column;
+   gap: 0.4rem;
+}
+
+.srFeature-relatedList li {
+   margin: 0;
+}
+
+.srFeature-relatedMeta {
+   font-size: 0.84rem;
+   color: var(--ink-soft);
+}
+
+.srFeature-attribution {
+   padding-block-start: 1.25rem;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 20%, transparent);
+   font-size: 0.9rem;
+   color: var(--ink-soft);
+}
+
+.srFeature-attribution p {
+   margin: 0;
+   overflow-wrap: anywhere;
+}
+</style>

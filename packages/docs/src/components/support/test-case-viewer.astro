@@ -1,0 +1,233 @@
+---
+import { Code } from 'astro:components';
+import ExternalLink from '@lucide/astro/icons/external-link';
+
+export interface Props {
+   slug: string;
+   title: string;
+   html: string;
+   css?: string;
+   js?: string;
+}
+
+const { slug, title, html, css, js } = Astro.props;
+const basePath = import.meta.env.BASE_URL.endsWith('/')
+   ? import.meta.env.BASE_URL
+   : `${import.meta.env.BASE_URL}/`;
+const caseHref = `${basePath}support/cases/${slug}/`;
+
+interface TabDefinition {
+   readonly id: string;
+   readonly label: string;
+   readonly key: 'preview' | 'html' | 'css' | 'js';
+}
+
+const tabs: TabDefinition[] = [
+   { id: `sr-${slug}-tab-preview`, label: 'Preview', key: 'preview' },
+   { id: `sr-${slug}-tab-html`, label: 'HTML', key: 'html' },
+   ...(css ? [ { id: `sr-${slug}-tab-css`, label: 'CSS', key: 'css' } as const ] : []),
+   ...(js ? [ { id: `sr-${slug}-tab-js`, label: 'JavaScript', key: 'js' } as const ] : []),
+];
+---
+
+<div class="srTabs" data-sr-tabs>
+   <div class="srTabs-bar">
+      <div class="srTabs-tablist" role="tablist" aria-label="Test case views">
+         {tabs.map((tab, index) => (
+            <button
+               type="button"
+               role="tab"
+               id={tab.id}
+               class="srTabs-tab"
+               aria-selected={index === 0 ? 'true' : 'false'}
+               tabindex={index === 0 ? '0' : '-1'}
+            >
+               {tab.label}
+            </button>
+         ))}
+      </div>
+
+      <a href={caseHref} class="srTabs-directLink">
+         <span>Open standalone page</span>
+         <ExternalLink size={15} aria-hidden="true" focusable="false" />
+      </a>
+   </div>
+
+   <div class="srTabs-panels">
+      <div
+         class="srTabs-panel"
+         role="tabpanel"
+         aria-labelledby={`sr-${slug}-tab-preview`}
+      >
+         <div class="srTabs-panelInner srTabs-panelInner--preview">
+            <iframe
+               class="srTabs-iframe"
+               title={`Isolated test case: ${title}`}
+               src={caseHref}
+               loading="lazy"
+            ></iframe>
+         </div>
+      </div>
+
+      <div
+         class="srTabs-panel"
+         role="tabpanel"
+         aria-labelledby={`sr-${slug}-tab-html`}
+         hidden="until-found"
+         data-focusable-panel="true"
+      >
+         <div class="srTabs-panelInner srTabs-panelInner--code">
+            <Code code={html} lang="html" theme="github-dark" />
+         </div>
+      </div>
+
+      {css && (
+         <div
+            class="srTabs-panel"
+            role="tabpanel"
+            aria-labelledby={`sr-${slug}-tab-css`}
+            hidden="until-found"
+            data-focusable-panel="true"
+         >
+            <div class="srTabs-panelInner srTabs-panelInner--code">
+               <Code code={css} lang="css" theme="github-dark" />
+            </div>
+         </div>
+      )}
+
+      {js && (
+         <div
+            class="srTabs-panel"
+            role="tabpanel"
+            aria-labelledby={`sr-${slug}-tab-js`}
+            hidden="until-found"
+            data-focusable-panel="true"
+         >
+            <div class="srTabs-panelInner srTabs-panelInner--code">
+               <Code code={js} lang="js" theme="github-dark" />
+            </div>
+         </div>
+      )}
+   </div>
+</div>
+
+<script>
+   import '../../scripts/test-case-tabs';
+</script>
+
+<style>
+.srTabs {
+   min-inline-size: 0;
+   border: 3px solid var(--ink);
+   overflow: hidden;
+   background: var(--paper-light);
+   box-shadow: 6px 6px 0 var(--ink);
+}
+
+.srTabs-bar {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   justify-content: space-between;
+   gap: 0.5rem 1rem;
+   padding-inline: 0.75rem;
+   border-bottom: 3px solid var(--ink);
+   background: var(--paper);
+}
+
+.srTabs-tablist {
+   min-inline-size: 0;
+   display: flex;
+   align-items: stretch;
+   overflow-x: auto;
+   gap: 0.25rem;
+}
+
+.srTabs-tab {
+   position: relative;
+   flex: none;
+   appearance: none;
+   border: none;
+   background: transparent;
+   color: var(--ink-soft);
+   font-family: var(--display);
+   font-size: 0.92rem;
+   font-weight: 700;
+   letter-spacing: 0.04em;
+   text-transform: uppercase;
+   min-block-size: 44px;
+   padding-block: 0.65rem;
+   padding-inline: 0.85rem;
+   cursor: pointer;
+}
+
+.srTabs-tab:hover {
+   color: var(--ink);
+}
+
+.srTabs-tab[aria-selected="true"] {
+   color: var(--ink);
+}
+
+.srTabs-tab[aria-selected="true"]::after {
+   content: "";
+   position: absolute;
+   inset-block-end: 0;
+   inset-inline: 0;
+   border-block-end: 4px solid var(--red);
+}
+
+.srTabs-directLink {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.35rem;
+   margin-inline-start: auto;
+   min-block-size: 36px;
+   padding-block: 0.35rem;
+   padding-inline: 0.25rem;
+   font-size: 0.86rem;
+   white-space: nowrap;
+}
+
+.srTabs-panels {
+   display: grid;
+   min-inline-size: 0;
+}
+
+.srTabs-panel {
+   grid-area: 1 / 1;
+   min-inline-size: 0;
+}
+
+.srTabs-panelInner {
+   min-inline-size: 0;
+}
+
+.srTabs-panelInner--preview {
+   background: #ffffff;
+   color: #111827;
+   color-scheme: light;
+}
+
+.srTabs-panelInner--code {
+   overflow-x: auto;
+   background: #24292e;
+}
+
+.srTabs-iframe {
+   display: block;
+   inline-size: 100%;
+   min-block-size: 180px;
+   border: none;
+   background: #ffffff;
+}
+
+.srTabs-panelInner--code :global(pre.astro-code) {
+   margin: 0;
+   padding: 1rem 1.15rem;
+   border: 0;
+   box-shadow: none;
+   font-size: 0.88rem;
+   overflow-x: auto;
+}
+</style>
