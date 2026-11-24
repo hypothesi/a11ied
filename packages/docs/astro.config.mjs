@@ -2,7 +2,9 @@ import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { defineConfig } from 'astro/config';
 
 const productionBase = '/a11ied/';
-const isProductionBuild = process.argv.includes('build');
+// `astro preview` serves the built site, so it needs the same base path as the build.
+const isProductionBuild =
+   process.argv.includes('build') || process.argv.includes('preview');
 
 async function prefixRootRelativeLinksInFile(path) {
    const html = await readFile(path, 'utf8');
@@ -37,6 +39,7 @@ async function prefixRootRelativeLinks(directory) {
 }
 
 export default defineConfig({
+   site: 'https://hypothesi.github.io',
    base: isProductionBuild ? productionBase : '/',
    compressHTML: true,
    integrations: isProductionBuild

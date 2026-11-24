@@ -1,6 +1,7 @@
 /**
- * Adds a label bar, syntax highlighting, and a copy button to every `pre > code` block
- * rendered by the docs shell.
+ * Adds a label, a copy button, and syntax highlighting to every `pre > code` block the
+ * docs shell renders. Output and agent prompts are prose, so they are left
+ * unhighlighted.
  */
 
 const TOKEN_PATTERN =
@@ -15,6 +16,8 @@ const COPY_KINDS: Record<string, string> = {
    CONFIG: 'config',
    OUTPUT: 'output',
 };
+
+const PLAIN_LABELS = new Set(['OUTPUT', 'AI AGENT PROMPT']);
 
 const CLIPBOARD_PATHS = [
    'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2',
@@ -120,7 +123,9 @@ function decorate(pre: HTMLPreElement): void {
    const source = code.textContent ?? '';
    const blockLabel = pre.dataset.label ?? 'TERMINAL';
 
-   highlight(code, source);
+   if (!PLAIN_LABELS.has(blockLabel)) {
+      highlight(code, source);
+   }
 
    const tools = document.createElement('div');
    const label = document.createElement('span');
@@ -129,6 +134,13 @@ function decorate(pre: HTMLPreElement): void {
    label.textContent = blockLabel;
    tools.append(label, createCopyButton(source, COPY_KINDS[blockLabel] ?? 'command'));
    pre.prepend(tools);
+
+   // A block that scrolls sideways has to be reachable by keyboard to be scrolled.
+   if (pre.scrollWidth > pre.clientWidth) {
+      pre.tabIndex = 0;
+      pre.setAttribute('role', 'group');
+      pre.setAttribute('aria-label', `${blockLabel.toLowerCase()} block`);
+   }
 }
 
 for (const pre of document.querySelectorAll('pre')) {
