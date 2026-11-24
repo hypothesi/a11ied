@@ -6,9 +6,7 @@ import record from '../../samples/criterion-record.json.txt?raw';
 const toc = [
    { id: 'sources', label: 'Where the data comes from' },
    { id: 'record', label: 'A criterion record' },
-   { id: 'files', label: 'The data files' },
    { id: 'license', label: 'W3C text and its license' },
-   { id: 'refresh', label: 'Refresh the data' },
 ];
 ---
 
@@ -55,29 +53,11 @@ const toc = [
          <dt><code>understandingExcerpt</code></dt>
          <dd>The opening of the Understanding document. <code>a1 wcag understanding 1.4.3</code> prints all of it.</dd>
       </dl>
-   </section>
-
-   <section>
-      <h2 id="files">The data files</h2>
       <p>
-         The files are in the <code>@a11ied/wcag-data</code> package, one set per WCAG
-         version. Use the <a href="/reference/api#wcag">API</a> or the CLI to read them. The
-         file layout can change between releases.
+         Read the data with the CLI or the <a href="/reference/api#wcag">API</a>. The files
+         inside the <code>@a11ied/wcag-data</code> package are not a public interface, and
+         their layout can change between releases.
       </p>
-      <dl class="defs">
-         <dt><code>criteria</code>, <code>criteria-by-level</code>, <code>slug-index</code></dt>
-         <dd>The criterion records, and indexes by level and by slug.</dd>
-         <dt><code>test-methods</code>, <code>test-method-summary</code>, <code>strategy</code></dt>
-         <dd>The test method of each criterion, the counts per level, and the testing strategy.</dd>
-         <dt><code>technique-index</code>, <code>failure-index</code>, <code>technique-bodies</code></dt>
-         <dd>Techniques and failures: their titles, the criteria that list them, and their text.</dd>
-         <dt><code>axe-rules</code>, <code>act-rules</code></dt>
-         <dd>Each rule and the criteria it maps to.</dd>
-         <dt><code>understanding</code>, <code>documents-content</code></dt>
-         <dd>The Understanding documents, converted to Markdown.</dd>
-         <dt><code>apg-patterns</code>, <code>mobile-guidance</code></dt>
-         <dd>The ARIA patterns and the mobile guidance. One file each, for both versions.</dd>
-      </dl>
    </section>
 
    <section>
@@ -87,21 +67,6 @@ const toc = [
          Markdown under the W3C Document License. The package includes a
          <code>NOTICE.md</code> with the attribution. Every command that prints this text
          also prints the title and URL of the document it came from.
-      </p>
-   </section>
-
-   <section>
-      <h2 id="refresh">Refresh the data</h2>
-      <p>
-         This is for maintainers. Nothing in normal use fetches data. From the repository
-         root:
-      </p>
-      <pre><code>npm run wcag:sync
-npm run wcag:validate</code></pre>
-      <p>
-         <code>wcag:sync</code> downloads the sources and regenerates the files.
-         <code>wcag:validate</code> checks them against the recorded sources. Review the diff
-         before you commit it.
       </p>
    </section>
 </DocShell>
