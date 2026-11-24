@@ -17,6 +17,9 @@
    },
    "devDependencies": {
       "@astrojs/check": "^0.9.10",
+      "@iconify-json/mdi": "1.2.3",
+      "astro-icon": "1.2.0",
+      "astro-llms-md": "3.0.3",
       "pagefind": "1.6.0",
       "typescript": "^6.0.3"
    }
