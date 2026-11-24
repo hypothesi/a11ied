@@ -8,7 +8,8 @@ const toc = [
    { id: 'sr', label: 'a1 sr' },
    { id: 'talkback', label: 'a1 talkback' },
    { id: 'keys', label: 'Key chords' },
-   { id: 'wcag', label: 'a1 wcag' },
+   { id: 'wcag', label: 'a1 wcag and search' },
+   { id: 'pattern', label: 'a1 pattern' },
    { id: 'axe', label: 'a1 axe' },
    { id: 'tree', label: 'a1 tree' },
    { id: 'check', label: 'a1 check' },
@@ -37,7 +38,10 @@ const toc = [
       </p>
       <div class="route-list">
          <div class="route-row"><code>a1 sr</code><span>Control a screen reader through a session.</span></div>
-         <div class="route-row"><code>a1 wcag</code><span>Look up criteria, techniques, axe rules, search results, and coverage.</span></div>
+         <div class="route-row"><code>a1 talkback</code><span>Turn TalkBack on or off on an Android device and record what it says.</span></div>
+         <div class="route-row"><code>a1 wcag</code><span>Look up criteria, techniques, and axe rules, with the test method for each criterion.</span></div>
+         <div class="route-row"><code>a1 pattern</code><span>Look up ARIA patterns, and check a widget against one.</span></div>
+         <div class="route-row"><code>a1 search</code><span>Search WCAG criteria and ARIA patterns together.</span></div>
          <div class="route-row"><code>a1 axe</code><span>Run axe-core against one or more targets.</span></div>
          <div class="route-row"><code>a1 tree</code><span>Print a target's accessibility tree.</span></div>
          <div class="route-row"><code>a1 check</code><span>Scan one page during development: axe, the accessibility tree, and applicability together.</span></div>
@@ -214,12 +218,15 @@ a1 sr press "VO+ArrowRight" --json</code></pre>
          <div class="route-row"><code>wcag show &lt;criterion&gt;</code><span>The requirement, a plain restatement of what to do, what WCAG2Mobile says about it on a mobile platform, how to test it, and what to do when it fails. <code>--verbose</code> adds the raw <code>testMethod.method</code>, <code>preferredEvidenceMode</code>, procedure IDs, and the rest of the mobile guidance.</span></div>
          <div class="route-row"><code>wcag understanding &lt;criterion&gt;</code><span>The full Understanding document for one criterion, converted to Markdown, with the source line the W3C Document License requires.</span></div>
          <div class="route-row"><code>wcag rule &lt;ruleId&gt;</code><span>One axe-core rule: the criteria it maps to, and the axe help text and URL.</span></div>
+         <div class="route-row"><code>search &lt;query&gt;</code><span>A top-level command: one ranked list across the WCAG corpus and the ARIA Authoring Practices Guide. <code>--kind</code> keeps one kind of row: <code>criterion</code>, <code>technique</code>, <code>failure</code>, <code>axe-rule</code>, <code>pattern</code>, or <code>example</code>. <code>--limit</code> defaults to 10.</span></div>
       </div>
       <pre><code>a1 wcag 1.4.3
 a1 wcag show status-messages --json
 a1 wcag understanding status-messages
 a1 wcag criteria --level AA --wcag 2.1 --json
 a1 wcag criteria --summary
+a1 search "focus order"
+a1 search "color contrast" --kind criterion
 a1 wcag rule color-contrast
 a1 wcag G18</code></pre>
       <p>These read bundled data. No command in this family opens a browser or makes a request.</p>
