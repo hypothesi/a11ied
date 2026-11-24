@@ -6,6 +6,7 @@ import { gotoSettled } from '../browser/load.js';
 import { launchAutomationBrowser } from '../browser/runtime.js';
 import { CliUsageError } from '../errors/cli-errors.js';
 import { screenshotElement } from './element.js';
+import { screenshotFullPage } from './full-page.js';
 import { parseHttpUrl } from '../targets/parse.js';
 
 const DEFAULT_VIEWPORT = { width: 1280, height: 900 };
@@ -212,7 +213,11 @@ async function takeScreenshot(page: Page, options: CapturePageOptions): Promise<
    }
    const path = resolve(options.out);
    await mkdir(dirname(path), { recursive: true });
-   await page.screenshot({ path, fullPage: options.fullPage ?? false });
+   if (options.fullPage) {
+      await screenshotFullPage(page, path);
+      return;
+   }
+   await page.screenshot({ path });
 }
 
 /** `capturePage` in a fresh context of a browser the caller owns and closes. */
