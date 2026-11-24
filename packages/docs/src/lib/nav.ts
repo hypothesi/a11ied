@@ -31,17 +31,17 @@ export const docsLinks: DocSection[] = [
    {
       title: 'AI agents',
       links: [
-         { href: '/guides/agents', label: 'Use with an AI agent' },
-         { href: '/guides/agent-skill', label: 'Install the agent skill' },
-         { href: '/guides/audit', label: 'Run an audit' },
+         { href: '/guides/agents', label: 'Connect an AI agent' },
+         { href: '/guides/agent-skill', label: 'Install the agent skills' },
+         { href: '/guides/audit', label: 'Audit a site with AI agents' },
       ],
    },
    {
       title: 'Test from the terminal',
       links: [
          { href: '/guides/screen-reader', label: 'Test with a screen reader' },
-         { href: '/guides/violations', label: 'Fix an axe violation' },
-         { href: '/guides/recording', label: 'Record a session' },
+         { href: '/guides/violations', label: 'Fix what a scan found' },
+         { href: '/guides/recording', label: 'Record a screen reader session' },
          { href: '/guides/troubleshooting', label: 'Troubleshooting' },
       ],
    },
@@ -61,7 +61,7 @@ export const docsLinks: DocSection[] = [
          { href: '/reference/mcp', label: 'MCP tools' },
          { href: '/reference/api', label: 'TypeScript API' },
          { href: '/reference/wcag-data', label: 'WCAG data' },
-         { href: '/support', label: 'Feature support' },
+         { href: '/support', label: 'Screen reader compatibility' },
       ],
    },
 ];

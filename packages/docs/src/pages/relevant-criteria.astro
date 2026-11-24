@@ -9,13 +9,13 @@ const toc = [
    { id: 'signals', label: 'What a1 looks for' },
    { id: 'states', label: 'The four states' },
    { id: 'see', label: 'See why a criterion is listed' },
-   { id: 'limits', label: 'Limits' },
+   { id: 'limits', label: 'Limits of relevance detection' },
 ];
 ---
 
 <DocShell
    title="Relevant criteria"
-   summary="<p>Not every criterion applies to every page. A page with no form has no form errors to test. <code>a1 check</code> looks at what a page is made of and lists the criteria worth checking on it.</p>"
+   summary="<p><code>a1 check</code> looks at what a page is made of and lists the WCAG criteria worth checking on it. Not every criterion applies to every page: a page with no form has no form errors to test.</p>"
    links={docsLinks}
    toc={toc}
 >
@@ -103,7 +103,7 @@ const toc = [
    </section>
 
    <section>
-      <h2 id="limits">Limits</h2>
+      <h2 id="limits">Limits of relevance detection</h2>
       <dl class="defs defs--wide">
          <dt>Something missing leaves no signal</dt>
          <dd>A status message with no live region, or a custom control with no role, gives a1 nothing to detect. <code>not-detected</code> is not a pass.</dd>

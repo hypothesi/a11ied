@@ -3,7 +3,7 @@ import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
 
 const toc = [
-   { id: 'record', label: 'Record a session' },
+   { id: 'record', label: 'Start a recording' },
    { id: 'permission', label: 'Screen Recording permission on macOS' },
    { id: 'problems', label: 'When it does not work' },
    { id: 'privacy', label: 'Before you share a recording' },
@@ -11,13 +11,13 @@ const toc = [
 ---
 
 <DocShell
-   title="Record a session"
+   title="Record a screen reader session"
    summary="<p>Record the screen while VoiceOver or NVDA reads a page. Attach the video and the log of announcements to a bug report, to show what happened on screen and what the screen reader said.</p>"
    links={docsLinks}
    toc={toc}
 >
    <section>
-      <h2 id="record">Record a session</h2>
+      <h2 id="record">Start a recording</h2>
       <p>
          Pass <code>--recording</code> with a file path when you start the session. Stopping
          the session finishes the file.

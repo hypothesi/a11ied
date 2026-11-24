@@ -62,8 +62,8 @@ const toc = [
       <pre><code>a1 check {practiceURL}</code></pre>
       <pre data-label="OUTPUT"><code>{withPracticeURL(checkBroken, practiceURL)}</code></pre>
       <p>
-         The scan counts failing elements: ten of them, under three rules. So it found three
-         of the page's ten problems. The other seven take more than a scan.
+         The scan lists ten failing elements under three rules. Steps 4 and 5 find a problem
+         on the same page that no scan rule reports.
       </p>
       <p>Read the report in three parts.</p>
       <dl class="defs">
@@ -154,8 +154,8 @@ a1 sr expect dialog --since opened</code></pre>
       </p>
       <p>Run steps 4 and 5 against the fixed page and <code>sr expect</code> passes.</p>
       <p>
-         You have now scanned a page, heard a defect the way a screen reader user does, and
-         written a check that fails when a dialog does not announce itself.
+         You have now scanned a page, read what a screen reader announces on it, and written
+         a check that fails when a dialog is not announced.
       </p>
    </section>
 
@@ -170,7 +170,7 @@ a1 sr expect dialog --since opened</code></pre>
          <dd>Move, read, and check announcements with VoiceOver, NVDA, or the simulated screen reader.</dd>
          <dt><a href="/guides/vitest">Test with Vitest</a></dt>
          <dd>Turn step 5 into a test that runs with the rest of your suite.</dd>
-         <dt><a href="/guides/agents">Use with an AI agent</a></dt>
+         <dt><a href="/guides/agents">Connect an AI agent</a></dt>
          <dd>Give a coding agent these commands as tools.</dd>
       </dl>
    </section>

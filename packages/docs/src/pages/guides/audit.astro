@@ -7,8 +7,8 @@ const toc = [
    { id: 'start', label: 'Start an audit' },
    { id: 'how', label: 'How the work is divided' },
    { id: 'scope', label: 'Choose the scope' },
-   { id: 'split', label: 'What is automated' },
-   { id: 'workers', label: 'Run the workers' },
+   { id: 'split', label: 'What a1 does and what a worker judges' },
+   { id: 'workers', label: 'What each worker does' },
    { id: 'track', label: 'Watch progress' },
    { id: 'stuck', label: 'When something is stuck' },
    { id: 'report', label: 'The report' },
@@ -17,8 +17,8 @@ const toc = [
 ---
 
 <DocShell
-   title="Run an audit"
-   summary="<p><code>a1 audit</code> organizes a WCAG audit that your own AI coding agent carries out. It splits the site into small units of work, hands them to the agent's workers, saves every result as it arrives, and writes a report you can hand to a client.</p>"
+   title="Audit a site with AI agents"
+   summary={`<p><code>a1 audit</code> organizes a WCAG audit that your own AI coding agent carries out. It splits the site into small units of work, hands them to the agent's workers, saves every result as it arrives, and writes a report you can hand to a client. <a href="/example-audit/">Browse an example report</a>.</p>`}
    links={docsLinks}
    toc={toc}
 >
@@ -26,16 +26,16 @@ const toc = [
       <h2 id="who">Who does the testing</h2>
       <p>
          Your AI coding agent does. <code>a1 audit</code> does not start agents and does not
-         call a model. It is the record keeper: it holds the list of work, gives a unit to
+         call a model. It keeps the records: it holds the list of work, gives a unit to
          whoever asks for one, checks each result that comes back, and builds the report.
       </p>
       <dl class="defs">
          <dt>Which agents</dt>
-         <dd>Any coding agent that can run terminal commands: Claude Code, Codex, Cursor, GitHub Copilot, Windsurf, and others. The <a href="/guides/agent-skill"><code>a11ied-audit</code> skill</a> teaches the agent the procedure.</dd>
+         <dd>Any coding agent that can run terminal commands or use the <a href="/guides/agents">MCP server</a>: Claude Code, Codex, Cursor, GitHub Copilot, Windsurf, and others. The <a href="/guides/agent-skill"><code>a11ied-audit</code> skill</a> teaches the agent the procedure.</dd>
          <dt>How they start</dt>
          <dd>You ask your agent for an audit. That agent leads: it sets the scope, then starts workers as its own subagents, usually three to six. An agent that cannot start subagents does the units itself, one after another.</dd>
          <dt>What a worker does</dt>
-         <dd>It runs <code>a1 audit next</code> to get a unit, tests the page with the other <code>a1</code> commands, and runs <code>a1 audit submit</code> with its results. Then it asks for the next unit.</dd>
+         <dd>It runs <code>a1 audit next</code> to get a unit, tests the page with the other <code>a1</code> commands, and runs <code>a1 audit submit</code> with its results. Then it asks for the next unit. Over MCP it calls <code>audit_next</code> and <code>audit_submit</code> to do the same.</dd>
          <dt>Without the skill</dt>
          <dd>Open several agent sessions yourself and tell each one to loop on <code>a1 audit next</code> under its own worker name. The work packet it prints carries the instructions.</dd>
       </dl>
@@ -113,9 +113,9 @@ a1 audit status</code></pre>
    </section>
 
    <section>
-      <h2 id="split">What is automated</h2>
+      <h2 id="split">What a1 does and what a worker judges</h2>
       <dl class="defs">
-         <dt>Automated</dt>
+         <dt>Done by a1</dt>
          <dd>Finding pages. axe failures, which become findings. Measurements: tab order, focus styles, overflow at 320 pixels wide and at 200 percent zoom, target sizes, and lists of media and forms. Claims, progress, and the report.</dd>
          <dt>Judged by a worker</dt>
          <dd>Every pass and every "not applicable". Whether an automated finding is real. Everything a scanner cannot see, such as whether alt text describes the image or an error message helps. Severity and the fix.</dd>
@@ -126,7 +126,7 @@ a1 audit status</code></pre>
    </section>
 
    <section>
-      <h2 id="workers">Run the workers</h2>
+      <h2 id="workers">What each worker does</h2>
       <p>
          A worker is one of your agent's subagents, or an agent session you opened, running a
          loop: claim a unit, test it, submit, repeat. Workers with different names take

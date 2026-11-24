@@ -9,13 +9,13 @@ const toc = [
    { id: 'scan', label: 'Ask for a scan' },
    { id: 'sr', label: 'Ask for a screen reader test' },
    { id: 'prompts', label: 'Prompts that work' },
-   { id: 'mistakes', label: 'Two mistakes to prevent' },
+   { id: 'mistakes', label: 'Two reporting rules to give the agent' },
 ];
 ---
 
 <DocShell
-   title="Use with an AI agent"
-   summary="<p>a11ied includes an MCP server. It gives a coding agent the a11ied commands as tools, so the agent can scan a page, drive a screen reader, and look up WCAG while it works. The server runs on your machine and opens no network port.</p>"
+   title="Connect an AI agent"
+   summary="<p>a11ied includes an MCP server. It gives Claude Code, Cursor, or any other agent that supports MCP the a11ied commands as tools, so the agent can scan a page, drive a screen reader, and look up WCAG while it works. The server runs on your machine and opens no network port.</p>"
    links={docsLinks}
    toc={toc}
 >
@@ -101,7 +101,7 @@ const toc = [
    </section>
 
    <section>
-      <h2 id="mistakes">Two mistakes to prevent</h2>
+      <h2 id="mistakes">Two reporting rules to give the agent</h2>
       <dl class="defs defs--wide">
          <dt>"The scan passed, so the page meets WCAG"</dt>
          <dd>A scanner decides part of some criteria and none of them fully. Ask the agent to report scan results and <a href="/test-methods">hand-checked results</a> separately.</dd>
@@ -109,7 +109,7 @@ const toc = [
          <dd>Every session reports <code>targetType</code>: <code>real</code> or <code>simulated</code>. Ask the agent to include it.</dd>
       </dl>
       <p>
-         The <a href="/guides/agent-skill">agent skill</a> writes both rules into the agent's
+         The <a href="/guides/agent-skill">agent skills</a> write both rules into the agent's
          instructions, so you do not have to repeat them. The
          <a href="/reference/mcp">MCP reference</a> lists every tool.
       </p>

@@ -32,7 +32,7 @@ const toc = [
       </p>
       <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
       <p>
-         See <a href="/guides/agents">use with an AI agent</a> for setup in specific agents.
+         See <a href="/guides/agents">connect an AI agent</a> for setup in specific agents.
          In a checkout of the repository, copy the entry in <code>mcp.example.json</code>.
       </p>
    </section>
@@ -61,7 +61,7 @@ const toc = [
                <tr><th scope="row"><code>sr_transcript</code></th><td>Return or save the transcript</td><td><code>a1 sr transcript</code></td></tr>
                <tr><th scope="row"><code>sr_list</code></th><td>List named screen reader commands</td><td><code>a1 sr list</code></td></tr>
                <tr><th scope="row"><code>talkback</code></th><td>Drive TalkBack on Android</td><td><code>a1 talkback</code></td></tr>
-               <tr><th scope="row"><code>audit_*</code></th><td>Run and report a WCAG audit</td><td><code>a1 audit</code></td></tr>
+               <tr><th scope="row"><code>audit_*</code></th><td>Track a WCAG audit and write its report</td><td><code>a1 audit</code></td></tr>
                <tr><th scope="row"><code>doctor</code></th><td>Report what is set up on the machine</td><td><code>a1 doctor</code></td></tr>
             </tbody>
          </table>
@@ -217,7 +217,7 @@ const toc = [
          These read and write the same audit as the <code>a1 audit</code> commands, so CLI
          and MCP workers can share one. Each takes an optional <code>audit</code> ID, except
          <code>audit_init</code> and <code>audit_list</code>. See
-         <a href="/guides/audit">run an audit</a>.
+         <a href="/guides/audit">audit a site with AI agents</a>.
       </p>
       <dl class="defs defs--wide">
          <dt><code>audit_init</code>, <code>audit_list</code></dt>

@@ -99,23 +99,24 @@ const toc = [
       </p>
       <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
       <p>
-         See <a href="/guides/agents">use with an AI agent</a>. To have agents run a full
-         WCAG audit and write the report, see <a href="/guides/audit">run an audit</a>.
+         See <a href="/guides/agents">connect an AI agent</a>. Your agent can also carry out
+         a full WCAG audit while <code>a1 audit</code> tracks the work and writes the report.
+         See <a href="/guides/audit">audit a site with AI agents</a>.
       </p>
    </section>
 
    <section>
       <h2 id="results">What the results mean</h2>
-      <p>a11ied keeps three kinds of evidence apart, and so should your reports.</p>
+      <p>a11ied labels every result as one of three kinds of evidence.</p>
       <dl class="defs">
          <dt>A scan</dt>
          <dd>Finds failures. A clean scan does not mean a criterion passes, because no criterion can be decided by a scanner alone.</dd>
          <dt>A transcript</dt>
-         <dd>Shows what a screen reader announced. A transcript from the simulated screen reader is not evidence of what VoiceOver or NVDA does.</dd>
+         <dd>The log of what a screen reader announced. A transcript from the simulated screen reader is not evidence of what VoiceOver or NVDA does.</dd>
          <dt>A judgment</dt>
-         <dd>Decides the rest: whether alt text describes the image, whether focus order makes sense. A person or an agent makes it, and <code>a1 audit</code> records it.</dd>
+         <dd>A person's or an agent's decision on what no tool measures, such as whether alt text describes its image or focus order makes sense. <code>a1 audit</code> records it.</dd>
       </dl>
-      <p>See <a href="/test-methods">test methods</a> for the numbers behind this.</p>
+      <p>See <a href="/test-methods">test methods</a> for how many criteria each kind of evidence can decide.</p>
    </section>
 
    <section>

@@ -7,16 +7,16 @@ import summary from '../samples/wcag-summary.txt?raw';
 
 const toc = [
    { id: 'methods', label: 'Three test methods' },
-   { id: 'numbers', label: 'The numbers' },
+   { id: 'numbers', label: 'How many criteria use each method' },
    { id: 'one', label: 'How to test one criterion' },
    { id: 'data', label: 'The method as data' },
-   { id: 'claims', label: 'What you can claim' },
+   { id: 'claims', label: 'What each kind of evidence supports' },
 ];
 ---
 
 <DocShell
    title="Test methods"
-   summary="<p>WCAG has 86 success criteria. A scanner cannot decide a single one of them alone. a11ied labels each criterion with how it has to be tested, so you know what to test after a scan.</p>"
+   summary="<p>a11ied labels each of WCAG's 86 success criteria with how it has to be tested, and prints the steps for any one of them. Use it to see what to test after a scan.</p>"
    links={docsLinks}
    toc={toc}
 >
@@ -43,7 +43,7 @@ const toc = [
    </section>
 
    <section>
-      <h2 id="numbers">The numbers</h2>
+      <h2 id="numbers">How many criteria use each method</h2>
       <pre><code>a1 wcag criteria --summary</code></pre>
       <pre data-label="OUTPUT"><code>{summary.trimEnd()}</code></pre>
       <p>
@@ -94,7 +94,7 @@ const toc = [
    </section>
 
    <section>
-      <h2 id="claims">What you can claim</h2>
+      <h2 id="claims">What each kind of evidence supports</h2>
       <p>For each statement you make, say which kind of evidence supports it.</p>
       <dl class="defs">
          <dt>A scan</dt>

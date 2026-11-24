@@ -45,7 +45,7 @@ const toc = [
          <dt><a href="#capture"><code>a1 capture</code></a></dt>
          <dd>Screenshot a page at a viewport, zoom, focus stop, or opened state.</dd>
          <dt><a href="#audit"><code>a1 audit</code></a></dt>
-         <dd>Run, track, and report a WCAG audit.</dd>
+         <dd>Track a WCAG audit that your AI agents carry out, and write the report.</dd>
       </dl>
       <h3>Drive a screen reader</h3>
       <dl class="defs">
@@ -199,7 +199,7 @@ a1 axe http://localhost:3000 --format sarif --out results.sarif</code></pre>
          The result has <code>violations</code>, <code>passes</code>, <code>incomplete</code>
          for checks axe could not decide, and <code>inapplicable</code>. With several
          targets, JSON has one report per target under <code>targets</code>. See
-         <a href="/guides/violations">fix an axe violation</a>.
+         <a href="/guides/violations">fix what a scan found</a>.
       </p>
    </section>
 
@@ -482,8 +482,8 @@ a1 pattern check http://localhost:3000 --pattern dialog --selector '[role="dialo
    <section>
       <h2 id="audit">a1 audit</h2>
       <p>
-         Runs a WCAG audit with AI agents as workers. See
-         <a href="/guides/audit">run an audit</a>. Every subcommand except <code>init</code>
+         Tracks a WCAG audit that your AI agents carry out, and writes the report. See
+         <a href="/guides/audit">audit a site with AI agents</a>. Every subcommand except <code>init</code>
          and <code>list</code> takes <code>--audit &lt;id&gt;</code>. Without it, a1 uses
          <code>$A11IED_AUDIT</code>, then the only audit in the workspace.
       </p>

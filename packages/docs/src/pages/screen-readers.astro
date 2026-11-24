@@ -4,9 +4,9 @@ import { docsLinks } from '../lib/nav';
 
 const toc = [
    { id: 'three', label: 'The three screen readers' },
-   { id: 'virtual', label: 'What the simulated one is' },
-   { id: 'choose', label: 'Which one to use' },
-   { id: 'default', label: 'Which one you get by default' },
+   { id: 'virtual', label: 'What the simulated screen reader is' },
+   { id: 'choose', label: 'Which screen reader to use' },
+   { id: 'default', label: 'Which screen reader runs by default' },
    { id: 'setup', label: 'Set up VoiceOver or NVDA' },
    { id: 'label', label: 'How results are labeled' },
    { id: 'talkback', label: 'TalkBack on Android' },
@@ -40,7 +40,7 @@ const toc = [
    </section>
 
    <section>
-      <h2 id="virtual">What the simulated one is</h2>
+      <h2 id="virtual">What the simulated screen reader is</h2>
       <p>
          The simulated screen reader is software that reads the page's accessibility tree,
          the structure a browser gives to assistive technology, and works out what a screen
@@ -62,7 +62,7 @@ const toc = [
    </section>
 
    <section>
-      <h2 id="choose">Which one to use</h2>
+      <h2 id="choose">Which screen reader to use</h2>
       <dl class="defs">
          <dt>Simulated</dt>
          <dd>While you build. In tests. In CI. For an AI agent. It is fast, it gives the same result on every machine, and tests can run many at once.</dd>
@@ -76,7 +76,7 @@ const toc = [
    </section>
 
    <section>
-      <h2 id="default">Which one you get by default</h2>
+      <h2 id="default">Which screen reader runs by default</h2>
       <p>
          Without <code>--sr</code>, <code>a1 sr start</code> uses the screen reader of the
          platform when it is set up: VoiceOver on macOS, NVDA on Windows. Otherwise it uses
@@ -100,7 +100,7 @@ a1 doctor --task reader</code></pre>
       </p>
       <p>
          To record the screen during a session, the app you run <code>a1</code> from also
-         needs permission. See <a href="/guides/recording">record a session</a>.
+         needs permission. See <a href="/guides/recording">record a screen reader session</a>.
       </p>
    </section>
 
@@ -127,7 +127,7 @@ a1 doctor --task reader</code></pre>
       </p>
       <p>
          For speech recorded from VoiceOver, TalkBack, NVDA, and JAWS on specific ARIA
-         features, see <a href="/support">feature support</a>.
+         features, see <a href="/support">screen reader compatibility</a>.
       </p>
    </section>
 </DocShell>

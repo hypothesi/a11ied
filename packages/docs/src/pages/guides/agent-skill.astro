@@ -12,7 +12,7 @@ const toc = [
 ---
 
 <DocShell
-   title="Install the agent skill"
+   title="Install the agent skills"
    summary="<p>A skill is a set of instructions a coding agent loads when a task calls for it. The a11ied skills teach an agent how to test accessibility with a11ied: what to run first, which screen reader to use, and how to report what it found.</p>"
    links={docsLinks}
    toc={toc}
@@ -31,14 +31,14 @@ const toc = [
          <dt><code>a11ied</code></dt>
          <dd>For checking a component or page while you build it.</dd>
          <dt><code>a11ied-audit</code></dt>
-         <dd>For a full WCAG audit with parallel workers and a report. See <a href="/guides/audit">run an audit</a>.</dd>
+         <dd>For a full WCAG audit with parallel workers and a report. See <a href="/guides/audit">audit a site with AI agents</a>.</dd>
       </dl>
    </section>
 
    <section>
       <h2 id="use">Use it</h2>
       <ol>
-         <li>Install the CLI: <code>npm install --global a11ied</code>.</li>
+         <li>Install the CLI with <code>npm install --global a11ied</code>, or <a href="/guides/agents">connect the MCP server</a>. The skills work with either.</li>
          <li>Restart the agent so it loads the skills.</li>
          <li>Start the app you want to test.</li>
          <li>Ask for a test, and name the page.</li>
@@ -65,10 +65,11 @@ const toc = [
    <section>
       <h2 id="mcp">Skill or MCP server</h2>
       <p>
-         The skill tells the agent how to test. The
-         <a href="/guides/agents">MCP server</a> gives it tools to test with. Each works
-         without the other: an agent with only the skill runs the <code>a1</code> commands in
-         a terminal. Install both for the best results.
+         The skills tell the agent how to test. The agent then needs a way to run a11ied,
+         and there are two. With the CLI installed, it runs <code>a1</code> commands in a
+         terminal. With the <a href="/guides/agents">MCP server</a> connected, it calls the
+         matching tools. Both skills cover both, so install whichever suits your agent, or
+         both.
       </p>
    </section>
 
