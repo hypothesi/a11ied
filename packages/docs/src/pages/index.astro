@@ -1,5 +1,6 @@
 ---
 import { Image } from 'astro:assets';
+import reportSummary from '../assets/audit-report-summary.png';
 import logo from '../assets/logo.png';
 import SiteHead from '../components/site-head.astro';
 import { REPOSITORY_URL } from '../lib/nav';
@@ -26,13 +27,11 @@ const heroCommands = [
 ].join('\n');
 const agentPrompt =
    `Check the Invite member dialog on ${practiceURL} with a11ied. Open it with the simulated screen reader and tell me whether the dialog is announced. Quote what the screen reader said.`;
-const auditCommands = [
-   'a1 audit init https://example.com --rule "Do not submit the contact form"',
-   'a1 audit discover',
-   'a1 audit scan',
-   'a1 audit next --worker w1',
-   'a1 audit report',
-].join('\n');
+const auditPrompt =
+   'Audit https://example.com against WCAG 2.2 AA with a11ied. Do not submit the contact form. Use four workers.';
+const skillsInstall = `npx -y @a1st/aix install ${REPOSITORY_URL}/blob/master/packages/skills/ai.json --only skills --user`;
+const reportAlt =
+   'The summary of an example audit report. The page does not meet WCAG 2.2 Level AA. 14 findings: 2 critical, 5 serious, 6 moderate, 1 minor. 10 criteria fail and 20 pass. A table lists what to fix first.';
 ---
 
 <html lang="en">
@@ -51,8 +50,9 @@ const auditCommands = [
          <nav class="topnav" aria-label="Site">
             <a href="/overview">Docs</a>
             <a href="/quickstart">Quickstart</a>
+            <a href="/example-audit/">Example audit</a>
             <a href="/reference/cli">CLI reference</a>
-            <a href="/support">Feature support</a>
+            <a href="/support">Compatibility</a>
             <a href={REPOSITORY_URL}>GitHub</a>
          </nav>
          {hasSearch ? <pagefind-modal-trigger class="search-trigger" placeholder="Search the docs" hide-shortcut></pagefind-modal-trigger> : null}
@@ -92,50 +92,93 @@ const auditCommands = [
 
          <section class="band band--ink" aria-labelledby="gap-heading">
             <div class="wrap">
-               <h2 id="gap-heading">Static scans do not catch everything</h2>
+               <h2 id="gap-heading">Static scans are not enough</h2>
                <p class="section-lead">
-                  A scanner reads a page's markup. It does not press Tab, open a dialog, or
-                  listen to a screen reader. a11ied does all three, so you can test the parts of
-                  accessibility that depend on how a page behaves.
+                  A static scan checks a page's markup against rules. a11ied runs that scan, and
+                  it also presses keys, opens dialogs, and logs what a screen reader announces, so
+                  you can test how a page behaves.
                </p>
                <ol class="tally">
                   <li><span class="tally-figure">86</span><span class="tally-label">success criteria in WCAG 2.2</span></li>
                   <li><span class="tally-figure">28</span><span class="tally-label">have an automated scanner rule, and each rule checks only part of its criterion</span></li>
-                  <li><span class="tally-figure">0</span><span class="tally-label">can be passed by a scan alone</span></li>
+                  <li><span class="tally-figure">58</span><span class="tally-label">have no scanner rule at all</span></li>
                </ol>
                <p class="section-lead">
-                  The rest takes a keyboard and a screen reader: whether focus moves into a
-                  dialog, whether an error message is announced, whether every control can be
-                  reached.
+                  With a11ied you test those with a keyboard and a screen reader: whether focus
+                  moves into a dialog, whether an error message is announced, whether every
+                  control can be reached.
                </p>
                <p><a class="button button--yellow" href="/test-methods">See how each criterion is tested</a></p>
             </div>
          </section>
 
-         <section class="band" aria-labelledby="features-heading">
+         <section class="band" aria-labelledby="audit-heading">
             <div class="wrap">
-               <h2 id="features-heading">What you can do with it</h2>
+               <div class="audit-grid">
+                  <div class="audit-copy">
+                     <p class="kicker">With Claude Code, Codex, Cursor, and other coding agents</p>
+                     <h2 id="audit-heading">Automated accessibility audits</h2>
+                     <p class="section-lead">
+                        Ask your AI coding agent to audit a site against WCAG. It tests each page
+                        with a scan, the keyboard, and a screen reader, and can split the work
+                        among its own subagents. a11ied tracks every check and writes the report.
+                     </p>
+                     <p class="section-lead">
+                        The report gives a verdict, each finding with a screenshot of the failing
+                        element and how to fix it, what to fix first, and what could not be
+                        verified.
+                     </p>
+                     <div class="actions">
+                        <a class="button button--primary" href="/example-audit/">Browse an example report</a>
+                        <a class="button" href="/guides/audit">How an audit works</a>
+                     </div>
+                  </div>
+                  <figure class="audit-shot">
+                     <a href="/example-audit/">
+                        <Image src={reportSummary} alt={reportAlt} width={1400} />
+                     </a>
+                  </figure>
+               </div>
+
+               <ol class="cards steps">
+                  <li class="card">
+                     <h3><span class="step">Step 1</span> Install the agent skills</h3>
+                     <p>
+                        Two skills teach your agent how to test with a11ied and how to run an audit.
+                        The agent then uses the <code>a1</code> command or the
+                        <a href="/guides/agents">MCP server</a>, whichever it has.
+                     </p>
+                     <pre><code>{skillsInstall}</code></pre>
+                     <p><a href="/guides/agent-skill">Install the agent skills</a></p>
+                  </li>
+                  <li class="card">
+                     <h3><span class="step">Step 2</span> Ask your agent for an audit</h3>
+                     <p>
+                        Say what to audit and what the agent must not do, such as sending a form.
+                        The agent runs the <code>a1 audit</code> commands. You do not have to.
+                     </p>
+                     <pre data-label="AI AGENT PROMPT"><code>{auditPrompt}</code></pre>
+                     <p><a href="/guides/audit">Audit a site with AI agents</a></p>
+                  </li>
+                  <li class="card">
+                     <h3><span class="step">Step 3</span> Read the report</h3>
+                     <p>
+                        The agent writes the report when the audit is done. Run this yourself at any
+                        time for the report so far: one HTML file you can send to a client, plus
+                        Markdown and JSON.
+                     </p>
+                     <pre><code>a1 audit report</code></pre>
+                     <p><a href="/example-audit/">Browse an example report</a></p>
+                  </li>
+               </ol>
+            </div>
+         </section>
+
+         <section class="band band--follow" aria-labelledby="features-heading">
+            <div class="wrap">
+               <h2 id="features-heading">Test while you build</h2>
 
                <article class="feature">
-                  <div class="feature-copy">
-                     <h3>Scan a page for accessibility failures</h3>
-                     <p>
-                        One command lists every failing element with the WCAG criterion it breaks
-                        and a command that looks up the fix.
-                     </p>
-                     <p>
-                        It also gives you a checklist of the criteria on that page that need a
-                        manual test, so you know what to check next.
-                     </p>
-                     <p><a href="/guides/violations">Fix an axe violation</a></p>
-                  </div>
-                  <div class="feature-show">
-                     <pre><code>a1 check {practiceURL}</code></pre>
-                     <pre data-label="OUTPUT"><code>{withPracticeURL(checkSample, practiceURL)}</code></pre>
-                  </div>
-               </article>
-
-               <article class="feature feature--flip">
                   <div class="feature-copy">
                      <h3>Capture a log of all screen reader output</h3>
                      <p>
@@ -156,7 +199,7 @@ const auditCommands = [
                   </div>
                </article>
 
-               <article class="feature">
+               <article class="feature feature--flip">
                   <div class="feature-copy">
                      <h3>Write end-to-end tests for screen reader behavior</h3>
                      <p>
@@ -165,8 +208,9 @@ const auditCommands = [
                         was announced, where the cursor is, and in what order.
                      </p>
                      <p>
-                        When a test fails, the error shows what the screen reader said. In this
-                        example a dialog opened and nothing was announced.
+                        When a test fails, the error shows what the screen reader said. The output
+                        here is this test run against a page where the dialog opens and nothing is
+                        announced.
                      </p>
                      <p><a href="/guides/vitest">Test with Vitest</a></p>
                   </div>
@@ -176,21 +220,20 @@ const auditCommands = [
                   </div>
                </article>
 
-               <article class="feature feature--flip">
+               <article class="feature">
                   <div class="feature-copy">
                      <h3>Give your AI coding agent accessibility tools</h3>
                      <p>
-                        A coding agent can write a dialog, but it has no way to check what a screen
-                        reader will announce. Add one block of configuration, and Claude Code,
-                        Cursor, or any other MCP client gets 37 tools: scan a page, drive a screen
-                        reader, check a widget against its ARIA pattern, look up a criterion.
+                        Add one block of configuration, and Claude Code, Cursor, or any other agent
+                        that supports MCP gets 37 tools: scan a page, drive a screen reader, check a
+                        widget against its ARIA pattern, look up a criterion. The agent can then
+                        test the interface it writes.
                      </p>
                      <p>
-                        In this example the agent asks whether a dialog is announced. The tool
-                        answers that nothing was, which is what the agent needs to fix the dialog
-                        and check again.
+                        In this example the agent asks whether a dialog is announced. a11ied answers
+                        that it is not, so the agent can fix the dialog and check again.
                      </p>
-                     <p><a href="/guides/agents">Use with an AI agent</a></p>
+                     <p><a href="/guides/agents">Connect an AI agent</a></p>
                   </div>
                   <div class="feature-show">
                      <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
@@ -199,26 +242,22 @@ const auditCommands = [
                   </div>
                </article>
 
-               <article class="feature">
+               <article class="feature feature--flip">
                   <div class="feature-copy">
-                     <h3>Run a WCAG audit with your own AI agents</h3>
+                     <h3>Scan a page for accessibility failures</h3>
                      <p>
-                        Your coding agent does the testing: Claude Code, Codex, Cursor, or any agent
-                        that can run commands. <code>a1 audit</code> does not start agents. It splits
-                        the site into small units of work, hands them out, saves every result as it
-                        arrives, and writes the report.
+                        One command lists every failing element with the WCAG criterion it breaks
+                        and a command that looks up the fix.
                      </p>
                      <p>
-                        The report lists each finding with a screenshot of the failing element, what
-                        to fix first, and what could not be verified.
+                        It also gives you a checklist of the criteria on that page that need a
+                        manual test, so you know what to check next.
                      </p>
-                     <p>
-                        <a href="/example-audit/">Browse an example report</a>, or read how to
-                        <a href="/guides/audit">run an audit</a>.
-                     </p>
+                     <p><a href="/guides/violations">Fix what a scan found</a></p>
                   </div>
                   <div class="feature-show">
-                     <pre><code>{auditCommands}</code></pre>
+                     <pre><code>a1 check {practiceURL}</code></pre>
+                     <pre data-label="OUTPUT"><code>{withPracticeURL(checkSample, practiceURL)}</code></pre>
                   </div>
                </article>
             </div>
@@ -226,7 +265,7 @@ const auditCommands = [
 
          <section class="band band--yellow" aria-labelledby="more-heading">
             <div class="wrap">
-               <h2 id="more-heading">More in the toolbox</h2>
+               <h2 id="more-heading">More commands</h2>
                <ul class="cards">
                   <li class="card">
                      <h3>Look up WCAG from the terminal</h3>
@@ -235,56 +274,30 @@ const auditCommands = [
                   </li>
                   <li class="card">
                      <h3>Check widgets against W3C ARIA patterns</h3>
-                     <p>Point it at your combobox or dialog. It presses every key the W3C's pattern documents and reports the ones that do nothing. 68 examples are built in.</p>
+                     <p>For a widget such as a combobox or dialog, it presses every key the W3C's ARIA pattern documents and reports the keys that do nothing. It knows the 68 examples in the W3C's ARIA Authoring Practices Guide.</p>
                      <p><code>a1 pattern check</code></p>
                   </li>
                   <li class="card">
                      <h3>Fail a build on new accessibility problems</h3>
-                     <p>One exit code means a check failed. Baselines let an existing site fail only on new problems. Reports come out as SARIF or EARL.</p>
+                     <p>A failed check exits with code 4, which stops a CI job. A baseline lets an existing site fail only on new problems. Reports come out as SARIF or EARL.</p>
                      <p><code>a1 axe --fail-on serious</code></p>
                   </li>
                   <li class="card">
-                     <h3>Capture a page at any size, zoom, or focus stop</h3>
-                     <p>Capture a page at 320 pixels wide, at 200 percent zoom, with WCAG text spacing, or on the fourth Tab stop.</p>
+                     <h3>Screenshot a page at any width, zoom, or Tab stop</h3>
+                     <p>Take a screenshot at 320 pixels wide, at 200 percent zoom, with WCAG text spacing, or after four presses of Tab.</p>
                      <p><code>a1 capture</code></p>
                   </li>
                   <li class="card">
                      <h3>Print what TalkBack says on Android</h3>
-                     <p>Turn TalkBack on from your desk and print what it says as focus moves through an app.</p>
+                     <p>Turn TalkBack on over adb, on a phone or an emulator, and print what it says as focus moves through an app.</p>
                      <p><code>a1 talkback walk</code></p>
                   </li>
                   <li class="card">
-                     <h3>See what each screen reader supports</h3>
+                     <h3>See which features each screen reader supports</h3>
                      <p>Screen reader results for 60 ARIA and HTML features. Most come from W3C ARIA-AT reports for VoiceOver, NVDA, and JAWS. a11ied recorded the rest.</p>
-                     <p><a href="/support">Feature support</a></p>
+                     <p><a href="/support">Screen reader compatibility</a></p>
                   </li>
                </ul>
-            </div>
-         </section>
-
-         <section class="band" aria-labelledby="honest-heading">
-            <div class="wrap narrow">
-               <h2 id="honest-heading">Every result shows where it came from</h2>
-               <p class="section-lead">
-                  a11ied labels each result as a scan, a screen reader log, or a judgment, and
-                  names the screen reader that produced it. A clean scan is reported as a clean
-                  scan, never as a pass.
-               </p>
-               <dl class="defs">
-                  <dt>A scan</dt>
-                  <dd>Finds failures, with the element and the WCAG criterion for each.</dd>
-                  <dt>A screen reader log</dt>
-                  <dd>Shows what was announced, and says whether the screen reader was real or simulated.</dd>
-                  <dt>A judgment</dt>
-                  <dd>Decides the rest. A person or an agent makes it, and the audit records it.</dd>
-               </dl>
-               <p><a href="/test-methods">How each criterion has to be tested</a></p>
-               <p class="built-on">
-                  Built on <a href="https://github.com/dequelabs/axe-core">axe-core</a>,
-                  <a href="https://www.guidepup.dev/">Guidepup</a>,
-                  <a href="https://playwright.dev/">Playwright</a>, and the W3C's own WCAG and ARIA
-                  data.
-               </p>
             </div>
          </section>
 
@@ -306,7 +319,12 @@ const auditCommands = [
 
       <footer class="site-foot">
          <div class="wrap foot-grid">
-            <p>The source is on <a href={REPOSITORY_URL}>GitHub</a>.</p>
+            <p>
+               Built on <a href="https://github.com/dequelabs/axe-core">axe-core</a>,
+               <a href="https://www.guidepup.dev/">Guidepup</a>,
+               <a href="https://playwright.dev/">Playwright</a>, and the W3C's WCAG and ARIA data.
+               The source is on <a href={REPOSITORY_URL}>GitHub</a>.
+            </p>
             <nav aria-label="Footer">
                <a href="/overview">Docs</a>
                <a href="/quickstart">Quickstart</a>
@@ -397,13 +415,27 @@ const auditCommands = [
    .feature-copy p { color: var(--ink-soft); }
    .feature-show { min-width: 0; }
 
+   /* Audit */
+   .audit-grid { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+   .audit-copy > * + * { margin-top: var(--lg); }
+   /* The report screenshot is tilted away from the reader, and its far edge goes soft. */
+   .audit-shot { min-width: 0; margin: 0; perspective: 1600px; }
+   .audit-shot a { position: relative; display: block; overflow: hidden; aspect-ratio: 4 / 3; border: 3px solid var(--ink); box-shadow: 12px 12px 0 var(--red); transform: rotateY(-14deg) rotateX(6deg); transform-origin: 0 50%; }
+   .audit-shot img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 0 0; }
+   .audit-shot a::after { position: absolute; inset: 66% 0 0; backdrop-filter: blur(1.5px); mask-image: linear-gradient(to bottom, transparent, #000); content: ''; pointer-events: none; }
+   .band > .wrap > .steps { margin-top: var(--3xl); }
+   .steps .card { min-width: 0; }
+   .steps .card > pre { margin-top: auto; }
+   .steps .card > pre + p { margin-top: 0; }
+   .step { display: block; margin-bottom: var(--xs); color: var(--red-dark); font-size: 0.86rem; letter-spacing: 0.14em; }
+   /* Two paper bands in a row: the second drops its top padding so the gap is not doubled. */
+   .band--follow { padding-top: 0; }
+
    /* Cards */
    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: var(--lg); margin: var(--xl) 0 0; padding: 0; list-style: none; }
    .card { display: flex; flex-direction: column; gap: var(--sm); margin: 0; padding: var(--lg); background: var(--paper-light); border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
    .card h3 { font-size: 1.35rem; }
    .card p:last-child { margin-top: auto; padding-top: var(--xs); }
-
-   .built-on { color: var(--ink-soft); }
 
    .band--cta a:not(.button) { color: var(--yellow); }
 
@@ -414,7 +446,8 @@ const auditCommands = [
    .site-foot a { color: var(--ink); }
 
    @media (max-width: 820px) {
-      .hero-grid, .feature, .feature--flip { grid-template-columns: minmax(0, 1fr); }
+      .hero-grid, .audit-grid, .feature, .feature--flip { grid-template-columns: minmax(0, 1fr); }
+      .audit-shot a { transform: none; }
       /* On a narrow screen the circle sits in the corner above the copy. */
       .hero { --size: 9rem; --hole: calc(100% - 3rem) 2.5rem; padding-top: 6.5rem; }
       .feature--flip .feature-copy { order: 0; }
