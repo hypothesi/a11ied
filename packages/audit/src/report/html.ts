@@ -136,9 +136,10 @@ function renderEvidence(
       return [
          '<figure class="report-shot" data-report-shot>',
          `<a href="${escapeHtml(link.href)}" title="Open the screenshot"><img src="${escapeHtml(link.href)}" alt="${escapeHtml(alt)}" loading="lazy"></a>`,
-         '<div class="report-shot-more" data-shot-more hidden>',
-         '<button type="button">Show full screenshot <span data-shot-size></span></button>',
-         '</div></figure>',
+         '<figcaption class="report-shot-more" data-shot-more hidden>',
+         '<span>Cropped to fit</span>',
+         '<button type="button">Show full screenshot</button>',
+         '</figcaption></figure>',
       ].join('');
    });
    return `<div class="report-evidence">${items.join('')}</div>`;

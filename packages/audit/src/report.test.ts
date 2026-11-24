@@ -135,6 +135,21 @@ describe('audit report', () => {
       expect(html).toContain('<li><strong>0</strong><span>Pass</span>');
    });
 
+   it('keeps the full-screenshot button out of the picture and hidden until it is needed', () => {
+      const audit = start(['2.4.7']);
+      addPage(audit, { locator: 'https://example.test/', name: 'Home' });
+      failFocus(audit, 'w1');
+
+      const { files } = writeAuditReport(audit, { formats: ['html'] });
+      const html = readFileSync(files[0] ?? '', 'utf8');
+
+      expect(html).toContain(
+         '<figcaption class="report-shot-more" data-shot-more hidden>',
+      );
+      expect(html).toContain('.report-shot-more[hidden]');
+      expect(html).not.toContain("content: '('");
+   });
+
    it('includes a screenshot viewer for pictures too tall to show in a thumbnail', () => {
       const audit = start(['2.4.7']);
       addPage(audit, { locator: 'https://example.test/', name: 'Home' });

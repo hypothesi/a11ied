@@ -3,6 +3,10 @@
  * inlined into it. Without the script each thumbnail is still a plain link to its image.
  */
 const PERCENT = 100;
+/** A picture is shown whole when that fills at least this much of the viewer's width. */
+const MIN_WHOLE_WIDTH = 0.5;
+/** Enlarging a small crop further than this only blurs it. */
+const MAX_ENLARGEMENT = 3;
 const numbers = new Intl.NumberFormat('en-US');
 
 /** The viewer dialog and the parts of it the script updates. */
@@ -50,10 +54,45 @@ function showPosition(viewer) {
    viewer.window.style.height = `${String((body.clientHeight / body.scrollHeight) * PERCENT)}%`;
 }
 
-function setActualSize(viewer, actual) {
-   viewer.dialog.classList.toggle('report-viewer--actual', actual);
-   viewer.zoom.setAttribute('aria-pressed', String(actual));
+/**
+ * Sizes the picture to fill the viewer. A picture that fits is shown whole and enlarged.
+ * A page-length capture would be a sliver shown whole, so it fills the width and
+ * scrolls.
+ */
+function fitImage(viewer) {
+   const { body, image } = viewer;
+   const actual = viewer.zoom.getAttribute('aria-pressed') === 'true';
+   if (actual || image.naturalWidth === 0) {
+      image.style.inlineSize = '';
+      return;
+   }
+   const style = getComputedStyle(body);
+   const padding = (side) => Number.parseFloat(style.getPropertyValue(`padding-${side}`));
+   const width = body.clientWidth - padding('left') - padding('right');
+   const height = body.clientHeight - padding('top') - padding('bottom');
+   const wholeWidth = Math.min(
+      width,
+      height * (image.naturalWidth / image.naturalHeight),
+   );
+   const fitted = wholeWidth >= width * MIN_WHOLE_WIDTH ? wholeWidth : width;
+   const limit = image.naturalWidth * MAX_ENLARGEMENT;
+   image.style.inlineSize = `${String(Math.floor(Math.min(fitted, limit)))}px`;
+}
+
+/** The overview strip takes room from the picture, so the fit runs again once it shows. */
+function layOut(viewer) {
+   viewer.map.hidden = true;
+   fitImage(viewer);
+   if (viewer.body.scrollHeight > viewer.body.clientHeight) {
+      viewer.map.hidden = false;
+      fitImage(viewer);
+   }
    showPosition(viewer);
+}
+
+function setActualSize(viewer, actual) {
+   viewer.zoom.setAttribute('aria-pressed', String(actual));
+   layOut(viewer);
 }
 
 function openViewer(viewer, thumbnail) {
@@ -62,27 +101,21 @@ function openViewer(viewer, thumbnail) {
    viewer.image.alt = thumbnail.alt;
    viewer.title.textContent = thumbnail.alt;
    viewer.size.textContent = describeSize(thumbnail);
-   setActualSize(viewer, false);
    viewer.dialog.showModal();
+   setActualSize(viewer, false);
    viewer.body.scrollTop = 0;
    viewer.body.scrollLeft = 0;
-   showPosition(viewer);
    viewer.body.focus();
 }
 
-/** A thumbnail cut off by the height cap gets a fade and a button saying so. */
-function markIfTall(thumbnail) {
+/** A thumbnail cut off by the height cap gets a note and a button under it saying so. */
+function markIfCropped(thumbnail) {
    const shot = thumbnail.closest('[data-report-shot]');
    const shownHeight =
       thumbnail.naturalHeight * (thumbnail.clientWidth / thumbnail.naturalWidth);
-   if (!shot || shownHeight <= thumbnail.clientHeight + 1) {
-      return;
+   if (shot && shownHeight > thumbnail.clientHeight + 1) {
+      shot.querySelector('[data-shot-more]').hidden = false;
    }
-   shot.classList.add('report-shot--tall');
-   const more = shot.querySelector('[data-shot-more]');
-   more.hidden = false;
-   more.querySelector('[data-shot-size]').textContent =
-      `${numbers.format(thumbnail.naturalHeight)} pixels tall`;
 }
 
 function connectThumbnail(viewer, shot) {
@@ -95,11 +128,11 @@ function connectThumbnail(viewer, shot) {
       openViewer(viewer, thumbnail);
    });
    if (thumbnail.complete && thumbnail.naturalWidth > 0) {
-      markIfTall(thumbnail);
+      markIfCropped(thumbnail);
       return;
    }
    thumbnail.addEventListener('load', () => {
-      markIfTall(thumbnail);
+      markIfCropped(thumbnail);
    });
 }
 
@@ -114,6 +147,13 @@ function connectViewer(viewer) {
       setActualSize(viewer, zoom.getAttribute('aria-pressed') !== 'true');
    });
    body.addEventListener('scroll', () => showPosition(viewer), { passive: true });
+   // The picture reports its size only once it has loaded, and the room for it can change.
+   viewer.image.addEventListener('load', () => layOut(viewer));
+   window.addEventListener('resize', () => {
+      if (dialog.open) {
+         layOut(viewer);
+      }
+   });
    viewer.close.addEventListener('click', () => dialog.close());
    // A click on the backdrop lands on the dialog element itself.
    dialog.addEventListener('click', (event) => {
