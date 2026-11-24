@@ -1,0 +1,9 @@
+import { resolveBrowserslistTargets } from '@a11ied/compat';
+
+const { targets } = resolveBrowserslistTargets({
+   browserslist: 'last 1 chrome version, last 1 safari version, last 1 and_chr version',
+});
+
+for (const target of targets) {
+   console.log(`${target.raw}: ${target.expectedScreenReaders.join(', ')}`);
+}

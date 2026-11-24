@@ -1,0 +1,24 @@
+import {
+   getFeature,
+   getTestCaseOutcomes,
+   listSupportedFeatures,
+   queryEnvironments,
+   queryTestCases,
+} from '@a11ied/compat';
+
+// Every tracked feature, or only the ones that match.
+console.log(listSupportedFeatures().length);
+console.log(listSupportedFeatures({ search: 'live' }).map((feature) => feature.key));
+
+// One feature, with every environment it was tested in.
+const alert = getFeature('role="alert"');
+console.log(alert?.key, alert?.versionedEnvironments.length);
+
+// The screen reader, browser, and operating system combinations with results.
+const nvda = queryEnvironments({ screenReader: 'NVDA', status: 'tested' });
+console.log(nvda.length);
+
+// The test cases a11ied ran, and what a screen reader said in one of them.
+const [ testCase ] = queryTestCases({ attribute: 'aria-live' });
+const { runs } = getTestCaseOutcomes(testCase?.slug ?? '');
+console.log(testCase?.slug, runs[0]?.outcome, runs[0]?.keyAnnouncement);

@@ -52,6 +52,7 @@ export const docsLinks: DocSection[] = [
          { href: '/guides/vitest', label: 'Test with Vitest' },
          { href: '/guides/scripting', label: 'Script the CLI' },
          { href: '/guides/ci', label: 'Run in CI' },
+         { href: '/guides/compat', label: 'Check support in code' },
       ],
    },
    {

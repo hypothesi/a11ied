@@ -1,0 +1,24 @@
+import { checkCompatibility } from '@a11ied/compat';
+
+const report = checkCompatibility({
+   browserslist: 'last 2 safari versions',
+   usages: [
+      'aria-pressed',
+      'aria-posinset',
+      {
+         feature: 'aria-invalid',
+         element: '<input aria-invalid="true">',
+         location: { file: 'src/signup.tsx', line: 12, column: 8 },
+      },
+   ],
+});
+
+for (const diagnostic of report.diagnostics) {
+   const { file, line } = diagnostic.location ?? {};
+   const where = file ? `  ${file}:${String(line)}` : '';
+   console.log(`${diagnostic.severity}  ${diagnostic.code}${where}`);
+   console.log(`   ${diagnostic.message}`);
+}
+
+console.log(`${report.summary.errors} errors, ${report.summary.warnings} warnings`);
+process.exitCode = report.summary.hasErrors ? 1 : 0;

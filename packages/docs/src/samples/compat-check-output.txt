@@ -1,0 +1,9 @@
+error  a11ied/must-failure
+   aria:aria-pressed fails RFC 2119 MUST requirements in VoiceOver for macOS 15.0 + Safari 18.6 (macOS 15.0) (+1 more).
+error  a11ied/severe-side-effect
+   aria:aria-pressed causes SEVERE screen reader side effects in VoiceOver for macOS 15.0 + Safari 18.6 (macOS 15.0) (+1 more).
+warning  a11ied/should-failure
+   aria:aria-posinset fails RFC 2119 SHOULD requirements in VoiceOver for macOS 15.0 + Safari 26 (macOS 15.0) (+1 more).
+error  a11ied/must-failure  src/signup.tsx:12
+   aria:aria-invalid fails RFC 2119 MUST requirements in VoiceOver for macOS 26 + Safari 26.2 (macOS 26) (+1 more).
+3 errors, 1 warnings

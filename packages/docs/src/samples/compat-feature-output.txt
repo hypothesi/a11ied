@@ -1,0 +1,5 @@
+unsupported
+chrome 157: JAWS 2025.2508.120 with Chrome 143 pass, MUST 50/50 (nearest-older)
+chrome 157: NVDA 2023.3.4 with Chrome 123.0.0 fail, MUST 47/50 (nearest-older)
+safari 27.2: VoiceOver for macOS 15.0 with Safari 18.6 fail, MUST 28/36 (nearest-older)
+chrome 157: VoiceOver is untested

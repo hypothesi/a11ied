@@ -15,3 +15,7 @@ them out, and the screen reader guide says so.
 `mcp-config.json.txt`, `github-workflow.yml.txt`, and the `*.ts.txt` files are examples
 a reader copies. The test examples pass against the practice page. Run them again
 after changing one.
+
+The `compat-*.ts.txt` files import `@a11ied/compat`, and each `compat-*-output.txt` is
+what its example prints. Type-check and run an example again after changing it, or after
+the compatibility data is synchronized, because the output names browser versions.
