@@ -1,0 +1,2184 @@
+{
+   "schemaVersion": 1,
+   "planVersionID": "163671",
+   "slug": "apg-command-button",
+   "directory": "apg/command-button",
+   "title": "Command Button Example",
+   "versionString": "V25.11.02",
+   "phase": "CANDIDATE",
+   "gitSha": "579707eb2b8edb274160d04163e83015bf38de55",
+   "updatedAt": "2025-11-02T18:44:41.000Z",
+   "exampleURL": "https://www.w3.org/WAI/ARIA/apg/patterns/button/examples/button/",
+   "designPatternURL": "https://www.w3.org/WAI/ARIA/apg/patterns/button/",
+   "upstreamURL": "https://aria-at.w3.org/test-plan/163671",
+   "featureRefs": [
+      {
+         "refId": "button",
+         "type": "aria",
+         "linkText": "button ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#button"
+      }
+   ],
+   "reports": [
+      {
+         "reportID": "567",
+         "atKey": "jaws",
+         "atName": "JAWS",
+         "atVersion": "2025.2508.120",
+         "browserKey": "chrome",
+         "browserName": "Chrome",
+         "browserVersion": "148",
+         "os": "Windows",
+         "osVersion": "Not recorded by ARIA-AT",
+         "device": "PC (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 28,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 28
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "tests": [
+            {
+               "testTitle": "Navigate forwards to a button",
+               "rowNumber": 5,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "148",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Down Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page  \u001d Button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDA1OeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQWY0NG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NmQxYeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQTMxM2",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "b (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page  \u001d Button \u001e  \n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDA1OeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQWY0NG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NmQxYeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQTMxM2",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "f (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page  \u001d Button \u001e  \n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDA1OeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQWY0NG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NmQxYeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQTMxM2",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page  \u001d Button \u001e  \n\nTo activate press Enter.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDA1OeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQWY0NG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NmQxYeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQTMxM2",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Print Page  \u001d Button \u001e  \nTo activate press spacebar.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDA1OeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQWY0NG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NmQxYeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQTMxM2",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/579707eb2b8edb274160d04163e83015bf38de55/build/tests/command-button/test-05-navForwardsToButton-jaws.collected.html",
+               "completedAt": "2026-05-19T00:27:46.469Z"
+            },
+            {
+               "testTitle": "Navigate backwards to a button",
+               "rowNumber": 6,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "148",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Up Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page  \u001d Button \u001e  \n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDFlYeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQWYzOT",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmE2YeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQjAxND",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+b (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page  \u001d Button \u001e  \n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDFlYeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQWYzOT",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmE2YeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQjAxND",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+f (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page  \u001d Button \u001e  \n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDFlYeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQWYzOT",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmE2YeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQjAxND",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page  \u001d Button \u001e  \n\nTo activate press Enter.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDFlYeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQWYzOT",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmE2YeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQjAxND",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Print Page  \u001d Button \u001e  \nTo activate press spacebar.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDFlYeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQWYzOT",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmE2YeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQjAxND",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/579707eb2b8edb274160d04163e83015bf38de55/build/tests/command-button/test-06-navBackToButton-jaws.collected.html",
+               "completedAt": "2026-05-19T00:29:37.297Z"
+            },
+            {
+               "testTitle": "Request information about a button",
+               "rowNumber": 9,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "148",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page  \u001d Button \u001e  \n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDIyOeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQTY5Nm",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDc3YeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQzdiOW",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page  \u001d Button \u001e  \n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDIyOeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQTY5Nm",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDc3YeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQzdiOW",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Print Page  \u001d Button \u001e  \nTo activate press spacebar.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDIyOeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQTY5Nm",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDc3YeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQzdiOW",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Print Page  \u001d Button \u001e  ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDIyOeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQTY5Nm",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDc3YeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQzdiOW",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/579707eb2b8edb274160d04163e83015bf38de55/build/tests/command-button/test-09-reqInfoAboutButton-jaws.collected.html",
+               "completedAt": "2026-05-19T00:30:51.363Z"
+            }
+         ],
+         "markedFinalAt": "2026-06-02T22:27:57.717Z"
+      },
+      {
+         "reportID": "542",
+         "atKey": "jaws",
+         "atName": "JAWS",
+         "atVersion": "2024.2310.70",
+         "browserKey": "chrome",
+         "browserName": "Chrome",
+         "browserVersion": "120.0.0",
+         "os": "Windows",
+         "osVersion": "Not recorded by ARIA-AT",
+         "device": "PC (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 28,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 28
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "tests": [
+            {
+               "testTitle": "Navigate forwards to a button",
+               "rowNumber": 5,
+               "atVersion": "2024.2310.70",
+               "browserVersion": "120.0.0",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Down Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page\nButton",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDA1OeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQWY0NG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NmQxYeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQTMxM2",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "b (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page Button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDA1OeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQWY0NG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NmQxYeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQTMxM2",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "f (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page Button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDA1OeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQWY0NG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NmQxYeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQTMxM2",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page Button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDA1OeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQWY0NG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NmQxYeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQTMxM2",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Print Page Button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDA1OeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQWY0NG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NmQxYeyIzIjoiT0dRM01leUl5SWpvaU1UWXpOamN4SW4wR1JrWlQifQTMxM2",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/579707eb2b8edb274160d04163e83015bf38de55/build/tests/command-button/test-05-navForwardsToButton-jaws.collected.html",
+               "completedAt": "2023-12-15T18:15:31.453Z"
+            },
+            {
+               "testTitle": "Navigate backwards to a button",
+               "rowNumber": 6,
+               "atVersion": "2024.2310.70",
+               "browserVersion": "120.0.0",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Up Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page\nButton",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDFlYeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQWYzOT",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmE2YeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQjAxND",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+b (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page Button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDFlYeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQWYzOT",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmE2YeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQjAxND",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+f (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page Button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDFlYeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQWYzOT",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmE2YeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQjAxND",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page Button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDFlYeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQWYzOT",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmE2YeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQjAxND",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Print Page Button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDFlYeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQWYzOT",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmE2YeyIzIjoiWVRBMk9leUl5SWpvaU1UWXpOamN4SW4wV1F5TlcifQjAxND",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/579707eb2b8edb274160d04163e83015bf38de55/build/tests/command-button/test-06-navBackToButton-jaws.collected.html",
+               "completedAt": "2023-12-15T18:18:06.584Z"
+            },
+            {
+               "testTitle": "Request information about a button",
+               "rowNumber": 9,
+               "atVersion": "2024.2310.70",
+               "browserVersion": "120.0.0",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page Button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDIyOeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQTY5Nm",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDc3YeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQzdiOW",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Print Page Button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDIyOeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQTY5Nm",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDc3YeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQzdiOW",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Print Page Button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDIyOeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQTY5Nm",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDc3YeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQzdiOW",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Print Page Button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZDIyOeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQTY5Nm",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDc3YeyIzIjoiWVRCaU5leUl5SWpvaU1UWXpOamN4SW4wVGxrTlQifQzdiOW",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/579707eb2b8edb274160d04163e83015bf38de55/build/tests/command-button/test-09-reqInfoAboutButton-jaws.collected.html",
+               "completedAt": "2023-12-15T18:20:22.541Z"
+            }
+         ],
+         "markedFinalAt": "2025-11-02T19:13:35.571Z"
+      },
+      {
+         "reportID": "541",
+         "atKey": "nvda",
+         "atName": "NVDA",
+         "atVersion": "2023.3",
+         "browserKey": "chrome",
+         "browserName": "Chrome",
+         "browserVersion": "120.0.0",
+         "os": "Windows",
+         "osVersion": "Not recorded by ARIA-AT",
+         "device": "PC (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 27,
+               "failed": 1,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 28
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "tests": [
+            {
+               "testTitle": "Navigate forwards to a button",
+               "rowNumber": 5,
+               "atVersion": "2023.3",
+               "browserVersion": "120.0.0",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Down Arrow (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "button    Print Page",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGU3MeyIzIjoiWVRnM1pleUl5SWpvaU1UWXpOamN4SW4wV05qWTIifQ2U4Yj",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODM1NeyIzIjoiWVRnM1pleUl5SWpvaU1UWXpOamN4SW4wV05qWTIifQ2RhMT",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "b (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "Print Page  button  ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGU3MeyIzIjoiWVRnM1pleUl5SWpvaU1UWXpOamN4SW4wV05qWTIifQ2U4Yj",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODM1NeyIzIjoiWVRnM1pleUl5SWpvaU1UWXpOamN4SW4wV05qWTIifQ2RhMT",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "f (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "Print Page  button  ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGU3MeyIzIjoiWVRnM1pleUl5SWpvaU1UWXpOamN4SW4wV05qWTIifQ2U4Yj",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODM1NeyIzIjoiWVRnM1pleUl5SWpvaU1UWXpOamN4SW4wV05qWTIifQ2RhMT",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "Print Page  button  ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGU3MeyIzIjoiWVRnM1pleUl5SWpvaU1UWXpOamN4SW4wV05qWTIifQ2U4Yj",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODM1NeyIzIjoiWVRnM1pleUl5SWpvaU1UWXpOamN4SW4wV05qWTIifQ2RhMT",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "Print Page  button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGU3MeyIzIjoiWVRnM1pleUl5SWpvaU1UWXpOamN4SW4wV05qWTIifQ2U4Yj",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODM1NeyIzIjoiWVRnM1pleUl5SWpvaU1UWXpOamN4SW4wV05qWTIifQ2RhMT",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/579707eb2b8edb274160d04163e83015bf38de55/build/tests/command-button/test-05-navForwardsToButton-nvda.collected.html",
+               "completedAt": "2023-12-15T19:43:31.434Z"
+            },
+            {
+               "testTitle": "Navigate backwards to a button",
+               "rowNumber": 6,
+               "atVersion": "2023.3",
+               "browserVersion": "120.0.0",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Up Arrow (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "button    Print Page",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "M2E1MeyIzIjoiTmpSallleUl5SWpvaU1UWXpOamN4SW4wVGc0TmoifQTBmY2",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTQ4ZeyIzIjoiTmpSallleUl5SWpvaU1UWXpOamN4SW4wVGc0TmoifQDUxZW",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+b (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "Print Page  button  ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "M2E1MeyIzIjoiTmpSallleUl5SWpvaU1UWXpOamN4SW4wVGc0TmoifQTBmY2",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTQ4ZeyIzIjoiTmpSallleUl5SWpvaU1UWXpOamN4SW4wVGc0TmoifQDUxZW",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+f (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "Print Page  button  ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "M2E1MeyIzIjoiTmpSallleUl5SWpvaU1UWXpOamN4SW4wVGc0TmoifQTBmY2",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTQ4ZeyIzIjoiTmpSallleUl5SWpvaU1UWXpOamN4SW4wVGc0TmoifQDUxZW",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "Print Page  button  ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "M2E1MeyIzIjoiTmpSallleUl5SWpvaU1UWXpOamN4SW4wVGc0TmoifQTBmY2",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTQ4ZeyIzIjoiTmpSallleUl5SWpvaU1UWXpOamN4SW4wVGc0TmoifQDUxZW",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "Print Page  button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "M2E1MeyIzIjoiTmpSallleUl5SWpvaU1UWXpOamN4SW4wVGc0TmoifQTBmY2",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTQ4ZeyIzIjoiTmpSallleUl5SWpvaU1UWXpOamN4SW4wVGc0TmoifQDUxZW",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/579707eb2b8edb274160d04163e83015bf38de55/build/tests/command-button/test-06-navBackToButton-nvda.collected.html",
+               "completedAt": "2023-12-15T19:46:02.529Z"
+            },
+            {
+               "testTitle": "Request information about a button",
+               "rowNumber": 9,
+               "atVersion": "2023.3",
+               "browserVersion": "120.0.0",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "Print Page  button  focused",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTc0ZeyIzIjoiTUdRM1pleUl5SWpvaU1UWXpOamN4SW4wakJsWkcifQDJkY2",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmFjNeyIzIjoiTUdRM1pleUl5SWpvaU1UWXpOamN4SW4wakJsWkcifQWU1MD",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "button    Print Page",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTc0ZeyIzIjoiTUdRM1pleUl5SWpvaU1UWXpOamN4SW4wakJsWkcifQDJkY2",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmFjNeyIzIjoiTUdRM1pleUl5SWpvaU1UWXpOamN4SW4wakJsWkcifQWU1MD",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "Print Page  button  focused",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTc0ZeyIzIjoiTUdRM1pleUl5SWpvaU1UWXpOamN4SW4wakJsWkcifQDJkY2",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmFjNeyIzIjoiTUdRM1pleUl5SWpvaU1UWXpOamN4SW4wakJsWkcifQWU1MD",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "Print Page",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTc0ZeyIzIjoiTUdRM1pleUl5SWpvaU1UWXpOamN4SW4wakJsWkcifQDJkY2",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmFjNeyIzIjoiTUdRM1pleUl5SWpvaU1UWXpOamN4SW4wakJsWkcifQWU1MD",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/579707eb2b8edb274160d04163e83015bf38de55/build/tests/command-button/test-09-reqInfoAboutButton-nvda.collected.html",
+               "completedAt": "2023-12-15T19:47:30.018Z"
+            }
+         ],
+         "markedFinalAt": "2025-11-02T19:14:19.056Z"
+      },
+      {
+         "reportID": "540",
+         "atKey": "voiceover_macos",
+         "atName": "VoiceOver for macOS",
+         "atVersion": "14.4",
+         "browserKey": "safari_macos",
+         "browserName": "Safari",
+         "browserVersion": "17.4.1",
+         "os": "macOS",
+         "osVersion": "14.4",
+         "device": "Mac (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 18,
+               "failed": 0,
+               "untestable": 2,
+               "unsupported": 0,
+               "total": 20
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 1,
+            "moderateSideEffects": 0
+         },
+         "tests": [
+            {
+               "testTitle": "Navigate forwards to a button",
+               "rowNumber": 5,
+               "atVersion": "14.4",
+               "browserVersion": "17.4.1",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+Right Arrow",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "Print Page, button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YjMxMeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQmEwMj",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmFjYeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQjU4OD",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "Print Page, button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YjMxMeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQmEwMj",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmFjYeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQjU4OD",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "j (single quick key nav on)",
+                           "mode": "singleQuickKeyNavOn"
+                        }
+                     ],
+                     "output": "Print Page, button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YjMxMeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQmEwMj",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmFjYeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQjU4OD",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "b (single quick key nav on)",
+                           "mode": "singleQuickKeyNavOn"
+                        }
+                     ],
+                     "output": "Print Page, button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YjMxMeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQmEwMj",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmFjYeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQjU4OD",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/579707eb2b8edb274160d04163e83015bf38de55/build/tests/command-button/test-05-navForwardsToButton-voiceover_macos.collected.html",
+               "completedAt": "2024-03-27T02:33:06.767Z"
+            },
+            {
+               "testTitle": "Navigate backwards to a button",
+               "rowNumber": 6,
+               "atVersion": "14.4",
+               "browserVersion": "17.4.1",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+Left Arrow",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "Print Page, button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "Y2RhNeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQDM1OG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTA4NeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQWEzMj",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "Print Page, button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "Y2RhNeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQDM1OG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTA4NeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQWEzMj",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+j (single quick key nav on)",
+                           "mode": "singleQuickKeyNavOn"
+                        }
+                     ],
+                     "output": "Run Test Setup, dimmed, button",
+                     "untestable": true,
+                     "assertions": [
+                        {
+                           "id": "Y2RhNeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQDM1OG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTA4NeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQWEzMj",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": [
+                        {
+                           "text": "Reading cursor position changed in an unexpected manner",
+                           "impact": "SEVERE",
+                           "details": "VoiceOver reading cursor moved forwards to the 'Run Setup' button instead of backwards to the 'Print Page' button."
+                        }
+                     ]
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+b (single quick key nav on)",
+                           "mode": "singleQuickKeyNavOn"
+                        }
+                     ],
+                     "output": "Print Page, button",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "Y2RhNeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQDM1OG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTA4NeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQWEzMj",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/579707eb2b8edb274160d04163e83015bf38de55/build/tests/command-button/test-06-navBackToButton-voiceover_macos.collected.html",
+               "completedAt": "2025-11-02T19:11:39.258Z"
+            },
+            {
+               "testTitle": "Request information about a button",
+               "rowNumber": 9,
+               "atVersion": "14.4",
+               "browserVersion": "17.4.1",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+F3",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "Print Page, button, is in the VoiceOver cursor",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDcyYeyIzIjoiWldNNU5leUl5SWpvaU1UWXpOamN4SW4wVFJsTTIifQTFjZW",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjhjNeyIzIjoiWldNNU5leUl5SWpvaU1UWXpOamN4SW4wVFJsTTIifQGRhMG",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+F4",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "Print Page, button, has keyboard focus",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDcyYeyIzIjoiWldNNU5leUl5SWpvaU1UWXpOamN4SW4wVFJsTTIifQTFjZW",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjhjNeyIzIjoiWldNNU5leUl5SWpvaU1UWXpOamN4SW4wVFJsTTIifQGRhMG",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/579707eb2b8edb274160d04163e83015bf38de55/build/tests/command-button/test-09-reqInfoAboutButton-voiceover_macos.collected.html",
+               "completedAt": "2024-01-18T01:41:50.915Z"
+            }
+         ],
+         "markedFinalAt": "2025-11-02T19:12:46.501Z"
+      },
+      {
+         "reportID": "539",
+         "atKey": "voiceover_macos",
+         "atName": "VoiceOver for macOS",
+         "atVersion": "15.0",
+         "browserKey": "safari_macos",
+         "browserName": "Safari",
+         "browserVersion": "18.6",
+         "os": "macOS",
+         "osVersion": "15.0",
+         "device": "Mac (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 18,
+               "failed": 0,
+               "untestable": 2,
+               "unsupported": 0,
+               "total": 20
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 1,
+            "moderateSideEffects": 0
+         },
+         "tests": [
+            {
+               "testTitle": "Navigate forwards to a button",
+               "rowNumber": 5,
+               "atVersion": "15.6.1",
+               "browserVersion": "18.6",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+Right Arrow",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "Print Page\n button\nYou are currently on a button. To click this button, press Control -Option -Space. ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YjMxMeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQmEwMj",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmFjYeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQjU4OD",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "Print Page\n button\nYou are currently on a button. To click this button, press Control -Option -Space. ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YjMxMeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQmEwMj",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmFjYeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQjU4OD",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "j (single quick key nav on)",
+                           "mode": "singleQuickKeyNavOn"
+                        }
+                     ],
+                     "output": "Print Page\n button\nYou are currently on a button. To click this button, press Control -Option -Space. ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YjMxMeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQmEwMj",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmFjYeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQjU4OD",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "b (single quick key nav on)",
+                           "mode": "singleQuickKeyNavOn"
+                        }
+                     ],
+                     "output": "Print Page\n button\nYou are currently on a button. To click this button, press Control -Option -Space. ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YjMxMeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQmEwMj",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmFjYeyIzIjoiWldRMk9leUl5SWpvaU1UWXpOamN4SW4wV0poTW0ifQjU4OD",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/579707eb2b8edb274160d04163e83015bf38de55/build/tests/command-button/test-05-navForwardsToButton-voiceover_macos.collected.html",
+               "completedAt": "2025-10-30T02:47:42.146Z"
+            },
+            {
+               "testTitle": "Navigate backwards to a button",
+               "rowNumber": 6,
+               "atVersion": "15.6.1",
+               "browserVersion": "18.6",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+Left Arrow",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "Print Page\n button\nYou are currently on a button. To click this button, press Control -Option -Space. ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "Y2RhNeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQDM1OG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTA4NeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQWEzMj",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "Print Page\n button\nYou are currently on a button. To click this button, press Control -Option -Space. ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "Y2RhNeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQDM1OG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTA4NeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQWEzMj",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+j (single quick key nav on)",
+                           "mode": "singleQuickKeyNavOn"
+                        }
+                     ],
+                     "output": "Run Test Setup\n , dimmed  button\nYou are currently on a button. This item is dimmed. ",
+                     "untestable": true,
+                     "assertions": [
+                        {
+                           "id": "Y2RhNeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQDM1OG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTA4NeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQWEzMj",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": [
+                        {
+                           "text": "Reading cursor position changed in an unexpected manner",
+                           "impact": "SEVERE",
+                           "details": "VoiceOver reading cursor moved forwards to the 'Run Setup' button instead of backwards to the 'Print Page' button."
+                        }
+                     ]
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+b (single quick key nav on)",
+                           "mode": "singleQuickKeyNavOn"
+                        }
+                     ],
+                     "output": "Print Page\n button\nYou are currently on a button. To click this button, press Control -Option -Space. ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "Y2RhNeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQDM1OG",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTA4NeyIzIjoiWm1aaE1leUl5SWpvaU1UWXpOamN4SW4wV1V5T1cifQWEzMj",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/579707eb2b8edb274160d04163e83015bf38de55/build/tests/command-button/test-06-navBackToButton-voiceover_macos.collected.html",
+               "completedAt": "2025-11-02T19:16:54.381Z"
+            },
+            {
+               "testTitle": "Request information about a button",
+               "rowNumber": 9,
+               "atVersion": "15.6.1",
+               "browserVersion": "18.6",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+F3",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "Print Page\n button  is in the VoiceOver cursor    ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDcyYeyIzIjoiWldNNU5leUl5SWpvaU1UWXpOamN4SW4wVFJsTTIifQTFjZW",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjhjNeyIzIjoiWldNNU5leUl5SWpvaU1UWXpOamN4SW4wVFJsTTIifQGRhMG",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+F4",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "Print Page\n button  has keyboard focus   ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDcyYeyIzIjoiWldNNU5leUl5SWpvaU1UWXpOamN4SW4wVFJsTTIifQTFjZW",
+                           "priority": "MUST",
+                           "statement": "Role 'button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjhjNeyIzIjoiWldNNU5leUl5SWpvaU1UWXpOamN4SW4wVFJsTTIifQGRhMG",
+                           "priority": "MUST",
+                           "statement": "Name 'Print Page' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "button",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/579707eb2b8edb274160d04163e83015bf38de55/build/tests/command-button/test-09-reqInfoAboutButton-voiceover_macos.collected.html",
+               "completedAt": "2025-10-30T02:50:13.550Z"
+            }
+         ],
+         "markedFinalAt": "2025-11-02T19:18:09.736Z"
+      }
+   ]
+}

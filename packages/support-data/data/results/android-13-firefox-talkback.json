@@ -1,0 +1,22 @@
+{
+   "schemaVersion": 1,
+   "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | firefox | pending | talkback | 14.2.0.618048417",
+   "environment": {
+      "id": "android-talkback-firefox",
+      "label": "Android 13 · Firefox · TalkBack",
+      "shortLabel": "Android TB (Firefox)",
+      "platformGroup": "android-talkback",
+      "device": "sdk_gphone64_arm64 (Android Emulator)",
+      "os": "Android",
+      "osVersion": "13 (API 33)",
+      "browser": "Firefox",
+      "browserVersion": "Pending",
+      "browserType": "browser",
+      "usageOrder": 2,
+      "screenReader": "TalkBack",
+      "screenReaderVersion": "14.2.0.618048417"
+   },
+   "status": "untested",
+   "statusNote": "Not yet tested on Android Firefox.",
+   "runs": []
+}

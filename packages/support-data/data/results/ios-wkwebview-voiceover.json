@@ -1,0 +1,22 @@
+{
+   "schemaVersion": 1,
+   "environmentKey": "iphone | ios | pending | wkwebview | pending | voiceover | ios",
+   "environment": {
+      "id": "ios-voiceover-wkwebview",
+      "label": "iOS · WKWebView · VoiceOver",
+      "shortLabel": "iOS VO (WebView)",
+      "platformGroup": "ios-voiceover",
+      "device": "iPhone",
+      "os": "iOS",
+      "osVersion": "Pending",
+      "browser": "WKWebView",
+      "browserVersion": "Pending",
+      "browserType": "webview",
+      "usageOrder": 2,
+      "screenReader": "VoiceOver",
+      "screenReaderVersion": "iOS"
+   },
+   "status": "untested",
+   "statusNote": "Not yet tested on iOS.",
+   "runs": []
+}

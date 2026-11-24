@@ -1,0 +1,659 @@
+{
+   "schemaVersion": 1,
+   "planVersionID": "163670",
+   "slug": "apg-alert",
+   "directory": "apg/alert",
+   "title": "Alert Example",
+   "versionString": "V25.11.02",
+   "phase": "CANDIDATE",
+   "gitSha": "5b831a682a2bd070ab3331272b6b34e7e4c76484",
+   "updatedAt": "2025-11-02T18:50:23.000Z",
+   "exampleURL": "https://www.w3.org/WAI/ARIA/apg/patterns/alert/examples/alert/",
+   "designPatternURL": "https://www.w3.org/WAI/ARIA/apg/patterns/alert/",
+   "upstreamURL": "https://aria-at.w3.org/test-plan/163670",
+   "featureRefs": [
+      {
+         "refId": "alert",
+         "type": "aria",
+         "linkText": "alert ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#alert"
+      }
+   ],
+   "reports": [
+      {
+         "reportID": "565",
+         "atKey": "jaws",
+         "atName": "JAWS",
+         "atVersion": "2025.2508.120",
+         "browserKey": "chrome",
+         "browserName": "Chrome",
+         "browserVersion": "148",
+         "os": "Windows",
+         "osVersion": "Not recorded by ARIA-AT",
+         "device": "PC (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 4,
+               "total": 4
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "tests": [
+            {
+               "testTitle": "Trigger an alert",
+               "rowNumber": 3,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "148",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Space (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Hello",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDhmNeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQzFiOW",
+                           "priority": "MAY",
+                           "statement": "Role 'alert' is conveyed",
+                           "verdict": "unsupported",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTFiOeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQDU3M2",
+                           "priority": "MUST",
+                           "statement": "Text 'Hello' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Enter (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Hello",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDhmNeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQzFiOW",
+                           "priority": "MAY",
+                           "statement": "Role 'alert' is conveyed",
+                           "verdict": "unsupported",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTFiOeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQDU3M2",
+                           "priority": "MUST",
+                           "statement": "Text 'Hello' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Space (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Hello",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDhmNeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQzFiOW",
+                           "priority": "MAY",
+                           "statement": "Role 'alert' is conveyed",
+                           "verdict": "unsupported",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTFiOeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQDU3M2",
+                           "priority": "MUST",
+                           "statement": "Text 'Hello' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Enter (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Hello",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDhmNeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQzFiOW",
+                           "priority": "MAY",
+                           "statement": "Role 'alert' is conveyed",
+                           "verdict": "unsupported",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTFiOeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQDU3M2",
+                           "priority": "MUST",
+                           "statement": "Text 'Hello' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/5b831a682a2bd070ab3331272b6b34e7e4c76484/build/tests/alert/test-03-triggerAlert-jaws.collected.html",
+               "completedAt": "2026-05-19T00:24:27.521Z"
+            }
+         ],
+         "markedFinalAt": "2026-06-02T22:27:23.229Z"
+      },
+      {
+         "reportID": "545",
+         "atKey": "voiceover_macos",
+         "atName": "VoiceOver for macOS",
+         "atVersion": "14.2",
+         "browserKey": "safari_macos",
+         "browserName": "Safari",
+         "browserVersion": "17.2.0",
+         "os": "macOS",
+         "osVersion": "14.2",
+         "device": "Mac (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 3,
+               "total": 3
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "tests": [
+            {
+               "testTitle": "Trigger an alert",
+               "rowNumber": 3,
+               "atVersion": "14.2",
+               "browserVersion": "17.2.0",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+Space",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "Hello",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWYwNeyIzIjoiTkROak5leUl5SWpvaU1UWXpOamN3SW4walUzT0QifQzFlNm",
+                           "priority": "MAY",
+                           "statement": "Role 'alert' is conveyed",
+                           "verdict": "unsupported",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MjhlMeyIzIjoiTkROak5leUl5SWpvaU1UWXpOamN3SW4walUzT0QifQjczMG",
+                           "priority": "MUST",
+                           "statement": "Text 'Hello' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Space",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "Hello",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWYwNeyIzIjoiTkROak5leUl5SWpvaU1UWXpOamN3SW4walUzT0QifQzFlNm",
+                           "priority": "MAY",
+                           "statement": "Role 'alert' is conveyed",
+                           "verdict": "unsupported",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MjhlMeyIzIjoiTkROak5leUl5SWpvaU1UWXpOamN3SW4walUzT0QifQjczMG",
+                           "priority": "MUST",
+                           "statement": "Text 'Hello' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Enter",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "Hello",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWYwNeyIzIjoiTkROak5leUl5SWpvaU1UWXpOamN3SW4walUzT0QifQzFlNm",
+                           "priority": "MAY",
+                           "statement": "Role 'alert' is conveyed",
+                           "verdict": "unsupported",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MjhlMeyIzIjoiTkROak5leUl5SWpvaU1UWXpOamN3SW4walUzT0QifQjczMG",
+                           "priority": "MUST",
+                           "statement": "Text 'Hello' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/5b831a682a2bd070ab3331272b6b34e7e4c76484/build/tests/alert/test-03-triggerAlert-voiceover_macos.collected.html",
+               "completedAt": "2023-12-14T18:44:33.990Z"
+            }
+         ],
+         "markedFinalAt": "2025-11-03T23:27:19.369Z"
+      },
+      {
+         "reportID": "544",
+         "atKey": "nvda",
+         "atName": "NVDA",
+         "atVersion": "2023.3",
+         "browserKey": "chrome",
+         "browserName": "Chrome",
+         "browserVersion": "120.0.6099.110",
+         "os": "Windows",
+         "osVersion": "Not recorded by ARIA-AT",
+         "device": "PC (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "tests": [
+            {
+               "testTitle": "Trigger an alert",
+               "rowNumber": 3,
+               "atVersion": "2023.3",
+               "browserVersion": "120.0.6099.110",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Space (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "alert  Hello",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MGM5ZeyIzIjoiTldZd05leUl5SWpvaU1UWXpOamN3SW4wV0ZpTTIifQjRiZj",
+                           "priority": "MAY",
+                           "statement": "Role 'alert' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjQwOeyIzIjoiTldZd05leUl5SWpvaU1UWXpOamN3SW4wV0ZpTTIifQTI5Nj",
+                           "priority": "MUST",
+                           "statement": "Text 'Hello' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Enter (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "alert  Hello",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MGM5ZeyIzIjoiTldZd05leUl5SWpvaU1UWXpOamN3SW4wV0ZpTTIifQjRiZj",
+                           "priority": "MAY",
+                           "statement": "Role 'alert' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjQwOeyIzIjoiTldZd05leUl5SWpvaU1UWXpOamN3SW4wV0ZpTTIifQTI5Nj",
+                           "priority": "MUST",
+                           "statement": "Text 'Hello' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Space (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "alert  Hello\nspace",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MGM5ZeyIzIjoiTldZd05leUl5SWpvaU1UWXpOamN3SW4wV0ZpTTIifQjRiZj",
+                           "priority": "MAY",
+                           "statement": "Role 'alert' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjQwOeyIzIjoiTldZd05leUl5SWpvaU1UWXpOamN3SW4wV0ZpTTIifQTI5Nj",
+                           "priority": "MUST",
+                           "statement": "Text 'Hello' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Enter (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "alert  Hello",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MGM5ZeyIzIjoiTldZd05leUl5SWpvaU1UWXpOamN3SW4wV0ZpTTIifQjRiZj",
+                           "priority": "MAY",
+                           "statement": "Role 'alert' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjQwOeyIzIjoiTldZd05leUl5SWpvaU1UWXpOamN3SW4wV0ZpTTIifQTI5Nj",
+                           "priority": "MUST",
+                           "statement": "Text 'Hello' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/5b831a682a2bd070ab3331272b6b34e7e4c76484/build/tests/alert/test-03-triggerAlert-nvda.collected.html",
+               "completedAt": "2023-12-14T13:14:31.522Z"
+            }
+         ],
+         "markedFinalAt": "2025-11-03T23:26:39.537Z"
+      },
+      {
+         "reportID": "543",
+         "atKey": "jaws",
+         "atName": "JAWS",
+         "atVersion": "2024.2310.70",
+         "browserKey": "chrome",
+         "browserName": "Chrome",
+         "browserVersion": "119.0.0",
+         "os": "Windows",
+         "osVersion": "Not recorded by ARIA-AT",
+         "device": "PC (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "tests": [
+            {
+               "testTitle": "Trigger an alert",
+               "rowNumber": 3,
+               "atVersion": "2024.2310.70",
+               "browserVersion": "119.0.0",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Space (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Alert!\nHello",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDhmNeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQzFiOW",
+                           "priority": "MAY",
+                           "statement": "Role 'alert' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTFiOeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQDU3M2",
+                           "priority": "MUST",
+                           "statement": "Text 'Hello' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Enter (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Alert!\nHello",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDhmNeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQzFiOW",
+                           "priority": "MAY",
+                           "statement": "Role 'alert' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTFiOeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQDU3M2",
+                           "priority": "MUST",
+                           "statement": "Text 'Hello' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Space (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Alert!\nHello",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDhmNeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQzFiOW",
+                           "priority": "MAY",
+                           "statement": "Role 'alert' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTFiOeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQDU3M2",
+                           "priority": "MUST",
+                           "statement": "Text 'Hello' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Enter (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Alert!\nHello",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDhmNeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQzFiOW",
+                           "priority": "MAY",
+                           "statement": "Role 'alert' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTFiOeyIzIjoiWVRJd09leUl5SWpvaU1UWXpOamN3SW4wV0UzWmoifQDU3M2",
+                           "priority": "MUST",
+                           "statement": "Text 'Hello' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "alert",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/5b831a682a2bd070ab3331272b6b34e7e4c76484/build/tests/alert/test-03-triggerAlert-jaws.collected.html",
+               "completedAt": "2023-12-11T17:57:04.493Z"
+            }
+         ],
+         "markedFinalAt": "2025-11-03T23:25:55.549Z"
+      }
+   ]
+}
