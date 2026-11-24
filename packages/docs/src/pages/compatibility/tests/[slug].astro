@@ -24,6 +24,7 @@ import {
    formatCompactRatio,
    formatRowBrowser,
    formatRowOsVersion,
+   formatScreenReader,
    formatShortDate,
    groupByScreenReaderAndOs,
 } from '../../../lib/support-grouping';
@@ -233,7 +234,7 @@ const toc = [
                                                 </span>
                                              </span>
                                              <span class="srRow-secondary">
-                                                <span>{group.screenReaderType} {env.screenReaderVersion}</span>
+                                                <span>{formatScreenReader(group.screenReaderType, env.screenReaderVersion)}</span>
                                              </span>
                                           </span>
                                           <span class="srRow-verdictGroup">
@@ -244,7 +245,7 @@ const toc = [
                                        <div class="srRow-body">
                                           <div class="srRow-metaStrip">
                                              <span>
-                                                <strong>Screen reader:</strong> {env.screenReader} {env.screenReaderVersion}
+                                                <strong>Screen reader:</strong> {formatScreenReader(env.screenReader, env.screenReaderVersion)}
                                              </span>
                                              <span aria-hidden="true">·</span>
                                              <span>

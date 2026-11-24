@@ -306,6 +306,26 @@ export function formatFeatureSummary(feature: FeatureReport): string {
    return `Screen reader support for ${feature.title}.`;
 }
 
+const MISSING_VERSION = /^(pending|not recorded)/i;
+
+/**
+ * A version of "Pending" or "Not recorded ..." is a gap in the data, so only the name is
+ * shown.
+ */
+export function formatNameAndVersion(name: string, version: string): string {
+   return MISSING_VERSION.test(version.trim()) ? name : `${name} ${version}`.trim();
+}
+
+/**
+ * Some runs recorded the version of the automation driver, such as "0.0.1-VoiceOver4",
+ * where the screen reader's own version belongs. That is not a version a reader can use.
+ */
+export function formatScreenReader(name: string, version: string): string {
+   const product = name.split(' ')[0] ?? name;
+   const isDriverVersion = version.toLowerCase().includes(product.toLowerCase());
+   return isDriverVersion ? name : formatNameAndVersion(name, version);
+}
+
 const LICENSE_NAME_AND_URL = /^(?<name>.+?)\s*\((?<url>https?:\/\/[^)\s]+)\)$/;
 
 /** Splits a license recorded as "Name (address)" so a page can link the name. */

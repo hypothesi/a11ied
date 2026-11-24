@@ -26,7 +26,12 @@ import {
 import OutcomeBadge from '../../components/support/outcome-badge.astro';
 import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
-import { formatFeatureSummary, parseLicense } from '../../lib/support-grouping';
+import {
+   formatFeatureSummary,
+   formatNameAndVersion,
+   formatScreenReader,
+   parseLicense,
+} from '../../lib/support-grouping';
 
 const MAX_CELLS_PER_COL = 4;
 const MAX_TARGETS_PREVIEW = 8;
@@ -376,11 +381,6 @@ function computeRealSrOverview(feature: FeatureReport): RealSrOverview {
    };
 }
 
-/** A version of "Pending" or "Not recorded ..." is a gap in the data, so only the name is shown. */
-function joinVersion(name: string, version: string): string {
-   return /^(pending|not recorded)/i.test(version.trim()) ? name : `${name} ${version}`.trim();
-}
-
 interface PresetVerdictPayload {
    readonly status: string;
    readonly matchedKeys: readonly string[];
@@ -401,8 +401,8 @@ function buildTileDetail(
    state: CellState,
 ): TileDetailPayload {
    const webviewLabel = env.browserType === 'webview' ? ' · WebView' : '';
-   const sourceLabel = env.source === 'local' ? 'a11ied Local' : 'W3C ARIA-AT';
-   const title = `${env.screenReader} ${env.screenReaderVersion} on ${env.browser} ${env.browserVersion}${webviewLabel}`;
+   const sourceLabel = env.source === 'local' ? 'a11ied' : 'W3C ARIA-AT';
+   const title = `${formatScreenReader(env.screenReader, env.screenReaderVersion)} on ${env.browser} ${env.browserVersion}${webviewLabel}`;
    const recorded = env.testedAt ? env.testedAt.slice(0, DATE_PREFIX_LEN) : 'Pending';
    const meta = `OS: ${formatCompactOS(env.os, env.osVersion)} · Device: ${env.device} · Source: ${sourceLabel} · Recorded: ${recorded}`;
 
@@ -685,6 +685,10 @@ const toc = [
                   <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--untested" aria-hidden="true"></span>Untested</li>
                </ul>
             </div>
+            <p class="ciuHero-key">
+               MUST and SHOULD are W3C ARIA-AT's terms. A MUST check is something a screen reader is
+               required to convey. A SHOULD check is recommended.
+            </p>
          </search>
       </div>
 
@@ -1154,12 +1158,12 @@ const toc = [
                   const env = envFile.environment;
                   return (
                      <tr>
-                        <th scope="row">{joinVersion(env.screenReader, env.screenReaderVersion)}</th>
+                        <th scope="row">{formatScreenReader(env.screenReader, env.screenReaderVersion)}</th>
                         <td>
-                           {joinVersion(env.browser, env.browserVersion)}
+                           {formatNameAndVersion(env.browser, env.browserVersion)}
                            {env.browserType === 'webview' ? ' (WebView)' : ''}
                         </td>
-                        <td>{joinVersion(env.os, env.osVersion)}</td>
+                        <td>{formatNameAndVersion(env.os, env.osVersion)}</td>
                         <td>{env.device}</td>
                         <td>{envFile.status === 'tested' ? 'Tested' : (envFile.statusNote ?? 'Not yet tested')}</td>
                      </tr>
@@ -1191,9 +1195,9 @@ const toc = [
             <tbody>
                {ariaAtEnvironments.map((env) => (
                   <tr>
-                     <th scope="row">{joinVersion(env.screenReader, env.screenReaderVersion)}</th>
-                     <td>{joinVersion(env.browser, env.browserVersion)}</td>
-                     <td>{joinVersion(env.os, env.osVersion)}</td>
+                     <th scope="row">{formatScreenReader(env.screenReader, env.screenReaderVersion)}</th>
+                     <td>{formatNameAndVersion(env.browser, env.browserVersion)}</td>
+                     <td>{formatNameAndVersion(env.os, env.osVersion)}</td>
                      <td>{env.planCount}</td>
                      <td>{env.latestTestedAt ? env.latestTestedAt.slice(0, DATE_PREFIX_LEN) : ''}</td>
                   </tr>
@@ -1405,6 +1409,12 @@ section.ciuTabPanel,
    font-size: 0.84rem;
    font-weight: 700;
    color: var(--ink-soft);
+}
+
+.ciuHero-key {
+   margin: 0.6rem 0 0;
+   color: var(--ink-soft);
+   font-size: 0.85rem;
 }
 
 .ciuLegend {

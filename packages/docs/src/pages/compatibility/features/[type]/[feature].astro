@@ -22,6 +22,7 @@ import {
    formatFeatureSummary,
    formatRowBrowser,
    formatRowOsVersion,
+   formatScreenReader,
    formatShortDate,
    groupByScreenReaderAndOs,
    isVirtualScreenReader,
@@ -170,7 +171,7 @@ const toc = [
    <div class="srFeature-overview">
       <div class="srFeature-overviewTop">
          <strong>{formatOverviewHeadline()}</strong>
-         <span class="srFeature-overviewSub">Counts each tested screen reader and browser pair. The simulated screen reader is left out.</span>
+         <span class="srFeature-overviewSub">Counts each tested screen reader and browser pair. The simulated screen reader is left out. A MUST check is something W3C ARIA-AT says a screen reader is required to convey.</span>
       </div>
       {realTotal > 0 && (
          <div class="srFeature-overviewBar" aria-hidden="true">
@@ -282,7 +283,7 @@ const toc = [
                                           )}
                                        </span>
                                        <span class="srRow-secondary">
-                                          <span>{group.screenReaderType} {env.screenReaderVersion}</span>
+                                          <span>{formatScreenReader(group.screenReaderType, env.screenReaderVersion)}</span>
                                           <span aria-hidden="true">·</span>
                                           <span>{env.source === 'local' ? 'a11ied' : 'ARIA-AT'}</span>
                                        </span>
@@ -296,7 +297,7 @@ const toc = [
                                  <div class="srRow-body">
                                     <div class="srRow-metaStrip">
                                        <span>
-                                          <strong>Screen reader:</strong> {env.screenReader} {env.screenReaderVersion}
+                                          <strong>Screen reader:</strong> {formatScreenReader(env.screenReader, env.screenReaderVersion)}
                                        </span>
                                        <span aria-hidden="true">·</span>
                                        <span>
