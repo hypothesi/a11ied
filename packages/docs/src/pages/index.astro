@@ -1,0 +1,419 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/logo.png';
+import SiteHead from '../components/site-head.astro';
+import { REPOSITORY_URL } from '../lib/nav';
+import { getPracticeURL, withPracticeURL } from '../lib/practice';
+import checkSample from '../samples/check-broken-short.txt?raw';
+import mcpConfig from '../samples/mcp-config.json.txt?raw';
+import agentResult from '../samples/mcp-expect-result.json.txt?raw';
+import expectFail from '../samples/sr-expect-fail.txt?raw';
+import transcriptSample from '../samples/sr-transcript-dialog.txt?raw';
+import failureSample from '../samples/vitest-failure.txt?raw';
+import testSample from '../samples/vitest-home.ts.txt?raw';
+
+const practiceURL = getPracticeURL(Astro);
+const hasSearch = import.meta.env.PROD;
+const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
+const description =
+   'a11ied is a CLI, testing library, and MCP server for automated screen reader and WCAG testing.';
+const heroCommands = [
+   `a1 sr start --sr virtual ${practiceURL}`,
+   'a1 sr goto --role button --name "Invite member"',
+   'a1 sr checkpoint opened',
+   'a1 sr activate',
+   'a1 sr expect dialog --since opened',
+].join('\n');
+const agentPrompt =
+   `Check the Invite member dialog on ${practiceURL} with a11ied. Open it with the simulated screen reader and tell me whether the dialog is announced. Quote what the screen reader said.`;
+const auditCommands = [
+   'a1 audit init https://example.com --rule "Do not submit the contact form"',
+   'a1 audit discover',
+   'a1 audit scan',
+   'a1 audit next --worker w1',
+   'a1 audit report',
+].join('\n');
+---
+
+<html lang="en">
+   <head>
+      <SiteHead title="a11ied: automated screen reader and accessibility testing" description={description} />
+   </head>
+   <body class="home">
+      <a class="skip-link" href="#content">Skip to content</a>
+      {hasSearch ? <pagefind-config bundle-path={`${basePath}pagefind/`} base-url={basePath}></pagefind-config> : null}
+
+      <header class="topbar">
+         <a class="brand" href="/" aria-label="a11ied home">
+            <Image src={logo} alt="" class="mark" width={112} height={112} />
+            <span class="brand-title">a<span class="brand-title-accent">11</span>ied</span>
+         </a>
+         <nav class="topnav" aria-label="Site">
+            <a href="/overview">Docs</a>
+            <a href="/quickstart">Quickstart</a>
+            <a href="/reference/cli">CLI reference</a>
+            <a href="/support">Feature support</a>
+            <a href={REPOSITORY_URL}>GitHub</a>
+         </nav>
+         {hasSearch ? <pagefind-modal-trigger class="search-trigger" placeholder="Search the docs" hide-shortcut></pagefind-modal-trigger> : null}
+      </header>
+
+      <main id="content">
+         <section class="hero band">
+            <div class="wrap hero-grid">
+               <div class="hero-copy">
+                  <p class="kicker">For developers, auditors, and AI agents</p>
+                  <h1>Automated screen reader and accessibility testing</h1>
+                  <p class="lead">
+                     <strong>a11ied</strong> is a CLI, testing library, and MCP server for automated
+                     screen reader and WCAG testing.
+                  </p>
+                  <p class="lead">
+                     Let AI coding agents verify their own fixes, catch WCAG violations in CI, and
+                     assert what your UI announces to a screen reader in your Vitest suite.
+                  </p>
+                  <div class="actions">
+                     <a class="button button--primary" href="/quickstart">Run the quickstart</a>
+                     <a class="button" href="/overview">Read the docs</a>
+                  </div>
+                  <pre class="install"><code>npm install --global a11ied</code></pre>
+               </div>
+               <figure class="hero-show">
+                  <pre><code>{heroCommands}</code></pre>
+                  <pre data-label="OUTPUT"><code>{expectFail.trimEnd()}</code></pre>
+                  <figcaption>
+                     On our <a href="/demo/team">practice page</a>, this button opens a dialog. It
+                     appears on screen, and the screen reader says nothing. No scanner reports
+                     that. These five lines do.
+                  </figcaption>
+               </figure>
+            </div>
+         </section>
+
+         <section class="band band--ink" aria-labelledby="gap-heading">
+            <div class="wrap">
+               <p class="kicker">Why a scan is not enough</p>
+               <h2 id="gap-heading">The scanner found 3 of 10</h2>
+               <p class="section-lead">
+                  The practice page has ten accessibility problems. A scan flags ten elements, and
+                  they add up to three of those problems. Two more need a rule you name. The last
+                  five appear only when something presses Tab, opens the dialog, and reads what is
+                  announced. a11ied does that part too.
+               </p>
+               <ol class="tally">
+                  <li><span class="tally-figure">3</span><span class="tally-label">found by a scan: missing alt text, unnamed buttons, low contrast</span></li>
+                  <li><span class="tally-figure">2</span><span class="tally-label">found by rules a default scan skips: heading order, a dialog with no name</span></li>
+                  <li><span class="tally-figure">5</span><span class="tally-label">found by the keyboard and a screen reader: filters the keyboard cannot reach, a filter state that is never announced, a silent dialog, a field with no label, a status message nobody hears</span></li>
+               </ol>
+               <p><a class="button button--yellow" href="/guides/demo">Find all ten yourself</a></p>
+            </div>
+         </section>
+
+         <section class="band" aria-labelledby="features-heading">
+            <div class="wrap">
+               <h2 id="features-heading">What you can do with it</h2>
+
+               <article class="feature">
+                  <div class="feature-copy">
+                     <h3>Scan a page, and see what the scan leaves undone</h3>
+                     <p>
+                        One command lists each failing element with the WCAG criterion it breaks
+                        and a command that looks up the fix.
+                     </p>
+                     <p>
+                        Then it lists the criteria this page triggers that no scanner can decide.
+                        Here the scan flags ten elements, and 38 criteria still need a person.
+                     </p>
+                     <p><a href="/guides/violations">Fix an axe violation</a></p>
+                  </div>
+                  <div class="feature-show">
+                     <pre><code>a1 check {practiceURL}</code></pre>
+                     <pre data-label="OUTPUT"><code>{withPracticeURL(checkSample, practiceURL)}</code></pre>
+                  </div>
+               </article>
+
+               <article class="feature feature--flip">
+                  <div class="feature-copy">
+                     <h3>Read what a screen reader says</h3>
+                     <p>
+                        Drive VoiceOver on macOS, NVDA on Windows, or a simulated screen reader that
+                        runs on any machine, all with the same commands. Move by heading, open a
+                        dialog, send a form, and read back everything that was announced.
+                     </p>
+                     <p>
+                        This is the dialog from the top of the page after the fix. The same steps
+                        now announce the dialog and move focus to its first field.
+                     </p>
+                     <p><a href="/guides/screen-reader">Test with a screen reader</a></p>
+                  </div>
+                  <div class="feature-show">
+                     <pre><code>a1 sr transcript --since opened</code></pre>
+                     <pre data-label="OUTPUT"><code>{withPracticeURL(transcriptSample, practiceURL)}</code></pre>
+                  </div>
+               </article>
+
+               <article class="feature">
+                  <div class="feature-copy">
+                     <h3>Tests that fail when the announcement is wrong</h3>
+                     <p>
+                        Write screen reader assertions next to your other tests, in Vitest, Jest,
+                        Mocha, or Playwright Test. Calls chain without <code>await</code>, and checks
+                        wait for late announcements.
+                     </p>
+                     <p>
+                        This test passes on the fixed page. Pointed at the broken one, it fails and
+                        prints what the screen reader said: nothing.
+                     </p>
+                     <p><a href="/guides/vitest">Test with Vitest</a></p>
+                  </div>
+                  <div class="feature-show">
+                     <pre data-label="invite.test.ts"><code>{withPracticeURL(testSample, practiceURL)}</code></pre>
+                     <pre data-label="OUTPUT"><code>{failureSample.trimEnd()}</code></pre>
+                  </div>
+               </article>
+
+               <article class="feature feature--flip">
+                  <div class="feature-copy">
+                     <h3>Agents that check their own work</h3>
+                     <p>
+                        A coding agent can write a dialog. It cannot hear one. Add one block of
+                        configuration and Claude Code, Cursor, or any other MCP client gets 37
+                        tools: scan a page, drive a screen reader, check a widget against its ARIA
+                        pattern, look up a criterion.
+                     </p>
+                     <p>
+                        Below is what the agent gets back when it runs the check from the top of
+                        this page. With that, it can fix the dialog and run the same check again.
+                     </p>
+                     <p><a href="/guides/agents">Use with an AI agent</a></p>
+                  </div>
+                  <div class="feature-show">
+                     <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
+                     <pre data-label="AI AGENT PROMPT"><code>{agentPrompt}</code></pre>
+                     <pre data-label="OUTPUT"><code>{agentResult.trimEnd()}</code></pre>
+                  </div>
+               </article>
+
+               <article class="feature">
+                  <div class="feature-copy">
+                     <h3>A WCAG audit, run by a team of agents</h3>
+                     <p>
+                        <code>a1 audit</code> splits a site into small units of work. Several agents
+                        test in parallel, every result is saved as it arrives, and a crashed agent
+                        loses nothing.
+                     </p>
+                     <p>
+                        The report lists each finding with a screenshot of the failing element, what
+                        to fix first, and what could not be verified. It never claims conformance it
+                        cannot support.
+                     </p>
+                     <p><a href="/guides/audit">Run an audit</a></p>
+                  </div>
+                  <div class="feature-show">
+                     <pre><code>{auditCommands}</code></pre>
+                  </div>
+               </article>
+            </div>
+         </section>
+
+         <section class="band band--yellow" aria-labelledby="more-heading">
+            <div class="wrap">
+               <h2 id="more-heading">And the rest of the toolbox</h2>
+               <ul class="cards">
+                  <li class="card">
+                     <h3>WCAG in your terminal</h3>
+                     <p>All 86 criteria of WCAG 2.2 with the W3C's guidance, and a test procedure for the 55 at Levels A and AA. It ships in the package and works offline.</p>
+                     <p><code>a1 wcag 4.1.3</code></p>
+                  </li>
+                  <li class="card">
+                     <h3>Widgets checked against the ARIA guide</h3>
+                     <p>Point it at your combobox or dialog. It presses every key the W3C's pattern documents and reports the ones that do nothing. 68 examples are built in.</p>
+                     <p><code>a1 pattern check</code></p>
+                  </li>
+                  <li class="card">
+                     <h3>CI that fails for the right reason</h3>
+                     <p>One exit code means a check failed. Baselines let an existing site fail only on new problems. Reports come out as SARIF or EARL.</p>
+                     <p><code>a1 axe --fail-on serious</code></p>
+                  </li>
+                  <li class="card">
+                     <h3>Screenshots of the hard cases</h3>
+                     <p>Capture a page at 320 pixels wide, at 200 percent zoom, with WCAG text spacing, or on the fourth Tab stop.</p>
+                     <p><code>a1 capture</code></p>
+                  </li>
+                  <li class="card">
+                     <h3>TalkBack on Android</h3>
+                     <p>Turn TalkBack on from your desk and print what it says as focus moves through an app.</p>
+                     <p><code>a1 talkback walk</code></p>
+                  </li>
+                  <li class="card">
+                     <h3>What screen readers support</h3>
+                     <p>Screen reader results for 60 ARIA and HTML features. Most come from W3C ARIA-AT reports for VoiceOver, NVDA, and JAWS. a11ied recorded the rest.</p>
+                     <p><a href="/support">Feature support</a></p>
+                  </li>
+               </ul>
+            </div>
+         </section>
+
+         <section class="band" aria-labelledby="honest-heading">
+            <div class="wrap narrow">
+               <p class="kicker">No false comfort</p>
+               <h2 id="honest-heading">It tells you what it did not test</h2>
+               <p class="section-lead">
+                  A scan cannot fully decide any of the 86 criteria in WCAG 2.2. a11ied lists the
+                  criteria your page triggers that still need a person, labels every simulated
+                  result as simulated, and never reports a clean scan as a pass.
+               </p>
+               <dl class="defs">
+                  <dt>A scan</dt>
+                  <dd>Finds failures. It never proves a pass.</dd>
+                  <dt>A transcript</dt>
+                  <dd>Shows what a screen reader announced, and says which screen reader.</dd>
+                  <dt>A judgment</dt>
+                  <dd>Decides the rest. A person or an agent makes it, and the audit records it.</dd>
+               </dl>
+               <p><a href="/test-methods">How each criterion has to be tested</a></p>
+               <p class="built-on">
+                  Built on <a href="https://github.com/dequelabs/axe-core">axe-core</a>,
+                  <a href="https://www.guidepup.dev/">Guidepup</a>,
+                  <a href="https://playwright.dev/">Playwright</a>, and the W3C's own WCAG and ARIA
+                  data.
+               </p>
+            </div>
+         </section>
+
+         <section class="band band--ink band--cta" aria-labelledby="cta-heading">
+            <div class="wrap narrow">
+               <h2 id="cta-heading">Your first transcript is five minutes away</h2>
+               <p class="section-lead">
+                  Install it, scan the practice page, and read what a screen reader says on it.
+                  There is no account to create, and the simulated screen reader needs no setup.
+               </p>
+               <pre class="install"><code>npm install --global a11ied</code></pre>
+               <div class="actions">
+                  <a class="button button--yellow" href="/quickstart">Run the quickstart</a>
+                  <a class="button button--ghost" href={REPOSITORY_URL}>View the source</a>
+               </div>
+            </div>
+         </section>
+      </main>
+
+      <footer class="site-foot">
+         <div class="wrap foot-grid">
+            <p>The source is on <a href={REPOSITORY_URL}>GitHub</a>.</p>
+            <nav aria-label="Footer">
+               <a href="/overview">Docs</a>
+               <a href="/quickstart">Quickstart</a>
+               <a href="/guides/troubleshooting">Troubleshooting</a>
+               <a href="/reference/cli">CLI reference</a>
+            </nav>
+         </div>
+      </footer>
+
+      {hasSearch ? <pagefind-modal></pagefind-modal> : null}
+      <script>
+         import '../scripts/code-blocks';
+      </script>
+   </body>
+</html>
+
+<style>
+   .home { --wrap: 72rem; }
+   .wrap { width: min(100% - 2.5rem, var(--wrap)); margin-inline: auto; }
+   .narrow { --wrap: 48rem; }
+   .band { padding-block: clamp(3rem, 8vw, 6rem); }
+   .hero { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
+   .band > .wrap > * + * { margin-top: var(--lg); }
+   /* Short samples wrap here, so the line that makes the point is never cut off. */
+   pre, pre code { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+   /* Top bar */
+   .topbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sm) var(--xl); padding: var(--sm) clamp(1.25rem, 4vw, 3rem); background: var(--yellow); border-bottom: 3px solid var(--ink); }
+   .topnav { display: flex; flex-wrap: wrap; gap: var(--xs) var(--lg); margin-inline-start: auto; }
+   .topnav a { color: var(--ink); font-weight: 600; text-decoration: none; }
+   .topnav a:hover { text-decoration: underline; text-decoration-thickness: 0.12em; }
+   .topbar .search-trigger { min-width: 12rem; }
+
+   /* Hero */
+   /*
+    * The halftone circle is two background layers: a sheet of dots, and paper over it with
+    * a round hole. The copy has its own paper background, so contrast checkers measure the
+    * text against a plain color.
+    */
+   .hero { --size: clamp(14rem, 36vw, 32rem); --hole: calc(100% - 9rem) 9rem; background: radial-gradient(circle at var(--hole), transparent calc(var(--size) / 2), var(--paper) calc(var(--size) / 2 + 1px)), radial-gradient(circle, var(--red) 2px, transparent 2.4px) 0 0 / 11px 11px, var(--paper); }
+   .hero-copy { padding-block: var(--xs); background: var(--paper); }
+   .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+   .hero-show { min-width: 0; margin: 0; }
+   .hero-show > pre + pre[data-label="OUTPUT"] { margin-top: 0; border-top: 0; }
+   .hero-show figcaption { margin-top: var(--lg); padding: var(--sm) var(--md); background: var(--paper-light); border: 2px solid var(--ink); font-size: 1rem; line-height: 1.5; }
+   .hero-copy > * + * { margin-top: var(--lg); }
+   .kicker { margin: 0; color: var(--red-dark); font: 700 0.86rem/1.4 var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
+   h1 { margin: 0; font: 700 clamp(2.6rem, 5.4vw, 4.6rem)/0.92 var(--display); letter-spacing: -0.04em; text-transform: uppercase; text-wrap: balance; filter: drop-shadow(4px 4px 0 var(--yellow)) drop-shadow(3px 3px 0 color-mix(in oklch, var(--red) 62%, transparent)); }
+   .lead { max-width: 40rem; color: var(--ink-soft); font-size: clamp(1.15rem, 1.8vw, 1.4rem); line-height: 1.5; }
+   .lead + .lead { margin-top: var(--sm); }
+   .actions { display: flex; flex-wrap: wrap; gap: var(--md); }
+   .button { display: inline-block; padding: 0.75rem 1.25rem; background: var(--paper-light); color: var(--ink); border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); font: 700 1.05rem/1 var(--display); letter-spacing: 0.06em; text-decoration: none; text-transform: uppercase; }
+   .button:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--ink); }
+   .button--primary { background: var(--ink); color: var(--yellow); box-shadow: 5px 5px 0 var(--red); }
+   .button--primary:hover { box-shadow: 3px 3px 0 var(--red); }
+   .button--yellow { background: var(--yellow); box-shadow: 5px 5px 0 var(--red); }
+   .button--yellow:hover { box-shadow: 3px 3px 0 var(--red); }
+   .button--ghost { background: transparent; color: var(--paper-light); border-color: var(--paper-light); box-shadow: none; }
+   .button--ghost:hover { background: var(--paper-light); color: var(--ink); box-shadow: none; transform: none; }
+   .install { max-width: 26rem; }
+
+   /* Section headings */
+   h2 { padding: 0; border: 0; font-size: clamp(2rem, 5vw, 3.6rem); line-height: 0.95; letter-spacing: -0.03em; }
+   .section-lead { max-width: 44rem; color: var(--ink-soft); font-size: 1.2rem; line-height: 1.55; }
+   h3 { font-size: 1.6rem; line-height: 1.05; text-transform: uppercase; letter-spacing: -0.01em; }
+
+   .feature-show > pre + pre[data-label="OUTPUT"] { margin-top: 0; border-top: 0; }
+
+   /* Dark and yellow bands */
+   .band--ink { background: var(--ink); color: var(--paper-light); }
+   .band--ink .kicker { color: var(--yellow); }
+   .band--ink .section-lead { color: color-mix(in oklch, var(--paper-light) 88%, var(--ink)); }
+   .band--ink h2 { color: var(--yellow); }
+   .band--yellow { background: var(--yellow); border-block: 3px solid var(--ink); }
+
+   .tally { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: var(--lg); margin: var(--xl) 0 0; padding: 0; list-style: none; }
+   .tally li { display: grid; gap: var(--xs); margin: 0; padding-top: var(--md); border-top: 3px solid var(--yellow); }
+   .tally-figure { color: var(--yellow); font: 700 clamp(4rem, 9vw, 6.5rem)/0.85 var(--display); letter-spacing: -0.04em; }
+   .tally-label { font-size: 1.05rem; line-height: 1.5; }
+
+   /* Features */
+   .feature { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: start; }
+   .band > .wrap > .feature { margin-top: var(--3xl); }
+   .band > .wrap > h2 + .feature { margin-top: var(--2xl); }
+   .feature--flip { grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); }
+   .feature--flip .feature-copy { order: 2; }
+   .feature-copy > * + *, .feature-show > * + * { margin-top: var(--md); }
+   .feature-copy p { color: var(--ink-soft); }
+   .feature-show { min-width: 0; }
+
+   /* Cards */
+   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: var(--lg); margin: var(--xl) 0 0; padding: 0; list-style: none; }
+   .card { display: flex; flex-direction: column; gap: var(--sm); margin: 0; padding: var(--lg); background: var(--paper-light); border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+   .card h3 { font-size: 1.35rem; }
+   .card p:last-child { margin-top: auto; padding-top: var(--xs); }
+
+   .built-on { color: var(--ink-soft); }
+
+   .band--cta a:not(.button) { color: var(--yellow); }
+
+   /* Footer */
+   .site-foot { padding-block: var(--lg); background: var(--yellow); border-top: 3px solid var(--ink); }
+   .foot-grid { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--md); }
+   .foot-grid nav { display: flex; flex-wrap: wrap; gap: var(--lg); }
+   .site-foot a { color: var(--ink); }
+
+   @media (max-width: 820px) {
+      .hero-grid, .feature, .feature--flip { grid-template-columns: minmax(0, 1fr); }
+      /* On a narrow screen the circle sits in the corner above the copy. */
+      .hero { --size: 9rem; --hole: calc(100% - 3rem) 2.5rem; padding-top: 6.5rem; }
+      .feature--flip .feature-copy { order: 0; }
+      .topnav { margin-inline-start: 0; }
+   }
+   @media (prefers-reduced-motion: reduce) {
+      .button:hover { transform: none; }
+   }
+</style>

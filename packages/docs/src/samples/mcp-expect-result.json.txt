@@ -1,0 +1,8 @@
+sr_expect  { "pattern": "dialog", "since": "opened" }
+
+{
+  "expectation": { "passed": false, "matched": false, "checked": 0, "expected": "\"dialog\"", "since": "opened", "not": false },
+  "exitCode": 4,
+  "message": "\"dialog\" was not announced in the transcript since \"opened\" (0 phrases checked).",
+  "session": { "target": "virtual", "targetType": "simulated", ... }
+}

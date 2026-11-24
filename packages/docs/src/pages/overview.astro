@@ -20,11 +20,10 @@ const toc = [
 ---
 
 <DocShell
-   title="Test what a screen reader says"
-   summary="<p>a11ied scans a web page for accessibility problems and shows you what a screen reader announces on it. Use it from the terminal, in your test suite, or through an AI coding agent.</p>"
+   title="Overview"
+   summary="<p>a11ied scans a web page for accessibility problems and shows you what a screen reader announces on it. This page has one real example of each way to use it: from the terminal, in a test suite, and through an AI coding agent.</p>"
    links={docsLinks}
    toc={toc}
-   variant="home"
 >
    <section>
       <h2 id="install">Install</h2>
@@ -82,7 +81,7 @@ const toc = [
          The same screen reader runs inside a test. This one opens a dialog and checks that
          the dialog announces its name and that focus moves into it.
       </p>
-      <pre data-label="team.test.ts"><code>{withPracticeURL(testSample, practiceURL)}</code></pre>
+      <pre data-label="invite.test.ts"><code>{withPracticeURL(testSample, practiceURL)}</code></pre>
       <p>
          See <a href="/guides/vitest">test with Vitest</a>, or
          <a href="/guides/testing">write screen reader tests</a> for Jest, Mocha, and
