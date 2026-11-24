@@ -28,7 +28,7 @@
          "refId": "checkbox",
          "type": "aria",
          "linkText": "checkbox",
-         "specURL": "Checkbox"
+         "specURL": ""
       },
       {
          "refId": "group",
@@ -40,7 +40,7 @@
          "refId": "list",
          "type": "html",
          "linkText": "list",
-         "specURL": "list"
+         "specURL": ""
       }
    ],
    "reports": [

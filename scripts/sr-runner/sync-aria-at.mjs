@@ -266,6 +266,15 @@ function normalizeRenderedUrl(renderedUrl) {
    return `${UPSTREAM_ORIGIN}${renderedUrl.startsWith('/') ? '' : '/'}${renderedUrl}`;
 }
 
+/**
+ * Upstream gives a few references a bare word such as "Checkbox" where the specification
+ * link belongs. Published as a link, that word is a broken relative URL.
+ */
+function normalizeSpecURL(value) {
+   const text = String(value ?? '');
+   return URL.canParse(text) && /^https?:/u.test(text) ? text : '';
+}
+
 function normalizeSpecRefType(rawType) {
    if (rawType === 'aria') {
       return 'aria';
@@ -303,7 +312,7 @@ function normalizeAssertion({ item, idx, scenarioUntestable, featureMap, summary
             refId,
             type: normalizedType,
             linkText: rawRef.linkText || `${refId} Specification`,
-            specURL: rawRef.value || '',
+            specURL: normalizeSpecURL(rawRef.value),
          });
       }
    }
@@ -575,7 +584,7 @@ function buildFeatureSummaries(rawAriaFeatures, rawHtmlFeatures, featureToPlanSl
             refId,
             type,
             linkText: String(item.linkText ?? refId),
-            specURL: String(item.value ?? ''),
+            specURL: normalizeSpecURL(item.value),
             total: Number(item.total ?? 0),
             passed: Number(item.passed ?? 0),
             failed: Number(item.failed ?? 0),
