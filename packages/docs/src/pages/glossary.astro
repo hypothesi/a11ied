@@ -378,7 +378,7 @@ const toc = letters.map((letter) => ({
 
 <DocShell
    title="Glossary"
-   summary="<p>The terms these docs use, each in a sentence or two. Where a page explains a term in full, the entry links to it.</p>"
+   summary="<p>The terms these docs use, each in a sentence or two. Where a page explains a term in full, the entry links to it. Each term is a link to its own entry, so you can copy its address.</p>"
    links={docsLinks}
    toc={toc}
 >
@@ -388,7 +388,9 @@ const toc = letters.map((letter) => ({
          <dl class="defs">
             {group.entries.map((entry) => (
                <>
-                  <dt id={getEntryID(entry.term)}>{entry.term}</dt>
+                  <dt id={getEntryID(entry.term)}>
+                     <a class="heading-link" href={`#${getEntryID(entry.term)}`}>{entry.term}</a>
+                  </dt>
                   <dd set:html={entry.definition} />
                </>
             ))}
