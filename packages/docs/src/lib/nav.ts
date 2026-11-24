@@ -63,6 +63,7 @@ export const docsLinks: DocSection[] = [
          { href: '/reference/api', label: 'TypeScript API' },
          { href: '/reference/wcag-data', label: 'WCAG data' },
          { href: '/compatibility', label: 'Screen reader compatibility' },
+         { href: '/glossary', label: 'Glossary' },
       ],
    },
 ];
