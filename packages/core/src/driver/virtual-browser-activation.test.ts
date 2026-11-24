@@ -8,6 +8,9 @@ import { createPlaywrightVirtualHost } from './virtual-playwright-host.js';
 /** Long enough that the click returns well before the next document arrives. */
 const SLOW_RESPONSE_MS = 750;
 
+/** Drawn over the whole page, so a pointer click cannot land on anything beneath it. */
+const COVER = '<div style="position: fixed; inset: 0"></div>';
+
 const server = createTestServer(),
    timeoutMs = 30_000;
 
@@ -120,6 +123,38 @@ describe('browser virtual cursor activation', () => {
             '',
             'client-router.html',
          );
+      },
+      timeoutMs,
+   );
+});
+
+describe('activation of a control that another element covers', () => {
+   it(
+      'follows a covered link the way a screen reader does',
+      async () => {
+         await withReader(async (_page, host) => {
+            await host.navigate({ direction: 'next', kind: 'link' });
+
+            const outcome = await host.runPortable('activate'),
+               title = await host.readTitle();
+
+            expect(outcome.moved).toStrictEqual(true);
+            expect(title.title).toBe('Basic page');
+         }, `<a href="/basic-page.html">Go to basic page</a>${COVER}`);
+      },
+      timeoutMs,
+   );
+
+   it(
+      'presses a covered button once',
+      async () => {
+         await withReader(async (page, host) => {
+            await host.navigate({ direction: 'next', kind: 'button' });
+
+            await host.runPortable('activate');
+
+            expect(await page.locator('button').getAttribute('data-presses')).toBe('1');
+         }, `<button onclick="this.dataset.presses = String(Number(this.dataset.presses ?? 0) + 1)">Open</button>${COVER}`);
       },
       timeoutMs,
    );
