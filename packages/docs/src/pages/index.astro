@@ -193,9 +193,9 @@ const reportAlt =
                         then focus moves to its first field.
                      </p>
                      <p><a href="/guides/screen-reader">Test with a screen reader</a></p>
-                     <Balloon kind="speech">Dialog, Invite member</Balloon>
                   </div>
                   <div class="feature-show">
+                     <Balloon kind="speech">Supports VoiceOver and NVDA!</Balloon>
                      <pre><code>a1 sr transcript --since opened</code></pre>
                      <pre data-label="OUTPUT"><code>{withPracticeURL(transcriptSample, practiceURL)}</code></pre>
                   </div>
@@ -215,9 +215,9 @@ const reportAlt =
                         announced.
                      </p>
                      <p><a href="/guides/vitest">Test with Vitest</a></p>
-                     <Balloon kind="whisper" mirror>...</Balloon>
                   </div>
                   <div class="feature-show">
+                     <Balloon kind="speech" mirror>Vitest! Jest! Mocha!</Balloon>
                      <pre data-label="invite.test.ts"><code>{withPracticeURL(testSample, practiceURL)}</code></pre>
                      <pre data-label="OUTPUT"><code>{failureSample.trimEnd()}</code></pre>
                   </div>
@@ -237,9 +237,9 @@ const reportAlt =
                         that it is not, so the agent can fix the dialog and check again.
                      </p>
                      <p><a href="/guides/agents">Connect an AI agent</a></p>
-                     <Balloon kind="thought">Was the dialog announced?</Balloon>
                   </div>
                   <div class="feature-show">
+                     <Balloon kind="thought">Was the dialog announced?</Balloon>
                      <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
                      <pre data-label="AI AGENT PROMPT"><code>{agentPrompt}</code></pre>
                      <pre data-label="OUTPUT"><code>{agentResult.trimEnd()}</code></pre>
@@ -258,9 +258,9 @@ const reportAlt =
                         manual test, so you know what to check next.
                      </p>
                      <p><a href="/guides/violations">Fix what a scan found</a></p>
-                     <Balloon kind="shout" mirror>10 problems to fix</Balloon>
                   </div>
                   <div class="feature-show">
+                     <Balloon kind="signal" mirror>Scanning...</Balloon>
                      <pre><code>a1 check {practiceURL}</code></pre>
                      <pre data-label="OUTPUT"><code>{withPracticeURL(checkSample, practiceURL)}</code></pre>
                   </div>
@@ -441,9 +441,13 @@ const reportAlt =
    .feature--flip .feature-copy { order: 2; }
    .feature-copy > * + *, .feature-show > * + * { margin-top: var(--md); }
    .feature-copy p { color: var(--ink-soft); }
-   /* Each balloon sits under the copy, on the side nearer the code it quotes. */
-   .feature-copy > :global(.balloon) { margin-top: var(--2xl); margin-inline-start: auto; }
-   .feature--flip .feature-copy > :global(.balloon) { margin-inline: 0 auto; }
+   /*
+    * Each balloon sits on top of its terminal, and its tail overlaps the terminal's top
+    * edge. That holds at every width, because the two are stacked in one column. The side
+    * margins keep the tail clear of the Copy button in the terminal's corner.
+    */
+   .feature-show > :global(.balloon) { z-index: 3; margin-inline: auto 24%; margin-bottom: calc(-1 * var(--md) - 0.7rem); }
+   .feature-show > :global(.balloon--mirror) { margin-inline: min(26%, 100% - 16rem) auto; }
    .feature-show { min-width: 0; }
 
    /* Audit */
