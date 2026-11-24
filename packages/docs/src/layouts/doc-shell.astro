@@ -1,5 +1,6 @@
 ---
 import { Image } from 'astro:assets';
+import { Icon } from 'astro-icon/components';
 import ArrowLeft from '@lucide/astro/icons/arrow-left';
 import ArrowRight from '@lucide/astro/icons/arrow-right';
 import Minus from '@lucide/astro/icons/minus';
@@ -179,7 +180,7 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
                   </div>
                ))}
             </nav>
-            <p class="rail-foot"><a href={REPOSITORY_URL}>Source on GitHub</a></p>
+            <p class="rail-foot"><a class="icon-link" href={REPOSITORY_URL}><Icon name="mdi:github" aria-hidden="true" />Source on GitHub</a></p>
          </div>
          <div class="mobile-bar">
             <details class="route-drawer">

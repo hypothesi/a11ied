@@ -1,5 +1,6 @@
 ---
 import { Image } from 'astro:assets';
+import { Icon } from 'astro-icon/components';
 import reportSummary from '../assets/audit-report-summary.png';
 import logo from '../assets/logo.png';
 import Balloon from '../components/home/balloon.astro';
@@ -54,7 +55,7 @@ const reportAlt =
             <a href="/example-audit/">Example audit</a>
             <a href="/reference/cli">CLI reference</a>
             <a href="/compatibility">Compatibility</a>
-            <a href={REPOSITORY_URL}>GitHub</a>
+            <a class="icon-link" href={REPOSITORY_URL}><Icon name="mdi:github" aria-hidden="true" />GitHub</a>
          </nav>
          {hasSearch ? <pagefind-modal-trigger class="search-trigger" placeholder="Search the docs" hide-shortcut></pagefind-modal-trigger> : null}
       </header>
