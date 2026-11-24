@@ -16,7 +16,7 @@ const practiceURL = getPracticeURL(Astro);
 const hasSearch = import.meta.env.PROD;
 const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
 const description =
-   'a11ied is a CLI, testing library, and MCP server for automated screen reader and WCAG testing.';
+   'a11ied is a CLI, testing library, and MCP server for automated screen reader and accessibility testing.';
 const heroCommands = [
    `a1 sr start --sr virtual ${practiceURL}`,
    'a1 sr goto --role button --name "Invite member"',
@@ -66,7 +66,7 @@ const auditCommands = [
                   <h1>Automated screen reader and accessibility testing</h1>
                   <p class="lead">
                      <strong>a11ied</strong> is a CLI, testing library, and MCP server for automated
-                     screen reader and WCAG testing.
+                     screen reader and accessibility testing.
                   </p>
                   <p class="lead">
                      Let AI coding agents verify their own fixes, catch WCAG violations in CI, and
@@ -82,9 +82,9 @@ const auditCommands = [
                   <pre><code>{heroCommands}</code></pre>
                   <pre data-label="OUTPUT"><code>{expectFail.trimEnd()}</code></pre>
                   <figcaption>
-                     On our <a href="/demo/team">practice page</a>, this button opens a dialog. It
-                     appears on screen, and the screen reader says nothing. No scanner reports
-                     that. These five lines do.
+                     These five commands open a dialog on a <a href="/demo/team">demo page</a> and
+                     check that a screen reader announces it. Nothing is announced, so the check
+                     fails. A static scan cannot find this.
                   </figcaption>
                </figure>
             </div>
@@ -92,20 +92,23 @@ const auditCommands = [
 
          <section class="band band--ink" aria-labelledby="gap-heading">
             <div class="wrap">
-               <p class="kicker">Why a scan is not enough</p>
-               <h2 id="gap-heading">The scanner found 3 of 10</h2>
+               <h2 id="gap-heading">Static scans do not catch everything</h2>
                <p class="section-lead">
-                  The practice page has ten accessibility problems. A scan flags ten elements, and
-                  they add up to three of those problems. Two more need a rule you name. The last
-                  five appear only when something presses Tab, opens the dialog, and reads what is
-                  announced. a11ied does that part too.
+                  A scanner reads a page's markup. It does not press Tab, open a dialog, or
+                  listen to a screen reader. a11ied does all three, so you can test the parts of
+                  accessibility that depend on how a page behaves.
                </p>
                <ol class="tally">
-                  <li><span class="tally-figure">3</span><span class="tally-label">found by a scan: missing alt text, unnamed buttons, low contrast</span></li>
-                  <li><span class="tally-figure">2</span><span class="tally-label">found by rules a default scan skips: heading order, a dialog with no name</span></li>
-                  <li><span class="tally-figure">5</span><span class="tally-label">found by the keyboard and a screen reader: filters the keyboard cannot reach, a filter state that is never announced, a silent dialog, a field with no label, a status message nobody hears</span></li>
+                  <li><span class="tally-figure">86</span><span class="tally-label">success criteria in WCAG 2.2</span></li>
+                  <li><span class="tally-figure">28</span><span class="tally-label">have an automated scanner rule, and each rule checks only part of its criterion</span></li>
+                  <li><span class="tally-figure">0</span><span class="tally-label">can be passed by a scan alone</span></li>
                </ol>
-               <p><a class="button button--yellow" href="/guides/demo">Find all ten yourself</a></p>
+               <p class="section-lead">
+                  The rest takes a keyboard and a screen reader: whether focus moves into a
+                  dialog, whether an error message is announced, whether every control can be
+                  reached.
+               </p>
+               <p><a class="button button--yellow" href="/test-methods">See how each criterion is tested</a></p>
             </div>
          </section>
 
@@ -115,14 +118,14 @@ const auditCommands = [
 
                <article class="feature">
                   <div class="feature-copy">
-                     <h3>Scan a page, and see what the scan leaves undone</h3>
+                     <h3>Scan a page for accessibility failures</h3>
                      <p>
-                        One command lists each failing element with the WCAG criterion it breaks
+                        One command lists every failing element with the WCAG criterion it breaks
                         and a command that looks up the fix.
                      </p>
                      <p>
-                        Then it lists the criteria this page triggers that no scanner can decide.
-                        Here the scan flags ten elements, and 38 criteria still need a person.
+                        It also gives you a checklist of the criteria on that page that need a
+                        manual test, so you know what to check next.
                      </p>
                      <p><a href="/guides/violations">Fix an axe violation</a></p>
                   </div>
@@ -134,15 +137,16 @@ const auditCommands = [
 
                <article class="feature feature--flip">
                   <div class="feature-copy">
-                     <h3>Read what a screen reader says</h3>
+                     <h3>Capture a log of all screen reader output</h3>
                      <p>
                         Drive VoiceOver on macOS, NVDA on Windows, or a simulated screen reader that
                         runs on any machine, all with the same commands. Move by heading, open a
-                        dialog, send a form, and read back everything that was announced.
+                        dialog, send a form.
                      </p>
                      <p>
-                        This is the dialog from the top of the page after the fix. The same steps
-                        now announce the dialog and move focus to its first field.
+                        Everything the screen reader announces is logged in order, and you can save
+                        the log to a file. In this example a dialog opens: its name is announced,
+                        then focus moves to its first field.
                      </p>
                      <p><a href="/guides/screen-reader">Test with a screen reader</a></p>
                   </div>
@@ -154,15 +158,15 @@ const auditCommands = [
 
                <article class="feature">
                   <div class="feature-copy">
-                     <h3>Tests that fail when the announcement is wrong</h3>
+                     <h3>Write end-to-end tests for screen reader behavior</h3>
                      <p>
-                        Write screen reader assertions next to your other tests, in Vitest, Jest,
-                        Mocha, or Playwright Test. Calls chain without <code>await</code>, and checks
-                        wait for late announcements.
+                        Drive a screen reader from Vitest, Jest, Mocha, or Playwright Test. Move by
+                        heading or landmark, press keys, and type into fields. Then assert on what
+                        was announced, where the cursor is, and in what order.
                      </p>
                      <p>
-                        This test passes on the fixed page. Pointed at the broken one, it fails and
-                        prints what the screen reader said: nothing.
+                        When a test fails, the error shows what the screen reader said. In this
+                        example a dialog opened and nothing was announced.
                      </p>
                      <p><a href="/guides/vitest">Test with Vitest</a></p>
                   </div>
@@ -174,16 +178,17 @@ const auditCommands = [
 
                <article class="feature feature--flip">
                   <div class="feature-copy">
-                     <h3>Agents that check their own work</h3>
+                     <h3>Give your AI coding agent accessibility tools</h3>
                      <p>
-                        A coding agent can write a dialog. It cannot hear one. Add one block of
-                        configuration and Claude Code, Cursor, or any other MCP client gets 37
-                        tools: scan a page, drive a screen reader, check a widget against its ARIA
-                        pattern, look up a criterion.
+                        A coding agent can write a dialog, but it has no way to check what a screen
+                        reader will announce. Add one block of configuration, and Claude Code,
+                        Cursor, or any other MCP client gets 37 tools: scan a page, drive a screen
+                        reader, check a widget against its ARIA pattern, look up a criterion.
                      </p>
                      <p>
-                        Below is what the agent gets back when it runs the check from the top of
-                        this page. With that, it can fix the dialog and run the same check again.
+                        In this example the agent asks whether a dialog is announced. The tool
+                        answers that nothing was, which is what the agent needs to fix the dialog
+                        and check again.
                      </p>
                      <p><a href="/guides/agents">Use with an AI agent</a></p>
                   </div>
@@ -196,18 +201,21 @@ const auditCommands = [
 
                <article class="feature">
                   <div class="feature-copy">
-                     <h3>A WCAG audit, run by a team of agents</h3>
+                     <h3>Run a WCAG audit with your own AI agents</h3>
                      <p>
-                        <code>a1 audit</code> splits a site into small units of work. Several agents
-                        test in parallel, every result is saved as it arrives, and a crashed agent
-                        loses nothing.
+                        Your coding agent does the testing: Claude Code, Codex, Cursor, or any agent
+                        that can run commands. <code>a1 audit</code> does not start agents. It splits
+                        the site into small units of work, hands them out, saves every result as it
+                        arrives, and writes the report.
                      </p>
                      <p>
                         The report lists each finding with a screenshot of the failing element, what
-                        to fix first, and what could not be verified. It never claims conformance it
-                        cannot support.
+                        to fix first, and what could not be verified.
                      </p>
-                     <p><a href="/guides/audit">Run an audit</a></p>
+                     <p>
+                        <a href="/example-audit/">Browse an example report</a>, or read how to
+                        <a href="/guides/audit">run an audit</a>.
+                     </p>
                   </div>
                   <div class="feature-show">
                      <pre><code>{auditCommands}</code></pre>
@@ -218,35 +226,35 @@ const auditCommands = [
 
          <section class="band band--yellow" aria-labelledby="more-heading">
             <div class="wrap">
-               <h2 id="more-heading">And the rest of the toolbox</h2>
+               <h2 id="more-heading">More in the toolbox</h2>
                <ul class="cards">
                   <li class="card">
-                     <h3>WCAG in your terminal</h3>
+                     <h3>Look up WCAG from the terminal</h3>
                      <p>All 86 criteria of WCAG 2.2 with the W3C's guidance, and a test procedure for the 55 at Levels A and AA. It ships in the package and works offline.</p>
                      <p><code>a1 wcag 4.1.3</code></p>
                   </li>
                   <li class="card">
-                     <h3>Widgets checked against the ARIA guide</h3>
+                     <h3>Check widgets against W3C ARIA patterns</h3>
                      <p>Point it at your combobox or dialog. It presses every key the W3C's pattern documents and reports the ones that do nothing. 68 examples are built in.</p>
                      <p><code>a1 pattern check</code></p>
                   </li>
                   <li class="card">
-                     <h3>CI that fails for the right reason</h3>
+                     <h3>Fail a build on new accessibility problems</h3>
                      <p>One exit code means a check failed. Baselines let an existing site fail only on new problems. Reports come out as SARIF or EARL.</p>
                      <p><code>a1 axe --fail-on serious</code></p>
                   </li>
                   <li class="card">
-                     <h3>Screenshots of the hard cases</h3>
+                     <h3>Capture a page at any size, zoom, or focus stop</h3>
                      <p>Capture a page at 320 pixels wide, at 200 percent zoom, with WCAG text spacing, or on the fourth Tab stop.</p>
                      <p><code>a1 capture</code></p>
                   </li>
                   <li class="card">
-                     <h3>TalkBack on Android</h3>
+                     <h3>Print what TalkBack says on Android</h3>
                      <p>Turn TalkBack on from your desk and print what it says as focus moves through an app.</p>
                      <p><code>a1 talkback walk</code></p>
                   </li>
                   <li class="card">
-                     <h3>What screen readers support</h3>
+                     <h3>See what each screen reader supports</h3>
                      <p>Screen reader results for 60 ARIA and HTML features. Most come from W3C ARIA-AT reports for VoiceOver, NVDA, and JAWS. a11ied recorded the rest.</p>
                      <p><a href="/support">Feature support</a></p>
                   </li>
@@ -256,18 +264,17 @@ const auditCommands = [
 
          <section class="band" aria-labelledby="honest-heading">
             <div class="wrap narrow">
-               <p class="kicker">No false comfort</p>
-               <h2 id="honest-heading">It tells you what it did not test</h2>
+               <h2 id="honest-heading">Every result shows where it came from</h2>
                <p class="section-lead">
-                  A scan cannot fully decide any of the 86 criteria in WCAG 2.2. a11ied lists the
-                  criteria your page triggers that still need a person, labels every simulated
-                  result as simulated, and never reports a clean scan as a pass.
+                  a11ied labels each result as a scan, a screen reader log, or a judgment, and
+                  names the screen reader that produced it. A clean scan is reported as a clean
+                  scan, never as a pass.
                </p>
                <dl class="defs">
                   <dt>A scan</dt>
-                  <dd>Finds failures. It never proves a pass.</dd>
-                  <dt>A transcript</dt>
-                  <dd>Shows what a screen reader announced, and says which screen reader.</dd>
+                  <dd>Finds failures, with the element and the WCAG criterion for each.</dd>
+                  <dt>A screen reader log</dt>
+                  <dd>Shows what was announced, and says whether the screen reader was real or simulated.</dd>
                   <dt>A judgment</dt>
                   <dd>Decides the rest. A person or an agent makes it, and the audit records it.</dd>
                </dl>
@@ -283,10 +290,10 @@ const auditCommands = [
 
          <section class="band band--ink band--cta" aria-labelledby="cta-heading">
             <div class="wrap narrow">
-               <h2 id="cta-heading">Your first transcript is five minutes away</h2>
+               <h2 id="cta-heading">Run your first check in five minutes</h2>
                <p class="section-lead">
-                  Install it, scan the practice page, and read what a screen reader says on it.
-                  There is no account to create, and the simulated screen reader needs no setup.
+                  Install it, scan a page, and capture what a screen reader announces on it. There
+                  is no account to create, and the simulated screen reader needs no setup.
                </p>
                <pre class="install"><code>npm install --global a11ied</code></pre>
                <div class="actions">

@@ -21,7 +21,23 @@ export const docsLinks: DocSection[] = [
       ],
    },
    {
-      title: 'Check a page',
+      title: 'Concepts',
+      links: [
+         { href: '/screen-readers', label: 'Screen readers' },
+         { href: '/test-methods', label: 'Test methods' },
+         { href: '/relevant-criteria', label: 'Relevant criteria' },
+      ],
+   },
+   {
+      title: 'AI agents',
+      links: [
+         { href: '/guides/agents', label: 'Use with an AI agent' },
+         { href: '/guides/agent-skill', label: 'Install the agent skill' },
+         { href: '/guides/audit', label: 'Run an audit' },
+      ],
+   },
+   {
+      title: 'Test from the terminal',
       links: [
          { href: '/guides/screen-reader', label: 'Test with a screen reader' },
          { href: '/guides/violations', label: 'Fix an axe violation' },
@@ -36,22 +52,6 @@ export const docsLinks: DocSection[] = [
          { href: '/guides/vitest', label: 'Test with Vitest' },
          { href: '/guides/scripting', label: 'Script the CLI' },
          { href: '/guides/ci', label: 'Run in CI' },
-      ],
-   },
-   {
-      title: 'AI agents',
-      links: [
-         { href: '/guides/agents', label: 'Use with an AI agent' },
-         { href: '/guides/agent-skill', label: 'Install the agent skill' },
-         { href: '/guides/audit', label: 'Run an audit' },
-      ],
-   },
-   {
-      title: 'Concepts',
-      links: [
-         { href: '/screen-readers', label: 'Screen readers' },
-         { href: '/test-methods', label: 'Test methods' },
-         { href: '/relevant-criteria', label: 'Relevant criteria' },
       ],
    },
    {
