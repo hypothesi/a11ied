@@ -197,7 +197,7 @@ const reportAlt =
                   <div class="feature-show">
                      <Balloon kind="speech">Supports VoiceOver and NVDA!</Balloon>
                      <pre><code>a1 sr transcript --since opened</code></pre>
-                     <pre data-label="OUTPUT"><code>{withPracticeURL(transcriptSample, practiceURL)}</code></pre>
+                     <pre data-label="OUTPUT" data-reveal><code>{withPracticeURL(transcriptSample, practiceURL)}</code></pre>
                   </div>
                </article>
 
@@ -219,7 +219,7 @@ const reportAlt =
                   <div class="feature-show">
                      <Balloon kind="speech" mirror>Vitest! Jest! Mocha!</Balloon>
                      <pre data-label="invite.test.ts"><code>{withPracticeURL(testSample, practiceURL)}</code></pre>
-                     <pre data-label="OUTPUT"><code>{failureSample.trimEnd()}</code></pre>
+                     <pre data-label="OUTPUT" data-reveal><code>{failureSample.trimEnd()}</code></pre>
                   </div>
                </article>
 
@@ -242,7 +242,7 @@ const reportAlt =
                      <Balloon kind="thought">Was the dialog announced?</Balloon>
                      <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
                      <pre data-label="AI AGENT PROMPT"><code>{agentPrompt}</code></pre>
-                     <pre data-label="OUTPUT"><code>{agentResult.trimEnd()}</code></pre>
+                     <pre data-label="OUTPUT" data-reveal><code>{agentResult.trimEnd()}</code></pre>
                   </div>
                </article>
 
@@ -262,7 +262,7 @@ const reportAlt =
                   <div class="feature-show">
                      <Balloon kind="signal" mirror>Scanning...</Balloon>
                      <pre><code>a1 check {practiceURL}</code></pre>
-                     <pre data-label="OUTPUT"><code>{withPracticeURL(checkSample, practiceURL)}</code></pre>
+                     <pre data-label="OUTPUT" data-reveal><code>{withPracticeURL(checkSample, practiceURL)}</code></pre>
                   </div>
                </article>
             </div>

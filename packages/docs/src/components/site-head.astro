@@ -88,7 +88,7 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
    kbd { padding: 0.1em 0.4em; background: var(--paper-light); border: 1px solid var(--ink); border-bottom-width: 2px; }
    pre { position: relative; overflow-x: auto; margin: 0; padding: 2.5rem var(--md) var(--md); background: var(--ink); color: var(--paper-light); border: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--red); font-size: 0.86rem; line-height: 1.65; tab-size: 3; }
    pre code { overflow-wrap: normal; font-size: inherit; }
-   .code-block-tools { position: absolute; inset: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: var(--md); padding: 0.4rem 0.4rem 0 var(--md); color: var(--yellow); font: 700 0.72rem/1 var(--display); letter-spacing: 0.12em; }
+   .code-block-tools { position: absolute; inset: 0 0 auto; display: flex; min-height: 2rem; align-items: center; justify-content: space-between; gap: var(--md); padding: 0.4rem 0.4rem 0 var(--md); color: var(--yellow); font: 700 0.72rem/1 var(--display); letter-spacing: 0.12em; }
    .copy-button { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 1.6rem; margin: 0; padding: 0.2rem 0.5rem; background: transparent; color: inherit; border: 1px solid currentColor; border-radius: 0; font: inherit; cursor: pointer; }
    .copy-button:hover { background: var(--yellow); color: var(--ink); border-color: var(--yellow); }
    .copy-button svg { width: 0.9rem; height: 0.9rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
@@ -103,6 +103,13 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
    pre:is([data-label="OUTPUT"], [data-label="AI AGENT PROMPT"]) { background: var(--paper-light); color: var(--ink); border-color: var(--ink); border-left-width: 4px; }
    pre:is([data-label="OUTPUT"], [data-label="AI AGENT PROMPT"]) .code-block-tools { color: var(--ink-soft); }
    pre:is([data-label="OUTPUT"], [data-label="AI AGENT PROMPT"]) .copy-button:hover { background: var(--ink); color: var(--paper-light); border-color: var(--ink); }
+   /* An output hidden behind a button, and the lines that print when the button is pressed. */
+   pre.output--collapsed > code { display: none; }
+   .reveal-button { display: block; margin: var(--xs) auto; padding: 0.6rem 1rem; background: var(--yellow); color: var(--ink); border: 2px solid var(--ink); border-radius: 0; box-shadow: 3px 3px 0 var(--ink); font: 700 0.9rem/1 var(--display); letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; user-select: none; }
+   .reveal-line { display: block; min-height: 1lh; opacity: 0; animation: reveal-line 180ms ease-out forwards; }
+   @keyframes reveal-line { from { opacity: 0; transform: translateY(0.35em); } to { opacity: 1; transform: none; } }
+   @media (hover: hover) { .reveal-button:hover { background: var(--ink); color: var(--yellow); } }
+   @media (prefers-reduced-motion: reduce) { .reveal-line { opacity: 1; animation: none; } }
    pre[data-label="AI AGENT PROMPT"] { border-left-color: var(--blue-dark); font-family: var(--body); font-size: 1rem; white-space: pre-wrap; }
    pre[data-label="AI AGENT PROMPT"] code { font-family: inherit; }
    /* Terms and their descriptions */
@@ -135,6 +142,8 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
    :is(.pf-result-excerpt, .pf-heading-excerpt, .pf-searchbox-result-excerpt) mark { padding-inline: 0.15em; background: var(--yellow) !important; }
    .search-trigger { display: block; }
 
+   .icon-link { display: inline-flex; align-items: center; gap: 0.4em; }
+   .icon-link > svg { flex: none; width: 1.25em; height: 1.25em; }
    .heading-link { color: inherit; font-weight: inherit; text-decoration: none; }
    .heading-link:hover { text-decoration: underline; text-decoration-thickness: 0.08em; }
 
@@ -147,5 +156,3 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
       pre:not([data-label="OUTPUT"]), pre:not([data-label="OUTPUT"]) code { white-space: pre-wrap; overflow-wrap: anywhere; }
    }
 </style>
-   .icon-link { display: inline-flex; align-items: center; gap: 0.4em; }
-   .icon-link > svg { flex: none; width: 1.25em; height: 1.25em; }
