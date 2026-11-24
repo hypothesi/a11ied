@@ -33,6 +33,7 @@ Two ways to load a fixture, and the difference matters:
 | `title-present.html`       | The same layout with a `title`, linking back to `title-missing.html`. |
 | `strict-csp.html`          | A page whose Content Security Policy blocks every script, for checking that the reader still attaches. |
 | `tall-page.html`           | Twenty bands of 1000 px, each a different color: 20,000 px in all, taller than the 16,384 px Chromium draws in one piece. A full-page capture has to show every band once. |
+| `entry-animation.html`     | Text that fades in over 1.5 seconds and has full contrast once it has, beside a spinner that never stops. A scan has to wait for the fade and must not wait for the spinner. |
 
 ## Pages that need their scripts
 

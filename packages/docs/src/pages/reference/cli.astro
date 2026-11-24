@@ -274,7 +274,7 @@ a1 pattern pending http://localhost:3000 --pattern combobox-select-only</code></
          <div class="route-list">
             <div class="route-row"><code>&lt;targets...&gt;</code><span>One or more http(s) URLs or file paths, or <code>-</code> for HTML on stdin. Multiple targets print one report each.</span></div>
             <div class="route-row"><code>--html &lt;markup&gt;</code><span>Load inline HTML instead of the positional target.</span></div>
-            <div class="route-row"><code>--timeout &lt;ms&gt;</code><span>Timeout for loading the target, in milliseconds. Defaults to 10000.</span></div>
+            <div class="route-row"><code>--timeout &lt;ms&gt;</code><span>Timeout for loading the target, in milliseconds. Defaults to 10000. Once the page has loaded, the scan waits up to 3 seconds for animations that are playing to finish, so a page that fades in is scanned as it ends up. An animation that repeats forever is not waited for.</span></div>
             <div class="route-row"><code>--level &lt;level&gt;</code><span>Run the rules mapped to one WCAG level and every level below it.</span></div>
             <div class="route-row"><code>--criterion &lt;criterion&gt;</code><span>Run the rules mapped to one criterion, by ID or slug.</span></div>
             <div class="route-row"><code>--rule &lt;ruleId...&gt;</code><span>Run named axe rules. Repeat the flag for more than one.</span></div>

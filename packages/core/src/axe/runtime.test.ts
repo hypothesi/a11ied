@@ -81,6 +81,22 @@ describe('axe runtime', () => {
    );
 });
 
+describe('axe runtime on a page with an entry animation', () => {
+   it(
+      'scans the settled page instead of a frame of its fade-in',
+      async () => {
+         const result = await runAxe(loadFor('entry-animation.html'), {
+            wcagVersion: '2.2',
+            ruleIds: ['color-contrast'],
+         });
+
+         expect(result.violations).toEqual([]);
+         expect(result.passes.map((entry) => entry.id)).toEqual(['color-contrast']);
+      },
+      AXE_RUNTIME_TIMEOUT_MS,
+   );
+});
+
 describe('axe runtime explicit rules', () => {
    it(
       'preserves incomplete results when the selected rule reports them',
