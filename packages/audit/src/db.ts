@@ -181,7 +181,13 @@ export function transact<TResult>(audit: Audit, work: () => TResult): TResult {
       audit.db.exec('COMMIT');
       return result;
    } catch (error) {
-      audit.db.exec('ROLLBACK');
+      /*
+       * SQLite rolls back by itself on a full disk, an I/O error, or an OR ROLLBACK
+       * conflict. A second ROLLBACK would then throw and replace the error that matters.
+       */
+      if (audit.db.isTransaction) {
+         audit.db.exec('ROLLBACK');
+      }
       throw error;
    }
 }
