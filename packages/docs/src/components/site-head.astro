@@ -126,7 +126,13 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
    .panel-kicker { margin: 0; color: var(--red-dark); font: 700 0.76rem/1 var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
 
    /* Search, drawn by Pagefind's components */
-   :root { --pf-font: var(--body); --pf-text: var(--ink); --pf-text-secondary: var(--ink-soft); --pf-text-muted: var(--ink-soft); --pf-background: var(--paper-light); --pf-border: var(--ink); --pf-border-focus: var(--blue); --pf-border-radius: 0; --pf-hover: var(--yellow-soft); --pf-mark: var(--yellow); --pf-outline-focus: var(--blue); }
+   :root { --pf-font: var(--body); --pf-text: var(--ink); --pf-text-secondary: var(--ink-soft); --pf-text-muted: var(--ink-soft); --pf-background: var(--paper-light); --pf-border: var(--ink); --pf-border-focus: var(--blue); --pf-border-radius: 0; --pf-hover: var(--yellow-soft); --pf-mark: var(--ink); --pf-outline-focus: var(--blue); }
+   /*
+    * A matched word in a search result is ink on a yellow highlight. Pagefind colors only
+    * the text and forces a transparent background with a selector that outranks any other,
+    * so the highlight needs !important.
+    */
+   :is(.pf-result-excerpt, .pf-heading-excerpt, .pf-searchbox-result-excerpt) mark { padding-inline: 0.15em; background: var(--yellow) !important; }
    .search-trigger { display: block; }
 
    .heading-link { color: inherit; font-weight: inherit; text-decoration: none; }
