@@ -8,7 +8,8 @@
       ".claude/**",
       "styles/**",
       "packages/wcag-data/test/apg/**",
-      "packages/cli/test/fixtures/**"
+      "packages/cli/test/fixtures/**",
+      "packages/docs/public/example-audit/**"
    ],
    "printWidth": 90,
    "tabWidth": 3,

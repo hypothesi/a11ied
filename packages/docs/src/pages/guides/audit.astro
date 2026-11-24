@@ -3,6 +3,7 @@ import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
 
 const toc = [
+   { id: 'who', label: 'Who does the testing' },
    { id: 'start', label: 'Start an audit' },
    { id: 'how', label: 'How the work is divided' },
    { id: 'scope', label: 'Choose the scope' },
@@ -17,18 +18,39 @@ const toc = [
 
 <DocShell
    title="Run an audit"
-   summary="<p><code>a1 audit</code> runs a WCAG audit of a site, a page, a feature, or a mobile app, with AI agents doing the testing. It splits the work into small units, lets several agents test in parallel, saves every result as it arrives, and writes a report you can hand to a client.</p>"
+   summary="<p><code>a1 audit</code> organizes a WCAG audit that your own AI coding agent carries out. It splits the site into small units of work, hands them to the agent's workers, saves every result as it arrives, and writes a report you can hand to a client.</p>"
    links={docsLinks}
    toc={toc}
 >
    <section>
-      <h2 id="start">Start an audit</h2>
+      <h2 id="who">Who does the testing</h2>
       <p>
-         The quickest way is to ask an agent that has the
-         <a href="/guides/agent-skill"><code>a11ied-audit</code> skill</a>.
+         Your AI coding agent does. <code>a1 audit</code> does not start agents and does not
+         call a model. It is the record keeper: it holds the list of work, gives a unit to
+         whoever asks for one, checks each result that comes back, and builds the report.
       </p>
+      <dl class="defs">
+         <dt>Which agents</dt>
+         <dd>Any coding agent that can run terminal commands: Claude Code, Codex, Cursor, GitHub Copilot, Windsurf, and others. The <a href="/guides/agent-skill"><code>a11ied-audit</code> skill</a> teaches the agent the procedure.</dd>
+         <dt>How they start</dt>
+         <dd>You ask your agent for an audit. That agent leads: it sets the scope, then starts workers as its own subagents, usually three to six. An agent that cannot start subagents does the units itself, one after another.</dd>
+         <dt>What a worker does</dt>
+         <dd>It runs <code>a1 audit next</code> to get a unit, tests the page with the other <code>a1</code> commands, and runs <code>a1 audit submit</code> with its results. Then it asks for the next unit.</dd>
+         <dt>Without the skill</dt>
+         <dd>Open several agent sessions yourself and tell each one to loop on <code>a1 audit next</code> under its own worker name. The work packet it prints carries the instructions.</dd>
+      </dl>
+      <p>
+         To see what comes out, browse the <a href="/example-audit/">example report</a>. It
+         is a real audit of the docs' practice page, a demo team settings screen, tested by
+         three workers and edited by a lead agent.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="start">Start an audit</h2>
+      <p>Install the <a href="/guides/agent-skill">agent skills</a>, then ask your agent.</p>
       <pre data-label="AI AGENT PROMPT"><code>Audit https://example.com against WCAG 2.2 AA with a11ied. Do not submit the contact form. Use four workers.</code></pre>
-      <p>The agent runs these commands. You can run them yourself.</p>
+      <p>The lead agent runs these commands first. You can run them yourself.</p>
       <pre><code>a1 audit init https://example.com --rule "Do not submit the contact form"
 a1 audit discover
 a1 audit scan
@@ -106,8 +128,9 @@ a1 audit status</code></pre>
    <section>
       <h2 id="workers">Run the workers</h2>
       <p>
-         A worker is an agent in a loop: claim a unit, test it, submit, repeat. Start several
-         with different names and they take different units.
+         A worker is one of your agent's subagents, or an agent session you opened, running a
+         loop: claim a unit, test it, submit, repeat. Workers with different names take
+         different units.
       </p>
       <pre><code>a1 audit next --worker w1
 a1 audit submit P1.keyboard --worker w1 --file result.json</code></pre>
@@ -165,7 +188,9 @@ a1 audit log --unit P3.forms</code></pre>
       <p>
          This writes <code>audit-report.html</code>, <code>.md</code>, and <code>.json</code>
          to the audit's <code>report/</code> folder. The HTML file is self-contained, with
-         screenshots inside it. Print it from a browser for a PDF.
+         screenshots inside it. Print it from a browser for a PDF. The
+         <a href="/example-audit/">example report</a> shows the HTML file as it is written,
+         and the same audit is there <a href="/example-audit/audit-report.md">as Markdown</a>.
       </p>
       <dl class="defs">
          <dt>Summary</dt>

@@ -14,10 +14,10 @@ const fixedURL = `${practiceURL}fixed/`;
 const toc = [
    { id: 'page', label: 'The two pages' },
    { id: 'scan', label: 'Problems 1 to 3: the scan' },
-   { id: 'rules', label: 'Problems 4 and 5: rules you name' },
+   { id: 'rules', label: 'Problems 4 and 5: rules you run by name' },
    { id: 'keyboard', label: 'Problems 6 and 7: the keyboard' },
    { id: 'dialog', label: 'Problem 8: opening the dialog' },
-   { id: 'label', label: 'Problem 9: a pass that is not one' },
+   { id: 'label', label: 'Problem 9: a field with no label' },
    { id: 'status', label: 'Problem 10: the confirmation' },
    { id: 'agent', label: 'The same run from an agent' },
    { id: 'fixes', label: 'The ten fixes' },
@@ -26,7 +26,7 @@ const toc = [
 
 <DocShell
    title="Practice on a broken page"
-   summary="<p>The practice page has ten accessibility problems. A second copy has all ten fixed. Run each command below against both and compare. A scan finds three of the problems. The other seven take a named rule, the keyboard, or a screen reader.</p>"
+   summary="<p>This guide uses a practice page: a team settings screen that the docs serve, with ten accessibility problems built in. A second copy has all ten fixed. Run each command below against both and compare. A scan finds three of the problems. The other seven take a named rule, the keyboard, or a screen reader.</p>"
    links={docsLinks}
    toc={toc}
 >
@@ -82,7 +82,7 @@ const toc = [
    </section>
 
    <section>
-      <h2 id="rules">Problems 4 and 5: rules you name</h2>
+      <h2 id="rules">Problems 4 and 5: rules you run by name</h2>
       <p>
          A default scan runs the axe rules that map to a WCAG criterion. axe has more rules
          that it tags as best practice. Run one of those by name with
@@ -190,7 +190,7 @@ a1 sr read --phrase</code></pre>
    </section>
 
    <section>
-      <h2 id="label">Problem 9: a pass that is not one</h2>
+      <h2 id="label">Problem 9: a field with no label</h2>
       <p>
          Look at press 4 in the table above. The broken filter field is
          <code>&lt;input type="search" placeholder="Filter members"&gt;</code> with no label.
@@ -283,6 +283,12 @@ a1 sr expect "Invitation sent" --since invite</code></pre>
             </tbody>
          </table>
       </div>
+      <p>
+         These ten were built in on purpose. A full audit of the same page found 14, some of
+         them beyond the ten, such as text field borders with too little contrast. Browse
+         the <a href="/example-audit/">example audit report</a> to see how an audit writes
+         them up.
+      </p>
       <p>
          Now run the same commands on your own page: <code>a1 check</code> first,
          <code>a1 tree</code> for names and roles, then <code>a1 sr</code> for what neither
