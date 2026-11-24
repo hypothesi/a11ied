@@ -40,7 +40,7 @@ export const docsLinks: DocSection[] = [
       title: 'Test from the terminal',
       links: [
          { href: '/guides/screen-reader', label: 'Test with a screen reader' },
-         { href: '/guides/violations', label: 'Fix what a scan found' },
+         { href: '/guides/violations', label: 'Fix scan failures' },
          { href: '/guides/recording', label: 'Record a screen reader session' },
          { href: '/guides/troubleshooting', label: 'Troubleshooting' },
       ],

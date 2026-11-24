@@ -12,15 +12,15 @@ import wcagStatus from '../../samples/wcag-413.txt?raw';
 const practiceURL = getPracticeURL(Astro);
 const fixedURL = `${practiceURL}fixed/`;
 const toc = [
-   { id: 'page', label: 'The two pages' },
-   { id: 'scan', label: 'Scan the page (problems 1 to 3)' },
-   { id: 'rules', label: 'Run axe rules by name (problems 4 and 5)' },
-   { id: 'keyboard', label: 'Press Tab through the page (problems 6 and 7)' },
-   { id: 'dialog', label: 'Open the dialog with a screen reader (problem 8)' },
-   { id: 'label', label: 'Read a form field with a screen reader (problem 9)' },
-   { id: 'status', label: 'Check that a confirmation is announced (problem 10)' },
+   { id: 'page', label: 'The broken page and the fixed page' },
+   { id: 'scan', label: 'Scan the page' },
+   { id: 'rules', label: 'Run axe rules by name' },
+   { id: 'keyboard', label: 'Press Tab through the page' },
+   { id: 'dialog', label: 'Open the dialog with a screen reader' },
+   { id: 'label', label: 'Read a form field with a screen reader' },
+   { id: 'status', label: 'Check that a confirmation is announced' },
    { id: 'agent', label: 'Give the same tests to an AI agent' },
-   { id: 'fixes', label: 'The ten fixes' },
+   { id: 'fixes', label: 'How each problem is fixed' },
 ];
 ---
 
@@ -31,7 +31,7 @@ const toc = [
    toc={toc}
 >
    <section>
-      <h2 id="page">The two pages</h2>
+      <h2 id="page">The broken page and the fixed page</h2>
       <dl class="defs">
          <dt><a href="/demo/team">The broken page</a></dt>
          <dd><code>{practiceURL}</code></dd>
@@ -53,7 +53,7 @@ const toc = [
    </section>
 
    <section>
-      <h2 id="scan">Scan the page (problems 1 to 3)</h2>
+      <h2 id="scan">Scan the page</h2>
       <p>Start with <code>a1 check</code> on any page you have not tested before.</p>
       <pre><code>a1 check {practiceURL}</code></pre>
       <pre data-label="OUTPUT"><code>{withPracticeURL(checkBroken, practiceURL)}</code></pre>
@@ -82,7 +82,7 @@ const toc = [
    </section>
 
    <section>
-      <h2 id="rules">Run axe rules by name (problems 4 and 5)</h2>
+      <h2 id="rules">Run axe rules by name</h2>
       <p>
          A default scan runs the axe rules that map to a WCAG criterion. axe has more rules
          that it tags as best practice. Run one of those by name with
@@ -113,7 +113,7 @@ a1 tree '{fixedURL}#invite' --role dialog</code></pre>
    </section>
 
    <section>
-      <h2 id="keyboard">Press Tab through the page (problems 6 and 7)</h2>
+      <h2 id="keyboard">Press Tab through the page</h2>
       <p>List the buttons the accessibility tree reports.</p>
       <pre><code>a1 tree {practiceURL} --role button</code></pre>
       <pre data-label="OUTPUT"><code>{treeButton.trimEnd()}</code></pre>
@@ -159,7 +159,7 @@ a1 sr press Tab --phrase</code></pre>
    </section>
 
    <section>
-      <h2 id="dialog">Open the dialog with a screen reader (problem 8)</h2>
+      <h2 id="dialog">Open the dialog with a screen reader</h2>
       <p>Move to the Invite member button, press it, and read where the cursor is.</p>
       <pre><code>a1 sr goto --role button --name "Invite member"
 a1 sr activate
@@ -190,7 +190,7 @@ a1 sr read --phrase</code></pre>
    </section>
 
    <section>
-      <h2 id="label">Read a form field with a screen reader (problem 9)</h2>
+      <h2 id="label">Read a form field with a screen reader</h2>
       <p>
          The filter field on the broken page is
          <code>&lt;input type="search" placeholder="Filter members"&gt;</code> with no label.
@@ -206,7 +206,7 @@ a1 sr read --phrase</code></pre>
    </section>
 
    <section>
-      <h2 id="status">Check that a confirmation is announced (problem 10)</h2>
+      <h2 id="status">Check that a confirmation is announced</h2>
       <p>
          With the dialog open, fill in the form and send it. The checkpoint marks the
          transcript so that <code>sr expect</code> reads only what came after it. The first
@@ -263,7 +263,7 @@ a1 sr expect "Invitation sent" --since invite</code></pre>
    </section>
 
    <section>
-      <h2 id="fixes">The ten fixes</h2>
+      <h2 id="fixes">How each problem is fixed</h2>
       <div class="table-wrap">
          <table>
             <thead>

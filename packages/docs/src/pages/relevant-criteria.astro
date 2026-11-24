@@ -7,7 +7,7 @@ import assessment from '../samples/relevance-assessment.json.txt?raw';
 const toc = [
    { id: 'what', label: 'What relevance is' },
    { id: 'signals', label: 'What a1 looks for' },
-   { id: 'states', label: 'The four states' },
+   { id: 'states', label: 'What each state means' },
    { id: 'see', label: 'See why a criterion is listed' },
    { id: 'limits', label: 'Limits of relevance detection' },
 ];
@@ -15,7 +15,7 @@ const toc = [
 
 <DocShell
    title="Relevant criteria"
-   summary="<p><code>a1 check</code> looks at what a page is made of and lists the WCAG criteria worth checking on it. Not every criterion applies to every page: a page with no form has no form errors to test.</p>"
+   summary="<p><code>a1 check</code> looks at what a page is made of and lists the WCAG criteria worth checking on it. Not every criterion applies to every page: For example, a page with no form has no form errors to test.</p>"
    links={docsLinks}
    toc={toc}
 >
@@ -53,7 +53,7 @@ const toc = [
    </section>
 
    <section>
-      <h2 id="states">The four states</h2>
+      <h2 id="states">What each state means</h2>
       <dl class="defs">
          <dt><code>relevant</code></dt>
          <dd>The page has something this criterion is about. Check it. The text report says "yes".</dd>
