@@ -61,8 +61,8 @@ const toc = [
       <pre><code>a1 sr start --sr virtual {fixedURL}</code></pre>
       <pre data-label="OUTPUT"><code>{withPracticeURL(start, fixedURL)}</code></pre>
       <p>
-         The examples on this page use the fixed copy of the
-         <a href="/guides/demo">practice page</a>.
+         The examples on this page use the docs' <a href="/guides/demo">practice page</a>, a
+         demo team settings screen.
       </p>
       <p class="note">
          Without <code>--sr</code>, <code>sr start</code> uses VoiceOver or NVDA when the
@@ -153,8 +153,9 @@ a1 sr find "Marcus"</code></pre>
    <section>
       <h2 id="page">Read the whole page</h2>
       <p>
-         <code>sr walk</code> reads a page from top to bottom and prints the transcript. It
-         starts a session when none is active.
+         <code>sr walk</code> reads a page from top to bottom and prints the transcript: a
+         log of everything the screen reader announced. It starts a session when none is
+         active.
       </p>
       <pre><code>a1 sr walk {fixedURL} --sr virtual --max 30</code></pre>
       <pre data-label="OUTPUT"><code>{withPracticeURL(walkFixed, practiceURL)}</code></pre>
@@ -331,7 +332,7 @@ a1 sr start --sr voiceover --app Calendar</code></pre>
          start: until you do, the screen reader stays under a1's control.
       </p>
       <p>
-         A session that nobody uses for 30 minutes ends. Change that with
+         A session ends after 30 minutes without a command. Change that with
          <code>--idle-timeout &lt;minutes&gt;</code> on <code>sr start</code>, or turn it off
          with <code>0</code>.
       </p>

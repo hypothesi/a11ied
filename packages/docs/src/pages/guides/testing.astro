@@ -60,13 +60,13 @@ const toc = [
    <section>
       <h2 id="example">A first test</h2>
       <p>
-         This test opens a dialog on the <a href="/guides/demo">practice page</a> and checks
-         that the dialog announces its name and that focus moves into it.
+         This test runs against the docs' <a href="/guides/demo">practice page</a>, a demo
+         page with a working copy and a broken copy. It opens a dialog and checks that the
+         dialog announces its name and that focus moves into it.
       </p>
       <pre data-label="invite.test.ts"><code>{withPracticeURL(testExample, practiceURL)}</code></pre>
       <p>
-         Run it against the broken practice page and it fails with what the screen reader
-         said:
+         Run it against the broken copy and it fails with what the screen reader said:
       </p>
       <pre data-label="OUTPUT"><code>{testFailure.trimEnd()}</code></pre>
    </section>

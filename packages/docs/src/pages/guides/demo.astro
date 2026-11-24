@@ -192,15 +192,15 @@ a1 sr read --phrase</code></pre>
    <section>
       <h2 id="label">Problem 9: a field with no label</h2>
       <p>
-         Look at press 4 in the table above. The broken filter field is
+         The filter field on the broken page is
          <code>&lt;input type="search" placeholder="Filter members"&gt;</code> with no label.
          axe accepts a placeholder as a name, so its <code>label</code> rule passes, and
          <code>a1 check --json</code> records criterion 3.3.2 Labels or Instructions with
          <code>axeVerdict: "pass"</code>.
       </p>
       <p>
-         The screen reader announces <code>searchbox, placeholder Filter members</code>: a
-         field with a hint and no name. The hint disappears when the user types. The fix is
+         Press Tab four times on the broken page and the screen reader announces
+         <code>searchbox, placeholder Filter members</code>: a field with a hint and no name. The hint disappears when the user types. The fix is
          a visible <code>&lt;label&gt;</code>.
       </p>
    </section>

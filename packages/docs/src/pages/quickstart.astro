@@ -14,8 +14,8 @@ const toc = [
    { id: 'install', label: '1. Install' },
    { id: 'doctor', label: '2. Check your machine' },
    { id: 'scan', label: '3. Scan a page' },
-   { id: 'listen', label: '4. Hear a problem' },
-   { id: 'assert', label: '5. Check what the scan missed' },
+   { id: 'listen', label: '4. List what a screen reader announces' },
+   { id: 'assert', label: '5. Test a dialog with a screen reader' },
    { id: 'stop', label: '6. Stop the session' },
    { id: 'fixed', label: '7. Compare the fixed page' },
    { id: 'next', label: 'Next steps' },
@@ -24,7 +24,7 @@ const toc = [
 
 <DocShell
    title="Quickstart"
-   summary="<p>Install a11ied, scan a page, and hear what a screen reader says on it. This takes about five minutes. You need Node.js and Chrome, Edge, Brave, or Chromium.</p>"
+   summary="<p>Install a11ied, scan a page, and capture what a screen reader announces on it. This takes about five minutes. You need Node.js and Chrome, Edge, Brave, or Chromium.</p>"
    links={docsLinks}
    toc={toc}
 >
@@ -56,8 +56,8 @@ const toc = [
    <section>
       <h2 id="scan">3. Scan a page</h2>
       <p>
-         The docs serve a <a href="/demo/team">practice page</a> with ten accessibility
-         problems in it. Scan it.
+         The docs serve a <a href="/demo/team">practice page</a>: a demo page with ten
+         accessibility problems built in. Scan it.
       </p>
       <pre><code>a1 check {practiceURL}</code></pre>
       <pre data-label="OUTPUT"><code>{withPracticeURL(checkBroken, practiceURL)}</code></pre>
@@ -70,7 +70,7 @@ const toc = [
          <dt>Problems</dt>
          <dd>What the scan found. Each entry gives the WCAG criterion that fails and its level (<code>[A]</code>, <code>[AA]</code>, or <code>[AAA]</code>), the rule, the failing elements, and a command that looks the rule up. A criterion with nothing under it, such as 1.4.6, fails by the rule listed just above it.</dd>
          <dt>Check by hand</dt>
-         <dd>The criteria this page triggers that a scanner cannot decide alone. A criterion can be in both lists: the scan found one failure, and the rest of the criterion still needs a person.</dd>
+         <dd>A checklist of the criteria on this page that need a manual test. A criterion can be in both lists: the scan found one failure, and the rest of the criterion still needs a person.</dd>
          <dt>The page</dt>
          <dd>What the page is made of. Two headings at levels 1 and 3 means a level was skipped.</dd>
       </dl>
@@ -81,10 +81,10 @@ const toc = [
    </section>
 
    <section>
-      <h2 id="listen">4. Hear a problem</h2>
+      <h2 id="listen">4. List what a screen reader announces</h2>
       <p>
-         The scan says three buttons have no text. To hear what that means for someone who
-         uses a screen reader, start a session.
+         The scan says three buttons have no text. To find out what a screen reader
+         announces for them, start a session.
       </p>
       <p class="note">
          Always pass <code>--sr virtual</code>, here and on the <code>a1 sr walk</code>
@@ -107,7 +107,7 @@ const toc = [
    </section>
 
    <section>
-      <h2 id="assert">5. Check what the scan missed</h2>
+      <h2 id="assert">5. Test a dialog with a screen reader</h2>
       <p>
          The <strong>Invite member</strong> button opens a dialog. A screen reader should
          announce the dialog when it opens. Move to the button, mark the spot in the
@@ -125,8 +125,8 @@ a1 sr expect dialog --since opened</code></pre>
       <pre data-label="OUTPUT"><code>{expectFail.trimEnd()}</code></pre>
       <p>
          The dialog opened on screen and the screen reader said nothing. The cursor stayed on
-         the button, so a screen reader user does not know a dialog exists. The scan did not
-         report this, and no scanner can.
+         the button, so a screen reader user does not know a dialog exists. A static scan cannot
+         report this.
       </p>
       <p>
          <code>sr expect</code> exits with code 4 when the announcement is missing, so the same
@@ -148,9 +148,9 @@ a1 sr expect dialog --since opened</code></pre>
       <pre><code>a1 check {practiceURL}fixed/</code></pre>
       <pre data-label="OUTPUT"><code>{withPracticeURL(checkFixed, practiceURL)}</code></pre>
       <p>
-         Nothing failed, and the list of criteria to check by hand got longer. The fixed page
-         adds a live region for its confirmation message, and with it more criteria that
-         need a person. A clean scan is where testing by hand starts.
+         Nothing failed. The checklist of criteria to test by hand is longer here, because
+         the fixed page adds a live region for its confirmation message and more criteria
+         now apply. After a clean scan, that checklist is what to test next.
       </p>
       <p>Run steps 4 and 5 against the fixed page and <code>sr expect</code> passes.</p>
       <p>
@@ -165,7 +165,7 @@ a1 sr expect dialog --since opened</code></pre>
          <dt>Your own page</dt>
          <dd>Run <code>a1 check</code> with the address of a page you are building, such as <code>http://localhost:3000/</code>.</dd>
          <dt><a href="/guides/demo">Practice on a broken page</a></dt>
-         <dd>Find the other problems on the practice page, one command at a time.</dd>
+         <dd>Find the other problems on this demo page, one command at a time.</dd>
          <dt><a href="/guides/screen-reader">Test with a screen reader</a></dt>
          <dd>Move, read, and check announcements with VoiceOver, NVDA, or the simulated screen reader.</dd>
          <dt><a href="/guides/vitest">Test with Vitest</a></dt>

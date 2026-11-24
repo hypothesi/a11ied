@@ -28,7 +28,8 @@ const toc = [
       <p>
          <code>a1 axe</code> runs <a href="https://github.com/dequelabs/axe-core">axe-core</a>
          inside the page in a real browser, so it tests what the browser rendered and not
-         only the HTML the server sent.
+         only the HTML the server sent. The examples here scan the docs'
+         <a href="/guides/demo">practice page</a>, a demo page with known problems.
       </p>
       <pre><code>a1 axe {practiceURL}</code></pre>
       <pre data-label="OUTPUT"><code>{withPracticeURL(axeViolation, practiceURL)}</code></pre>
@@ -109,7 +110,7 @@ const toc = [
 
    <section>
       <h2 id="verify">Confirm the fix</h2>
-      <p>Run the scan again for that rule, then hear the result.</p>
+      <p>Run the scan again for that rule, then check what a screen reader announces.</p>
       <pre><code>a1 axe {practiceURL}fixed/ --rule button-name
 a1 sr start --sr virtual {practiceURL}fixed/
 a1 sr elements button
@@ -117,7 +118,7 @@ a1 sr stop</code></pre>
       <p>
          The scan tells you the button has a name. The screen reader tells you what the name
          is. "button, Remove Dana Whitfield" is a fix. "button, button" or "button, icon"
-         passes the scan and helps nobody.
+         passes the scan and still does not tell the user what the button does.
       </p>
    </section>
 

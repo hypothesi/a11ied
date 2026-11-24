@@ -74,9 +74,9 @@ const toc = [
    <section>
       <h2 id="example">A first test file</h2>
       <p>
-         These tests run against the fixed copy of the
-         <a href="/guides/demo">practice page</a>. Copy the file and run
-         <code>npx vitest</code>.
+         These tests run against the docs' <a href="/guides/demo">practice page</a>, a demo
+         page with a working copy and a broken copy. They use the working copy. Copy the file
+         and run <code>npx vitest</code>.
       </p>
       <pre data-label="invite.test.ts"><code>{withPracticeURL(vitestExample, practiceURL)}</code></pre>
       <p>The three tests show the three ways to write one.</p>
@@ -93,7 +93,7 @@ const toc = [
          Import <code>test</code> from <code>a11ied/vitest</code> in place of Vitest's own. It
          starts a screen reader before each test and stops it after, whether the test passed
          or failed. <code>srOptions</code> says what to read. Set it for a file with
-         <code>test.extend</code>, as above, or for a block with <code>test.scoped</code>.
+         <code>test.extend</code>, as in the first test file, or for a block with <code>test.scoped</code>.
       </p>
       <pre data-label="checkout.test.ts"><code>{scopedSample}</code></pre>
       <dl class="defs">
@@ -134,7 +134,7 @@ const toc = [
    <section>
       <h2 id="fail">When a check fails</h2>
       <p>
-         Point the first test at the broken practice page, where the dialog never takes
+         Point the first test at the broken copy of the practice page, where the dialog never takes
          focus. Vitest reports the line and what the screen reader said.
       </p>
       <pre data-label="OUTPUT"><code>{testFailure.trimEnd()}</code></pre>

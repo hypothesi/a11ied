@@ -11,9 +11,9 @@ const practiceURL = getPracticeURL(Astro);
 const toc = [
    { id: 'install', label: 'Install' },
    { id: 'check', label: 'Scan a page' },
-   { id: 'listen', label: 'Read it with a screen reader' },
-   { id: 'test', label: 'Keep it fixed with a test' },
-   { id: 'agent', label: 'Give the tools to an AI agent' },
+   { id: 'listen', label: 'Capture what a screen reader announces' },
+   { id: 'test', label: 'Write a test' },
+   { id: 'agent', label: 'Connect an AI agent' },
    { id: 'results', label: 'What the results mean' },
    { id: 'next', label: 'Where to go next' },
 ];
@@ -30,8 +30,8 @@ const toc = [
       <pre><code>npm install --global a11ied</code></pre>
       <p>
          The command is <code>a1</code>. The examples below run against a
-         <a href="/demo/team">practice page</a> with ten accessibility problems in it, so you
-         can copy and run them unchanged.
+         <a href="/demo/team">practice page</a>: a demo page the docs serve, with ten
+         accessibility problems built in. You can copy and run them unchanged.
       </p>
    </section>
 
@@ -45,17 +45,16 @@ const toc = [
       <pre data-label="OUTPUT"><code>{withPracticeURL(checkSample, practiceURL)}</code></pre>
       <p>
          Each problem names the <abbr title="Web Content Accessibility Guidelines">WCAG</abbr>
-         criterion it fails, the element, and a command that explains the fix. Below the
-         problems is the part most scanners leave out: the criteria this page triggers that
-         no scanner can decide.
+         criterion it fails, the element, and a command that looks up the fix. Below the
+         problems is a checklist: the criteria on this page that need a manual test.
       </p>
    </section>
 
    <section>
-      <h2 id="listen">Read it with a screen reader</h2>
+      <h2 id="listen">Capture what a screen reader announces</h2>
       <p>
-         <code>a1 sr</code> drives a screen reader and prints what it announces.
-         <code>sr walk</code> reads a whole page.
+         <code>a1 sr</code> drives a screen reader and logs everything it announces.
+         <code>sr walk</code> reads a whole page and prints the log.
       </p>
       <pre><code>a1 sr walk {practiceURL} --sr virtual</code></pre>
       <pre data-label="OUTPUT"><code>{withPracticeURL(walkSample, practiceURL)}</code></pre>
@@ -76,7 +75,7 @@ const toc = [
    </section>
 
    <section>
-      <h2 id="test">Keep it fixed with a test</h2>
+      <h2 id="test">Write a test</h2>
       <p>
          The same screen reader runs inside a test. This one opens a dialog and checks that
          the dialog announces its name and that focus moves into it.
@@ -90,11 +89,13 @@ const toc = [
    </section>
 
    <section>
-      <h2 id="agent">Give the tools to an AI agent</h2>
+      <h2 id="agent">Connect an AI agent</h2>
       <p>
-         A coding agent can write a dialog but cannot hear it. a11ied includes an
-         <abbr title="Model Context Protocol">MCP</abbr> server that gives the agent every
-         command above as a tool, so it can check its own work.
+         A coding agent can write a dialog, but it has no way to check what a screen reader
+         will announce. a11ied includes an
+         <abbr title="Model Context Protocol">MCP</abbr> server that gives the agent the
+         <code>a1</code> commands as tools: scan a page, drive a screen reader, look up a
+         criterion.
       </p>
       <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
       <p>
@@ -123,7 +124,7 @@ const toc = [
          <dt><a href="/quickstart">Quickstart</a></dt>
          <dd>Install, scan a page, and read it with a screen reader. Five minutes.</dd>
          <dt><a href="/guides/demo">Practice on a broken page</a></dt>
-         <dd>Find all ten problems on the practice page. A scan reports three of them.</dd>
+         <dd>Work through a demo page with ten accessibility problems, one command at a time.</dd>
          <dt><a href="/guides/screen-reader">Test with a screen reader</a></dt>
          <dd>Every <code>a1 sr</code> command, with VoiceOver, NVDA, or the simulated screen reader.</dd>
          <dt><a href="/reference/cli">CLI reference</a></dt>
