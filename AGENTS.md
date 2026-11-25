@@ -6,6 +6,17 @@ Maintainer release workflow reference: `internal-docs/maintainer-release-checkli
 
 Dependency policy and approved exceptions: `internal-docs/dependency-licenses.md`
 
+## internal-docs
+
+`internal-docs/` is only for maintainer documentation that stays accurate as long as the
+code it describes: architecture, policies, and maintenance or release procedures.
+
+- Do not write plans, research findings, audits, investigation notes, comparisons, or
+  run records into `internal-docs/`, even temporarily.
+- Do not commit them anywhere else in the repository either.
+- Put task plans and findings in beads (`bd create`, `bd update <id> --append-notes`).
+  Put scratch files outside the repository.
+
 ## Quick Reference
 
 ```bash

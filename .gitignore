@@ -32,5 +32,6 @@ output/
 # gitignore excludes every ai.json, so re-include this one.
 !packages/skills/ai.json
 
-# Internal planning docs stay local
+# Plans and research stay local. AGENTS.md says where they go instead.
 internal-docs/plans/
+internal-docs/research/
