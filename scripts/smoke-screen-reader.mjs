@@ -189,9 +189,11 @@ async function searchForHeading(transcriptStdout) {
 async function checkInteraction(fixture) {
    await runCliOrFail(['sr', 'top']);
    await runCliOrFail(['sr', 'next', 'form-field']);
+   // In NVDA's browse mode letters are navigation keys, so a person presses Enter to type
+   // into the field (focus mode) and Escape to navigate again. Otherwise "native" moves
+   // the cursor around the page and "next button" types a "b" into the field.
+   await runCliOrFail(['sr', 'press', 'Enter']);
    await runCliOrFail(['sr', 'type', INPUT_TEXT]);
-   // NVDA switches to focus mode in a text field, where "next button" would type a "b".
-   // Escape returns it to browse mode, as a person would.
    await runCliOrFail(['sr', 'press', 'Escape']);
    await runCliOrFail(['sr', 'next', 'button']);
    await runCliOrFail(['sr', 'activate']);
