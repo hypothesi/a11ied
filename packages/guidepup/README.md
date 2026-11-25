@@ -2,11 +2,9 @@
 
 `@a11ied/guidepup` provides platform adapters for screen reader automation in the a11ied toolkit. It wraps [`@guidepup/guidepup`](https://github.com/guidepup/guidepup) and [`@guidepup/virtual-screen-reader`](https://github.com/guidepup/virtual-screen-reader) with a unified interface.
 
-## install
+## internal package
 
-```sh
-npm install @a11ied/guidepup
-```
+This is an internal package of [`a11ied`](https://www.npmjs.com/package/a11ied). It is published because `a11ied` depends on it, and its API can change in any release. Install `a11ied` instead.
 
 ## usage
 

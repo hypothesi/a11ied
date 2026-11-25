@@ -2,11 +2,9 @@
 
 `@a11ied/contracts` is the shared schema and result-shape layer for the a11ied toolkit. It exports Zod schemas and inferred TypeScript types used across all a11ied packages.
 
-## install
+## internal package
 
-```sh
-npm install @a11ied/contracts
-```
+This is an internal package of [`a11ied`](https://www.npmjs.com/package/a11ied). It is published because `a11ied` depends on it, and its API can change in any release. Install `a11ied` instead.
 
 ## usage
 

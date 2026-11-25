@@ -2,10 +2,28 @@
    "name": "@a11ied/support-data",
    "version": "0.1.0",
    "description": "Versioned screen reader and assistive technology compatibility dataset, test cases, and W3C ARIA-AT reports.",
+   "keywords": [
+      "a11y",
+      "accessibility",
+      "aria-at",
+      "compatibility",
+      "screen-reader"
+   ],
+   "homepage": "https://hypothesi.github.io/a11ied/compatibility/",
+   "bugs": {
+      "url": "https://github.com/hypothesi/a11ied/issues"
+   },
+   "license": "MIT",
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/hypothesi/a11ied.git",
+      "directory": "packages/support-data"
+   },
    "files": [
       "dist",
       "data",
-      "NOTICE.md"
+      "NOTICE.md",
+      "CHANGELOG.md"
    ],
    "type": "module",
    "main": "./dist/index.js",
@@ -29,5 +47,7 @@
       "prepack": "npm run build",
       "typecheck": "tsc -p tsconfig.json --noEmit"
    },
-   "dependencies": {}
+   "engines": {
+      "node": ">=24"
+   }
 }

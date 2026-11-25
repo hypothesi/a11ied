@@ -1,9 +1,21 @@
 {
    "name": "@a11ied/guidepup",
    "version": "0.1.0",
+   "description": "VoiceOver, NVDA, and simulated screen reader adapters. Internal package of a11ied, published because the a1 CLI depends on it. Its API can change in any release; install a11ied instead.",
+   "homepage": "https://github.com/hypothesi/a11ied/tree/master/packages/guidepup#readme",
+   "bugs": {
+      "url": "https://github.com/hypothesi/a11ied/issues"
+   },
+   "license": "MIT",
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/hypothesi/a11ied.git",
+      "directory": "packages/guidepup"
+   },
    "files": [
       "dist",
-      "scripts"
+      "scripts",
+      "CHANGELOG.md"
    ],
    "type": "module",
    "main": "./dist/index.js",
@@ -39,5 +51,8 @@
    },
    "devDependencies": {
       "@types/proper-lockfile": "4.1.4"
+   },
+   "engines": {
+      "node": ">=24"
    }
 }

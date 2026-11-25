@@ -2,6 +2,8 @@
 
 `@a11ied/wcag-data` is the pinned local data workspace for WCAG source sync and normalized artifact generation.
 
+This is an internal package of [`a11ied`](https://www.npmjs.com/package/a11ied). It is published because `a11ied` depends on it, and its API can change in any release. Install `a11ied` instead.
+
 This package is responsible for:
 
 - keeping raw upstream sync inputs under `data/raw/`

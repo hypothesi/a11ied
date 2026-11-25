@@ -2,11 +2,9 @@
 
 `@a11ied/wcag-engine` is the lookup, search, test method, and relevance layer for the a11ied toolkit. It queries the normalized WCAG artifacts from `@a11ied/wcag-data`.
 
-## install
+## internal package
 
-```sh
-npm install @a11ied/wcag-engine
-```
+This is an internal package of [`a11ied`](https://www.npmjs.com/package/a11ied). It is published because `a11ied` depends on it, and its API can change in any release. Install `a11ied` instead.
 
 ## usage
 

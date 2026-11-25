@@ -2,11 +2,9 @@
 
 `@a11ied/mcp-server` is the [Model Context Protocol](https://modelcontextprotocol.io) server for the a11ied toolkit. It exposes a11ied's WCAG lookup, axe scanning, and screen reader control tools to AI agents and editors over stdio.
 
-## install
+## internal package
 
-```sh
-npm install @a11ied/mcp-server
-```
+This is an internal package of [`a11ied`](https://www.npmjs.com/package/a11ied). It is published because `a11ied` depends on it, and its API can change in any release. Install `a11ied` instead.
 
 ## start via CLI
 

@@ -2,9 +2,28 @@
    "name": "@a11ied/compat",
    "version": "0.1.0",
    "description": "Programmatic screen reader and assistive technology compatibility query and Browserslist diagnostics engine for editors, linters, and bundlers.",
+   "keywords": [
+      "a11y",
+      "accessibility",
+      "aria",
+      "browserslist",
+      "compatibility",
+      "screen-reader"
+   ],
+   "homepage": "https://hypothesi.github.io/a11ied/guides/compatibility-api/",
+   "bugs": {
+      "url": "https://github.com/hypothesi/a11ied/issues"
+   },
+   "license": "MIT",
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/hypothesi/a11ied.git",
+      "directory": "packages/compat"
+   },
    "files": [
       "dist",
-      "NOTICE.md"
+      "NOTICE.md",
+      "CHANGELOG.md"
    ],
    "type": "module",
    "main": "./dist/index.js",
@@ -27,5 +46,8 @@
    "dependencies": {
       "@a11ied/support-data": "0.1.0",
       "browserslist": "4.29.6"
+   },
+   "engines": {
+      "node": ">=24"
    }
 }

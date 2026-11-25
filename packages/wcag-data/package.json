@@ -1,10 +1,22 @@
 {
    "name": "@a11ied/wcag-data",
    "version": "0.1.0",
+   "description": "Normalized WCAG, ACT, and APG data. Internal package of a11ied, published because the a1 CLI depends on it. Its API can change in any release; install a11ied instead.",
+   "homepage": "https://github.com/hypothesi/a11ied/tree/master/packages/wcag-data#readme",
+   "bugs": {
+      "url": "https://github.com/hypothesi/a11ied/issues"
+   },
+   "license": "MIT",
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/hypothesi/a11ied.git",
+      "directory": "packages/wcag-data"
+   },
    "files": [
       "dist",
       "data/generated",
-      "NOTICE.md"
+      "NOTICE.md",
+      "CHANGELOG.md"
    ],
    "type": "module",
    "main": "./dist/index.js",
@@ -36,5 +48,8 @@
    },
    "devDependencies": {
       "@types/turndown": "5.0.6"
+   },
+   "engines": {
+      "node": ">=24"
    }
 }

@@ -1,9 +1,20 @@
 {
    "name": "@a11ied/knowledge",
    "version": "0.1.0",
-   "description": "Accessibility knowledge base, WCAG and APG query engine, and HTML relevance inference.",
+   "description": "WCAG and APG knowledge base and HTML relevance inference. Internal package of a11ied, published because the a1 CLI depends on it. Its API can change in any release; install a11ied instead.",
+   "homepage": "https://github.com/hypothesi/a11ied/tree/master/packages/knowledge#readme",
+   "bugs": {
+      "url": "https://github.com/hypothesi/a11ied/issues"
+   },
+   "license": "MIT",
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/hypothesi/a11ied.git",
+      "directory": "packages/knowledge"
+   },
    "files": [
-      "dist"
+      "dist",
+      "CHANGELOG.md"
    ],
    "type": "module",
    "main": "./dist/index.js",
@@ -19,11 +30,15 @@
    },
    "scripts": {
       "build": "tsup src/index.ts --format esm --dts --clean",
-      "typecheck": "tsc --noEmit"
+      "typecheck": "tsc --noEmit",
+      "prepack": "npm run build"
    },
    "dependencies": {
       "@a11ied/contracts": "0.1.0",
       "@a11ied/wcag-engine": "0.1.0",
       "jsdom": "30.0.1"
+   },
+   "engines": {
+      "node": ">=24"
    }
 }

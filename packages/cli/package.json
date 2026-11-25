@@ -1,12 +1,35 @@
 {
    "name": "a11ied",
    "version": "0.1.0",
+   "description": "Accessibility testing from the terminal: WCAG lookup, axe scans, and VoiceOver, NVDA, or simulated screen reader sessions, as the a1 CLI, a test API, and an MCP server.",
+   "keywords": [
+      "a11y",
+      "accessibility",
+      "axe",
+      "cli",
+      "mcp",
+      "nvda",
+      "screen-reader",
+      "voiceover",
+      "wcag"
+   ],
+   "homepage": "https://hypothesi.github.io/a11ied/",
+   "bugs": {
+      "url": "https://github.com/hypothesi/a11ied/issues"
+   },
+   "license": "MIT",
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/hypothesi/a11ied.git",
+      "directory": "packages/cli"
+   },
    "bin": {
       "a1": "./dist/cli.js",
       "a11ied": "./dist/cli.js"
    },
    "files": [
-      "dist"
+      "dist",
+      "CHANGELOG.md"
    ],
    "type": "module",
    "types": "./dist/index.d.ts",
@@ -41,7 +64,7 @@
    },
    "dependencies": {
       "@a11ied/audit": "0.1.0",
-      "@a11ied/contracts": "^0.1.0",
+      "@a11ied/contracts": "0.1.0",
       "@a11ied/core": "0.1.0",
       "@a11ied/guidepup": "0.1.0",
       "@a11ied/mcp-server": "0.1.0",
@@ -65,5 +88,8 @@
       "vitest": {
          "optional": true
       }
+   },
+   "engines": {
+      "node": ">=24"
    }
 }

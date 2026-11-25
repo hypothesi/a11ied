@@ -1,8 +1,20 @@
 {
    "name": "@a11ied/contracts",
    "version": "0.1.0",
+   "description": "Shared Zod schemas and result types. Internal package of a11ied, published because the a1 CLI depends on it. Its API can change in any release; install a11ied instead.",
+   "homepage": "https://github.com/hypothesi/a11ied/tree/master/packages/contracts#readme",
+   "bugs": {
+      "url": "https://github.com/hypothesi/a11ied/issues"
+   },
+   "license": "MIT",
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/hypothesi/a11ied.git",
+      "directory": "packages/contracts"
+   },
    "files": [
-      "dist"
+      "dist",
+      "CHANGELOG.md"
    ],
    "type": "module",
    "main": "./dist/index.js",
@@ -23,5 +35,8 @@
    },
    "dependencies": {
       "zod": "^4.6.6"
+   },
+   "engines": {
+      "node": ">=24"
    }
 }
