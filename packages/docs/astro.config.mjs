@@ -19,7 +19,13 @@ const LLMS_DEFAULT_EXCLUDES = [
  * The compatibility tables are hundreds of pages of test results, the demo pages are
  * practice targets, and the example audit is a generated report. None of them is docs.
  */
-const LLMS_EXCLUDED_SECTIONS = ['compatibility', 'demo', 'example-audit', 'pagefind'];
+const LLMS_EXCLUDED_SECTIONS = [
+   'compatibility',
+   'demo',
+   'example-audit',
+   'pagefind',
+   'playground',
+];
 // Page furniture and decoration that would be noise in the Markdown copy of a page.
 const LLMS_NOISE_SELECTORS = [
    'nav',

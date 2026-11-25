@@ -17,6 +17,7 @@ export const docsLinks: DocSection[] = [
       links: [
          { href: '/overview', label: 'Overview' },
          { href: '/quickstart', label: 'Quickstart' },
+         { href: '/playground', label: 'Playground' },
          { href: '/guides/demo', label: 'Practice on a broken page' },
       ],
    },
