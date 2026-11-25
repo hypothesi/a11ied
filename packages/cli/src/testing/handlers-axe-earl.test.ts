@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -53,6 +54,11 @@ async function runEarl(baseUrl: string): Promise<{ report: EarlReport; status: n
       outPath,
    ]);
 
+   // Without the report, the CLI's own error is the only clue to what went wrong.
+   expect(
+      existsSync(outPath),
+      `a1 axe exited ${String(result.status)}: ${result.stderr}`,
+   ).toBe(true);
    const report = JSON.parse(await readFile(outPath, 'utf8')) as EarlReport;
    expect(result.stdout).toBe('');
    return { report, status: result.status };
