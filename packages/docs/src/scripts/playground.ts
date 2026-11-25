@@ -347,17 +347,21 @@ function renderChecks(parts: Parts): void {
    );
 }
 
+/** Shows the empty hint before anything is said, and the cursor line and checks after. */
 function renderCounts(parts: Parts): void {
-   const empty = parts.root.querySelector('[data-pg-log-empty]'),
-      spoken = state.entries.filter((entry) => entry.kind !== 'mark').length;
+   const hasSpoken = state.entries.length > 0;
+   const shownWhen: ReadonlyArray<readonly [selector: string, isShown: boolean]> = [
+      ['[data-pg-log-empty]', !hasSpoken],
+      ['[data-pg-now]', hasSpoken],
+      ['[data-pg-checks]', hasSpoken],
+   ];
 
-   setText(
-      parts,
-      '[data-pg-log-count]',
-      `${String(spoken)} ${spoken === 1 ? 'phrase' : 'phrases'}`,
-   );
-   if (empty instanceof HTMLElement) {
-      empty.hidden = state.entries.length > 0;
+   for (const [selector, isShown] of shownWhen) {
+      const element = parts.root.querySelector(selector);
+
+      if (element instanceof HTMLElement) {
+         element.hidden = !isShown;
+      }
    }
    parts.commands.textContent = state.commands.join('\n');
 }
@@ -536,7 +540,7 @@ function resetFor(parts: Parts, slug: string): void {
    showCase(parts, slug);
    renderCounts(parts);
    renderChecks(parts);
-   setText(parts, '[data-pg-now]', 'The cursor is not on anything yet.');
+   setText(parts, '[data-pg-now]', '');
    url.searchParams.set(CASE_PARAM, slug);
    globalThis.history.replaceState({}, '', url);
 }
@@ -576,7 +580,11 @@ async function loadCase(parts: Parts, slug: string): Promise<void> {
       state.commands = [
          `a1 sr start --sr virtual ${new URL(href, globalThis.location.href).href}`,
       ];
-      await collect(parts, runtime, 'start');
+      // Starting says "document". The log stays empty until the visitor does something.
+      const speech = await runtime.readSpeech();
+
+      state.spokenCount = speech.spokenPhraseLog.length;
+      renderCounts(parts);
       parts.frame.contentWindow?.addEventListener('scroll', async () => {
          await showCursor(parts, runtime);
       });
