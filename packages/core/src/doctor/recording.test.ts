@@ -17,12 +17,13 @@ vi.mock('node:module', () => ({ createRequire: vi.fn().mockReturnValue(mocks.loa
 afterEach(() => vi.clearAllMocks());
 
 describe('Windows recording prerequisite', () => {
-   it('refuses a missing recorder binary without executing it', () => {
+   it('names the commands that download a missing ffmpeg, without executing it', () => {
       vi.mocked(existsSync).mockReturnValue(false);
       const check = checkWindowsRecording();
 
       expect(check.status).toStrictEqual('fail');
-      expect(check.detail).toContain('binary is missing');
+      expect(check.detail).toContain('npm approve-scripts ffmpeg-static');
+      expect(check.detail).toContain('npm rebuild ffmpeg-static');
       expect(spawnSync).not.toHaveBeenCalled();
    });
 

@@ -10,6 +10,10 @@ const RECORDING_PROBE_SECONDS = 1;
 const RECORDING_PROBE_TIMEOUT_MS = 4000;
 const SCREEN_RECORDING_PERMISSION_NOTE =
    'If the same command works from Terminal but fails here, grant Screen Recording permission to the current host app.';
+const MISSING_FFMPEG_DETAIL =
+   'ffmpeg is missing. It is downloaded by the ffmpeg-static install script, which npm skips with --ignore-scripts, ' +
+   'strict-allow-scripts, or an allowScripts entry that denies it. ' +
+   'Run `npm approve-scripts ffmpeg-static`, then `npm rebuild ffmpeg-static`.';
 
 /** Check the existing recorder's binary without recording or changing OS settings. */
 export function checkWindowsRecording(): DoctorCheck {
@@ -23,11 +27,7 @@ export function checkWindowsRecording(): DoctorCheck {
       const recordRequire = createRequire(require.resolve('@guidepup/record'));
       const binary: unknown = recordRequire('ffmpeg-static');
       if (typeof binary !== 'string' || !existsSync(binary)) {
-         return {
-            ...check,
-            detail:
-               'The configured Windows recorder binary is missing. Resolve the recorder dependency and installation.',
-         };
+         return { ...check, detail: MISSING_FFMPEG_DETAIL };
       }
       const result = spawnSync(binary, ['-version'], {
          encoding: 'utf8',
