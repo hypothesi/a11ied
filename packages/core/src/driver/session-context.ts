@@ -1,6 +1,10 @@
+import { setTimeout as wait } from 'node:timers/promises';
+
 import {
    accessibilityDriverSessionSchema,
    type AccessibilityDriverSession,
+   type DriverFocusResult,
+   type DriverFocusTarget,
    type Platform,
    type SessionRecording,
    type VirtualEngine,
@@ -131,6 +135,30 @@ function describeWindow(window: {
    return parts.length > 0 ? parts.join(', ') : 'unnamed window';
 }
 
+/** How long a browser that was just opened has to show its window. */
+const BROWSER_WINDOW_WAIT_MS = 20_000;
+
+const FOCUS_RETRY_MS = 500;
+
+/**
+ * Brings the target forward, trying again while its window does not exist yet. A browser
+ * launched on Windows returns before its window opens, so one early attempt finds
+ * nothing.
+ */
+async function focusWhenShown(
+   adapter: DriverAdapter,
+   app: DriverFocusTarget,
+   deadline: number,
+): Promise<DriverFocusResult> {
+   const result = await adapter.focus(app);
+
+   if (result.status !== 'not-found' || Date.now() >= deadline) {
+      return result;
+   }
+   await wait(FOCUS_RETRY_MS);
+   return focusWhenShown(adapter, app, deadline);
+}
+
 /** Focus a real target only after its adapter has acquired desktop ownership. */
 export async function initializeSessionTarget(
    options: Pick<SessionContextOptions, 'target' | 'url' | 'app' | 'browser'>,
@@ -154,7 +182,7 @@ export async function initializeSessionTarget(
       }
       return undefined;
    }
-   const result = await adapter.focus(app);
+   const result = await focusWhenShown(adapter, app, Date.now() + BROWSER_WINDOW_WAIT_MS);
    const focus = await waitForWindowFocus(app);
    if (result.status !== 'focused' || !focus.focused) {
       throw new CliEnvironmentError(

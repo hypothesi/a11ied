@@ -193,6 +193,54 @@ describe('navigation ownership and browser selection', () => {
    });
 });
 
+describe('bringing a just-opened browser forward', () => {
+   it('tries again until the browser window exists', async () => {
+      const attempts = 3,
+         context = await createContext(),
+         target = { appName: 'chrome.exe' },
+         url = 'https://createdbyfireside.com/';
+      vi.spyOn(browserLaunch, 'openUrlInBrowser').mockResolvedValue({
+         focusTarget: target,
+      });
+      const focus = vi
+         .spyOn(context.adapter, 'focus')
+         .mockResolvedValueOnce({ status: 'not-found', target, platform: 'nvda' })
+         .mockResolvedValueOnce({ status: 'not-found', target, platform: 'nvda' })
+         .mockResolvedValue({ status: 'focused', target, platform: 'nvda' });
+      vi.spyOn(guidepup, 'waitForWindowFocus').mockResolvedValue({
+         focused: true,
+         waitedMs: 0,
+      });
+
+      const app = await initializeSessionTarget({ target: 'nvda', url }, context.adapter);
+
+      expect(focus).toHaveBeenCalledTimes(attempts);
+      expect(app).to.eql(target);
+   });
+
+   it('does not try again when focusing failed for another reason', async () => {
+      const context = await createContext(),
+         target = { appName: 'chrome.exe' },
+         url = 'https://createdbyfireside.com/';
+      vi.spyOn(browserLaunch, 'openUrlInBrowser').mockResolvedValue({
+         focusTarget: target,
+      });
+      const focus = vi
+         .spyOn(context.adapter, 'focus')
+         .mockResolvedValue({ status: 'failed', target, platform: 'nvda' });
+      vi.spyOn(guidepup, 'waitForWindowFocus').mockResolvedValue({
+         focused: false,
+         waitedMs: 0,
+      });
+
+      await expect(
+         initializeSessionTarget({ target: 'nvda', url }, context.adapter),
+      ).rejects.toMatchObject({ code: 'browser-focus-unconfirmed' });
+
+      expect(focus).toHaveBeenCalledTimes(1);
+   });
+});
+
 describe('shared virtual document startup', () => {
    it.each(['jsdom', 'browser'] as const)(
       'loads the initial document once with %s',
