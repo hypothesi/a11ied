@@ -4,6 +4,7 @@ import { Icon } from 'astro-icon/components';
 import reportSummary from '../assets/audit-report-summary.png';
 import logo from '../assets/logo.png';
 import Balloon from '../components/balloon.astro';
+import SiteFooter from '../components/site-footer.astro';
 import SiteHead from '../components/site-head.astro';
 import { REPOSITORY_URL } from '../lib/nav';
 import { getPracticeURL, withPracticeURL } from '../lib/practice';
@@ -358,24 +359,7 @@ const reportAlt =
          </section>
       </main>
 
-      <footer class="site-foot">
-         <div class="wrap foot-grid">
-            <p>
-               Built on <a href="https://github.com/dequelabs/axe-core">axe-core</a>,
-               <a href="https://www.guidepup.dev/">Guidepup</a>,
-               <a href="https://playwright.dev/">Playwright</a>, and the W3C's WCAG and ARIA data.
-               The source is on <a href={REPOSITORY_URL}>GitHub</a>.
-            </p>
-            <nav aria-label="Footer">
-               <a href="/overview">Docs</a>
-               <a href="/quickstart">Quickstart</a>
-               <a href="/guides/troubleshooting">Troubleshooting</a>
-               <a href="/reference/cli">CLI reference</a>
-               <a href="/glossary">Glossary</a>
-               <a href="/llms.txt">llms.txt</a>
-            </nav>
-         </div>
-      </footer>
+      <SiteFooter />
 
       {hasSearch ? <pagefind-modal></pagefind-modal> : null}
       <script>
@@ -501,12 +485,6 @@ const reportAlt =
    .card p:last-child { margin-top: auto; padding-top: var(--xs); }
 
    .band--cta a:not(.button) { color: var(--yellow); }
-
-   /* Footer */
-   .site-foot { padding-block: var(--lg); background: var(--yellow); border-top: 3px solid var(--ink); }
-   .foot-grid { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--md); }
-   .foot-grid nav { display: flex; flex-wrap: wrap; gap: var(--lg); }
-   .site-foot a { color: var(--ink); }
 
    @media (max-width: 820px) {
       .hero-grid, .audit-grid, .panel, .feature, .feature--flip { grid-template-columns: minmax(0, 1fr); }
