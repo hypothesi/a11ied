@@ -1,5 +1,9 @@
 # @a11ied/support-data
 
+## 0.1.1
+
+No changes in this release.
+
 ## 0.1.0
 
 First release.

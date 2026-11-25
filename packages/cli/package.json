@@ -1,6 +1,6 @@
 {
    "name": "a11ied",
-   "version": "0.1.0",
+   "version": "0.1.1",
    "description": "Accessibility testing from the terminal: WCAG lookup, axe scans, and VoiceOver, NVDA, or simulated screen reader sessions, as the a1 CLI, a test API, and an MCP server.",
    "keywords": [
       "a11y",
@@ -63,11 +63,11 @@
       "typecheck": "tsc -p tsconfig.json --noEmit"
    },
    "dependencies": {
-      "@a11ied/audit": "0.1.0",
-      "@a11ied/contracts": "0.1.0",
-      "@a11ied/core": "0.1.0",
-      "@a11ied/guidepup": "0.1.0",
-      "@a11ied/mcp-server": "0.1.0",
+      "@a11ied/audit": "0.1.1",
+      "@a11ied/contracts": "0.1.1",
+      "@a11ied/core": "0.1.1",
+      "@a11ied/guidepup": "0.1.1",
+      "@a11ied/mcp-server": "0.1.1",
       "chalk": "6.0.0",
       "clipboardy": "5.3.2",
       "commander": "^15.0.0",

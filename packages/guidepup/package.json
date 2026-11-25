@@ -1,6 +1,6 @@
 {
    "name": "@a11ied/guidepup",
-   "version": "0.1.0",
+   "version": "0.1.1",
    "description": "VoiceOver, NVDA, and simulated screen reader adapters. Internal package of a11ied, published because the a1 CLI depends on it. Its API can change in any release; install a11ied instead.",
    "homepage": "https://github.com/hypothesi/a11ied/tree/master/packages/guidepup#readme",
    "bugs": {
@@ -41,7 +41,7 @@
       "typecheck": "tsc -p tsconfig.json --noEmit"
    },
    "dependencies": {
-      "@a11ied/contracts": "0.1.0",
+      "@a11ied/contracts": "0.1.1",
       "@guidepup/guidepup": "^0.33.2",
       "@guidepup/virtual-screen-reader": "^0.32.1",
       "dom-accessibility-api": "0.7.1",

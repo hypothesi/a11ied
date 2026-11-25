@@ -1,5 +1,13 @@
 # a11ied
 
+## 0.1.1
+
+### Patch Changes
+
+- [`5a27be9`](https://github.com/hypothesi/a11ied/commit/5a27be9d2e55cfd5a960d88c4a3d07186fdfa273) - `a1 doctor` now says how to fix a missing ffmpeg for Windows recording. When npm skipped
+  the `ffmpeg-static` install script, for example with `--ignore-scripts`, the check names
+  `npm approve-scripts ffmpeg-static` and `npm rebuild ffmpeg-static`.
+
 ## 0.1.0
 
 First release.

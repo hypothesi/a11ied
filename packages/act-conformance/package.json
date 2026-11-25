@@ -10,10 +10,10 @@
       "typecheck": "tsc -p tsconfig.json --noEmit"
    },
    "dependencies": {
-      "@a11ied/contracts": "0.1.0",
-      "@a11ied/core": "0.1.0",
-      "@a11ied/earl": "0.1.0",
-      "@a11ied/wcag-engine": "0.1.0",
+      "@a11ied/contracts": "0.1.1",
+      "@a11ied/core": "0.1.1",
+      "@a11ied/earl": "0.1.1",
+      "@a11ied/wcag-engine": "0.1.1",
       "axe-core": "^4.13.0"
    },
    "devDependencies": {
