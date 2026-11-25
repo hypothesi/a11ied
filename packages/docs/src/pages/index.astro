@@ -105,28 +105,6 @@ const reportAlt =
             </div>
          </section>
 
-         <section class="band band--ink" aria-labelledby="gap-heading">
-            <div class="wrap">
-               <h2 id="gap-heading">Static scans are not enough</h2>
-               <p class="section-lead">
-                  A static scan checks a page's markup against rules. a11ied runs that scan, and
-                  it also presses keys, opens dialogs, and logs what a screen reader announces, so
-                  you can test how a page behaves.
-               </p>
-               <ol class="tally">
-                  <li><span class="tally-figure">86</span><span class="tally-label">success criteria in WCAG 2.2</span></li>
-                  <li><span class="tally-figure">28</span><span class="tally-label">have an automated scanner rule, and each rule checks only part of its criterion</span></li>
-                  <li><span class="tally-figure">58</span><span class="tally-label">have no scanner rule at all</span></li>
-               </ol>
-               <p class="section-lead">
-                  With a11ied you test those with a keyboard and a screen reader: whether focus
-                  moves into a dialog, whether an error message is announced, whether every
-                  control can be reached.
-               </p>
-               <p><a class="button button--yellow" href="/test-methods">See how each criterion is tested</a></p>
-            </div>
-         </section>
-
          <section class="band" aria-labelledby="audit-heading">
             <div class="wrap">
                <div class="audit-grid">
@@ -427,10 +405,6 @@ const reportAlt =
    .band--ink h2 { color: var(--yellow); }
    .band--yellow { background: var(--yellow); border-block: 3px solid var(--ink); }
 
-   .tally { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: var(--lg); margin: var(--xl) 0 0; padding: 0; list-style: none; }
-   .tally li { display: grid; gap: var(--xs); margin: 0; padding-top: var(--md); border-top: 3px solid var(--yellow); }
-   .tally-figure { color: var(--yellow); font: 700 clamp(4rem, 9vw, 6.5rem)/0.85 var(--display); letter-spacing: -0.04em; }
-   .tally-label { font-size: 1.05rem; line-height: 1.5; }
 
    /* Features */
    .feature { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: start; }
