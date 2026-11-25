@@ -47,6 +47,9 @@ const tabs: TabDefinition[] = [
          ))}
       </div>
 
+      <a href={`/playground/?case=${slug}`} class="srTabs-directLink">
+         <span>Try it in the playground</span>
+      </a>
       <a href={caseHref} class="srTabs-directLink">
          <span>Open standalone page</span>
          <ExternalLink size={15} aria-hidden="true" focusable="false" />
@@ -187,6 +190,11 @@ const tabs: TabDefinition[] = [
    padding-inline: 0.25rem;
    font-size: 0.86rem;
    white-space: nowrap;
+}
+
+/* Only the first link is pushed to the far side; the second sits next to it. */
+.srTabs-directLink + .srTabs-directLink {
+   margin-inline-start: 0;
 }
 
 .srTabs-panels {
