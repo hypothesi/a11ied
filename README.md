@@ -73,7 +73,7 @@ sr.goTo({ role: 'button', name: 'Pay' })
 
 ## workspaces
 
-The repo is split into npm workspaces. `packages/cli` publishes the end-user `a11ied` package, and the scoped `@a11ied/*` libraries are publishable as standalone building blocks.
+The repo is split into npm workspaces. Three of them are packages people install: `a11ied` from `packages/cli`, `@a11ied/compat`, and `@a11ied/support-data`. The other `@a11ied/*` packages are internal. They are published only because `a11ied` depends on them, and their APIs can change in any release.
 
 - `packages/contracts`: shared schemas and result shapes (`@a11ied/contracts`)
 - `packages/audit`: audit storage, work units, findings, progress, dashboard, and reports (`@a11ied/audit`)
@@ -84,8 +84,10 @@ The repo is split into npm workspaces. `packages/cli` publishes the end-user `a1
 - `packages/wcag-engine`: lookup and search APIs over the WCAG data package (`@a11ied/wcag-engine`)
 - `packages/earl`: builds W3C EARL 1.0 accessibility reports as JSON-LD (`@a11ied/earl`)
 - `packages/cli`: end-user command line entrypoint (published as `a11ied`)
+- `packages/compat`: screen reader compatibility checks for editors, linters, and bundlers (`@a11ied/compat`)
+- `packages/support-data`: the recorded screen reader test cases and results `@a11ied/compat` reads (`@a11ied/support-data`)
 - `packages/act-conformance`: runs a11ied against the W3C ACT test cases (not published)
-- `packages/docs`: Astro docs site
+- `packages/docs`: Astro docs site (not published)
 - `packages/knowledge`, `packages/observe`: page signal extraction and page measurements used by scans
 - `packages/skills`: the `a11ied` (development checks) and `a11ied-audit` (audits) Agent Skills
 
@@ -120,6 +122,14 @@ That flow does four things:
 If the generated diffs look wrong, stop there. The provenance manifests and regression fixtures are supposed to make surprising changes obvious.
 
 For the package-level details, see [packages/wcag-data/README.md](packages/wcag-data/README.md).
+
+## releases
+
+Every published package shares one version, and [Changesets](https://changesets.dev)
+writes the changelogs. When a pull request changes what users of `a11ied`,
+`@a11ied/compat`, or `@a11ied/support-data` get, run `npx changeset` and describe the
+change for them. [.changeset/README.md](.changeset/README.md) says how to write one, and
+[the release checklist](internal-docs/maintainer-release-checklist.md) covers publishing.
 
 ## release readiness
 

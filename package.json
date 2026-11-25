@@ -3,6 +3,7 @@
    "version": "0.1.0",
    "private": true,
    "description": "CLI-first accessibility automation toolkit built on Guidepup.",
+   "license": "MIT",
    "workspaces": [
       "apps/*",
       "packages/*"
@@ -32,9 +33,12 @@
       "typecheck": "turbo run typecheck",
       "typecheck:examples": "tsc -p examples/tsconfig.json",
       "wcag:sync": "npm run sync --workspace @a11ied/wcag-data",
-      "wcag:validate": "npm run validate --workspace @a11ied/wcag-data"
+      "wcag:validate": "npm run validate --workspace @a11ied/wcag-data",
+      "version-packages": "changeset version && npm install --package-lock-only --ignore-scripts"
    },
    "devDependencies": {
+      "@changesets/changelog-github": "1.0.1",
+      "@changesets/cli": "3.0.3",
       "@types/jsdom": "^30.0.0",
       "@types/node": "^26.3.0",
       "@vitest/browser": "4.1.12",

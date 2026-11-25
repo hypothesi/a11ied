@@ -1,0 +1,118 @@
+name: release
+
+on:
+   push:
+      branches:
+         - master
+   workflow_dispatch:
+
+concurrency:
+   group: release
+   cancel-in-progress: false
+
+permissions:
+   contents: read
+
+jobs:
+   version:
+      runs-on: ubuntu-latest
+      permissions:
+         contents: write
+         pull-requests: write
+      outputs:
+         unpublished: ${{ steps.plan.outputs.unpublished }}
+         unreleased: ${{ steps.plan.outputs.unreleased }}
+      steps:
+         - name: Check out repo
+           uses: actions/checkout@v7
+
+         - name: Set up Node.js
+           uses: actions/setup-node@v7
+           with:
+              node-version: 24
+              cache: npm
+
+         - name: Install dependencies
+           run: npm ci --ignore-scripts
+
+         # With changesets waiting, this opens or updates the "chore: version packages" pull
+         # request. Without any, it does nothing, and the next step looks for a version that
+         # has not reached npm yet: the one that pull request set when it was merged.
+         - name: Open or update the version pull request
+           id: changesets
+           uses: changesets/action@v2
+           with:
+              version: npm run version-packages
+              title: 'chore: version packages'
+              commit: 'chore: version packages'
+           env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+         - name: Find a version not yet on npm or GitHub
+           id: plan
+           if: steps.changesets.outputs.hasChangesets == 'false'
+           env:
+              GH_TOKEN: ${{ github.token }}
+           run: |
+              npx changeset publish-plan --output "$RUNNER_TEMP/publish-plan.json"
+              unpublished="$(node -p "require(process.argv[1]).plan.flat().some((release) => release.kind === 'publish')" "$RUNNER_TEMP/publish-plan.json")"
+              echo "unpublished=${unpublished}" >> "$GITHUB_OUTPUT"
+              version="$(node -p "require('./packages/cli/package.json').version")"
+              if gh release view "v${version}" >/dev/null 2>&1; then
+                echo "unreleased=false" >> "$GITHUB_OUTPUT"
+              else
+                echo "unreleased=true" >> "$GITHUB_OUTPUT"
+              fi
+
+   publish:
+      needs: version
+      if: needs.version.outputs.unpublished == 'true' || needs.version.outputs.unreleased == 'true'
+      runs-on: ubuntu-latest
+      environment: npm
+      # npm trusted publishing: npm trades this job's GitHub OIDC token for a short-lived
+      # publish credential, and adds provenance. Each package's trusted publisher on
+      # npmjs.com names this file and the npm environment; see the release checklist.
+      permissions:
+         contents: write
+         id-token: write
+      steps:
+         - name: Check out repo
+           uses: actions/checkout@v7
+
+         - name: Set up Node.js
+           uses: actions/setup-node@v7
+           with:
+              node-version: 24
+              registry-url: https://registry.npmjs.org
+
+         - name: Install dependencies
+           run: npm ci --ignore-scripts
+
+         - name: Data validation
+           run: npm run wcag:validate
+
+         - name: Standards
+           run: npm run standards
+
+         - name: Test
+           run: npm test
+
+         - name: Pack public workspaces
+           run: npm run pack:check
+
+         # Skips packages npm already has. One GitHub release stands for every package, so
+         # per-package git tags are left out.
+         - name: Publish to npm
+           run: npx changeset publish --no-git-tag
+
+         - name: Create the GitHub release
+           env:
+              GH_TOKEN: ${{ github.token }}
+           run: |
+              version="$(node -p "require('./packages/cli/package.json').version")"
+              if gh release view "v${version}" >/dev/null 2>&1; then
+                echo "v${version} already has a GitHub release."
+                exit 0
+              fi
+              node scripts/release-notes.mjs "${version}" > "$RUNNER_TEMP/release-notes.md"
+              gh release create "v${version}" --target "${GITHUB_SHA}" --title "v${version}" --notes-file "$RUNNER_TEMP/release-notes.md"
