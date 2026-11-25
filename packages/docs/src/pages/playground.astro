@@ -66,20 +66,27 @@ function getShortTitle(title: string): string {
          <a class="ws-back" href="/overview">Back to the docs</a>
       </header>
 
-      <main id="content" data-playground data-runtime-src={runtimeURL} data-base-path={basePath}>
+      <main
+         id="content"
+         data-playground
+         data-mode="cases"
+         data-runtime-src={runtimeURL}
+         data-bridge-src={`${basePath}playground-bridge.js`}
+         data-base-path={basePath}
+      >
          <div class="ws-intro">
             <h1>Playground</h1>
-            <p>
-               Hear a page the way a11ied's simulated screen reader does, in your browser. Pick a
-               test case, run it, and read what was announced.
-            </p>
+            <div class="ws-modes" role="group" aria-label="What to test">
+               <button type="button" class="ws-mode" data-pg-mode="cases" aria-pressed="true">Test cases</button>
+               <button type="button" class="ws-mode" data-pg-mode="explore" aria-pressed="false">Any page</button>
+            </div>
             <noscript>
                <p>This page needs JavaScript, which is turned off in this browser.</p>
             </noscript>
          </div>
 
          <div class="ws">
-            <section class="ws-pane ws-cases" aria-labelledby="ws-cases-heading">
+            <section class="ws-pane ws-cases" aria-labelledby="ws-cases-heading" data-when="cases">
                <h2 id="ws-cases-heading" class="ws-pane-head"><span class="ws-step">1</span> Pick a test case</h2>
                <div class="ws-filter">
                   <label class="sr-only" for="ws-filter">Filter test cases</label>
@@ -105,8 +112,18 @@ function getShortTitle(title: string): string {
             </section>
 
             <section class="ws-pane ws-stage" aria-labelledby="ws-stage-heading">
-               <h2 id="ws-stage-heading" class="ws-pane-head"><span class="ws-step">2</span> Run it</h2>
-               <div class="ws-about">
+               <h2 id="ws-stage-heading" class="ws-pane-head">
+                  <span class="ws-head-text" data-when="cases"><span class="ws-step">2</span> Run it</span>
+                  <span class="ws-head-text" data-when="explore"><span class="ws-step">1</span> Open a page and move through it</span>
+               </h2>
+               <div class="ws-about" data-when="explore">
+                  <p class="ws-about-text">
+                     Type an address, or start with the
+                     <button type="button" class="ws-link" data-pg-load={`${basePath}demo/team/`}>practice page</button>
+                     or its <button type="button" class="ws-link" data-pg-load={`${basePath}demo/team/fixed/`}>fixed copy</button>.
+                  </p>
+               </div>
+               <div class="ws-about" data-when="cases">
                   <p class="ws-case-title" data-pg-title></p>
                   {cases.map(({ testCase }) => (
                      <p
@@ -126,12 +143,13 @@ function getShortTitle(title: string): string {
                </div>
 
                <div class="ws-toolbar" role="group" aria-label="Screen reader controls">
-                  <button type="button" class="ws-button ws-button--primary" data-pg-action="run-test">Run the test</button>
-                  <span class="ws-or">or step through it:</span>
+                  <button type="button" class="ws-button ws-button--primary" data-pg-action="run-test" data-when="cases">Run the test</button>
+                  <span class="ws-or" data-when="cases">or step through it:</span>
                   <button type="button" class="ws-button" data-pg-action="previous">Previous</button>
                   <button type="button" class="ws-button" data-pg-action="next">Next</button>
+                  <span class="ws-position" data-pg-position role="status"></span>
                   <button type="button" class="ws-button" data-pg-action="activate">Activate</button>
-                  <details class="ws-more">
+                  <details class="ws-more" data-pg-more>
                      <summary>More keys</summary>
                      <div class="ws-more-body">
                         <button type="button" class="ws-button" data-pg-action="tab">Tab</button>
@@ -150,16 +168,25 @@ function getShortTitle(title: string): string {
                </div>
 
                <div class="ws-browser">
-                  <div class="ws-browser-bar">
+                  <div class="ws-browser-bar" data-when="cases">
                      <span class="ws-browser-url" data-pg-url></span>
                      <a class="ws-browser-open" data-pg-open href={cases[0]?.caseHref}>
                         <span>Open by itself</span>
                         <ExternalLink size={14} aria-hidden="true" focusable="false" />
                      </a>
                   </div>
+                  <form class="ws-browser-bar ws-address" data-pg-address data-when="explore">
+                     <label class="sr-only" for="ws-url">Page address</label>
+                     <input id="ws-url" class="ws-input" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://" data-pg-url-input />
+                     <button type="submit" class="ws-button ws-button--small">Load</button>
+                  </form>
                   <div class="ws-frame-wrap">
-                     <iframe class="ws-frame" data-pg-frame title="Test case"></iframe>
+                     <iframe class="ws-frame" data-pg-frame title="Page under test"></iframe>
                      <span class="ws-cursor" data-pg-cursor aria-hidden="true" hidden></span>
+                     <div class="ws-blocked" data-pg-blocked hidden>
+                        <p data-pg-blocked-text></p>
+                        <pre class="ws-commands" data-no-decorate><code data-pg-blocked-commands></code></pre>
+                     </div>
                   </div>
                </div>
 
@@ -171,7 +198,7 @@ function getShortTitle(title: string): string {
                         <button type="button" class="ws-button ws-button--small" data-pg-action="copy-commands">Copy the commands</button>
                      </div>
                   </details>
-                  <details class="ws-extra">
+                  <details class="ws-extra" data-when="cases">
                      <summary>What real screen readers said for this case</summary>
                      <div class="ws-extra-body">
                         {cases.map(({ testCase, runs }) => (
@@ -203,11 +230,15 @@ function getShortTitle(title: string): string {
             </section>
 
             <section class="ws-pane ws-output" aria-labelledby="ws-output-heading">
-               <h2 id="ws-output-heading" class="ws-pane-head"><span class="ws-step">3</span> Read what it said</h2>
+               <h2 id="ws-output-heading" class="ws-pane-head">
+                  <span class="ws-head-text" data-when="cases"><span class="ws-step">3</span> Read what it said</span>
+                  <span class="ws-head-text" data-when="explore"><span class="ws-step">2</span> Read what it said</span>
+               </h2>
                <p class="ws-now" data-pg-now hidden></p>
                <ol class="ws-log" data-pg-log role="log" aria-live="polite" aria-label="Screen reader output" tabindex="0"></ol>
                <div class="ws-log-empty" data-pg-log-empty>
-                  <p>Nothing yet. Press <strong>Run the test</strong> and the screen reader's words appear here.</p>
+                  <p data-when="cases">Nothing yet. Press <strong>Run the test</strong> and the screen reader's words appear here.</p>
+                  <p data-when="explore">Nothing yet. Press <strong>Next</strong> and the screen reader's words appear here.</p>
                </div>
 
                <div class="ws-checks" data-pg-checks hidden>
@@ -267,15 +298,23 @@ function getShortTitle(title: string): string {
    .ws-top .brand-title { font-size: 1.6rem; }
    .ws-back { color: var(--ink); font-weight: 600; }
 
-   /* One line that says what the page is and what to do. */
-   .ws-intro { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--xs) var(--lg); padding: var(--md) var(--lg); }
+   /* The page's name, and the choice between the test cases and any page. */
+   .ws-intro { display: flex; flex-wrap: wrap; align-items: center; gap: var(--xs) var(--lg); padding: var(--sm) var(--lg); }
    .ws-intro h1 { padding: 0; border: 0; margin: 0; font: 700 1.8rem/1 var(--display); letter-spacing: -0.02em; text-transform: uppercase; }
    .ws-intro p { margin: 0; color: var(--ink-soft); }
+   .ws-modes { display: inline-flex; border: 2px solid var(--ink); }
+   .ws-mode { min-height: 2.25rem; padding: 0.35rem 0.9rem; background: var(--paper-light); color: var(--ink); border: 0; border-radius: 0; font: 600 0.95rem/1 var(--body); cursor: pointer; }
+   .ws-mode + .ws-mode { border-inline-start: 2px solid var(--ink); }
+   .ws-mode[aria-pressed="true"] { background: var(--ink); color: var(--yellow); }
+   /* Each mode shows only its own parts. */
+   [data-mode="cases"] [data-when="explore"], [data-mode="explore"] [data-when="cases"] { display: none; }
 
    /* Three panes fill the rest of the window. Each scrolls by itself. */
-   .ws { --intro: 4.25rem; display: grid; grid-template-columns: 16rem minmax(0, 1fr) minmax(20rem, 25rem); height: calc(100dvh - var(--top) - var(--intro)); min-height: 34rem; border-block: 3px solid var(--ink); }
+   .ws { --intro: 3.75rem; display: grid; grid-template-columns: 16rem minmax(0, 1fr) minmax(20rem, 25rem); height: calc(100dvh - var(--top) - var(--intro)); min-height: 34rem; border-block: 3px solid var(--ink); }
    .ws-pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--paper-light); }
    .ws-pane + .ws-pane { border-inline-start: 3px solid var(--ink); }
+   [data-mode="explore"] .ws { grid-template-columns: minmax(0, 1fr) minmax(20rem, 28rem); }
+   .ws-head-text { display: flex; align-items: center; gap: var(--sm); }
    /* The numbered head of each pane is the instruction for that step. */
    .ws-pane-head { display: flex; align-items: center; gap: var(--sm); padding: 0.6rem var(--md); border: 0; border-bottom: var(--rule); margin: 0; background: var(--paper); font: 700 1.05rem/1.2 var(--display); letter-spacing: 0.02em; text-transform: none; }
    .ws-step { display: grid; place-items: center; flex: none; width: 1.6rem; height: 1.6rem; background: var(--ink); color: var(--yellow); border-radius: 50%; font-size: 0.9rem; }
@@ -284,7 +323,7 @@ function getShortTitle(title: string): string {
    .ws-button { display: inline-flex; align-items: center; justify-content: center; min-height: 2.25rem; padding: 0.4rem 0.75rem; background: var(--paper-light); color: var(--ink); border: 2px solid var(--ink); border-radius: 0; font: 600 0.92rem/1 var(--body); cursor: pointer; user-select: none; }
    .ws-button--primary { min-height: 2.75rem; padding-inline: 1.1rem; background: var(--yellow); box-shadow: 3px 3px 0 var(--ink); font: 700 1rem/1 var(--display); letter-spacing: 0.06em; text-transform: uppercase; }
    .ws-button--small { min-height: 2rem; padding: 0.3rem 0.6rem; border-width: 1px; font-size: 0.85rem; }
-   .ws-button:disabled { opacity: 0.55; cursor: progress; }
+   .ws-button:disabled { opacity: 0.45; cursor: default; }
    @media (hover: hover) {
       .ws-button:not(:disabled):hover { background: var(--ink); color: var(--yellow); }
    }
@@ -315,6 +354,10 @@ function getShortTitle(title: string): string {
    .ws-about-text[hidden] { display: none; }
    .ws-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--xs) var(--sm); padding: var(--sm) var(--md) var(--md); }
    .ws-or { color: var(--ink-soft); font-size: 0.9rem; }
+   /* Where the cursor is among the page's items. */
+   .ws-position { color: var(--ink-soft); font-size: 0.9rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+   .ws-position:empty { display: none; }
+   .ws-link { padding: 0; background: none; color: var(--red-dark); border: 0; font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
    .ws-more { position: relative; }
    .ws-more summary, .ws-extra summary { color: var(--ink); font-size: 0.92rem; font-weight: 600; cursor: pointer; }
    .ws-more summary { padding: 0.5rem 0.2rem; }
@@ -325,6 +368,12 @@ function getShortTitle(title: string): string {
    .ws-browser-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--xs) var(--md); padding: 0.3rem var(--sm); background: var(--ink); color: var(--paper-light); font-size: 0.78rem; }
    .ws-browser-url { overflow: hidden; flex: 1 1 8rem; min-width: 0; font-family: var(--code); text-overflow: ellipsis; white-space: nowrap; }
    .ws-browser-open { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--yellow); white-space: nowrap; }
+   .ws-address { flex-wrap: nowrap; }
+   .ws-address .ws-input { flex: 1; min-width: 0; min-height: 2rem; font-family: var(--code); font-size: 0.85rem; }
+   /* Shown in place of a page that would not load. */
+   .ws-blocked { position: absolute; inset: 0; display: grid; align-content: center; gap: var(--sm); overflow-y: auto; padding: var(--lg); background: var(--paper-light); }
+   .ws-blocked[hidden] { display: none; }
+   .ws-blocked p { max-width: 38rem; margin: 0; }
    .ws-frame-wrap { position: relative; flex: 1; min-height: 0; }
    .ws-frame { display: block; width: 100%; height: 100%; background: #ffffff; border: 0; }
    /* Drawn over the frame from outside, so the test case itself is never changed. */

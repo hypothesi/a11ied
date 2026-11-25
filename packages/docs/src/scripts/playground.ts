@@ -1,101 +1,99 @@
 /**
- * Runs the playground page. A standalone test case loads in the frame, and this script
- * adds a11ied's simulated screen reader to that frame from outside, then drives it. The
- * reader is the same script `a1 sr --sr virtual` adds to a page, so the phrases match.
+ * Runs the playground page. A page loads in the frame: a standalone test case, or any
+ * page whose address the visitor types. a11ied's simulated screen reader is added to the
+ * frame along with a small relay script, and this script drives the reader by sending the
+ * relay messages. The reader is the same script `a1 sr --sr virtual` adds to a page, so
+ * the phrases match.
  */
-import type { VirtualRuntime } from '@a11ied/guidepup/browser';
 import type { TranscriptEntry } from '@a11ied/support-data/types';
 
 import {
    evaluateTestRun,
    type GradedTestCase,
 } from '../../../../scripts/sr-runner/evaluate.mjs';
+import { toEntry, toTranscriptEntry, type LogEntry } from './playground/log';
+import { findParts, setShown, setText, type Parts } from './playground/parts';
+import {
+   isRecord,
+   listenToRelay,
+   mountByAddress,
+   mountFetched,
+   readState,
+   request,
+   surveyItems,
+   type CursorBox,
+   type ReaderState,
+} from './playground/relay';
 
-type EntryKind = 'item' | 'live' | 'edge' | 'mark';
+type Mode = 'cases' | 'explore';
 
-interface LogEntry {
+interface StepOptions {
    readonly command: string;
-   readonly phrase: string;
-   readonly kind: EntryKind;
-   /** A short label shown before the text: the role, or the kind of live region. */
-   readonly tag: string;
-   readonly text: string;
-   /** The role of the item under the cursor, when this phrase is that item's. */
-   readonly role?: string | undefined;
-}
-
-interface Parts {
-   readonly root: HTMLElement;
-   readonly caseButtons: readonly HTMLButtonElement[];
-   readonly filter: HTMLInputElement;
-   readonly jumpSelect: HTMLSelectElement;
-   readonly frame: HTMLIFrameElement;
-   readonly cursor: HTMLElement;
-   readonly log: HTMLElement;
-   readonly commands: HTMLElement;
-   readonly checkList: HTMLElement;
-   readonly rowTemplate: HTMLTemplateElement;
-   readonly checkTemplate: HTMLTemplateElement;
+   readonly cli: string;
+   readonly method: 'runPortable' | 'navigate' | 'press';
+   readonly argument: unknown;
+   /** The action can change the page, so wait for it to react and count its items again. */
+   readonly changesPage?: boolean;
 }
 
 const JUMP_KINDS = ['heading', 'link', 'button', 'form-field', 'landmark'] as const;
 
 type JumpKind = (typeof JUMP_KINDS)[number];
 
-const LIVE_PATTERN = /^(polite|assertive): /;
-
-const EDGE_PHRASES = new Set(['document', 'end of document']);
-
 /** Time for the page's own script, and any live region, to react to an action. */
 const SETTLE_MS = 300;
 
 const READ_STEP_MS = 90;
 
-const MAX_STEPS = 60;
+/** The most items counted on one page. A longer page shows its count with a plus sign. */
+const MAX_ITEMS = 300;
 
 const STATUS_RESET_MS = 2500;
 
-const CASE_PARAM = 'case';
-
 const CHECKPOINT = 'before';
+
+const LOADING_NOTE = 'Loading the page and starting the screen reader...';
 
 /** The width of the outline drawn around the element under the cursor, in pixels. */
 const CURSOR_BORDER = 3;
 
 const state: {
+   mode: Mode;
    slug: string;
-   runtime: VirtualRuntime | undefined;
+   pageURL: string;
    entries: LogEntry[];
    commands: string[];
    spokenCount: number;
    /** Where in the log the first activation happened, for cases that need one. */
    activatedAt: number | undefined;
-   /** Whether the cursor has been on the last item of the page. */
    hasReachedEnd: boolean;
    isBusy: boolean;
+   isReady: boolean;
    loadCount: number;
+   tokens: readonly string[];
+   isCapped: boolean;
+   /** The cursor's place among the page's items, when it is known. */
+   index: number | undefined;
+   atEnd: boolean;
+   canActivate: boolean;
 } = {
+   mode: 'cases',
    slug: '',
-   runtime: undefined,
+   pageURL: '',
    entries: [],
    commands: [],
    spokenCount: 0,
    activatedAt: undefined,
    hasReachedEnd: false,
    isBusy: false,
+   isReady: false,
    loadCount: 0,
+   tokens: [],
+   isCapped: false,
+   index: undefined,
+   atEnd: false,
+   canActivate: false,
 };
-
-function isVirtualRuntime(value: unknown): value is VirtualRuntime {
-   return (
-      typeof value === 'object' &&
-      value !== null &&
-      'start' in value &&
-      typeof value.start === 'function' &&
-      'runPortable' in value &&
-      typeof value.runPortable === 'function'
-   );
-}
 
 function isJumpKind(value: string): value is JumpKind {
    return JUMP_KINDS.some((kind) => kind === value);
@@ -103,13 +101,9 @@ function isJumpKind(value: string): value is JumpKind {
 
 function isGradedTestCase(value: unknown): value is GradedTestCase {
    return (
-      typeof value === 'object' &&
-      value !== null &&
-      'slug' in value &&
+      isRecord(value) &&
       typeof value.slug === 'string' &&
-      'evaluation' in value &&
-      typeof value.evaluation === 'object' &&
-      value.evaluation !== null &&
+      isRecord(value.evaluation) &&
       'expectedPhrases' in value.evaluation
    );
 }
@@ -120,59 +114,8 @@ function wait(ms: number): Promise<void> {
    });
 }
 
-function findParts(): Parts | undefined {
-   const root = document.querySelector('[data-playground]');
-
-   if (!(root instanceof HTMLElement)) {
-      return undefined;
-   }
-   const caseButtons = [...root.querySelectorAll('[data-pg-case-button]')].filter(
-      (button): button is HTMLButtonElement => button instanceof HTMLButtonElement,
-   );
-   const checkList = root.querySelector('[data-pg-check-list]'),
-      checkTemplate = root.querySelector('[data-pg-check-template]'),
-      commands = root.querySelector('[data-pg-commands]'),
-      cursor = root.querySelector('[data-pg-cursor]'),
-      filter = root.querySelector('[data-pg-filter]'),
-      frame = root.querySelector('[data-pg-frame]'),
-      jumpSelect = root.querySelector('[data-pg-jump]'),
-      log = root.querySelector('[data-pg-log]'),
-      rowTemplate = root.querySelector('[data-pg-row-template]');
-
-   if (
-      !(filter instanceof HTMLInputElement) ||
-      !(jumpSelect instanceof HTMLSelectElement) ||
-      !(frame instanceof HTMLIFrameElement) ||
-      !(cursor instanceof HTMLElement) ||
-      !(log instanceof HTMLElement) ||
-      !(commands instanceof HTMLElement) ||
-      !(checkList instanceof HTMLElement) ||
-      !(rowTemplate instanceof HTMLTemplateElement) ||
-      !(checkTemplate instanceof HTMLTemplateElement)
-   ) {
-      return undefined;
-   }
-   return {
-      root,
-      caseButtons,
-      filter,
-      jumpSelect,
-      frame,
-      cursor,
-      log,
-      commands,
-      checkList,
-      rowTemplate,
-      checkTemplate,
-   };
-}
-
-function setText(parts: Parts, selector: string, text: string): void {
-   const element = parts.root.querySelector(selector);
-
-   if (element) {
-      element.textContent = text;
-   }
+function describe(error: unknown): string {
+   return error instanceof Error ? error.message : String(error);
 }
 
 function showStatus(parts: Parts, message: string): void {
@@ -182,13 +125,62 @@ function showStatus(parts: Parts, message: string): void {
    }, STATUS_RESET_MS);
 }
 
-function setBusy(parts: Parts, isBusy: boolean): void {
-   state.isBusy = isBusy;
+/** A control is off while the reader is busy, and whenever pressing it would do nothing. */
+function renderAvailability(parts: Parts): void {
+   const isIdle = state.isReady && !state.isBusy;
+   const allowed: Record<string, boolean> = {
+      previous: state.index !== 0,
+      next: !state.atEnd,
+      'read-all': !state.atEnd,
+      activate: state.canActivate,
+   };
+
    for (const control of parts.root.querySelectorAll('[data-pg-action]')) {
       if (control instanceof HTMLButtonElement) {
-         control.disabled = isBusy;
+         const action = control.dataset.pgAction ?? '',
+            isAlwaysOn = action.startsWith('copy-');
+
+         control.disabled = !isAlwaysOn && !(isIdle && (allowed[action] ?? true));
       }
    }
+}
+
+function setBusy(parts: Parts, isBusy: boolean): void {
+   state.isBusy = isBusy;
+   renderAvailability(parts);
+}
+
+/** Says where the cursor is among the page's items. */
+function renderPosition(parts: Parts): void {
+   const { index, isCapped, tokens } = state;
+
+   if (index === undefined || tokens.length === 0) {
+      setText(parts, '[data-pg-position]', '');
+      return;
+   }
+   setText(
+      parts,
+      '[data-pg-position]',
+      `${String(index + 1)} of ${String(tokens.length)}${isCapped ? '+' : ''}`,
+   );
+}
+
+/** Finds the cursor among the counted items, preferring the place nearest the last one. */
+function locate(position: string, near: number | undefined): number | undefined {
+   const matches = state.tokens.flatMap((token, index) =>
+      token === position ? [index] : [],
+   );
+   let [best] = matches;
+
+   if (best === undefined || near === undefined) {
+      return best;
+   }
+   for (const index of matches) {
+      if (Math.abs(index - near) < Math.abs(best - near)) {
+         best = index;
+      }
+   }
+   return best;
 }
 
 /** The test case as a11ied's runner grades it, read from the page. */
@@ -204,37 +196,6 @@ function getCaseHref(parts: Parts, slug: string): string {
    return `${parts.root.dataset.basePath ?? '/'}compatibility/cases/${slug}/`;
 }
 
-/** Turns one spoken phrase into a log entry, using the cursor's role when it applies. */
-function toEntry(command: string, phrase: string, role: string | undefined): LogEntry {
-   const live = LIVE_PATTERN.exec(phrase);
-
-   if (live) {
-      return {
-         command,
-         phrase,
-         kind: 'live',
-         tag: `live: ${live[1] ?? ''}`,
-         text: phrase.slice(live[0].length),
-      };
-   }
-   if (EDGE_PHRASES.has(phrase)) {
-      return { command, phrase, kind: 'edge', tag: '', text: phrase };
-   }
-   const rolePrefix = `${role ?? ''}, `;
-
-   if (role && phrase.startsWith(rolePrefix)) {
-      return {
-         command,
-         phrase,
-         kind: 'item',
-         tag: role,
-         text: phrase.slice(rolePrefix.length),
-         role,
-      };
-   }
-   return { command, phrase, kind: 'item', tag: '', text: phrase, role };
-}
-
 function renderRow(parts: Parts, entry: LogEntry, position: number): void {
    const row = parts.rowTemplate.content.firstElementChild?.cloneNode(true);
 
@@ -242,7 +203,6 @@ function renderRow(parts: Parts, entry: LogEntry, position: number): void {
       return;
    }
    const tag = row.querySelector('[data-row-tag]');
-
    const cells: ReadonlyArray<readonly [selector: string, text: string]> = [
       ['[data-row-step]', entry.kind === 'mark' ? '' : String(position)],
       ['[data-row-command]', entry.command],
@@ -265,13 +225,6 @@ function renderRow(parts: Parts, entry: LogEntry, position: number): void {
    parts.log.scrollTop = parts.log.scrollHeight;
 }
 
-function toTranscriptEntry(entry: LogEntry, index: number): TranscriptEntry {
-   const base = { step: index + 1, command: entry.command, phrase: entry.phrase };
-
-   // The runner grades by the role the reader reported, so the same role goes with each line.
-   return entry.role === undefined ? base : { ...base, role: entry.role };
-}
-
 /** The log in the form a11ied's runner grades, and where the activation falls in it. */
 function getTranscript(): { entries: TranscriptEntry[]; activatedAt: number } {
    const marksBefore = state.entries
@@ -288,7 +241,7 @@ function getTranscript(): { entries: TranscriptEntry[]; activatedAt: number } {
 /** Grades the log so far with the checks a11ied's runner uses for this case. */
 function renderChecks(parts: Parts): void {
    const result = parts.root.querySelector('[data-pg-result]'),
-      testCase = readTestCase(parts, state.slug);
+      testCase = state.mode === 'cases' ? readTestCase(parts, state.slug) : undefined;
 
    if (!testCase) {
       parts.checkList.replaceChildren();
@@ -348,21 +301,12 @@ function renderChecks(parts: Parts): void {
 }
 
 /** Shows the empty hint before anything is said, and the cursor line and checks after. */
-function renderCounts(parts: Parts): void {
+function renderPanels(parts: Parts): void {
    const hasSpoken = state.entries.length > 0;
-   const shownWhen: ReadonlyArray<readonly [selector: string, isShown: boolean]> = [
-      ['[data-pg-log-empty]', !hasSpoken],
-      ['[data-pg-now]', hasSpoken],
-      ['[data-pg-checks]', hasSpoken],
-   ];
 
-   for (const [selector, isShown] of shownWhen) {
-      const element = parts.root.querySelector(selector);
-
-      if (element instanceof HTMLElement) {
-         element.hidden = !isShown;
-      }
-   }
+   setShown(parts, '[data-pg-log-empty]', !hasSpoken);
+   setShown(parts, '[data-pg-now]', hasSpoken);
+   setShown(parts, '[data-pg-checks]', hasSpoken && state.mode === 'cases');
    parts.commands.textContent = state.commands.join('\n');
 }
 
@@ -375,50 +319,73 @@ function addEntries(parts: Parts, entries: readonly LogEntry[]): void {
          state.entries.filter((each) => each.kind !== 'mark').length,
       );
    }
-   renderCounts(parts);
+   renderPanels(parts);
    renderChecks(parts);
 }
 
 /** Outlines the element under the reader's cursor, drawn over the frame from outside. */
-async function showCursor(parts: Parts, runtime: VirtualRuntime): Promise<void> {
-   const inner = parts.frame.contentDocument,
-      node = await runtime.readActivationNode();
-
-   if (!node || !inner || node === inner.body || node === inner.documentElement) {
+function showCursor(parts: Parts, box: CursorBox | undefined): void {
+   if (!box) {
       parts.cursor.hidden = true;
       return;
    }
-   node.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-   const box = node.getBoundingClientRect();
-
-   parts.cursor.hidden = false;
    const widest = parts.frame.clientWidth - CURSOR_BORDER - CURSOR_BORDER;
 
+   parts.cursor.hidden = false;
    parts.cursor.style.left = `${String(Math.max(box.left - CURSOR_BORDER, 0))}px`;
    parts.cursor.style.top = `${String(Math.max(box.top - CURSOR_BORDER, 0))}px`;
    parts.cursor.style.width = `${String(Math.min(box.width, widest))}px`;
    parts.cursor.style.height = `${String(box.height)}px`;
 }
 
+/** Counts the page's items again, then puts the cursor back where it was. */
+async function countItems(parts: Parts, keepIndex: number | undefined): Promise<void> {
+   const survey = await surveyItems(parts.frame, MAX_ITEMS);
+
+   if (!survey) {
+      return;
+   }
+   state.tokens = survey.tokens;
+   state.isCapped = survey.isCapped;
+   state.index = Math.min(keepIndex ?? 0, Math.max(survey.tokens.length - 1, 0));
+   await request(parts.frame, 'seek', state.index);
+   // Counting made the reader repeat phrases that are already in the log.
+   const after = await readState(parts.frame);
+
+   state.spokenCount = after.phrases.length;
+   state.atEnd = after.atEnd;
+   state.canActivate = after.canActivate;
+   showCursor(parts, state.index === 0 ? undefined : after.box);
+}
+
 /**
  * Reads what the reader has said since the last look and adds it to the log.
  *
- * @returns Whether the cursor is on the last item of the page
+ * @returns What the reader reported
  */
-async function collect(
+async function sync(
    parts: Parts,
-   runtime: VirtualRuntime,
    command: string,
-): Promise<boolean> {
-   const [speech, current] = await Promise.all([
-      runtime.readSpeech(),
-      runtime.readCurrentItem(),
-   ]);
-   const fresh = speech.spokenPhraseLog.slice(state.spokenCount);
-   const { item } = current;
+   moved: -1 | 0 | 1 = 0,
+): Promise<ReaderState> {
+   const reader = await readState(parts.frame);
+   const fresh = reader.phrases.slice(state.spokenCount);
+   const { item } = reader;
 
-   state.spokenCount = speech.spokenPhraseLog.length;
-   state.hasReachedEnd ||= current.atEnd;
+   state.spokenCount = reader.phrases.length;
+   state.atEnd = reader.atEnd;
+   state.canActivate = reader.canActivate;
+   state.hasReachedEnd ||= reader.atEnd;
+   /*
+    * An action can change what the item says, and with it the name of its position. The
+    * cursor has not moved then, so its place is kept.
+    */
+   const located = locate(reader.position, state.index) ?? state.index;
+
+   state.index =
+      moved !== 0 && state.index !== undefined
+         ? Math.max(state.index + moved, 0)
+         : located;
    addEntries(
       parts,
       fresh.map((phrase) =>
@@ -432,46 +399,36 @@ async function collect(
       states = item.states.length > 0 ? ` (${item.states.join(', ')})` : '';
 
    setText(parts, '[data-pg-now]', `Cursor: ${item.role ?? 'item'}${name}${states}`);
-   await showCursor(parts, runtime);
-   return current.atEnd;
+   showCursor(parts, reader.box);
+   renderPosition(parts);
+   return reader;
 }
 
-function addRuntime(parts: Parts): Promise<VirtualRuntime> {
-   const inner = parts.frame.contentDocument,
-      source = parts.root.dataset.runtimeSrc ?? '';
-   const read = (): unknown =>
-      parts.frame.contentWindow
-         ? Reflect.get(parts.frame.contentWindow, 'a11iedVirtualRuntime')
-         : undefined;
+/** Runs one reader action, then logs what it made the reader say. */
+async function step(parts: Parts, options: StepOptions): Promise<ReaderState> {
+   const moves: Record<string, -1 | 1> = { next: 1, previous: -1 };
+   const moved =
+      options.method === 'runPortable' ? (moves[String(options.argument)] ?? 0) : 0;
 
-   return new Promise((resolve, reject) => {
-      const existing = read();
+   await request(parts.frame, options.method, options.argument);
+   if (options.changesPage) {
+      await wait(SETTLE_MS);
+   }
+   state.commands.push(options.cli);
+   const reader = await sync(parts, options.command, moved);
 
-      if (isVirtualRuntime(existing)) {
-         resolve(existing);
-         return;
-      }
-      if (!inner) {
-         reject(new Error('The test case did not load.'));
-         return;
-      }
-      const tag = inner.createElement('script');
+   if (options.changesPage && reader.hasChanged) {
+      await countItems(parts, state.index);
+      renderPosition(parts);
+   }
+   return reader;
+}
 
-      tag.src = source;
-      tag.addEventListener('load', () => {
-         const loaded = read();
-
-         if (isVirtualRuntime(loaded)) {
-            resolve(loaded);
-         } else {
-            reject(new Error('The screen reader script did not start.'));
-         }
-      });
-      tag.addEventListener('error', () => {
-         reject(new Error('The screen reader script did not load.'));
-      });
-      inner.head.append(tag);
-   });
+/** The reader's script, then the relay's, as full addresses. */
+function getScriptURLs(parts: Parts): string[] {
+   return [parts.root.dataset.runtimeSrc ?? '', parts.root.dataset.bridgeSrc ?? ''].map(
+      (source) => new URL(source, globalThis.location.href).href,
+   );
 }
 
 function showCase(parts: Parts, slug: string): void {
@@ -515,125 +472,183 @@ function filterCases(parts: Parts): void {
          group.hidden = !group.querySelector('[data-pg-case-item]:not([hidden])');
       }
    }
-   const none = parts.root.querySelector('[data-pg-none]');
-
-   if (none instanceof HTMLElement) {
-      none.hidden = Boolean(
-         parts.root.querySelector('[data-pg-case-item]:not([hidden])'),
-      );
-   }
+   setShown(
+      parts,
+      '[data-pg-none]',
+      !parts.root.querySelector('[data-pg-case-item]:not([hidden])'),
+   );
 }
 
-/** Clears the log and the reader state, and shows the chosen case's details. */
-function resetFor(parts: Parts, slug: string): void {
-   const url = new URL(globalThis.location.href);
-
-   state.slug = slug;
-   state.runtime = undefined;
+/** Clears the log and what is known about the page in the frame. */
+function resetSession(parts: Parts): void {
    state.entries = [];
    state.commands = [];
    state.spokenCount = 0;
    state.activatedAt = undefined;
    state.hasReachedEnd = false;
+   state.isReady = false;
+   state.tokens = [];
+   state.isCapped = false;
+   state.index = undefined;
+   state.atEnd = false;
+   state.canActivate = false;
    parts.log.replaceChildren();
    parts.cursor.hidden = true;
-   showCase(parts, slug);
-   renderCounts(parts);
-   renderChecks(parts);
+   setShown(parts, '[data-pg-blocked]', false);
    setText(parts, '[data-pg-now]', '');
-   url.searchParams.set(CASE_PARAM, slug);
+   renderPanels(parts);
+   renderChecks(parts);
+   renderPosition(parts);
+}
+
+function rememberInAddress(mode: Mode, key: 'case' | 'url', value: string): void {
+   const url = new URL(globalThis.location.href);
+
+   url.searchParams.delete('case');
+   url.searchParams.delete('url');
+   url.searchParams.set('mode', mode);
+   url.searchParams.set(key, value);
    globalThis.history.replaceState({}, '', url);
 }
 
-function loadFrame(frame: HTMLIFrameElement, href: string): Promise<void> {
-   return new Promise((resolve) => {
-      frame.addEventListener(
-         'load',
-         () => {
-            resolve();
-         },
-         { once: true },
-      );
-      frame.src = href;
-   });
+/** Starts the reader on the page now in the frame and counts the page's items. */
+async function beginSession(parts: Parts, address: string): Promise<void> {
+   await request(parts.frame, 'start');
+   state.commands = [`a1 sr start --sr virtual ${address}`];
+   state.isReady = true;
+   await countItems(parts, 0);
+   renderPanels(parts);
+   renderPosition(parts);
 }
 
-/** Loads a case into the frame and starts the reader on it. */
+/** Explains why a page would not load here, and how to test it with the CLI. */
+function showBlocked(parts: Parts, url: string, error: unknown): void {
+   // A refused request arrives as a TypeError with no useful text. Other errors say why.
+   const reason =
+      error instanceof TypeError
+         ? 'A browser lets one site read another only when that site allows it, and this one does not.'
+         : describe(error);
+
+   setText(
+      parts,
+      '[data-pg-blocked-text]',
+      `This page could not be loaded here. ${reason} The a1 command has no such limit:`,
+   );
+   setText(
+      parts,
+      '[data-pg-blocked-commands]',
+      [`a1 sr start --sr virtual ${url}`, 'a1 sr walk', 'a1 sr stop'].join('\n'),
+   );
+   setShown(parts, '[data-pg-blocked]', true);
+}
+
+/** Loads a test case into the frame and starts the reader on it. */
 async function loadCase(parts: Parts, slug: string): Promise<void> {
    const href = getCaseHref(parts, slug),
       loadID = state.loadCount + 1;
 
    state.loadCount = loadID;
-   resetFor(parts, slug);
+   state.slug = slug;
+   resetSession(parts);
+   showCase(parts, slug);
+   rememberInAddress('cases', 'case', slug);
    setBusy(parts, true);
-
+   setText(parts, '[data-pg-status]', LOADING_NOTE);
    try {
-      await loadFrame(parts.frame, href);
-      const runtime = await addRuntime(parts);
-
-      // A newer load has taken over the frame.
-      if (state.loadCount !== loadID) {
-         return;
+      await mountByAddress(parts.frame, href, getScriptURLs(parts));
+      if (state.loadCount === loadID) {
+         await beginSession(parts, new URL(href, globalThis.location.href).href);
       }
-      await runtime.start();
-      state.runtime = runtime;
-      state.commands = [
-         `a1 sr start --sr virtual ${new URL(href, globalThis.location.href).href}`,
-      ];
-      // Starting says "document". The log stays empty until the visitor does something.
-      const speech = await runtime.readSpeech();
-
-      state.spokenCount = speech.spokenPhraseLog.length;
-      renderCounts(parts);
-      parts.frame.contentWindow?.addEventListener('scroll', async () => {
-         await showCursor(parts, runtime);
-      });
    } catch (error) {
-      showStatus(parts, error instanceof Error ? error.message : String(error));
+      showStatus(parts, describe(error));
    } finally {
       if (state.loadCount === loadID) {
+         setText(parts, '[data-pg-status]', '');
          setBusy(parts, false);
       }
    }
 }
 
-/** Runs one reader action, then logs what it made the reader say. */
-async function step(
-   parts: Parts,
-   options: {
-      command: string;
-      cli: string;
-      run: (runtime: VirtualRuntime) => Promise<unknown>;
-      /** Wait for the page to react before reading what was said. */
-      settles?: boolean;
-   },
-): Promise<boolean> {
-   const { runtime } = state;
+/** Reads what the visitor typed as an address, adding the scheme when it is left out. */
+function toPageURL(typed: string): URL | undefined {
+   const text = typed.trim();
 
-   if (!runtime) {
-      return true;
+   if (text === '') {
+      return undefined;
    }
-   await options.run(runtime);
-   if (options.settles) {
-      await wait(SETTLE_MS);
+   const hasScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(text),
+      isLocalPath = text.startsWith('/');
+
+   try {
+      const url = new URL(
+         hasScheme || isLocalPath ? text : `https://${text}`,
+         globalThis.location.href,
+      );
+
+      return url.protocol === 'http:' || url.protocol === 'https:' ? url : undefined;
+   } catch {
+      return undefined;
    }
-   state.commands.push(options.cli);
-   return collect(parts, runtime, options.command);
+}
+
+/** Loads any page into the frame and starts the reader on it. */
+async function loadPage(parts: Parts, typed: string): Promise<void> {
+   const loadID = state.loadCount + 1,
+      url = toPageURL(typed);
+
+   if (!url) {
+      showStatus(parts, 'Type a web address, such as example.com.');
+      return;
+   }
+   state.loadCount = loadID;
+   state.pageURL = url.href;
+   resetSession(parts);
+   parts.urlInput.value = url.href;
+   parts.frame.title = `Page under test: ${url.href}`;
+   rememberInAddress('explore', 'url', url.href);
+   setBusy(parts, true);
+   setText(parts, '[data-pg-status]', LOADING_NOTE);
+   try {
+      await mountFetched(parts.frame, url.href, getScriptURLs(parts));
+      if (state.loadCount === loadID) {
+         await beginSession(parts, url.href);
+      }
+   } catch (error) {
+      if (state.loadCount === loadID) {
+         parts.frame.removeAttribute('srcdoc');
+         showBlocked(parts, url.href, error);
+      }
+   } finally {
+      if (state.loadCount === loadID) {
+         setText(parts, '[data-pg-status]', '');
+         setBusy(parts, false);
+      }
+   }
+}
+
+function setMode(parts: Parts, mode: Mode): void {
+   state.mode = mode;
+   parts.root.dataset.mode = mode;
+   for (const button of parts.root.querySelectorAll('[data-pg-mode]')) {
+      if (button instanceof HTMLElement) {
+         button.setAttribute('aria-pressed', String(button.dataset.pgMode === mode));
+      }
+   }
+   // Moving around is the whole point of the open mode, so its extra keys start open.
+   for (const more of parts.root.querySelectorAll('[data-pg-more]')) {
+      if (more instanceof HTMLDetailsElement) {
+         more.open = mode === 'explore';
+      }
+   }
 }
 
 /** Moves forward one item at a time until the end of the page, at a readable pace. */
 async function readOn(parts: Parts, remaining: number): Promise<void> {
-   const { runtime } = state;
-
-   if (!runtime || remaining === 0) {
+   if (remaining === 0 || state.atEnd) {
       return;
    }
-   await runtime.runPortable('next');
-   const isAtEnd = await collect(parts, runtime, 'read all');
-
-   if (isAtEnd) {
-      return;
-   }
+   await request(parts.frame, 'runPortable', 'next');
+   await sync(parts, 'read all', 1);
    await wait(READ_STEP_MS);
    await readOn(parts, remaining - 1);
 }
@@ -644,14 +659,11 @@ async function goToButton(
    name: string,
    remaining: number,
 ): Promise<boolean> {
-   const { runtime } = state;
-
-   if (!runtime || remaining === 0) {
+   if (remaining === 0) {
       return false;
    }
-   await runtime.runPortable('next');
-   await collect(parts, runtime, 'go to');
-   const { item } = await runtime.readCurrentItem();
+   await request(parts.frame, 'runPortable', 'next');
+   const { item } = await sync(parts, 'go to', 1);
 
    if (item.role === 'button' && item.name === name) {
       return true;
@@ -666,6 +678,17 @@ function markActivation(parts: Parts): void {
    }
 }
 
+function activate(parts: Parts): Promise<ReaderState> {
+   markActivation(parts);
+   return step(parts, {
+      command: 'activate',
+      cli: 'a1 sr activate',
+      method: 'runPortable',
+      argument: 'activate',
+      changesPage: true,
+   });
+}
+
 /** Does what a11ied's own runner does for this case: read it all, then act if it has to. */
 async function runWholeTest(parts: Parts): Promise<void> {
    const rule = readTestCase(parts, state.slug)?.evaluation;
@@ -675,22 +698,21 @@ async function runWholeTest(parts: Parts): Promise<void> {
 
    await loadCase(parts, state.slug);
    setBusy(parts, true);
-   await readOn(parts, MAX_STEPS);
+   await readOn(parts, MAX_ITEMS);
    state.commands.push('a1 sr read-all');
-   if (isInteractive && activateName !== '' && state.runtime) {
-      await state.runtime.runPortable('top');
+   if (isInteractive && activateName !== '') {
+      await request(parts.frame, 'runPortable', 'top');
       // Going back to the top repeats phrases already in the log, so they are not added.
-      const speech = await state.runtime.readSpeech();
+      const atTop = await readState(parts.frame);
 
-      state.spokenCount = speech.spokenPhraseLog.length;
-      const isFound = await goToButton(parts, activateName, MAX_STEPS);
-
+      state.spokenCount = atTop.phrases.length;
+      state.index = 0;
       state.commands.push(
          'a1 sr top',
          `a1 sr goto --role button --name "${activateName}"`,
          `a1 sr checkpoint ${CHECKPOINT}`,
       );
-      if (isFound) {
+      if (await goToButton(parts, activateName, MAX_ITEMS)) {
          addEntries(parts, [
             {
                command: 'checkpoint',
@@ -700,13 +722,7 @@ async function runWholeTest(parts: Parts): Promise<void> {
                text: `Checkpoint "${CHECKPOINT}"`,
             },
          ]);
-         markActivation(parts);
-         await step(parts, {
-            command: 'activate',
-            cli: 'a1 sr activate',
-            run: (runtime) => runtime.runPortable('activate'),
-            settles: true,
-         });
+         await activate(parts);
       }
    }
    if (firstExpected !== undefined) {
@@ -717,7 +733,6 @@ async function runWholeTest(parts: Parts): Promise<void> {
       );
    }
    state.commands.push('a1 sr stop');
-   renderCounts(parts);
 }
 
 async function copyText(parts: Parts, text: string, done: string): Promise<void> {
@@ -742,65 +757,59 @@ async function jumpToNext(parts: Parts): Promise<void> {
    if (!isJumpKind(kind)) {
       return;
    }
+   const before = state.spokenCount;
+
    await step(parts, {
       command: `next ${kind}`,
       cli: `a1 sr next ${kind}`,
-      run: async (runtime) => {
-         const outcome = await runtime.navigate({ kind, direction: 'next' });
-
-         if (!outcome.moved) {
-            showStatus(parts, `There is no next ${kind.replace('-', ' ')}.`);
-         }
-      },
+      method: 'navigate',
+      argument: { kind, direction: 'next' },
    });
+   if (state.spokenCount === before) {
+      showStatus(parts, `There is no next ${kind.replace('-', ' ')}.`);
+   }
 }
 
 /** What each control does to the reader. */
 function getReaderActions(parts: Parts): Record<string, () => Promise<unknown>> {
-   const press = (command: string, chord: string): Promise<boolean> =>
+   const press = (chord: string): Promise<ReaderState> =>
       step(parts, {
-         command,
+         command: chord,
          cli: `a1 sr press ${chord}`,
-         run: (runtime) => runtime.press([chord]),
-         settles: true,
+         method: 'press',
+         argument: [chord],
+         changesPage: true,
+      });
+   const move = (verb: 'next' | 'previous'): Promise<ReaderState> =>
+      step(parts, {
+         command: verb,
+         cli: `a1 sr ${verb}`,
+         method: 'runPortable',
+         argument: verb,
       });
 
    return {
-      restart: () => loadCase(parts, state.slug),
+      restart: () =>
+         state.mode === 'cases'
+            ? loadCase(parts, state.slug)
+            : loadPage(parts, state.pageURL),
       'run-test': () => runWholeTest(parts),
       'read-all': async () => {
          state.commands.push('a1 sr read-all');
-         await readOn(parts, MAX_STEPS);
+         await readOn(parts, MAX_ITEMS);
       },
-      next: () =>
-         step(parts, {
-            command: 'next',
-            cli: 'a1 sr next',
-            run: (runtime) => runtime.runPortable('next'),
-         }),
-      previous: () =>
-         step(parts, {
-            command: 'previous',
-            cli: 'a1 sr previous',
-            run: (runtime) => runtime.runPortable('previous'),
-         }),
-      activate: () => {
-         markActivation(parts);
-         return step(parts, {
-            command: 'activate',
-            cli: 'a1 sr activate',
-            run: (runtime) => runtime.runPortable('activate'),
-            settles: true,
-         });
-      },
-      tab: () => press('Tab', 'Tab'),
-      'shift-tab': () => press('Shift+Tab', 'Shift+Tab'),
+      next: () => move('next'),
+      previous: () => move('previous'),
+      activate: () => activate(parts),
+      tab: () => press('Tab'),
+      'shift-tab': () => press('Shift+Tab'),
       escape: () =>
          step(parts, {
             command: 'Escape',
             cli: 'a1 sr escape',
-            run: (runtime) => runtime.runPortable('escape'),
-            settles: true,
+            method: 'runPortable',
+            argument: 'escape',
+            changesPage: true,
          }),
       jump: () => jumpToNext(parts),
    };
@@ -816,9 +825,9 @@ async function runReaderAction(parts: Parts, action: string): Promise<void> {
    try {
       await run();
    } catch (error) {
-      showStatus(parts, error instanceof Error ? error.message : String(error));
+      showStatus(parts, describe(error));
    } finally {
-      renderCounts(parts);
+      renderPanels(parts);
       setBusy(parts, false);
    }
 }
@@ -835,40 +844,89 @@ async function runAction(parts: Parts, action: string): Promise<void> {
    await runReaderAction(parts, action);
 }
 
+/** Opens a mode, loading the last page used in it or the one to start with. */
+async function openMode(parts: Parts, mode: Mode, target?: string): Promise<void> {
+   setMode(parts, mode);
+   if (mode === 'cases') {
+      const [first] = parts.caseButtons;
+
+      await loadCase(
+         parts,
+         target ?? (state.slug || (first?.dataset.pgCaseButton ?? '')),
+      );
+      return;
+   }
+   const practice = parts.root.querySelector('[data-pg-load]');
+   const fallback =
+      practice instanceof HTMLElement ? (practice.dataset.pgLoad ?? '') : '';
+
+   await loadPage(parts, target ?? (state.pageURL || fallback));
+}
+
+async function handleClick(parts: Parts, target: EventTarget | null): Promise<void> {
+   const button =
+      target instanceof Element
+         ? target.closest(
+              '[data-pg-action], [data-pg-case-button], [data-pg-mode], [data-pg-load]',
+           )
+         : undefined;
+
+   if (!(button instanceof HTMLElement)) {
+      return;
+   }
+   const { pgAction, pgCaseButton, pgLoad, pgMode } = button.dataset;
+
+   if (pgAction !== undefined) {
+      await runAction(parts, pgAction);
+   } else if (pgCaseButton !== undefined) {
+      await loadCase(parts, pgCaseButton);
+   } else if (pgMode === 'cases' || pgMode === 'explore') {
+      await openMode(parts, pgMode);
+   } else if (pgLoad !== undefined) {
+      await loadPage(parts, pgLoad);
+   }
+}
+
 function start(): void {
    const parts = findParts();
 
    if (!parts) {
       return;
    }
-   const requested = new URL(globalThis.location.href).searchParams.get(CASE_PARAM),
-      slugs = parts.caseButtons.map((button) => button.dataset.pgCaseButton ?? '');
-   const first = requested !== null && slugs.includes(requested) ? requested : slugs[0];
+   const params = new URL(globalThis.location.href).searchParams;
+   const isExplore = params.get('mode') === 'explore',
+      requestedCase = params.get('case') ?? undefined,
+      requestedURL = params.get('url') ?? undefined;
+   const hasCase = parts.caseButtons.some(
+      (button) => button.dataset.pgCaseButton === requestedCase,
+   );
+   const report = (error: unknown): void => {
+      showStatus(parts, describe(error));
+   };
 
-   parts.root.addEventListener('click', async (event) => {
-      const button =
-         event.target instanceof Element
-            ? event.target.closest('[data-pg-action], [data-pg-case-button]')
-            : undefined;
-
-      if (!(button instanceof HTMLElement)) {
-         return;
-      }
-      if (button.dataset.pgAction !== undefined) {
-         await runAction(parts, button.dataset.pgAction);
-         return;
-      }
-      if (button.dataset.pgCaseButton !== undefined) {
-         await loadCase(parts, button.dataset.pgCaseButton);
-      }
+   listenToRelay(parts.frame, {
+      onNavigate: (url) => {
+         if (state.mode === 'explore') {
+            loadPage(parts, url).catch(report);
+         } else {
+            showStatus(parts, 'A test case does not follow links.');
+         }
+      },
+   });
+   parts.root.addEventListener('click', (event) => {
+      handleClick(parts, event.target).catch(report);
    });
    parts.filter.addEventListener('input', () => {
       filterCases(parts);
    });
-   if (first !== undefined) {
-      loadCase(parts, first).catch((error: unknown) => {
-         showStatus(parts, error instanceof Error ? error.message : String(error));
-      });
+   parts.root.querySelector('[data-pg-address]')?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      loadPage(parts, parts.urlInput.value).catch(report);
+   });
+   if (isExplore) {
+      openMode(parts, 'explore', requestedURL).catch(report);
+   } else {
+      openMode(parts, 'cases', hasCase ? requestedCase : undefined).catch(report);
    }
 }
 
