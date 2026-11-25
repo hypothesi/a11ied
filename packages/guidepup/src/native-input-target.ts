@@ -27,6 +27,16 @@ export function isNativeTargetAvailable(
    );
 }
 
+/** Names a window by whatever the operating system reported for it. */
+function describeWindow(window: FrontmostWindow): string {
+   const parts = [
+      window.appName ?? window.processName ?? window.bundleId,
+      window.pid === undefined ? undefined : `pid ${String(window.pid)}`,
+      window.windowTitle === undefined ? undefined : `"${window.windowTitle}"`,
+   ].filter((part): part is string => part !== undefined);
+   return parts.length > 0 ? parts.join(', ') : 'unnamed window';
+}
+
 /** Pin the observed process; window titles are constraints only when requested. */
 export async function observeNativeInputTarget(
    expected?: DriverFocusTarget,
@@ -44,7 +54,11 @@ export async function observeNativeInputTarget(
    if (expected && !isFrontmostMatch(expected, foreground)) {
       throw new DriverCommandError(
          'native-target-changed',
-         'The foreground target changed. Read the state and refocus the intended target before continuing.',
+         [
+            'The foreground target changed. Read the state and refocus the intended target before continuing.',
+            `Expected: ${describeWindow(expected)}.`,
+            `In front: ${describeWindow(foreground)}.`,
+         ].join(' '),
          { expected, foreground },
       );
    }
