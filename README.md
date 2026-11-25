@@ -6,6 +6,11 @@
 - **Check while you build**: [axe scans](https://hypothesi.github.io/a11ied/guides/violations/), the accessibility tree, screenshots at a viewport or focus stop, [real screen reader sessions](https://hypothesi.github.io/a11ied/guides/screen-reader/) with VoiceOver and NVDA through Guidepup, and TalkBack on Android over adb.
 - **Audit**: run an [agent-driven WCAG audit](https://hypothesi.github.io/a11ied/guides/audit/) of a site, page, feature, or mobile app, with durable progress, parallel workers, a live dashboard, and a client-ready report.
 
+## try it in the browser
+
+- [Playground](https://hypothesi.github.io/a11ied/playground/): run the simulated screen reader on a test case or a practice page in your browser, and read the log of what it announced.
+- [Screen reader compatibility](https://hypothesi.github.io/a11ied/compatibility/): a "Can I use" for screen readers. Search an ARIA role, attribute, or HTML element to see what each screen reader announces for it, by browser and operating system, from a11ied's recorded runs and W3C ARIA-AT reports. `@a11ied/compat` checks the same data from code.
+
 ## install
 
 ```sh
