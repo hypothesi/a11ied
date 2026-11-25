@@ -1,10 +1,10 @@
 ![a11ied: automated screen reader and WCAG testing](.github/assets/header.png)
 
-`a11ied` is a CLI-first accessibility toolkit. It does three jobs:
+`a11ied` is a CLI-first accessibility toolkit. The [docs site](https://hypothesi.github.io/a11ied/) has the guides and reference, starting with the [quickstart](https://hypothesi.github.io/a11ied/quickstart/). It does three jobs:
 
-- **Look things up**: WCAG criteria, techniques, test methods, and ARIA patterns, pinned from the W3C sources.
-- **Check while you build**: axe scans, the accessibility tree, screenshots at a viewport or focus stop, real screen reader sessions with VoiceOver and NVDA through Guidepup, and TalkBack on Android over adb.
-- **Audit**: run an agent-driven WCAG audit of a site, page, feature, or mobile app, with durable progress, parallel workers, a live dashboard, and a client-ready report.
+- **Look things up**: [WCAG criteria, techniques](https://hypothesi.github.io/a11ied/reference/wcag-data/), [test methods](https://hypothesi.github.io/a11ied/test-methods/), and ARIA patterns, pinned from the W3C sources.
+- **Check while you build**: [axe scans](https://hypothesi.github.io/a11ied/guides/violations/), the accessibility tree, screenshots at a viewport or focus stop, [real screen reader sessions](https://hypothesi.github.io/a11ied/guides/screen-reader/) with VoiceOver and NVDA through Guidepup, and TalkBack on Android over adb.
+- **Audit**: run an [agent-driven WCAG audit](https://hypothesi.github.io/a11ied/guides/audit/) of a site, page, feature, or mobile app, with durable progress, parallel workers, a live dashboard, and a client-ready report.
 
 ## install
 
@@ -23,6 +23,8 @@ a1 pattern combobox          # the ARIA pattern: its keyboard and attribute tabl
 a1 check http://localhost:3000  # scan one page while you build
 a1 help-all
 ```
+
+The [CLI reference](https://hypothesi.github.io/a11ied/reference/cli/) describes every command. [Set up VoiceOver or NVDA](https://hypothesi.github.io/a11ied/screen-readers/#setup) explains what `a1 setup` and `a1 doctor` do on each platform.
 
 ## audit a site, page, or app
 
@@ -45,17 +47,18 @@ Narrow the scope with `--page` (one page), `--criteria 1.4.3,2.4.7`, `--passes k
 or `--platform ios`. On web, the scan lists the controls on each page that open a menu,
 dialog, tab, or section, and a submission must account for every one. A finding gives a
 selector for the failing element, and `a1` takes an outlined screenshot of it for the
-report. The [audit guide](packages/docs/src/pages/guides/audit.astro) covers the workflow,
+report. The [audit guide](https://hypothesi.github.io/a11ied/guides/audit/) covers the workflow,
 and [internal-docs/audit-architecture.md](internal-docs/audit-architecture.md)
-explains the design. Agents use the `a11ied-audit` skill in `packages/skills/`.
+explains the design. Agents use the `a11ied-audit` skill in [`packages/skills/`](packages/skills);
+[Set up an AI agent](https://hypothesi.github.io/a11ied/guides/agents/) covers the skills and the [MCP tools](https://hypothesi.github.io/a11ied/reference/mcp/).
 
-Use the runtime API:
+Use the [runtime API](https://hypothesi.github.io/a11ied/reference/api/):
 
 ```js
 import { listWcagCriteria, runAxe, startDriverSession } from 'a11ied';
 ```
 
-Drive a screen reader from a test. `a11ied/test` works under any runner, and `a11ied/vitest`
+Drive a screen reader from a test ([Write screen reader tests](https://hypothesi.github.io/a11ied/guides/testing/), [Test with Vitest](https://hypothesi.github.io/a11ied/guides/vitest/)). `a11ied/test` works under any runner, and `a11ied/vitest`
 adds `toHaveSpoken`, `toHaveSpokenInOrder`, and `toHaveCursorOn` matchers plus a `test`
 whose `sr` fixture is a queued screen reader, so a test writes no `await` until it needs a
 value. Commands and checks chain, and a check waits up to five seconds for its phrase:
@@ -73,23 +76,23 @@ sr.goTo({ role: 'button', name: 'Pay' })
 
 ## workspaces
 
-The repo is split into npm workspaces. Three of them are packages people install: `a11ied` from `packages/cli`, `@a11ied/compat`, and `@a11ied/support-data`. The other `@a11ied/*` packages are internal. They are published only because `a11ied` depends on them, and their APIs can change in any release.
+The repo is split into npm workspaces. Three of them are packages people install: `a11ied` from `packages/cli`, `@a11ied/compat` (the [compatibility API](https://hypothesi.github.io/a11ied/guides/compatibility-api/)), and `@a11ied/support-data` (the data behind the [compatibility tables](https://hypothesi.github.io/a11ied/compatibility/)). The other `@a11ied/*` packages are internal. They are published only because `a11ied` depends on them, and their APIs can change in any release.
 
-- `packages/contracts`: shared schemas and result shapes (`@a11ied/contracts`)
-- `packages/audit`: audit storage, work units, findings, progress, dashboard, and reports (`@a11ied/audit`)
-- `packages/core`: browser, axe, screen reader driver, audit scans, and page checks (`@a11ied/core`)
-- `packages/guidepup`: adapter layer for real and virtual screen reader automation (`@a11ied/guidepup`)
-- `packages/mcp-server`: MCP bridge around the core runtime (`@a11ied/mcp-server`)
-- `packages/wcag-data`: normalized WCAG data artifacts (`@a11ied/wcag-data`)
-- `packages/wcag-engine`: lookup and search APIs over the WCAG data package (`@a11ied/wcag-engine`)
-- `packages/earl`: builds W3C EARL 1.0 accessibility reports as JSON-LD (`@a11ied/earl`)
-- `packages/cli`: end-user command line entrypoint (published as `a11ied`)
-- `packages/compat`: screen reader compatibility checks for editors, linters, and bundlers (`@a11ied/compat`)
-- `packages/support-data`: the recorded screen reader test cases and results `@a11ied/compat` reads (`@a11ied/support-data`)
-- `packages/act-conformance`: runs a11ied against the W3C ACT test cases (not published)
-- `packages/docs`: Astro docs site (not published)
-- `packages/knowledge`, `packages/observe`: page signal extraction and page measurements used by scans
-- `packages/skills`: the `a11ied` (development checks) and `a11ied-audit` (audits) Agent Skills
+- [`packages/contracts`](packages/contracts): shared schemas and result shapes (`@a11ied/contracts`)
+- [`packages/audit`](packages/audit): audit storage, work units, findings, progress, dashboard, and reports (`@a11ied/audit`)
+- [`packages/core`](packages/core): browser, axe, screen reader driver, audit scans, and page checks (`@a11ied/core`)
+- [`packages/guidepup`](packages/guidepup): adapter layer for real and virtual screen reader automation (`@a11ied/guidepup`)
+- [`packages/mcp-server`](packages/mcp-server): MCP bridge around the core runtime (`@a11ied/mcp-server`)
+- [`packages/wcag-data`](packages/wcag-data): normalized WCAG data artifacts (`@a11ied/wcag-data`)
+- [`packages/wcag-engine`](packages/wcag-engine): lookup and search APIs over the WCAG data package (`@a11ied/wcag-engine`)
+- [`packages/earl`](packages/earl): builds W3C EARL 1.0 accessibility reports as JSON-LD (`@a11ied/earl`)
+- [`packages/cli`](packages/cli): end-user command line entrypoint (published as `a11ied`)
+- [`packages/compat`](packages/compat): screen reader compatibility checks for editors, linters, and bundlers (`@a11ied/compat`)
+- [`packages/support-data`](packages/support-data): the recorded screen reader test cases and results `@a11ied/compat` reads (`@a11ied/support-data`)
+- [`packages/act-conformance`](packages/act-conformance): runs a11ied against the W3C ACT test cases (not published)
+- [`packages/docs`](packages/docs): Astro docs site (not published)
+- [`packages/knowledge`](packages/knowledge), [`packages/observe`](packages/observe): page signal extraction and page measurements used by scans
+- [`packages/skills`](packages/skills): the `a11ied` (development checks) and `a11ied-audit` (audits) Agent Skills
 
 ## quick start
 
