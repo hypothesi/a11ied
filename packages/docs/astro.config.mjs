@@ -37,7 +37,7 @@ const isProductionBuild =
  * A page is served at an address that ends in a slash. A link without one costs the
  * reader a redirect, and gives search engines two addresses for one page.
  */
-function addTrailingSlash(match, path, suffix = '') {
+function addTrailingSlash(_match, path, suffix = '') {
    const isPage = !path.endsWith('/') && !/\.[a-z0-9]+$/i.test(path);
 
    return `href="${isPage ? `${path}/` : path}${suffix}"`;
