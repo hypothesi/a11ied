@@ -228,6 +228,7 @@ async function openUrlOnWindows(
    }
    const child = spawn('cmd', ['/c', 'start', '', url], {
       stdio: 'ignore',
+      windowsHide: true,
    });
    child.unref();
    await waitForChildExit(child, BROWSER_OPEN_TIMEOUT_MS);

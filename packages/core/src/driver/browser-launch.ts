@@ -121,6 +121,7 @@ function spawnOpen(choice: BrowserChoice, url: string): ReturnType<typeof spawn>
       }
       return spawn('cmd', ['/c', 'start', '', choice.appName, ...args], {
          stdio: 'ignore',
+         windowsHide: true,
       });
    }
    return spawn(choice.location ?? choice.appName, [url], { stdio: 'ignore' });

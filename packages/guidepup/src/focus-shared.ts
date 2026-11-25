@@ -38,7 +38,20 @@ export function loadPackageScript(relativePath: string, baseUrl: string): string
    throw new Error(`Unable to locate script "${relativePath}" from base "${baseUrl}".`);
 }
 
-export const focusExecFile = promisify(execFile);
+const execFileAsync = promisify(execFile);
+
+/**
+ * Runs a focus or foreground query. On Windows each run starts PowerShell, and without
+ * `windowsHide` its console opens in Windows Terminal and takes the foreground, so every
+ * check saw its own console in front instead of the browser.
+ */
+export function focusExecFile(
+   file: string,
+   args: readonly string[],
+   options: { timeout: number },
+): Promise<{ stdout: string; stderr: string }> {
+   return execFileAsync(file, args, { ...options, encoding: 'utf8', windowsHide: true });
+}
 export const FOCUS_COMMAND_TIMEOUT_MS = 5000;
 
 export function escapeAppleScriptString(value: string): string {
