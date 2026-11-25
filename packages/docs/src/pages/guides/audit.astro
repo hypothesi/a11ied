@@ -31,7 +31,7 @@ const toc = [
       </p>
       <dl class="defs">
          <dt>Which agents</dt>
-         <dd>Any coding agent that can run terminal commands or use the <a href="/guides/agents">MCP server</a>: Claude Code, Codex, Cursor, GitHub Copilot, Windsurf, and others. The <a href="/guides/agent-skill"><code>a11ied-audit</code> skill</a> teaches the agent the procedure.</dd>
+         <dd>Any coding agent that can run terminal commands or use the <a href="/guides/agents#connect">MCP server</a>: Claude Code, Codex, Cursor, GitHub Copilot, Windsurf, and others. The <a href="/guides/agents#skills"><code>a11ied-audit</code> skill</a> teaches the agent the procedure.</dd>
          <dt>How they start</dt>
          <dd>You ask your agent for an audit. That agent leads: it sets the scope, then starts workers as its own subagents, usually three to six. An agent that cannot start subagents does the units itself, one after another.</dd>
          <dt>What a worker does</dt>
@@ -48,7 +48,7 @@ const toc = [
 
    <section>
       <h2 id="start">Start an audit</h2>
-      <p>Install the <a href="/guides/agent-skill">agent skills</a>, then ask your agent.</p>
+      <p>Install the <a href="/guides/agents#skills">agent skills</a>, then ask your agent.</p>
       <pre data-label="AI AGENT PROMPT"><code>Audit https://example.com against WCAG 2.2 AA with a11ied. Do not submit the contact form. Use four workers.</code></pre>
       <p>The lead agent runs these commands first. You can run them yourself.</p>
       <pre><code>a1 audit init https://example.com --rule "Do not submit the contact form"

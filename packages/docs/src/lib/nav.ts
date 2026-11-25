@@ -31,8 +31,7 @@ export const docsLinks: DocSection[] = [
    {
       title: 'AI agents',
       links: [
-         { href: '/guides/agents', label: 'Connect an AI agent' },
-         { href: '/guides/agent-skill', label: 'Install the agent skills' },
+         { href: '/guides/agents', label: 'Set up an AI agent' },
          { href: '/guides/audit', label: 'Audit a site with AI agents' },
       ],
    },

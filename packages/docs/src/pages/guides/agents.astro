@@ -1,30 +1,71 @@
 ---
 import DocShell from '../../layouts/doc-shell.astro';
-import { docsLinks } from '../../lib/nav';
+import { docsLinks, REPOSITORY_URL } from '../../lib/nav';
 import mcpConfig from '../../samples/mcp-config.json.txt?raw';
 
+const skillsInstall = `npx -y @a1st/aix install ${REPOSITORY_URL}/blob/master/packages/skills/ai.json --only skills --user`;
 const toc = [
-   { id: 'connect', label: 'Connect the server' },
-   { id: 'first', label: 'Make the first call' },
+   { id: 'what', label: 'What an agent needs' },
+   { id: 'skills', label: 'Install the skills' },
+   { id: 'connect', label: 'Install the CLI or connect the MCP server' },
+   { id: 'first', label: 'Make the first request' },
    { id: 'scan', label: 'Ask for a scan' },
    { id: 'sr', label: 'Ask for a screen reader test' },
    { id: 'prompts', label: 'Prompts that work' },
+   { id: 'rules', label: 'What the skills teach' },
    { id: 'mistakes', label: 'Reporting rules to give the agent' },
 ];
 ---
 
 <DocShell
-   title="Connect an AI agent"
-   summary="<p>a11ied includes an MCP server. It gives Claude Code, Cursor, or any other agent that supports MCP the a11ied commands as tools, so the agent can scan a page, drive a screen reader, and look up WCAG while it works. The server runs on your machine and opens no network port.</p>"
+   title="Set up an AI agent"
+   summary="<p>An AI coding agent needs two things to test with a11ied: instructions for how to test, and a way to run a11ied. This page sets up both for Claude Code, Codex, Cursor, or any other coding agent, then shows what to ask for.</p>"
    links={docsLinks}
    toc={toc}
 >
    <section>
-      <h2 id="connect">Connect the server</h2>
+      <h2 id="what">What an agent needs</h2>
+      <dl class="defs">
+         <dt>The skills</dt>
+         <dd>Instructions the agent loads when a task calls for them. They teach it how to test with a11ied: what to run first, which screen reader to use, and how to report what it found.</dd>
+         <dt>A way to run a11ied</dt>
+         <dd>The <code>a1</code> command in a terminal, or the MCP server, which gives the agent the same commands as tools. Install either one. The skills work with both.</dd>
+      </dl>
       <p>
-         Add a11ied to the MCP configuration your agent reads, then restart the agent.
+         Choose the MCP server for an agent that cannot run terminal commands, or when you
+         want every a11ied call to appear as a tool call. Otherwise the CLI is enough.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="skills">Install the skills</h2>
+      <pre><code>{skillsInstall}</code></pre>
+      <p>
+         <a href="http://aix.a1st.dev/">aix</a> finds the coding agents on your machine and
+         asks which one gets the skills. <code>--user</code> installs them for every project.
+         Add <code>--target claude-code</code>, <code>--target codex</code>, or another agent
+         name to skip the question. Restart the agent so it loads them.
+      </p>
+      <p>This installs two skills.</p>
+      <dl class="defs">
+         <dt><code>a11ied</code></dt>
+         <dd>For checking a component or page while you build it.</dd>
+         <dt><code>a11ied-audit</code></dt>
+         <dd>For a full WCAG audit with parallel workers and a report. See <a href="/guides/audit">audit a site with AI agents</a>.</dd>
+      </dl>
+      <p>To update the skills, run the install command again. It replaces them with the current ones.</p>
+   </section>
+
+   <section>
+      <h2 id="connect">Install the CLI or connect the MCP server</h2>
+      <h3>The CLI</h3>
+      <pre><code>npm install --global a11ied</code></pre>
+      <p>The agent runs <code>a1</code> commands in its terminal, the same ones you would type.</p>
+      <h3>The MCP server</h3>
+      <p>
          <abbr title="Model Context Protocol">MCP</abbr> is the standard that lets an agent
-         call outside tools.
+         call outside tools. Add a11ied to the MCP configuration your agent reads, then
+         restart the agent. The server runs on your machine and opens no network port.
       </p>
       <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
       <dl class="defs">
@@ -37,13 +78,14 @@ const toc = [
       </dl>
       <p>
          If you installed a11ied globally, <code>"command": "a1"</code> with
-         <code>"args": ["mcp"]</code> uses that copy.
+         <code>"args": ["mcp"]</code> uses that copy. The
+         <a href="/reference/mcp">MCP reference</a> lists every tool.
       </p>
    </section>
 
    <section>
-      <h2 id="first">Make the first call</h2>
-      <pre data-label="AI AGENT PROMPT"><code>Call the a11ied doctor tool and tell me what is ready on this machine.</code></pre>
+      <h2 id="first">Make the first request</h2>
+      <pre data-label="AI AGENT PROMPT"><code>Run the a11ied doctor check and tell me what is ready on this machine.</code></pre>
       <p>
          <code>doctor</code> reports which browser a11ied will use and which screen readers
          are set up. Now you and the agent both know what it can run here.
@@ -55,9 +97,10 @@ const toc = [
       <p>Start your development server. Give the agent the exact URL.</p>
       <pre data-label="AI AGENT PROMPT"><code>Check http://localhost:3000/account/settings with a11ied. For each problem, give me the element, the WCAG criterion, and the fix. Then list the criteria I still have to check by hand.</code></pre>
       <p>
-         The agent calls <code>check</code>. The result has the axe violations, the criteria
-         the page triggers, and <code>nextCommands</code>, the lookups to run next. For a
-         scan alone, the agent calls <code>run_axe</code>.
+         The agent runs <code>a1 check</code>, or calls the <code>check</code> tool. The
+         result has the axe violations, the criteria the page triggers, and
+         <code>nextCommands</code>, the lookups to run next. For a scan alone, it uses
+         <code>a1 axe</code> or the <code>run_axe</code> tool.
       </p>
    </section>
 
@@ -68,7 +111,10 @@ const toc = [
          can.
       </p>
       <pre data-label="AI AGENT PROMPT"><code>Use the a11ied simulated screen reader on http://localhost:3000/checkout. Open the payment dialog and check three things: focus moves into the dialog, the dialog announces its name, and Escape returns focus to the button that opened it. Quote the announcements. Stop the session when you finish.</code></pre>
-      <p>The agent uses four tools.</p>
+      <p>
+         In a terminal the agent runs the <a href="/guides/screen-reader"><code>a1 sr</code>
+         commands</a>. Over MCP it uses four tools.
+      </p>
       <dl class="defs">
          <dt><code>sr_session</code></dt>
          <dd>Starts and stops the session. For the simulated screen reader it passes <code>target: "virtual"</code>. On a machine where VoiceOver or NVDA is the default, it must also pass <code>allowVirtual: true</code>, which is the agent stating that it knows the result is a simulation.</dd>
@@ -89,6 +135,8 @@ const toc = [
       <h2 id="prompts">Prompts that work</h2>
       <p>Name the page, the behavior, and what you want back.</p>
       <dl class="defs">
+         <dt>Test a page</dt>
+         <dd>"Use the a11ied skill to test http://localhost:3000/checkout. Run the scan first. Then test the field labels and the error messages with the screen reader. Report the two separately."</dd>
          <dt>Check a change</dt>
          <dd>"Check each route this branch changes with a11ied and report only new problems."</dd>
          <dt>Test a widget</dt>
@@ -101,18 +149,30 @@ const toc = [
    </section>
 
    <section>
+      <h2 id="rules">What the skills teach</h2>
+      <dl class="defs defs--wide">
+         <dt>Look up the criterion first</dt>
+         <dd>When a task names a WCAG criterion, the agent reads how to test it before it tests anything.</dd>
+         <dt>Match the test to the criterion</dt>
+         <dd>A scan covers part of some criteria. The rest need a screen reader, the keyboard, or judgment.</dd>
+         <dt>Start simulated, finish real</dt>
+         <dd>The simulated screen reader for quick runs. VoiceOver or NVDA when the question is what the real one does.</dd>
+         <dt>Keep results apart</dt>
+         <dd>Scan results, transcripts, and judgments are reported separately. A clean scan is never reported as meeting WCAG.</dd>
+         <dt>Label simulated output</dt>
+         <dd>Output from the simulated screen reader is never presented as VoiceOver or NVDA.</dd>
+      </dl>
+   </section>
+
+   <section>
       <h2 id="mistakes">Reporting rules to give the agent</h2>
+      <p>The skills write both of these rules into the agent's instructions. Without the skills, give them yourself.</p>
       <dl class="defs defs--wide">
          <dt>"The scan passed, so the page meets WCAG"</dt>
          <dd>A scanner decides part of some criteria and none of them fully. Ask the agent to report scan results and <a href="/test-methods">hand-checked results</a> separately.</dd>
          <dt>"VoiceOver says..." from a simulated run</dt>
          <dd>Every session reports <code>targetType</code>: <code>real</code> or <code>simulated</code>. Ask the agent to include it.</dd>
       </dl>
-      <p>
-         The <a href="/guides/agent-skill">agent skills</a> write both rules into the agent's
-         instructions, so you do not have to repeat them. The
-         <a href="/reference/mcp">MCP reference</a> lists every tool.
-      </p>
       <p>
          These docs are also published as plain text for AI tools.
          <a href="/llms.txt"><code>llms.txt</code></a> lists every page, and
