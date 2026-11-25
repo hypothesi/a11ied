@@ -1,16 +1,17 @@
 ---
+import { Image } from 'astro:assets';
 import runtimeURL from '@a11ied/guidepup/virtual-page.js?url';
 import { listEnvironmentFiles, screenReaderTests } from '@a11ied/support-data';
-import ChevronLeft from '@lucide/astro/icons/chevron-left';
-import ChevronRight from '@lucide/astro/icons/chevron-right';
 import ExternalLink from '@lucide/astro/icons/external-link';
-import Balloon from '../components/balloon.astro';
+import logo from '../assets/logo.png';
+import SiteFooter from '../components/site-footer.astro';
+import SiteHead from '../components/site-head.astro';
 import OutcomeBadge from '../components/support/outcome-badge.astro';
-import DocShell from '../layouts/doc-shell.astro';
-import { docsLinks } from '../lib/nav';
 import { isVirtualScreenReader } from '../lib/support-grouping';
 
 const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
+const description =
+   "Run a11ied's simulated screen reader on a test case in your browser, and read the log of what it announced.";
 const environmentFiles = listEnvironmentFiles();
 const groupNames = [ ...new Set(screenReaderTests.map((testCase) => testCase.featureGroup)) ];
 const groups = groupNames.map((name) => ({
@@ -42,298 +43,367 @@ const jumpKinds = [
    { value: 'form-field', label: 'Form field' },
    { value: 'landmark', label: 'Landmark' },
 ];
+const tabs = [
+   { id: 'checks', label: 'Checks' },
+   { id: 'commands', label: 'As a1 commands' },
+   { id: 'real', label: 'Real screen readers' },
+];
+
+/** The part of a title after "attribute: ", which the group heading already says. */
+function getShortTitle(title: string): string {
+   const [ , ...rest ] = title.split(': ');
+
+   return rest.length > 0 ? rest.join(': ') : title;
+}
 ---
 
-<DocShell
-   title="Playground"
-   summary="<p>Run a11ied's simulated screen reader in your browser. Pick a test case, step through it, and read the log of what was announced. Nothing to install.</p>"
-   links={docsLinks}
-   variant="wide"
->
-   <div class="pg" data-playground data-runtime-src={runtimeURL} data-base-path={basePath}>
-      <noscript>
-         <p class="note">The playground runs the screen reader with JavaScript, which is turned off in this browser.</p>
-      </noscript>
+<html lang="en">
+   <head>
+      <SiteHead title="Playground | a11ied" description={description} />
+   </head>
+   <body class="ws-page">
+      <a class="skip-link" href="#content">Skip to content</a>
 
-      <section class="pg-picker" aria-labelledby="pg-picker-heading">
-         <h2 id="pg-picker-heading" class="pg-heading">Test case</h2>
-         <div class="pg-picker-row">
-            <label class="sr-only" for="pg-case">Test case</label>
-            <select id="pg-case" data-pg-case>
-               {groups.map((group) => (
-                  <optgroup label={group.name}>
-                     {group.cases.map((testCase) => (
-                        <option value={testCase.slug}>{testCase.title}</option>
-                     ))}
-                  </optgroup>
-               ))}
-            </select>
-            <button type="button" class="pg-button pg-button--icon" data-pg-step-case="-1" aria-label="Previous test case">
-               <ChevronLeft size={18} aria-hidden="true" focusable="false" />
-            </button>
-            <button type="button" class="pg-button pg-button--icon" data-pg-step-case="1" aria-label="Next test case">
-               <ChevronRight size={18} aria-hidden="true" focusable="false" />
-            </button>
-            <span class="pg-count" data-pg-count></span>
-         </div>
+      <header class="ws-top">
+         <a class="brand" href="/" aria-label="a11ied home">
+            <Image src={logo} alt="" class="mark" width={80} height={80} />
+            <span class="brand-title">a<span class="brand-title-accent">11</span>ied</span>
+         </a>
+         <a class="ws-back" href="/overview">Back to the docs</a>
+      </header>
 
-         {cases.map(({ testCase }) => (
-            <div
-               class="pg-about"
-               data-pg-about={testCase.slug}
-               data-test={JSON.stringify({
-                  slug: testCase.slug,
-                  attribute: testCase.attribute,
-                  evaluation: testCase.evaluation,
-                  assertions: testCase.assertions,
-               })}
-               hidden
-            >
-               <p>{testCase.summary}</p>
-               <p><strong>Expected:</strong> {testCase.expectedBehavior}</p>
+      <main id="content" class="ws" data-playground data-runtime-src={runtimeURL} data-base-path={basePath}>
+         <section class="ws-pane ws-cases" aria-labelledby="ws-cases-heading">
+            <div class="ws-intro">
+               <h1 id="ws-cases-heading">Playground</h1>
+               <p>Run a11ied's simulated screen reader on a test case, in your browser.</p>
+               <noscript>
+                  <p>This page needs JavaScript, which is turned off in this browser.</p>
+               </noscript>
+               <label class="ws-label" for="ws-filter">Filter test cases</label>
+               <input id="ws-filter" class="ws-input" type="search" autocomplete="off" data-pg-filter />
             </div>
-         ))}
-      </section>
+            <div class="ws-scroll" tabindex="0" role="group" aria-label="Test cases">
+               {groups.map((group) => (
+                  <div class="ws-group" data-pg-group>
+                     <h2 class="ws-group-name">{group.name}</h2>
+                     <ul class="ws-case-list">
+                        {group.cases.map((testCase) => (
+                           <li data-pg-case-item data-search={`${testCase.title} ${testCase.attribute} ${group.name}`.toLowerCase()}>
+                              <button type="button" class="ws-case-button" data-pg-case-button={testCase.slug} data-title={testCase.title}>
+                                 {getShortTitle(testCase.title)}
+                              </button>
+                           </li>
+                        ))}
+                     </ul>
+                  </div>
+               ))}
+               <p class="ws-none" data-pg-none hidden>No test case matches.</p>
+            </div>
+         </section>
 
-      <div class="pg-grid">
-         <section class="pg-stage" aria-label="The test case and the controls">
-            <Balloon kind="speech"><span data-pg-say>Loading...</span></Balloon>
+         <section class="ws-pane ws-stage" aria-labelledby="ws-stage-heading">
+            <div class="ws-about">
+               <h2 id="ws-stage-heading" class="ws-case-title" data-pg-title>Test case</h2>
+               {cases.map(({ testCase }) => (
+                  <div
+                     class="ws-about-text"
+                     data-pg-about={testCase.slug}
+                     data-test={JSON.stringify({
+                        slug: testCase.slug,
+                        attribute: testCase.attribute,
+                        evaluation: testCase.evaluation,
+                        assertions: testCase.assertions,
+                     })}
+                     hidden
+                  >
+                     <p>{testCase.summary}</p>
+                     <p><strong>Expected:</strong> {testCase.expectedBehavior}</p>
+                  </div>
+               ))}
+            </div>
 
-            <div class="pg-browser">
-               <div class="pg-browser-bar">
-                  <span class="pg-browser-url" data-pg-url></span>
-                  <a class="pg-browser-open" data-pg-open href={cases[0]?.caseHref}>
+            <div class="ws-toolbar" role="group" aria-label="Screen reader controls">
+               <div class="ws-tools">
+                  <button type="button" class="ws-button ws-button--primary" data-pg-action="run-test">Run the whole test</button>
+                  <button type="button" class="ws-button" data-pg-action="restart">Start over</button>
+               </div>
+               <div class="ws-tools">
+                  <button type="button" class="ws-button" data-pg-action="previous">Previous</button>
+                  <button type="button" class="ws-button" data-pg-action="next">Next</button>
+                  <button type="button" class="ws-button" data-pg-action="activate">Activate</button>
+                  <button type="button" class="ws-button" data-pg-action="read-all">Read to the end</button>
+               </div>
+               <div class="ws-tools">
+                  <button type="button" class="ws-button" data-pg-action="tab">Tab</button>
+                  <button type="button" class="ws-button" data-pg-action="shift-tab">Shift+Tab</button>
+                  <button type="button" class="ws-button" data-pg-action="escape">Escape</button>
+               </div>
+               <div class="ws-tools">
+                  <label class="ws-label ws-label--inline" for="ws-jump">Jump to next</label>
+                  <select id="ws-jump" class="ws-input ws-input--select" data-pg-jump>
+                     {jumpKinds.map((kind) => <option value={kind.value}>{kind.label}</option>)}
+                  </select>
+                  <button type="button" class="ws-button" data-pg-action="jump">Go</button>
+               </div>
+            </div>
+
+            <div class="ws-browser">
+               <div class="ws-browser-bar">
+                  <span class="ws-browser-url" data-pg-url></span>
+                  <a class="ws-browser-open" data-pg-open href={cases[0]?.caseHref}>
                      <span>Open by itself</span>
                      <ExternalLink size={14} aria-hidden="true" focusable="false" />
                   </a>
                </div>
-               <div class="pg-frame-wrap">
-                  <iframe class="pg-frame" data-pg-frame title="Test case"></iframe>
-                  <span class="pg-cursor" data-pg-cursor aria-hidden="true" hidden></span>
+               <div class="ws-frame-wrap">
+                  <iframe class="ws-frame" data-pg-frame title="Test case"></iframe>
+                  <span class="ws-cursor" data-pg-cursor aria-hidden="true" hidden></span>
                </div>
             </div>
 
-            <div class="pg-controls" role="group" aria-label="Screen reader controls">
-               <div class="pg-controls-row">
-                  <button type="button" class="pg-button pg-button--primary" data-pg-action="run-test">Run the whole test</button>
-                  <button type="button" class="pg-button" data-pg-action="restart">Start over</button>
+            <div class="ws-drawer" data-sr-tabs>
+               <div class="ws-tablist" role="tablist" aria-label="Details for this test case">
+                  {tabs.map((tab, index) => (
+                     <button
+                        type="button"
+                        role="tab"
+                        id={`ws-tab-${tab.id}`}
+                        class="ws-tab"
+                        aria-selected={index === 0 ? 'true' : 'false'}
+                        tabindex={index === 0 ? '0' : '-1'}
+                     >
+                        {tab.label}
+                     </button>
+                  ))}
+                  <span class="ws-result" data-pg-result></span>
                </div>
-               <div class="pg-controls-row">
-                  <button type="button" class="pg-button" data-pg-action="previous">Previous</button>
-                  <button type="button" class="pg-button" data-pg-action="next">Next</button>
-                  <button type="button" class="pg-button" data-pg-action="activate">Activate</button>
-                  <button type="button" class="pg-button" data-pg-action="read-all">Read to the end</button>
+
+               <div class="ws-tabpanel" role="tabpanel" aria-labelledby="ws-tab-checks" data-focusable-panel="true" tabindex="0">
+                  <p class="ws-note">a11ied grades this case with these checks. They update as the screen reader speaks.</p>
+                  <ul class="ws-check-list" data-pg-check-list></ul>
                </div>
-               <div class="pg-controls-row">
-                  <button type="button" class="pg-button" data-pg-action="tab">Tab</button>
-                  <button type="button" class="pg-button" data-pg-action="shift-tab">Shift+Tab</button>
-                  <button type="button" class="pg-button" data-pg-action="escape">Escape</button>
-                  <span class="pg-jump">
-                     <label for="pg-jump">Jump to the next</label>
-                     <select id="pg-jump" data-pg-jump>
-                        {jumpKinds.map((kind) => <option value={kind.value}>{kind.label}</option>)}
-                     </select>
-                     <button type="button" class="pg-button" data-pg-action="jump">Go</button>
-                  </span>
+
+               <div class="ws-tabpanel" role="tabpanel" aria-labelledby="ws-tab-commands" data-focusable-panel="true" hidden>
+                  <p class="ws-note">Each control is one <code>a1</code> command. This list grows as you use them.</p>
+                  <pre class="ws-commands" data-no-decorate><code data-pg-commands></code></pre>
+                  <button type="button" class="ws-button ws-button--small" data-pg-action="copy-commands">Copy the commands</button>
+               </div>
+
+               <div class="ws-tabpanel" role="tabpanel" aria-labelledby="ws-tab-real" data-focusable-panel="true" hidden>
+                  <p class="ws-note">
+                     a11ied ran this case with each of these and recorded the result. The simulated
+                     screen reader does not always agree with the real ones.
+                  </p>
+                  {cases.map(({ testCase, runs }) => (
+                     <div data-pg-real={testCase.slug} hidden>
+                        <table class="ws-table">
+                           <thead>
+                              <tr>
+                                 <th scope="col">Screen reader and browser</th>
+                                 <th scope="col">Result</th>
+                                 <th scope="col">What it said</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              {runs.map(({ label, isSimulated, run }) => (
+                                 <tr>
+                                    <th scope="row">{isSimulated ? 'Simulated screen reader' : label}</th>
+                                    <td><OutcomeBadge outcome={run.outcome} compact={true} /></td>
+                                    <td>{run.keyAnnouncement}</td>
+                                 </tr>
+                              ))}
+                           </tbody>
+                        </table>
+                        <p class="ws-note"><a href={`/compatibility/tests/${testCase.slug}/`}>Every recorded transcript for this case</a></p>
+                     </div>
+                  ))}
                </div>
             </div>
-            <p class="pg-simulated">
-               This is the <a href="/screen-readers#virtual">simulated screen reader</a>. It shows what
-               the page exposes. It is not VoiceOver or NVDA.
+         </section>
+
+         <section class="ws-pane ws-output" aria-labelledby="ws-output-heading">
+            <div class="ws-pane-head">
+               <h2 id="ws-output-heading">Screen reader output</h2>
+               <span class="ws-count" data-pg-log-count>0 phrases</span>
+            </div>
+            <p class="ws-now" data-pg-now>The cursor is not on anything yet.</p>
+            <ol class="ws-log" data-pg-log role="log" aria-live="polite" aria-labelledby="ws-output-heading" tabindex="0"></ol>
+            <p class="ws-log-empty" data-pg-log-empty>Press Next, or run the whole test.</p>
+            <div class="ws-output-foot">
+               <button type="button" class="ws-button ws-button--small" data-pg-action="copy-log">Copy the log</button>
+               <span class="ws-status" data-pg-status role="status"></span>
+            </div>
+            <p class="ws-simulated">
+               This is the <a href="/screen-readers#virtual">simulated screen reader</a>. It shows what the
+               page exposes. It is not VoiceOver or NVDA.
             </p>
          </section>
 
-         <section class="pg-output" aria-labelledby="pg-output-heading">
-            <div class="pg-output-head">
-               <h2 id="pg-output-heading" class="pg-heading">Screen reader output</h2>
-               <span class="pg-count" data-pg-log-count>0 phrases</span>
-            </div>
-            <p class="pg-now" data-pg-now>The cursor is not on anything yet.</p>
-            <ol class="pg-log" data-pg-log role="log" aria-live="polite" aria-labelledby="pg-output-heading" tabindex="0"></ol>
-            <p class="pg-log-empty" data-pg-log-empty>Press Next, or run the whole test.</p>
-            <div class="pg-output-foot">
-               <button type="button" class="pg-button pg-button--small" data-pg-action="copy-log">Copy the log</button>
-               <span class="pg-status" data-pg-status role="status"></span>
-            </div>
+         <template data-pg-row-template>
+            <li class="ws-row">
+               <span class="ws-row-step" data-row-step></span>
+               <span class="ws-row-command" data-row-command></span>
+               <span class="ws-row-phrase">
+                  <span class="ws-row-tag" data-row-tag hidden></span>
+                  <span data-row-text></span>
+               </span>
+            </li>
+         </template>
+         <template data-pg-check-template>
+            <li class="ws-check">
+               <span class="ws-check-state" data-check-state></span>
+               <span class="ws-check-text">
+                  <span class="ws-check-priority" data-check-priority></span>
+                  <span data-check-statement></span>
+               </span>
+            </li>
+         </template>
+      </main>
 
-            <div class="pg-checks">
-               <div class="pg-output-head">
-                  <h3 class="pg-subheading">Checks</h3>
-                  <span class="pg-result" data-pg-result></span>
-               </div>
-               <p class="pg-checks-note">
-                  a11ied grades this case with these checks. They update as the screen reader speaks.
-               </p>
-               <ul class="pg-check-list" data-pg-check-list></ul>
-            </div>
-         </section>
-      </div>
-
-      <section class="pg-commands" aria-labelledby="pg-commands-heading">
-         <h2 id="pg-commands-heading" class="pg-heading">The same steps with the CLI</h2>
-         <p>Each button above is one <code>a1</code> command. This list grows as you press them.</p>
-         <pre class="pg-commands-code" data-no-decorate tabindex="0" role="group" aria-labelledby="pg-commands-heading"><code data-pg-commands></code></pre>
-         <button type="button" class="pg-button pg-button--small" data-pg-action="copy-commands">Copy the commands</button>
-      </section>
-
-      <section class="pg-real" aria-labelledby="pg-real-heading">
-         <h2 id="pg-real-heading" class="pg-heading">What screen readers said for this case</h2>
-         <p>
-            a11ied ran this case with each of these and recorded the result. The simulated screen
-            reader does not always agree with the real ones.
-         </p>
-         {cases.map(({ testCase, runs }) => (
-            <div data-pg-real={testCase.slug} hidden>
-               <div class="pg-real-wrap" tabindex="0" role="region" aria-label={`Recorded results for ${testCase.title}`}>
-                  <table class="pg-real-table">
-                     <thead>
-                        <tr>
-                           <th scope="col">Screen reader and browser</th>
-                           <th scope="col">Result</th>
-                           <th scope="col">What it said</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        {runs.map(({ label, isSimulated, run }) => (
-                           <tr>
-                              <th scope="row">{isSimulated ? 'Simulated screen reader' : label}</th>
-                              <td><OutcomeBadge outcome={run.outcome} compact={true} /></td>
-                              <td>{run.keyAnnouncement}</td>
-                           </tr>
-                        ))}
-                     </tbody>
-                  </table>
-               </div>
-               <p><a href={`/compatibility/tests/${testCase.slug}/`}>Every recorded transcript for this case</a></p>
-            </div>
-         ))}
-      </section>
-
-      <template data-pg-row-template>
-         <li class="pg-row">
-            <span class="pg-row-step" data-row-step></span>
-            <span class="pg-row-command" data-row-command></span>
-            <span class="pg-row-phrase">
-               <span class="pg-row-tag" data-row-tag hidden></span>
-               <span data-row-text></span>
-            </span>
-         </li>
-      </template>
-      <template data-pg-check-template>
-         <li class="pg-check">
-            <span class="pg-check-state" data-check-state></span>
-            <span class="pg-check-text">
-               <span class="pg-check-priority" data-check-priority></span>
-               <span data-check-statement></span>
-            </span>
-         </li>
-      </template>
-   </div>
-</DocShell>
-
-<script>
-   import '../scripts/playground';
-</script>
+      <SiteFooter />
+      <script>
+         import '../scripts/test-case-tabs';
+         import '../scripts/playground';
+      </script>
+   </body>
+</html>
 
 <style>
-   /* Every grid here has one flexible column, so long content scrolls inside its own box. */
-   .pg { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--xl); }
-   .pg-heading { padding: 0; border: 0; margin: 0; font-size: 1.35rem; }
-   .pg-subheading { margin: 0; font-size: 1.05rem; text-transform: uppercase; }
-   .sr-only { position: absolute; overflow: hidden; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; clip-path: inset(50%); white-space: nowrap; }
+   .ws-page { --top: 3.5rem; --rule: 3px solid var(--ink); }
 
-   /* Buttons */
-   .pg-button { display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; min-height: 2.5rem; padding: 0.5rem 0.9rem; background: var(--paper-light); color: var(--ink); border: 2px solid var(--ink); border-radius: 0; box-shadow: 3px 3px 0 var(--ink); font: 700 0.95rem/1 var(--display); letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; user-select: none; }
-   .pg-button--primary { background: var(--yellow); box-shadow: 3px 3px 0 var(--red); }
-   .pg-button--icon { padding-inline: 0.55rem; }
-   .pg-button--small { min-height: 2rem; padding: 0.35rem 0.7rem; box-shadow: none; font-size: 0.82rem; }
-   .pg-button:disabled { box-shadow: none; opacity: 0.55; cursor: progress; }
+   /* Header: the logo and one way back. */
+   .ws-top { display: flex; align-items: center; justify-content: space-between; gap: var(--md); height: var(--top); padding-inline: var(--md); background: var(--yellow); border-bottom: var(--rule); }
+   .ws-top :global(.mark) { width: 2.4rem; height: 2.4rem; }
+   .ws-top .brand-title { font-size: 1.6rem; }
+   .ws-back { color: var(--ink); font-weight: 600; }
+
+   /* The workspace fills the window under the header. Each pane scrolls by itself. */
+   .ws { display: grid; grid-template-columns: 17rem minmax(0, 1fr) minmax(20rem, 26rem); height: calc(100dvh - var(--top)); min-height: 40rem; }
+   .ws-pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+   .ws-pane + .ws-pane { border-inline-start: var(--rule); }
+   .ws p { margin: 0; }
+
+   /* Shared controls */
+   .ws-button { display: inline-flex; align-items: center; justify-content: center; min-height: 2.25rem; padding: 0.4rem 0.7rem; background: var(--paper-light); color: var(--ink); border: 2px solid var(--ink); border-radius: 0; font: 700 0.85rem/1 var(--display); letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; user-select: none; }
+   .ws-button--primary { background: var(--yellow); }
+   .ws-button--small { min-height: 2rem; padding: 0.3rem 0.6rem; font-size: 0.78rem; }
+   .ws-button:disabled { opacity: 0.55; cursor: progress; }
    @media (hover: hover) {
-      .pg-button:not(:disabled):hover { background: var(--ink); color: var(--yellow); }
+      .ws-button:not(:disabled):hover { background: var(--ink); color: var(--yellow); }
    }
+   .ws-label { display: block; color: var(--ink-soft); font: 700 0.74rem/1.4 var(--display); letter-spacing: 0.08em; text-transform: uppercase; }
+   .ws-label--inline { display: inline; }
+   .ws-input { width: 100%; min-height: 2.25rem; padding: 0.3rem 0.5rem; background: var(--paper-light); color: var(--ink); border: 2px solid var(--ink); border-radius: 0; font: inherit; }
+   .ws-input--select { width: auto; }
+   .ws-note { color: var(--ink-soft); font-size: 0.88rem; }
+   .ws-count { color: var(--yellow); font: 700 0.74rem/1 var(--display); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
 
-   /* Picker */
-   .pg-picker { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sm); }
-   .pg-picker-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sm); }
-   .pg-picker select { flex: 1 1 18rem; min-width: 0; max-width: 100%; min-height: 2.5rem; padding: 0.4rem 0.6rem; background: var(--paper-light); color: var(--ink); border: 2px solid var(--ink); border-radius: 0; font: inherit; font-weight: 600; }
-   .pg-count { color: var(--ink-soft); font: 700 0.82rem/1 var(--display); letter-spacing: 0.06em; text-transform: uppercase; }
-   .pg-about { display: grid; gap: var(--xs); max-width: 60rem; }
-   .pg-about[hidden] { display: none; }
-   .pg-about p { margin: 0; color: var(--ink-soft); }
+   /* Cases */
+   .ws-cases { background: var(--paper-light); }
+   .ws-intro { display: grid; gap: var(--xs); padding: var(--md); border-bottom: 2px solid var(--ink); }
+   .ws-intro h1 { padding: 0; border: 0; margin: 0; font: 700 1.9rem/1 var(--display); letter-spacing: -0.02em; text-transform: uppercase; }
+   .ws-intro > p { color: var(--ink-soft); font-size: 0.92rem; }
+   .ws-intro .ws-label { margin-top: var(--xs); }
+   .ws-scroll { overflow-y: auto; flex: 1; min-height: 0; padding: var(--sm) 0 var(--md); }
+   .ws-group[hidden] { display: none; }
+   .ws-group-name { padding: var(--sm) var(--md) var(--xs); border: 0; margin: 0; color: var(--red-dark); font: 700 0.76rem/1.3 var(--display); letter-spacing: 0.1em; text-transform: uppercase; }
+   .ws-case-list { margin: 0; padding: 0; list-style: none; }
+   .ws-case-list li { margin: 0; }
+   .ws-case-list li[hidden] { display: none; }
+   .ws-case-button { display: block; width: 100%; padding: 0.4rem var(--md); background: transparent; color: var(--ink); border: 0; border-inline-start: 4px solid transparent; font: inherit; font-size: 0.9rem; line-height: 1.35; text-align: start; cursor: pointer; }
+   .ws-case-button[aria-current="true"] { background: var(--ink); color: var(--yellow); border-inline-start-color: var(--red); font-weight: 600; }
+   @media (hover: hover) {
+      .ws-case-button:not([aria-current="true"]):hover { background: var(--yellow-soft); }
+   }
+   .ws-none { padding: var(--md); color: var(--ink-soft); }
+   .ws-none[hidden] { display: none; }
 
-   /* Stage and output, side by side when there is room. */
-   .pg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr)); gap: var(--xl); align-items: start; }
-   .pg-stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--md); min-width: 0; }
-   /* The balloon says the latest phrase, and its tail rests on the page that produced it. */
-   .pg-stage > :global(.balloon) { z-index: 3; margin-inline: auto 18%; margin-bottom: calc(-1 * var(--md) - 0.7rem); }
-   .pg-stage :global(.balloon-text > span) { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; font-size: 1.25rem; text-transform: none; }
-
-   .pg-browser { min-width: 0; background: var(--paper-light); border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--red); }
-   .pg-browser-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--xs) var(--md); padding: 0.45rem 0.7rem; background: var(--ink); color: var(--paper-light); font-size: 0.82rem; }
-   .pg-browser-url { overflow: hidden; flex: 1 1 8rem; min-width: 0; font-family: var(--mono, ui-monospace, monospace); text-overflow: ellipsis; white-space: nowrap; }
-   .pg-browser-open { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--yellow); white-space: nowrap; }
-   .pg-frame-wrap { position: relative; }
-   .pg-frame { display: block; width: 100%; height: 16rem; background: #ffffff; border: 0; }
+   /* Stage */
+   .ws-stage { background: var(--paper); }
+   .ws-about { display: grid; gap: var(--xs); padding: var(--sm) var(--md); border-bottom: 2px solid var(--ink); }
+   .ws-case-title { padding: 0; border: 0; margin: 0; font: 700 1.25rem/1.15 var(--display); text-transform: none; }
+   .ws-about-text { display: grid; gap: 0.2rem; color: var(--ink-soft); font-size: 0.9rem; line-height: 1.45; }
+   .ws-about-text[hidden] { display: none; }
+   .ws-toolbar { display: flex; flex-wrap: wrap; gap: var(--xs) var(--md); padding: var(--sm) var(--md); background: var(--paper-light); border-bottom: 2px solid var(--ink); }
+   .ws-tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--xs); }
+   .ws-browser { display: flex; flex-direction: column; flex: 1 1 12rem; min-height: 10rem; }
+   .ws-browser-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--xs) var(--md); padding: 0.35rem var(--md); background: var(--ink); color: var(--paper-light); font-size: 0.8rem; }
+   .ws-browser-url { overflow: hidden; flex: 1 1 8rem; min-width: 0; font-family: var(--code); text-overflow: ellipsis; white-space: nowrap; }
+   .ws-browser-open { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--yellow); white-space: nowrap; }
+   .ws-frame-wrap { position: relative; flex: 1; min-height: 0; }
+   .ws-frame { display: block; width: 100%; height: 100%; background: #ffffff; border: 0; }
    /* Drawn over the frame from outside, so the test case itself is never changed. */
-   .pg-cursor { position: absolute; z-index: 2; border: 3px solid var(--red); border-radius: 3px; box-shadow: 0 0 0 3px color-mix(in oklch, var(--yellow) 70%, transparent); pointer-events: none; transition: all 120ms ease-out; }
-   .pg-cursor[hidden] { display: none; }
+   .ws-cursor { position: absolute; z-index: 2; border: 3px solid var(--red); border-radius: 3px; box-shadow: 0 0 0 3px color-mix(in oklch, var(--yellow) 70%, transparent); pointer-events: none; transition: all 120ms ease-out; }
+   .ws-cursor[hidden] { display: none; }
 
-   .pg-controls { display: grid; gap: var(--sm); }
-   .pg-controls-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sm); }
-   .pg-jump { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--xs); font-weight: 600; }
-   .pg-jump select { min-height: 2.5rem; padding: 0.3rem 0.5rem; background: var(--paper-light); color: var(--ink); border: 2px solid var(--ink); border-radius: 0; font: inherit; }
-   .pg-simulated { margin: 0; color: var(--ink-soft); font-size: 0.92rem; }
+   /* Drawer under the stage */
+   .ws-drawer { display: flex; flex-direction: column; height: 15rem; border-top: var(--rule); background: var(--paper-light); }
+   .ws-tablist { display: flex; align-items: center; gap: var(--xs); overflow-x: auto; padding-inline: var(--sm); border-bottom: 2px solid var(--ink); }
+   .ws-tab { padding: 0.55rem 0.7rem; background: transparent; color: var(--ink-soft); border: 0; border-bottom: 4px solid transparent; font: 700 0.8rem/1 var(--display); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; cursor: pointer; }
+   .ws-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--red); }
+   .ws-tabpanel { display: grid; align-content: start; gap: var(--sm); overflow-y: auto; flex: 1; min-height: 0; padding: var(--sm) var(--md) var(--md); }
+   .ws-tabpanel[hidden] { display: none; }
+   .ws-result { margin-inline-start: auto; padding: 0.15rem 0.45rem; font: 700 0.72rem/1.4 var(--display); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
+   .ws-result:empty { display: none; }
+   .ws-check-list { display: grid; gap: var(--xs); margin: 0; padding: 0; list-style: none; }
+   .ws-check { display: grid; grid-template-columns: 4.8rem minmax(0, 1fr); gap: var(--sm); align-items: baseline; margin: 0; font-size: 0.92rem; }
+   .ws-check-state { padding: 0.15rem 0.4rem; background: #e7e0d3; color: #474c5c; font: 700 0.7rem/1.4 var(--display); letter-spacing: 0.06em; text-align: center; text-transform: uppercase; white-space: nowrap; }
+   .ws-check--met .ws-check-state, .ws-result--pass { background: #1e7a46; color: #ffffff; }
+   .ws-check--failed .ws-check-state, .ws-result--fail { background: #bd2b26; color: #ffffff; }
+   .ws-result--partial { background: #a15c00; color: #ffffff; }
+   .ws-check-priority { margin-inline-end: 0.35rem; color: var(--ink-soft); font: 700 0.7rem/1 var(--display); letter-spacing: 0.06em; }
+   .ws-commands { padding: var(--sm) var(--md); box-shadow: none; font-size: 0.82rem; }
+   .ws-tabpanel > .ws-button { justify-self: start; }
+   .ws-tabpanel > div[hidden] { display: none; }
+   .ws-tabpanel > div { display: grid; gap: var(--sm); }
+   .ws-table { width: 100%; border: 2px solid var(--ink); border-collapse: collapse; font-size: 0.88rem; }
+   .ws-table th, .ws-table td { padding: 0.45rem 0.6rem; border-bottom: 1px solid color-mix(in oklch, var(--ink) 16%, transparent); text-align: start; vertical-align: top; }
+   .ws-table thead th { background: var(--paper); font: 700 0.72rem/1.3 var(--display); letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
 
    /* Output */
-   .pg-output { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sm); min-width: 0; padding: var(--md); background: var(--paper-light); border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
-   .pg-output-head, .pg-output-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--xs) var(--md); }
-   .pg-now { margin: 0; padding: 0.5rem 0.7rem; background: var(--yellow-soft); border-inline-start: 4px solid var(--ink); font-weight: 600; }
-   .pg-log { display: grid; align-content: start; overflow-y: auto; height: 22rem; margin: 0; padding: 0; border: 2px solid var(--ink); background: var(--paper); list-style: none; }
-   .pg-log:empty { display: none; }
-   .pg-log-empty { display: grid; place-items: center; height: 22rem; margin: 0; padding: var(--md); border: 2px dashed color-mix(in oklch, var(--ink) 45%, transparent); color: var(--ink-soft); text-align: center; }
-   .pg-log-empty[hidden] { display: none; }
-   .pg-row { display: grid; grid-template-columns: 2.2rem 5.4rem minmax(0, 1fr); gap: var(--sm); align-items: baseline; margin: 0; padding: 0.55rem 0.7rem; border-bottom: 1px solid color-mix(in oklch, var(--ink) 16%, transparent); animation: pg-row-in 200ms ease-out; }
-   .pg-row:last-child { background: var(--paper-light); box-shadow: inset 4px 0 0 var(--red); }
-   .pg-row-step { color: var(--ink-soft); font: 700 0.8rem/1.4 var(--display); text-align: end; }
-   .pg-row-command { color: var(--ink-soft); font: 700 0.72rem/1.6 var(--display); letter-spacing: 0.08em; text-transform: uppercase; }
-   .pg-row-phrase { min-width: 0; font-size: 1.05rem; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
-   .pg-row-tag { display: inline-block; margin-inline-end: 0.4rem; padding: 0.1rem 0.4rem; background: var(--ink); color: var(--paper-light); font: 700 0.7rem/1.4 var(--display); letter-spacing: 0.08em; text-transform: uppercase; vertical-align: 0.1em; }
-   .pg-row-tag[hidden] { display: none; }
+   .ws-output { background: var(--paper-light); }
+   .ws-pane-head { display: flex; align-items: center; justify-content: space-between; gap: var(--md); padding: 0.6rem var(--md); background: var(--ink); color: var(--paper-light); }
+   .ws-pane-head h2 { padding: 0; border: 0; margin: 0; color: var(--yellow); font: 700 1rem/1 var(--display); letter-spacing: 0.08em; text-transform: uppercase; }
+   .ws-now { padding: 0.55rem var(--md); background: var(--yellow-soft); border-bottom: 2px solid var(--ink); font-weight: 600; }
+   .ws-log { display: grid; align-content: start; overflow-y: auto; flex: 1; min-height: 0; margin: 0; padding: 0; background: var(--paper); list-style: none; }
+   .ws-log:empty { display: none; }
+   .ws-log-empty { display: grid; place-items: center; flex: 1; padding: var(--md); color: var(--ink-soft); text-align: center; }
+   .ws-log-empty[hidden] { display: none; }
+   .ws-row { display: grid; grid-template-columns: 1.6rem 5rem minmax(0, 1fr); gap: var(--sm); align-items: baseline; margin: 0; padding: 0.55rem var(--md); border-bottom: 1px solid color-mix(in oklch, var(--ink) 16%, transparent); animation: ws-row-in 200ms ease-out; }
+   .ws-row:last-child { background: var(--paper-light); box-shadow: inset 4px 0 0 var(--red); }
+   .ws-row-step { color: var(--ink-soft); font: 700 0.78rem/1.4 var(--display); text-align: end; }
+   .ws-row-command { color: var(--ink-soft); font: 700 0.7rem/1.6 var(--display); letter-spacing: 0.08em; text-transform: uppercase; }
+   .ws-row-phrase { min-width: 0; font-size: 1.05rem; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+   .ws-row-tag { display: inline-block; margin-inline-end: 0.4rem; padding: 0.1rem 0.4rem; background: var(--ink); color: var(--paper-light); font: 700 0.68rem/1.4 var(--display); letter-spacing: 0.08em; text-transform: uppercase; vertical-align: 0.1em; }
+   .ws-row-tag[hidden] { display: none; }
    /* A live region speaks without the cursor moving, so its row stands apart. */
-   .pg-row--live { background: var(--yellow-soft); }
-   .pg-row--live .pg-row-tag { background: var(--red-dark); }
-   .pg-row--edge .pg-row-phrase { color: var(--ink-soft); font-weight: 400; }
+   .ws-row--live { background: var(--yellow-soft); }
+   .ws-row--live .ws-row-tag { background: var(--red-dark); }
+   .ws-row--edge .ws-row-phrase { color: var(--ink-soft); font-weight: 400; }
    /* A checkpoint is a mark in the log, not something the screen reader said. */
-   .pg-row--mark { background: transparent; border-block: 1px dashed color-mix(in oklch, var(--ink) 45%, transparent); }
-   .pg-row--mark .pg-row-phrase { color: var(--ink-soft); font-size: 0.9rem; font-weight: 600; }
-   @keyframes pg-row-in { from { opacity: 0; transform: translateY(0.4rem); } to { opacity: 1; transform: none; } }
-   .pg-status { color: var(--ink-soft); font-size: 0.9rem; }
+   .ws-row--mark { border-block: 1px dashed color-mix(in oklch, var(--ink) 45%, transparent); }
+   .ws-row--mark .ws-row-phrase { color: var(--ink-soft); font-size: 0.88rem; }
+   @keyframes ws-row-in { from { opacity: 0; transform: translateY(0.4rem); } to { opacity: 1; transform: none; } }
+   .ws-output-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--xs) var(--md); padding: var(--sm) var(--md); border-top: 2px solid var(--ink); }
+   .ws-status { color: var(--ink-soft); font-size: 0.88rem; }
+   .ws-simulated { padding: 0 var(--md) var(--sm); color: var(--ink-soft); font-size: 0.85rem; }
 
-   .pg-checks { display: grid; gap: var(--xs); padding-top: var(--sm); border-top: 2px solid var(--ink); }
-   .pg-checks-note { margin: 0; color: var(--ink-soft); font-size: 0.9rem; }
-   .pg-check-list { display: grid; gap: var(--xs); margin: 0; padding: 0; list-style: none; }
-   .pg-check { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr); gap: var(--sm); align-items: baseline; margin: 0; }
-   .pg-check-state, .pg-result { padding: 0.15rem 0.45rem; background: #e7e0d3; color: #474c5c; font: 700 0.72rem/1.4 var(--display); letter-spacing: 0.06em; text-align: center; text-transform: uppercase; white-space: nowrap; }
-   .pg-check--met .pg-check-state, .pg-result--pass { background: #1e7a46; color: #ffffff; }
-   .pg-check--failed .pg-check-state, .pg-result--fail { background: #bd2b26; color: #ffffff; }
-   .pg-result--partial { background: #a15c00; color: #ffffff; }
-   .pg-result:empty { display: none; }
-   .pg-check-priority { margin-inline-end: 0.35rem; color: var(--ink-soft); font: 700 0.72rem/1 var(--display); letter-spacing: 0.06em; }
-
-   /* Commands and recorded results */
-   .pg-commands, .pg-real { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sm); justify-items: start; min-width: 0; }
-   .pg-commands > p, .pg-real p { margin: 0; color: var(--ink-soft); }
-   .pg-commands-code { width: 100%; min-width: 0; padding: var(--md); }
-   .pg-real > div { display: grid; gap: var(--sm); width: 100%; min-width: 0; }
-   .pg-real > div[hidden] { display: none; }
-   .pg-real-wrap { overflow-x: auto; border: 2px solid var(--ink); background: var(--paper-light); }
-   .pg-real-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-   .pg-real-table th, .pg-real-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid color-mix(in oklch, var(--ink) 16%, transparent); text-align: start; vertical-align: top; }
-   .pg-real-table thead th { background: var(--paper); font: 700 0.76rem/1.3 var(--display); letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
-   .pg-real-table tbody tr:last-child :is(th, td) { border-bottom: 0; }
-
+   /* Narrower windows: the output moves under the other two panes, then everything stacks. */
+   @media (max-width: 1180px) {
+      .ws { grid-template-columns: 15rem minmax(0, 1fr); height: auto; }
+      .ws-cases, .ws-stage { height: calc(100dvh - var(--top)); min-height: 36rem; }
+      .ws-output { grid-column: 1 / -1; height: 30rem; border-inline-start: 0; border-top: var(--rule); }
+   }
+   @media (max-width: 760px) {
+      .ws { grid-template-columns: minmax(0, 1fr); }
+      .ws-cases { height: 18rem; min-height: 0; }
+      .ws-stage { height: auto; min-height: 0; border-inline-start: 0; border-top: var(--rule); }
+      .ws-browser { flex: none; height: 16rem; }
+      .ws-drawer { height: 18rem; }
+   }
    @media (prefers-reduced-motion: reduce) {
-      .pg-row { animation: none; }
-      .pg-cursor { transition: none; }
+      .ws-row { animation: none; }
+      .ws-cursor { transition: none; }
    }
 </style>

@@ -26,7 +26,8 @@ interface LogEntry {
 
 interface Parts {
    readonly root: HTMLElement;
-   readonly caseSelect: HTMLSelectElement;
+   readonly caseButtons: readonly HTMLButtonElement[];
+   readonly filter: HTMLInputElement;
    readonly jumpSelect: HTMLSelectElement;
    readonly frame: HTMLIFrameElement;
    readonly cursor: HTMLElement;
@@ -125,18 +126,21 @@ function findParts(): Parts | undefined {
    if (!(root instanceof HTMLElement)) {
       return undefined;
    }
-   const caseSelect = root.querySelector('[data-pg-case]'),
-      checkList = root.querySelector('[data-pg-check-list]'),
+   const caseButtons = [...root.querySelectorAll('[data-pg-case-button]')].filter(
+      (button): button is HTMLButtonElement => button instanceof HTMLButtonElement,
+   );
+   const checkList = root.querySelector('[data-pg-check-list]'),
       checkTemplate = root.querySelector('[data-pg-check-template]'),
       commands = root.querySelector('[data-pg-commands]'),
       cursor = root.querySelector('[data-pg-cursor]'),
+      filter = root.querySelector('[data-pg-filter]'),
       frame = root.querySelector('[data-pg-frame]'),
       jumpSelect = root.querySelector('[data-pg-jump]'),
       log = root.querySelector('[data-pg-log]'),
       rowTemplate = root.querySelector('[data-pg-row-template]');
 
    if (
-      !(caseSelect instanceof HTMLSelectElement) ||
+      !(filter instanceof HTMLInputElement) ||
       !(jumpSelect instanceof HTMLSelectElement) ||
       !(frame instanceof HTMLIFrameElement) ||
       !(cursor instanceof HTMLElement) ||
@@ -150,7 +154,8 @@ function findParts(): Parts | undefined {
    }
    return {
       root,
-      caseSelect,
+      caseButtons,
+      filter,
       jumpSelect,
       frame,
       cursor,
@@ -244,7 +249,7 @@ function renderRow(parts: Parts, entry: LogEntry, position: number): void {
       ['[data-row-text]', entry.text],
    ];
 
-   row.classList.add(`pg-row--${entry.kind}`);
+   row.classList.add(`ws-row--${entry.kind}`);
    for (const [selector, text] of cells) {
       const cell = row.querySelector(selector);
 
@@ -302,7 +307,7 @@ function renderChecks(parts: Parts): void {
 
    if (result instanceof HTMLElement) {
       result.textContent = isComplete ? `Result: ${graded.outcome}` : '';
-      result.className = `pg-result pg-result--${graded.outcome}`;
+      result.className = `ws-result ws-result--${graded.outcome}`;
    }
    parts.checkList.replaceChildren(
       ...graded.assertionResults.flatMap((check) => {
@@ -311,8 +316,14 @@ function renderChecks(parts: Parts): void {
          if (!(node instanceof HTMLElement)) {
             return [];
          }
-         const isMet = check.verdict === 'pass',
-            unmetLabel = isComplete ? 'Not met' : 'Not yet';
+         const isFailed = check.verdict === 'fail' && isComplete,
+            isMet = check.verdict === 'pass';
+         /*
+          * Only a failed MUST or SHOULD counts against the case. A MAY that was not
+          * conveyed is reported as unsupported, which is not a failure.
+          */
+         const failedLabel = isComplete ? 'Not met' : 'Not yet',
+            unmetLabel = check.verdict === 'fail' ? failedLabel : 'Not said';
          const cells: ReadonlyArray<readonly [selector: string, text: string]> = [
             ['[data-check-state]', isMet ? 'Met' : unmetLabel],
             ['[data-check-priority]', check.priority],
@@ -320,9 +331,9 @@ function renderChecks(parts: Parts): void {
          ];
 
          if (isMet) {
-            node.classList.add('pg-check--met');
-         } else if (isComplete) {
-            node.classList.add('pg-check--failed');
+            node.classList.add('ws-check--met');
+         } else if (isFailed) {
+            node.classList.add('ws-check--failed');
          }
          for (const [selector, text] of cells) {
             const cell = node.querySelector(selector);
@@ -417,7 +428,6 @@ async function collect(
       states = item.states.length > 0 ? ` (${item.states.join(', ')})` : '';
 
    setText(parts, '[data-pg-now]', `Cursor: ${item.role ?? 'item'}${name}${states}`);
-   setText(parts, '[data-pg-say]', speech.lastSpokenPhrase || '...');
    await showCursor(parts, runtime);
    return current.atEnd;
 }
@@ -462,23 +472,52 @@ function addRuntime(parts: Parts): Promise<VirtualRuntime> {
 
 function showCase(parts: Parts, slug: string): void {
    const href = getCaseHref(parts, slug),
-      open = parts.root.querySelector('[data-pg-open]'),
-      { options, selectedIndex } = parts.caseSelect;
+      open = parts.root.querySelector('[data-pg-open]');
 
    for (const block of parts.root.querySelectorAll('[data-pg-about], [data-pg-real]')) {
       if (block instanceof HTMLElement) {
          block.hidden = (block.dataset.pgAbout ?? block.dataset.pgReal) !== slug;
       }
    }
+   for (const button of parts.caseButtons) {
+      const isCurrent = button.dataset.pgCaseButton === slug;
+
+      if (isCurrent) {
+         button.setAttribute('aria-current', 'true');
+         button.scrollIntoView({ block: 'nearest' });
+         setText(parts, '[data-pg-title]', button.dataset.title ?? '');
+         parts.frame.title = `Test case: ${button.dataset.title ?? slug}`;
+      } else {
+         button.removeAttribute('aria-current');
+      }
+   }
    if (open instanceof HTMLAnchorElement) {
       open.href = href;
    }
    setText(parts, '[data-pg-url]', new URL(href, globalThis.location.href).href);
-   setText(
-      parts,
-      '[data-pg-count]',
-      `${String(selectedIndex + 1)} of ${String(options.length)}`,
-   );
+}
+
+/** Shows only the cases whose title, attribute, or group contains the typed text. */
+function filterCases(parts: Parts): void {
+   const query = parts.filter.value.trim().toLowerCase();
+
+   for (const item of parts.root.querySelectorAll('[data-pg-case-item]')) {
+      if (item instanceof HTMLElement) {
+         item.hidden = !(item.dataset.search ?? '').includes(query);
+      }
+   }
+   for (const group of parts.root.querySelectorAll('[data-pg-group]')) {
+      if (group instanceof HTMLElement) {
+         group.hidden = !group.querySelector('[data-pg-case-item]:not([hidden])');
+      }
+   }
+   const none = parts.root.querySelector('[data-pg-none]');
+
+   if (none instanceof HTMLElement) {
+      none.hidden = Boolean(
+         parts.root.querySelector('[data-pg-case-item]:not([hidden])'),
+      );
+   }
 }
 
 /** Clears the log and the reader state, and shows the chosen case's details. */
@@ -494,11 +533,9 @@ function resetFor(parts: Parts, slug: string): void {
    state.hasReachedEnd = false;
    parts.log.replaceChildren();
    parts.cursor.hidden = true;
-   parts.caseSelect.value = slug;
    showCase(parts, slug);
    renderCounts(parts);
    renderChecks(parts);
-   setText(parts, '[data-pg-say]', 'Loading...');
    setText(parts, '[data-pg-now]', 'The cursor is not on anything yet.');
    url.searchParams.set(CASE_PARAM, slug);
    globalThis.history.replaceState({}, '', url);
@@ -545,7 +582,6 @@ async function loadCase(parts: Parts, slug: string): Promise<void> {
       });
    } catch (error) {
       showStatus(parts, error instanceof Error ? error.message : String(error));
-      setText(parts, '[data-pg-say]', 'Not available');
    } finally {
       if (state.loadCount === loadID) {
          setBusy(parts, false);
@@ -798,13 +834,13 @@ function start(): void {
       return;
    }
    const requested = new URL(globalThis.location.href).searchParams.get(CASE_PARAM),
-      slugs = [...parts.caseSelect.options].map((option) => option.value);
+      slugs = parts.caseButtons.map((button) => button.dataset.pgCaseButton ?? '');
    const first = requested !== null && slugs.includes(requested) ? requested : slugs[0];
 
    parts.root.addEventListener('click', async (event) => {
       const button =
          event.target instanceof Element
-            ? event.target.closest('[data-pg-action], [data-pg-step-case]')
+            ? event.target.closest('[data-pg-action], [data-pg-case-button]')
             : undefined;
 
       if (!(button instanceof HTMLElement)) {
@@ -814,16 +850,12 @@ function start(): void {
          await runAction(parts, button.dataset.pgAction);
          return;
       }
-      const offset = Number(button.dataset.pgStepCase);
-      const next =
-         slugs[(slugs.indexOf(state.slug) + offset + slugs.length) % slugs.length];
-
-      if (next !== undefined) {
-         await loadCase(parts, next);
+      if (button.dataset.pgCaseButton !== undefined) {
+         await loadCase(parts, button.dataset.pgCaseButton);
       }
    });
-   parts.caseSelect.addEventListener('change', async () => {
-      await loadCase(parts, parts.caseSelect.value);
+   parts.filter.addEventListener('input', () => {
+      filterCases(parts);
    });
    if (first !== undefined) {
       loadCase(parts, first).catch((error: unknown) => {
