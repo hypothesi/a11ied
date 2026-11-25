@@ -1,4 +1,5 @@
 import { readFile, readdir, writeFile } from 'node:fs/promises';
+import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 import icon from 'astro-icon';
 import llms from 'astro-llms-md';
@@ -32,12 +33,24 @@ const LLMS_NOISE_SELECTORS = [
 const isProductionBuild =
    process.argv.includes('build') || process.argv.includes('preview');
 
+/**
+ * A page is served at an address that ends in a slash. A link without one costs the
+ * reader a redirect, and gives search engines two addresses for one page.
+ */
+function addTrailingSlash(match, path, suffix = '') {
+   const isPage = !path.endsWith('/') && !/\.[a-z0-9]+$/i.test(path);
+
+   return `href="${isPage ? `${path}/` : path}${suffix}"`;
+}
+
 async function prefixRootRelativeLinksInFile(path) {
    const html = await readFile(path, 'utf8');
 
    await writeFile(
       path,
-      html.replaceAll(/href="\/(?!a11ied\/)/g, `href="${productionBase}`),
+      html
+         .replaceAll(/href="\/(?!a11ied\/)/g, `href="${productionBase}`)
+         .replaceAll(/href="(\/a11ied\/[^"#?]*)([#?][^"]*)?"/g, addTrailingSlash),
    );
 }
 
@@ -64,6 +77,11 @@ async function prefixRootRelativeLinks(directory) {
    );
 }
 
+/** Leaves the practice pages, the bare test fixtures, and the 404 page out of the sitemap. */
+function isSearchablePage(pageURL) {
+   return !/\/(demo|compatibility\/cases)\/|\/404/.test(pageURL);
+}
+
 export default defineConfig({
    site,
    base: isProductionBuild ? productionBase : '/',
@@ -84,6 +102,7 @@ export default defineConfig({
                     },
                  },
               },
+              sitemap({ filter: isSearchablePage }),
               // Writes llms.txt, llms-full.txt, and a Markdown copy of each page for AI tools.
               llms({
                  siteUrl: `${site}${productionBase.replace(/\/$/, '')}`,
