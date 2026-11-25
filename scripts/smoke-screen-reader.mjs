@@ -190,6 +190,9 @@ async function checkInteraction(fixture) {
    await runCliOrFail(['sr', 'top']);
    await runCliOrFail(['sr', 'next', 'form-field']);
    await runCliOrFail(['sr', 'type', INPUT_TEXT]);
+   // NVDA switches to focus mode in a text field, where "next button" would type a "b".
+   // Escape returns it to browse mode, as a person would.
+   await runCliOrFail(['sr', 'press', 'Escape']);
    await runCliOrFail(['sr', 'next', 'button']);
    await runCliOrFail(['sr', 'activate']);
    if (fixture.observed.value !== INPUT_TEXT || fixture.observed.activations !== 1) {
