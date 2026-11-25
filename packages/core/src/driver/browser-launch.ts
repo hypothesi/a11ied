@@ -7,7 +7,8 @@ import { createBrowserAutomationPolicy } from '../browser/policy.js';
 import { openUrlInSystemAutomationBrowser, openUrlOnMac } from '../browser/helper.js';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
 
-const BROWSER_OPEN_TIMEOUT_MS = 5000;
+/** A cold browser start on a busy machine, such as a CI runner, can take over 5 seconds. */
+const BROWSER_OPEN_TIMEOUT_MS = 15_000;
 
 /** Names people type for --browser, mapped to the policy's candidate ids. */
 const BROWSER_ALIASES: Readonly<Record<string, string>> = {

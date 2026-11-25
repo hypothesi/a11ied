@@ -7,7 +7,8 @@ import type { BrowserAutomationCandidate, DriverFocusTarget } from '@a11ied/cont
 
 import { createBrowserAutomationPolicy } from './detection.js';
 
-const BROWSER_OPEN_TIMEOUT_MS = 5000;
+/** A cold browser start on a busy machine, such as a CI runner, can take over 5 seconds. */
+const BROWSER_OPEN_TIMEOUT_MS = 15_000;
 
 function resolveBundleId(candidate: BrowserAutomationCandidate): string | undefined {
    const bundleIds: Partial<Record<BrowserAutomationCandidate['id'], string>> = {
