@@ -33,8 +33,10 @@ public class A11iedFocus {
     try { LockSetForegroundWindow(2); } catch {}
     try { SystemParametersInfo(0x2001, 0, IntPtr.Zero, 0x0003); } catch {}
 
-    keybd_event(0x12, 0, 0, UIntPtr.Zero);
-    keybd_event(0x12, 0, 2, UIntPtr.Zero);
+    // Windows lets a process take the foreground once it sent the last input. Any key
+    // does; 0x0E is unassigned, so no app acts on it. Alt opened Chrome's app menu.
+    keybd_event(0x0E, 0, 0, UIntPtr.Zero);
+    keybd_event(0x0E, 0, 2, UIntPtr.Zero);
 
     if (fgThread != 0 && targetThread != 0 && fgThread != targetThread) {
       AttachThreadInput(fgThread, targetThread, true);
