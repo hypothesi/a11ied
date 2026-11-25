@@ -2,13 +2,14 @@ Add-Type @"
 __WIN32_FOCUS_CSHARP__
 "@ -ErrorAction SilentlyContinue
 
-$pid = __PID_EXPRESSION__
+# Not $pid: PowerShell reserves that name for its own process id, read-only, in any case.
+$targetPid = __PID_EXPRESSION__
 $processName = '__PROCESS_NAME__'
 $windowTitle = '__WINDOW_TITLE__'
 $matchMode = '__MATCH_MODE__'
 $targetId = $null
 $proc = $null
-if ($pid) { $targetId = $pid }
+if ($targetPid) { $targetId = $targetPid }
 if (-not $targetId -and $windowTitle) {
   if ($matchMode -eq "contains") {
     $proc = Get-Process | Where-Object { $_.MainWindowTitle -and $_.MainWindowTitle -like ("*" + $windowTitle + "*") } | Select-Object -First 1
