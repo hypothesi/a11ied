@@ -116,6 +116,21 @@ async function noopWriteMetadata(): Promise<void> {
    // Ephemeral sessions never touch the state directory.
 }
 
+/** Names a window by whatever the operating system reported for it. */
+function describeWindow(window: {
+   appName?: string | undefined;
+   processName?: string | undefined;
+   pid?: number | undefined;
+   windowTitle?: string | undefined;
+}): string {
+   const parts = [
+      window.appName ?? window.processName,
+      window.pid === undefined ? undefined : `pid ${String(window.pid)}`,
+      window.windowTitle === undefined ? undefined : `"${window.windowTitle}"`,
+   ].filter((part): part is string => part !== undefined);
+   return parts.length > 0 ? parts.join(', ') : 'unnamed window';
+}
+
 /** Focus a real target only after its adapter has acquired desktop ownership. */
 export async function initializeSessionTarget(
    options: Pick<SessionContextOptions, 'target' | 'url' | 'app' | 'browser'>,
@@ -144,8 +159,13 @@ export async function initializeSessionTarget(
    if (result.status !== 'focused' || !focus.focused) {
       throw new CliEnvironmentError(
          'browser-focus-unconfirmed',
-         'The session target did not come to the front. Reader startup was cancelled.',
-         { target: app, frontmost: focus.frontmost },
+         [
+            'The session target did not come to the front. Reader startup was cancelled.',
+            `Wanted: ${describeWindow(app)}.`,
+            `In front: ${focus.frontmost ? describeWindow(focus.frontmost) : 'unknown'}.`,
+            `Focus attempt: ${[result.status, ...(result.details ?? [])].join('; ')}.`,
+         ].join(' '),
+         { target: app, frontmost: focus.frontmost, focusResult: result },
       );
    }
    return app;
