@@ -130,14 +130,3 @@ writes the changelogs. When a pull request changes what users of `a11ied`,
 `@a11ied/compat`, or `@a11ied/support-data` get, run `npx changeset` and describe the
 change for them. [.changeset/README.md](.changeset/README.md) says how to write one, and
 [the release checklist](internal-docs/maintainer-release-checklist.md) covers publishing.
-
-## release readiness
-
-The current release record is [internal-docs/releases/v0.1.0-readiness.md](internal-docs/releases/v0.1.0-readiness.md).
-
-That file is the one to read before a public minor or major cut. It includes:
-
-- publish steps for all public npm packages
-- docs publish path
-- Agent Skill release path
-- deferred items that still need an explicit release decision

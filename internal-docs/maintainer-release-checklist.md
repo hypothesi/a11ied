@@ -22,10 +22,6 @@ a1 help-all
 a1 doctor --json
 ```
 
-## Release record
-
-The current release record lives in `internal-docs/releases/v0.1.0-readiness.md`. It documents the package release order, the docs publish path, the Agent Skill release path, and deferred items.
-
 ## Packages
 
 Three packages are for users: `a11ied`, `@a11ied/compat`, and `@a11ied/support-data`. The
@@ -141,7 +137,8 @@ access to the GitHub repository.
 
 ## Known deferred items
 
-Some rough edges are tracked and accepted for the current milestone. Real-target smoke testing is still manual even though package publication now runs through GitHub Actions. See the release record for the full list.
+Known problems are tracked as beads. `bd list --status open` lists them; decide for each
+one whether it blocks the release.
 
 ## Manual smoke tests are required
 
