@@ -20,6 +20,14 @@ const hasSearch = import.meta.env.PROD;
 const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
 const description =
    'a11ied is a CLI, testing library, and MCP server for automated screen reader and accessibility testing.';
+const websiteData = {
+   '@context': 'https://schema.org',
+   '@type': 'WebSite',
+   name: 'a11ied',
+   url: new URL(basePath, Astro.site).href,
+   description,
+   inLanguage: 'en',
+};
 const heroCommands = [
    `a1 sr start --sr virtual ${practiceURL}`,
    'a1 sr goto --role button --name "Invite member"',
@@ -38,7 +46,11 @@ const reportAlt =
 
 <html lang="en">
    <head>
-      <SiteHead title="a11ied: automated screen reader and accessibility testing" description={description} />
+      <SiteHead
+         title="a11ied: automated screen reader and accessibility testing"
+         description={description}
+         structuredData={[ websiteData ]}
+      />
    </head>
    <body class="home">
       <a class="skip-link" href="#content">Skip to content</a>

@@ -1,20 +1,61 @@
 ---
+import { SEO } from 'astro-seo';
+
 interface Props {
    /** The full text of the browser tab. */
    title: string;
    description: string;
+   /** Keeps a page out of search engines. For the 404 page. */
+   noindex?: boolean;
+   /** JSON-LD objects that describe the page to search engines. */
+   structuredData?: Record<string, unknown>[];
 }
 
-const { title, description } = Astro.props;
+const SITE_NAME = 'a11ied';
+const SOCIAL_IMAGE_ALT = 'a11ied: automated screen reader and accessibility testing';
+const SOCIAL_IMAGE_WIDTH = 1200;
+const SOCIAL_IMAGE_HEIGHT = 630;
+
+const { title, description, noindex = false, structuredData = [] } = Astro.props;
 // Pagefind writes the search bundle into the built site, so search exists only there.
 const hasSearch = import.meta.env.PROD;
 const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
+// Every page is served with a trailing slash, so that is the address search engines get.
+const canonical = new URL(Astro.url.pathname.replace(/\/*$/, '/'), Astro.site).href;
+const socialImage = new URL(`${basePath}og.png`, Astro.site).href;
 ---
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#f2e9d5" />
-<meta name="description" content={description} />
+<SEO
+   title={title}
+   description={description}
+   canonical={canonical}
+   noindex={noindex}
+   openGraph={{
+      basic: { title, type: 'website', image: socialImage, url: canonical },
+      optional: { description, siteName: SITE_NAME, locale: 'en_US' },
+      image: { width: SOCIAL_IMAGE_WIDTH, height: SOCIAL_IMAGE_HEIGHT, alt: SOCIAL_IMAGE_ALT },
+   }}
+   twitter={{
+      card: 'summary_large_image',
+      title,
+      description,
+      image: socialImage,
+      imageAlt: SOCIAL_IMAGE_ALT,
+   }}
+/>
+{hasSearch ? <link rel="sitemap" href={`${basePath}sitemap-index.xml`} /> : null}
+{
+   structuredData.map((item) => (
+      <script
+         is:inline
+         type="application/ld+json"
+         set:html={JSON.stringify(item).replaceAll('<', '\\u003c')}
+      />
+   ))
+}
 <link
    rel="icon"
    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23ec4933'/%3E%3Cpath d='M4 4h56v56H4z' fill='none' stroke='%2317213b' stroke-width='5'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-family='Arial' font-weight='700' font-size='36' fill='%23fff9ec'%3Ea!%3C/text%3E%3C/svg%3E"
@@ -22,7 +63,6 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;600;700&family=Atkinson+Hyperlegible+Next:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-<title>{title}</title>
 {hasSearch ? <link rel="stylesheet" href={`${basePath}pagefind/pagefind-component-ui.css`} /> : null}
 {hasSearch ? <script is:inline type="module" src={`${basePath}pagefind/pagefind-component-ui.js`}></script> : null}
 <style is:global>

@@ -19,9 +19,40 @@ interface Props {
    toc?: TocItem[];
    /** `wide` lets a data page use the full width. */
    variant?: 'page' | 'wide';
+   /** Browser tab and search result title, when the heading alone would be ambiguous. */
+   tabTitle?: string;
+   /** Search result description, when the summary alone would repeat on other pages. */
+   metaDescription?: string;
+   noindex?: boolean;
 }
 
-const { title, summary, links, toc = [], variant = 'page' } = Astro.props;
+/** Search engines cut a description off at about this length. */
+const MAX_DESCRIPTION_LENGTH = 160;
+
+const {
+   title,
+   summary,
+   links,
+   toc = [],
+   variant = 'page',
+   tabTitle = title,
+   metaDescription,
+   noindex = false,
+} = Astro.props;
+
+/** Keeps the opening sentences of a summary that fit in a search result. */
+function getMetaDescription(text: string): string {
+   let kept = '';
+
+   // A sentence ends at a full stop followed by a space, so "element.focus()" stays whole.
+   for (const sentence of text.split(/(?<=[.!?])\s+/)) {
+      if (kept !== '' && `${kept} ${sentence}`.length > MAX_DESCRIPTION_LENGTH) {
+         break;
+      }
+      kept = kept === '' ? sentence : `${kept} ${sentence}`;
+   }
+   return kept;
+}
 
 function normalizePath(value: string): string {
    const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
@@ -45,7 +76,39 @@ const activeIndex = flatLinks.findIndex((link) => isLinkActive(link.href, pathna
 const activeSection = links.find((section) => section.links.some((link) => isLinkActive(link.href, pathname)));
 const previousLink = activeIndex > 0 ? flatLinks[activeIndex - 1] : undefined;
 const nextLink = activeIndex === -1 ? undefined : flatLinks[activeIndex + 1];
-const description = summary.replaceAll(/<[^>]+>/g, '').replaceAll(/\s+/g, ' ').trim();
+const summaryText = summary.replaceAll(/<[^>]+>/g, '').replaceAll(/\s+/g, ' ').trim();
+const description = metaDescription ?? getMetaDescription(summaryText);
+const siteURL = new URL(import.meta.env.BASE_URL.replace(/\/*$/, '/'), Astro.site).href;
+const pageURL = new URL(Astro.url.pathname.replace(/\/*$/, '/'), Astro.site).href;
+// A section has no page of its own, so its breadcrumb points at the section's first page.
+const sectionPath = activeSection?.links[0]?.href.replace(/^\//, '');
+const sectionURL = sectionPath === undefined ? undefined : `${siteURL}${sectionPath}/`;
+const breadcrumbs = [
+   { name: 'a11ied', item: siteURL },
+   ...(sectionURL ? [ { name: activeSection?.title, item: sectionURL } ] : []),
+   { name: title, item: pageURL },
+];
+const structuredData = [
+   {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: breadcrumbs.map((crumb, index) => ({
+         '@type': 'ListItem',
+         position: index + 1,
+         name: crumb.name,
+         item: crumb.item,
+      })),
+   },
+   {
+      '@context': 'https://schema.org',
+      '@type': 'TechArticle',
+      headline: tabTitle,
+      description,
+      url: pageURL,
+      inLanguage: 'en',
+      isPartOf: { '@type': 'WebSite', name: 'a11ied', url: siteURL },
+   },
+];
 /*
  * Search exists only in the built site. The triggers hide the shortcut hint because, with
  * it, the button's visible text is no longer part of its accessible name (WCAG 2.5.3).
@@ -57,7 +120,12 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
 
 <html lang="en">
    <head>
-      <SiteHead title={`${title} | a11ied`} description={description} />
+      <SiteHead
+         title={`${tabTitle} | a11ied`}
+         description={description}
+         noindex={noindex}
+         structuredData={noindex ? [] : structuredData}
+      />
       <style is:global>
          /* Layout */
          .shell { --halftone: 9.5rem; display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); align-items: start; }

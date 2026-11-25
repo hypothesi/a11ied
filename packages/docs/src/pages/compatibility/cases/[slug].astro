@@ -32,6 +32,8 @@ if (!testCase) {
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="icon" href="data:," />
+      <!-- A bare test fixture. Search engines should list the test's own page, not this one. -->
+      <meta name="robots" content="noindex" />
       <title>{testCase.isolatedTitle}</title>
       {testCase.css && <style is:inline set:html={testCase.css} />}
    </head>
