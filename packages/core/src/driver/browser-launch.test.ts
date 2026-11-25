@@ -25,26 +25,32 @@ const candidates: BrowserAutomationCandidate[] = [
 
 describe('resolveBrowserChoice', () => {
    it('picks a detected candidate by id, alias, or label', () => {
-      expect(resolveBrowserChoice('edge', candidates)).toMatchObject({
+      expect(resolveBrowserChoice('edge', candidates, 'darwin')).toMatchObject({
          appName: 'Microsoft Edge',
          focusTarget: { appName: 'Microsoft Edge', bundleId: 'com.microsoft.edgemac' },
       });
-      expect(resolveBrowserChoice('Google Chrome', candidates).focusTarget.bundleId).toBe(
-         'com.google.Chrome',
-      );
+      expect(
+         resolveBrowserChoice('Google Chrome', candidates, 'darwin').focusTarget.bundleId,
+      ).toBe('com.google.Chrome');
       expect(resolveBrowserChoice('chrome', candidates).location).toContain(
          'Google Chrome',
       );
    });
 
    it('opens any other name as an app of that name', () => {
-      expect(resolveBrowserChoice('Safari', candidates)).toEqual({
+      expect(resolveBrowserChoice('Safari', candidates, 'darwin')).toEqual({
          appName: 'Safari',
          focusTarget: { appName: 'Safari', bundleId: 'com.apple.Safari' },
       });
-      expect(resolveBrowserChoice('Arc', candidates)).toEqual({
+      expect(resolveBrowserChoice('Arc', candidates, 'darwin')).toEqual({
          appName: 'Arc',
          focusTarget: { appName: 'Arc' },
+      });
+   });
+
+   it('leaves out the macOS bundle id on Windows, where no window reports one', () => {
+      expect(resolveBrowserChoice('chrome', candidates, 'win32').focusTarget).toEqual({
+         appName: 'Google Chrome',
       });
    });
 

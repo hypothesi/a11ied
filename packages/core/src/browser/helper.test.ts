@@ -2,7 +2,7 @@ import { ChildProcess } from 'node:child_process';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { openUrlOnMac } from './helper.js';
+import { deriveFocusTarget, openUrlOnMac } from './helper.js';
 
 const mocks = vi.hoisted(() => ({ spawn: vi.fn() }));
 
@@ -45,5 +45,24 @@ describe('macOS browser opening', () => {
          expect.anything(),
       );
       expect(mocks.spawn).not.toHaveBeenCalledWith('open', [url], expect.anything());
+   });
+});
+
+describe('the focus target for the system browser', () => {
+   const chrome = {
+      id: 'chrome',
+      label: 'Google Chrome',
+      source: 'system',
+      launchMode: 'channel',
+      // Forward slashes, which every platform's path functions split, as Windows does.
+      location: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
+   } as const;
+
+   it('names the executable and leaves out the macOS bundle id on Windows', () => {
+      expect(deriveFocusTarget(chrome, 'win32')).toEqual({ appName: 'chrome.exe' });
+   });
+
+   it('adds the bundle id on macOS', () => {
+      expect(deriveFocusTarget(chrome, 'darwin')?.bundleId).toBe('com.google.Chrome');
    });
 });

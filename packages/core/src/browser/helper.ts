@@ -20,11 +20,15 @@ function resolveBundleId(candidate: BrowserAutomationCandidate): string | undefi
    return bundleIds[candidate.id];
 }
 
-/** Derives the app-focus target a driver session should use for a browser candidate. */
+/**
+ * Derives the app-focus target a driver session should use for a browser candidate. A
+ * bundle id is a macOS identity. Elsewhere no window reports one, so it is left out.
+ */
 export function deriveFocusTarget(
    candidate: BrowserAutomationCandidate,
+   platform: NodeJS.Platform = process.platform,
 ): DriverFocusTarget | undefined {
-   const bundleId = resolveBundleId(candidate);
+   const bundleId = platform === 'darwin' ? resolveBundleId(candidate) : undefined;
    if (candidate.location) {
       const appName = basename(candidate.location);
       if (appName) {

@@ -48,6 +48,7 @@ export interface BrowserChoice {
 export function resolveBrowserChoice(
    browser: string,
    candidates: readonly BrowserAutomationCandidate[],
+   platform: NodeJS.Platform = process.platform,
 ): BrowserChoice {
    const wanted = browser.trim().toLowerCase();
    const id = BROWSER_ALIASES[wanted] ?? wanted;
@@ -57,7 +58,8 @@ export function resolveBrowserChoice(
    const appName = candidate?.location
       ? basename(candidate.location)
       : (candidate?.label ?? browser.trim());
-   const bundleId = BUNDLE_IDS[candidate?.id ?? id];
+   // A bundle id is a macOS identity. Elsewhere no window reports one, so it never matches.
+   const bundleId = platform === 'darwin' ? BUNDLE_IDS[candidate?.id ?? id] : undefined;
    const focusTarget: DriverFocusTarget = bundleId ? { appName, bundleId } : { appName };
    const choice: BrowserChoice = { appName, focusTarget };
    if (candidate) {
