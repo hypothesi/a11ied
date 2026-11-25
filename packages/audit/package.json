@@ -1,6 +1,6 @@
 {
    "name": "@a11ied/audit",
-   "version": "0.1.0",
+   "version": "0.1.1",
    "description": "Audit storage, work units, findings, and reports. Internal package of a11ied, published because the a1 CLI depends on it. Its API can change in any release; install a11ied instead.",
    "homepage": "https://github.com/hypothesi/a11ied/tree/master/packages/audit#readme",
    "bugs": {
@@ -34,7 +34,7 @@
       "typecheck": "tsc -p tsconfig.json --noEmit"
    },
    "dependencies": {
-      "@a11ied/wcag-engine": "0.1.0",
+      "@a11ied/wcag-engine": "0.1.1",
       "zod": "^4.6.6"
    },
    "engines": {

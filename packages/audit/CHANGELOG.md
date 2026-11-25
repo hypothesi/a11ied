@@ -1,5 +1,9 @@
 # @a11ied/audit
 
+## 0.1.1
+
+No changes in this release.
+
 ## 0.1.0
 
 First release, as an internal package of `a11ied`.
