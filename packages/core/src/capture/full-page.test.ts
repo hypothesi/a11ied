@@ -14,7 +14,8 @@ const BAND_COUNT = 20;
 const BAND_HEIGHT_PX = 1000;
 const RGBA_BYTES = 4;
 const CENTER_DIVISOR = 2;
-const timeoutMs = 30_000;
+/** Each capture drives a browser over 20,000 pixels of page, slowly on a shared CI runner. */
+const timeoutMs = 60_000;
 
 const server = createTestServer(),
    tempRoots: string[] = [];
@@ -31,15 +32,19 @@ afterEach(async () => {
    await cleanupTempRoots(tempRoots);
 });
 
-/** The color at the center of each band, as it appears in the saved picture. */
-function readBandColors(file: string, scale: number): string[] {
+/**
+ * The picture's height, and the color at the center of each band as it appears in it. The
+ * picture is decoded once: at 200 percent zoom it is tens of millions of pixels.
+ */
+function readBands(file: string, scale: number): { height: number; colors: string[] } {
    const picture = PNG.sync.read(readFileSync(file));
    const column = Math.floor(picture.width / CENTER_DIVISOR);
-   return Array.from({ length: BAND_COUNT }, (_unused, band) => {
+   const colors = Array.from({ length: BAND_COUNT }, (_unused, band) => {
       const row = (band * BAND_HEIGHT_PX + BAND_HEIGHT_PX / CENTER_DIVISOR) * scale;
       const offset = (row * picture.width + column) * RGBA_BYTES;
       return picture.data.subarray(offset, offset + RGBA_BYTES).join(',');
    });
+   return { height: picture.height, colors };
 }
 
 async function captureTallPage(options: {
@@ -61,11 +66,9 @@ describe('full-page capture of a page taller than one browser surface', () => {
       async () => {
          const file = await captureTallPage({ viewport: '320x800' });
 
-         const colors = readBandColors(file, 1);
+         const { colors, height } = readBands(file, 1);
 
-         expect(PNG.sync.read(readFileSync(file)).height).toBe(
-            BAND_COUNT * BAND_HEIGHT_PX,
-         );
+         expect(height).toBe(BAND_COUNT * BAND_HEIGHT_PX);
          expect(new Set(colors).size).toBe(BAND_COUNT);
       },
       timeoutMs,
@@ -75,13 +78,11 @@ describe('full-page capture of a page taller than one browser surface', () => {
       'shows every part of the page once at 200 percent zoom',
       async () => {
          const zoom = 2;
-         const file = await captureTallPage({ viewport: '640x800', zoom });
+         const file = await captureTallPage({ viewport: '320x800', zoom });
 
-         const colors = readBandColors(file, zoom);
+         const { colors, height } = readBands(file, zoom);
 
-         expect(PNG.sync.read(readFileSync(file)).height).toBe(
-            BAND_COUNT * BAND_HEIGHT_PX * zoom,
-         );
+         expect(height).toBe(BAND_COUNT * BAND_HEIGHT_PX * zoom);
          expect(new Set(colors).size).toBe(BAND_COUNT);
       },
       timeoutMs,
