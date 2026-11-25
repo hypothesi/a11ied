@@ -1,0 +1,3719 @@
+{
+   "schemaVersion": 1,
+   "planVersionID": "163676",
+   "slug": "apg-quantity-spin-button",
+   "directory": "apg/quantity-spin-button",
+   "title": "Quantity Spin Button Example",
+   "versionString": "V25.12.16",
+   "phase": "CANDIDATE",
+   "gitSha": "207a4b7a4e305f2c5eeccd984e92e331abaa0ed3",
+   "updatedAt": "2025-12-16T22:59:07.000Z",
+   "exampleURL": "https://www.w3.org/WAI/ARIA/apg/patterns/spinbutton/examples/quantity-spinbutton/",
+   "designPatternURL": "https://www.w3.org/WAI/ARIA/apg/patterns/spinbutton/",
+   "upstreamURL": "https://aria-at.w3.org/test-plan/163676",
+   "featureRefs": [
+      {
+         "refId": "aria-errormessage",
+         "type": "aria",
+         "linkText": "aria-errormessage ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-errormessage"
+      },
+      {
+         "refId": "aria-invalid",
+         "type": "aria",
+         "linkText": "aria-invalid ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-invalid"
+      },
+      {
+         "refId": "aria-valuemax",
+         "type": "aria",
+         "linkText": "aria-valuemax ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-valuemax"
+      },
+      {
+         "refId": "aria-valuemin",
+         "type": "aria",
+         "linkText": "aria-valuemin ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-valuemin"
+      },
+      {
+         "refId": "aria-valuenow",
+         "type": "aria",
+         "linkText": "aria-valuenow ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-valuenow"
+      },
+      {
+         "refId": "spinbutton",
+         "type": "aria",
+         "linkText": "spinbutton ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#spinbutton"
+      },
+      {
+         "refId": "inputTypeText",
+         "type": "html",
+         "linkText": "HTML text input HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#el-input-text"
+      },
+      {
+         "refId": "label",
+         "type": "html",
+         "linkText": "HTML label HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#el-label"
+      }
+   ],
+   "reports": [
+      {
+         "reportID": "557",
+         "atKey": "voiceover_macos",
+         "atName": "VoiceOver for macOS",
+         "atVersion": "26",
+         "browserKey": "safari_macos",
+         "browserName": "Safari",
+         "browserVersion": "26.2",
+         "os": "macOS",
+         "osVersion": "26",
+         "device": "Mac (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 16,
+               "failed": 23,
+               "untestable": 16,
+               "unsupported": 0,
+               "total": 55
+            },
+            "should": {
+               "passed": 3,
+               "failed": 17,
+               "untestable": 12,
+               "unsupported": 0,
+               "total": 32
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 2,
+               "total": 2
+            },
+            "severeSideEffects": 5,
+            "moderateSideEffects": 1
+         },
+         "tests": [
+            {
+               "testTitle": "Navigate forwards to a spin button",
+               "rowNumber": 5,
+               "atVersion": "26",
+               "browserVersion": "26.2",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+Right Arrow",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "0% Adults stepper\nYou are currently on a stepper. To begin interacting with this stepper, press Control-Option-Shift-Down Arrow.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MTUyNeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQGRhMD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZGJhNeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQmM0Yj",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MGE2YeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQ2RlY2",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "M2RkYeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQzkzOD",
+                           "priority": "MUST",
+                           "statement": "Screen reader switched from reading mode to interaction mode",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": [
+                        {
+                           "text": "Output is excessively verbose, e.g., includes redundant and/or irrelevant speech",
+                           "impact": "MODERATE",
+                           "details": "Stepper value redundantly conveyed as percentage of range, making actual value difficult to perceive."
+                        }
+                     ]
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "0% Adults stepper\nYou are currently on a stepper. To begin interacting with this stepper, press Control-Option-Shift-Down Arrow.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MTUyNeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQGRhMD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZGJhNeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQmM0Yj",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ODkwNeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQzJkNW",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MGE2YeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQ2RlY2",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmVkYeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQzllNm",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YTExMeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQTMyZj",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "M2RkYeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQzkzOD",
+                           "priority": "MUST",
+                           "statement": "Screen reader switched from reading mode to interaction mode",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "j (single quick key nav on)",
+                           "mode": "singleQuickKeyNavOn"
+                        }
+                     ],
+                     "output": "Add adult button\nYou are currently on a button. To click this button, press Control-Option-Space.",
+                     "untestable": true,
+                     "assertions": [
+                        {
+                           "id": "MTUyNeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQGRhMD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZGJhNeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQmM0Yj",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ODkwNeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQzJkNW",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MGE2YeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQ2RlY2",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmVkYeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQzllNm",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YTExMeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQTMyZj",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "M2RkYeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQzkzOD",
+                           "priority": "MUST",
+                           "statement": "Screen reader switched from reading mode to interaction mode",
+                           "verdict": "untestable",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": [
+                        {
+                           "text": "Reading cursor position changed in an unexpected manner",
+                           "impact": "SEVERE",
+                           "details": "Reading cursor skipped past the spin button, incorrectly  navigating to the add adult button"
+                        }
+                     ]
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "f (single quick key nav on)",
+                           "mode": "singleQuickKeyNavOn"
+                        }
+                     ],
+                     "output": "Text field not found",
+                     "untestable": true,
+                     "assertions": [
+                        {
+                           "id": "MTUyNeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQGRhMD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZGJhNeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQmM0Yj",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ODkwNeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQzJkNW",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MGE2YeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQ2RlY2",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmVkYeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQzllNm",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YTExMeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQTMyZj",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "M2RkYeyIzIjoiTVRjM1pleUl5SWpvaU1UWXpOamMySW4wVGd4WVcifQzkzOD",
+                           "priority": "MUST",
+                           "statement": "Screen reader switched from reading mode to interaction mode",
+                           "verdict": "untestable",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": [
+                        {
+                           "text": "Reading cursor position changed in an unexpected manner",
+                           "impact": "SEVERE",
+                           "details": "VoiceOver did not recognize the spin button text input as a text input"
+                        }
+                     ]
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-05-navForwardsToSpinbutton-voiceover_macos.collected.html",
+               "completedAt": "2026-04-22T16:30:54.429Z"
+            },
+            {
+               "testTitle": "Navigate backwards to a spin button",
+               "rowNumber": 6,
+               "atVersion": "26",
+               "browserVersion": "26.2",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+Left Arrow",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "0% Adults stepper\nYou are currently on a stepper. To begin interacting with this stepper, press Control-Option-Shift-Down Arrow.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZmFmZeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQDhiZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NWQwYeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQTU4Nm",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NDMwYeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQjQ4YT",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2E1NeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQDhlOG",
+                           "priority": "MUST",
+                           "statement": "Screen reader switched from reading mode to interaction mode",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "0% Adults stepper\nYou are currently on a stepper. To begin interacting with this stepper, press Control-Option-Shift-Down Arrow.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZmFmZeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQDhiZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NWQwYeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQTU4Nm",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MGM2ZeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQmY4OT",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NDMwYeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQjQ4YT",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NzhmNeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQzY3Nz",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YWE0NeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQGVjMm",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2E1NeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQDhlOG",
+                           "priority": "MUST",
+                           "statement": "Screen reader switched from reading mode to interaction mode",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+j (single quick key nav on)",
+                           "mode": "singleQuickKeyNavOn"
+                        }
+                     ],
+                     "output": "Remove adult dimmed button\nYou are currently on a button. This item is dimmed.\n",
+                     "untestable": true,
+                     "assertions": [
+                        {
+                           "id": "ZmFmZeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQDhiZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NWQwYeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQTU4Nm",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MGM2ZeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQmY4OT",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NDMwYeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQjQ4YT",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NzhmNeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQzY3Nz",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YWE0NeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQGVjMm",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2E1NeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQDhlOG",
+                           "priority": "MUST",
+                           "statement": "Screen reader switched from reading mode to interaction mode",
+                           "verdict": "untestable",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": [
+                        {
+                           "text": "Reading cursor position changed in an unexpected manner",
+                           "impact": "SEVERE",
+                           "details": "Reading cursor skipped past the spin button, incorrectly  navigating to the Remove Adult button"
+                        }
+                     ]
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+f (single quick key nav on)",
+                           "mode": "singleQuickKeyNavOn"
+                        }
+                     ],
+                     "output": "Text field not found\nYou are currently on a link. To click this link, press Control-Option-Space.",
+                     "untestable": true,
+                     "assertions": [
+                        {
+                           "id": "ZmFmZeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQDhiZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NWQwYeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQTU4Nm",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MGM2ZeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQmY4OT",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NDMwYeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQjQ4YT",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NzhmNeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQzY3Nz",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YWE0NeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQGVjMm",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "untestable",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2E1NeyIzIjoiTmpFNVpleUl5SWpvaU1UWXpOamMySW4wVGN6T0cifQDhlOG",
+                           "priority": "MUST",
+                           "statement": "Screen reader switched from reading mode to interaction mode",
+                           "verdict": "untestable",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": [
+                        {
+                           "text": "Other",
+                           "impact": "SEVERE",
+                           "details": "VoiceOver did not recognize the spin button text input as a text input"
+                        }
+                     ]
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-06-navBackToSpinbutton-voiceover_macos.collected.html",
+               "completedAt": "2026-04-21T16:36:07.754Z"
+            },
+            {
+               "testTitle": "Request information about a spin button",
+               "rowNumber": 9,
+               "atVersion": "26",
+               "browserVersion": "26.2",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+F3",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "0% Adults stepper is in the VoiceOver cursor\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MWY5MeyIzIjoiTjJGak9leUl5SWpvaU1UWXpOamMySW4wV0kxWmoifQGJjNj",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MjlhMeyIzIjoiTjJGak9leUl5SWpvaU1UWXpOamMySW4wV0kxWmoifQjY5MG",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MmExZeyIzIjoiTjJGak9leUl5SWpvaU1UWXpOamMySW4wV0kxWmoifQTM5OG",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MDg0YeyIzIjoiTjJGak9leUl5SWpvaU1UWXpOamMySW4wV0kxWmoifQTRmYj",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YzdjMeyIzIjoiTjJGak9leUl5SWpvaU1UWXpOamMySW4wV0kxWmoifQzZiZT",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OWUxYeyIzIjoiTjJGak9leUl5SWpvaU1UWXpOamMySW4wV0kxWmoifQ2M4M2",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+F4",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "0% Adults stepper has keyboard focus\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MWY5MeyIzIjoiTjJGak9leUl5SWpvaU1UWXpOamMySW4wV0kxWmoifQGJjNj",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MjlhMeyIzIjoiTjJGak9leUl5SWpvaU1UWXpOamMySW4wV0kxWmoifQjY5MG",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MmExZeyIzIjoiTjJGak9leUl5SWpvaU1UWXpOamMySW4wV0kxWmoifQTM5OG",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MDg0YeyIzIjoiTjJGak9leUl5SWpvaU1UWXpOamMySW4wV0kxWmoifQTRmYj",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YzdjMeyIzIjoiTjJGak9leUl5SWpvaU1UWXpOamMySW4wV0kxWmoifQzZiZT",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OWUxYeyIzIjoiTjJGak9leUl5SWpvaU1UWXpOamMySW4wV0kxWmoifQ2M4M2",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+l",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "No output was detected.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MDg0YeyIzIjoiTjJGak9leUl5SWpvaU1UWXpOamMySW4wV0kxWmoifQTRmYj",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-09-reqInfoAboutSpinbutton-voiceover_macos.collected.html",
+               "completedAt": "2026-04-22T16:37:03.451Z"
+            },
+            {
+               "testTitle": "Request information about an invalid value in a spin button",
+               "rowNumber": 10,
+               "atVersion": "26",
+               "browserVersion": "26.2",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+F3",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "114.3% Adults invalid data stepper\nactions available You are currently on a stepper. To begin interacting with this stepper, press Control-Option-Shift-Down Arrow.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MTg3YeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQTY2NW",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OGE3MeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQjNjZj",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "YzY5NeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQDA2Yj",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "YTQ5YeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQ2Q4YT",
+                           "priority": "MUST",
+                           "statement": "Value, '9', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTYyMeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQ2VhNj",
+                           "priority": "MUST",
+                           "statement": "State, 'not valid', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-invalid",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDdmMeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQjhlZD",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjdhYeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQzE0NW",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NmM5NeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQmViOW",
+                           "priority": "MUST",
+                           "statement": "Error message, 'Must be between 1 and 8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-errormessage",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+F4",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "114.3% Adults invalid data stepper has keyboard focus\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MTg3YeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQTY2NW",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OGE3MeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQjNjZj",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "YzY5NeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQDA2Yj",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "YTQ5YeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQ2Q4YT",
+                           "priority": "MUST",
+                           "statement": "Value, '9', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTYyMeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQ2VhNj",
+                           "priority": "MUST",
+                           "statement": "State, 'not valid', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-invalid",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDdmMeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQjhlZD",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjdhYeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQzE0NW",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NmM5NeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQmViOW",
+                           "priority": "MUST",
+                           "statement": "Error message, 'Must be between 1 and 8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-errormessage",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+l",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "No output was detected.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YTQ5YeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQ2Q4YT",
+                           "priority": "MUST",
+                           "statement": "Value, '9', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OTYyMeyIzIjoiWlRZeU5leUl5SWpvaU1UWXpOamMySW4walV6TkcifQ2VhNj",
+                           "priority": "MUST",
+                           "statement": "State, 'not valid', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-invalid",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-10-reqInfoAboutInvalidSpinbutton-voiceover_macos.collected.html",
+               "completedAt": "2026-03-26T14:33:31.203Z"
+            },
+            {
+               "testTitle": "Increment a spin button by one step",
+               "rowNumber": 12,
+               "atVersion": "26",
+               "browserVersion": "26.2",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Up Arrow (quick nav off)",
+                           "mode": "quickNavOff"
+                        }
+                     ],
+                     "output": "14.3%\nYou are currently on a stepper. To begin interacting with this stepper, press Control-Option-Shift-Down Arrow.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWQwMeyIzIjoiTW1WbVpleUl5SWpvaU1UWXpOamMySW4wREpsWXoifQmFlZD",
+                           "priority": "MUST",
+                           "statement": "Value, '2', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+Shift+Down Arrow",
+                           "mode": "defaultMode"
+                        },
+                        {
+                           "text": "Control+Option+Up Arrow",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "14.3%\nYou are currently in a stepper. To decrease this value, press Control-Option-Down Arrow. To increase this value, press Control-Option-Up Arrow.To exit this stepper, press Control-Option-Shift-Up Arrow.\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWQwMeyIzIjoiTW1WbVpleUl5SWpvaU1UWXpOamMySW4wREpsWXoifQmFlZD",
+                           "priority": "MUST",
+                           "statement": "Value, '2', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+Shift+Down Arrow",
+                           "mode": "defaultMode"
+                        },
+                        {
+                           "text": "Control+Option+Right Arrow",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "In stepper\nYou are currently in a stepper. To decrease this value, press Control-Option-Down Arrow. To increase this value, press Control-Option-Up Arrow.To exit this stepper, press Control-Option-Shift-Up Arrow.\n0",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWQwMeyIzIjoiTW1WbVpleUl5SWpvaU1UWXpOamMySW4wREpsWXoifQmFlZD",
+                           "priority": "MUST",
+                           "statement": "Value, '2', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-12-incrementSpinbuttonByOneStep-voiceover_macos.collected.html",
+               "completedAt": "2026-03-26T14:36:05.639Z"
+            },
+            {
+               "testTitle": "Decrement a spin button by one step",
+               "rowNumber": 14,
+               "atVersion": "26",
+               "browserVersion": "26.2",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Down Arrow (quick nav off)",
+                           "mode": "quickNavOff"
+                        }
+                     ],
+                     "output": "0%\nYou are currently on a stepper. To begin interacting with this stepper, press Control-Option-Shift-Down Arrow.\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTU0ZeyIzIjoiTVRBME1leUl5SWpvaU1UWXpOamMySW4wak5qWm0ifQmI0Yz",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+Shift+Down Arrow",
+                           "mode": "defaultMode"
+                        },
+                        {
+                           "text": "Control+Option+Down Arrow",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "0%\nYou are currently in a stepper. To decrease this value, press Control-Option-Down Arrow. To increase this value, press Control-Option-Up Arrow.To exit this stepper, press Control-Option-Shift-Up Arrow.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTU0ZeyIzIjoiTVRBME1leUl5SWpvaU1UWXpOamMySW4wak5qWm0ifQmI0Yz",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+Shift+Down Arrow",
+                           "mode": "defaultMode"
+                        },
+                        {
+                           "text": "Control+Option+Left Arrow",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "In stepper\nYou are currently in a stepper. To decrease this value, press Control-Option-Down Arrow. To increase this value, press Control-Option-Up Arrow.To exit this stepper, press Control-Option-Shift-Up Arrow.\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTU0ZeyIzIjoiTVRBME1leUl5SWpvaU1UWXpOamMySW4wak5qWm0ifQmI0Yz",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": [
+                        {
+                           "text": "Other",
+                           "impact": "SEVERE",
+                           "details": "Value did not change and VoiceOver played an error earcon"
+                        }
+                     ]
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-14-decrementSpinbuttonByOneStep-voiceover_macos.collected.html",
+               "completedAt": "2026-04-22T16:33:44.634Z"
+            },
+            {
+               "testTitle": "Type an invalid value into a spin button",
+               "rowNumber": 16,
+               "atVersion": "26",
+               "browserVersion": "26.2",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "9",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "114.3%\nactions available You are currently on a stepper. To begin interacting with this stepper, press Control-Option-Shift-Down ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "OWFlOeyIzIjoiTXpsbE1leUl5SWpvaU1UWXpOamMySW4welF6T0cifQGVkMW",
+                           "priority": "MAY",
+                           "statement": "State, 'not valid', is conveyed",
+                           "verdict": "unsupported",
+                           "featureRef": "aria-invalid",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NTc1NeyIzIjoiTXpsbE1leUl5SWpvaU1UWXpOamMySW4welF6T0cifQTEwMD",
+                           "priority": "MAY",
+                           "statement": "Error message, 'Must be between 1 and 8', is conveyed",
+                           "verdict": "unsupported",
+                           "featureRef": "aria-errormessage",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-16-typeInvalidValueIntoSpinButton-voiceover_macos.collected.html",
+               "completedAt": "2026-01-22T16:11:22.817Z"
+            }
+         ],
+         "markedFinalAt": "2026-05-06T07:49:33.171Z"
+      },
+      {
+         "reportID": "556",
+         "atKey": "nvda",
+         "atName": "NVDA",
+         "atVersion": "2025.3",
+         "browserKey": "chrome",
+         "browserName": "Chrome",
+         "browserVersion": "144",
+         "os": "Windows",
+         "osVersion": "Not recorded by ARIA-AT",
+         "device": "PC (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 55,
+               "failed": 11,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 66
+            },
+            "should": {
+               "passed": 16,
+               "failed": 24,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 40
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 2,
+               "total": 2
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 2
+         },
+         "tests": [
+            {
+               "testTitle": "Navigate forwards to a spin button",
+               "rowNumber": 5,
+               "atVersion": "2025.3",
+               "browserVersion": "144",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Down Arrow (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "spin button  editable    1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YTFkOeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQWUzZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "Njk1YeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQmVmM2",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "N2UwYeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQjMzYT",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YmI2NeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQTVjMW",
+                           "priority": "MUST",
+                           "statement": "NVDA switched from browse mode to focus mode",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "f (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "Adults  spin button  editable    1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YTFkOeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQWUzZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "Njk1YeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQmVmM2",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "N2ZmNeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQWM5OT",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "N2UwYeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQjMzYT",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODljYeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQzYxZW",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmRjNeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQDU4MD",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YmI2NeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQTVjMW",
+                           "priority": "MUST",
+                           "statement": "NVDA switched from browse mode to focus mode",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "Adults  spin button  editable  selected 1\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YTFkOeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQWUzZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "Njk1YeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQmVmM2",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "N2ZmNeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQWM5OT",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "N2UwYeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQjMzYT",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODljYeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQzYxZW",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmRjNeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQDU4MD",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YmI2NeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQTVjMW",
+                           "priority": "MUST",
+                           "statement": "NVDA switched from browse mode to focus mode",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "e (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "Adults  spin button  editable    1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YTFkOeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQWUzZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "Njk1YeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQmVmM2",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "N2ZmNeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQWM5OT",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "N2UwYeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQjMzYT",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODljYeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQzYxZW",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmRjNeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQDU4MD",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YmI2NeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQTVjMW",
+                           "priority": "MUST",
+                           "statement": "NVDA switched from browse mode to focus mode",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "Adults  spin button  editable  selected 1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YTFkOeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQWUzZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "Njk1YeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQmVmM2",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "N2ZmNeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQWM5OT",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "N2UwYeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQjMzYT",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODljYeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQzYxZW",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmRjNeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQDU4MD",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YmI2NeyIzIjoiTlRBNVpleUl5SWpvaU1UWXpOamMySW4wRE01WVQifQTVjMW",
+                           "priority": "MUST",
+                           "statement": "NVDA switched from browse mode to focus mode",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-05-navForwardsToSpinbutton-nvda.collected.html",
+               "completedAt": "2026-01-28T03:25:57.645Z"
+            },
+            {
+               "testTitle": "Navigate backwards to a spin button",
+               "rowNumber": 6,
+               "atVersion": "2025.3",
+               "browserVersion": "144",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Up Arrow (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "spin button  editable    1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MGYxZeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQmFlZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NTMzNeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQTFlYj",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MmVjMeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQjU4OD",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MTRjOeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQWFjN2",
+                           "priority": "MUST",
+                           "statement": "NVDA switched from browse mode to focus mode",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+f (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "Adults  spin button  editable    1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MGYxZeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQmFlZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NTMzNeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQTFlYj",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MWEzNeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQmZhYj",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MmVjMeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQjU4OD",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjA4OeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQWZhNG",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDA2NeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQ2NmOG",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MTRjOeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQWFjN2",
+                           "priority": "MUST",
+                           "statement": "NVDA switched from browse mode to focus mode",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "Adults  spin button  editable  selected 1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MGYxZeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQmFlZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NTMzNeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQTFlYj",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MWEzNeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQmZhYj",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MmVjMeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQjU4OD",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjA4OeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQWZhNG",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDA2NeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQ2NmOG",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MTRjOeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQWFjN2",
+                           "priority": "MUST",
+                           "statement": "NVDA switched from browse mode to focus mode",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+e (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "Adults  spin button  editable    1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MGYxZeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQmFlZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NTMzNeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQTFlYj",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MWEzNeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQmZhYj",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MmVjMeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQjU4OD",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjA4OeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQWZhNG",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDA2NeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQ2NmOG",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MTRjOeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQWFjN2",
+                           "priority": "MUST",
+                           "statement": "NVDA switched from browse mode to focus mode",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "Adults  spin button  editable  selected 1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MGYxZeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQmFlZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NTMzNeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQTFlYj",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MWEzNeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQmZhYj",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "MmVjMeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQjU4OD",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjA4OeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQWZhNG",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDA2NeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQ2NmOG",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MTRjOeyIzIjoiWldVNVlleUl5SWpvaU1UWXpOamMySW4wek5rT0QifQWFjN2",
+                           "priority": "MUST",
+                           "statement": "NVDA switched from browse mode to focus mode",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-06-navBackToSpinbutton-nvda.collected.html",
+               "completedAt": "2026-01-28T03:28:29.209Z"
+            },
+            {
+               "testTitle": "Request information about a spin button",
+               "rowNumber": 9,
+               "atVersion": "2025.3",
+               "browserVersion": "144",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "Adults  spin button  focused  editable  selected 1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ODJiOeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQDQ5OT",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZTgwMeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQDUyOW",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NTc5NeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQmE5Yz",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "OTViYeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQ2RkND",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2I2YeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQTlhOT",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OGI4YeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQ2RmNj",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "spin button  editable    1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ODJiOeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQDQ5OT",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZTgwMeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQDUyOW",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NTc5NeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQmE5Yz",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "OTViYeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQ2RkND",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "Adults  spin button  focused  editable  selected 1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ODJiOeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQDQ5OT",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZTgwMeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQDUyOW",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NTc5NeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQmE5Yz",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "OTViYeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQ2RkND",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2I2YeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQTlhOT",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OGI4YeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQ2RmNj",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "OTViYeyIzIjoiWldVNFpleUl5SWpvaU1UWXpOamMySW4wRGhtWXoifQ2RkND",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-09-reqInfoAboutSpinbutton-nvda.collected.html",
+               "completedAt": "2026-01-28T03:31:15.179Z"
+            },
+            {
+               "testTitle": "Request information about an invalid value in a spin button",
+               "rowNumber": 10,
+               "atVersion": "2025.3",
+               "browserVersion": "144",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "Adults  spin button  focused  invalid entry  editable  Must be between 1 and 8   selected 9\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YmU0MeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQjg4OD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MDk5MeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQ2U0MT",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ZjY1ZeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQjA4ND",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "YWVmMeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQmEyNT",
+                           "priority": "MUST",
+                           "statement": "Value, '9', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZTcxNeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQzBkNz",
+                           "priority": "MUST",
+                           "statement": "State, 'not valid', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-invalid",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MzI1YeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQjUxOD",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MDU1OeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQDVlYW",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NmUwMeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQTBmNT",
+                           "priority": "MUST",
+                           "statement": "Error message, 'Must be between 1 and 8', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-errormessage",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "spin button  invalid entry  editable    Must be between 1 and 8   9",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YmU0MeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQjg4OD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MDk5MeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQ2U0MT",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ZjY1ZeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQjA4ND",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "YWVmMeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQmEyNT",
+                           "priority": "MUST",
+                           "statement": "Value, '9', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZTcxNeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQzBkNz",
+                           "priority": "MUST",
+                           "statement": "State, 'not valid', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-invalid",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "Adults  spin button  focused  invalid entry  editable  Must be between 1 and 8   selected 9",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YmU0MeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQjg4OD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MDk5MeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQ2U0MT",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ZjY1ZeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQjA4ND",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "YWVmMeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQmEyNT",
+                           "priority": "MUST",
+                           "statement": "Value, '9', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZTcxNeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQzBkNz",
+                           "priority": "MUST",
+                           "statement": "State, 'not valid', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-invalid",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MzI1YeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQjUxOD",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MDU1OeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQDVlYW",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NmUwMeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQTBmNT",
+                           "priority": "MUST",
+                           "statement": "Error message, 'Must be between 1 and 8', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-errormessage",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "9",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWVmMeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQmEyNT",
+                           "priority": "MUST",
+                           "statement": "Value, '9', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZTcxNeyIzIjoiTldJNFlleUl5SWpvaU1UWXpOamMySW4wMlJqWXoifQzBkNz",
+                           "priority": "MUST",
+                           "statement": "State, 'not valid', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-invalid",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-10-reqInfoAboutInvalidSpinbutton-nvda.collected.html",
+               "completedAt": "2026-04-08T16:38:32.736Z"
+            },
+            {
+               "testTitle": "Increment a spin button by one step",
+               "rowNumber": 12,
+               "atVersion": "2025.3",
+               "browserVersion": "144",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Up Arrow (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "2\n2 unselected",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTYxNeyIzIjoiTmpVMU9leUl5SWpvaU1UWXpOamMySW4wREJsWVcifQDM2Mz",
+                           "priority": "MUST",
+                           "statement": "Value, '2', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": [
+                        {
+                           "text": "Output is excessively verbose, e.g., includes redundant and/or irrelevant speech",
+                           "impact": "MODERATE",
+                           "details": "the new current value was repeated twice"
+                        }
+                     ]
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-12-incrementSpinbuttonByOneStep-nvda.collected.html",
+               "completedAt": "2026-01-28T03:36:58.030Z"
+            },
+            {
+               "testTitle": "Decrement a spin button by one step",
+               "rowNumber": 14,
+               "atVersion": "2025.3",
+               "browserVersion": "144",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Down Arrow (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "1\nselection removed",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGYwNeyIzIjoiWTJJek1leUl5SWpvaU1UWXpOamMySW4wamhqT0cifQjNmND",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-14-decrementSpinbuttonByOneStep-nvda.collected.html",
+               "completedAt": "2026-01-28T03:38:47.463Z"
+            },
+            {
+               "testTitle": "Type an invalid value into a spin button",
+               "rowNumber": 16,
+               "atVersion": "2025.3",
+               "browserVersion": "144",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "9 (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "9\n9 unselected",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "NjE1MeyIzIjoiWm1RMFpleUl5SWpvaU1UWXpOamMySW4wVEUwWWoifQjU2MG",
+                           "priority": "MAY",
+                           "statement": "State, 'not valid', is conveyed",
+                           "verdict": "unsupported",
+                           "featureRef": "aria-invalid",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NmU4OeyIzIjoiWm1RMFpleUl5SWpvaU1UWXpOamMySW4wVEUwWWoifQTJiOD",
+                           "priority": "MAY",
+                           "statement": "Error message, 'Must be between 1 and 8', is conveyed",
+                           "verdict": "unsupported",
+                           "featureRef": "aria-errormessage",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": [
+                        {
+                           "text": "Output is excessively verbose, e.g., includes redundant and/or irrelevant speech",
+                           "impact": "MODERATE",
+                           "details": "the new current value was repeated twice"
+                        }
+                     ]
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-16-typeInvalidValueIntoSpinButton-nvda.collected.html",
+               "completedAt": "2026-01-28T03:39:55.245Z"
+            }
+         ],
+         "markedFinalAt": "2026-04-21T16:04:20.971Z"
+      },
+      {
+         "reportID": "555",
+         "atKey": "jaws",
+         "atName": "JAWS",
+         "atVersion": "2025.2508.120",
+         "browserKey": "chrome",
+         "browserName": "Chrome",
+         "browserVersion": "144",
+         "os": "Windows",
+         "osVersion": "Not recorded by ARIA-AT",
+         "device": "PC (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 56,
+               "failed": 10,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 66
+            },
+            "should": {
+               "passed": 36,
+               "failed": 4,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 40
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 2,
+               "total": 2
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "tests": [
+            {
+               "testTitle": "Navigate forwards to a spin button",
+               "rowNumber": 5,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "144",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Down Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "1\nedit spin box",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTUwYeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQzJhNj",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NTc3YeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQWM5ZG",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NTE5ZeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQjNjZj",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OWIxNeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQjUzM2",
+                           "priority": "MUST",
+                           "statement": "JAWS switched from virtual cursor active to PC cursor active",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "f (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Guests group\nAdults edit spin box\n1\nmin 1 max 8",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTUwYeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQzJhNj",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NTc3YeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQWM5ZG",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ZTZmYeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQmY2NT",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NTE5ZeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQjNjZj",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjRmYeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQWQwOT",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZTA3OeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQGM1OD",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OWIxNeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQjUzM2",
+                           "priority": "MUST",
+                           "statement": "JAWS switched from virtual cursor active to PC cursor active",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Adults edit spin box\n1\nmin 1 max 8\nTo set the value use the Arrow keys or type the value.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTUwYeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQzJhNj",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NTc3YeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQWM5ZG",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ZTZmYeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQmY2NT",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NTE5ZeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQjNjZj",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjRmYeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQWQwOT",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZTA3OeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQGM1OD",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OWIxNeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQjUzM2",
+                           "priority": "MUST",
+                           "statement": "JAWS switched from virtual cursor active to PC cursor active",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "e (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Guests group\nAdults edit spin box\n1\nmin 1 max 8",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTUwYeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQzJhNj",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NTc3YeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQWM5ZG",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ZTZmYeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQmY2NT",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NTE5ZeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQjNjZj",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjRmYeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQWQwOT",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZTA3OeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQGM1OD",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OWIxNeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQjUzM2",
+                           "priority": "MUST",
+                           "statement": "JAWS switched from virtual cursor active to PC cursor active",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Adults edit spin box\n1\nmin 1 max 8\nTo set the value use the Arrow keys or type the value.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTUwYeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQzJhNj",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NTc3YeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQWM5ZG",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ZTZmYeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQmY2NT",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NTE5ZeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQjNjZj",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjRmYeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQWQwOT",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZTA3OeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQGM1OD",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "OWIxNeyIzIjoiTVRBeFpleUl5SWpvaU1UWXpOamMySW4wRGxrWlQifQjUzM2",
+                           "priority": "MUST",
+                           "statement": "JAWS switched from virtual cursor active to PC cursor active",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-05-navForwardsToSpinbutton-jaws.collected.html",
+               "completedAt": "2026-04-22T16:42:29.507Z"
+            },
+            {
+               "testTitle": "Navigate backwards to a spin button",
+               "rowNumber": 6,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "144",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Up Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "1\nedit spin box",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ODhiNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQTU3OT",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MWY1NeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQTU5ZT",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "Y2I2OeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQWRjNT",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2ZhNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQ2NjZD",
+                           "priority": "MUST",
+                           "statement": "JAWS switched from virtual cursor active to PC cursor active",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+f (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Guests group\nAdults edit spin box\n1\nmin 1 max 8",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ODhiNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQTU3OT",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MWY1NeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQTU5ZT",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NzBkNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQmM5MD",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "Y2I2OeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQWRjNT",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjYxNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQTM4N2",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZmQxMeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQDEzMm",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2ZhNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQ2NjZD",
+                           "priority": "MUST",
+                           "statement": "JAWS switched from virtual cursor active to PC cursor active",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Adults edit spin box\n1\nmin 1 max 8\nTo set the value use the Arrow keys or type the value.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ODhiNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQTU3OT",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MWY1NeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQTU5ZT",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NzBkNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQmM5MD",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "Y2I2OeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQWRjNT",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjYxNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQTM4N2",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZmQxMeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQDEzMm",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2ZhNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQ2NjZD",
+                           "priority": "MUST",
+                           "statement": "JAWS switched from virtual cursor active to PC cursor active",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+e (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Guests group\n\nAdults edit spin box\n1\nmin 1 max 8",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ODhiNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQTU3OT",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MWY1NeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQTU5ZT",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NzBkNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQmM5MD",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "Y2I2OeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQWRjNT",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjYxNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQTM4N2",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZmQxMeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQDEzMm",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2ZhNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQ2NjZD",
+                           "priority": "MUST",
+                           "statement": "JAWS switched from virtual cursor active to PC cursor active",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Adults edit spin box\n1\nmin 1 max 8\nTo set the value use the Arrow keys or type the value.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ODhiNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQTU3OT",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MWY1NeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQTU5ZT",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NzBkNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQmM5MD",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "Y2I2OeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQWRjNT",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjYxNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQTM4N2",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZmQxMeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQDEzMm",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2ZhNeyIzIjoiTldaa1lleUl5SWpvaU1UWXpOamMySW4wamxsTUQifQ2NjZD",
+                           "priority": "MUST",
+                           "statement": "JAWS switched from virtual cursor active to PC cursor active",
+                           "verdict": "fail",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-06-navBackToSpinbutton-jaws.collected.html",
+               "completedAt": "2026-01-28T02:58:37.907Z"
+            },
+            {
+               "testTitle": "Request information about a spin button",
+               "rowNumber": 9,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "144",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Adults edit spin box\n1\nmin 1 max 8",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MmI2OeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQTgxNz",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NTU3ZeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQTFlOT",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ZjBmMeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQDI5Mj",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NzE5ZeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQGYxMz",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZDQ1OeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQDgyNz",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjgwMeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQTZkOD",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Adults edit spin box\n1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MmI2OeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQTgxNz",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NTU3ZeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQTFlOT",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ZjBmMeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQDI5Mj",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NzE5ZeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQGYxMz",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Adults edit spin box\n1\nmin 1 max 8\nTo set the value use the Arrow keys or type the value.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MmI2OeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQTgxNz",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NTU3ZeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQTFlOT",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ZjBmMeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQDI5Mj",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "NzE5ZeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQGYxMz",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZDQ1OeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQDgyNz",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjgwMeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQTZkOD",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "NzE5ZeyIzIjoiWkdKaU1leUl5SWpvaU1UWXpOamMySW4welkxTmoifQGYxMz",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-09-reqInfoAboutSpinbutton-jaws.collected.html",
+               "completedAt": "2026-01-28T03:06:58.861Z"
+            },
+            {
+               "testTitle": "Request information about an invalid value in a spin button",
+               "rowNumber": 10,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "144",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Adults edit spin box Has Error invalid entry\n9",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "NzQzZeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQjA4ZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MGZkZeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQjhmOG",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ZWVjNeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQTAxND",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "OWEzNeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQzgzNz",
+                           "priority": "MUST",
+                           "statement": "Value, '9', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjM2MeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQzBkND",
+                           "priority": "MUST",
+                           "statement": "State, 'not valid', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-invalid",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmQzMeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQ2RhYj",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDZlOeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQDU5Mm",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NzI0MeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQzU0Zj",
+                           "priority": "MUST",
+                           "statement": "Error message, 'Must be between 1 and 8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-errormessage",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Adults edit spin box Has Error invalid entry\n9",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "NzQzZeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQjA4ZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MGZkZeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQjhmOG",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ZWVjNeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQTAxND",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "OWEzNeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQzgzNz",
+                           "priority": "MUST",
+                           "statement": "Value, '9', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjM2MeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQzBkND",
+                           "priority": "MUST",
+                           "statement": "State, 'not valid', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-invalid",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "Adults edit spin box invalid entry Has Error\n9\nMust be between 1 and 8",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "NzQzZeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQjA4ZD",
+                           "priority": "MUST",
+                           "statement": "Role 'spin button' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "spinbutton",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MGZkZeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQjhmOG",
+                           "priority": "SHOULD",
+                           "statement": "Support for edit commands in the input is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "inputTypeText",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "ZWVjNeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQTAxND",
+                           "priority": "MUST",
+                           "statement": "Name of the spin button, 'Adults', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "label",
+                           "featureType": "html"
+                        },
+                        {
+                           "id": "OWEzNeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQzgzNz",
+                           "priority": "MUST",
+                           "statement": "Value, '9', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjM2MeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQzBkND",
+                           "priority": "MUST",
+                           "statement": "State, 'not valid', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-invalid",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MmQzMeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQ2RhYj",
+                           "priority": "SHOULD",
+                           "statement": "Minimum value, '1', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemin",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NDZlOeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQDU5Mm",
+                           "priority": "SHOULD",
+                           "statement": "Maximum value, '8', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-valuemax",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NzI0MeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQzU0Zj",
+                           "priority": "MUST",
+                           "statement": "Error message, 'Must be between 1 and 8', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-errormessage",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "9",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "OWEzNeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQzgzNz",
+                           "priority": "MUST",
+                           "statement": "Value, '9', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YjM2MeyIzIjoiT0dZNU9leUl5SWpvaU1UWXpOamMySW4wVGxoTVcifQzBkND",
+                           "priority": "MUST",
+                           "statement": "State, 'not valid', is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "aria-invalid",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-10-reqInfoAboutInvalidSpinbutton-jaws.collected.html",
+               "completedAt": "2026-01-28T03:05:27.888Z"
+            },
+            {
+               "testTitle": "Increment a spin button by one step",
+               "rowNumber": 12,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "144",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Up Arrow (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "2",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MzZkMeyIzIjoiTWpNMk5leUl5SWpvaU1UWXpOamMySW4wV001WmoifQjcxYT",
+                           "priority": "MUST",
+                           "statement": "Value, '2', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-12-incrementSpinbuttonByOneStep-jaws.collected.html",
+               "completedAt": "2026-01-28T03:07:30.318Z"
+            },
+            {
+               "testTitle": "Decrement a spin button by one step",
+               "rowNumber": 14,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "144",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Down Arrow (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "1",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "MGEwMeyIzIjoiTm1FNE1leUl5SWpvaU1UWXpOamMySW4wRFExTlQifQmM3Zj",
+                           "priority": "MUST",
+                           "statement": "Value, '1', is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "aria-valuenow",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-14-decrementSpinbuttonByOneStep-jaws.collected.html",
+               "completedAt": "2026-01-28T03:07:49.497Z"
+            },
+            {
+               "testTitle": "Type an invalid value into a spin button",
+               "rowNumber": 16,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "144",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "9 (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "9",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZmFiMeyIzIjoiT0RRek9leUl5SWpvaU1UWXpOamMySW4wRE5qWXoifQGZmMT",
+                           "priority": "MAY",
+                           "statement": "State, 'not valid', is conveyed",
+                           "verdict": "unsupported",
+                           "featureRef": "aria-invalid",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "Y2FhZeyIzIjoiT0RRek9leUl5SWpvaU1UWXpOamMySW4wRE5qWXoifQDY2Yj",
+                           "priority": "MAY",
+                           "statement": "Error message, 'Must be between 1 and 8', is conveyed",
+                           "verdict": "unsupported",
+                           "featureRef": "aria-errormessage",
+                           "featureType": "aria"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/207a4b7a4e305f2c5eeccd984e92e331abaa0ed3/build/tests/apg/quantity-spin-button/test-16-typeInvalidValueIntoSpinButton-jaws.collected.html",
+               "completedAt": "2026-01-28T03:09:06.599Z"
+            }
+         ],
+         "markedFinalAt": "2026-05-06T07:43:47.330Z"
+      }
+   ]
+}

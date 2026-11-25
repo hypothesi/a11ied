@@ -37,6 +37,12 @@ the AA contrast rule and is claimed by both `color-contrast` and `color-contrast
 so the AAA rule reports failed on the AA rule's passing examples. a11ied cannot change
 that. What the baseline does is make a new contradiction fail the build.
 
+One entry comes from the browser, not from axe. Test case `58847c38` for rule `b5c3f8` is
+an XML file whose root is a `<math>` element with no namespace, so its expected outcome is
+inapplicable. Chrome shows an XML file it cannot style in its built-in XML viewer, which
+is an HTML page with no `lang`, and axe reports that page as failing `html-has-lang`.
+Chrome 158 does this; earlier versions in this run did not.
+
 ## The corpus
 
 `src/corpus.ts` pins `w3c/wcag-act-rules` to a commit and fetches it with a blobless

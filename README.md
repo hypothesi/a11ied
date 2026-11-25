@@ -99,7 +99,9 @@ npm test
 
 ## standards data workflow
 
-When you need to refresh the pinned WCAG artifacts, stay at the repo root and run:
+See [maintaining the WCAG data](internal-docs/maintaining-wcag-data.md) for what the
+data files hold. When you need to refresh the pinned WCAG artifacts, stay at the repo root
+and run:
 
 ```sh
 npm run wcag:sync

@@ -1,0 +1,59 @@
+---
+interface Props {
+   /** Speech: said aloud. Thought: a cloud. Signal: jagged, the way comics draw a machine's voice. */
+   kind: 'speech' | 'thought' | 'signal';
+   /** Puts the tail on the left instead of the right. */
+   mirror?: boolean;
+}
+
+const { kind, mirror = false } = Astro.props;
+const SPEECH_PATH = 'M40 10 H256 Q290 10 290 44 V84 Q290 118 256 118 H232 L262 160 L184 118 H40 Q10 118 10 84 V44 Q10 10 40 10 Z';
+const SHOUT_POINTS = '150,12 173,27 209,17 214,34 256,31 243,46 283,51 253,62 283,73 243,78 256,93 214,90 236,160 173,97 150,112 127,97 91,107 86,90 44,93 57,78 17,73 47,62 17,51 57,46 44,31 86,34 91,17 127,27';
+---
+
+<!-- Decoration: the copy beside the balloon says the same thing in a sentence. -->
+<div class:list={[ 'balloon', `balloon--${kind}`, { 'balloon--mirror': mirror } ]} aria-hidden="true">
+   <span class="balloon-dots"></span>
+   <svg class="balloon-shape" viewBox="0 0 300 170" focusable="false">
+      {kind === 'speech' && (
+         <>
+            <path class="shadow" d={SPEECH_PATH} transform="translate(7 7)" />
+            <path class="outline" d={SPEECH_PATH} />
+         </>
+      )}
+      {kind === 'signal' && (
+         <>
+            <polygon class="shadow" points={SHOUT_POINTS} transform="translate(7 7)" />
+            <polygon class="outline" points={SHOUT_POINTS} />
+         </>
+      )}
+      {kind === 'thought' && (
+         <>
+            <g class="shadow" transform="translate(7 7)"><ellipse cx="150" cy="62" rx="118" ry="42" /><ellipse cx="70" cy="40" rx="34" ry="34" /><ellipse cx="120" cy="28" rx="36" ry="26" /><ellipse cx="180" cy="28" rx="38" ry="26" /><ellipse cx="232" cy="44" rx="34" ry="30" /><ellipse cx="246" cy="76" rx="30" ry="28" /><ellipse cx="200" cy="96" rx="36" ry="26" /><ellipse cx="140" cy="100" rx="38" ry="24" /><ellipse cx="84" cy="94" rx="34" ry="26" /><ellipse cx="48" cy="66" rx="30" ry="30" /><circle cx="238" cy="134" r="12" /><circle cx="264" cy="158" r="7" /></g>
+            <g class="edge"><ellipse cx="150" cy="62" rx="118" ry="42" /><ellipse cx="70" cy="40" rx="34" ry="34" /><ellipse cx="120" cy="28" rx="36" ry="26" /><ellipse cx="180" cy="28" rx="38" ry="26" /><ellipse cx="232" cy="44" rx="34" ry="30" /><ellipse cx="246" cy="76" rx="30" ry="28" /><ellipse cx="200" cy="96" rx="36" ry="26" /><ellipse cx="140" cy="100" rx="38" ry="24" /><ellipse cx="84" cy="94" rx="34" ry="26" /><ellipse cx="48" cy="66" rx="30" ry="30" /></g>
+            <g class="fill"><ellipse cx="150" cy="62" rx="118" ry="42" /><ellipse cx="70" cy="40" rx="34" ry="34" /><ellipse cx="120" cy="28" rx="36" ry="26" /><ellipse cx="180" cy="28" rx="38" ry="26" /><ellipse cx="232" cy="44" rx="34" ry="30" /><ellipse cx="246" cy="76" rx="30" ry="28" /><ellipse cx="200" cy="96" rx="36" ry="26" /><ellipse cx="140" cy="100" rx="38" ry="24" /><ellipse cx="84" cy="94" rx="34" ry="26" /><ellipse cx="48" cy="66" rx="30" ry="30" /></g>
+            <circle class="outline" cx="238" cy="134" r="12" />
+            <circle class="outline" cx="264" cy="158" r="7" />
+         </>
+      )}
+   </svg>
+   <span class="balloon-text"><span><slot /></span></span>
+</div>
+
+<style>
+   .balloon { position: relative; width: clamp(15rem, 24vw, 19rem); aspect-ratio: 300 / 170; transform: rotate(-3deg); }
+   .balloon--mirror { transform: rotate(3deg); }
+   /* A patch of halftone dots behind the balloon, like the shading in a printed comic. */
+   .balloon-dots { position: absolute; z-index: 0; top: -12%; right: -6%; width: 52%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, var(--red) 1.5px, transparent 1.8px) 0 0 / 8px 8px; }
+   .balloon--mirror .balloon-dots { right: auto; left: -6%; }
+   .balloon-shape { position: absolute; z-index: 1; inset: 0; overflow: visible; width: 100%; height: 100%; }
+   .balloon--mirror .balloon-shape { transform: scaleX(-1); }
+   .shadow { fill: var(--red); stroke: var(--red); stroke-width: 5; stroke-linejoin: round; }
+   .outline { fill: var(--paper-light); stroke: var(--ink); stroke-width: 5; stroke-linejoin: round; }
+   .edge { fill: var(--ink); stroke: var(--ink); stroke-width: 10; }
+   .fill { fill: var(--paper-light); }
+   /* The words sit over the body of the balloon, above the tail. */
+   .balloon-text { position: absolute; z-index: 2; inset: 6% 12% 31% 12%; display: grid; place-items: center; text-align: center; }
+   /* The words carry the balloon's own color as a background, so their contrast can be measured. */
+   .balloon-text > span { background: var(--paper-light); color: var(--ink); font: 700 1.3rem/1.1 var(--display); letter-spacing: 0.01em; text-transform: uppercase; }
+</style>

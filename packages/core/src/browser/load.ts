@@ -28,9 +28,36 @@ function ignoreError(): void {
 }
 
 /**
- * When a page mounts an SPA framework or Storybook asynchronously into an empty root
- * element, wait for child nodes to attach so scans and screen readers do not read an
- * empty shell.
+ * Waits for the animations a page is playing to finish, up to the limit. A page that
+ * fades in on load is otherwise scanned or photographed part-way through, where text is
+ * still the wrong color. An animation that repeats forever, is paused, or follows
+ * scrolling never finishes, so it is not waited for.
+ */
+async function waitForEntryAnimations(page: Page, limitMs: number): Promise<void> {
+   await page.evaluate(async (limit) => {
+      const playing = document.getAnimations().filter((animation) => {
+         const endTime = animation.effect?.getComputedTiming().endTime;
+         return (
+            animation.playState === 'running' &&
+            animation.timeline instanceof DocumentTimeline &&
+            typeof endTime === 'number' &&
+            Number.isFinite(endTime)
+         );
+      });
+      await Promise.race([
+         Promise.allSettled(playing.map((animation) => animation.finished)),
+         new Promise((done) => {
+            setTimeout(done, limit);
+         }),
+      ]);
+   }, limitMs);
+}
+
+/**
+ * Waits for a loaded page to reach the state a person would see. When a page mounts an
+ * SPA framework or Storybook asynchronously into an empty root element, waits for child
+ * nodes to attach so scans and screen readers do not read an empty shell. Then waits for
+ * entry animations to finish.
  */
 export async function waitForDocumentSettled(
    page: Page,
@@ -57,11 +84,11 @@ export async function waitForDocumentSettled(
          return '';
       });
 
+      const timeout = Math.min(
+         options?.timeoutMs ?? SETTLE_TIMEOUT_MS,
+         SETTLE_TIMEOUT_MS,
+      );
       if (emptyContainerSelector) {
-         const timeout = Math.min(
-            options?.timeoutMs ?? SETTLE_TIMEOUT_MS,
-            SETTLE_TIMEOUT_MS,
-         );
          await page
             .waitForSelector(`${emptyContainerSelector}:not(:empty)`, {
                state: 'attached',
@@ -69,6 +96,7 @@ export async function waitForDocumentSettled(
             })
             .catch(ignoreError);
       }
+      await waitForEntryAnimations(page, timeout);
    } catch {
       // Ignored if evaluate fails (e.g. cross-origin framing or navigation error)
    }

@@ -1,0 +1,3212 @@
+{
+   "schemaVersion": 1,
+   "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+   "environment": {
+      "id": "virtual-chromium",
+      "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+      "shortLabel": "Virtual SR",
+      "platformGroup": "virtual",
+      "device": "Headless Chromium (Playwright)",
+      "os": "macOS",
+      "osVersion": "26.3.1 (arm64)",
+      "browser": "Google Chrome (Headless)",
+      "browserVersion": "157.0.8103.79",
+      "browserType": "browser",
+      "usageOrder": 1,
+      "screenReader": "a11ied / Guidepup Virtual",
+      "screenReaderVersion": "0.32.1"
+   },
+   "status": "tested",
+   "runs": [
+      {
+         "testSlug": "aria-labelledby-single-id",
+         "runAt": "2026-11-20T19:05:45.804Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "button, Billing address",
+         "notes": "Matched expected announcement: \"button, Billing address\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "heading, Billing address, level 2",
+               "role": "heading",
+               "name": "Billing address"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "button, Billing address",
+               "role": "button",
+               "name": "Billing address"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "Edit",
+               "role": "text",
+               "name": "Edit"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "end of button, Billing address",
+               "role": "button",
+               "name": "Billing address"
+            },
+            {
+               "step": 5,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-single-id-1",
+               "priority": "MUST",
+               "statement": "Convey \"Billing address\" across at least 2 elements",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "heading, Billing address, level 2"
+            },
+            {
+               "id": "aria-labelledby-single-id-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Edit\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-single-id-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Billing address"
+            },
+            {
+               "id": "aria-labelledby-single-id-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-multiple-ids",
+         "runAt": "2026-11-20T19:05:45.858Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "button, Delete quarterly invoice",
+         "notes": "Matched expected announcement: \"button, Delete quarterly invoice\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "Delete",
+               "role": "text",
+               "name": "Delete"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "quarterly invoice",
+               "role": "text",
+               "name": "quarterly invoice"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "end of paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 5,
+               "command": "virtual.walk",
+               "phrase": "button, Delete quarterly invoice",
+               "role": "button",
+               "name": "Delete quarterly invoice"
+            },
+            {
+               "step": 6,
+               "command": "virtual.walk",
+               "phrase": "X",
+               "role": "text",
+               "name": "X"
+            },
+            {
+               "step": 7,
+               "command": "virtual.walk",
+               "phrase": "end of button, Delete quarterly invoice",
+               "role": "button",
+               "name": "Delete quarterly invoice"
+            },
+            {
+               "step": 8,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-multiple-ids-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Delete quarterly invoice\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Delete quarterly invoice"
+            },
+            {
+               "id": "aria-labelledby-multiple-ids-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"X, button\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-multiple-ids-3",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"button X\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-multiple-ids-4",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Delete quarterly invoice"
+            },
+            {
+               "id": "aria-labelledby-multiple-ids-5",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-reverse-dom-order",
+         "runAt": "2026-11-20T19:05:45.913Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "button, Account settings",
+         "notes": "Matched expected announcement: \"button, Account settings\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "settings",
+               "role": "text",
+               "name": "settings"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "Account",
+               "role": "text",
+               "name": "Account"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "end of paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 5,
+               "command": "virtual.walk",
+               "phrase": "button, Account settings",
+               "role": "button",
+               "name": "Account settings"
+            },
+            {
+               "step": 6,
+               "command": "virtual.walk",
+               "phrase": "Open",
+               "role": "text",
+               "name": "Open"
+            },
+            {
+               "step": 7,
+               "command": "virtual.walk",
+               "phrase": "end of button, Account settings",
+               "role": "button",
+               "name": "Account settings"
+            },
+            {
+               "step": 8,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-reverse-dom-order-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Account settings\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Account settings"
+            },
+            {
+               "id": "aria-labelledby-reverse-dom-order-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"settings Account, button\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-reverse-dom-order-3",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Open\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-reverse-dom-order-4",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Account settings"
+            },
+            {
+               "id": "aria-labelledby-reverse-dom-order-5",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-self-reference",
+         "runAt": "2026-11-20T19:05:45.962Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "button, Remove Monthly plan",
+         "notes": "Matched expected announcement: \"button, Remove Monthly plan\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "Monthly plan",
+               "role": "text",
+               "name": "Monthly plan"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "end of paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "button, Remove Monthly plan",
+               "role": "button",
+               "name": "Remove Monthly plan"
+            },
+            {
+               "step": 5,
+               "command": "virtual.walk",
+               "phrase": "Remove",
+               "role": "text",
+               "name": "Remove"
+            },
+            {
+               "step": 6,
+               "command": "virtual.walk",
+               "phrase": "end of button, Remove Monthly plan",
+               "role": "button",
+               "name": "Remove Monthly plan"
+            },
+            {
+               "step": 7,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 2
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-self-reference-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Remove Monthly plan\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Remove Monthly plan"
+            },
+            {
+               "id": "aria-labelledby-self-reference-2",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Remove Monthly plan"
+            },
+            {
+               "id": "aria-labelledby-self-reference-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-display-none-target",
+         "runAt": "2026-11-20T19:05:46.008Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "button, Export CSV report",
+         "notes": "Matched expected announcement: \"button, Export CSV report\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "button, Export CSV report",
+               "role": "button",
+               "name": "Export CSV report"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "Download",
+               "role": "text",
+               "name": "Download"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "end of button, Export CSV report",
+               "role": "button",
+               "name": "Export CSV report"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-display-none-target-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Export CSV report\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Export CSV report"
+            },
+            {
+               "id": "aria-labelledby-display-none-target-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Download\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-display-none-target-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Export CSV report"
+            },
+            {
+               "id": "aria-labelledby-display-none-target-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-aria-hidden-target",
+         "runAt": "2026-11-20T19:05:46.064Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "button, Archive message",
+         "notes": "Matched expected announcement: \"button, Archive message\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "button, Archive message",
+               "role": "button",
+               "name": "Archive message"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "Move",
+               "role": "text",
+               "name": "Move"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "end of button, Archive message",
+               "role": "button",
+               "name": "Archive message"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-aria-hidden-target-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Archive message\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Archive message"
+            },
+            {
+               "id": "aria-labelledby-aria-hidden-target-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Move\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-aria-hidden-target-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Archive message"
+            },
+            {
+               "id": "aria-labelledby-aria-hidden-target-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-precedence-over-aria-label",
+         "runAt": "2026-11-20T19:05:46.112Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "textbox, Primary email",
+         "notes": "Matched expected announcement: \"textbox, Primary email\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "Primary email",
+               "role": "text",
+               "name": "Primary email"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "end of paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "Backup email",
+               "role": "text",
+               "name": "Backup email"
+            },
+            {
+               "step": 5,
+               "command": "virtual.walk",
+               "phrase": "textbox, Primary email",
+               "role": "textbox",
+               "name": "Primary email"
+            },
+            {
+               "step": 6,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-precedence-over-aria-label-1",
+               "priority": "MUST",
+               "statement": "Convey \"Primary email\" across at least 2 elements",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Primary email"
+            },
+            {
+               "id": "aria-labelledby-precedence-over-aria-label-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Secondary email\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-precedence-over-aria-label-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"text\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "textbox, Primary email"
+            },
+            {
+               "id": "aria-labelledby-precedence-over-aria-label-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-broken-id-fallback",
+         "runAt": "2026-11-20T19:05:46.148Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "button, Save draft",
+         "notes": "Matched expected announcement: \"button, Save draft\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "button, Save draft",
+               "role": "button",
+               "name": "Save draft"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 2
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-broken-id-fallback-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Save draft\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Save draft"
+            },
+            {
+               "id": "aria-labelledby-broken-id-fallback-2",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Save draft"
+            },
+            {
+               "id": "aria-labelledby-broken-id-fallback-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-chained-no-recursion",
+         "runAt": "2026-11-20T19:05:46.197Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "button, Parent text",
+         "notes": "Matched expected announcement: \"button, Parent text\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "Grandparent label",
+               "role": "text",
+               "name": "Grandparent label"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "Grandparent label",
+               "role": "grandparent label",
+               "name": "Grandparent label"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "Parent text",
+               "role": "text",
+               "name": "Parent text"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "end, Grandparent label",
+               "role": "end",
+               "name": "Grandparent label"
+            },
+            {
+               "step": 5,
+               "command": "virtual.walk",
+               "phrase": "button, Parent text",
+               "role": "button",
+               "name": "Parent text"
+            },
+            {
+               "step": 6,
+               "command": "virtual.walk",
+               "phrase": "Original button",
+               "role": "text",
+               "name": "Original button"
+            },
+            {
+               "step": 7,
+               "command": "virtual.walk",
+               "phrase": "end of button, Parent text",
+               "role": "button",
+               "name": "Parent text"
+            },
+            {
+               "step": 8,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-chained-no-recursion-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Parent text\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Parent text"
+            },
+            {
+               "id": "aria-labelledby-chained-no-recursion-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Grandparent label\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-chained-no-recursion-3",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Original button\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-chained-no-recursion-4",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Parent text"
+            },
+            {
+               "id": "aria-labelledby-chained-no-recursion-5",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-prohibited-generic-div",
+         "runAt": "2026-11-20T19:05:46.239Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "fail",
+         "keyAnnouncement": "Visible paragraph text",
+         "notes": "\"Special announcement\" spoken 2x (expected <= 1).",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "Special announcement",
+               "role": "text",
+               "name": "Special announcement"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "Special announcement",
+               "role": "special announcement",
+               "name": "Special announcement"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "Visible paragraph text",
+               "role": "text",
+               "name": "Visible paragraph text"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "end, Special announcement",
+               "role": "end",
+               "name": "Special announcement"
+            },
+            {
+               "step": 5,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 1,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-prohibited-generic-div-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Visible paragraph text\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Visible paragraph text"
+            },
+            {
+               "id": "aria-labelledby-prohibited-generic-div-2",
+               "priority": "MUST",
+               "statement": "Do not leak prohibited text \"Special announcement\" beyond 1 occurrence(s)",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "fail",
+               "notes": "\"Special announcement\" spoken 2x (expected <= 1)."
+            },
+            {
+               "id": "aria-labelledby-prohibited-generic-div-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-label-button-override",
+         "runAt": "2026-11-20T19:05:46.280Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "button, Close settings dialog",
+         "notes": "Matched expected announcement: \"button, Close settings dialog\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "button, Close settings dialog",
+               "role": "button",
+               "name": "Close settings dialog"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "X",
+               "role": "text",
+               "name": "X"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "end of button, Close settings dialog",
+               "role": "button",
+               "name": "Close settings dialog"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-label-button-override-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Close settings dialog\" on the target",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Close settings dialog"
+            },
+            {
+               "id": "aria-label-button-override-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"X\" on the target",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-label-button-override-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Close settings dialog"
+            },
+            {
+               "id": "aria-label-button-override-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-label-landmark-nav",
+         "runAt": "2026-11-20T19:05:46.321Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "navigation, Breadcrumb trail",
+         "notes": "Matched expected announcement: \"navigation, Breadcrumb trail\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "navigation, Breadcrumb trail",
+               "role": "navigation",
+               "name": "Breadcrumb trail"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "link, Home",
+               "role": "link",
+               "name": "Home"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "end of navigation, Breadcrumb trail",
+               "role": "navigation",
+               "name": "Breadcrumb trail"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 2
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-label-landmark-nav-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Breadcrumb trail\" on the target",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "navigation, Breadcrumb trail"
+            },
+            {
+               "id": "aria-label-landmark-nav-2",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"navigation\"",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "navigation, Breadcrumb trail"
+            },
+            {
+               "id": "aria-label-landmark-nav-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-label-prohibited-span",
+         "runAt": "2026-11-20T19:05:46.367Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "fail",
+         "keyAnnouncement": "Visible text",
+         "notes": "Forbidden text \"Secret label\" was exposed on the target.",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "Secret label",
+               "role": "secret label",
+               "name": "Secret label"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "Visible text",
+               "role": "text",
+               "name": "Visible text"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "end, Secret label",
+               "role": "end",
+               "name": "Secret label"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 1,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-label-prohibited-span-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Visible text\" on the target",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Visible text"
+            },
+            {
+               "id": "aria-label-prohibited-span-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Secret label\" on the target",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "fail",
+               "evidence": "Secret label",
+               "notes": "Forbidden text \"Secret label\" was exposed on the target."
+            },
+            {
+               "id": "aria-label-prohibited-span-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-describedby-input-hint",
+         "runAt": "2026-11-20T19:05:46.411Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "textbox, API token, Starts with sk_live",
+         "notes": "Matched expected announcement: \"textbox, API token, Starts with sk_live\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "API token",
+               "role": "text",
+               "name": "API token"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "textbox, API token, Starts with sk_live",
+               "role": "textbox",
+               "name": "API token"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "Starts with sk_live",
+               "role": "text",
+               "name": "Starts with sk_live"
+            },
+            {
+               "step": 5,
+               "command": "virtual.walk",
+               "phrase": "end of paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 6,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-describedby-input-hint-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"API token\" on the target",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "textbox, API token, Starts with sk_live"
+            },
+            {
+               "id": "aria-describedby-input-hint-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"Starts with sk_live\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "textbox, API token, Starts with sk_live"
+            },
+            {
+               "id": "aria-describedby-input-hint-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"text\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "textbox, API token, Starts with sk_live"
+            },
+            {
+               "id": "aria-describedby-input-hint-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-describedby-multiple-ids",
+         "runAt": "2026-11-20T19:05:46.461Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "button, Delete project, Permanent action. Cannot be undone.",
+         "notes": "Matched expected announcement: \"button, Delete project, Permanent action. Cannot be undone.\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "button, Delete project, Permanent action. Cannot be undone.",
+               "role": "button",
+               "name": "Delete project"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "Permanent action.",
+               "role": "text",
+               "name": "Permanent action."
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "end of paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 5,
+               "command": "virtual.walk",
+               "phrase": "paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 6,
+               "command": "virtual.walk",
+               "phrase": "Cannot be undone.",
+               "role": "text",
+               "name": "Cannot be undone."
+            },
+            {
+               "step": 7,
+               "command": "virtual.walk",
+               "phrase": "end of paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 8,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-describedby-multiple-ids-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Delete project\" on the target",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Delete project, Permanent action. Cannot be undone."
+            },
+            {
+               "id": "aria-describedby-multiple-ids-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"Permanent action\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Delete project, Permanent action. Cannot be undone."
+            },
+            {
+               "id": "aria-describedby-multiple-ids-3",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"Cannot be undone\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Delete project, Permanent action. Cannot be undone."
+            },
+            {
+               "id": "aria-describedby-multiple-ids-4",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Delete project, Permanent action. Cannot be undone."
+            },
+            {
+               "id": "aria-describedby-multiple-ids-5",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-describedby-hidden-target",
+         "runAt": "2026-11-20T19:05:46.498Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "button, Submit form, Sends application immediately",
+         "notes": "Matched expected announcement: \"button, Submit form, Sends application immediately\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "button, Submit form, Sends application immediately",
+               "role": "button",
+               "name": "Submit form"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-describedby-hidden-target-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Submit form\" on the target",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Submit form, Sends application immediately"
+            },
+            {
+               "id": "aria-describedby-hidden-target-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"Sends application immediately\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Submit form, Sends application immediately"
+            },
+            {
+               "id": "aria-describedby-hidden-target-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Submit form, Sends application immediately"
+            },
+            {
+               "id": "aria-describedby-hidden-target-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-hidden-true-text",
+         "runAt": "2026-11-20T19:05:46.540Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "Visible sentence",
+         "notes": "Matched expected announcement: \"Visible sentence\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "Visible sentence",
+               "role": "text",
+               "name": "Visible sentence"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "end of paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-hidden-true-text-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Visible sentence\" on the target",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Visible sentence"
+            },
+            {
+               "id": "aria-hidden-true-text-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Hidden decorative text\" on the target",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-hidden-true-text-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-hidden-false-inside-true",
+         "runAt": "2026-11-20T19:05:46.580Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "After hidden block",
+         "notes": "Matched expected announcement: \"After hidden block\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "After hidden block",
+               "role": "text",
+               "name": "After hidden block"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "end of paragraph",
+               "role": "paragraph"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-hidden-false-inside-true-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"After hidden block\" on the target",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "After hidden block"
+            },
+            {
+               "id": "aria-hidden-false-inside-true-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Hidden parent text\" on the target",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-hidden-false-inside-true-3",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Nested aria-hidden false\" on the target",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-hidden-false-inside-true-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-expanded-false-initial",
+         "runAt": "2026-11-20T19:05:46.618Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "button, Account menu, not expanded",
+         "notes": "Matched expected announcement: \"button, Account menu, not expanded\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "button, Account menu, not expanded",
+               "role": "button",
+               "name": "Account menu"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-expanded-false-initial-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Account menu\" on the target",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Account menu, not expanded"
+            },
+            {
+               "id": "aria-expanded-false-initial-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"collapsed\"",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Account menu, not expanded"
+            },
+            {
+               "id": "aria-expanded-false-initial-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Account menu, not expanded"
+            },
+            {
+               "id": "aria-expanded-false-initial-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-expanded-toggle-dynamic",
+         "runAt": "2026-11-20T19:05:47.043Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "button, Details, 1 control, expanded",
+         "notes": "Pre- and post-activation behavior matched spec: \"button, Details, 1 control, expanded\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "button, Details, 1 control, not expanded",
+               "role": "button",
+               "name": "Details"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            },
+            {
+               "step": 3,
+               "command": "virtual.activate",
+               "phrase": "button, Details, 1 control, expanded",
+               "itemText": "Details"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-expanded-toggle-dynamic-1",
+               "priority": "MUST",
+               "statement": "Convey initial control text \"Details\" before activation",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Details, 1 control, not expanded"
+            },
+            {
+               "id": "aria-expanded-toggle-dynamic-2",
+               "priority": "MUST",
+               "statement": "Convey dynamic announcement \"expanded\" after activation",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Details, 1 control, expanded"
+            },
+            {
+               "id": "aria-expanded-toggle-dynamic-3",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"expanded\"",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Details, 1 control, expanded"
+            },
+            {
+               "id": "aria-expanded-toggle-dynamic-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-disabled-button",
+         "runAt": "2026-11-20T19:05:47.091Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "button, Publish changes, disabled",
+         "notes": "Matched expected announcement: \"button, Publish changes, disabled\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "button, Publish changes, disabled",
+               "role": "button",
+               "name": "Publish changes"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-disabled-button-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Publish changes\" on the target",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Publish changes, disabled"
+            },
+            {
+               "id": "aria-disabled-button-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"disabled\"",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Publish changes, disabled"
+            },
+            {
+               "id": "aria-disabled-button-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Publish changes, disabled"
+            },
+            {
+               "id": "aria-disabled-button-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-disabled-link",
+         "runAt": "2026-11-20T19:05:47.126Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "link, Download archive, disabled",
+         "notes": "Matched expected announcement: \"link, Download archive, disabled\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "link, Download archive, disabled",
+               "role": "link",
+               "name": "Download archive"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-disabled-link-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Download archive\" on the target",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "link, Download archive, disabled"
+            },
+            {
+               "id": "aria-disabled-link-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"disabled\"",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "link, Download archive, disabled"
+            },
+            {
+               "id": "aria-disabled-link-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"link\"",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "link, Download archive, disabled"
+            },
+            {
+               "id": "aria-disabled-link-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-current-page",
+         "runAt": "2026-11-20T19:05:47.171Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "link, Pricing, current page",
+         "notes": "Matched expected announcement: \"link, Pricing, current page\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "navigation, Main",
+               "role": "navigation",
+               "name": "Main"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "link, Home",
+               "role": "link",
+               "name": "Home"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "link, Pricing, current page",
+               "role": "link",
+               "name": "Pricing"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "end of navigation, Main",
+               "role": "navigation",
+               "name": "Main"
+            },
+            {
+               "step": 5,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-current-page-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Pricing\" on the target",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "link, Pricing, current page"
+            },
+            {
+               "id": "aria-current-page-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"current page\"",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "link, Pricing, current page"
+            },
+            {
+               "id": "aria-current-page-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"link\"",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "link, Home"
+            },
+            {
+               "id": "aria-current-page-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-current-step",
+         "runAt": "2026-11-20T19:05:47.235Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "Shipping",
+         "notes": "Matched expected announcement: \"Shipping\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "list",
+               "role": "list"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "listitem, level 1, position 1, set size 3",
+               "role": "listitem"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "Account",
+               "role": "text",
+               "name": "Account"
+            },
+            {
+               "step": 4,
+               "command": "virtual.walk",
+               "phrase": "end of listitem, level 1, position 1, set size 3",
+               "role": "listitem"
+            },
+            {
+               "step": 5,
+               "command": "virtual.walk",
+               "phrase": "listitem, level 1, current step, position 2, set size 3",
+               "role": "listitem"
+            },
+            {
+               "step": 6,
+               "command": "virtual.walk",
+               "phrase": "Shipping",
+               "role": "text",
+               "name": "Shipping"
+            },
+            {
+               "step": 7,
+               "command": "virtual.walk",
+               "phrase": "end of listitem, level 1, current step, position 2, set size 3",
+               "role": "listitem"
+            },
+            {
+               "step": 8,
+               "command": "virtual.walk",
+               "phrase": "listitem, level 1, position 3, set size 3",
+               "role": "listitem"
+            },
+            {
+               "step": 9,
+               "command": "virtual.walk",
+               "phrase": "Payment",
+               "role": "text",
+               "name": "Payment"
+            },
+            {
+               "step": 10,
+               "command": "virtual.walk",
+               "phrase": "end of listitem, level 1, position 3, set size 3",
+               "role": "listitem"
+            },
+            {
+               "step": 11,
+               "command": "virtual.walk",
+               "phrase": "end of list",
+               "role": "list"
+            },
+            {
+               "step": 12,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-current-step-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Shipping\" on the target",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Shipping"
+            },
+            {
+               "id": "aria-current-step-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"current step\"",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "listitem, level 1, current step, position 2, set size 3"
+            },
+            {
+               "id": "aria-current-step-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-live-polite-update",
+         "runAt": "2026-11-20T19:05:47.610Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "polite: Preferences saved",
+         "notes": "Pre- and post-activation behavior matched spec: \"polite: Preferences saved\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "button, Save settings",
+               "role": "button",
+               "name": "Save settings"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            },
+            {
+               "step": 3,
+               "command": "virtual.activate",
+               "phrase": "polite: Preferences saved",
+               "itemText": "Save settings"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-live-polite-update-1",
+               "priority": "MUST",
+               "statement": "Convey initial control text \"Save settings\" before activation",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Save settings"
+            },
+            {
+               "id": "aria-live-polite-update-2",
+               "priority": "MUST",
+               "statement": "Convey dynamic announcement \"Preferences saved\" after activation",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "polite: Preferences saved"
+            },
+            {
+               "id": "aria-live-polite-update-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-live-assertive-update",
+         "runAt": "2026-11-20T19:05:47.996Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "assertive: Session expired",
+         "notes": "Pre- and post-activation behavior matched spec: \"assertive: Session expired\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "button, Validate token",
+               "role": "button",
+               "name": "Validate token"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            },
+            {
+               "step": 3,
+               "command": "virtual.activate",
+               "phrase": "assertive: Session expired",
+               "itemText": "Validate token"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-live-assertive-update-1",
+               "priority": "MUST",
+               "statement": "Convey initial control text \"Validate token\" before activation",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Validate token"
+            },
+            {
+               "id": "aria-live-assertive-update-2",
+               "priority": "MUST",
+               "statement": "Convey dynamic announcement \"Session expired\" after activation",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "assertive: Session expired"
+            },
+            {
+               "id": "aria-live-assertive-update-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "role-alert-dynamic",
+         "runAt": "2026-11-20T21:26:09.927Z",
+         "driver": "a11ied/screenReader (sr: virtual, engine: browser)",
+         "outcome": "pass",
+         "keyAnnouncement": "assertive: Hello",
+         "notes": "Pre- and post-activation behavior matched spec: \"assertive: Hello\".",
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "alert-pre-button",
+               "priority": "MUST",
+               "statement": "Convey initial control label \"Trigger alert\" before activation",
+               "featureRef": "button",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "button, Trigger alert"
+            },
+            {
+               "id": "alert-post-text",
+               "priority": "MUST",
+               "statement": "Convey alert text \"Hello\" after activating the trigger button",
+               "featureRef": "alert",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "assertive: Hello"
+            },
+            {
+               "id": "alert-post-role",
+               "priority": "MAY",
+               "statement": "Convey role \"alert\" when the alert region updates",
+               "featureRef": "alert",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "assertive: Hello"
+            },
+            {
+               "id": "alert-no-side-effects",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "alert",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ],
+         "transcript": [
+            {
+               "step": 1,
+               "command": "virtual.walk",
+               "phrase": "button, Trigger alert",
+               "role": "button",
+               "name": "Trigger alert"
+            },
+            {
+               "step": 2,
+               "command": "virtual.walk",
+               "phrase": "alert",
+               "role": "alert"
+            },
+            {
+               "step": 3,
+               "command": "virtual.walk",
+               "phrase": "end of document",
+               "role": "document"
+            },
+            {
+               "step": 4,
+               "command": "virtual.activate",
+               "phrase": "assertive: Hello",
+               "itemText": "Trigger alert"
+            }
+         ],
+         "environmentKey": "headless-chromium-(playwright) | macos | 26.3.1-(arm64) | google-chrome-(headless) | 157.0.8103.79 | a11ied-/-guidepup-virtual | 0.32.1",
+         "environment": {
+            "id": "virtual-chromium",
+            "label": "Virtual SR 0.32.1 · Headless Google Chrome 157.0.8103.79",
+            "shortLabel": "Virtual SR",
+            "platformGroup": "virtual",
+            "device": "Headless Chromium (Playwright)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Google Chrome (Headless)",
+            "browserVersion": "157.0.8103.79",
+            "browserType": "browser",
+            "usageOrder": 1,
+            "screenReader": "a11ied / Guidepup Virtual",
+            "screenReaderVersion": "0.32.1"
+         }
+      }
+   ]
+}

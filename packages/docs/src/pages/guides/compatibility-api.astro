@@ -1,0 +1,217 @@
+---
+import DocShell from '../../layouts/doc-shell.astro';
+import { docsLinks } from '../../lib/nav';
+import checkOutput from '../../samples/compat-check-output.txt?raw';
+import checkExample from '../../samples/compat-check.ts.txt?raw';
+import featureOutput from '../../samples/compat-feature-output.txt?raw';
+import featureExample from '../../samples/compat-feature.ts.txt?raw';
+import queryOutput from '../../samples/compat-query-output.txt?raw';
+import queryExample from '../../samples/compat-query.ts.txt?raw';
+import targetsOutput from '../../samples/compat-targets-output.txt?raw';
+import targetsExample from '../../samples/compat-targets.ts.txt?raw';
+
+const toc = [
+   { id: 'install', label: 'Install' },
+   { id: 'check', label: 'Check the features you use' },
+   { id: 'usages', label: 'Ways to name a feature' },
+   { id: 'browsers', label: 'Choose the browsers' },
+   { id: 'diagnostics', label: 'Read the diagnostics' },
+   { id: 'one', label: 'Check one feature' },
+   { id: 'query', label: 'Query the data' },
+];
+---
+
+<DocShell
+   title="Check screen reader support in code"
+   summary={`<p><code>@a11ied/compat</code> answers the question the <a href="/compatibility">compatibility tables</a> answer, in code. Give it your Browserslist query and the ARIA and HTML features you use. It tells you which screen readers in those browsers fail each feature. Use it in a lint rule, an editor extension, or a build step.</p>`}
+   links={docsLinks}
+   toc={toc}
+>
+   <section>
+      <h2 id="install">Install</h2>
+      <pre><code>npm install --save-dev @a11ied/compat</code></pre>
+      <p>
+         The results ship inside the package, so a check reads no network and gives the same
+         answer every time. They are the same results the
+         <a href="/compatibility">screen reader compatibility</a> tables show:
+         W3C ARIA-AT reports, and test cases a11ied ran.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="check">Check the features you use</h2>
+      <p>
+         <code>checkCompatibility</code> takes a Browserslist query and a list of features.
+         It returns one diagnostic for each way a feature fails in the browsers you named.
+      </p>
+      <pre data-label="check-features.ts"><code>{checkExample.trimEnd()}</code></pre>
+      <pre data-label="OUTPUT"><code>{checkOutput.trimEnd()}</code></pre>
+      <p>
+         Each message names the first screen reader, browser, and operating system that
+         fails, and counts the rest. The report has four parts.
+      </p>
+      <dl class="defs">
+         <dt><code>diagnostics</code></dt>
+         <dd>The problems found. This is the list a lint rule reports.</dd>
+         <dt><code>results</code></dt>
+         <dd>One entry per feature, with every matched test result. See <a href="#one">check one feature</a>.</dd>
+         <dt><code>targets</code></dt>
+         <dd>The browsers the query resolved to.</dd>
+         <dt><code>summary</code></dt>
+         <dd>Counts of errors, warnings, and notes. <code>hasErrors</code> is true when there is at least one error, and <code>hasIssues</code> when there is an error or a warning.</dd>
+      </dl>
+   </section>
+
+   <section>
+      <h2 id="usages">Ways to name a feature</h2>
+      <p>A feature is a string, or an object when you want the diagnostic to carry a location.</p>
+      <dl class="defs">
+         <dt><code>'aria-pressed'</code></dt>
+         <dd>An ARIA attribute.</dd>
+         <dt><code>'role="alert"'</code>, <code>'aria:alert'</code></dt>
+         <dd>An ARIA role. Both forms mean the same feature.</dd>
+         <dt><code>'@checked'</code>, <code>'html:@checked'</code></dt>
+         <dd>An HTML attribute.</dd>
+         <dt><code>&#123; feature, element, location &#125;</code></dt>
+         <dd><code>feature</code> is one of the strings above. <code>element</code> is the markup, and <code>location</code> is a <code>file</code>, <code>line</code>, and <code>column</code>. Both are copied onto the diagnostic unchanged.</dd>
+      </dl>
+      <p>
+         A name the data does not have gets the status <code>unknown-feature</code>. Pass
+         <code>reportUnknownFeatures: true</code> to get a diagnostic for it.
+         <a href="#query"><code>listSupportedFeatures()</code></a> returns the 60 features
+         the data covers.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="browsers">Choose the browsers</h2>
+      <dl class="defs">
+         <dt><code>browserslist</code></dt>
+         <dd>A query such as <code>'defaults'</code> or <code>'last 2 versions'</code>, or a list of queries.</dd>
+         <dt>No <code>browserslist</code></dt>
+         <dd>The check uses your project's Browserslist configuration, and <code>defaults</code> when it finds none.</dd>
+         <dt><code>path</code>, <code>env</code>, <code>config</code></dt>
+         <dd>Where Browserslist looks for that configuration, and which environment in it to use.</dd>
+      </dl>
+      <p>
+         Browserslist names browsers, not screen readers, so each browser stands for the
+         screen readers people use with it.
+      </p>
+      <pre data-label="targets.ts"><code>{targetsExample.trimEnd()}</code></pre>
+      <pre data-label="OUTPUT"><code>{targetsOutput.trimEnd()}</code></pre>
+      <div class="table-wrap">
+         <table>
+            <thead>
+               <tr><th scope="col">Browserslist name</th><th scope="col">Browser</th><th scope="col">Screen readers checked</th></tr>
+            </thead>
+            <tbody>
+               <tr><th scope="row"><code>chrome</code></th><td>Chrome on a desktop</td><td>JAWS, NVDA, VoiceOver</td></tr>
+               <tr><th scope="row"><code>firefox</code></th><td>Firefox on a desktop</td><td>NVDA, VoiceOver, JAWS</td></tr>
+               <tr><th scope="row"><code>safari</code></th><td>Safari on macOS</td><td>VoiceOver</td></tr>
+               <tr><th scope="row"><code>edge</code></th><td>Edge on Windows</td><td>JAWS, NVDA</td></tr>
+               <tr><th scope="row"><code>and_chr</code>, <code>and_ff</code></th><td>Chrome and Firefox on Android</td><td>TalkBack</td></tr>
+               <tr><th scope="row"><code>android</code></th><td>Android WebView</td><td>TalkBack</td></tr>
+               <tr><th scope="row"><code>ios_saf</code></th><td>Safari on iOS</td><td>VoiceOver</td></tr>
+            </tbody>
+         </table>
+      </div>
+      <p>These options narrow or widen what is checked.</p>
+      <dl class="defs">
+         <dt><code>screenReaders</code></dt>
+         <dd>Check only these, such as <code>[ 'NVDA', 'JAWS' ]</code>.</dd>
+         <dt><code>versionMatching</code></dt>
+         <dd><code>'nearest'</code>, the default, uses the closest browser version that was tested. <code>'exact'</code> uses a result only when the tested version matches the target.</dd>
+         <dt><code>includeWebViews</code></dt>
+         <dd>Count results recorded in a WebView. On by default.</dd>
+         <dt><code>includeVirtual</code></dt>
+         <dd>Count results from the <a href="/screen-readers#virtual">simulated screen reader</a>. Off by default, because it is not a screen reader anyone uses.</dd>
+      </dl>
+   </section>
+
+   <section>
+      <h2 id="diagnostics">Read the diagnostics</h2>
+      <p>
+         MUST, SHOULD, and MAY are the priorities W3C ARIA-AT gives each check: what a screen
+         reader is required to convey, what it is recommended to, and what it may.
+      </p>
+      <div class="table-wrap">
+         <table>
+            <thead>
+               <tr><th scope="col">Code</th><th scope="col">Severity</th><th scope="col">Meaning</th></tr>
+            </thead>
+            <tbody>
+               <tr><th scope="row"><code>a11ied/must-failure</code></th><td><code>error</code></td><td>A MUST check fails.</td></tr>
+               <tr><th scope="row"><code>a11ied/severe-side-effect</code></th><td><code>error</code></td><td>The screen reader did something the test did not expect, rated severe.</td></tr>
+               <tr><th scope="row"><code>a11ied/should-failure</code></th><td><code>warning</code></td><td>A SHOULD check fails.</td></tr>
+               <tr><th scope="row"><code>a11ied/moderate-side-effect</code></th><td><code>warning</code></td><td>The screen reader did something the test did not expect, rated moderate.</td></tr>
+               <tr><th scope="row"><code>a11ied/may-failure</code></th><td><code>info</code></td><td>A MAY check fails. Reported only with <code>minPriority: 'MAY'</code>.</td></tr>
+               <tr><th scope="row"><code>a11ied/untested-target</code></th><td><code>info</code></td><td>A browser and screen reader pair in your targets has no result. Reported only with <code>reportUntested: true</code>.</td></tr>
+               <tr><th scope="row"><code>a11ied/unknown-feature</code></th><td><code>info</code></td><td>The data does not have the feature. Reported only with <code>reportUnknownFeatures: true</code>.</td></tr>
+            </tbody>
+         </table>
+      </div>
+      <p>
+         <code>minPriority</code> sets how far down the list a check goes. The default,
+         <code>'SHOULD'</code>, reports errors and warnings. <code>'MUST'</code> reports
+         errors only.
+      </p>
+      <p>Each diagnostic has these fields.</p>
+      <dl class="defs">
+         <dt><code>code</code>, <code>severity</code>, <code>message</code></dt>
+         <dd>What a lint rule or an editor shows.</dd>
+         <dt><code>featureKey</code></dt>
+         <dd>The feature, such as <code>aria:aria-pressed</code>.</dd>
+         <dt><code>location</code>, <code>element</code></dt>
+         <dd>Copied from the usage you passed in.</dd>
+         <dt><code>specURL</code>, <code>docsPath</code></dt>
+         <dd>The feature in its specification, and its page in the compatibility tables. <code>docsPath</code> is a path under this site.</dd>
+         <dt><code>affectedEnvironments</code></dt>
+         <dd>Every failing screen reader, browser, and operating system, each with the checks that failed and any bug filed against the screen reader.</dd>
+      </dl>
+   </section>
+
+   <section>
+      <h2 id="one">Check one feature</h2>
+      <p>
+         <code>checkFeatureSupport</code> returns the result for one feature without building
+         diagnostics. Use it to show support in an editor hover or a documentation page.
+      </p>
+      <pre data-label="check-one.ts"><code>{featureExample.trimEnd()}</code></pre>
+      <pre data-label="OUTPUT"><code>{featureOutput.trimEnd()}</code></pre>
+      <dl class="defs">
+         <dt><code>status</code></dt>
+         <dd><code>supported</code>, <code>partial</code>, <code>unsupported</code>, <code>untested</code>, or <code>unknown-feature</code>. One failing pair makes a feature <code>unsupported</code>.</dd>
+         <dt><code>matchedEnvironments</code></dt>
+         <dd>One entry for each target and screen reader that has a result: the tested environment, its outcome, the check counts, and the checks that failed.</dd>
+         <dt><code>matchPrecision</code></dt>
+         <dd><code>exact</code> when the tested browser version is the target's. <code>nearest-older</code> or <code>nearest-newer</code> when the closest tested version was used.</dd>
+         <dt><code>untestedTargets</code></dt>
+         <dd>The target and screen reader pairs with no result, each with the reason.</dd>
+      </dl>
+   </section>
+
+   <section>
+      <h2 id="query">Query the data</h2>
+      <p>These functions read the results without a Browserslist query.</p>
+      <pre data-label="query.ts"><code>{queryExample.trimEnd()}</code></pre>
+      <pre data-label="OUTPUT"><code>{queryOutput.trimEnd()}</code></pre>
+      <dl class="defs">
+         <dt><code>listSupportedFeatures(filter)</code></dt>
+         <dd>The features. Filter by <code>type</code> (<code>'aria'</code> or <code>'html'</code>) or <code>search</code>.</dd>
+         <dt><code>getFeature(name)</code></dt>
+         <dd>One feature with every environment it was tested in.</dd>
+         <dt><code>queryEnvironments(filter)</code></dt>
+         <dd>The tested combinations. Filter by <code>screenReader</code>, <code>browser</code>, <code>os</code>, <code>status</code>, or <code>source</code>.</dd>
+         <dt><code>queryTestCases(filter)</code></dt>
+         <dd>The test cases a11ied ran. Filter by <code>attribute</code>, <code>category</code>, <code>tag</code>, or <code>search</code>.</dd>
+         <dt><code>getTestCaseOutcomes(slug)</code></dt>
+         <dd>Each run of one test case, with its outcome and the transcript of what the screen reader said.</dd>
+         <dt><code>resolveBrowserslistTargets(options)</code></dt>
+         <dd>The browsers a query resolves to, and the screen readers each stands for.</dd>
+      </dl>
+      <p>
+         The package exports the type of every value on this page, such as
+         <code>CompatibilityReport</code> and <code>CompatibilityDiagnostic</code>.
+      </p>
+   </section>
+</DocShell>

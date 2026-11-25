@@ -11,6 +11,9 @@
       "typecheck": {
          "dependsOn": ["transit"]
       },
+      "@a11ied/docs#typecheck": {
+         "dependsOn": ["^build"]
+      },
       "dev": {
          "cache": false,
          "persistent": true

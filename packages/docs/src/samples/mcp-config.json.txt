@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "a11ied": {
+      "command": "npx",
+      "args": ["-y", "a11ied", "mcp"]
+    }
+  }
+}

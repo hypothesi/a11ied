@@ -1,193 +1,475 @@
 ---
-import DocShell from '../layouts/doc-shell.astro';
-import { docsLinks } from '../lib/nav';
+import { Image } from 'astro:assets';
+import { Icon } from 'astro-icon/components';
+import reportSummary from '../assets/audit-report-summary.png';
+import logo from '../assets/logo.png';
+import Balloon from '../components/balloon.astro';
+import SiteFooter from '../components/site-footer.astro';
+import SiteHead from '../components/site-head.astro';
+import { REPOSITORY_URL } from '../lib/nav';
+import { getPracticeURL, withPracticeURL } from '../lib/practice';
+import checkSample from '../samples/check-broken-short.txt?raw';
+import mcpConfig from '../samples/mcp-config.json.txt?raw';
+import agentResult from '../samples/mcp-expect-result.json.txt?raw';
+import expectFail from '../samples/sr-expect-fail.txt?raw';
+import transcriptSample from '../samples/sr-transcript-dialog.txt?raw';
+import failureSample from '../samples/vitest-failure.txt?raw';
+import testSample from '../samples/vitest-home.ts.txt?raw';
 
-const toc = [
-   { id: 'components', label: 'Component testing' },
-   { id: 'audits', label: 'Terminal & CI audits' },
-   { id: 'agents', label: 'AI coding agents' },
-   { id: 'targets', label: 'Execution targets' },
-   { id: 'next', label: 'Where to start' },
-];
+const practiceURL = getPracticeURL(Astro);
+const hasSearch = import.meta.env.PROD;
+const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
+const description =
+   'a11ied is a CLI, testing library, and MCP server for automated screen reader and accessibility testing.';
+const websiteData = {
+   '@context': 'https://schema.org',
+   '@type': 'WebSite',
+   name: 'a11ied',
+   url: new URL(basePath, Astro.site).href,
+   description,
+   inLanguage: 'en',
+};
+const heroCommands = [
+   `a1 sr start --sr virtual ${practiceURL}`,
+   'a1 sr goto --role button --name "Invite member"',
+   'a1 sr checkpoint opened',
+   'a1 sr activate',
+   'a1 sr expect dialog --since opened',
+].join('\n');
+const agentPrompt =
+   `Check the Invite member dialog on ${practiceURL} with a11ied. Open it with the simulated screen reader and tell me whether the dialog is announced. Quote what the screen reader said.`;
+const auditPrompt =
+   'Audit https://example.com against WCAG 2.2 AA with a11ied. Do not submit the contact form. Use four workers.';
+const skillsInstall = `npx -y @a1st/aix install ${REPOSITORY_URL}/blob/master/packages/skills/ai.json --only skills --user`;
+const reportAlt =
+   'The summary of an example audit report. The page does not meet WCAG 2.2 Level AA. 14 findings: 2 critical, 5 serious, 6 moderate, 1 minor. 10 criteria fail and 20 pass. A table lists what to fix first.';
 ---
 
-<DocShell
-   title="Automated screen reader and WCAG testing"
-   summary="<p><strong>a11ied</strong> is a CLI, testing library, and MCP server for automated screen reader and WCAG testing.</p><p>Let AI coding agents verify their own fixes, catch <abbr title='Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility'><a href='https://www.w3.org/WAI/standards-guidelines/wcag/' target='_blank' rel='noreferrer'>WCAG</a></abbr> violations in CI, and assert what your UI announces to a <abbr title='Assistive technology software that speaks on-screen text and UI controls to blind and low-vision users'>screen reader</abbr> in your Vitest suite.</p>"
-   links={docsLinks}
-   toc={toc}
->
-   <section class="panel" id="components">
-      <div class="panel-head">
-         <p class="panel-kicker">Interactive testing</p>
-         <h2>Assert what users hear, not just DOM attributes</h2>
-      </div>
-      <p>
-         Static linters catch missing <code>alt</code> attributes, but they can't tell you if a custom
-         combobox traps focus, announces its collapsed state, or reads the active option when a user
-         presses ArrowDown. With <code>a11ied/vitest</code>, you can drive a virtual screen reader
-         directly inside your test suite—with zero browser setup or operating system permissions.
-      </p>
-      <pre><code>import {'{'} describe {'}'} from 'vitest';
-import {'{'} test {'}'} from 'a11ied/vitest';
+<html lang="en">
+   <head>
+      <SiteHead
+         title="a11ied: automated screen reader and accessibility testing"
+         description={description}
+         structuredData={[ websiteData ]}
+      />
+   </head>
+   <body class="home">
+      <a class="skip-link" href="#content">Skip to content</a>
+      {hasSearch ? <pagefind-config bundle-path={`${basePath}pagefind/`} base-url={basePath}></pagefind-config> : null}
 
-const combobox = test.extend({'{'}
-   srOptions: {'{'} url: 'http://localhost:3000/components/combobox' {'}'},
-{'}'});
+      <header class="topbar">
+         <a class="brand" href="/" aria-label="a11ied home">
+            <Image src={logo} alt="" class="mark" width={112} height={112} />
+            <span class="brand-title">a<span class="brand-title-accent">11</span>ied</span>
+         </a>
+         <nav class="topnav" aria-label="Site">
+            <a href="/overview">Docs</a>
+            <a href="/quickstart">Quickstart</a>
+            <a href="/playground">Playground</a>
+            <a href="/reference/cli">CLI reference</a>
+            <a href="/compatibility">Compatibility</a>
+            <a class="icon-link" href={REPOSITORY_URL}><Icon name="mdi:github" aria-hidden="true" />GitHub</a>
+         </nav>
+         {hasSearch ? <pagefind-modal-trigger class="search-trigger" placeholder="Search the docs" hide-shortcut></pagefind-modal-trigger> : null}
+      </header>
 
-describe('combobox component', () => {'{'}
-   combobox('announces active option and expanded state', ({'{'} sr {'}'}) => {'{'}
-      sr.press('Tab')
-         .expect.spoken('combobox, Select country, collapsed')
-         .press('ArrowDown')
-         .expect.spoken('combobox, Select country, expanded')
-         .and.spoken('option, Canada, 1 of 3');
-   {'}'});
-{'}'});</code></pre>
-      <p>
-         Chained commands queue and execute in sequence without littering tests with <code>await</code> boilerplate.
-         The in-process virtual screen reader computes the full <abbr title="Accessible Rich Internet Applications: W3C specification of attributes that define accessible UI roles, states, and properties"><a href="https://www.w3.org/TR/wai-aria/" target="_blank" rel="noreferrer">ARIA</a></abbr> accessibility tree
-         and speech queue in milliseconds, asserting against <strong><abbr title="WCAG 4.1.2: Name, Role, Value requires that UI components have accessible names, roles, and states"><a href="https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html" target="_blank" rel="noreferrer">WCAG 4.1.2 (Name, Role, Value)</a></abbr></strong> and <strong><abbr title="WCAG 2.4.3: Focus Order requires that interactive components receive focus in an order that preserves meaning and operability"><a href="https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html" target="_blank" rel="noreferrer">2.4.3 (Focus Order)</a></abbr></strong> as fast as standard unit tests.
-      </p>
-      <p>
-         Building a custom widget from scratch? Query official keyboard shortcuts and expected <abbr title="Accessible Rich Internet Applications: W3C specification of attributes that define accessible UI roles, states, and properties"><a href="https://www.w3.org/TR/wai-aria/" target="_blank" rel="noreferrer">ARIA</a></abbr> attributes
-         from the <abbr title="W3C ARIA Authoring Practices Guide: official design patterns and keyboard interaction standards for custom web widgets"><a href="https://www.w3.org/WAI/ARIA/apg/" target="_blank" rel="noreferrer">W3C ARIA Authoring Practices Guide (APG)</a></abbr> directly from your terminal:
-      </p>
-      <pre><code>a1 pattern combobox</code></pre>
-   </section>
-
-   <section class="panel" id="audits">
-      <div class="panel-head">
-         <p class="panel-kicker">Auditing & CI</p>
-         <h2>Full-page audits with actionable remediation</h2>
-      </div>
-      <p>
-         Audit local dev servers or staging URLs directly from your terminal or GitHub Actions with
-         <code>a1 check</code>. Powered by <abbr title="Open-source automated accessibility testing engine for HTML and DOM structure from Deque Systems"><a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noreferrer">axe-core</a></abbr>,
-         every failure is mapped directly to its official <abbr title="Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility"><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG</a></abbr> success
-         criterion, isolated to the offending element, and paired with clear instructions to fix it.
-      </p>
-      <pre><code>a1 check http://localhost:3000/checkout --level AA</code></pre>
-      <pre data-label="OUTPUT"><code>&#10007; 2 problems to fix.
-
-1.1.1  Non-text Content  [A]
-  button[type="button"] > img
-  Fix: Provide an alt attribute or aria-label for the icon button.
-
-3.3.1  Error Identification  [A]
-  input#card-number
-  Fix: Reference the error message element using aria-describedby.</code></pre>
-      <p>
-         Need deeper context on a criterion? Query official <abbr title="Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility"><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG</a></abbr> requirements,
-         failure scenarios, and test methods without leaving your terminal:
-      </p>
-      <pre><code>a1 wcag 3.3.1</code></pre>
-      <p>
-         You can also run <code>a1 inspect</code> to discover which criteria apply to a page before testing
-         (see <a href="/relevant-criteria">relevant criteria</a> and <a href="/test-methods">test methods</a>).
-      </p>
-   </section>
-
-   <section class="field-note" id="agents">
-      <div class="panel-head">
-         <p class="panel-kicker">Agentic workflows</p>
-         <h2>A real feedback loop for AI coding agents</h2>
-      </div>
-      <p>
-         AI coding assistants generate UI components rapidly, but they have no way to verify whether
-         assistive technology actually works with what they write. Without runtime feedback, agents guess
-         at <abbr title="Accessible Rich Internet Applications: W3C specification of attributes that define accessible UI roles, states, and properties"><a href="https://www.w3.org/TR/wai-aria/" target="_blank" rel="noreferrer">ARIA</a></abbr> attributes
-         and frequently introduce accessibility regressions in dynamic interfaces.
-      </p>
-      <p>
-         <code>a11ied</code> provides a local <abbr title="Model Context Protocol: open standard for connecting AI coding assistants to external tools"><a href="https://modelcontextprotocol.io/" target="_blank" rel="noreferrer">Model Context Protocol (MCP)</a></abbr> server
-         that gives Claude Code, Cursor, Windsurf, and other agents native tools to inspect accessibility trees,
-         drive <abbr title="Apple's built-in screen reader for macOS"><a href="https://support.apple.com/guide/voiceover/welcome/mac" target="_blank" rel="noreferrer">VoiceOver</a></abbr> or <abbr title="NonVisual Desktop Access: the open-source screen reader for Windows"><a href="https://www.nvaccess.org/" target="_blank" rel="noreferrer">NVDA</a></abbr>,
-         and verify their own fixes against <abbr title="Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility"><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG</a></abbr> criteria.
-      </p>
-      <pre data-label="CONFIG"><code>{`{\n  "mcpServers": {\n    "a11ied": {\n      "command": "npx",\n      "args": ["-y", "a11ied", "mcp"]\n    }\n  }\n}`}</code></pre>
-      <p>
-         Give your coding agent tasks that require verifying real interaction, not just inspecting static HTML:
-      </p>
-      <pre data-label="AI AGENT PROMPT"><code>Review the checkout dialog on http://localhost:3000/checkout.
-Start a screen reader session, open the modal, and verify:
-1. Focus moves to the first field inside the dialog.
-2. VoiceOver announces the dialog title and modal role upon opening.
-3. Pressing Escape closes the dialog and restores focus to the trigger.</code></pre>
-      <p>
-         The agent runs keyboard navigation commands, inspects the spoken phrase log, diagnoses failures against
-         <abbr title="Web Content Accessibility Guidelines: the W3C standard of testable criteria for digital accessibility"><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noreferrer">WCAG</a></abbr> criteria,
-         and iterates on the code until the test passes.
-      </p>
-   </section>
-
-   <section class="split panel" id="targets">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Architecture</p>
-            <h2>Simulation speed vs. real OS fidelity</h2>
-         </div>
-         <p>
-            <code>a11ied</code> provides two distinct execution targets so you can balance instantaneous testing
-            speed in CI with full real-world operating system fidelity:
-         </p>
-         <div class="route-list">
-            <div class="route-row">
-               <strong>Virtual screen reader</strong>
-               <span>
-                  A lightweight, headless JavaScript engine that computes the <abbr title="Accessible Rich Internet Applications: W3C specification of attributes that define accessible UI roles, states, and properties"><a href="https://www.w3.org/TR/wai-aria/" target="_blank" rel="noreferrer">ARIA</a></abbr> accessibility
-                  tree and speech queue in memory. Runs in milliseconds in Node.js or Linux CI containers with zero
-                  browser windows, system permissions, or audio hardware required. Ideal for component tests,
-                  unit suites, and fast pull request checks.
-               </span>
+      <main id="content">
+         <section class="hero band">
+            <div class="wrap hero-grid">
+               <div class="hero-copy">
+                  <p class="kicker">For developers, auditors, and AI agents</p>
+                  <h1>Automated screen reader and accessibility testing</h1>
+                  <p class="lead">
+                     <strong>a11ied</strong> is a CLI, testing library, and MCP server for automated
+                     screen reader and accessibility testing.
+                  </p>
+                  <p class="lead">
+                     Let AI coding agents verify their own fixes, catch WCAG violations in CI, and
+                     assert what your UI announces to a screen reader in your Vitest suite.
+                  </p>
+                  <div class="actions">
+                     <a class="button button--primary" href="/quickstart">Run the quickstart</a>
+                     <a class="button" href="/overview">Read the docs</a>
+                  </div>
+                  <pre class="install"><code>npm install --global a11ied</code></pre>
+               </div>
+               <figure class="hero-show">
+                  <pre><code>{heroCommands}</code></pre>
+                  <pre data-label="OUTPUT"><code>{expectFail.trimEnd()}</code></pre>
+                  <figcaption>
+                     These five commands open a dialog on a <a href="/demo/team">demo page</a> and
+                     check that a screen reader announces it. Nothing is announced, so the check
+                     fails. A static scan cannot find this.
+                  </figcaption>
+               </figure>
             </div>
-            <div class="route-row">
-               <strong>VoiceOver & NVDA</strong>
-               <span>
-                  Real operating system assistive technologies automated via <abbr title="Open-source library for driving VoiceOver and NVDA with code"><a href="https://guidepup.dev/" target="_blank" rel="noreferrer">Guidepup</a></abbr>—using
-                  AppleScript on macOS for <abbr title="Apple's built-in screen reader for macOS"><a href="https://support.apple.com/guide/voiceover/welcome/mac" target="_blank" rel="noreferrer">VoiceOver</a></abbr> and native accessibility APIs
-                  on Windows for <abbr title="NonVisual Desktop Access: the open-source screen reader for Windows"><a href="https://www.nvaccess.org/" target="_blank" rel="noreferrer">NVDA</a></abbr>.
-                  Ideal for end-to-end integration tests, validating platform-specific speech synthesis, and catching OS quirks before release. See the
-                  <a href="/screen-readers">screen readers guide</a>.
-               </span>
+         </section>
+
+         <section class="band" aria-labelledby="audit-heading">
+            <div class="wrap">
+               <div class="audit-grid">
+                  <div class="audit-copy">
+                     <p class="kicker">With Claude Code, Codex, Cursor, and other coding agents</p>
+                     <h2 id="audit-heading">Automated accessibility audits</h2>
+                     <p class="section-lead">
+                        Ask your AI coding agent to audit a site against WCAG. It tests each page
+                        with a scan, the keyboard, and a screen reader, and can split the work
+                        among its own subagents. a11ied tracks every check and writes the report.
+                     </p>
+                     <p class="section-lead">
+                        The report gives a verdict, each finding with a screenshot of the failing
+                        element and how to fix it, what to fix first, and what could not be
+                        verified.
+                     </p>
+                     <div class="actions">
+                        <a class="button button--primary" href="/example-audit/">Browse an example report</a>
+                        <a class="button" href="/guides/audit">How an audit works</a>
+                     </div>
+                  </div>
+                  <figure class="audit-shot">
+                     <a href="/example-audit/">
+                        <Image src={reportSummary} alt={reportAlt} width={1400} />
+                     </a>
+                  </figure>
+               </div>
+
+               <ol class="cards steps">
+                  <li class="card">
+                     <h3><span class="step">Step 1</span> Install the agent skills</h3>
+                     <p>
+                        Two skills teach your agent how to test with a11ied and how to run an audit.
+                        The agent then uses the <code>a1</code> command or the
+                        <a href="/guides/agents#connect">MCP server</a>, whichever it has.
+                     </p>
+                     <pre><code>{skillsInstall}</code></pre>
+                     <p><a href="/guides/agents">Set up an AI agent</a></p>
+                  </li>
+                  <li class="card">
+                     <h3><span class="step">Step 2</span> Ask your agent for an audit</h3>
+                     <p>
+                        Say what to audit and what the agent must not do, such as sending a form.
+                        The agent runs the <code>a1 audit</code> commands. You do not have to.
+                     </p>
+                     <pre data-label="AI AGENT PROMPT"><code>{auditPrompt}</code></pre>
+                     <p><a href="/guides/audit">Audit a site with AI agents</a></p>
+                  </li>
+                  <li class="card">
+                     <h3><span class="step">Step 3</span> Read the report</h3>
+                     <p>
+                        The agent writes the report when the audit is done. Run this yourself at any
+                        time for the report so far: one HTML file you can send to a client, plus
+                        Markdown and JSON.
+                     </p>
+                     <pre><code>a1 audit report</code></pre>
+                     <p><a href="/example-audit/">Browse an example report</a></p>
+                  </li>
+               </ol>
             </div>
-         </div>
-      </div>
-      <div class="split-aside">
-         <div class="tag">Environment check</div>
-         <p class="aside-note">
-            Run <code>a1 doctor</code> in your terminal to check which browsers, permissions, and screen readers
-            are configured and ready on your machine.
-         </p>
-      </div>
-   </section>
-
-   <section class="feature-block" id="next">
-      <h2>Where to start</h2>
-      <div class="feature-grid">
-         <section class="feature-card">
-            <h3>Quickstart</h3>
-            <p>Install the package, check your machine, and run your first virtual screen reader session in under two minutes.</p>
-            <p class="feature-link"><a href="/quickstart">Get started</a></p>
          </section>
 
-         <section class="feature-card">
-            <h3>Component testing</h3>
-            <p>Add screen reader assertions to your Vitest suite with the <code>a11ied/vitest</code> fixture, or use <code>a11ied/test</code> with Jest.</p>
-            <p class="feature-link"><a href="/guides/vitest">Vitest guide</a></p>
+         <section class="band band--follow" aria-labelledby="features-heading">
+            <div class="wrap">
+               <h2 id="features-heading">Test while you build</h2>
+
+               <article class="feature">
+                  <div class="feature-copy">
+                     <h3>Capture a log of all screen reader output</h3>
+                     <p>
+                        Drive VoiceOver on macOS, NVDA on Windows, or a simulated screen reader that
+                        runs on any machine, all with the same commands. Move by heading, open a
+                        dialog, send a form.
+                     </p>
+                     <p>
+                        Everything the screen reader announces is logged in order, and you can save
+                        the log to a file. In this example a dialog opens: its name is announced,
+                        then focus moves to its first field.
+                     </p>
+                     <p><a href="/guides/screen-reader">Test with a screen reader</a></p>
+                  </div>
+                  <div class="feature-show">
+                     <Balloon kind="speech">Supports VoiceOver and NVDA!</Balloon>
+                     <pre><code>a1 sr transcript --since opened</code></pre>
+                     <pre data-label="OUTPUT" data-reveal><code>{withPracticeURL(transcriptSample, practiceURL)}</code></pre>
+                  </div>
+               </article>
+
+               <article class="feature feature--flip">
+                  <div class="feature-copy">
+                     <h3>Write end-to-end tests for screen reader behavior</h3>
+                     <p>
+                        Drive a screen reader from Vitest, Jest, Mocha, or Playwright Test. Move by
+                        heading or landmark, press keys, and type into fields. Then assert on what
+                        was announced, where the cursor is, and in what order.
+                     </p>
+                     <p>
+                        When a test fails, the error shows what the screen reader said. The output
+                        here is this test run against a page where the dialog opens and nothing is
+                        announced.
+                     </p>
+                     <p><a href="/guides/vitest">Test with Vitest</a></p>
+                  </div>
+                  <div class="feature-show">
+                     <Balloon kind="speech" mirror>Vitest! Jest! Mocha!</Balloon>
+                     <pre data-label="invite.test.ts"><code>{withPracticeURL(testSample, practiceURL)}</code></pre>
+                     <pre data-label="OUTPUT" data-reveal><code>{failureSample.trimEnd()}</code></pre>
+                  </div>
+               </article>
+
+               <article class="feature">
+                  <div class="feature-copy">
+                     <h3>Give your AI coding agent accessibility tools</h3>
+                     <p>
+                        Add one block of configuration, and Claude Code, Cursor, or any other agent
+                        that supports MCP gets 37 tools: scan a page, drive a screen reader, check a
+                        widget against its ARIA pattern, look up a criterion. The agent can then
+                        test the interface it writes.
+                     </p>
+                     <p>
+                        In this example the agent asks whether a dialog is announced. a11ied answers
+                        that it is not, so the agent can fix the dialog and check again.
+                     </p>
+                     <p><a href="/guides/agents">Set up an AI agent</a></p>
+                  </div>
+                  <div class="feature-show">
+                     <Balloon kind="thought">Was the dialog announced?</Balloon>
+                     <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
+                     <pre data-label="AI AGENT PROMPT"><code>{agentPrompt}</code></pre>
+                     <pre data-label="OUTPUT" data-reveal><code>{agentResult.trimEnd()}</code></pre>
+                  </div>
+               </article>
+
+               <article class="feature feature--flip">
+                  <div class="feature-copy">
+                     <h3>Scan a page for accessibility failures</h3>
+                     <p>
+                        One command lists every failing element with the WCAG criterion it breaks
+                        and a command that looks up the fix.
+                     </p>
+                     <p>
+                        It also gives you a checklist of the criteria on that page that need a
+                        manual test, so you know what to check next.
+                     </p>
+                     <p><a href="/guides/violations">Fix scan failures</a></p>
+                  </div>
+                  <div class="feature-show">
+                     <Balloon kind="signal" mirror>Scanning...</Balloon>
+                     <pre><code>a1 check {practiceURL}</code></pre>
+                     <pre data-label="OUTPUT" data-reveal><code>{withPracticeURL(checkSample, practiceURL)}</code></pre>
+                  </div>
+               </article>
+            </div>
          </section>
 
-         <section class="feature-card">
-            <h3>AI agent setup</h3>
-            <p>Connect the MCP server to Cursor, Claude Code, or Windsurf to give your coding assistant accessibility testing tools.</p>
-            <p class="feature-link"><a href="/guides/agents">Agent guide</a></p>
+         <section class="band band--follow" aria-labelledby="caniuse-heading">
+            <div class="wrap">
+               <div class="panel">
+                  <div class="panel-art" aria-hidden="true">
+                     <div class="burst">
+                        <div class="burst-edge"><div class="burst-fill"><span class="burst-word">Pow!</span></div></div>
+                     </div>
+                  </div>
+                  <div class="panel-copy">
+                     <p class="caption">Screen reader compatibility</p>
+                     <h2 id="caniuse-heading">It's caniuse for accessibility features</h2>
+                     <p class="section-lead">
+                        Look up an ARIA attribute, an ARIA role, or an HTML element and see what
+                        VoiceOver, NVDA, JAWS, and TalkBack say for it, by browser and operating
+                        system. It covers 60 features, and most results come from W3C ARIA-AT
+                        reports.
+                     </p>
+                     <p><a class="button button--primary" href="/compatibility">Look up a feature</a></p>
+                  </div>
+               </div>
+            </div>
          </section>
 
-         <section class="feature-card">
-            <h3>Interactive demo</h3>
-            <p>Walk through auditing and fixing real accessibility violations on a sample team settings app.</p>
-            <p class="feature-link"><a href="/guides/demo">Practice on demo</a></p>
+         <section class="band band--yellow" aria-labelledby="more-heading">
+            <div class="wrap">
+               <h2 id="more-heading">More commands</h2>
+               <ul class="cards">
+                  <li class="card">
+                     <h3>Look up WCAG from the terminal</h3>
+                     <p>All 86 criteria of WCAG 2.2 with the W3C's guidance, and a test procedure for the 55 at Levels A and AA. It ships in the package and works offline.</p>
+                     <p><code>a1 wcag 4.1.3</code></p>
+                  </li>
+                  <li class="card">
+                     <h3>Check widgets against W3C ARIA patterns</h3>
+                     <p>For a widget such as a combobox or dialog, it presses every key the W3C's ARIA pattern documents and reports the keys that do nothing. It knows the 68 examples in the W3C's ARIA Authoring Practices Guide.</p>
+                     <p><code>a1 pattern check</code></p>
+                  </li>
+                  <li class="card">
+                     <h3>Fail a build on new accessibility problems</h3>
+                     <p>A failed check exits with code 4, which stops a CI job. A baseline lets an existing site fail only on new problems. Reports come out as SARIF or EARL.</p>
+                     <p><code>a1 axe --fail-on serious</code></p>
+                  </li>
+                  <li class="card">
+                     <h3>Screenshot a page at any width, zoom, or Tab stop</h3>
+                     <p>Take a screenshot at 320 pixels wide, at 200 percent zoom, with WCAG text spacing, or after four presses of Tab.</p>
+                     <p><code>a1 capture</code></p>
+                  </li>
+                  <li class="card">
+                     <h3>Print what TalkBack says on Android</h3>
+                     <p>Turn TalkBack on over adb, on a phone or an emulator, and print what it says as focus moves through an app.</p>
+                     <p><code>a1 talkback walk</code></p>
+                  </li>
+                  <li class="card">
+                     <h3>Print a page's accessibility tree</h3>
+                     <p>See the roles, names, and states a screen reader works from. Filter the tree by role or name, or click a control first to open a menu or dialog.</p>
+                     <p><code>a1 tree</code></p>
+                  </li>
+               </ul>
+            </div>
          </section>
-      </div>
-   </section>
-</DocShell>
+
+         <section class="band band--ink band--cta" aria-labelledby="cta-heading">
+            <div class="wrap narrow">
+               <h2 id="cta-heading">Run your first check in five minutes</h2>
+               <p class="section-lead">
+                  Install it, scan a page, and capture what a screen reader announces on it. There
+                  is no account to create, and the simulated screen reader needs no setup.
+               </p>
+               <pre class="install"><code>npm install --global a11ied</code></pre>
+               <div class="actions">
+                  <a class="button button--yellow" href="/quickstart">Run the quickstart</a>
+                  <a class="button button--ghost" href={REPOSITORY_URL}>View the source</a>
+               </div>
+            </div>
+         </section>
+      </main>
+
+      <SiteFooter />
+
+      {hasSearch ? <pagefind-modal></pagefind-modal> : null}
+      <script>
+         import '../scripts/code-blocks';
+      </script>
+   </body>
+</html>
+
+<style>
+   .home { --wrap: 72rem; }
+   .wrap { width: min(100% - 2.5rem, var(--wrap)); margin-inline: auto; }
+   .narrow { --wrap: 48rem; }
+   .band { padding-block: clamp(3rem, 8vw, 6rem); }
+   .hero { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
+   .band > .wrap > * + * { margin-top: var(--lg); }
+   /* Short samples wrap here, so the line that makes the point is never cut off. */
+   pre, pre code { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+   /* Top bar */
+   .topbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sm) var(--xl); padding: var(--sm) clamp(1.25rem, 4vw, 3rem); background: var(--yellow); border-bottom: 3px solid var(--ink); }
+   .topnav { display: flex; flex-wrap: wrap; gap: var(--xs) var(--lg); margin-inline-start: auto; }
+   .topnav a { color: var(--ink); font-weight: 600; text-decoration: none; }
+   .topnav a:hover { text-decoration: underline; text-decoration-thickness: 0.12em; }
+   .topbar .search-trigger { min-width: 12rem; }
+
+   /* Hero */
+   /*
+    * The halftone circle is two background layers: a sheet of dots, and paper over it with
+    * a round hole. The copy has its own paper background, so contrast checkers measure the
+    * text against a plain color.
+    */
+   .hero { --size: clamp(14rem, 36vw, 32rem); --hole: calc(100% - 9rem) 9rem; background: radial-gradient(circle at var(--hole), transparent calc(var(--size) / 2), var(--paper) calc(var(--size) / 2 + 1px)), radial-gradient(circle, var(--red) 2px, transparent 2.4px) 0 0 / 11px 11px, var(--paper); }
+   .hero-copy { padding-block: var(--xs); background: var(--paper); }
+   .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+   .hero-show { min-width: 0; margin: 0; }
+   .hero-show > pre + pre[data-label="OUTPUT"] { margin-top: 0; border-top: 0; }
+   .hero-show figcaption { margin-top: var(--lg); padding: var(--sm) var(--md); background: var(--paper-light); border: 2px solid var(--ink); font-size: 1rem; line-height: 1.5; }
+   .hero-copy > * + * { margin-top: var(--lg); }
+   .kicker { margin: 0; color: var(--red-dark); font: 700 0.86rem/1.4 var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
+   h1 { margin: 0; font: 700 clamp(2.6rem, 5.4vw, 4.6rem)/0.92 var(--display); letter-spacing: -0.04em; text-transform: uppercase; text-wrap: balance; filter: drop-shadow(4px 4px 0 var(--yellow)) drop-shadow(3px 3px 0 color-mix(in oklch, var(--red) 62%, transparent)); }
+   .lead { max-width: 40rem; color: var(--ink-soft); font-size: clamp(1.15rem, 1.8vw, 1.4rem); line-height: 1.5; }
+   .lead + .lead { margin-top: var(--sm); }
+   .actions { display: flex; flex-wrap: wrap; gap: var(--md); }
+   .button { display: inline-block; padding: 0.75rem 1.25rem; background: var(--paper-light); color: var(--ink); border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); font: 700 1.05rem/1 var(--display); letter-spacing: 0.06em; text-decoration: none; text-transform: uppercase; }
+   .button:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--ink); }
+   .button--primary { background: var(--ink); color: var(--yellow); box-shadow: 5px 5px 0 var(--red); }
+   .button--primary:hover { box-shadow: 3px 3px 0 var(--red); }
+   .button--yellow { background: var(--yellow); box-shadow: 5px 5px 0 var(--red); }
+   .button--yellow:hover { box-shadow: 3px 3px 0 var(--red); }
+   .button--ghost { background: transparent; color: var(--paper-light); border-color: var(--paper-light); box-shadow: none; }
+   .button--ghost:hover { background: var(--paper-light); color: var(--ink); box-shadow: none; transform: none; }
+   .install { max-width: 26rem; }
+
+   /* Section headings */
+   h2 { padding: 0; border: 0; font-size: clamp(2rem, 5vw, 3.6rem); line-height: 0.95; letter-spacing: -0.03em; }
+   .section-lead { max-width: 44rem; color: var(--ink-soft); font-size: 1.2rem; line-height: 1.55; }
+   h3 { font-size: 1.6rem; line-height: 1.05; text-transform: uppercase; letter-spacing: -0.01em; }
+
+   .feature-show > pre + pre[data-label="OUTPUT"] { margin-top: 0; border-top: 0; }
+
+   /* Dark and yellow bands */
+   .band--ink { background: var(--ink); color: var(--paper-light); }
+   .band--ink .kicker { color: var(--yellow); }
+   .band--ink .section-lead { color: color-mix(in oklch, var(--paper-light) 88%, var(--ink)); }
+   .band--ink h2 { color: var(--yellow); }
+   .band--yellow { background: var(--yellow); border-block: 3px solid var(--ink); }
+
+
+   /* Features */
+   .feature { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: start; }
+   .band > .wrap > .feature { margin-top: var(--3xl); }
+   .band > .wrap > h2 + .feature { margin-top: var(--2xl); }
+   .feature--flip { grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); }
+   .feature--flip .feature-copy { order: 2; }
+   .feature-copy > * + *, .feature-show > * + * { margin-top: var(--md); }
+   .feature-copy p { color: var(--ink-soft); }
+   /*
+    * Each balloon sits on top of its terminal, and its tail overlaps the terminal's top
+    * edge. That holds at every width, because the two are stacked in one column. The side
+    * margins keep the tail clear of the Copy button in the terminal's corner.
+    */
+   .feature-show > :global(.balloon) { z-index: 3; margin-inline: auto 24%; margin-bottom: calc(-1 * var(--md) - 0.7rem); }
+   .feature-show > :global(.balloon--mirror) { margin-inline: min(26%, 100% - 16rem) auto; }
+   .feature-show { min-width: 0; }
+
+   /* Audit */
+   .audit-grid { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+   .audit-copy > * + * { margin-top: var(--lg); }
+   /* The report screenshot is tilted away from the reader, and its far edge goes soft. */
+   .audit-shot { min-width: 0; margin: 0; perspective: 1600px; }
+   .audit-shot a { position: relative; display: block; overflow: hidden; aspect-ratio: 4 / 3; border: 3px solid var(--ink); box-shadow: 12px 12px 0 var(--red); transform: rotateY(-14deg) rotateX(6deg); transform-origin: 0 50%; }
+   .audit-shot img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 0 0; }
+   .audit-shot a::after { position: absolute; inset: 66% 0 0; backdrop-filter: blur(1.5px); mask-image: linear-gradient(to bottom, transparent, #000); content: ''; pointer-events: none; }
+   .band > .wrap > .steps { margin-top: var(--3xl); }
+   .steps .card { min-width: 0; }
+   .steps .card > pre { margin-top: auto; }
+   .steps .card > pre + p { margin-top: 0; }
+   .step { display: block; margin-bottom: var(--xs); color: var(--red-dark); font-size: 0.86rem; letter-spacing: 0.14em; }
+   /* Two paper bands in a row: the second drops its top padding so the gap is not doubled. */
+   .band--follow { padding-top: 0; }
+
+   /* Comic panel */
+   .panel { display: grid; grid-template-columns: minmax(0, 0.5fr) minmax(0, 1fr); background: var(--paper-light); border: 3px solid var(--ink); box-shadow: 10px 10px 0 var(--ink); }
+   /* The dots stay behind the burst. No text sits on them, so contrast stays measurable. */
+   .panel-art { display: grid; place-items: center; padding: var(--lg) var(--md); background: radial-gradient(circle, var(--red) 2px, transparent 2.4px) 0 0 / 11px 11px, var(--yellow); border-inline-end: 3px solid var(--ink); }
+   .panel-copy { padding: clamp(1.5rem, 4vw, 3rem); }
+   .panel-copy > * + * { margin-top: var(--lg); }
+   .caption { display: inline-block; margin: 0; padding: 0.35rem 0.7rem; background: var(--yellow); border: 2px solid var(--ink); font: 700 0.86rem/1.4 var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
+   .burst { --burst: polygon(50.0% 0.0%, 57.3% 17.8%, 70.0% 8.6%, 69.3% 25.8%, 89.1% 18.8%, 80.6% 35.2%, 92.9% 40.2%, 82.0% 50.0%, 97.8% 60.9%, 79.7% 64.3%, 86.7% 79.3%, 68.7% 73.5%, 71.7% 95.0%, 57.6% 83.1%, 50.0% 95.0%, 42.9% 81.2%, 28.3% 95.0%, 29.4% 75.8%, 14.0% 78.7%, 22.1% 63.5%, 3.2% 60.7%, 16.0% 50.0%, 1.3% 38.9%, 21.2% 36.1%, 14.8% 21.9%, 29.4% 24.2%, 28.7% 5.9%, 43.1% 19.8%); width: clamp(12rem, 25vw, 18rem); aspect-ratio: 1; filter: drop-shadow(7px 7px 0 var(--ink)); transform: rotate(-9deg); }
+   .burst-edge, .burst-fill { display: grid; place-items: center; clip-path: var(--burst); }
+   .burst-edge { width: 100%; height: 100%; background: var(--ink); }
+   .burst-fill { width: calc(100% - 16px); height: calc(100% - 16px); background: var(--paper-light); }
+   .burst-word { color: var(--red-dark); font: 700 clamp(3rem, 6.4vw, 4.8rem)/1 var(--display); letter-spacing: -0.02em; text-transform: uppercase; filter: drop-shadow(3px 3px 0 var(--yellow)); }
+
+   /* Cards */
+   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: var(--lg); margin: var(--xl) 0 0; padding: 0; list-style: none; }
+   .card { display: flex; flex-direction: column; gap: var(--sm); margin: 0; padding: var(--lg); background: var(--paper-light); border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+   .card h3 { font-size: 1.35rem; }
+   .card p:last-child { margin-top: auto; padding-top: var(--xs); }
+
+   .band--cta a:not(.button) { color: var(--yellow); }
+
+   @media (max-width: 820px) {
+      .hero-grid, .audit-grid, .panel, .feature, .feature--flip { grid-template-columns: minmax(0, 1fr); }
+      .panel-art { border-inline-end: 0; border-block-end: 3px solid var(--ink); }
+      .audit-shot a { transform: none; }
+      /* On a narrow screen the circle sits in the corner above the copy. */
+      .hero { --size: 9rem; --hole: calc(100% - 3rem) 2.5rem; padding-top: 6.5rem; }
+      .feature--flip .feature-copy { order: 0; }
+      .topnav { margin-inline-start: 0; }
+   }
+   @media (prefers-reduced-motion: reduce) {
+      .button:hover { transform: none; }
+   }
+</style>

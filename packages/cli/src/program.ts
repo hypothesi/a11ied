@@ -30,11 +30,12 @@ interface DoctorCommandOptions {
 }
 
 async function executeDoctorCommand(options: DoctorCommandOptions): Promise<void> {
-   const [{ executeCommand }, { createDoctorReport }, renderers] = await Promise.all([
-      import('./lib/execute.js'),
-      import('#core'),
-      import('./renderers/index.js'),
-   ]);
+   const [{ executeCommand }, { CliUsageError, createDoctorReport }, renderers] =
+      await Promise.all([
+         import('./lib/execute.js'),
+         import('#core'),
+         import('./renderers/index.js'),
+      ]);
 
    await executeCommand(
       {
@@ -44,12 +45,19 @@ async function executeDoctorCommand(options: DoctorCommandOptions): Promise<void
          json: options.json,
       },
       () => {
-         const request = doctorRequestSchema.parse({
+         const request = doctorRequestSchema.safeParse({
             task: options.task,
             target: options.sr,
             recording: options.recording,
          });
-         const report = createDoctorReport(undefined, request);
+         if (!request.success) {
+            const [issue] = request.error.issues;
+            throw new CliUsageError(
+               'validation-error',
+               `${issue?.path.join('.') ?? 'options'}: ${issue?.message ?? 'not valid'}`,
+            );
+         }
+         const report = createDoctorReport(undefined, request.data);
          const execution: CommandExecution = {
             result: report,
          };
@@ -75,7 +83,7 @@ function registerDoctorCommand(program: Command): void {
       .option('--sr <reader>', 'Check voiceover, nvda, or virtual.')
       .option(
          '--recording',
-         'Also check screen recording permission; captures a temporary video on macOS.',
+         'With --task reader or audit, also check screen recording permission; captures a temporary video on macOS.',
       )
       .option(
          '--strict',

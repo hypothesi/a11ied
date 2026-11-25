@@ -1,0 +1,18 @@
+check  PRACTICE_URL
+
+✗ 10 problems to fix.
+
+Problems
+  4.1.2  Name, Role, Value  [A]
+      Buttons must have discernible text  critical
+      3 failing elements:
+        tr[data-status="active"][data-member-row=""]:nth-child(1) > td:nth-child(5) > .icon-button[type="button"]
+        ...
+      Fix it:  a1 wcag rule button-name
+  ...
+
+Check by hand
+  38 criteria this page triggers need a person:
+    • 2.1.1  Keyboard
+    • 2.4.3  Focus Order
+    ...

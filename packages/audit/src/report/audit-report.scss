@@ -157,6 +157,46 @@ p {
    font-size: 0.9rem;
 }
 
+.report-tiles li[class] {
+   border-color: var(--a1-report-tile-color);
+   background: color-mix(
+      in srgb,
+      var(--a1-report-tile-color) 12%,
+      var(--a1-report-bgColor)
+   );
+}
+
+.report-tiles li[class] strong {
+   color: var(--a1-report-tile-color);
+}
+
+.report-tiles li[class] span {
+   color: var(--a1-report-color);
+}
+
+.report-tile--critical,
+.report-tile--fail {
+   --a1-report-tile-color: var(--a1-report-critical-color);
+}
+
+.report-tile--serious {
+   --a1-report-tile-color: var(--a1-report-serious-color);
+}
+
+.report-tile--moderate,
+.report-tile--cannot-tell {
+   --a1-report-tile-color: var(--a1-report-moderate-color);
+}
+
+.report-tile--minor,
+.report-tile--not-applicable {
+   --a1-report-tile-color: var(--a1-report-minor-color);
+}
+
+.report-tile--pass {
+   --a1-report-tile-color: var(--a1-report-pass-color);
+}
+
 .report-tableWrap {
    overflow-x: auto;
 }
@@ -184,6 +224,11 @@ td {
 thead th {
    border-block-end-width: 2px;
    font-size: 0.85rem;
+   white-space: nowrap;
+}
+
+/* A finding ID such as F10 stays on one line in a narrow column. */
+td a[href^='#'] {
    white-space: nowrap;
 }
 
@@ -271,7 +316,6 @@ thead th {
 }
 
 .report-shot {
-   position: relative;
    overflow: hidden;
    inline-size: min(100%, 22rem);
    border: 1px solid var(--a1-report-borderColor);
@@ -284,7 +328,8 @@ thead th {
    /* A fixed width keeps a tall capture from shrinking to a sliver; its top shows here. */
    inline-size: 100%;
    block-size: auto;
-   max-block-size: 14rem;
+   /* Tall enough to show a 1280 by 900 capture, the default viewport, without cropping. */
+   max-block-size: 16rem;
    object-fit: cover;
    object-position: top;
 }
@@ -294,24 +339,21 @@ thead th {
    cursor: zoom-in;
 }
 
-/* Fades the bottom of a cut-off screenshot so it reads as continuing. */
-.report-shot--tall::after {
-   position: absolute;
-   inset-inline: 0;
-   inset-block-end: 0;
-   block-size: 6rem;
-   background: linear-gradient(to bottom, transparent, var(--a1-report-bgColor) 85%);
-   content: '';
-   pointer-events: none;
+/* Sits under the picture, never over it, and only for a screenshot that was cropped. */
+.report-shot-more {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.4rem 0.75rem;
+   align-items: center;
+   justify-content: space-between;
+   padding: 0.5rem 0.6rem;
+   border-block-start: 1px solid var(--a1-report-borderColor);
+   color: var(--a1-report-muted-color);
+   font-size: 0.8rem;
 }
 
-.report-shot-more {
-   position: absolute;
-   z-index: 1;
-   inset-inline: 0;
-   inset-block-end: 1rem;
-   display: flex;
-   justify-content: center;
+.report-shot-more[hidden] {
+   display: none;
 }
 
 .report-shot-more button,
@@ -333,19 +375,6 @@ thead th {
    .report-viewer button:hover {
       border-color: var(--a1-report-link-color);
    }
-}
-
-.report-shot-more span {
-   color: var(--a1-report-muted-color);
-   font-weight: 400;
-}
-
-.report-shot-more span::before {
-   content: '(';
-}
-
-.report-shot-more span::after {
-   content: ')';
 }
 
 .report-shot a:focus-visible,
@@ -379,11 +408,17 @@ thead th {
 .report-viewer-bar {
    display: flex;
    flex-wrap: wrap;
-   align-items: center;
+   align-items: flex-start;
    justify-content: space-between;
    gap: 0.75rem;
    padding: 0.75rem 1rem;
    border-block-end: 1px solid var(--a1-report-borderColor);
+}
+
+/* A long selector in the title wraps beside the buttons instead of pushing them down. */
+.report-viewer-bar > div:first-child {
+   flex: 1 1 16rem;
+   min-inline-size: 0;
 }
 
 .report-viewer-bar h2 {
@@ -391,6 +426,7 @@ thead th {
    border: 0;
    margin: 0;
    font-size: 1rem;
+   overflow-wrap: anywhere;
 }
 
 .report-viewer-meta {
@@ -415,6 +451,7 @@ thead th {
 }
 
 .report-viewer-body {
+   display: flex;
    overflow: auto;
    flex: 1;
    min-inline-size: 0;
@@ -422,15 +459,13 @@ thead th {
    background: var(--a1-report-page-bgColor);
 }
 
-/* Fit to width by default: a tall page scrolls down, a wide one never scrolls sideways. */
+/* The script sets the width. Auto margins center the picture and still let it scroll. */
 .report-viewer-body img {
    display: block;
-   max-inline-size: 100%;
-   margin-inline: auto;
-}
-
-.report-viewer--actual .report-viewer-body img {
-   max-inline-size: none;
+   flex: none;
+   margin: auto;
+   /* A capture often ends in the same pale color as the viewer, so its edge is drawn. */
+   outline: 1px solid var(--a1-report-borderColor);
 }
 
 /* The whole screenshot shrunk to the strip's height, with a window over the part on screen. */

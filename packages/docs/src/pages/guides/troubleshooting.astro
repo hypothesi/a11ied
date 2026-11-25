@@ -3,130 +3,148 @@ import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
 
 const toc = [
-   { id: 'doctor', label: 'Run doctor first' },
-   { id: 'session', label: 'Session errors' },
-   { id: 'browser', label: 'Browser errors' },
+   { id: 'doctor', label: 'Start with doctor' },
+   { id: 'load', label: 'The page did not load' },
+   { id: 'browser', label: 'No browser was found' },
+   { id: 'session', label: 'No active session' },
    { id: 'voiceover', label: 'VoiceOver started unexpectedly' },
-   { id: 'recording', label: 'Recording problems' },
-   { id: 'thin', label: 'Empty results' },
+   { id: 'expect', label: 'A check fails that should pass' },
+   { id: 'empty', label: 'The result is missing something' },
+   { id: 'codes', label: 'Exit codes' },
 ];
 ---
 
 <DocShell
    title="Troubleshooting"
-   summary="Most a1 failures have one of a few causes: no browser, no active session, the wrong screen reader started, or a page that had not rendered yet. doctor finds the first two. This page covers the rest, with the exact error text each one prints."
+   summary="<p>Fixes for the errors a1 prints most often. Each entry starts with the text of the message, so you can search this page for your error.</p>"
    links={docsLinks}
    toc={toc}
 >
-   <section class="panel" id="doctor">
-      <h2>Run doctor first</h2>
-      <p>
-         <code>a1 doctor</code> checks the browser and each screen reader, and prints the exact
-         command to fix whatever is missing under Action items. Most of the environment errors
-         below appear when a command runs before a step <code>doctor</code> reported is fixed.
-      </p>
+   <section>
+      <h2 id="doctor">Start with doctor</h2>
       <pre><code>a1 doctor</code></pre>
       <p>
-         See <a href="/quickstart">the quickstart</a> for what each check does and
-         <a href="/screen-readers#real">setting up VoiceOver or NVDA</a> for the one-time
-         steps each of them needs.
+         <code>doctor</code> checks the browser and each screen reader. When something is
+         missing, it prints the command that fixes it under <strong>Action items</strong>.
+         <code>a1 setup</code> runs the setup steps for VoiceOver or NVDA.
       </p>
    </section>
 
-   <section class="panel" id="session">
-      <h2>Session errors</h2>
-      <div class="route-list">
-         <div class="route-row">
-            <strong>missing-session</strong>
-            <span>
-               <code>✗ Error (missing-session): No active screen reader session. Start one with "a1 sr start".</code>
-               Every <code>sr</code> command but <code>press</code>, <code>type</code>,
-               <code>do</code>, and <code>walk</code> needs a session already running. Run
-               <code>sr start --sr virtual &lt;url&gt;</code> first.
-            </span>
-         </div>
-         <div class="route-row">
-            <strong>A command exits 4 that you expected to pass</strong>
-            <span>
-               <code>find</code>, <code>goto</code>, <code>wait --for</code>, and
-               <code>expect</code> exit 4 when nothing matches, so a script can act on it. Run
-               <code>sr transcript</code> to see every announcement so far. Word order
-               matters: the simulated screen reader announces the role, then the name, such as
-               <code>"button, Pay"</code>, not <code>"Pay, button"</code>.
-            </span>
-         </div>
-         <div class="route-row">
-            <strong>sr wait --for never matches</strong>
-            <span>
-               <code>wait</code> only matches announcements made after it starts. An announcement
-               the triggering command already printed in its own output came before the wait and
-               does not match. Check that output directly, or run <code>expect --since</code>
-               against a checkpoint set before the triggering command. See
-               <a href="/guides/screen-reader#check">assert on the transcript</a>.
-            </span>
-         </div>
-      </div>
-   </section>
-
-   <section class="panel" id="browser">
-      <h2>Browser errors</h2>
-      <div class="route-list">
-         <div class="route-row">
-            <strong>browser-unavailable</strong>
-            <span>
-               <code>✗ Error (browser-unavailable): No usable Chromium-family browser is available for Playwright automation.</code>
-               Install one: <code>npx playwright install chromium</code>, or install Chrome,
-               Edge, Brave, or Chromium and a1 will find it. <code>a1 doctor --json</code> lists
-               every candidate it checked under <code>result.browserAutomation.candidates</code>.
-            </span>
-         </div>
-         <div class="route-row">
-            <strong>The scan hangs, then times out</strong>
-            <span>
-               <code>--timeout &lt;ms&gt;</code> bounds how long loading the page may take,
-               10000 ms by default. A route behind auth or a slow dev server needs a longer
-               timeout, or <code>--wait-for &lt;css&gt;</code> to wait for a specific element
-               instead of the page's own load event.
-            </span>
-         </div>
-      </div>
-   </section>
-
-   <section class="field-note" id="voiceover">
-      <h2>VoiceOver started unexpectedly</h2>
+   <section>
+      <h2 id="load">The page did not load</h2>
+      <pre data-label="OUTPUT"><code>✗ Error (internal-error): page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/</code></pre>
       <p>
-         <code>sr start</code> and <code>sr walk</code> start VoiceOver on macOS when
-         <code>--sr</code> is not given and no session is active. If VoiceOver just took over
-         the screen, run <code>a1 sr stop</code> to end that session, then rerun the command
-         with <code>--sr virtual</code>. Add that flag to every script
-         and CI step. See <a href="/guides/ci#target">run in CI</a>.
+         Nothing is listening at that address. Start your development server, check the port,
+         and run the command again.
       </p>
-      <pre><code>a1 sr stop --json
-a1 sr walk http://localhost:3000/checkout --sr virtual --json</code></pre>
-   </section>
-
-   <section class="panel" id="recording">
-      <h2>Recording problems</h2>
       <p>
-         See <a href="/guides/recording#troubleshoot">record a session</a> for the full list:
-         screen recording permission belongs to the app running <code>a1</code>, not to
-         <code>a1</code> itself, the simulated screen reader cannot record, and a recording that
-         is empty means the session was stopped before the file finished writing.
+         When a page loads slowly and the command times out, raise the limit with
+         <code>--timeout &lt;ms&gt;</code>. The default is 10000. For a page that draws itself
+         after loading, <code>--wait-for &lt;css&gt;</code> waits until an element appears.
+      </p>
+      <p>
+         For a page behind a sign-in, <code>a1 check</code> and <code>a1 capture</code> take
+         <code>--storage-state &lt;file&gt;</code>, a saved Playwright sign-in state.
+         <code>a1 axe</code> takes <code>--cookie</code> and <code>--header</code>.
       </p>
    </section>
 
-   <section class="panel" id="thin">
-      <h2>Empty results</h2>
+   <section>
+      <h2 id="browser">No browser was found</h2>
+      <pre data-label="OUTPUT"><code>✗ Error (browser-unavailable): No usable Chromium-family browser is available for Playwright automation.</code></pre>
       <p>
-         A page with under 10 elements and 50 characters of text adds a warning that a
-         single-page app may not have mounted. Load the route in a browser first to confirm
-         it renders before trusting an empty <code>axe</code> or <code>tree</code> result.
+         Scans, the accessibility tree, and the simulated screen reader need Chrome, Edge,
+         Brave, or Chromium. a1 uses one that is installed on the system. On a machine with
+         none, such as a CI image, install one:
       </p>
+      <pre><code>npx playwright install chromium</code></pre>
+   </section>
+
+   <section>
+      <h2 id="session">No active session</h2>
+      <pre data-label="OUTPUT"><code>✗ Error (missing-session): No active screen reader session. Start one with "a1 sr start".</code></pre>
       <p>
-         The relevant criteria scan in <code>a1 check</code> reports <code>not-detected</code>
-         for the same reason: it reads only the HTML the server returned, so content a client
-         framework adds after load is not detected. See the
-         <a href="/relevant-criteria#limits">limits of the relevant criteria scan</a>.
+         Most <code>a1 sr</code> commands act on a running session. Start one first.
+      </p>
+      <pre><code>a1 sr start --sr virtual http://localhost:3000/</code></pre>
+      <p>
+         A session ends after 30 idle minutes, so this can appear when you come
+         back from a break.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="voiceover">VoiceOver started unexpectedly</h2>
+      <p>
+         Without <code>--sr</code>, <code>sr start</code> and <code>sr walk</code> use
+         VoiceOver on a Mac that is set up for it. <code>sr press</code>,
+         <code>sr type</code>, and <code>sr do</code> do the same when no session is active.
+         Stop it, then say which screen reader you want.
+      </p>
+      <pre><code>a1 sr stop
+a1 sr walk http://localhost:3000/ --sr virtual</code></pre>
+      <p>Put <code>--sr virtual</code> in every script and CI step.</p>
+   </section>
+
+   <section>
+      <h2 id="expect">A check fails that should pass</h2>
+      <p>
+         <code>sr expect</code>, <code>sr goto</code>, <code>sr find</code>, and
+         <code>sr wait --for</code> exit 4 when nothing matches. To see what the screen
+         reader said, print the transcript.
+      </p>
+      <pre><code>a1 sr transcript --tail 10</code></pre>
+      <dl class="defs defs--wide">
+         <dt>The words are in a different order</dt>
+         <dd>The simulated screen reader says the role first: <code>button, Pay</code>. Match a shorter string, such as <code>Pay</code>.</dd>
+         <dt><code>expect --since</code> checked 0 phrases</dt>
+         <dd>Either the checkpoint was set after the action, or the action announced nothing. Set the checkpoint before the action. If it still checks 0 phrases, the silence is the defect.</dd>
+         <dt><code>wait --for</code> never matches</dt>
+         <dd><code>wait</code> matches only announcements made after it starts. For one that already happened, use <code>expect --since</code>.</dd>
+         <dt>The announcement arrives late</dt>
+         <dd>Use <code>sr wait --for &lt;text&gt; --timeout 10000</code> before the <code>expect</code>.</dd>
+      </dl>
+   </section>
+
+   <section>
+      <h2 id="empty">The result is missing something</h2>
+      <p>
+         a1 tests the page as it is when the command runs. A dialog, a menu, or an error
+         message that appears only after a click is not there yet.
+      </p>
+      <dl class="defs defs--wide">
+         <dt>Content behind a click</dt>
+         <dd><code>--click &lt;selector&gt;</code> on <code>check</code>, <code>axe</code>, and <code>tree</code> clicks one element before the test.</dd>
+         <dt>Content that loads late</dt>
+         <dd><code>--wait-for &lt;css&gt;</code> waits for an element before the test.</dd>
+         <dt>Content behind several steps</dt>
+         <dd>Start a session, get there with <code>a1 sr</code>, and read it from the session.</dd>
+      </dl>
+      <p>
+         After a page loads, a1 waits up to three seconds for animations to finish, so a page
+         that fades in is tested as it ends up.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="codes">Exit codes</h2>
+      <dl class="defs">
+         <dt>0</dt>
+         <dd>The command ran and nothing it checked failed.</dd>
+         <dt>1</dt>
+         <dd>The command line could not be read: an unknown command or option, or a missing argument.</dd>
+         <dt>2</dt>
+         <dd>The command was used wrongly: an option value that is not allowed, or no active session.</dd>
+         <dt>3</dt>
+         <dd>The machine is not ready: no browser, or a screen reader that is not set up.</dd>
+         <dt>4</dt>
+         <dd>A check failed: a violation, or an announcement that was not made.</dd>
+         <dt>5</dt>
+         <dd>Something else went wrong, such as a page that did not load.</dd>
+      </dl>
+      <p>
+         Recording has its own list. See
+         <a href="/guides/recording#problems">record a screen reader session</a>.
       </p>
    </section>
 </DocShell>

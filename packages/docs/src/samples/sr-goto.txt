@@ -1,0 +1,6 @@
+sr goto --role button --name Invite member  virtual
+  Phrase:  button, Invite member
+  Item:    Invite member
+  Role:    button
+  Name:    Invite member
+  Found:   yes

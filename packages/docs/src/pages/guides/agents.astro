@@ -1,128 +1,182 @@
 ---
 import DocShell from '../../layouts/doc-shell.astro';
-import { docsLinks } from '../../lib/nav';
+import { docsLinks, REPOSITORY_URL } from '../../lib/nav';
+import mcpConfig from '../../samples/mcp-config.json.txt?raw';
 
+const skillsInstall = `npx -y @a1st/aix install ${REPOSITORY_URL}/blob/master/packages/skills/ai.json --only skills --user`;
 const toc = [
-   { id: 'connect', label: 'Connect the server' },
-   { id: 'run', label: 'The automated checks' },
-   { id: 'driver', label: 'Screen reader sessions' },
-   { id: 'prompts', label: 'Example prompts' },
-   { id: 'pitfalls', label: 'Common mistakes' },
+   { id: 'what', label: 'What an agent needs' },
+   { id: 'skills', label: 'Install the skills' },
+   { id: 'connect', label: 'Install the CLI or connect the MCP server' },
+   { id: 'first', label: 'Make the first request' },
+   { id: 'scan', label: 'Ask for a scan' },
+   { id: 'sr', label: 'Ask for a screen reader test' },
+   { id: 'prompts', label: 'Prompts that work' },
+   { id: 'rules', label: 'What the skills teach' },
+   { id: 'mistakes', label: 'Reporting rules to give the agent' },
 ];
 ---
 
 <DocShell
-   title="Use with an AI agent"
-   summary="The MCP server is a local process that your editor or coding agent starts. It exposes the a11ied commands as MCP tools, so the agent can run the automated checks, drive a screen reader, and look up criteria from the Web Content Accessibility Guidelines (WCAG) for the page you name. It runs over stdio and opens no network port."
+   title="Set up an AI agent"
+   summary="<p>An AI coding agent needs two things to test with a11ied: instructions for how to test, and a way to run a11ied. This page sets up both for Claude Code, Codex, Cursor, or any other coding agent, then shows what to ask for.</p>"
    links={docsLinks}
    toc={toc}
 >
-   <section class="panel" id="connect">
-      <h2>Connect the server</h2>
-      <p>Add a11ied to the MCP configuration your editor or agent reads, then restart it.</p>
-      <pre data-label="CONFIG"><code>{`{
-  "mcpServers": {
-    "a11ied": {
-      "command": "npx",
-      "args": ["-y", "a11ied", "mcp"]
-    }
-  }
-}`}</code></pre>
+   <section>
+      <h2 id="what">What an agent needs</h2>
+      <dl class="defs">
+         <dt>The skills</dt>
+         <dd>Instructions the agent loads when a task calls for them. They teach it how to test with a11ied: what to run first, which screen reader to use, and how to report what it found.</dd>
+         <dt>A way to run a11ied</dt>
+         <dd>The <code>a1</code> command in a terminal, or the MCP server, which gives the agent the same commands as tools. Install either one. The skills work with both.</dd>
+      </dl>
       <p>
-         Point <code>command</code> at <code>a1</code> with <code>args: ["mcp"]</code> instead if
-         you installed the package globally and want the client to use that copy.
-      </p>
-      <p>
-         Ask the agent to call <code>doctor</code> first. The result says which browser a11ied
-         uses and whether VoiceOver, NVDA, and the simulated screen reader are ready, so the
-         agent knows which tools it can run on this machine.
-      </p>
-      <p>
-         The server also serves seven read-only resources, including the criteria index and the
-         test method of every criterion in WCAG 2.1 and 2.2. See the
-         <a href="/reference/mcp">MCP reference</a>.
+         Choose the MCP server for an agent that cannot run terminal commands, or when you
+         want every a11ied call to appear as a tool call. Otherwise the CLI is enough.
       </p>
    </section>
 
-   <section class="panel" id="run">
-      <h2>The automated checks</h2>
+   <section>
+      <h2 id="skills">Install the skills</h2>
+      <pre><code>{skillsInstall}</code></pre>
       <p>
-         The automated checks run axe-core, the open-source rule engine most automated
-         accessibility checkers use. a1 injects it into the page and runs it there, so it sees
-         the rendered DOM, not just the HTML a server sent. Start your development server, then
-         give the agent the exact route and the WCAG level you want tested.
+         <a href="https://aix.a1st.dev/">aix</a> finds the coding agents on your machine and
+         asks which one gets the skills. <code>--user</code> installs them for every project.
+         Add <code>--target claude-code</code>, <code>--target codex</code>, or another agent
+         name to skip the question. Restart the agent so it loads them.
       </p>
-      <pre data-label="AI AGENT PROMPT"><code>Open http://localhost:3000/account/settings.
-Use a11ied to run axe at WCAG level AA.
-For each violation, give me the selector, the impact, and the failing HTML.</code></pre>
+      <p>This installs two skills.</p>
+      <dl class="defs">
+         <dt><code>a11ied</code></dt>
+         <dd>For checking a component or page while you build it.</dd>
+         <dt><code>a11ied-audit</code></dt>
+         <dd>For a full WCAG audit with parallel workers and a report. See <a href="/guides/audit">audit a site with AI agents</a>.</dd>
+      </dl>
+      <p>To update the skills, run the install command again. It replaces them with the current ones.</p>
+   </section>
+
+   <section>
+      <h2 id="connect">Install the CLI or connect the MCP server</h2>
+      <h3>The CLI</h3>
+      <pre><code>npm install --global a11ied</code></pre>
+      <p>The agent runs <code>a1</code> commands in its terminal, the same ones you would type.</p>
+      <h3>The MCP server</h3>
       <p>
-         The agent calls <code>run_axe</code> with <code>target</code> set to the URL and
-         <code>level: "AA"</code>. Omitting <code>criterion</code>, <code>level</code>, and
-         <code>ruleIds</code> runs every rule mapped to a WCAG criterion. The response has a
-         <code>verdict</code> object and <code>exitCode</code> 4 when a violation was found.
+         <abbr title="Model Context Protocol">MCP</abbr> is the standard that lets an agent
+         call outside tools. Add a11ied to the MCP configuration your agent reads, then
+         restart the agent. The server runs on your machine and opens no network port.
+      </p>
+      <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
+      <dl class="defs">
+         <dt>Claude Code</dt>
+         <dd>Run <code>claude mcp add a11ied -- npx -y a11ied mcp</code>.</dd>
+         <dt>Cursor</dt>
+         <dd>Put that configuration block in <code>.cursor/mcp.json</code>.</dd>
+         <dt>Other agents</dt>
+         <dd>Any client that starts an MCP server over stdio works. The command is <code>npx -y a11ied mcp</code>.</dd>
+      </dl>
+      <p>
+         If you installed a11ied globally, <code>"command": "a1"</code> with
+         <code>"args": ["mcp"]</code> uses that copy. The
+         <a href="/reference/mcp">MCP reference</a> lists every tool.
       </p>
    </section>
 
-   <section class="panel" id="driver">
-      <h2>Screen reader sessions</h2>
+   <section>
+      <h2 id="first">Make the first request</h2>
+      <pre data-label="AI AGENT PROMPT"><code>Run the a11ied doctor check and tell me what is ready on this machine.</code></pre>
       <p>
-         Use a session for labels, focus order, dialogs, menus, and validation messages. The
-         automated checks do not test any of those in sequence.
-      </p>
-      <pre data-label="AI AGENT PROMPT"><code>Use a11ied to walk the checkout form with the screen reader.
-Move through every field in order and collect every announcement.
-Tell me which controls announce without a name and where the order
-does not match the visual order.</code></pre>
-      <p>
-         The agent calls <code>sr_session</code> with <code>action: "start"</code>, then
-         <code>sr_action</code> for each step, then <code>sr_expect</code> to check that an
-         announcement was made. For VoiceOver or NVDA, open the page in a browser before the agent
-         starts. For the simulated screen reader, the agent passes <code>url</code> and
-         <code>allowVirtual: true</code>.
-      </p>
-      <p>
-         Remind the agent to call <code>sr_session</code> with <code>action: "stop"</code> when
-         it finishes. A session left open keeps VoiceOver or NVDA under automation until
-         something stops it.
+         <code>doctor</code> reports which browser a11ied will use and which screen readers
+         are set up. Now you and the agent both know what it can run here.
       </p>
    </section>
 
-   <section class="ledger" id="prompts">
-      <h2>Example prompts</h2>
-      <div class="route-list">
-         <div class="route-row">
-            <strong>Review a branch</strong>
-            <span>Run <code>run_axe</code> on the routes the diff touches and compare each violation against the intended behavior.</span>
-         </div>
-         <div class="route-row">
-            <strong>Test a dialog</strong>
-            <span>Open it, move focus through it, close it, and report which element has focus at each step.</span>
-         </div>
-         <div class="route-row">
-            <strong>Work one criterion</strong>
-            <span>Run <code>wcag_show</code> for the criterion, read its test method, run <code>check</code> on the page, then run the test the <code>strategy</code> lists.</span>
-         </div>
-         <div class="route-row">
-            <strong>Narrow a bug report</strong>
-            <span>Reproduce the reported step, run <code>sr_transcript</code>, and quote the exact announcement.</span>
-         </div>
-      </div>
+   <section>
+      <h2 id="scan">Ask for a scan</h2>
+      <p>Start your development server. Give the agent the exact URL.</p>
+      <pre data-label="AI AGENT PROMPT"><code>Check http://localhost:3000/account/settings with a11ied. For each problem, give me the element, the WCAG criterion, and the fix. Then list the criteria I still have to check by hand.</code></pre>
+      <p>
+         The agent runs <code>a1 check</code>, or calls the <code>check</code> tool. The
+         result has the axe violations, the criteria the page triggers, and
+         <code>nextCommands</code>, the lookups to run next. For a scan alone, it uses
+         <code>a1 axe</code> or the <code>run_axe</code> tool.
+      </p>
    </section>
 
-   <section class="field-note" id="pitfalls">
-      <h2>Common mistakes</h2>
+   <section>
+      <h2 id="sr">Ask for a screen reader test</h2>
       <p>
-         Reporting a passing axe run as meeting WCAG level AA. axe rules decide only some of
-         the level AA criteria. Ask the agent to run <code>wcag_criteria</code> with
-         <code>summary: true</code> and report the <a href="/test-methods">test method</a> next
-         to every result.
+         A scan cannot test focus, dialogs, menus, or error messages. A screen reader session
+         can.
       </p>
+      <pre data-label="AI AGENT PROMPT"><code>Use the a11ied simulated screen reader on http://localhost:3000/checkout. Open the payment dialog and check three things: focus moves into the dialog, the dialog announces its name, and Escape returns focus to the button that opened it. Quote the announcements. Stop the session when you finish.</code></pre>
       <p>
-         Quoting the simulated screen reader as VoiceOver. The <code>sr_session</code> start
-         response has <code>targetType</code>: <code>real</code> for VoiceOver and NVDA,
-         <code>simulated</code> for the simulated screen reader. Ask the agent to include it in
-         its report. The <a href="/guides/agent-skill">agent skill</a> puts both rules in the
-         agent's instructions.
+         In a terminal the agent runs the <a href="/guides/screen-reader"><code>a1 sr</code>
+         commands</a>. Over MCP it uses four tools.
+      </p>
+      <dl class="defs">
+         <dt><code>sr_session</code></dt>
+         <dd>Starts and stops the session. For the simulated screen reader it passes <code>target: "virtual"</code>. On a machine where VoiceOver or NVDA is the default, it must also pass <code>allowVirtual: true</code>, which is the agent stating that it knows the result is a simulation.</dd>
+         <dt><code>sr_action</code></dt>
+         <dd>One step: move, press a key, type, set a checkpoint.</dd>
+         <dt><code>sr_expect</code></dt>
+         <dd>Checks that something was announced.</dd>
+         <dt><code>sr_transcript</code></dt>
+         <dd>Returns everything the screen reader said.</dd>
+      </dl>
+      <p>
+         Tell the agent to stop the session. A VoiceOver or NVDA session keeps control of the
+         screen reader until something stops it.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="prompts">Prompts that work</h2>
+      <p>Name the page, the behavior, and what you want back.</p>
+      <dl class="defs">
+         <dt>Test a page</dt>
+         <dd>"Use the a11ied skill to test http://localhost:3000/checkout. Run the scan first. Then test the field labels and the error messages with the screen reader. Report the two separately."</dd>
+         <dt>Check a change</dt>
+         <dd>"Check each route this branch changes with a11ied and report only new problems."</dd>
+         <dt>Test a widget</dt>
+         <dd>"Look up the ARIA combobox pattern with a11ied, then test our country picker against its keyboard table."</dd>
+         <dt>Work one criterion</dt>
+         <dd>"Look up WCAG 4.1.3 with a11ied, read how to test it, and test the save button on /settings."</dd>
+         <dt>Narrow a bug report</dt>
+         <dd>"A user says the cart total is not read out. Reproduce it with a11ied and quote the transcript."</dd>
+      </dl>
+   </section>
+
+   <section>
+      <h2 id="rules">What the skills teach</h2>
+      <dl class="defs defs--wide">
+         <dt>Look up the criterion first</dt>
+         <dd>When a task names a WCAG criterion, the agent reads how to test it before it tests anything.</dd>
+         <dt>Match the test to the criterion</dt>
+         <dd>A scan covers part of some criteria. The rest need a screen reader, the keyboard, or judgment.</dd>
+         <dt>Start simulated, finish real</dt>
+         <dd>The simulated screen reader for quick runs. VoiceOver or NVDA when the question is what the real one does.</dd>
+         <dt>Keep results apart</dt>
+         <dd>Scan results, transcripts, and judgments are reported separately. A clean scan is never reported as meeting WCAG.</dd>
+         <dt>Label simulated output</dt>
+         <dd>Output from the simulated screen reader is never presented as VoiceOver or NVDA.</dd>
+      </dl>
+   </section>
+
+   <section>
+      <h2 id="mistakes">Reporting rules to give the agent</h2>
+      <p>The skills write both of these rules into the agent's instructions. Without the skills, give them yourself.</p>
+      <dl class="defs defs--wide">
+         <dt>"The scan passed, so the page meets WCAG"</dt>
+         <dd>A scanner decides part of some criteria and none of them fully. Ask the agent to report scan results and <a href="/test-methods">hand-checked results</a> separately.</dd>
+         <dt>"VoiceOver says..." from a simulated run</dt>
+         <dd>Every session reports <code>targetType</code>: <code>real</code> or <code>simulated</code>. Ask the agent to include it.</dd>
+      </dl>
+      <p>
+         These docs are also published as plain text for AI tools.
+         <a href="/llms.txt"><code>llms.txt</code></a> lists every page, and
+         <a href="/llms-full.txt"><code>llms-full.txt</code></a> has all of them in one file.
       </p>
    </section>
 </DocShell>

@@ -1,0 +1,9 @@
+# Transcript: virtual on PRACTICE_URLfixed/
+
+Started 2026-11-24T12:46:17.666Z. Exported 2026-11-24T12:46:29.347Z. 2 phrases.
+
+Selected 2 of 44 session entries.
+Earlier entries were omitted by the selection.
+
+1. [12:46:26.047] dialog, Invite member (Invite member)
+2. [12:46:26.047] textbox, Email address, required (Email address)

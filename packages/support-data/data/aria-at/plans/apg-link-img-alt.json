@@ -1,0 +1,1952 @@
+{
+   "schemaVersion": 1,
+   "planVersionID": "163634",
+   "slug": "apg-link-img-alt",
+   "directory": "apg/link-img-alt",
+   "title": "Link Example 2 (img element with alt attribute)",
+   "versionString": "V25.01.23",
+   "phase": "RECOMMENDED",
+   "gitSha": "e1f64782a2275e489d431f845bb4070de10f3420",
+   "updatedAt": "2025-01-23T20:56:14.000Z",
+   "exampleURL": "https://www.w3.org/WAI/ARIA/apg/patterns/link/examples/link/",
+   "designPatternURL": "https://www.w3.org/WAI/ARIA/apg/patterns/link/",
+   "upstreamURL": "https://aria-at.w3.org/test-plan/163634",
+   "featureRefs": [
+      {
+         "refId": "link",
+         "type": "aria",
+         "linkText": "link ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#link"
+      }
+   ],
+   "reports": [
+      {
+         "reportID": "571",
+         "atKey": "jaws",
+         "atName": "JAWS",
+         "atVersion": "2025.2508.120",
+         "browserKey": "chrome",
+         "browserName": "Chrome",
+         "browserVersion": "148",
+         "os": "Windows",
+         "osVersion": "Not recorded by ARIA-AT",
+         "device": "PC (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 24,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 24
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "tests": [
+            {
+               "testTitle": "Navigate forwards to a link",
+               "rowNumber": 3,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "148",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "u (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Link \u001e W3C Website",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzYwZeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTdhOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODQ2YeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTBjYj",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "W3C Website  \u001d Link \u001e  \n\nTo activate press Enter.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzYwZeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTdhOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODQ2YeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTBjYj",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Down Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": " \u001d Link \u001e W3C Website\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzYwZeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTdhOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODQ2YeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTBjYj",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "W3C Website \u001d Link \u001e \nTo activate press Enter.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzYwZeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTdhOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODQ2YeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTBjYj",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/e1f64782a2275e489d431f845bb4070de10f3420/build/tests/link-img-alt/test-03-navForwardsToLink-jaws.collected.html",
+               "completedAt": "2026-05-19T00:38:55.242Z"
+            },
+            {
+               "testTitle": "Navigate backwards to a link",
+               "rowNumber": 6,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "148",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+u (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Link \u001e W3C Website",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWFmZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTgwOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjdiZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTM1ND",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Up Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": " \u001d Link \u001e W3C Website\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWFmZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTgwOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjdiZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTM1ND",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "W3C Website  \u001d Link \u001e  \n\nTo activate press Enter.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWFmZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTgwOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjdiZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTM1ND",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "W3C Website \u001d Link \u001e \nTo activate press Enter.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWFmZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTgwOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjdiZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTM1ND",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/e1f64782a2275e489d431f845bb4070de10f3420/build/tests/link-img-alt/test-06-navBackToLink-jaws.collected.html",
+               "completedAt": "2026-05-19T00:40:19.210Z"
+            },
+            {
+               "testTitle": "Request information about a link",
+               "rowNumber": 9,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "148",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "W3C Website  \u001d Link \u001e  \n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGY2MeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQjAzMT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjcxNeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQDMxYz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": " \u001d Link \u001e W3C Website\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGY2MeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQjAzMT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjcxNeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQDMxYz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "W3C Website \u001d Link \u001e \nTo activate press Enter.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGY2MeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQjAzMT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjcxNeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQDMxYz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "W3C Website \u001d Link \u001e ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGY2MeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQjAzMT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjcxNeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQDMxYz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/e1f64782a2275e489d431f845bb4070de10f3420/build/tests/link-img-alt/test-09-reqInfoAboutLink-jaws.collected.html",
+               "completedAt": "2026-05-19T00:41:09.517Z"
+            }
+         ],
+         "markedFinalAt": "2026-06-02T22:28:49.208Z"
+      },
+      {
+         "reportID": "503",
+         "atKey": "jaws",
+         "atName": "JAWS",
+         "atVersion": "2025.2412.50",
+         "browserKey": "chrome",
+         "browserName": "Chrome",
+         "browserVersion": "143",
+         "os": "Windows",
+         "osVersion": "Not recorded by ARIA-AT",
+         "device": "PC (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 24,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 24
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "tests": [
+            {
+               "testTitle": "Navigate forwards to a link",
+               "rowNumber": 3,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "143",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "u (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": " \u001d Link \u001e W3C Website\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzYwZeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTdhOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODQ2YeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTBjYj",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "W3C Website  \u001d Link \u001e  \n\nTo activate press Enter.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzYwZeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTdhOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODQ2YeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTBjYj",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Down Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": " \u001d Link \u001e W3C Website\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzYwZeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTdhOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODQ2YeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTBjYj",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "W3C Website \u001d Link \u001e \nTo activate press Enter.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzYwZeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTdhOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODQ2YeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTBjYj",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/e1f64782a2275e489d431f845bb4070de10f3420/build/tests/link-img-alt/test-03-navForwardsToLink-jaws.collected.html",
+               "completedAt": "2025-12-17T03:08:06.078Z"
+            },
+            {
+               "testTitle": "Navigate backwards to a link",
+               "rowNumber": 6,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "143",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+u (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": " \u001d Link \u001e W3C Website\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWFmZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTgwOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjdiZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTM1ND",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Up Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": " \u001d Link \u001e W3C Website\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWFmZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTgwOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjdiZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTM1ND",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "W3C Website  \u001d Link \u001e  \n\nTo activate press Enter.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWFmZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTgwOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjdiZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTM1ND",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "W3C Website \u001d Link \u001e \nTo activate press Enter.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWFmZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTgwOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjdiZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTM1ND",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/e1f64782a2275e489d431f845bb4070de10f3420/build/tests/link-img-alt/test-06-navBackToLink-jaws.collected.html",
+               "completedAt": "2025-12-17T03:09:13.368Z"
+            },
+            {
+               "testTitle": "Request information about a link",
+               "rowNumber": 9,
+               "atVersion": "2025.2508.120",
+               "browserVersion": "143",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "W3C Website  \u001d Link \u001e  \n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGY2MeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQjAzMT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjcxNeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQDMxYz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": " \u001d Link \u001e W3C Website\n",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGY2MeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQjAzMT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjcxNeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQDMxYz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "W3C Website \u001d Link \u001e \nTo activate press Enter.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGY2MeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQjAzMT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjcxNeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQDMxYz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "W3C Website \u001d Link \u001e ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGY2MeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQjAzMT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjcxNeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQDMxYz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/e1f64782a2275e489d431f845bb4070de10f3420/build/tests/link-img-alt/test-09-reqInfoAboutLink-jaws.collected.html",
+               "completedAt": "2025-12-17T03:09:47.849Z"
+            }
+         ],
+         "markedFinalAt": "2026-05-06T03:33:42.221Z"
+      },
+      {
+         "reportID": "337",
+         "atKey": "voiceover_macos",
+         "atName": "VoiceOver for macOS",
+         "atVersion": "15.2",
+         "browserKey": "safari_macos",
+         "browserName": "Safari",
+         "browserVersion": "18",
+         "os": "macOS",
+         "osVersion": "15.2",
+         "device": "Mac (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 16,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 16
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "tests": [
+            {
+               "testTitle": "Navigate forwards to a link",
+               "rowNumber": 3,
+               "atVersion": "15.2",
+               "browserVersion": "18",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+Right Arrow",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "\nlink W3C Website\nYou are currently on a link. To click this link, press Control-Option-Space.",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTlhZeyIzIjoiTXpsaVpleUl5SWpvaU1UWXpOak0wSW4wamRtWkQifQjBkNz",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NzQ5NeyIzIjoiTXpsaVpleUl5SWpvaU1UWXpOak0wSW4wamRtWkQifQzRlOT",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "link\n              W3C Website\nYou are currently on a link. To click this link, press Control            -Option            -Space. ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTlhZeyIzIjoiTXpsaVpleUl5SWpvaU1UWXpOak0wSW4wamRtWkQifQjBkNz",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NzQ5NeyIzIjoiTXpsaVpleUl5SWpvaU1UWXpOak0wSW4wamRtWkQifQzRlOT",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "l (quick nav on)",
+                           "mode": "quickNavOn"
+                        }
+                     ],
+                     "output": "  W3C Website\n            link\nYou are currently on a link. To click this link, press Control            -Option            -Space. ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZTlhZeyIzIjoiTXpsaVpleUl5SWpvaU1UWXpOak0wSW4wamRtWkQifQjBkNz",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NzQ5NeyIzIjoiTXpsaVpleUl5SWpvaU1UWXpOak0wSW4wamRtWkQifQzRlOT",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/e1f64782a2275e489d431f845bb4070de10f3420/build/tests/link-img-alt/test-03-navForwardsToLink-voiceover_macos.collected.html",
+               "completedAt": "2025-02-03T19:58:08.669Z"
+            },
+            {
+               "testTitle": "Navigate backwards to a link",
+               "rowNumber": 6,
+               "atVersion": "15.2",
+               "browserVersion": "18",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+Left Arrow",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "link\nlink\n              W3C Website\nYou are currently on a link. To click this link, press Control            -Option            -Space. ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzA2ZeyIzIjoiWWpjM05leUl5SWpvaU1UWXpOak0wSW4walppTWoifQTNjNz",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZTgwYeyIzIjoiWWpjM05leUl5SWpvaU1UWXpOak0wSW4walppTWoifQTkxOG",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "link\n              W3C Website\nYou are currently on a link. To click this link, press Control            -Option            -Space. ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzA2ZeyIzIjoiWWpjM05leUl5SWpvaU1UWXpOak0wSW4walppTWoifQTNjNz",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZTgwYeyIzIjoiWWpjM05leUl5SWpvaU1UWXpOak0wSW4walppTWoifQTkxOG",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+l (quick nav on)",
+                           "mode": "quickNavOn"
+                        }
+                     ],
+                     "output": "  W3C Website\n            link\nYou are currently on a link. To click this link, press Control            -Option            -Space. ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzA2ZeyIzIjoiWWpjM05leUl5SWpvaU1UWXpOak0wSW4walppTWoifQTNjNz",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZTgwYeyIzIjoiWWpjM05leUl5SWpvaU1UWXpOak0wSW4walppTWoifQTkxOG",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/e1f64782a2275e489d431f845bb4070de10f3420/build/tests/link-img-alt/test-06-navBackToLink-voiceover_macos.collected.html",
+               "completedAt": "2025-02-03T19:59:29.120Z"
+            },
+            {
+               "testTitle": "Request information about a link",
+               "rowNumber": 9,
+               "atVersion": "15.2",
+               "browserVersion": "18",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+F3",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "W3C Website             link             is in the VoiceOver cursor             ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "NmFhNeyIzIjoiTXpNd1lleUl5SWpvaU1UWXpOak0wSW4wbUV4TWoifQWJmMW",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MWY5OeyIzIjoiTXpNd1lleUl5SWpvaU1UWXpOak0wSW4wbUV4TWoifQDM1MT",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Control+Option+F4",
+                           "mode": "defaultMode"
+                        }
+                     ],
+                     "output": "W3C Website             link             has keyboard focus              ",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "NmFhNeyIzIjoiTXpNd1lleUl5SWpvaU1UWXpOak0wSW4wbUV4TWoifQWJmMW",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "MWY5OeyIzIjoiTXpNd1lleUl5SWpvaU1UWXpOak0wSW4wbUV4TWoifQDM1MT",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/e1f64782a2275e489d431f845bb4070de10f3420/build/tests/link-img-alt/test-09-reqInfoAboutLink-voiceover_macos.collected.html",
+               "completedAt": "2025-02-03T20:00:34.086Z"
+            }
+         ],
+         "markedFinalAt": "2025-02-03T20:01:50.678Z"
+      },
+      {
+         "reportID": "335",
+         "atKey": "jaws",
+         "atName": "JAWS",
+         "atVersion": "2025.2412.50",
+         "browserKey": "chrome",
+         "browserName": "Chrome",
+         "browserVersion": "132",
+         "os": "Windows",
+         "osVersion": "Not recorded by ARIA-AT",
+         "device": "PC (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 24,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 24
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "tests": [
+            {
+               "testTitle": "Navigate forwards to a link",
+               "rowNumber": 3,
+               "atVersion": "2025.2412.50",
+               "browserVersion": "132",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "u (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Link W3C Website",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzYwZeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTdhOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODQ2YeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTBjYj",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "W3C Website Link",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzYwZeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTdhOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODQ2YeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTBjYj",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Down Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Link W3C Website",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzYwZeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTdhOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODQ2YeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTBjYj",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "W3C Website Link",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzYwZeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTdhOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ODQ2YeyIzIjoiTURkak1leUl5SWpvaU1UWXpOak0wSW4walpqTTIifQTBjYj",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/e1f64782a2275e489d431f845bb4070de10f3420/build/tests/link-img-alt/test-03-navForwardsToLink-jaws.collected.html",
+               "completedAt": "2025-02-06T23:35:50.303Z"
+            },
+            {
+               "testTitle": "Navigate backwards to a link",
+               "rowNumber": 6,
+               "atVersion": "2025.2412.50",
+               "browserVersion": "132",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+u (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Link W3C Website",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWFmZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTgwOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjdiZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTM1ND",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Up Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Link W3C Website",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWFmZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTgwOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjdiZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTM1ND",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "W3C Website Link",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWFmZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTgwOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjdiZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTM1ND",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "W3C Website Link",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YWFmZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTgwOD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NjdiZeyIzIjoiWmpKa05leUl5SWpvaU1UWXpOak0wSW4wbUl5TW0ifQTM1ND",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/e1f64782a2275e489d431f845bb4070de10f3420/build/tests/link-img-alt/test-06-navBackToLink-jaws.collected.html",
+               "completedAt": "2025-02-06T23:38:34.259Z"
+            },
+            {
+               "testTitle": "Request information about a link",
+               "rowNumber": 9,
+               "atVersion": "2025.2412.50",
+               "browserVersion": "132",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "W3C Website Link",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGY2MeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQjAzMT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjcxNeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQDMxYz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (virtual cursor active)",
+                           "mode": "virtualCursor"
+                        }
+                     ],
+                     "output": "Link W3C Website",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGY2MeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQjAzMT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjcxNeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQDMxYz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "W3C Website Link",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGY2MeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQjAzMT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjcxNeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQDMxYz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (PC cursor active)",
+                           "mode": "pcCursor"
+                        }
+                     ],
+                     "output": "W3C WebsiteLink",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZGY2MeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQjAzMT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "ZjcxNeyIzIjoiWkdSak1leUl5SWpvaU1UWXpOak0wSW4wRGN3T1QifQDMxYz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/e1f64782a2275e489d431f845bb4070de10f3420/build/tests/link-img-alt/test-09-reqInfoAboutLink-jaws.collected.html",
+               "completedAt": "2025-02-06T23:42:01.868Z"
+            }
+         ],
+         "markedFinalAt": "2025-02-07T00:10:23.349Z"
+      },
+      {
+         "reportID": "334",
+         "atKey": "nvda",
+         "atName": "NVDA",
+         "atVersion": "2024.4.1",
+         "browserKey": "chrome",
+         "browserName": "Chrome",
+         "browserVersion": "132",
+         "os": "Windows",
+         "osVersion": "Not recorded by ARIA-AT",
+         "device": "PC (model not recorded by ARIA-AT)",
+         "summary": {
+            "must": {
+               "passed": 26,
+               "failed": 2,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 28
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 2
+         },
+         "tests": [
+            {
+               "testTitle": "Navigate forwards to a link",
+               "rowNumber": 3,
+               "atVersion": "2024.4.1",
+               "browserVersion": "132",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "u (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "W3C Website  link",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZWU4MeyIzIjoiTnpKaU1leUl5SWpvaU1UWXpOak0wSW4wakUwT0QifQjZhNj",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2NjMeyIzIjoiTnpKaU1leUl5SWpvaU1UWXpOak0wSW4wakUwT0QifQjVmNz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "k (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "W3C Website  link",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZWU4MeyIzIjoiTnpKaU1leUl5SWpvaU1UWXpOak0wSW4wakUwT0QifQjZhNj",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2NjMeyIzIjoiTnpKaU1leUl5SWpvaU1UWXpOak0wSW4wakUwT0QifQjVmNz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "W3C Website  link",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZWU4MeyIzIjoiTnpKaU1leUl5SWpvaU1UWXpOak0wSW4wakUwT0QifQjZhNj",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2NjMeyIzIjoiTnpKaU1leUl5SWpvaU1UWXpOak0wSW4wakUwT0QifQjVmNz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Down Arrow (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "link    W3C Website",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZWU4MeyIzIjoiTnpKaU1leUl5SWpvaU1UWXpOak0wSW4wakUwT0QifQjZhNj",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2NjMeyIzIjoiTnpKaU1leUl5SWpvaU1UWXpOak0wSW4wakUwT0QifQjVmNz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Tab (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "W3C Website  link",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ZWU4MeyIzIjoiTnpKaU1leUl5SWpvaU1UWXpOak0wSW4wakUwT0QifQjZhNj",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "N2NjMeyIzIjoiTnpKaU1leUl5SWpvaU1UWXpOak0wSW4wakUwT0QifQjVmNz",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/e1f64782a2275e489d431f845bb4070de10f3420/build/tests/link-img-alt/test-03-navForwardsToLink-nvda.collected.html",
+               "completedAt": "2025-02-04T00:13:02.369Z"
+            },
+            {
+               "testTitle": "Navigate backwards to a link",
+               "rowNumber": 6,
+               "atVersion": "2024.4.1",
+               "browserVersion": "132",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+u (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "W3C Website  link",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzEyMeyIzIjoiWXpneE1leUl5SWpvaU1UWXpOak0wSW4walF5TVQifQzNjOT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YzU0MeyIzIjoiWXpneE1leUl5SWpvaU1UWXpOak0wSW4walF5TVQifQjgxYW",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+k (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "W3C Website  link",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzEyMeyIzIjoiWXpneE1leUl5SWpvaU1UWXpOak0wSW4walF5TVQifQzNjOT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YzU0MeyIzIjoiWXpneE1leUl5SWpvaU1UWXpOak0wSW4walF5TVQifQjgxYW",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Up Arrow (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "link    W3C Website",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzEyMeyIzIjoiWXpneE1leUl5SWpvaU1UWXpOak0wSW4walF5TVQifQzNjOT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YzU0MeyIzIjoiWXpneE1leUl5SWpvaU1UWXpOak0wSW4walF5TVQifQjgxYW",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "W3C Website  link",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzEyMeyIzIjoiWXpneE1leUl5SWpvaU1UWXpOak0wSW4walF5TVQifQzNjOT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YzU0MeyIzIjoiWXpneE1leUl5SWpvaU1UWXpOak0wSW4walF5TVQifQjgxYW",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Shift+Tab (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "W3C Website  link",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "YzEyMeyIzIjoiWXpneE1leUl5SWpvaU1UWXpOak0wSW4walF5TVQifQzNjOT",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "YzU0MeyIzIjoiWXpneE1leUl5SWpvaU1UWXpOak0wSW4walF5TVQifQjgxYW",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/e1f64782a2275e489d431f845bb4070de10f3420/build/tests/link-img-alt/test-06-navBackToLink-nvda.collected.html",
+               "completedAt": "2025-02-04T00:15:49.578Z"
+            },
+            {
+               "testTitle": "Request information about a link",
+               "rowNumber": 9,
+               "atVersion": "2024.4.1",
+               "browserVersion": "132",
+               "commandResults": [
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "W3C Website  link  focused  linked",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ODdjZeyIzIjoiWkRWalpleUl5SWpvaU1UWXpOak0wSW4wR1kwTnoifQjg3MD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NWU2NeyIzIjoiWkRWalpleUl5SWpvaU1UWXpOak0wSW4wR1kwTnoifQzE1NT",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": [
+                        {
+                           "text": "Output is excessively verbose, e.g., includes redundant and/or irrelevant speech",
+                           "impact": "MODERATE",
+                           "details": "The \"linked\" state announced by NVDA for links via Insert+Tab is unhelpful."
+                        }
+                     ]
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (browse mode on)",
+                           "mode": "browseMode"
+                        }
+                     ],
+                     "output": "link    W3C Website",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ODdjZeyIzIjoiWkRWalpleUl5SWpvaU1UWXpOak0wSW4wR1kwTnoifQjg3MD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NWU2NeyIzIjoiWkRWalpleUl5SWpvaU1UWXpOak0wSW4wR1kwTnoifQzE1NT",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Tab (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "W3C Website  link  focused  linked",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ODdjZeyIzIjoiWkRWalpleUl5SWpvaU1UWXpOak0wSW4wR1kwTnoifQjg3MD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "pass",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NWU2NeyIzIjoiWkRWalpleUl5SWpvaU1UWXpOak0wSW4wR1kwTnoifQzE1NT",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "pass"
+                        }
+                     ],
+                     "negativeSideEffects": [
+                        {
+                           "text": "Output is excessively verbose, e.g., includes redundant and/or irrelevant speech",
+                           "impact": "MODERATE",
+                           "details": "The \"linked\" state announced by NVDA for links via Insert+Tab is unhelpful."
+                        }
+                     ]
+                  },
+                  {
+                     "commands": [
+                        {
+                           "text": "Insert+Up Arrow (focus mode on)",
+                           "mode": "focusMode"
+                        }
+                     ],
+                     "output": "blank",
+                     "untestable": false,
+                     "assertions": [
+                        {
+                           "id": "ODdjZeyIzIjoiWkRWalpleUl5SWpvaU1UWXpOak0wSW4wR1kwTnoifQjg3MD",
+                           "priority": "MUST",
+                           "statement": "Role 'link' is conveyed",
+                           "verdict": "fail",
+                           "featureRef": "link",
+                           "featureType": "aria"
+                        },
+                        {
+                           "id": "NWU2NeyIzIjoiWkRWalpleUl5SWpvaU1UWXpOak0wSW4wR1kwTnoifQzE1NT",
+                           "priority": "MUST",
+                           "statement": "Name 'W3C website' is conveyed.",
+                           "verdict": "fail"
+                        }
+                     ],
+                     "negativeSideEffects": []
+                  }
+               ],
+               "renderedUrl": "https://aria-at.w3.org/aria-at/e1f64782a2275e489d431f845bb4070de10f3420/build/tests/link-img-alt/test-09-reqInfoAboutLink-nvda.collected.html",
+               "completedAt": "2025-02-07T00:09:41.502Z"
+            }
+         ],
+         "markedFinalAt": "2025-02-07T00:10:39.281Z"
+      }
+   ]
+}

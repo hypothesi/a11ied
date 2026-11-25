@@ -1,0 +1,7 @@
+sr expect
+  Expected:  "dialog"
+  Checked:   0 phrases since "opened"
+  Matched:   nothing
+  Result:    fail
+
+✗ Error (expectation-failed): "dialog" was not announced in the transcript since "opened" (0 phrases checked).

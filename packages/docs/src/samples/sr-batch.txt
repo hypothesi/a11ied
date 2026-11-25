@@ -1,0 +1,7 @@
+sr batch
+✓ 1. goto {"role":"button","name":"Invite member","max":500}  button, Invite member
+✓ 2. checkpoint {"label":"opened"}  button, Invite member
+✓ 3. activate  textbox, Email address, required
+✓ 4. expect dialog, Invite member since "opened"  pass
+
+4 steps passed.

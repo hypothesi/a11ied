@@ -1,0 +1,400 @@
+---
+import type { AriaAtCommandResult } from '@a11ied/support-data';
+import type { AssertionVerdict } from '@a11ied/support-data/types';
+import PriorityBadge from './priority-badge.astro';
+
+export interface Props {
+   commandResults: readonly AriaAtCommandResult[];
+   showFeatureLinks?: boolean;
+}
+
+const { commandResults, showFeatureLinks = false } = Astro.props;
+
+function formatVerdictLabel(verdict: AssertionVerdict): string {
+   switch (verdict) {
+      case 'pass': {
+         return 'Pass';
+      }
+      case 'fail': {
+         return 'Fail';
+      }
+      case 'unsupported': {
+         return 'Not conveyed';
+      }
+      case 'untestable': {
+         return 'Untestable';
+      }
+      default: {
+         return String(verdict);
+      }
+   }
+}
+---
+
+<ol class="srCommands">
+   {commandResults.map((commandResult) => (
+      <li class="srCommands-item">
+         <div class="srCommands-commandRow">
+            <div class="srCommands-commandPills">
+               {commandResult.commands.map((cmd) => (
+                  <span class="srCommands-commandPill">
+                     <code>{cmd.text}</code>
+                     {cmd.mode && cmd.mode !== 'defaultMode' && (
+                        <span class="srCommands-commandMode">({cmd.mode})</span>
+                     )}
+                  </span>
+               ))}
+               {commandResult.commands.length === 0 && (
+                  <span class="srCommands-commandPill">
+                     <code>Initial / automatic step</code>
+                  </span>
+               )}
+            </div>
+            {commandResult.untestable && (
+               <span class="srCommands-untestable">Untestable</span>
+            )}
+         </div>
+
+         <pre class="srCommands-output" data-no-decorate><code>{commandResult.output || '(no screen reader speech recorded)'}</code></pre>
+
+         {commandResult.assertions.length > 0 && (
+            <ul class="srCommands-assertions">
+               {commandResult.assertions.map((assertion) => (
+                  <li class="srCommands-assertionRow">
+                     <div class="srCommands-assertionMeta">
+                        <PriorityBadge priority={assertion.priority} />
+                        <span class:list={[ 'srCommands-verdict', `srCommands-verdict--${assertion.verdict}` ]}>
+                           {formatVerdictLabel(assertion.verdict)}
+                        </span>
+                     </div>
+                     <div class="srCommands-assertionBody">
+                        <span class="srCommands-assertionStatement">{assertion.statement}</span>
+                        {showFeatureLinks && assertion.featureType && assertion.featureRef && (
+                           <a
+                              href={`/compatibility/features/${assertion.featureType}/${assertion.featureRef}/`}
+                              class="srCommands-featureChip"
+                           >
+                              <code>{assertion.featureRef}</code>
+                           </a>
+                        )}
+                        {assertion.bugs && assertion.bugs.length > 0 && (
+                           <ul class="srCommands-bugs">
+                              {assertion.bugs.map((bug) => (
+                                 <li>
+                                    <a href={bug.url} target="_blank" rel="noopener noreferrer">
+                                       {bug.title || bug.url}
+                                    </a>
+                                 </li>
+                              ))}
+                           </ul>
+                        )}
+                     </div>
+                  </li>
+               ))}
+            </ul>
+         )}
+
+         {commandResult.negativeSideEffects.length > 0 && (
+            <div class="srCommands-sideEffects">
+               <strong class="srCommands-sideEffectsTitle">Negative side effects</strong>
+               <ul class="srCommands-sideEffectList">
+                  {commandResult.negativeSideEffects.map((effect) => (
+                     <li class="srCommands-sideEffectItem">
+                        <span class:list={[
+                           'srCommands-impact',
+                           `srCommands-impact--${effect.impact.toLowerCase()}`,
+                        ]}>
+                           {effect.impact}
+                        </span>
+                        <span>{effect.text}</span>
+                        {effect.details && (
+                           <span class="srCommands-sideEffectDetails">{effect.details}</span>
+                        )}
+                        {effect.bugs && effect.bugs.length > 0 && (
+                           <ul class="srCommands-bugs">
+                              {effect.bugs.map((bug) => (
+                                 <li>
+                                    <a href={bug.url} target="_blank" rel="noopener noreferrer">
+                                       {bug.title || bug.url}
+                                    </a>
+                                 </li>
+                              ))}
+                           </ul>
+                        )}
+                     </li>
+                  ))}
+               </ul>
+            </div>
+         )}
+      </li>
+   ))}
+</ol>
+
+<style>
+.srCommands {
+   list-style: none;
+   margin: 0.65rem 0 0;
+   padding: 0;
+   display: flex;
+   flex-direction: column;
+   gap: 0.85rem;
+}
+
+.srCommands-item {
+   margin: 0;
+   padding-block-start: 0.75rem;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 14%, transparent);
+   background: transparent;
+   min-inline-size: 0;
+}
+
+.srCommands-item:first-child {
+   padding-block-start: 0;
+   border-top: none;
+}
+
+.srCommands-commandRow {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   justify-content: space-between;
+   gap: 0.5rem;
+   margin-block-end: 0.5rem;
+}
+
+.srCommands-commandPills {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.4rem;
+}
+
+.srCommands-commandPill {
+   display: inline-flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 0.3rem;
+   padding-block: 0.22rem;
+   padding-inline: 0.5rem;
+   border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
+   border-radius: 3px;
+   background: var(--paper);
+   font-size: 0.82rem;
+   line-height: 1;
+}
+
+.srCommands-commandPill code {
+   background: transparent;
+   padding: 0;
+}
+
+.srCommands-commandMode {
+   color: var(--ink-soft);
+   font-size: 0.78rem;
+}
+
+.srCommands-untestable {
+   display: inline-flex;
+   align-items: center;
+   padding-block: 0.2rem;
+   padding-inline: 0.5rem;
+   border: none;
+   border-radius: 3px;
+   background: #fef3c7;
+   color: #78350f;
+   font-family: var(--display);
+   font-size: 0.74rem;
+   font-weight: 700;
+   text-transform: uppercase;
+   line-height: 1;
+}
+
+.srCommands-output {
+   position: static;
+   margin: 0 0 0.65rem;
+   padding: 0.65rem 0.85rem;
+   border: none;
+   border-radius: 3px;
+   box-shadow: none;
+   background: var(--ink);
+   color: var(--paper-light);
+   font-size: 0.86rem;
+   white-space: pre-wrap;
+   overflow-wrap: anywhere;
+   overflow-x: auto;
+}
+
+.srCommands-assertions {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   flex-direction: column;
+   gap: 0.4rem;
+}
+
+.srCommands-assertionRow {
+   margin: 0;
+   display: flex;
+   flex-wrap: wrap;
+   align-items: flex-start;
+   gap: 0.55rem;
+   padding-block: 0.45rem;
+   border-top: 1px dashed color-mix(in oklch, var(--ink) 20%, transparent);
+}
+
+.srCommands-assertionRow:first-child {
+   border-top: none;
+   padding-block-start: 0.15rem;
+}
+
+.srCommands-assertionMeta {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.35rem;
+   flex-shrink: 0;
+}
+
+.srCommands-verdict {
+   display: inline-flex;
+   align-items: center;
+   padding-block: 0.18rem;
+   padding-inline: 0.45rem;
+   border: none;
+   border-radius: 3px;
+   font-family: var(--display);
+   font-size: 0.74rem;
+   font-weight: 700;
+   text-transform: uppercase;
+   letter-spacing: 0.04em;
+   line-height: 1;
+}
+
+.srCommands-verdict--pass {
+   background: #e3f4ea;
+   color: #134e2c;
+}
+
+.srCommands-verdict--fail {
+   background: #fde8e8;
+   color: #7f1d1d;
+}
+
+.srCommands-verdict--unsupported {
+   background: var(--paper);
+   color: var(--ink-soft);
+}
+
+.srCommands-verdict--untestable {
+   background: #fef3c7;
+   color: #78350f;
+}
+
+.srCommands-assertionBody {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: baseline;
+   gap: 0.45rem;
+   flex: 1 1 240px;
+   min-inline-size: 0;
+}
+
+.srCommands-assertionStatement {
+   font-size: 0.9rem;
+   color: var(--ink);
+}
+
+.srCommands-featureChip {
+   display: inline-flex;
+   align-items: center;
+   padding-block: 0.14rem;
+   padding-inline: 0.45rem;
+   border: none;
+   border-radius: 3px;
+   background: var(--paper);
+   font-size: 0.76rem;
+   line-height: 1;
+   text-decoration: none;
+}
+
+.srCommands-featureChip code {
+   background: transparent;
+   padding: 0;
+}
+
+.srCommands-bugs {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.45rem;
+   font-size: 0.82rem;
+}
+
+.srCommands-bugs li {
+   margin: 0;
+}
+
+.srCommands-sideEffects {
+   margin-block-start: 0.65rem;
+   padding: 0.5rem 0.75rem;
+   border: none;
+   border-left: 3px solid #bd2b26;
+   border-radius: 0 3px 3px 0;
+   background: #fef2f2;
+}
+
+.srCommands-sideEffectsTitle {
+   display: block;
+   margin-block-end: 0.35rem;
+   font-size: 0.84rem;
+   color: #7f1d1d;
+}
+
+.srCommands-sideEffectList {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   flex-direction: column;
+   gap: 0.35rem;
+}
+
+.srCommands-sideEffectItem {
+   margin: 0;
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 0.45rem;
+   font-size: 0.86rem;
+}
+
+.srCommands-sideEffectDetails {
+   font-size: 0.82rem;
+   color: var(--ink-soft);
+}
+
+.srCommands-impact {
+   display: inline-flex;
+   align-items: center;
+   padding-block: 0.16rem;
+   padding-inline: 0.45rem;
+   border: none;
+   border-radius: 3px;
+   font-family: var(--display);
+   font-size: 0.74rem;
+   font-weight: 700;
+   text-transform: uppercase;
+   line-height: 1;
+}
+
+.srCommands-impact--severe {
+   background: #bd2b26;
+   color: #ffffff;
+}
+
+.srCommands-impact--moderate {
+   background: #fef3c7;
+   color: #78350f;
+}
+</style>

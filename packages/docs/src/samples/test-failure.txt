@@ -1,0 +1,11 @@
+ FAIL  invite.test.ts > opens the invite dialog with its name
+ScreenReaderAssertionError: "dialog, Invite member" was not announced in the transcript since "opened" (0 phrases checked).
+The reader said nothing.
+Waited 5000 ms.
+ ❯ invite.test.ts:12:7
+     10|    sr.checkpoint('opened');
+     11|    sr.activate();
+     12|    sr.expectSpoken('dialog, Invite member', { since: 'opened' });
+       |       ^
+     13|    sr.expectCursorOn({ role: 'textbox', name: 'Email address' });
+     14| });

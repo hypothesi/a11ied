@@ -1,0 +1,17 @@
+Testing it
+  A scan covers part of this:
+    a1 axe --criterion 1.4.3 <target>
+  That runs the axe rule "color-contrast".
+
+  Assess Contrast (Minimum) (wcag_1_4_3)
+  Scope:       state
+  Applies to:  Text and images of text, except logos, incidental content, and
+  inactive controls.
+
+  Actions
+  • Measure text/background contrast across states, images, gradients, and
+  overlays;
+  record size and weight.
+  • Apply 4.5:1 for normal text and 3:1 for qualifying large text; document each
+  normative exception.
+  ...

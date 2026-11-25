@@ -1,0 +1,139 @@
+---
+import DocShell from '../layouts/doc-shell.astro';
+import { docsLinks } from '../lib/nav';
+import { getPracticeURL, withPracticeURL } from '../lib/practice';
+import checkSample from '../samples/check-broken-short.txt?raw';
+import mcpConfig from '../samples/mcp-config.json.txt?raw';
+import walkSample from '../samples/sr-walk-broken.txt?raw';
+import testSample from '../samples/vitest-home.ts.txt?raw';
+
+const practiceURL = getPracticeURL(Astro);
+const toc = [
+   { id: 'install', label: 'Install' },
+   { id: 'check', label: 'Scan a page' },
+   { id: 'listen', label: 'Capture what a screen reader announces' },
+   { id: 'test', label: 'Write a test' },
+   { id: 'agent', label: 'Set up an AI agent' },
+   { id: 'results', label: 'What the results mean' },
+   { id: 'next', label: 'Where to go next' },
+];
+---
+
+<DocShell
+   title="Overview"
+   summary="<p>a11ied scans a web page for accessibility problems and shows you what a screen reader announces on it. This page has one real example of each way to use it: from the terminal, in a test suite, and through an AI coding agent.</p>"
+   links={docsLinks}
+   toc={toc}
+>
+   <section>
+      <h2 id="install">Install</h2>
+      <pre><code>npm install --global a11ied</code></pre>
+      <p>
+         The command is <code>a1</code>. The examples below run against a
+         <a href="/demo/team">practice page</a>: a demo page the docs serve, with ten
+         accessibility problems built in. You can copy and run them unchanged.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="check">Scan a page</h2>
+      <p>
+         <code>a1 check</code> runs <a href="https://github.com/dequelabs/axe-core">axe-core</a>,
+         the open-source rule engine behind most accessibility scanners, in a real browser.
+      </p>
+      <pre><code>a1 check {practiceURL}</code></pre>
+      <pre data-label="OUTPUT"><code>{withPracticeURL(checkSample, practiceURL)}</code></pre>
+      <p>
+         Each problem names the <abbr title="Web Content Accessibility Guidelines">WCAG</abbr>
+         criterion it fails, the element, and a command that looks up the fix. Below the
+         problems is a checklist: the criteria on this page that need a manual test.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="listen">Capture what a screen reader announces</h2>
+      <p>
+         <code>a1 sr</code> drives a screen reader and logs everything it announces.
+         <code>sr walk</code> reads a whole page and prints the log.
+      </p>
+      <pre><code>a1 sr walk {practiceURL} --sr virtual</code></pre>
+      <pre data-label="OUTPUT"><code>{withPracticeURL(walkSample, practiceURL)}</code></pre>
+      <p>
+         Line 46 is a button that says only "button". Line 15 is a search field with no label.
+         A scanner reported the first and passed the second.
+      </p>
+      <p>
+         <code>sr walk</code> leaves the screen reader running for more commands. Stop it with
+         <code>a1 sr stop</code>.
+      </p>
+      <p>
+         <code>--sr virtual</code> is a simulated screen reader that needs no setup and runs
+         anywhere. <code>--sr voiceover</code> on macOS and <code>--sr nvda</code> on Windows
+         drive the real ones with the same commands. See
+         <a href="/screen-readers">screen readers</a>.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="test">Write a test</h2>
+      <p>
+         The same screen reader runs inside a test. This one opens a dialog and checks that
+         the dialog announces its name and that focus moves into it.
+      </p>
+      <pre data-label="invite.test.ts"><code>{withPracticeURL(testSample, practiceURL)}</code></pre>
+      <p>
+         See <a href="/guides/vitest">test with Vitest</a>, or
+         <a href="/guides/testing">write screen reader tests</a> for Jest, Mocha, and
+         Playwright Test.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="agent">Set up an AI agent</h2>
+      <p>
+         A coding agent can write a dialog, but it has no way to check what a screen reader
+         will announce. a11ied includes an
+         <abbr title="Model Context Protocol">MCP</abbr> server that gives the agent the
+         <code>a1</code> commands as tools: scan a page, drive a screen reader, look up a
+         criterion.
+      </p>
+      <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
+      <p>
+         See <a href="/guides/agents">set up an AI agent</a>. Your agent can also carry out
+         a full WCAG audit while <code>a1 audit</code> tracks the work and writes the report.
+         See <a href="/guides/audit">audit a site with AI agents</a>.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="results">What the results mean</h2>
+      <p>a11ied labels every result as one of three kinds of evidence.</p>
+      <dl class="defs">
+         <dt>A scan</dt>
+         <dd>Finds failures. A clean scan does not mean a criterion passes, because no criterion can be decided by a scanner alone.</dd>
+         <dt>A transcript</dt>
+         <dd>The log of what a screen reader announced. A transcript from the simulated screen reader is not evidence of what VoiceOver or NVDA does.</dd>
+         <dt>A judgment</dt>
+         <dd>A person's or an agent's decision on what no tool measures, such as whether alt text describes its image or focus order makes sense. <code>a1 audit</code> records it.</dd>
+      </dl>
+      <p>See <a href="/test-methods">test methods</a> for how many criteria each kind of evidence can decide.</p>
+   </section>
+
+   <section>
+      <h2 id="next">Where to go next</h2>
+      <dl class="defs">
+         <dt><a href="/quickstart">Quickstart</a></dt>
+         <dd>Install, scan a page, and read it with a screen reader. Five minutes.</dd>
+         <dt><a href="/playground">Playground</a></dt>
+         <dd>Run the simulated screen reader on a test case in your browser, with nothing to install.</dd>
+         <dt><a href="/guides/demo">Practice on a broken page</a></dt>
+         <dd>Work through a demo page with ten accessibility problems, one command at a time.</dd>
+         <dt><a href="/guides/screen-reader">Test with a screen reader</a></dt>
+         <dd>Every <code>a1 sr</code> command, with VoiceOver, NVDA, or the simulated screen reader.</dd>
+         <dt><a href="/reference/cli">CLI reference</a></dt>
+         <dd>Every command and option.</dd>
+         <dt><a href="/glossary">Glossary</a></dt>
+         <dd>The terms these docs use, each in a sentence or two.</dd>
+      </dl>
+   </section>
+</DocShell>

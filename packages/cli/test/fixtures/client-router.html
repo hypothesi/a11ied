@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <title>Client-side router</title>
+   </head>
+   <body>
+      <main>
+         <h1>Source page</h1>
+         <a href="/basic-page.html">Go to basic page</a>
+      </main>
+      <script>
+         document.querySelector('a').addEventListener('click', async (event) => {
+            const { href } = event.currentTarget;
+            event.preventDefault();
+            const response = await fetch(href);
+            const next = new DOMParser().parseFromString(
+               await response.text(),
+               'text/html',
+            );
+            history.pushState({}, '', href);
+            document.title = next.title;
+            document.body.replaceWith(next.body);
+         });
+      </script>
+   </body>
+</html>

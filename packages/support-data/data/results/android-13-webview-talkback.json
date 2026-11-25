@@ -1,0 +1,2617 @@
+{
+   "schemaVersion": 1,
+   "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+   "environment": {
+      "id": "android-talkback-webview",
+      "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+      "shortLabel": "Android TB (WebView)",
+      "platformGroup": "android-talkback",
+      "device": "sdk_gphone64_arm64 (Android Emulator)",
+      "os": "Android",
+      "osVersion": "13 (API 33)",
+      "browser": "Android System WebView",
+      "browserVersion": "109.0.5414.123",
+      "browserType": "webview",
+      "usageOrder": 3,
+      "screenReader": "TalkBack",
+      "screenReaderVersion": "14.2.0.618048417"
+   },
+   "status": "tested",
+   "runs": [
+      {
+         "testSlug": "aria-labelledby-single-id",
+         "runAt": "2026-11-20T20:03:54.776Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Billing address. button",
+         "notes": "Matched expected announcement: \"Billing address. button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Billing address. heading 2"
+            },
+            {
+               "step": 2,
+               "command": "TalkBack swipe-right",
+               "phrase": "Billing address. button"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-single-id-1",
+               "priority": "MUST",
+               "statement": "Convey \"Billing address\" across at least 2 elements",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Billing address. heading 2"
+            },
+            {
+               "id": "aria-labelledby-single-id-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Edit\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-single-id-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Billing address. button"
+            },
+            {
+               "id": "aria-labelledby-single-id-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-multiple-ids",
+         "runAt": "2026-11-20T20:04:07.808Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Delete quarterly invoice. button",
+         "notes": "Matched expected announcement: \"Delete quarterly invoice. button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Delete"
+            },
+            {
+               "step": 2,
+               "command": "TalkBack swipe-right",
+               "phrase": "quarterly invoice"
+            },
+            {
+               "step": 3,
+               "command": "TalkBack swipe-right",
+               "phrase": "Delete quarterly invoice. button"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-multiple-ids-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Delete quarterly invoice\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Delete quarterly invoice. button"
+            },
+            {
+               "id": "aria-labelledby-multiple-ids-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"X, button\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-multiple-ids-3",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"button X\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-multiple-ids-4",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Delete quarterly invoice. button"
+            },
+            {
+               "id": "aria-labelledby-multiple-ids-5",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-reverse-dom-order",
+         "runAt": "2026-11-20T20:04:20.853Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Account settings. button",
+         "notes": "Matched expected announcement: \"Account settings. button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "settings"
+            },
+            {
+               "step": 2,
+               "command": "TalkBack swipe-right",
+               "phrase": "Account"
+            },
+            {
+               "step": 3,
+               "command": "TalkBack swipe-right",
+               "phrase": "Account settings. button"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-reverse-dom-order-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Account settings\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Account settings. button"
+            },
+            {
+               "id": "aria-labelledby-reverse-dom-order-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"settings Account, button\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-reverse-dom-order-3",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Open\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-reverse-dom-order-4",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Account settings. button"
+            },
+            {
+               "id": "aria-labelledby-reverse-dom-order-5",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-self-reference",
+         "runAt": "2026-11-20T20:04:31.834Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Remove Monthly plan. button",
+         "notes": "Matched expected announcement: \"Remove Monthly plan. button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Monthly plan"
+            },
+            {
+               "step": 2,
+               "command": "TalkBack swipe-right",
+               "phrase": "Remove Monthly plan. button"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 2
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-self-reference-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Remove Monthly plan\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Remove Monthly plan. button"
+            },
+            {
+               "id": "aria-labelledby-self-reference-2",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Remove Monthly plan. button"
+            },
+            {
+               "id": "aria-labelledby-self-reference-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-display-none-target",
+         "runAt": "2026-11-20T20:04:40.486Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Export CSV report. button",
+         "notes": "Matched expected announcement: \"Export CSV report. button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Export CSV report. button"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-display-none-target-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Export CSV report\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Export CSV report. button"
+            },
+            {
+               "id": "aria-labelledby-display-none-target-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Download\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-display-none-target-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Export CSV report. button"
+            },
+            {
+               "id": "aria-labelledby-display-none-target-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-aria-hidden-target",
+         "runAt": "2026-11-20T20:04:49.192Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Archive message. button",
+         "notes": "Matched expected announcement: \"Archive message. button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Archive message. button"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-aria-hidden-target-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Archive message\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Archive message. button"
+            },
+            {
+               "id": "aria-labelledby-aria-hidden-target-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Move\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-aria-hidden-target-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Archive message. button"
+            },
+            {
+               "id": "aria-labelledby-aria-hidden-target-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-precedence-over-aria-label",
+         "runAt": "2026-11-20T20:05:02.253Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Edit box. Primary email",
+         "notes": "Matched expected announcement: \"Edit box. Primary email\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Primary email"
+            },
+            {
+               "step": 2,
+               "command": "TalkBack swipe-right",
+               "phrase": "Backup email"
+            },
+            {
+               "step": 3,
+               "command": "TalkBack swipe-right",
+               "phrase": "Edit box. Primary email"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-precedence-over-aria-label-1",
+               "priority": "MUST",
+               "statement": "Convey \"Primary email\" across at least 2 elements",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Primary email"
+            },
+            {
+               "id": "aria-labelledby-precedence-over-aria-label-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Secondary email\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-precedence-over-aria-label-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"text\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Edit box. Primary email"
+            },
+            {
+               "id": "aria-labelledby-precedence-over-aria-label-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-broken-id-fallback",
+         "runAt": "2026-11-20T20:05:10.962Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Save draft. button, Double-tap to activate",
+         "notes": "Matched expected announcement: \"Save draft. button, Double-tap to activate\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Save draft. button, Double-tap to activate"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 2
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-broken-id-fallback-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Save draft\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Save draft. button, Double-tap to activate"
+            },
+            {
+               "id": "aria-labelledby-broken-id-fallback-2",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Save draft. button, Double-tap to activate"
+            },
+            {
+               "id": "aria-labelledby-broken-id-fallback-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-chained-no-recursion",
+         "runAt": "2026-11-20T20:05:25.790Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Parent text. button",
+         "notes": "Matched expected announcement: \"Parent text. button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Grandparent label"
+            },
+            {
+               "step": 2,
+               "command": "TalkBack swipe-right",
+               "phrase": "Parent text. button"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-chained-no-recursion-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Parent text\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Parent text. button"
+            },
+            {
+               "id": "aria-labelledby-chained-no-recursion-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Grandparent label\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-chained-no-recursion-3",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Original button\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-chained-no-recursion-4",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Parent text. button"
+            },
+            {
+               "id": "aria-labelledby-chained-no-recursion-5",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-prohibited-generic-div",
+         "runAt": "2026-11-20T20:05:36.625Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "fail",
+         "keyAnnouncement": "Special announcement",
+         "notes": "Expected phrase \"Visible paragraph text\" was not spoken.",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Special announcement"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 1,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-prohibited-generic-div-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Visible paragraph text\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "fail",
+               "notes": "Expected phrase \"Visible paragraph text\" was not spoken."
+            },
+            {
+               "id": "aria-labelledby-prohibited-generic-div-2",
+               "priority": "MUST",
+               "statement": "Do not leak prohibited text \"Special announcement\" beyond 1 occurrence(s)",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "Observed 1 occurrence(s) (limit 1)."
+            },
+            {
+               "id": "aria-labelledby-prohibited-generic-div-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-label-button-override",
+         "runAt": "2026-11-20T20:05:45.325Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Close settings dialog. button",
+         "notes": "Matched expected announcement: \"Close settings dialog. button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Close settings dialog. button"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-label-button-override-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Close settings dialog\" on the target",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Close settings dialog. button"
+            },
+            {
+               "id": "aria-label-button-override-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"X\" on the target",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-label-button-override-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Close settings dialog. button"
+            },
+            {
+               "id": "aria-label-button-override-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-label-landmark-nav",
+         "runAt": "2026-11-20T20:05:53.948Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "fail",
+         "keyAnnouncement": "Home. link, Double-tap to activate",
+         "notes": "Expected phrase \"Breadcrumb trail\" was not spoken. Expected role \"navigation\" was not exposed in speech.",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Home. link, Double-tap to activate"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 1,
+               "failed": 1,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 2
+            },
+            "should": {
+               "passed": 0,
+               "failed": 1,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-label-landmark-nav-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Breadcrumb trail\" on the target",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "fail",
+               "notes": "Expected phrase \"Breadcrumb trail\" was not spoken."
+            },
+            {
+               "id": "aria-label-landmark-nav-2",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"navigation\"",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "fail",
+               "notes": "Expected role \"navigation\" was not exposed in speech."
+            },
+            {
+               "id": "aria-label-landmark-nav-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-label-prohibited-span",
+         "runAt": "2026-11-20T20:06:02.983Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "fail",
+         "keyAnnouncement": "Secret label",
+         "notes": "Expected phrase \"Visible text\" was not spoken. Forbidden text \"Secret label\" was exposed on the target.",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Secret label"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 1,
+               "failed": 2,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-label-prohibited-span-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Visible text\" on the target",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "fail",
+               "notes": "Expected phrase \"Visible text\" was not spoken."
+            },
+            {
+               "id": "aria-label-prohibited-span-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Secret label\" on the target",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "fail",
+               "evidence": "Secret label",
+               "notes": "Forbidden text \"Secret label\" was exposed on the target."
+            },
+            {
+               "id": "aria-label-prohibited-span-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-describedby-input-hint",
+         "runAt": "2026-11-20T20:06:16.108Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Edit box. API token Starts with sk_live",
+         "notes": "Matched expected announcement: \"Edit box. API token Starts with sk_live\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "API token"
+            },
+            {
+               "step": 2,
+               "command": "TalkBack swipe-right",
+               "phrase": "Edit box. API token Starts with sk_live"
+            },
+            {
+               "step": 3,
+               "command": "TalkBack swipe-right",
+               "phrase": "Starts with sk_live"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-describedby-input-hint-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"API token\" on the target",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Edit box. API token Starts with sk_live"
+            },
+            {
+               "id": "aria-describedby-input-hint-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"Starts with sk_live\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Edit box. API token Starts with sk_live"
+            },
+            {
+               "id": "aria-describedby-input-hint-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"text\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Edit box. API token Starts with sk_live"
+            },
+            {
+               "id": "aria-describedby-input-hint-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-describedby-multiple-ids",
+         "runAt": "2026-11-20T20:06:29.236Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Delete project. button. Permanent action. Cannot be undone.",
+         "notes": "Matched expected announcement: \"Delete project. button. Permanent action. Cannot be undone.\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Delete project. button. Permanent action. Cannot be undone."
+            },
+            {
+               "step": 2,
+               "command": "TalkBack swipe-right",
+               "phrase": "Permanent action."
+            },
+            {
+               "step": 3,
+               "command": "TalkBack swipe-right",
+               "phrase": "Cannot be undone."
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-describedby-multiple-ids-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Delete project\" on the target",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Delete project. button. Permanent action. Cannot be undone."
+            },
+            {
+               "id": "aria-describedby-multiple-ids-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"Permanent action\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Delete project. button. Permanent action. Cannot be undone."
+            },
+            {
+               "id": "aria-describedby-multiple-ids-3",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"Cannot be undone\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Delete project. button. Permanent action. Cannot be undone."
+            },
+            {
+               "id": "aria-describedby-multiple-ids-4",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Delete project. button. Permanent action. Cannot be undone."
+            },
+            {
+               "id": "aria-describedby-multiple-ids-5",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-describedby-hidden-target",
+         "runAt": "2026-11-20T20:06:37.863Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Submit form. button. Sends application immediately",
+         "notes": "Matched expected announcement: \"Submit form. button. Sends application immediately\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Submit form. button. Sends application immediately"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-describedby-hidden-target-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Submit form\" on the target",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Submit form. button. Sends application immediately"
+            },
+            {
+               "id": "aria-describedby-hidden-target-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"Sends application immediately\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Submit form. button. Sends application immediately"
+            },
+            {
+               "id": "aria-describedby-hidden-target-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Submit form. button. Sends application immediately"
+            },
+            {
+               "id": "aria-describedby-hidden-target-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-hidden-true-text",
+         "runAt": "2026-11-20T20:06:46.477Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Visible sentence",
+         "notes": "Matched expected announcement: \"Visible sentence\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Visible sentence"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-hidden-true-text-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Visible sentence\" on the target",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Visible sentence"
+            },
+            {
+               "id": "aria-hidden-true-text-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Hidden decorative text\" on the target",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-hidden-true-text-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-hidden-false-inside-true",
+         "runAt": "2026-11-20T20:06:55.116Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "After hidden block",
+         "notes": "Matched expected announcement: \"After hidden block\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "After hidden block"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-hidden-false-inside-true-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"After hidden block\" on the target",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "After hidden block"
+            },
+            {
+               "id": "aria-hidden-false-inside-true-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Hidden parent text\" on the target",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-hidden-false-inside-true-3",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Nested aria-hidden false\" on the target",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-hidden-false-inside-true-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-expanded-false-initial",
+         "runAt": "2026-11-20T20:07:03.772Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "collapsed. Account menu. button",
+         "notes": "Matched expected announcement: \"collapsed. Account menu. button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "collapsed. Account menu. button"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-expanded-false-initial-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Account menu\" on the target",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "collapsed. Account menu. button"
+            },
+            {
+               "id": "aria-expanded-false-initial-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"collapsed\"",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "collapsed. Account menu. button"
+            },
+            {
+               "id": "aria-expanded-false-initial-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "collapsed. Account menu. button"
+            },
+            {
+               "id": "aria-expanded-false-initial-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-expanded-toggle-dynamic",
+         "runAt": "2026-11-20T20:07:22.191Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "expanded. Details. button, expanded. Details. button, Double-tap to activate. Actions available, use Tap with 3 fingers to view, expanded",
+         "notes": "Pre- and post-activation behavior matched spec: \"expanded. Details. button, expanded. Details. button, Double-tap to activate. Actions available, use Tap with 3 fingers to view, expanded\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "collapsed. Details. button"
+            },
+            {
+               "step": 2,
+               "command": "TalkBack double-tap (activate)",
+               "phrase": "expanded. Details. button, expanded. Details. button, Double-tap to activate. Actions available, use Tap with 3 fingers to view, expanded"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-expanded-toggle-dynamic-1",
+               "priority": "MUST",
+               "statement": "Convey initial control text \"Details\" before activation",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "collapsed. Details. button"
+            },
+            {
+               "id": "aria-expanded-toggle-dynamic-2",
+               "priority": "MUST",
+               "statement": "Convey dynamic announcement \"expanded\" after activation",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "expanded. Details. button, expanded. Details. button, Double-tap to activate. Actions available, use Tap with 3 fingers to view, expanded"
+            },
+            {
+               "id": "aria-expanded-toggle-dynamic-3",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"expanded\"",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "expanded. Details. button, expanded. Details. button, Double-tap to activate. Actions available, use Tap with 3 fingers to view, expanded"
+            },
+            {
+               "id": "aria-expanded-toggle-dynamic-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-disabled-button",
+         "runAt": "2026-11-20T20:07:30.840Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Publish changes. button. disabled",
+         "notes": "Matched expected announcement: \"Publish changes. button. disabled\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Publish changes. button. disabled"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-disabled-button-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Publish changes\" on the target",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Publish changes. button. disabled"
+            },
+            {
+               "id": "aria-disabled-button-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"disabled\"",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Publish changes. button. disabled"
+            },
+            {
+               "id": "aria-disabled-button-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Publish changes. button. disabled"
+            },
+            {
+               "id": "aria-disabled-button-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-disabled-link",
+         "runAt": "2026-11-20T20:07:39.481Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Download archive. link. disabled",
+         "notes": "Matched expected announcement: \"Download archive. link. disabled\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Download archive. link. disabled"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-disabled-link-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Download archive\" on the target",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Download archive. link. disabled"
+            },
+            {
+               "id": "aria-disabled-link-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"disabled\"",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Download archive. link. disabled"
+            },
+            {
+               "id": "aria-disabled-link-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"link\"",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Download archive. link. disabled"
+            },
+            {
+               "id": "aria-disabled-link-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-current-page",
+         "runAt": "2026-11-20T20:07:50.268Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "current page. Pricing. link",
+         "notes": "Matched expected announcement: \"current page. Pricing. link\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Home. link, Double-tap to activate"
+            },
+            {
+               "step": 2,
+               "command": "TalkBack swipe-right",
+               "phrase": "current page. Pricing. link"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-current-page-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Pricing\" on the target",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "current page. Pricing. link"
+            },
+            {
+               "id": "aria-current-page-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"current page\"",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "current page. Pricing. link"
+            },
+            {
+               "id": "aria-current-page-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"link\"",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Home. link, Double-tap to activate"
+            },
+            {
+               "id": "aria-current-page-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-current-step",
+         "runAt": "2026-11-20T20:08:10.631Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "fail",
+         "keyAnnouncement": "Shipping",
+         "notes": "Expected ARIA state \"current step\" was omitted.",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "1. . 1 of 3. 3 items"
+            },
+            {
+               "step": 2,
+               "command": "TalkBack swipe-right",
+               "phrase": "Account"
+            },
+            {
+               "step": 3,
+               "command": "TalkBack swipe-right",
+               "phrase": "2. . 2 of 3"
+            },
+            {
+               "step": 4,
+               "command": "TalkBack swipe-right",
+               "phrase": "Shipping"
+            },
+            {
+               "step": 5,
+               "command": "TalkBack swipe-right",
+               "phrase": "3. . 3 of 3"
+            },
+            {
+               "step": 6,
+               "command": "TalkBack swipe-right",
+               "phrase": "Payment"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 1,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-current-step-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Shipping\" on the target",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Shipping"
+            },
+            {
+               "id": "aria-current-step-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"current step\"",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "fail",
+               "notes": "Expected ARIA state \"current step\" was omitted."
+            },
+            {
+               "id": "aria-current-step-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-live-polite-update",
+         "runAt": "2026-11-20T20:08:28.603Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Save settings. button, Preferences saved, Save settings. button",
+         "notes": "Pre- and post-activation behavior matched spec: \"Save settings. button, Preferences saved, Save settings. button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Save settings. button"
+            },
+            {
+               "step": 2,
+               "command": "TalkBack double-tap (activate)",
+               "phrase": "Save settings. button, Preferences saved, Save settings. button"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-live-polite-update-1",
+               "priority": "MUST",
+               "statement": "Convey initial control text \"Save settings\" before activation",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Save settings. button"
+            },
+            {
+               "id": "aria-live-polite-update-2",
+               "priority": "MUST",
+               "statement": "Convey dynamic announcement \"Preferences saved\" after activation",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Save settings. button, Preferences saved, Save settings. button"
+            },
+            {
+               "id": "aria-live-polite-update-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-live-assertive-update",
+         "runAt": "2026-11-20T20:08:46.501Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Validate token. button, Session expired, Validate token. button",
+         "notes": "Pre- and post-activation behavior matched spec: \"Validate token. button, Session expired, Validate token. button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Validate token. button"
+            },
+            {
+               "step": 2,
+               "command": "TalkBack double-tap (activate)",
+               "phrase": "Validate token. button, Session expired, Validate token. button"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         },
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-live-assertive-update-1",
+               "priority": "MUST",
+               "statement": "Convey initial control text \"Validate token\" before activation",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Validate token. button"
+            },
+            {
+               "id": "aria-live-assertive-update-2",
+               "priority": "MUST",
+               "statement": "Convey dynamic announcement \"Session expired\" after activation",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Validate token. button, Session expired, Validate token. button"
+            },
+            {
+               "id": "aria-live-assertive-update-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "role-alert-dynamic",
+         "runAt": "2026-11-20T21:39:23.176Z",
+         "driver": "a11ied/android/talkback (adb + webview)",
+         "outcome": "pass",
+         "keyAnnouncement": "Trigger alert. button, Hello, Trigger alert. button, Double-tap to activate",
+         "notes": "Pre- and post-activation behavior matched spec: \"Trigger alert. button, Hello, Trigger alert. button, Double-tap to activate\".",
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "alert-pre-button",
+               "priority": "MUST",
+               "statement": "Convey initial control label \"Trigger alert\" before activation",
+               "featureRef": "button",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Trigger alert. button, Double-tap to activate"
+            },
+            {
+               "id": "alert-post-text",
+               "priority": "MUST",
+               "statement": "Convey alert text \"Hello\" after activating the trigger button",
+               "featureRef": "alert",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Trigger alert. button, Hello, Trigger alert. button, Double-tap to activate"
+            },
+            {
+               "id": "alert-post-role",
+               "priority": "MAY",
+               "statement": "Convey role \"alert\" when the alert region updates",
+               "featureRef": "alert",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Trigger alert. button, Hello, Trigger alert. button, Double-tap to activate"
+            },
+            {
+               "id": "alert-no-side-effects",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "alert",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ],
+         "transcript": [
+            {
+               "step": 1,
+               "command": "TalkBack swipe-right",
+               "phrase": "Trigger alert. button, Double-tap to activate"
+            },
+            {
+               "step": 2,
+               "command": "TalkBack double-tap (activate)",
+               "phrase": "Trigger alert. button, Hello, Trigger alert. button, Double-tap to activate"
+            }
+         ],
+         "environmentKey": "sdk_gphone64_arm64-(android-emulator) | android | 13-(api-33) | android-system-webview | 109.0.5414.123 | talkback | 14.2.0.618048417",
+         "environment": {
+            "id": "android-talkback-webview",
+            "label": "Android 13 · Android System WebView 109.0.5414.123 · TalkBack",
+            "shortLabel": "Android TB (WebView)",
+            "platformGroup": "android-talkback",
+            "device": "sdk_gphone64_arm64 (Android Emulator)",
+            "os": "Android",
+            "osVersion": "13 (API 33)",
+            "browser": "Android System WebView",
+            "browserVersion": "109.0.5414.123",
+            "browserType": "webview",
+            "usageOrder": 3,
+            "screenReader": "TalkBack",
+            "screenReaderVersion": "14.2.0.618048417"
+         }
+      }
+   ]
+}

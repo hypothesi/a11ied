@@ -3,181 +3,131 @@ import DocShell from '../layouts/doc-shell.astro';
 import { docsLinks } from '../lib/nav';
 
 const toc = [
-   { id: 'supported', label: 'Supported targets' },
-   { id: 'default', label: 'Target selection & fallback hierarchy' },
-   { id: 'virtual', label: 'Virtual screen reader' },
-   { id: 'real', label: 'Real OS screen readers (VoiceOver & NVDA)' },
-   { id: 'choose', label: 'Choosing the right target' },
+   { id: 'three', label: 'Supported screen readers' },
+   { id: 'virtual', label: 'What the simulated screen reader is' },
+   { id: 'choose', label: 'Which screen reader to use' },
+   { id: 'default', label: 'Which screen reader runs by default' },
+   { id: 'setup', label: 'Set up VoiceOver or NVDA' },
+   { id: 'label', label: 'How results are labeled' },
+   { id: 'talkback', label: 'TalkBack on Android' },
 ];
 ---
 
 <DocShell
    title="Screen readers"
-   summary="<p>Automated accessibility testing requires different trade-offs at different stages of development. <strong>a11ied</strong> provides three execution targets: a zero-setup <strong>virtual screen reader</strong> for instant in-process assertions, and real automation for <abbr title='Apple&apos;s built-in screen reader for macOS'><a href='https://support.apple.com/guide/voiceover/welcome/mac' target='_blank' rel='noreferrer'>VoiceOver</a></abbr> on macOS and <abbr title='NonVisual Desktop Access: the open-source screen reader for Windows'><a href='https://www.nvaccess.org/' target='_blank' rel='noreferrer'>NVDA</a></abbr> on Windows.</p><p>Pass <code>--sr &lt;target&gt;</code> to select an engine, and inspect detailed runtime metadata on every response.</p>"
+   summary="<p>a11ied drives three screen readers with the same commands: VoiceOver, NVDA, and a simulated one that runs anywhere. This page explains what each is good for and what a result from each one proves.</p>"
    links={docsLinks}
    toc={toc}
 >
-   <section class="ledger" id="supported">
-      <div class="panel-head">
-         <p class="panel-kicker">Target matrix</p>
-         <h2>Supported screen reader engines</h2>
-      </div>
-      <div class="route-list">
-         <div class="route-row">
-            <code>virtual</code>
-            <span>
-               <strong>Headless & In-process (Cross-platform)</strong>. A complete software screen reader
-               engine that computes the <abbr title="Accessible Rich Internet Applications: W3C specification of attributes that define accessible UI roles, states, and properties"><a href="https://www.w3.org/TR/wai-aria/" target="_blank" rel="noreferrer">ARIA</a></abbr> accessibility tree
-               and announcement sequence in memory or headless Chromium. Requires zero system permissions,
-               operates identically across macOS, Windows, and Linux, and executes in milliseconds inside unit tests or CI pipelines.
-            </span>
-         </div>
-         <div class="route-row">
-            <code>voiceover</code>
-            <span>
-               <strong>macOS Native Assistive Technology</strong>. Automates Apple's built-in <abbr title="Apple's built-in screen reader for macOS"><a href="https://support.apple.com/guide/voiceover/welcome/mac" target="_blank" rel="noreferrer">VoiceOver</a></abbr> through
-               AppleScript and <abbr title="Open-source library for driving VoiceOver and NVDA with code"><a href="https://guidepup.dev/" target="_blank" rel="noreferrer">Guidepup</a></abbr>.
-               Interacts with the real operating system accessibility API and can record synchronized video to <code>.mov</code> files.
-            </span>
-         </div>
-         <div class="route-row">
-            <code>nvda</code>
-            <span>
-               <strong>Windows Open-Source Assistive Technology</strong>. Automates the <abbr title="NonVisual Desktop Access: the open-source screen reader for Windows"><a href="https://www.nvaccess.org/" target="_blank" rel="noreferrer">NVDA</a></abbr> screen
-               reader on Windows through Guidepup and native platform hooks. Captures spoken speech output and supports <code>.mp4</code> screen recording.
-            </span>
-         </div>
+   <section>
+      <h2 id="three">Supported screen readers</h2>
+      <div class="table-wrap">
+         <table>
+            <thead>
+               <tr><th scope="col"><code>--sr</code></th><th scope="col">What it is</th><th scope="col">Runs on</th><th scope="col">Setup</th></tr>
+            </thead>
+            <tbody>
+               <tr><th scope="row"><code>virtual</code></th><td>A simulation of a screen reader</td><td>macOS, Windows, Linux, CI</td><td>None</td></tr>
+               <tr><th scope="row"><code>voiceover</code></th><td>Apple's VoiceOver</td><td>macOS</td><td><code>a1 setup</code>, once</td></tr>
+               <tr><th scope="row"><code>nvda</code></th><td>NVDA, the free screen reader for Windows</td><td>Windows</td><td><code>a1 setup</code>, once</td></tr>
+            </tbody>
+         </table>
       </div>
       <p>
-         Every response from an <code>a1 sr</code> command includes precise provenance metadata:
-      </p>
-      <ul>
-         <li><code>target</code>: The requested engine (<code>virtual</code>, <code>voiceover</code>, or <code>nvda</code>).</li>
-         <li><code>targetType</code>: <code>real</code> for native OS screen readers or <code>simulated</code> for virtual mode.</li>
-         <li><code>engine</code>: For virtual sessions, reports <code>browser</code> (headless Chromium running live client JavaScript) or <code>jsdom</code> (in-memory DOM).</li>
-      </ul>
-   </section>
-
-   <section class="panel" id="default">
-      <div class="panel-head">
-         <p class="panel-kicker">Automation defaults</p>
-         <h2>Target selection & fallback hierarchy</h2>
-      </div>
-      <p>
-         When you invoke <code>a1 sr start</code> without specifying an explicit <code>--sr</code> flag,
-         <code>a11ied</code> intelligently selects the appropriate target based on your current operating system
-         and environment readiness:
-      </p>
-      <ol>
-         <li><strong>Platform detection</strong>: On macOS, it defaults to <code>voiceover</code>. On Windows, it defaults to <code>nvda</code>. On Linux, CI containers, and Docker environments, it defaults to <code>virtual</code>.</li>
-         <li><strong>Readiness check</strong>: If native VoiceOver or NVDA is detected but <code>a1 doctor</code> reports that required system permissions or preference bundles are missing (<code>requires-setup</code>), the session automatically falls back to <code>virtual</code>.</li>
-         <li><strong>Transparent notice</strong>: When a fallback occurs, <code>a11ied</code> emits a clear warning in the output stating that a virtual simulation ran rather than native assistive technology, along with the <code>a1 doctor</code> command to configure native support.</li>
-      </ol>
-   </section>
-
-   <section class="split panel" id="virtual">
-      <div class="stack">
-         <div class="panel-head">
-            <p class="panel-kicker">Headless simulation</p>
-            <h2>Virtual screen reader</h2>
-         </div>
-         <p>
-            The virtual screen reader is engineered for maximum speed and deterministic reproducibility.
-            Because native screen readers take control of system focus and audio, running them in automated
-            watch loops or shared CI workers is often impractical.
-         </p>
-         <p>
-            When starting a virtual session explicitly on macOS or Windows, pass <code>--sr virtual</code>:
-         </p>
-         <pre><code>a1 sr start --sr virtual http://localhost:3000/checkout</code></pre>
-         <p>
-            <strong>Execution modes:</strong>
-         </p>
-         <ul>
-            <li>
-               <strong>Browser engine (Default for URLs)</strong>: When passed an HTTP/HTTPS URL, the virtual
-               reader spins up a headless Chromium instance. All client-side JavaScript, custom elements, CSS transitions,
-               and dynamic DOM mutations (such as modal popups and live status updates) execute exactly as they do in production.
-            </li>
-            <li>
-               <strong>JSDOM engine (In-memory testing)</strong>: When testing raw HTML strings or running isolated unit tests
-               without a local web server, the virtual reader operates in-memory using jsdom for sub-millisecond execution.
-            </li>
-         </ul>
-      </div>
-      <div class="split-aside">
-         <div class="tag">AI agent friendly</div>
-         <p class="aside-note">
-            Because the virtual engine requires no audio hardware and produces structured JSON logs,
-            it is the primary target used by AI coding assistants via the <abbr title="Model Context Protocol: open standard for connecting AI coding assistants to external tools"><a href="https://modelcontextprotocol.io/" target="_blank" rel="noreferrer">Model Context Protocol (MCP)</a></abbr> server.
-         </p>
-      </div>
-   </section>
-
-   <section class="panel" id="real">
-      <div class="panel-head">
-         <p class="panel-kicker">Operating system fidelity</p>
-         <h2>Real OS screen readers (VoiceOver & NVDA)</h2>
-      </div>
-      <p>
-         Real screen readers interact directly with the operating system's accessibility tree and speech synthesizer.
-         When you start a session targeting <code>voiceover</code> or <code>nvda</code>, <code>a11ied</code> launches
-         your system browser, brings its window to the foreground, and attaches Guidepup automation:
-      </p>
-      <pre><code>a1 sr start --sr voiceover http://localhost:3000/checkout
-a1 sr next</code></pre>
-      <p>
-         <strong>Window management:</strong> If you switch windows while inspecting tests, run <code>a1 sr focus</code>
-         to restore the test browser to the foreground. You can also target specific processes using <code>--app</code>,
-         <code>--bundle-id</code>, <code>--process</code>, or <code>--window-title</code>.
-      </p>
-      <p>
-         <strong>One-time machine setup:</strong> Before running native screen readers for the first time,
-         run <code>a1 setup</code> to install necessary preference bundles and verify OS permissions:
-      </p>
-      <pre><code>a1 setup</code></pre>
-      <p>
-         On macOS, this enables AppleScript control within VoiceOver settings and installs the Guidepup testing preferences bundle.
-         To record video demonstrations of tests in action, grant Screen Recording permissions to your terminal or host app in macOS System Settings.
-         See the <a href="/guides/recording">recording guide</a>.
-      </p>
-      <p>
-         <strong>VoiceOver command sets:</strong> When controlling VoiceOver, <code>a11ied</code> defaults to
-         semantic <strong>VoiceOver Commander</strong> commands (direct AppleScript IPC, layout-independent, fast and deterministic),
-         while also supporting physical <strong>VoiceOver Keycodes</strong> (OS-level simulated modifier chords).
-         See the <a href="/guides/screen-reader#voiceover-commands">VoiceOver Commander vs. Keycodes guide</a> for an in-depth comparison.
+         a11ied drives VoiceOver and NVDA through
+         <a href="https://www.guidepup.dev/">Guidepup</a>, an open-source library.
       </p>
    </section>
 
-   <section class="field-note" id="choose">
-      <div class="panel-head">
-         <p class="panel-kicker">Architecture guide</p>
-         <h2>Choosing the right target</h2>
-      </div>
-      <div class="route-list">
-         <div class="route-row">
-            <strong>Use virtual when:</strong>
-            <span>
-               You are writing unit or component tests with <code>a11ied/vitest</code>; running pull request validation in Linux CI/CD pipelines;
-               running fast TDD watch loops during development; or connecting AI coding agents via MCP.
-               Virtual testing is instantaneous, headless, and identical across developer machines.
-            </span>
-         </div>
-         <div class="route-row">
-            <strong>Use VoiceOver or NVDA when:</strong>
-            <span>
-               You need to verify platform-specific accessibility quirks; test keyboard rotor or elements list navigation;
-               confirm cursor placement across complex OS dialog transitions; create video evidence for QA or compliance audits;
-               or investigate bug reports originating from real assistive technology users.
-            </span>
-         </div>
-         <div class="route-row">
-            <strong>TalkBack on Android:</strong>
-            <span>
-               TalkBack is not an <code>--sr</code> target. <a href="/reference/cli#talkback"><code>a1 talkback</code></a>
-               turns it on or off over adb and walks focus on a phone or Google Play emulator, printing what TalkBack said at each stop.
-            </span>
-         </div>
-      </div>
+   <section>
+      <h2 id="virtual">What the simulated screen reader is</h2>
+      <p>
+         The simulated screen reader is software that reads the page's accessibility tree,
+         the structure a browser gives to assistive technology, and works out what a screen
+         reader would announce for each element. It makes no sound and takes over nothing.
+      </p>
+      <p>It runs in one of two engines, and tells you which when a session starts.</p>
+      <dl class="defs">
+         <dt><code>browser</code></dt>
+         <dd>A headless Chromium page. Page scripts run, so dialogs open and live regions announce. This is what you get for a URL.</dd>
+         <dt><code>jsdom</code></dt>
+         <dd>An in-memory document with no browser. Page scripts do not run, so only what is in the markup is announced. This is what you get for inline HTML in a test, or when no Chromium browser is installed.</dd>
+      </dl>
+      <p>
+         It is a model, and a real screen reader differs from it. VoiceOver and NVDA word
+         things differently from the model and from each other, and each has bugs and
+         shortcuts the model does not have. A transcript from the simulated screen reader
+         shows what the page exposes. It does not show what VoiceOver or NVDA says.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="choose">Which screen reader to use</h2>
+      <dl class="defs">
+         <dt>Simulated</dt>
+         <dd>While you build. In tests. In CI. For an AI agent. It is fast, it gives the same result on every machine, and tests can run many at once.</dd>
+         <dt>VoiceOver or NVDA</dt>
+         <dd>Before a release. To reproduce a user's bug report. To record evidence for an audit. Whenever the question is what a real user hears.</dd>
+      </dl>
+      <p>
+         A good habit: develop against the simulated screen reader, then confirm the
+         behavior that matters once with a real one.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="default">Which screen reader runs by default</h2>
+      <p>
+         Without <code>--sr</code>, <code>a1 sr start</code> uses the screen reader of the
+         platform when it is set up: VoiceOver on macOS, NVDA on Windows. Otherwise it uses
+         the simulated one and prints a warning that says so. On Linux it is always the
+         simulated one.
+      </p>
+      <p>
+         A real screen reader takes over the keyboard and speaks. If that is not what you
+         want, pass <code>--sr virtual</code>.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="setup">Set up VoiceOver or NVDA</h2>
+      <pre><code>a1 setup
+a1 doctor --task reader</code></pre>
+      <p>
+         <code>a1 setup</code> runs Guidepup's setup. On macOS it lets VoiceOver be controlled
+         by scripts. On Windows it installs a copy of NVDA for automation. <code>a1 doctor</code>
+         then shows what is ready, with the command for anything that is not.
+      </p>
+      <p>
+         To record the screen during a session, the app you run <code>a1</code> from also
+         needs permission. See <a href="/guides/recording">record a screen reader session</a>.
+      </p>
+   </section>
+
+   <section>
+      <h2 id="label">How results are labeled</h2>
+      <p>Every session and every JSON result says where it came from.</p>
+      <dl class="defs">
+         <dt><code>target</code></dt>
+         <dd><code>virtual</code>, <code>voiceover</code>, or <code>nvda</code>.</dd>
+         <dt><code>targetType</code></dt>
+         <dd><code>simulated</code> or <code>real</code>.</dd>
+         <dt><code>engine</code></dt>
+         <dd>For the simulated screen reader, <code>browser</code> or <code>jsdom</code>.</dd>
+      </dl>
+      <p>Keep these with any transcript you put in a report.</p>
+   </section>
+
+   <section>
+      <h2 id="talkback">TalkBack on Android</h2>
+      <p>
+         TalkBack is not an <code>--sr</code> choice. <a href="/reference/cli#talkback"><code>a1
+         talkback</code></a> turns it on or off on a phone or emulator and prints what it
+         says as focus moves.
+      </p>
+      <p>
+         For speech recorded from VoiceOver, TalkBack, NVDA, and JAWS on specific ARIA
+         features, see <a href="/compatibility">screen reader compatibility</a>.
+      </p>
    </section>
 </DocShell>

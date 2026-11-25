@@ -1,0 +1,198 @@
+---
+import { SEO } from 'astro-seo';
+
+interface Props {
+   /** The full text of the browser tab. */
+   title: string;
+   description: string;
+   /** Keeps a page out of search engines. For the 404 page. */
+   noindex?: boolean;
+   /** JSON-LD objects that describe the page to search engines. */
+   structuredData?: Record<string, unknown>[];
+}
+
+const SITE_NAME = 'a11ied';
+const SOCIAL_IMAGE_ALT = 'a11ied: automated screen reader and accessibility testing';
+const SOCIAL_IMAGE_WIDTH = 1200;
+const SOCIAL_IMAGE_HEIGHT = 630;
+
+const { title, description, noindex = false, structuredData = [] } = Astro.props;
+// Pagefind writes the search bundle into the built site, so search exists only there.
+const hasSearch = import.meta.env.PROD;
+const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
+// Every page is served with a trailing slash, so that is the address search engines get.
+const canonical = new URL(Astro.url.pathname.replace(/\/*$/, '/'), Astro.site).href;
+const socialImage = new URL(`${basePath}og.png`, Astro.site).href;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#f2e9d5" />
+<SEO
+   title={title}
+   description={description}
+   canonical={canonical}
+   noindex={noindex}
+   openGraph={{
+      basic: { title, type: 'website', image: socialImage, url: canonical },
+      optional: { description, siteName: SITE_NAME, locale: 'en_US' },
+      image: { width: SOCIAL_IMAGE_WIDTH, height: SOCIAL_IMAGE_HEIGHT, alt: SOCIAL_IMAGE_ALT },
+   }}
+   twitter={{
+      card: 'summary_large_image',
+      title,
+      description,
+      image: socialImage,
+      imageAlt: SOCIAL_IMAGE_ALT,
+   }}
+/>
+{hasSearch ? <link rel="sitemap" href={`${basePath}sitemap-index.xml`} /> : null}
+{
+   structuredData.map((item) => (
+      <script
+         is:inline
+         type="application/ld+json"
+         set:html={JSON.stringify(item).replaceAll('<', '\\u003c')}
+      />
+   ))
+}
+<link
+   rel="icon"
+   href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23ec4933'/%3E%3Cpath d='M4 4h56v56H4z' fill='none' stroke='%2317213b' stroke-width='5'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-family='Arial' font-weight='700' font-size='36' fill='%23fff9ec'%3Ea!%3C/text%3E%3C/svg%3E"
+/>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;600;700&family=Atkinson+Hyperlegible+Next:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+{hasSearch ? <link rel="stylesheet" href={`${basePath}pagefind/pagefind-component-ui.css`} /> : null}
+{hasSearch ? <script is:inline type="module" src={`${basePath}pagefind/pagefind-component-ui.js`}></script> : null}
+<style is:global>
+   :root {
+      color-scheme: light;
+      --paper: oklch(94% 0.025 84);
+      --paper-light: oklch(97% 0.014 84);
+      --ink: oklch(24% 0.055 266);
+      --ink-soft: oklch(38% 0.04 266);
+      --rule: color-mix(in oklch, var(--ink) 22%, transparent);
+      --red: oklch(62% 0.2 30);
+      --red-dark: oklch(39% 0.15 28);
+      --yellow: oklch(87% 0.17 92);
+      --yellow-soft: color-mix(in oklch, var(--yellow) 42%, var(--paper-light));
+      --blue: oklch(57% 0.17 250);
+      --blue-dark: oklch(43% 0.16 250);
+      --display: "Archivo Narrow", "Arial Narrow", sans-serif;
+      --body: "Atkinson Hyperlegible Next", Verdana, sans-serif;
+      --code: "SFMono-Regular", "SF Mono", Consolas, monospace;
+      --xs: 0.5rem;
+      --sm: 0.75rem;
+      --md: 1rem;
+      --lg: 1.5rem;
+      --xl: 2rem;
+      --2xl: 3rem;
+      --3xl: 4.5rem;
+      --rail: 17rem;
+      --prose: 46rem;
+   }
+
+   * { box-sizing: border-box; }
+   html { min-height: 100%; background: var(--paper); scroll-padding-top: var(--lg); }
+   body { margin: 0; min-height: 100vh; font-family: var(--body); color: var(--ink); background: var(--paper); }
+   ::selection { background: var(--yellow); color: var(--ink); }
+   a { color: var(--red-dark); font-weight: 600; text-decoration-thickness: 0.08em; text-underline-offset: 0.18em; }
+   a:hover { text-decoration-thickness: 0.16em; }
+   :is(a, summary, button, select, input, [tabindex]):focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+   abbr[title] { text-decoration: underline dotted 0.1em; text-underline-offset: 0.2em; cursor: help; }
+
+   .skip-link { position: absolute; top: var(--xs); left: var(--xs); z-index: 10; padding: var(--xs) var(--sm); background: var(--ink); color: var(--yellow); font-weight: 700; transform: translateY(-200%); }
+   .skip-link:focus { transform: none; }
+
+   /* Rail */
+   .brand { display: flex; align-items: center; gap: var(--sm); color: inherit; text-decoration: none; }
+   .mark { display: block; width: 3.5rem; height: 3.5rem; object-fit: contain; }
+   .brand-title { font: 700 2.1rem/0.9 var(--display); letter-spacing: -0.04em; }
+   .brand-title-accent { color: var(--red-dark); }
+   /* Prose */
+   section[id], :is(h2, h3)[id] { scroll-margin-top: var(--lg); }
+   h2, h3 { margin: 0; font-family: var(--display); font-weight: 700; text-wrap: balance; }
+   h2 { padding-top: var(--md); border-top: 3px solid var(--ink); font-size: 1.75rem; line-height: 1.05; letter-spacing: -0.01em; text-transform: uppercase; }
+   h3 { font-size: 1.3rem; line-height: 1.15; }
+   p, li, dd, td, th { font-size: 1.04rem; line-height: 1.65; }
+   p { margin: 0; }
+   ul, ol { margin: 0; padding-left: 1.3rem; }
+   li + li { margin-top: var(--xs); }
+   strong { font-weight: 700; }
+   .steps > li::marker { font-family: var(--display); font-weight: 700; }
+   /* Code */
+   code, pre, samp, kbd { font-family: var(--code); }
+   code, kbd { overflow-wrap: break-word; font-size: 0.86em; }
+   :not(pre) > code { padding: 0.1em 0.3em; background: var(--yellow-soft); box-decoration-break: clone; }
+   kbd { padding: 0.1em 0.4em; background: var(--paper-light); border: 1px solid var(--ink); border-bottom-width: 2px; }
+   pre { position: relative; overflow-x: auto; margin: 0; padding: 2.5rem var(--md) var(--md); background: var(--ink); color: var(--paper-light); border: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--red); font-size: 0.86rem; line-height: 1.65; tab-size: 3; }
+   pre code { overflow-wrap: normal; font-size: inherit; }
+   .code-block-tools { position: absolute; inset: 0 0 auto; display: flex; min-height: 2rem; align-items: center; justify-content: space-between; gap: var(--md); padding: 0.4rem 0.4rem 0 var(--md); color: var(--yellow); font: 700 0.72rem/1 var(--display); letter-spacing: 0.12em; }
+   .copy-button { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 1.6rem; margin: 0; padding: 0.2rem 0.5rem; background: transparent; color: inherit; border: 1px solid currentColor; border-radius: 0; font: inherit; cursor: pointer; }
+   .copy-button:hover { background: var(--yellow); color: var(--ink); border-color: var(--yellow); }
+   .copy-button svg { width: 0.9rem; height: 0.9rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
+   .token-command { color: var(--yellow); font-weight: 700; }
+   .token-option { color: oklch(84% 0.1 235); }
+   .token-string { color: oklch(84% 0.12 60); }
+   .token-variable { color: oklch(87% 0.11 100); font-style: italic; }
+   .token-keyword { color: oklch(82% 0.12 330); font-weight: 700; }
+   .token-url { color: oklch(86% 0.1 165); }
+
+   /* What the tool prints, and what you tell an agent, are light so they read apart from what you type. */
+   pre:is([data-label="OUTPUT"], [data-label="AI AGENT PROMPT"]) { background: var(--paper-light); color: var(--ink); border-color: var(--ink); border-left-width: 4px; }
+   pre:is([data-label="OUTPUT"], [data-label="AI AGENT PROMPT"]) .code-block-tools { color: var(--ink-soft); }
+   pre:is([data-label="OUTPUT"], [data-label="AI AGENT PROMPT"]) .copy-button:hover { background: var(--ink); color: var(--paper-light); border-color: var(--ink); }
+   /* An output hidden behind a button, and the lines that print when the button is pressed. */
+   pre.output--collapsed > code { display: none; }
+   .reveal-button { display: block; margin: var(--xs) auto; padding: 0.6rem 1rem; background: var(--yellow); color: var(--ink); border: 2px solid var(--ink); border-radius: 0; box-shadow: 3px 3px 0 var(--ink); font: 700 0.9rem/1 var(--display); letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; user-select: none; }
+   .reveal-line { display: block; min-height: 1lh; opacity: 0; animation: reveal-line 180ms ease-out forwards; }
+   @keyframes reveal-line { from { opacity: 0; transform: translateY(0.35em); } to { opacity: 1; transform: none; } }
+   @media (hover: hover) { .reveal-button:hover { background: var(--ink); color: var(--yellow); } }
+   @media (prefers-reduced-motion: reduce) { .reveal-line { opacity: 1; animation: none; } }
+   pre[data-label="AI AGENT PROMPT"] { border-left-color: var(--blue-dark); font-family: var(--body); font-size: 1rem; white-space: pre-wrap; }
+   pre[data-label="AI AGENT PROMPT"] code { font-family: inherit; }
+   /* Terms and their descriptions */
+   dl.defs { display: grid; grid-template-columns: minmax(9rem, 0.42fr) minmax(0, 1fr); margin-block-end: 0; border-bottom: 1px solid var(--rule); }
+   dl.defs > :is(dt, dd) { margin: 0; padding-block: var(--sm); border-top: 1px solid var(--rule); }
+   dl.defs > dt { padding-right: var(--lg); font-weight: 700; line-height: 1.5; }
+   dl.defs > dt code { font-weight: 400; }
+   dl.defs > dd { color: var(--ink-soft); }
+   dl.defs--wide { grid-template-columns: minmax(12rem, 0.75fr) minmax(0, 1fr); }
+
+   .table-wrap { overflow-x: auto; }
+   table { width: 100%; border-collapse: collapse; }
+   th, td { padding: var(--sm) var(--lg) var(--sm) 0; border-top: 1px solid var(--rule); text-align: start; vertical-align: top; }
+   thead th { border-top: 0; border-bottom: 2px solid var(--ink); font: 700 0.8rem/1.2 var(--display); letter-spacing: 0.1em; text-transform: uppercase; }
+   tbody th { font-weight: 700; }
+   td { color: var(--ink-soft); }
+
+   .note { padding: var(--md) var(--lg); background: var(--paper-light); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--yellow); }
+   .note > * + * { margin-top: var(--xs); }
+   .note-title { color: var(--red-dark); font: 700 0.8rem/1 var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
+   .panel-kicker { margin: 0; color: var(--red-dark); font: 700 0.76rem/1 var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
+
+   /* Search, drawn by Pagefind's components */
+   :root { --pf-font: var(--body); --pf-text: var(--ink); --pf-text-secondary: var(--ink-soft); --pf-text-muted: var(--ink-soft); --pf-background: var(--paper-light); --pf-border: var(--ink); --pf-border-focus: var(--blue); --pf-border-radius: 0; --pf-hover: var(--yellow-soft); --pf-mark: var(--ink); --pf-outline-focus: var(--blue); }
+   /*
+    * A matched word in a search result is ink on a yellow highlight. Pagefind colors only
+    * the text and forces a transparent background with a selector that outranks any other,
+    * so the highlight needs !important.
+    */
+   :is(.pf-result-excerpt, .pf-heading-excerpt, .pf-searchbox-result-excerpt) mark { padding-inline: 0.15em; background: var(--yellow) !important; }
+   .search-trigger { display: block; }
+
+   .icon-link { display: inline-flex; align-items: center; gap: 0.4em; }
+   .icon-link > svg { flex: none; width: 1.25em; height: 1.25em; }
+   .heading-link { color: inherit; font-weight: inherit; text-decoration: none; }
+   .heading-link:hover { text-decoration: underline; text-decoration-thickness: 0.08em; }
+
+
+   @media (max-width: 640px) {
+      dl.defs, dl.defs--wide { grid-template-columns: minmax(0, 1fr); }
+      dl.defs > dt { padding-bottom: 0; }
+      dl.defs > dd { padding-top: 0.2rem; border-top: 0; }
+      /* On a phone, commands wrap so nothing is cut off, and output scrolls so its columns stay aligned. */
+      pre:not([data-label="OUTPUT"]), pre:not([data-label="OUTPUT"]) code { white-space: pre-wrap; overflow-wrap: anywhere; }
+   }
+</style>

@@ -1,0 +1,30 @@
+---
+import { REPOSITORY_URL } from '../lib/nav';
+---
+
+<footer class="siteFooter">
+   <div class="siteFooter-inner">
+      <p>
+         Built on <a href="https://github.com/dequelabs/axe-core">axe-core</a>,
+         <a href="https://www.guidepup.dev/">Guidepup</a>,
+         <a href="https://playwright.dev/">Playwright</a>, and the W3C's WCAG and ARIA data.
+         The source is on <a href={REPOSITORY_URL}>GitHub</a>.
+      </p>
+      <nav aria-label="Footer">
+         <a href="/overview">Docs</a>
+         <a href="/quickstart">Quickstart</a>
+         <a href="/guides/troubleshooting">Troubleshooting</a>
+         <a href="/reference/cli">CLI reference</a>
+         <a href="/glossary">Glossary</a>
+         <a href="/llms.txt">llms.txt</a>
+      </nav>
+   </div>
+</footer>
+
+<style>
+   .siteFooter { padding-block: var(--lg); background: var(--yellow); border-top: 3px solid var(--ink); }
+   .siteFooter-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--md); width: min(100% - 2.5rem, 72rem); margin-inline: auto; }
+   .siteFooter-inner > p { margin: 0; }
+   .siteFooter nav { display: flex; flex-wrap: wrap; gap: var(--lg); }
+   .siteFooter a { color: var(--ink); }
+</style>

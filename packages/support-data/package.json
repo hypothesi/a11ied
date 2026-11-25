@@ -1,0 +1,33 @@
+{
+   "name": "@a11ied/support-data",
+   "version": "0.1.0",
+   "description": "Versioned screen reader and assistive technology compatibility dataset, test cases, and W3C ARIA-AT reports.",
+   "files": [
+      "dist",
+      "data",
+      "NOTICE.md"
+   ],
+   "type": "module",
+   "main": "./dist/index.js",
+   "types": "./dist/index.d.ts",
+   "exports": {
+      ".": {
+         "types": "./dist/index.d.ts",
+         "import": "./dist/index.js"
+      },
+      "./types": {
+         "types": "./dist/types.d.ts",
+         "import": "./dist/types.js"
+      },
+      "./package.json": "./package.json"
+   },
+   "publishConfig": {
+      "access": "public"
+   },
+   "scripts": {
+      "build": "tsup src/index.ts src/types.ts --format esm --dts --clean",
+      "prepack": "npm run build",
+      "typecheck": "tsc -p tsconfig.json --noEmit"
+   },
+   "dependencies": {}
+}

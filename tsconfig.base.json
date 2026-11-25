@@ -25,6 +25,7 @@
          "#core": ["packages/cli/src/bridges/core.ts"],
          "#mcp-server": ["packages/cli/src/bridges/mcp-server.ts"],
          "@a11ied/audit": ["packages/audit/src/index.ts"],
+         "@a11ied/compat": ["packages/compat/src/index.ts"],
          "@a11ied/contracts": ["packages/contracts/src/index.ts"],
          "@a11ied/core": ["packages/core/src/index.ts"],
          "@a11ied/earl": ["packages/earl/src/index.ts"],
@@ -33,6 +34,8 @@
          "@a11ied/knowledge": ["packages/knowledge/src/index.ts"],
          "@a11ied/mcp-server": ["packages/mcp-server/src/index.ts"],
          "@a11ied/observe": ["packages/observe/src/index.ts"],
+         "@a11ied/support-data": ["packages/support-data/src/index.ts"],
+         "@a11ied/support-data/types": ["packages/support-data/src/types.ts"],
          "@a11ied/wcag-engine": ["packages/wcag-engine/src/index.ts"],
          "@a11ied/wcag-data": ["packages/wcag-data/src/index.ts"]
       }

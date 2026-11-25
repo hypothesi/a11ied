@@ -6,18 +6,19 @@ import {
    type VirtualSpeech,
    type VirtualCurrentItem,
 } from '@a11ied/guidepup';
-import type { JSHandle, Page } from 'playwright';
+import type { ElementHandle, JSHandle, Page } from 'playwright';
 
 import { waitForDocumentSettled } from '../browser/load.js';
 import { launchAutomationBrowser } from '../browser/policy.js';
 import { withCurrentBrowserPage } from '../browser/current-page.js';
 import { CliEnvironmentError, CliUsageError } from '../errors/cli-errors.js';
 
+import { VIRTUAL_ACTIVATION_BUDGET_MS } from './loop-budget.js';
+import { withPageReaction } from './page-reaction.js';
 import { ownVirtualPage } from './virtual-page-owner.js';
 import { isNavigationError, withDecodedErrors } from './virtual-browser-errors.js';
 
 const PAGE_URL_PATTERN = /^(?:https?|file):/iu;
-const BROWSER_ACTIVATION_TIMEOUT_MS = 10_000;
 
 /** Whether a document URL names a page a browser can open, rather than a placeholder. */
 export function isPageUrl(url: string): boolean {
@@ -104,6 +105,58 @@ async function readBrowserSnapshot(
    });
 }
 
+/**
+ * Whether a pointer click at the element's center would land on something else: an
+ * overlay, a closed menu's neighbors, or nothing at all for an element with no size.
+ */
+async function isCoveredForPointer(element: ElementHandle<Element>): Promise<boolean> {
+   return element.evaluate((node) => {
+      const half = 0.5;
+      if (!node.isConnected) {
+         return false;
+      }
+      node.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
+      const rect = node.getBoundingClientRect();
+      const centerX = rect.left + rect.width * half,
+         centerY = rect.top + rect.height * half;
+      let top = document.elementFromPoint(centerX, centerY);
+      let inner = top?.shadowRoot?.elementFromPoint(centerX, centerY);
+      while (inner && inner !== top) {
+         top = inner;
+         inner = top.shadowRoot?.elementFromPoint(centerX, centerY);
+      }
+      return top !== node && !node.contains(top);
+   });
+}
+
+/**
+ * A screen reader activates a control through the accessibility API, so what is drawn
+ * over the control does not stop it. A pointer click is used when it can land, because
+ * the browser trusts it. Otherwise the click is delivered to the element itself.
+ */
+async function activateElement(element: ElementHandle<Element>): Promise<void> {
+   if (!(await isCoveredForPointer(element))) {
+      await element.click({ noWaitAfter: false, timeout: VIRTUAL_ACTIVATION_BUDGET_MS });
+      return;
+   }
+   await element
+      .evaluate((node) => {
+         if (node instanceof HTMLElement) {
+            node.click();
+            return;
+         }
+         node.dispatchEvent(
+            new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }),
+         );
+      })
+      .catch((error: unknown) => {
+         // A link's own navigation can end the call before it returns.
+         if (!isNavigationError(error)) {
+            throw error;
+         }
+      });
+}
+
 /** A bound click can finish navigation without replaying input in the next document. */
 async function activateBrowserCursor(
    context: NavigationRecoveryContext,
@@ -129,7 +182,9 @@ async function activateBrowserCursor(
       if (!element) {
          return { moved: false };
       }
-      await element.click({ noWaitAfter: false, timeout: BROWSER_ACTIVATION_TIMEOUT_MS });
+      await withPageReaction(page, VIRTUAL_ACTIVATION_BUDGET_MS, () =>
+         activateElement(element),
+      );
       const sameDocument = await prepared.document
          .evaluate((document) => document === globalThis.document)
          .catch((error: unknown) => {

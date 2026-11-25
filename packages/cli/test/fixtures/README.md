@@ -28,6 +28,12 @@ Two ways to load a fixture, and the difference matters:
 | `landmark-maze.html`       | Two `main` elements, two unlabeled `nav` elements, a named and an unnamed `section`, and a paragraph outside every landmark. Fails `landmark-no-duplicate-main`, `landmark-unique`, and `region`.                                                                                                                                                                    |
 | `aria-widgets.html`        | Each widget twice, once broken and once correct: an icon-only button, a `div` with `role="button"` and no `tabindex`, a `role="checkbox"` with no `aria-checked`, a toggle whose `aria-pressed` never changes, tabs with no `aria-selected`, a disclosure button whose `aria-controls` is an empty string, and an `aria-labelledby` pointing at an id that does not exist. Fails `button-name`, `aria-required-attr`, and `label`. |
 | `form-errors.html`         | A field labeled only by a placeholder, an unlabeled `select`, radios with no legend, error text that is not linked to a field, and one field with `aria-describedby` and `aria-invalid` done right. Fails `select-name`. axe's `label` rule **passes** the placeholder-only field, which is the point of it.                                                         |
+| `link-navigation.html`     | One link to `basic-page.html`, for following a link into a new document. |
+| `title-missing.html`       | A page with no `title` that links to `title-present.html`. |
+| `title-present.html`       | The same layout with a `title`, linking back to `title-missing.html`. |
+| `strict-csp.html`          | A page whose Content Security Policy blocks every script, for checking that the reader still attaches. |
+| `tall-page.html`           | Twenty bands of 1000 px, each a different color: 20,000 px in all, taller than the 16,384 px Chromium draws in one piece. A full-page capture has to show every band once. |
+| `entry-animation.html`     | Text that fades in over 1.5 seconds and has full contrast once it has, beside a spinner that never stops. A scan has to wait for the fade and must not wait for the spinner. |
 
 ## Pages that need their scripts
 
@@ -37,6 +43,8 @@ Two ways to load a fixture, and the difference matters:
 | `status-message.html`  | A form that writes its confirmation to a `role="status"` region.                                                                                                                                                                                                                                        |
 | `live-regions.html`    | The same message written three ways: to `role="status"` after a 250 ms delay, to `role="alert"` during the click, and to a `div` with no role. Only the third announces nothing, and the timing difference decides whether `sr wait --for` or `sr expect --since` is the right check.                   |
 | `modal-untrapped.html` | Two dialogs from one page. The first is a `div` with `role="dialog"` that opens without moving focus and has no accessible name. The second is a native `dialog` opened with `showModal()`. Loading it with `#rename` opens the first one, so a scan can reach markup that is otherwise never rendered. |
+| `delayed-navigation.html` | A button that goes to `basic-page.html` 250 ms after the click, so the click returns before the navigation starts. |
+| `client-router.html`   | A link the page handles itself, the way a client-side router does: it fetches `basic-page.html` and swaps that page's body into the same document. Activation has to wait for the swap. |
 
 ## APG examples
 

@@ -1,0 +1,8 @@
+heading-order  Heading levels should only increase by one
+
+Criteria (0)
+  No WCAG criterion maps to this rule.
+
+Fix
+  Ensure the order of headings is semantically correct
+  https://dequeuniversity.com/rules/axe/4.13/heading-order?application=axeAPI

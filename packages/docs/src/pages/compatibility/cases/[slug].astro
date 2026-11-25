@@ -1,0 +1,44 @@
+---
+import {
+   getTestCaseBySlug,
+   screenReaderTests,
+   type ScreenReaderTestCase,
+} from '@a11ied/support-data';
+
+export function getStaticPaths(): readonly {
+   readonly params: { readonly slug: string };
+   readonly props: { readonly testCase: ScreenReaderTestCase };
+}[] {
+   return screenReaderTests.map((testCase) => ({
+      params: { slug: testCase.slug },
+      props: { testCase },
+   }));
+}
+
+export interface Props {
+   testCase?: ScreenReaderTestCase;
+}
+
+const props = Astro.props;
+const testCase = props.testCase ?? getTestCaseBySlug(String(Astro.params.slug));
+if (!testCase) {
+   throw new Error(`Unknown screen reader test case slug: ${String(Astro.params.slug)}`);
+}
+---
+
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="icon" href="data:," />
+      <!-- A bare test fixture. Search engines should list the test's own page, not this one. -->
+      <meta name="robots" content="noindex" />
+      <title>{testCase.isolatedTitle}</title>
+      {testCase.css && <style is:inline set:html={testCase.css} />}
+   </head>
+   <body>
+      <Fragment set:html={testCase.html} />
+      {testCase.js && <script is:inline set:html={testCase.js} />}
+   </body>
+</html>

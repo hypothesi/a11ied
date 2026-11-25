@@ -1,0 +1,1189 @@
+{
+   "schemaVersion": 1,
+   "syncedAt": "2026-11-20T21:27:59.526Z",
+   "upstreamURL": "https://aria-at.w3.org/reports/aria-features",
+   "license": "W3C Document License (https://www.w3.org/Consortium/Legal/copyright-documents)",
+   "plansCount": 27,
+   "reportsCount": 110,
+   "features": [
+      {
+         "refId": "alert",
+         "type": "aria",
+         "linkText": "alert ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#alert",
+         "total": 15,
+         "passed": 15,
+         "failed": 0,
+         "untestable": 0,
+         "passedPercentage": 100,
+         "planSlugs": ["apg-alert"]
+      },
+      {
+         "refId": "aria-activedescendant",
+         "type": "aria",
+         "linkText": "aria-activedescendant ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-activedescendant",
+         "total": 69,
+         "passed": 61,
+         "failed": 8,
+         "untestable": 0,
+         "passedPercentage": 88,
+         "planSlugs": ["apg-menu-button-actions-active-descendant"]
+      },
+      {
+         "refId": "aria-checked",
+         "type": "aria",
+         "linkText": "aria-checked ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-checked",
+         "total": 615,
+         "passed": 591,
+         "failed": 19,
+         "untestable": 5,
+         "passedPercentage": 96,
+         "planSlugs": [
+            "apg-checkbox",
+            "apg-radiogroup-aria-activedescendant",
+            "apg-radiogroup-roving-tabindex",
+            "apg-rating-radio-group",
+            "apg-switch",
+            "apg-switch-button"
+         ]
+      },
+      {
+         "refId": "aria-colcount",
+         "type": "aria",
+         "linkText": "aria-colcount ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-colcount",
+         "total": 19,
+         "passed": 15,
+         "failed": 4,
+         "untestable": 0,
+         "passedPercentage": 78,
+         "planSlugs": ["apg-minimal-data-grid"]
+      },
+      {
+         "refId": "aria-colindex",
+         "type": "aria",
+         "linkText": "aria-colindex ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-colindex",
+         "total": 49,
+         "passed": 23,
+         "failed": 26,
+         "untestable": 0,
+         "passedPercentage": 46,
+         "planSlugs": ["apg-minimal-data-grid"]
+      },
+      {
+         "refId": "aria-current",
+         "type": "aria",
+         "linkText": "aria-current ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-current",
+         "total": 24,
+         "passed": 22,
+         "failed": 2,
+         "untestable": 0,
+         "passedPercentage": 91,
+         "planSlugs": ["apg-disclosure-navigation"]
+      },
+      {
+         "refId": "aria-errormessage",
+         "type": "aria",
+         "linkText": "aria-errormessage ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-errormessage",
+         "total": 6,
+         "passed": 3,
+         "failed": 3,
+         "untestable": 0,
+         "passedPercentage": 50,
+         "planSlugs": ["apg-quantity-spin-button"]
+      },
+      {
+         "refId": "aria-expanded",
+         "type": "aria",
+         "linkText": "aria-expanded ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-expanded",
+         "total": 661,
+         "passed": 528,
+         "failed": 126,
+         "untestable": 7,
+         "passedPercentage": 79,
+         "planSlugs": [
+            "apg-accordion",
+            "apg-disclosure-faq",
+            "apg-disclosure-navigation",
+            "apg-menu-button-actions",
+            "apg-menu-button-actions-active-descendant",
+            "apg-menu-button-navigation"
+         ]
+      },
+      {
+         "refId": "aria-haspopup",
+         "type": "aria",
+         "linkText": "aria-haspopup ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-haspopup",
+         "total": 191,
+         "passed": 182,
+         "failed": 8,
+         "untestable": 1,
+         "passedPercentage": 95,
+         "planSlugs": [
+            "apg-menu-button-actions",
+            "apg-menu-button-actions-active-descendant",
+            "apg-menu-button-navigation"
+         ]
+      },
+      {
+         "refId": "aria-invalid",
+         "type": "aria",
+         "linkText": "aria-invalid ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-invalid",
+         "total": 11,
+         "passed": 8,
+         "failed": 3,
+         "untestable": 0,
+         "passedPercentage": 72,
+         "planSlugs": ["apg-quantity-spin-button"]
+      },
+      {
+         "refId": "aria-label",
+         "type": "aria",
+         "linkText": "aria-label ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-label",
+         "total": 91,
+         "passed": 84,
+         "failed": 7,
+         "untestable": 0,
+         "passedPercentage": 92,
+         "planSlugs": ["apg-disclosure-navigation", "apg-link-css"]
+      },
+      {
+         "refId": "aria-labelledby",
+         "type": "aria",
+         "linkText": "aria-labelledby ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-labelledby",
+         "total": 493,
+         "passed": 408,
+         "failed": 77,
+         "untestable": 8,
+         "passedPercentage": 82,
+         "planSlugs": [
+            "apg-accordion",
+            "apg-checkbox",
+            "apg-horizontal-slider",
+            "apg-menu-button-actions",
+            "apg-menu-button-actions-active-descendant",
+            "apg-menu-button-navigation",
+            "apg-minimal-data-grid",
+            "apg-radiogroup-aria-activedescendant",
+            "apg-radiogroup-roving-tabindex",
+            "apg-rating-radio-group",
+            "apg-seek-slider",
+            "apg-tabs-manual-activation",
+            "apg-vertical-temperature-slider"
+         ]
+      },
+      {
+         "refId": "aria-modal",
+         "type": "aria",
+         "linkText": "aria-modal ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-modal",
+         "total": 20,
+         "passed": 20,
+         "failed": 0,
+         "untestable": 0,
+         "passedPercentage": 100,
+         "planSlugs": ["apg-modal-dialog"]
+      },
+      {
+         "refId": "aria-orientation",
+         "type": "aria",
+         "linkText": "aria-orientation ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-orientation",
+         "total": 82,
+         "passed": 53,
+         "failed": 26,
+         "untestable": 3,
+         "passedPercentage": 64,
+         "planSlugs": [
+            "apg-horizontal-slider",
+            "apg-seek-slider",
+            "apg-vertical-temperature-slider"
+         ]
+      },
+      {
+         "refId": "aria-posinset",
+         "type": "aria",
+         "linkText": "aria-posinset ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-posinset",
+         "total": 679,
+         "passed": 526,
+         "failed": 142,
+         "untestable": 11,
+         "passedPercentage": 77,
+         "planSlugs": [
+            "apg-menu-button-actions",
+            "apg-menu-button-actions-active-descendant",
+            "apg-menu-button-navigation",
+            "apg-radiogroup-aria-activedescendant",
+            "apg-radiogroup-roving-tabindex",
+            "apg-rating-radio-group",
+            "apg-tabs-manual-activation"
+         ]
+      },
+      {
+         "refId": "aria-pressed",
+         "type": "aria",
+         "linkText": "aria-pressed ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-pressed",
+         "total": 222,
+         "passed": 203,
+         "failed": 16,
+         "untestable": 3,
+         "passedPercentage": 91,
+         "planSlugs": ["apg-toggle-button"]
+      },
+      {
+         "refId": "aria-required",
+         "type": "aria",
+         "linkText": "aria-required ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-required",
+         "total": 19,
+         "passed": 18,
+         "failed": 0,
+         "untestable": 1,
+         "passedPercentage": 94,
+         "planSlugs": ["apg-accordion"]
+      },
+      {
+         "refId": "aria-rowcount",
+         "type": "aria",
+         "linkText": "aria-rowcount ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-rowcount",
+         "total": 19,
+         "passed": 15,
+         "failed": 4,
+         "untestable": 0,
+         "passedPercentage": 78,
+         "planSlugs": ["apg-minimal-data-grid"]
+      },
+      {
+         "refId": "aria-rowindex",
+         "type": "aria",
+         "linkText": "aria-rowindex ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-rowindex",
+         "total": 46,
+         "passed": 25,
+         "failed": 21,
+         "untestable": 0,
+         "passedPercentage": 54,
+         "planSlugs": ["apg-minimal-data-grid"]
+      },
+      {
+         "refId": "aria-selected",
+         "type": "aria",
+         "linkText": "aria-selected ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-selected",
+         "total": 61,
+         "passed": 55,
+         "failed": 1,
+         "untestable": 5,
+         "passedPercentage": 90,
+         "planSlugs": ["apg-tabs-manual-activation"]
+      },
+      {
+         "refId": "aria-setsize",
+         "type": "aria",
+         "linkText": "aria-setsize ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-setsize",
+         "total": 662,
+         "passed": 528,
+         "failed": 123,
+         "untestable": 11,
+         "passedPercentage": 79,
+         "planSlugs": [
+            "apg-menu-button-actions",
+            "apg-menu-button-actions-active-descendant",
+            "apg-menu-button-navigation",
+            "apg-radiogroup-aria-activedescendant",
+            "apg-radiogroup-roving-tabindex",
+            "apg-rating-radio-group",
+            "apg-tabs-manual-activation"
+         ]
+      },
+      {
+         "refId": "aria-valuemax",
+         "type": "aria",
+         "linkText": "aria-valuemax ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-valuemax",
+         "total": 172,
+         "passed": 101,
+         "failed": 63,
+         "untestable": 8,
+         "passedPercentage": 58,
+         "planSlugs": [
+            "apg-horizontal-slider",
+            "apg-quantity-spin-button",
+            "apg-seek-slider",
+            "apg-vertical-temperature-slider"
+         ]
+      },
+      {
+         "refId": "aria-valuemin",
+         "type": "aria",
+         "linkText": "aria-valuemin ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-valuemin",
+         "total": 172,
+         "passed": 101,
+         "failed": 63,
+         "untestable": 8,
+         "passedPercentage": 58,
+         "planSlugs": [
+            "apg-horizontal-slider",
+            "apg-quantity-spin-button",
+            "apg-seek-slider",
+            "apg-vertical-temperature-slider"
+         ]
+      },
+      {
+         "refId": "aria-valuenow",
+         "type": "aria",
+         "linkText": "aria-valuenow ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-valuenow",
+         "total": 340,
+         "passed": 293,
+         "failed": 35,
+         "untestable": 12,
+         "passedPercentage": 86,
+         "planSlugs": [
+            "apg-horizontal-slider",
+            "apg-quantity-spin-button",
+            "apg-seek-slider",
+            "apg-vertical-temperature-slider"
+         ]
+      },
+      {
+         "refId": "aria-valuetext",
+         "type": "aria",
+         "linkText": "aria-valuetext ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#aria-valuetext",
+         "total": 328,
+         "passed": 297,
+         "failed": 15,
+         "untestable": 16,
+         "passedPercentage": 90,
+         "planSlugs": ["apg-seek-slider", "apg-vertical-temperature-slider"]
+      },
+      {
+         "refId": "button",
+         "type": "aria",
+         "linkText": "button ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#button",
+         "total": 124,
+         "passed": 119,
+         "failed": 1,
+         "untestable": 4,
+         "passedPercentage": 95,
+         "planSlugs": ["apg-command-button"]
+      },
+      {
+         "refId": "checkbox",
+         "type": "aria",
+         "linkText": "checkbox",
+         "specURL": "",
+         "total": 152,
+         "passed": 146,
+         "failed": 6,
+         "untestable": 0,
+         "passedPercentage": 96,
+         "planSlugs": ["apg-checkbox"]
+      },
+      {
+         "refId": "grid",
+         "type": "aria",
+         "linkText": "grid ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#grid",
+         "total": 29,
+         "passed": 14,
+         "failed": 15,
+         "untestable": 0,
+         "passedPercentage": 48,
+         "planSlugs": ["apg-minimal-data-grid"]
+      },
+      {
+         "refId": "group",
+         "type": "aria",
+         "linkText": "group ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#group",
+         "total": 39,
+         "passed": 28,
+         "failed": 11,
+         "untestable": 0,
+         "passedPercentage": 71,
+         "planSlugs": ["apg-checkbox"]
+      },
+      {
+         "refId": "link",
+         "type": "aria",
+         "linkText": "link ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#link",
+         "total": 208,
+         "passed": 205,
+         "failed": 3,
+         "untestable": 0,
+         "passedPercentage": 98,
+         "planSlugs": ["apg-link-css", "apg-link-img-alt", "apg-link-span-text"]
+      },
+      {
+         "refId": "menu",
+         "type": "aria",
+         "linkText": "menu ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#menu",
+         "total": 12,
+         "passed": 10,
+         "failed": 2,
+         "untestable": 0,
+         "passedPercentage": 83,
+         "planSlugs": [
+            "apg-menu-button-actions",
+            "apg-menu-button-actions-active-descendant",
+            "apg-menu-button-navigation"
+         ]
+      },
+      {
+         "refId": "menuitem",
+         "type": "aria",
+         "linkText": "menuitem ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#menuitem",
+         "total": 170,
+         "passed": 129,
+         "failed": 41,
+         "untestable": 0,
+         "passedPercentage": 75,
+         "planSlugs": [
+            "apg-menu-button-actions",
+            "apg-menu-button-actions-active-descendant",
+            "apg-menu-button-navigation"
+         ]
+      },
+      {
+         "refId": "radio",
+         "type": "aria",
+         "linkText": "radio ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#radio",
+         "total": 936,
+         "passed": 912,
+         "failed": 20,
+         "untestable": 4,
+         "passedPercentage": 97,
+         "planSlugs": [
+            "apg-radiogroup-aria-activedescendant",
+            "apg-radiogroup-roving-tabindex",
+            "apg-rating-radio-group"
+         ]
+      },
+      {
+         "refId": "radiogroup",
+         "type": "aria",
+         "linkText": "radiogroup ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#radiogroup",
+         "total": 318,
+         "passed": 281,
+         "failed": 35,
+         "untestable": 2,
+         "passedPercentage": 88,
+         "planSlugs": [
+            "apg-radiogroup-aria-activedescendant",
+            "apg-radiogroup-roving-tabindex",
+            "apg-rating-radio-group"
+         ]
+      },
+      {
+         "refId": "region",
+         "type": "aria",
+         "linkText": "region ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#region",
+         "total": 17,
+         "passed": 9,
+         "failed": 8,
+         "untestable": 0,
+         "passedPercentage": 52,
+         "planSlugs": ["apg-accordion", "apg-disclosure-navigation"]
+      },
+      {
+         "refId": "slider",
+         "type": "aria",
+         "linkText": "slider ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#slider",
+         "total": 172,
+         "passed": 158,
+         "failed": 10,
+         "untestable": 4,
+         "passedPercentage": 91,
+         "planSlugs": [
+            "apg-horizontal-slider",
+            "apg-seek-slider",
+            "apg-vertical-temperature-slider"
+         ]
+      },
+      {
+         "refId": "spinbutton",
+         "type": "aria",
+         "linkText": "spinbutton ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#spinbutton",
+         "total": 44,
+         "passed": 40,
+         "failed": 0,
+         "untestable": 4,
+         "passedPercentage": 90,
+         "planSlugs": ["apg-quantity-spin-button"]
+      },
+      {
+         "refId": "switch",
+         "type": "aria",
+         "linkText": "switch ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#switch",
+         "total": 416,
+         "passed": 395,
+         "failed": 10,
+         "untestable": 11,
+         "passedPercentage": 94,
+         "planSlugs": ["apg-switch", "apg-switch-button", "apg-switch-checkbox"]
+      },
+      {
+         "refId": "tab",
+         "type": "aria",
+         "linkText": "tab ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#tab",
+         "total": 90,
+         "passed": 79,
+         "failed": 2,
+         "untestable": 9,
+         "passedPercentage": 87,
+         "planSlugs": ["apg-tabs-manual-activation"]
+      },
+      {
+         "refId": "tablist",
+         "type": "aria",
+         "linkText": "tablist ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#tablist",
+         "total": 15,
+         "passed": 8,
+         "failed": 5,
+         "untestable": 2,
+         "passedPercentage": 53,
+         "planSlugs": ["apg-tabs-manual-activation"]
+      },
+      {
+         "refId": "tabpanel",
+         "type": "aria",
+         "linkText": "tabpanel ARIA Specification",
+         "specURL": "https://www.w3.org/TR/wai-aria/#tabpanel",
+         "total": 6,
+         "passed": 3,
+         "failed": 2,
+         "untestable": 1,
+         "passedPercentage": 50,
+         "planSlugs": ["apg-tabs-manual-activation"]
+      },
+      {
+         "refId": "@checked",
+         "type": "html",
+         "linkText": "@checked HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#att-checked",
+         "total": 82,
+         "passed": 75,
+         "failed": 4,
+         "untestable": 3,
+         "passedPercentage": 91,
+         "planSlugs": ["apg-switch-checkbox"]
+      },
+      {
+         "refId": "button",
+         "type": "html",
+         "linkText": "button HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#el-button",
+         "total": 1302,
+         "passed": 1257,
+         "failed": 31,
+         "untestable": 14,
+         "passedPercentage": 96,
+         "planSlugs": [
+            "apg-accordion",
+            "apg-disclosure-faq",
+            "apg-disclosure-navigation",
+            "apg-menu-button-actions",
+            "apg-menu-button-actions-active-descendant",
+            "apg-menu-button-navigation",
+            "apg-switch-button",
+            "apg-toggle-button",
+            "html-button"
+         ]
+      },
+      {
+         "refId": "div",
+         "type": "html",
+         "linkText": "div HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#el-div",
+         "total": 3,
+         "passed": 3,
+         "failed": 0,
+         "untestable": 0,
+         "passedPercentage": 100,
+         "planSlugs": ["apg-disclosure-faq"]
+      },
+      {
+         "refId": "heading",
+         "type": "html",
+         "linkText": "heading HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#el-h1-h6",
+         "total": 88,
+         "passed": 86,
+         "failed": 0,
+         "untestable": 2,
+         "passedPercentage": 97,
+         "planSlugs": ["apg-accordion"]
+      },
+      {
+         "refId": "htmlButton",
+         "type": "html",
+         "linkText": "HTML button HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#el-button",
+         "total": 90,
+         "passed": 81,
+         "failed": 0,
+         "untestable": 9,
+         "passedPercentage": 90,
+         "planSlugs": ["apg-tabs-manual-activation"]
+      },
+      {
+         "refId": "htmlLink",
+         "type": "html",
+         "linkText": "a (hyperlink) HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#el-a",
+         "total": 244,
+         "passed": 234,
+         "failed": 10,
+         "untestable": 0,
+         "passedPercentage": 95,
+         "planSlugs": [
+            "apg-disclosure-navigation",
+            "apg-minimal-data-grid",
+            "apg-radiogroup-aria-activedescendant",
+            "apg-radiogroup-roving-tabindex",
+            "apg-tabs-manual-activation"
+         ]
+      },
+      {
+         "refId": "inputTypeCheckbox",
+         "type": "html",
+         "linkText": "inputTypeCheckbox HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#el-input-checkbox",
+         "total": 128,
+         "passed": 118,
+         "failed": 4,
+         "untestable": 6,
+         "passedPercentage": 92,
+         "planSlugs": ["apg-switch-checkbox"]
+      },
+      {
+         "refId": "inputTypeText",
+         "type": "html",
+         "linkText": "inputTypeText HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#el-input-text",
+         "total": 59,
+         "passed": 49,
+         "failed": 5,
+         "untestable": 5,
+         "passedPercentage": 83,
+         "planSlugs": ["apg-accordion", "apg-quantity-spin-button"]
+      },
+      {
+         "refId": "label",
+         "type": "html",
+         "linkText": "HTML label HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#el-label",
+         "total": 98,
+         "passed": 89,
+         "failed": 2,
+         "untestable": 7,
+         "passedPercentage": 90,
+         "planSlugs": ["apg-quantity-spin-button", "apg-switch-checkbox"]
+      },
+      {
+         "refId": "link",
+         "type": "html",
+         "linkText": "link HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#el-link",
+         "total": 44,
+         "passed": 44,
+         "failed": 0,
+         "untestable": 0,
+         "passedPercentage": 100,
+         "planSlugs": ["apg-rating-radio-group"]
+      },
+      {
+         "refId": "list",
+         "type": "html",
+         "linkText": "list",
+         "specURL": "",
+         "total": 6,
+         "passed": 4,
+         "failed": 2,
+         "untestable": 0,
+         "passedPercentage": 66,
+         "planSlugs": ["apg-checkbox"]
+      },
+      {
+         "refId": "nav",
+         "type": "html",
+         "linkText": "nav HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#el-nav",
+         "total": 20,
+         "passed": 20,
+         "failed": 0,
+         "untestable": 0,
+         "passedPercentage": 100,
+         "planSlugs": ["apg-disclosure-navigation"]
+      },
+      {
+         "refId": "td",
+         "type": "html",
+         "linkText": "td HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#el-td",
+         "total": 53,
+         "passed": 53,
+         "failed": 0,
+         "untestable": 0,
+         "passedPercentage": 100,
+         "planSlugs": ["apg-minimal-data-grid"]
+      },
+      {
+         "refId": "th",
+         "type": "html",
+         "linkText": "th HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#el-th",
+         "total": 52,
+         "passed": 28,
+         "failed": 24,
+         "untestable": 0,
+         "passedPercentage": 53,
+         "planSlugs": ["apg-minimal-data-grid"]
+      },
+      {
+         "refId": "ul",
+         "type": "html",
+         "linkText": "ul HTML-AAM Specification",
+         "specURL": "https://www.w3.org/TR/html-aam-1.0/#el-ul",
+         "total": 48,
+         "passed": 44,
+         "failed": 4,
+         "untestable": 0,
+         "passedPercentage": 91,
+         "planSlugs": ["apg-disclosure-faq", "apg-disclosure-navigation"]
+      }
+   ],
+   "plans": [
+      {
+         "slug": "apg-accordion",
+         "directory": "apg/accordion",
+         "title": "Accordion",
+         "versionString": "V25.07.14",
+         "phase": "CANDIDATE",
+         "planVersionID": "163649",
+         "reportsCount": 4,
+         "featureRefs": [
+            "aria:aria-expanded",
+            "aria:aria-labelledby",
+            "aria:aria-required",
+            "aria:region",
+            "html:button",
+            "html:heading",
+            "html:inputTypeText"
+         ]
+      },
+      {
+         "slug": "apg-menu-button-actions-active-descendant",
+         "directory": "apg/menu-button-actions-active-descendant",
+         "title": "Action Menu Button Example Using aria-activedescendant",
+         "versionString": "V25.10.26",
+         "phase": "CANDIDATE",
+         "planVersionID": "163666",
+         "reportsCount": 5,
+         "featureRefs": [
+            "aria:aria-activedescendant",
+            "aria:aria-expanded",
+            "aria:aria-haspopup",
+            "aria:aria-labelledby",
+            "aria:aria-posinset",
+            "aria:aria-setsize",
+            "aria:menu",
+            "aria:menuitem",
+            "html:button"
+         ]
+      },
+      {
+         "slug": "apg-menu-button-actions",
+         "directory": "apg/menu-button-actions",
+         "title": "Action Menu Button Example Using element.focus()",
+         "versionString": "V25.02.13",
+         "phase": "CANDIDATE",
+         "planVersionID": "163637",
+         "reportsCount": 4,
+         "featureRefs": [
+            "aria:aria-expanded",
+            "aria:aria-haspopup",
+            "aria:aria-labelledby",
+            "aria:aria-posinset",
+            "aria:aria-setsize",
+            "aria:menu",
+            "aria:menuitem",
+            "html:button"
+         ]
+      },
+      {
+         "slug": "apg-alert",
+         "directory": "apg/alert",
+         "title": "Alert Example",
+         "versionString": "V25.11.02",
+         "phase": "CANDIDATE",
+         "planVersionID": "163670",
+         "reportsCount": 4,
+         "featureRefs": ["aria:alert"]
+      },
+      {
+         "slug": "apg-checkbox",
+         "directory": "apg/checkbox",
+         "title": "Checkbox Example (Two State)",
+         "versionString": "V25.12.19",
+         "phase": "CANDIDATE",
+         "planVersionID": "163678",
+         "reportsCount": 3,
+         "featureRefs": [
+            "aria:aria-checked",
+            "aria:aria-labelledby",
+            "aria:checkbox",
+            "aria:group",
+            "html:list"
+         ]
+      },
+      {
+         "slug": "apg-horizontal-slider",
+         "directory": "apg/horizontal-slider",
+         "title": "Color Viewer Slider",
+         "versionString": "V24.12.04",
+         "phase": "CANDIDATE",
+         "planVersionID": "163630",
+         "reportsCount": 6,
+         "featureRefs": [
+            "aria:aria-labelledby",
+            "aria:aria-orientation",
+            "aria:aria-valuemax",
+            "aria:aria-valuemin",
+            "aria:aria-valuenow",
+            "aria:slider"
+         ]
+      },
+      {
+         "slug": "apg-command-button",
+         "directory": "apg/command-button",
+         "title": "Command Button Example",
+         "versionString": "V25.11.02",
+         "phase": "CANDIDATE",
+         "planVersionID": "163671",
+         "reportsCount": 5,
+         "featureRefs": ["aria:button"]
+      },
+      {
+         "slug": "apg-disclosure-navigation",
+         "directory": "apg/disclosure-navigation",
+         "title": "Disclosure Navigation Menu Example",
+         "versionString": "V25.10.27",
+         "phase": "CANDIDATE",
+         "planVersionID": "163668",
+         "reportsCount": 5,
+         "featureRefs": [
+            "aria:aria-current",
+            "aria:aria-expanded",
+            "aria:aria-label",
+            "aria:region",
+            "html:button",
+            "html:htmlLink",
+            "html:nav",
+            "html:ul"
+         ]
+      },
+      {
+         "slug": "apg-disclosure-faq",
+         "directory": "apg/disclosure-faq",
+         "title": "Disclosure of Answers to Frequently Asked Questions Example",
+         "versionString": "V25.11.04",
+         "phase": "CANDIDATE",
+         "planVersionID": "163673",
+         "reportsCount": 3,
+         "featureRefs": ["aria:aria-expanded", "html:button", "html:div", "html:ul"]
+      },
+      {
+         "slug": "html-button",
+         "directory": "html/button",
+         "title": "HTML Button Element",
+         "versionString": "V26.09.02",
+         "phase": "CANDIDATE",
+         "planVersionID": "163684",
+         "reportsCount": 3,
+         "featureRefs": ["html:button"]
+      },
+      {
+         "slug": "apg-link-span-text",
+         "directory": "apg/link-span-text",
+         "title": "Link Example 1 (span element with text content)",
+         "versionString": "V25.11.03",
+         "phase": "RECOMMENDED",
+         "planVersionID": "163672",
+         "reportsCount": 4,
+         "featureRefs": ["aria:link"]
+      },
+      {
+         "slug": "apg-link-img-alt",
+         "directory": "apg/link-img-alt",
+         "title": "Link Example 2 (img element with alt attribute)",
+         "versionString": "V25.01.23",
+         "phase": "RECOMMENDED",
+         "planVersionID": "163634",
+         "reportsCount": 5,
+         "featureRefs": ["aria:link"]
+      },
+      {
+         "slug": "apg-link-css",
+         "directory": "apg/link-css",
+         "title": "Link Example 3 (CSS :before content property on a span element)",
+         "versionString": "V25.01.23",
+         "phase": "RECOMMENDED",
+         "planVersionID": "163633",
+         "reportsCount": 5,
+         "featureRefs": ["aria:aria-label", "aria:link"]
+      },
+      {
+         "slug": "apg-seek-slider",
+         "directory": "apg/seek-slider",
+         "title": "Media Seek Slider",
+         "versionString": "V25.03.14",
+         "phase": "CANDIDATE",
+         "planVersionID": "163642",
+         "reportsCount": 4,
+         "featureRefs": [
+            "aria:aria-labelledby",
+            "aria:aria-orientation",
+            "aria:aria-valuemax",
+            "aria:aria-valuemin",
+            "aria:aria-valuenow",
+            "aria:aria-valuetext",
+            "aria:slider"
+         ]
+      },
+      {
+         "slug": "apg-minimal-data-grid",
+         "directory": "apg/minimal-data-grid",
+         "title": "Minimal Data Grid",
+         "versionString": "V26.07.01",
+         "phase": "CANDIDATE",
+         "planVersionID": "163680",
+         "reportsCount": 3,
+         "featureRefs": [
+            "aria:aria-colcount",
+            "aria:aria-colindex",
+            "aria:aria-labelledby",
+            "aria:aria-rowcount",
+            "aria:aria-rowindex",
+            "aria:grid",
+            "html:htmlLink",
+            "html:td",
+            "html:th"
+         ]
+      },
+      {
+         "slug": "apg-modal-dialog",
+         "directory": "apg/modal-dialog",
+         "title": "Modal Dialog Example",
+         "versionString": "V24.06.07",
+         "phase": "CANDIDATE",
+         "planVersionID": "147736",
+         "reportsCount": 5,
+         "featureRefs": ["aria:aria-modal"]
+      },
+      {
+         "slug": "apg-menu-button-navigation",
+         "directory": "apg/menu-button-navigation",
+         "title": "Navigation Menu Button",
+         "versionString": "V25.02.13",
+         "phase": "CANDIDATE",
+         "planVersionID": "163639",
+         "reportsCount": 4,
+         "featureRefs": [
+            "aria:aria-expanded",
+            "aria:aria-haspopup",
+            "aria:aria-labelledby",
+            "aria:aria-posinset",
+            "aria:aria-setsize",
+            "aria:menu",
+            "aria:menuitem",
+            "html:button"
+         ]
+      },
+      {
+         "slug": "apg-quantity-spin-button",
+         "directory": "apg/quantity-spin-button",
+         "title": "Quantity Spin Button Example",
+         "versionString": "V25.12.16",
+         "phase": "CANDIDATE",
+         "planVersionID": "163676",
+         "reportsCount": 3,
+         "featureRefs": [
+            "aria:aria-errormessage",
+            "aria:aria-invalid",
+            "aria:aria-valuemax",
+            "aria:aria-valuemin",
+            "aria:aria-valuenow",
+            "aria:spinbutton",
+            "html:inputTypeText",
+            "html:label"
+         ]
+      },
+      {
+         "slug": "apg-radiogroup-aria-activedescendant",
+         "directory": "apg/radiogroup-aria-activedescendant",
+         "title": "Radio Group Example Using aria-activedescendant",
+         "versionString": "V25.10.26",
+         "phase": "CANDIDATE",
+         "planVersionID": "163665",
+         "reportsCount": 4,
+         "featureRefs": [
+            "aria:aria-checked",
+            "aria:aria-labelledby",
+            "aria:aria-posinset",
+            "aria:aria-setsize",
+            "aria:radio",
+            "aria:radiogroup",
+            "html:htmlLink"
+         ]
+      },
+      {
+         "slug": "apg-radiogroup-roving-tabindex",
+         "directory": "apg/radiogroup-roving-tabindex",
+         "title": "Radio Group Example Using Roving tabindex",
+         "versionString": "V25.10.27",
+         "phase": "CANDIDATE",
+         "planVersionID": "163667",
+         "reportsCount": 5,
+         "featureRefs": [
+            "aria:aria-checked",
+            "aria:aria-labelledby",
+            "aria:aria-posinset",
+            "aria:aria-setsize",
+            "aria:radio",
+            "aria:radiogroup",
+            "html:htmlLink"
+         ]
+      },
+      {
+         "slug": "apg-rating-radio-group",
+         "directory": "apg/rating-radio-group",
+         "title": "Rating Radio Group",
+         "versionString": "V25.04.22",
+         "phase": "CANDIDATE",
+         "planVersionID": "163646",
+         "reportsCount": 3,
+         "featureRefs": [
+            "aria:aria-checked",
+            "aria:aria-labelledby",
+            "aria:aria-posinset",
+            "aria:aria-setsize",
+            "aria:radio",
+            "aria:radiogroup",
+            "html:link"
+         ]
+      },
+      {
+         "slug": "apg-switch",
+         "directory": "apg/switch",
+         "title": "Switch Example",
+         "versionString": "V25.10.01",
+         "phase": "CANDIDATE",
+         "planVersionID": "163660",
+         "reportsCount": 4,
+         "featureRefs": ["aria:aria-checked", "aria:switch"]
+      },
+      {
+         "slug": "apg-switch-button",
+         "directory": "apg/switch-button",
+         "title": "Switch Example Using HTML Button",
+         "versionString": "V25.10.01",
+         "phase": "CANDIDATE",
+         "planVersionID": "163661",
+         "reportsCount": 4,
+         "featureRefs": ["aria:aria-checked", "aria:switch", "html:button"]
+      },
+      {
+         "slug": "apg-switch-checkbox",
+         "directory": "apg/switch-checkbox",
+         "title": "Switch Example Using HTML Checkbox Input",
+         "versionString": "V25.12.16",
+         "phase": "CANDIDATE",
+         "planVersionID": "163677",
+         "reportsCount": 3,
+         "featureRefs": [
+            "aria:switch",
+            "html:@checked",
+            "html:inputTypeCheckbox",
+            "html:label"
+         ]
+      },
+      {
+         "slug": "apg-tabs-manual-activation",
+         "directory": "apg/tabs-manual-activation",
+         "title": "Tabs with Manual Activation",
+         "versionString": "V25.10.20",
+         "phase": "CANDIDATE",
+         "planVersionID": "163664",
+         "reportsCount": 3,
+         "featureRefs": [
+            "aria:aria-labelledby",
+            "aria:aria-posinset",
+            "aria:aria-selected",
+            "aria:aria-setsize",
+            "aria:tab",
+            "aria:tablist",
+            "aria:tabpanel",
+            "html:htmlButton",
+            "html:htmlLink"
+         ]
+      },
+      {
+         "slug": "apg-toggle-button",
+         "directory": "apg/toggle-button",
+         "title": "Toggle Button",
+         "versionString": "V24.10.22",
+         "phase": "CANDIDATE",
+         "planVersionID": "163626",
+         "reportsCount": 5,
+         "featureRefs": ["aria:aria-pressed", "html:button"]
+      },
+      {
+         "slug": "apg-vertical-temperature-slider",
+         "directory": "apg/vertical-temperature-slider",
+         "title": "Vertical Temperature Slider",
+         "versionString": "V25.07.24",
+         "phase": "CANDIDATE",
+         "planVersionID": "163650",
+         "reportsCount": 4,
+         "featureRefs": [
+            "aria:aria-labelledby",
+            "aria:aria-orientation",
+            "aria:aria-valuemax",
+            "aria:aria-valuemin",
+            "aria:aria-valuenow",
+            "aria:aria-valuetext",
+            "aria:slider"
+         ]
+      }
+   ]
+}

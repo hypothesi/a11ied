@@ -1,0 +1,10 @@
+Search results for "keyboard trap"  10 matches
+
+  Kind       Id      Title                          Where
+  criterion  2.1.1   Keyboard                       Level A
+  criterion  2.1.2   No Keyboard Trap               Level A
+  criterion  2.1.3   Keyboard (No Exception)        Level AAA
+  criterion  1.4.13  Content on Hover or Focus      Level AA
+  ...
+
+Run a1 wcag <id> or a1 pattern <id> for one row

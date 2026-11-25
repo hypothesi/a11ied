@@ -1,6 +1,6 @@
 ---
 name: a11ied-audit
-description: Run a WCAG accessibility audit of a website, page, feature, or mobile app with the a1 CLI, from scoping to a client-ready report. Use for any request to audit, assess, or report on WCAG conformance, at any scope, from one criterion on one page to a whole site at Level AA. Tracks progress durably, runs workers in parallel, and resumes after interruption.
+description: Run a WCAG accessibility audit of a website, page, feature, or mobile app with the a1 CLI or the a11ied MCP tools, from scoping to a client-ready report. Use for any request to audit, assess, or report on WCAG conformance, at any scope, from one criterion on one page to a whole site at Level AA. Tracks progress durably, runs workers in parallel, and resumes after interruption.
 ---
 
 # a11ied audit
@@ -12,6 +12,40 @@ their findings, and deliver the report. The `a1 audit` commands hold all state i
 Workers follow [the worker guide](resources/worker.md). Read it once: you will hand it to each
 worker, and you follow it yourself when you cannot start workers. For a mobile app, also read
 [auditing a mobile app](resources/mobile.md).
+
+## CLI or MCP
+
+The audit runs the same way through the `a1` CLI or the a11ied MCP server. Use whichever you have. Neither needs the
+other, and a lead and its workers can mix them: both read and write the same audit.
+
+- **CLI.** Run `a1 audit ...` in a shell. When `a1` is not on the PATH, run `npx -y a11ied audit ...`.
+- **MCP.** When the server is connected, call the `audit_*` tool in place of the command.
+
+This skill and the worker guide write each step as a CLI command. Over MCP, use this table.
+
+| CLI command                                 | MCP tool                                    |
+| ------------------------------------------- | ------------------------------------------- |
+| `audit init`, `audit list`                  | `audit_init`, `audit_list`                  |
+| `audit page add/list/exclude/include`       | `audit_page`                                |
+| `audit discover`, `audit scan`              | `audit_discover`, `audit_scan`              |
+| `audit next`, `audit show`, `audit submit`  | `audit_next`, `audit_show`, `audit_submit`  |
+| `audit note`, `audit block`, `audit reopen` | `audit_note`, `audit_block`, `audit_reopen` |
+| `audit limitation`                          | `audit_limitation`                          |
+| `audit status`, `audit log`                 | `audit_status` (`log: true` for the log)    |
+| `audit findings`, `audit finding show`      | `audit_findings`                            |
+| `audit finding dismiss/merge/update`        | `audit_finding`                             |
+| `audit signals`, `audit report`             | `audit_signals`, `audit_report`             |
+
+What differs over MCP:
+
+- `audit_next` takes `passes` and `excludePasses` where the CLI takes `--pass` and `--not-pass`.
+- `audit_submit` takes the result as its `submission` argument. There is no file to write.
+- `a1 audit dashboard` has no tool. Give the user progress from `audit_status`.
+- One MCP server holds one screen reader session, and subagents usually share their lead's server. Two workers must
+  never use the `sr_*` tools at the same time. Give one worker `passes: ["semantics"]`, give the others
+  `excludePasses: ["semantics"]`, and tell the others to use `tree` and `capture` where they would use a screen reader.
+  A worker that can run shell commands avoids this limit: `a1 sr` with the `A11IED_STATE_DIR` from its work packet
+  gives it a private session.
 
 ## The model
 

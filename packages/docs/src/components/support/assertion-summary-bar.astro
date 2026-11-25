@@ -1,0 +1,105 @@
+---
+import type { AssertionSummary, PriorityCounts } from '@a11ied/support-data/types';
+
+export interface Props {
+   summary: AssertionSummary;
+   compact?: boolean;
+}
+
+const { summary, compact = false } = Astro.props;
+
+function getTierState(counts: PriorityCounts): 'ok' | 'warn' | 'fail' {
+   if (counts.failed > 0) {
+      return 'fail';
+   }
+   if (counts.untestable > 0) {
+      return 'warn';
+   }
+   return 'ok';
+}
+---
+
+<div class={`srSummaryBar${compact ? ' srSummaryBar--compact' : ''}`}>
+   {summary.must.total > 0 && (
+      <span class={`srSummaryBar-pill srSummaryBar-pill--${getTierState(summary.must)}`}>
+         <strong>MUST</strong> {summary.must.passed}/{summary.must.total}
+      </span>
+   )}
+   {summary.should.total > 0 && (
+      <span class={`srSummaryBar-pill srSummaryBar-pill--${getTierState(summary.should)}`}>
+         <strong>SHOULD</strong> {summary.should.passed}/{summary.should.total}
+      </span>
+   )}
+   {summary.may.total > 0 && (
+      <span class="srSummaryBar-pill srSummaryBar-pill--neutral">
+         <strong>MAY</strong> {summary.may.passed}/{summary.may.total}
+      </span>
+   )}
+   {summary.severeSideEffects > 0 && (
+      <span class="srSummaryBar-pill srSummaryBar-pill--fail">
+         {summary.severeSideEffects} severe side effect{summary.severeSideEffects === 1 ? '' : 's'}
+      </span>
+   )}
+   {summary.moderateSideEffects > 0 && (
+      <span class="srSummaryBar-pill srSummaryBar-pill--warn">
+         {summary.moderateSideEffects} moderate side effect{summary.moderateSideEffects === 1 ? '' : 's'}
+      </span>
+   )}
+   {!compact && summary.severeSideEffects === 0 && summary.moderateSideEffects === 0 && (
+      <span class="srSummaryBar-pill srSummaryBar-pill--neutral">
+         0 side effects
+      </span>
+   )}
+</div>
+
+<style>
+.srSummaryBar {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 0.4rem;
+}
+
+.srSummaryBar-pill {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.3rem;
+   padding-block: 0.22rem;
+   padding-inline: 0.5rem;
+   border: none;
+   border-radius: 3px;
+   font-family: var(--display);
+   font-size: 0.76rem;
+   font-weight: 700;
+   letter-spacing: 0.04em;
+   line-height: 1;
+   font-variant-numeric: tabular-nums;
+   white-space: nowrap;
+}
+
+.srSummaryBar-pill--ok {
+   background: #e3f4ea;
+   color: #134e2c;
+}
+
+.srSummaryBar-pill--warn {
+   background: #fef3c7;
+   color: #78350f;
+}
+
+.srSummaryBar-pill--fail {
+   background: #fde8e8;
+   color: #7f1d1d;
+}
+
+.srSummaryBar-pill--neutral {
+   background: var(--paper);
+   color: var(--ink-soft);
+}
+
+.srSummaryBar--compact .srSummaryBar-pill {
+   padding-block: 0.14rem;
+   padding-inline: 0.45rem;
+   font-size: 0.72rem;
+}
+</style>

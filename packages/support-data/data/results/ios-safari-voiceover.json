@@ -1,0 +1,22 @@
+{
+   "schemaVersion": 1,
+   "environmentKey": "iphone | ios | pending | safari | pending | voiceover | ios",
+   "environment": {
+      "id": "ios-voiceover-safari",
+      "label": "iOS · Safari · VoiceOver",
+      "shortLabel": "iOS VO (Safari)",
+      "platformGroup": "ios-voiceover",
+      "device": "iPhone",
+      "os": "iOS",
+      "osVersion": "Pending",
+      "browser": "Safari",
+      "browserVersion": "Pending",
+      "browserType": "browser",
+      "usageOrder": 1,
+      "screenReader": "VoiceOver",
+      "screenReaderVersion": "iOS"
+   },
+   "status": "untested",
+   "statusNote": "Not yet tested on iOS.",
+   "runs": []
+}

@@ -14,6 +14,7 @@ export default defineConfig({
             'packages/cli/src/bridges/mcp-server.ts',
          ),
          '@a11ied/audit': resolve(import.meta.dirname, 'packages/audit/src/index.ts'),
+         '@a11ied/compat': resolve(import.meta.dirname, 'packages/compat/src/index.ts'),
          '@a11ied/contracts': resolve(
             import.meta.dirname,
             'packages/contracts/src/index.ts',
@@ -37,6 +38,14 @@ export default defineConfig({
             'packages/mcp-server/src/index.ts',
          ),
          '@a11ied/observe': resolve(import.meta.dirname, 'packages/observe/src/index.ts'),
+         '@a11ied/support-data/types': resolve(
+            import.meta.dirname,
+            'packages/support-data/src/types.ts',
+         ),
+         '@a11ied/support-data': resolve(
+            import.meta.dirname,
+            'packages/support-data/src/index.ts',
+         ),
          '@a11ied/wcag-engine': resolve(
             import.meta.dirname,
             'packages/wcag-engine/src/index.ts',

@@ -1,0 +1,26 @@
+! No session was active, so one was started.
+# Transcript: virtual on PRACTICE_URLfixed/
+
+Started 2026-11-24T12:46:17.666Z. Exported 2026-11-24T12:46:18.044Z. 30 phrases.
+
+1. [12:46:18.035] banner
+2. [12:46:18.035] Northwind
+3. [12:46:18.035] navigation, Workspace settings (Workspace settings)
+4. [12:46:18.035] link, General (General)
+5. [12:46:18.035] link, Billing (Billing)
+6. [12:46:18.035] link, Team, current page (Team)
+7. [12:46:18.035] end of navigation, Workspace settings (Workspace settings)
+8. [12:46:18.035] end of banner
+9. [12:46:18.035] main
+10. [12:46:18.035] heading, Team, level 1 (Team)
+...
+17. [12:46:18.035] searchbox, Filter members, placeholder Filter members (Filter members)
+18. [12:46:18.035] group, Filter by status (Filter by status)
+19. [12:46:18.035] button, All, pressed (All)
+20. [12:46:18.035] button, Active, not pressed (Active)
+21. [12:46:18.035] button, Pending, not pressed (Pending)
+22. [12:46:18.035] end of group, Filter by status (Filter by status)
+23. [12:46:18.035] button, Invite member (Invite member)
+...
+
+Stopped at the cap of 30 items; raise --max to see more.

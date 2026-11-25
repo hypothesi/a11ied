@@ -1,0 +1,21 @@
+import { checkFeatureSupport } from '@a11ied/compat';
+
+const result = checkFeatureSupport('aria-pressed', {
+   browserslist: 'last 1 chrome version, last 1 safari version',
+});
+
+console.log(result.status);
+
+for (const match of result.matchedEnvironments) {
+   const { environment, summary } = match;
+   console.log(
+      `${match.target.raw}: ${environment.screenReader} ${environment.screenReaderVersion}`,
+      `with ${environment.browser} ${environment.browserVersion}`,
+      `${match.outcome}, MUST ${summary.must.passed}/${summary.must.total}`,
+      `(${match.matchPrecision})`,
+   );
+}
+
+for (const gap of result.untestedTargets) {
+   console.log(`${gap.target.raw}: ${gap.screenReader} is untested`);
+}

@@ -1,0 +1,214 @@
+---
+import type { TranscriptEntry } from '@a11ied/support-data/types';
+
+export interface Props {
+   transcript: readonly TranscriptEntry[];
+   driver: string;
+   runAt: string;
+}
+
+const { transcript, driver, runAt } = Astro.props;
+
+function formatRunTimestamp(isoDate: string): string {
+   const parsed = new Date(isoDate);
+   if (Number.isNaN(parsed.getTime())) {
+      return isoDate;
+   }
+   try {
+      return new Intl.DateTimeFormat('en-US', {
+         month: 'short',
+         day: 'numeric',
+         year: 'numeric',
+         hour: 'numeric',
+         minute: '2-digit',
+         timeZone: 'UTC',
+         timeZoneName: 'short',
+      }).format(parsed);
+   } catch {
+      return isoDate;
+   }
+}
+
+function buildStepMeta(entry: TranscriptEntry): string {
+   const parts: string[] = [];
+   if (entry.role) {
+      parts.push(`Role: ${entry.role}`);
+   }
+   if (entry.name) {
+      parts.push(`Name: ${entry.name}`);
+   }
+   if (entry.itemText && entry.itemText !== entry.phrase) {
+      parts.push(`Item text: ${entry.itemText}`);
+   }
+   return parts.join(' · ');
+}
+
+const formattedRunAt = formatRunTimestamp(runAt);
+---
+
+<div class="srTranscript-body">
+   {transcript.length === 0 ? (
+      <p class="srTranscript-empty">No announcements recorded in this run.</p>
+   ) : (
+      <ol class="srTranscript-list">
+         {transcript.map((entry, index) => {
+            const stepMeta = buildStepMeta(entry);
+            return (
+               <li class="srTranscript-item">
+                  <span class="srTranscript-step">{String(index + 1)}.</span>
+                  <div class="srTranscript-cmdWrap">
+                     {entry.command ? (
+                        <code class="srTranscript-command">{entry.command}</code>
+                     ) : (
+                        <span class="srTranscript-commandFallback">Output</span>
+                     )}
+                  </div>
+                  <div class="srTranscript-content">
+                     <code class="srTranscript-phrase">{entry.phrase || '(silence)'}</code>
+                     {stepMeta && <p class="srTranscript-subMeta">{stepMeta}</p>}
+                  </div>
+               </li>
+            );
+         })}
+      </ol>
+   )}
+   <p class="srTranscript-footer">
+      <span>
+         Recorded <time datetime={runAt} title={runAt}>{formattedRunAt}</time>
+      </span>
+      <span class="srTranscript-footerSep" aria-hidden="true">·</span>
+      <span>
+         Driver: <code>{driver}</code>
+      </span>
+   </p>
+</div>
+
+<style>
+.srTranscript-body {
+   container-type: inline-size;
+   min-inline-size: 0;
+   overflow-wrap: anywhere;
+   padding-block: 0.55rem 0.2rem;
+   padding-inline: 0.1rem;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 12%, transparent);
+   font-size: 0.86rem;
+}
+
+.srTranscript-empty {
+   margin: 0;
+   color: var(--ink-soft);
+   font-style: italic;
+}
+
+.srTranscript-list {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   flex-direction: column;
+   gap: 0.55rem;
+}
+
+.srTranscript-item {
+   min-inline-size: 0;
+   margin: 0;
+   display: grid;
+   grid-template-columns: 1.5rem minmax(0, 1fr);
+   gap: 0.25rem 0.5rem;
+   padding-block-end: 0.55rem;
+   border-bottom: 1px dashed color-mix(in oklch, var(--ink) 25%, transparent);
+}
+
+.srTranscript-item:last-child {
+   padding-block-end: 0;
+   border-bottom: none;
+}
+
+.srTranscript-step {
+   font-variant-numeric: tabular-nums;
+   font-weight: 700;
+   font-size: 0.82rem;
+   color: var(--ink-soft);
+}
+
+.srTranscript-cmdWrap {
+   min-inline-size: 0;
+}
+
+.srTranscript-command {
+   display: inline-block;
+   padding-block: 0.14rem;
+   padding-inline: 0.45rem;
+   background: var(--paper);
+   border: 1px solid color-mix(in oklch, var(--ink) 24%, transparent);
+   border-radius: 3px;
+   font-size: 0.78rem;
+   color: var(--ink);
+   overflow-wrap: anywhere;
+}
+
+.srTranscript-commandFallback {
+   font-size: 0.78rem;
+   color: var(--ink-soft);
+   font-weight: 700;
+}
+
+.srTranscript-content {
+   grid-column: 2;
+   min-inline-size: 0;
+}
+
+.srTranscript-phrase {
+   display: block;
+   padding: 0.3rem 0.55rem;
+   border-radius: 3px;
+   background: var(--ink);
+   color: var(--paper-light);
+   font-family: var(--code);
+   font-size: 0.86rem;
+   overflow-wrap: anywhere;
+}
+
+.srTranscript-subMeta {
+   margin-block: 0.25rem 0;
+   margin-inline: 0;
+   font-size: 0.78rem;
+   color: var(--ink-soft);
+   overflow-wrap: anywhere;
+}
+
+.srTranscript-footer {
+   min-inline-size: 0;
+   margin-block: 0.65rem 0;
+   margin-inline: 0;
+   padding-block-start: 0.55rem;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 20%, transparent);
+   display: flex;
+   flex-wrap: wrap;
+   align-items: baseline;
+   gap: 0.25rem 0.5rem;
+   font-size: 0.78rem;
+   color: var(--ink-soft);
+   overflow-wrap: anywhere;
+}
+
+.srTranscript-footer code {
+   padding: 0.1em 0.35em;
+   border-radius: 3px;
+   background: var(--paper);
+   color: var(--ink);
+   font-size: 0.76rem;
+}
+
+@container (width >= 520px) {
+   .srTranscript-item {
+      grid-template-columns: 1.75rem minmax(8rem, 11.5rem) minmax(0, 1fr);
+      align-items: baseline;
+      gap: 0.75rem;
+   }
+
+   .srTranscript-content {
+      grid-column: auto;
+   }
+}
+</style>

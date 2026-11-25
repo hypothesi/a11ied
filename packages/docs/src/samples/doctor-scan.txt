@@ -1,0 +1,10 @@
+✓ Ready for a1 commands on macOS 26.3.1 (arm64)
+
+Targets
+  ✓ virtual-dom  ready  No setup needed.
+
+Browser automation
+  ✓ Google Chrome  ready  Used for a1 axe scans.
+      Path    /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+      Launch  system install, opened through the "chrome" browser channel
+  ...

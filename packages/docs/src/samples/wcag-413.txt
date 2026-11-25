@@ -1,0 +1,24 @@
+4.1.3  Status Messages  [AA]
+Guideline 4.1 Compatible
+
+  In content implemented using markup languages, status messages can be
+  programmatically determined through role or properties such that they can be
+  presented to the user by assistive technologies without receiving focus.
+...
+
+Testing it
+  Assess Status Messages (status_message_probe)
+  Scope:       state
+  Applies to:  Status messages that do not constitute a change of context.
+
+  Actions
+  • Trigger success, result-count, waiting, progress, and error status messages
+  while preserving focus.
+  • Record screen-reader announcements and inspect roles/properties without moving
+  focus to the message.
+...
+
+If it fails
+  ARIA19  Using ARIA role=alert or Live Regions to Identify Errors  aria
+  ARIA22  Using role=status to present status messages  aria
+  11 more, and the full guidance: a1 wcag understanding 4.1.3

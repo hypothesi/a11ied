@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8" />
+      <title>Entry animation</title>
+      <style>
+         body {
+            background: #ffffff;
+            color: #1a1a1a;
+         }
+         main {
+            animation: fade-in 1500ms linear both;
+         }
+         .spinner {
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #1a1a1a;
+            animation: spin 1s linear infinite;
+         }
+         @keyframes fade-in {
+            from {
+               opacity: 0;
+            }
+            to {
+               opacity: 1;
+            }
+         }
+         @keyframes spin {
+            to {
+               transform: rotate(360deg);
+            }
+         }
+      </style>
+   </head>
+   <body>
+      <main>
+         <h1>Entry animation</h1>
+         <p>This text fades in when the page loads and has full contrast once it has.</p>
+      </main>
+      <div class="spinner" aria-hidden="true"></div>
+   </body>
+</html>

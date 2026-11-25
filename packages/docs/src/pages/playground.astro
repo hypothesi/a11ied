@@ -1,0 +1,452 @@
+---
+import { Image } from 'astro:assets';
+import runtimeURL from '@a11ied/guidepup/virtual-page.js?url';
+import { listEnvironmentFiles, screenReaderTests } from '@a11ied/support-data';
+import ExternalLink from '@lucide/astro/icons/external-link';
+import logo from '../assets/logo.png';
+import SiteFooter from '../components/site-footer.astro';
+import SiteHead from '../components/site-head.astro';
+import OutcomeBadge from '../components/support/outcome-badge.astro';
+import { isVirtualScreenReader } from '../lib/support-grouping';
+
+const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
+const description =
+   "Run a11ied's simulated screen reader on a test case in your browser, and read the log of what it announced.";
+const environmentFiles = listEnvironmentFiles();
+const groupNames = [ ...new Set(screenReaderTests.map((testCase) => testCase.featureGroup)) ];
+const groups = groupNames.map((name) => ({
+   name,
+   cases: screenReaderTests.filter((testCase) => testCase.featureGroup === name),
+}));
+const cases = screenReaderTests.map((testCase) => ({
+   testCase,
+   caseHref: `${basePath}compatibility/cases/${testCase.slug}/`,
+   // Each recorded run of this case: which screen reader, how it did, and what it said.
+   runs: environmentFiles.flatMap((envFile) => {
+      const run = envFile.runs.find((candidate) => candidate.testSlug === testCase.slug);
+
+      return run
+         ? [
+              {
+                 label: envFile.environment.shortLabel,
+                 isSimulated: isVirtualScreenReader(envFile.environment.screenReader),
+                 run,
+              },
+           ]
+         : [];
+   }),
+}));
+const jumpKinds = [
+   { value: 'heading', label: 'Heading' },
+   { value: 'link', label: 'Link' },
+   { value: 'button', label: 'Button' },
+   { value: 'form-field', label: 'Form field' },
+   { value: 'landmark', label: 'Landmark' },
+];
+/** The part of a title after "attribute: ", which the group heading already says. */
+function getShortTitle(title: string): string {
+   const [ , ...rest ] = title.split(': ');
+
+   return rest.length > 0 ? rest.join(': ') : title;
+}
+---
+
+<html lang="en">
+   <head>
+      <SiteHead title="Playground | a11ied" description={description} />
+   </head>
+   <body class="ws-page">
+      <a class="skip-link" href="#content">Skip to content</a>
+
+      <header class="ws-top">
+         <a class="brand" href="/" aria-label="a11ied home">
+            <Image src={logo} alt="" class="mark" width={80} height={80} />
+            <span class="brand-title">a<span class="brand-title-accent">11</span>ied</span>
+         </a>
+         <a class="ws-back" href="/overview">Back to the docs</a>
+      </header>
+
+      <main
+         id="content"
+         data-playground
+         data-mode="cases"
+         data-runtime-src={runtimeURL}
+         data-bridge-src={`${basePath}playground-bridge.js`}
+         data-base-path={basePath}
+      >
+         <div class="ws-intro">
+            <h1>Playground</h1>
+            <div class="ws-modes" role="group" aria-label="What to test">
+               <button type="button" class="ws-mode" data-pg-mode="cases" aria-pressed="true">Test cases</button>
+               <button type="button" class="ws-mode" data-pg-mode="explore" aria-pressed="false">Any page</button>
+            </div>
+            <noscript>
+               <p>This page needs JavaScript, which is turned off in this browser.</p>
+            </noscript>
+         </div>
+
+         <div class="ws">
+            <section class="ws-pane ws-cases" aria-labelledby="ws-cases-heading" data-when="cases">
+               <h2 id="ws-cases-heading" class="ws-pane-head"><span class="ws-step">1</span> Pick a test case</h2>
+               <div class="ws-filter">
+                  <label class="sr-only" for="ws-filter">Filter test cases</label>
+                  <input id="ws-filter" class="ws-input" type="search" autocomplete="off" placeholder="Filter" data-pg-filter />
+               </div>
+               <div class="ws-scroll" tabindex="0" role="group" aria-label="Test cases">
+                  {groups.map((group) => (
+                     <div class="ws-group" data-pg-group>
+                        <h3 class="ws-group-name">{group.name}</h3>
+                        <ul class="ws-case-list">
+                           {group.cases.map((testCase) => (
+                              <li data-pg-case-item data-search={`${testCase.title} ${testCase.attribute} ${group.name}`.toLowerCase()}>
+                                 <button type="button" class="ws-case-button" data-pg-case-button={testCase.slug} data-title={testCase.title}>
+                                    {getShortTitle(testCase.title)}
+                                 </button>
+                              </li>
+                           ))}
+                        </ul>
+                     </div>
+                  ))}
+                  <p class="ws-none" data-pg-none hidden>No test case matches.</p>
+               </div>
+            </section>
+
+            <section class="ws-pane ws-stage" aria-labelledby="ws-stage-heading">
+               <h2 id="ws-stage-heading" class="ws-pane-head">
+                  <span class="ws-head-text" data-when="cases"><span class="ws-step">2</span> Run it</span>
+                  <span class="ws-head-text" data-when="explore"><span class="ws-step">1</span> Open a page and move through it</span>
+               </h2>
+               <div class="ws-about" data-when="explore">
+                  <p class="ws-about-text">
+                     Type an address, or start with the
+                     <button type="button" class="ws-link" data-pg-load={`${basePath}demo/team/`}>practice page</button>
+                     or its <button type="button" class="ws-link" data-pg-load={`${basePath}demo/team/fixed/`}>fixed copy</button>.
+                  </p>
+               </div>
+               <div class="ws-about" data-when="cases">
+                  <p class="ws-case-title" data-pg-title></p>
+                  {cases.map(({ testCase }) => (
+                     <p
+                        class="ws-about-text"
+                        data-pg-about={testCase.slug}
+                        data-test={JSON.stringify({
+                           slug: testCase.slug,
+                           attribute: testCase.attribute,
+                           evaluation: testCase.evaluation,
+                           assertions: testCase.assertions,
+                        })}
+                        hidden
+                     >
+                        {testCase.expectedBehavior}
+                     </p>
+                  ))}
+               </div>
+
+               <div class="ws-toolbar" role="group" aria-label="Screen reader controls">
+                  <button type="button" class="ws-button ws-button--primary" data-pg-action="run-test" data-when="cases">Run the test</button>
+                  <span class="ws-or" data-when="cases">or step through it:</span>
+                  <button type="button" class="ws-button" data-pg-action="previous">Previous</button>
+                  <button type="button" class="ws-button" data-pg-action="next">Next</button>
+                  <span class="ws-position" data-pg-position role="status"></span>
+                  <button type="button" class="ws-button" data-pg-action="activate">Activate</button>
+                  <details class="ws-more" data-pg-more>
+                     <summary>More keys</summary>
+                     <div class="ws-more-body">
+                        <button type="button" class="ws-button" data-pg-action="tab">Tab</button>
+                        <button type="button" class="ws-button" data-pg-action="shift-tab">Shift+Tab</button>
+                        <button type="button" class="ws-button" data-pg-action="escape">Escape</button>
+                        <button type="button" class="ws-button" data-pg-action="read-all">Read to the end</button>
+                        <span class="ws-jump">
+                           <label for="ws-jump">Jump to next</label>
+                           <select id="ws-jump" class="ws-input ws-input--select" data-pg-jump>
+                              {jumpKinds.map((kind) => <option value={kind.value}>{kind.label}</option>)}
+                           </select>
+                           <button type="button" class="ws-button" data-pg-action="jump">Go</button>
+                        </span>
+                     </div>
+                  </details>
+               </div>
+
+               <div class="ws-browser">
+                  <div class="ws-browser-bar" data-when="cases">
+                     <span class="ws-browser-url" data-pg-url></span>
+                     <a class="ws-browser-open" data-pg-open href={cases[0]?.caseHref}>
+                        <span>Open by itself</span>
+                        <ExternalLink size={14} aria-hidden="true" focusable="false" />
+                     </a>
+                  </div>
+                  <form class="ws-browser-bar ws-address" data-pg-address data-when="explore">
+                     <label class="sr-only" for="ws-url">Page address</label>
+                     <input id="ws-url" class="ws-input" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://" data-pg-url-input />
+                     <button type="submit" class="ws-button ws-button--small">Load</button>
+                  </form>
+                  <div class="ws-frame-wrap">
+                     <iframe class="ws-frame" data-pg-frame title="Page under test"></iframe>
+                     <span class="ws-cursor" data-pg-cursor aria-hidden="true" hidden></span>
+                     <div class="ws-blocked" data-pg-blocked hidden>
+                        <p data-pg-blocked-text></p>
+                        <pre class="ws-commands" data-no-decorate><code data-pg-blocked-commands></code></pre>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="ws-extras">
+                  <details class="ws-extra">
+                     <summary>The same steps as <code>a1</code> commands</summary>
+                     <div class="ws-extra-body">
+                        <pre class="ws-commands" data-no-decorate><code data-pg-commands></code></pre>
+                        <button type="button" class="ws-button ws-button--small" data-pg-action="copy-commands">Copy the commands</button>
+                     </div>
+                  </details>
+                  <details class="ws-extra" data-when="cases">
+                     <summary>What real screen readers said for this case</summary>
+                     <div class="ws-extra-body">
+                        {cases.map(({ testCase, runs }) => (
+                           <div data-pg-real={testCase.slug} hidden>
+                              <table class="ws-table">
+                                 <thead>
+                                    <tr>
+                                       <th scope="col">Screen reader and browser</th>
+                                       <th scope="col">Result</th>
+                                       <th scope="col">What it said</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody>
+                                    {runs.map(({ label, isSimulated, run }) => (
+                                       <tr>
+                                          <th scope="row">{isSimulated ? 'Simulated screen reader' : label}</th>
+                                          <td><OutcomeBadge outcome={run.outcome} compact={true} /></td>
+                                          <td>{run.keyAnnouncement}</td>
+                                       </tr>
+                                    ))}
+                                 </tbody>
+                              </table>
+                              <p class="ws-note"><a href={`/compatibility/tests/${testCase.slug}/`}>Every recorded transcript for this case</a></p>
+                           </div>
+                        ))}
+                     </div>
+                  </details>
+               </div>
+            </section>
+
+            <section class="ws-pane ws-output" aria-labelledby="ws-output-heading">
+               <h2 id="ws-output-heading" class="ws-pane-head">
+                  <span class="ws-head-text" data-when="cases"><span class="ws-step">3</span> Read what it said</span>
+                  <span class="ws-head-text" data-when="explore"><span class="ws-step">2</span> Read what it said</span>
+               </h2>
+               <p class="ws-now" data-pg-now hidden></p>
+               <ol class="ws-log" data-pg-log role="log" aria-live="polite" aria-label="Screen reader output" tabindex="0"></ol>
+               <div class="ws-log-empty" data-pg-log-empty>
+                  <p data-when="cases">Nothing yet. Press <strong>Run the test</strong> and the screen reader's words appear here.</p>
+                  <p data-when="explore">Nothing yet. Press <strong>Next</strong> and the screen reader's words appear here.</p>
+               </div>
+
+               <div class="ws-checks" data-pg-checks hidden>
+                  <div class="ws-checks-head">
+                     <h3>Did it pass?</h3>
+                     <span class="ws-result" data-pg-result></span>
+                  </div>
+                  <ul class="ws-check-list" data-pg-check-list></ul>
+               </div>
+
+               <div class="ws-output-foot">
+                  <button type="button" class="ws-button ws-button--small" data-pg-action="restart">Start over</button>
+                  <button type="button" class="ws-button ws-button--small" data-pg-action="copy-log">Copy the log</button>
+                  <span class="ws-status" data-pg-status role="status"></span>
+               </div>
+               <p class="ws-simulated">
+                  Simulated screen reader, not <a href="/screen-readers#virtual">VoiceOver or NVDA</a>.
+               </p>
+            </section>
+         </div>
+
+         <template data-pg-row-template>
+            <li class="ws-row">
+               <span class="ws-row-step" data-row-step></span>
+               <span class="ws-row-phrase">
+                  <span class="ws-row-tag" data-row-tag hidden></span>
+                  <span data-row-text></span>
+               </span>
+               <span class="ws-row-command" data-row-command></span>
+            </li>
+         </template>
+         <template data-pg-check-template>
+            <li class="ws-check">
+               <span class="ws-check-state" data-check-state></span>
+               <span class="ws-check-text">
+                  <span data-check-statement></span>
+                  <span class="ws-check-priority" data-check-priority></span>
+               </span>
+            </li>
+         </template>
+      </main>
+
+      <SiteFooter />
+      <script>
+         import '../scripts/playground';
+      </script>
+   </body>
+</html>
+
+<style>
+   .ws-page { --top: 3.5rem; --rule: 2px solid var(--ink); }
+   .sr-only { position: absolute; overflow: hidden; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; clip-path: inset(50%); white-space: nowrap; }
+
+   /* Header: the logo and one way back. */
+   .ws-top { display: flex; align-items: center; justify-content: space-between; gap: var(--md); height: var(--top); padding-inline: var(--lg); background: var(--yellow); border-bottom: 3px solid var(--ink); }
+   .ws-top :global(.mark) { width: 2.4rem; height: 2.4rem; }
+   .ws-top .brand-title { font-size: 1.6rem; }
+   .ws-back { color: var(--ink); font-weight: 600; }
+
+   /* The page's name, and the choice between the test cases and any page. */
+   .ws-intro { display: flex; flex-wrap: wrap; align-items: center; gap: var(--xs) var(--lg); padding: var(--sm) var(--lg); }
+   .ws-intro h1 { padding: 0; border: 0; margin: 0; font: 700 1.8rem/1 var(--display); letter-spacing: -0.02em; text-transform: uppercase; }
+   .ws-intro p { margin: 0; color: var(--ink-soft); }
+   .ws-modes { display: inline-flex; border: 2px solid var(--ink); }
+   .ws-mode { min-height: 2.25rem; padding: 0.35rem 0.9rem; background: var(--paper-light); color: var(--ink); border: 0; border-radius: 0; font: 600 0.95rem/1 var(--body); cursor: pointer; }
+   .ws-mode + .ws-mode { border-inline-start: 2px solid var(--ink); }
+   .ws-mode[aria-pressed="true"] { background: var(--ink); color: var(--yellow); }
+   /* Each mode shows only its own parts. */
+   [data-mode="cases"] [data-when="explore"], [data-mode="explore"] [data-when="cases"] { display: none; }
+
+   /* Three panes fill the rest of the window. Each scrolls by itself. */
+   .ws { --intro: 3.75rem; display: grid; grid-template-columns: 16rem minmax(0, 1fr) minmax(20rem, 25rem); height: calc(100dvh - var(--top) - var(--intro)); min-height: 34rem; border-block: 3px solid var(--ink); }
+   .ws-pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--paper-light); }
+   .ws-pane + .ws-pane { border-inline-start: 3px solid var(--ink); }
+   [data-mode="explore"] .ws { grid-template-columns: minmax(0, 1fr) minmax(20rem, 28rem); }
+   .ws-head-text { display: flex; align-items: center; gap: var(--sm); }
+   /* The numbered head of each pane is the instruction for that step. */
+   .ws-pane-head { display: flex; align-items: center; gap: var(--sm); padding: 0.6rem var(--md); border: 0; border-bottom: var(--rule); margin: 0; background: var(--paper); font: 700 1.05rem/1.2 var(--display); letter-spacing: 0.02em; text-transform: none; }
+   .ws-step { display: grid; place-items: center; flex: none; width: 1.6rem; height: 1.6rem; background: var(--ink); color: var(--yellow); border-radius: 50%; font-size: 0.9rem; }
+
+   /* Shared controls */
+   .ws-button { display: inline-flex; align-items: center; justify-content: center; min-height: 2.25rem; padding: 0.4rem 0.75rem; background: var(--paper-light); color: var(--ink); border: 2px solid var(--ink); border-radius: 0; font: 600 0.92rem/1 var(--body); cursor: pointer; user-select: none; }
+   .ws-button--primary { min-height: 2.75rem; padding-inline: 1.1rem; background: var(--yellow); box-shadow: 3px 3px 0 var(--ink); font: 700 1rem/1 var(--display); letter-spacing: 0.06em; text-transform: uppercase; }
+   .ws-button--small { min-height: 2rem; padding: 0.3rem 0.6rem; border-width: 1px; font-size: 0.85rem; }
+   .ws-button:disabled { opacity: 0.45; cursor: default; }
+   @media (hover: hover) {
+      .ws-button:not(:disabled):hover { background: var(--ink); color: var(--yellow); }
+   }
+   .ws-input { width: 100%; min-height: 2.25rem; padding: 0.3rem 0.5rem; background: #ffffff; color: var(--ink); border: 1px solid var(--ink); border-radius: 0; font: inherit; }
+   .ws-input--select { width: auto; }
+   .ws-note { margin: 0; color: var(--ink-soft); font-size: 0.88rem; }
+
+   /* 1. Cases */
+   .ws-filter { padding: var(--sm) var(--md); }
+   .ws-scroll { overflow-y: auto; flex: 1; min-height: 0; padding-bottom: var(--md); }
+   .ws-group[hidden] { display: none; }
+   .ws-group-name { padding: var(--sm) var(--md) 0.2rem; margin: 0; color: var(--ink-soft); font: 700 0.72rem/1.3 var(--display); letter-spacing: 0.1em; text-transform: uppercase; }
+   .ws-case-list { margin: 0; padding: 0; list-style: none; }
+   .ws-case-list li { margin: 0; }
+   .ws-case-list li[hidden] { display: none; }
+   .ws-case-button { display: block; width: 100%; padding: 0.35rem var(--md); background: transparent; color: var(--ink); border: 0; border-inline-start: 4px solid transparent; font: inherit; font-size: 0.9rem; line-height: 1.35; text-align: start; cursor: pointer; }
+   .ws-case-button[aria-current="true"] { background: var(--yellow-soft); border-inline-start-color: var(--red); font-weight: 700; }
+   @media (hover: hover) {
+      .ws-case-button:not([aria-current="true"]):hover { background: var(--paper); }
+   }
+   .ws-none { margin: 0; padding: var(--md); color: var(--ink-soft); }
+   .ws-none[hidden] { display: none; }
+
+   /* 2. Stage */
+   .ws-about { display: grid; gap: 0.2rem; padding: var(--sm) var(--md) 0; }
+   .ws-case-title { margin: 0; font-weight: 700; line-height: 1.3; }
+   .ws-about-text { margin: 0; color: var(--ink-soft); font-size: 0.92rem; line-height: 1.45; }
+   .ws-about-text[hidden] { display: none; }
+   .ws-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--xs) var(--sm); padding: var(--sm) var(--md) var(--md); }
+   .ws-or { color: var(--ink-soft); font-size: 0.9rem; }
+   /* Where the cursor is among the page's items. */
+   .ws-position { color: var(--ink-soft); font-size: 0.9rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+   .ws-position:empty { display: none; }
+   .ws-link { padding: 0; background: none; color: var(--red-dark); border: 0; font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
+   .ws-more { position: relative; }
+   .ws-more summary, .ws-extra summary { color: var(--ink); font-size: 0.92rem; font-weight: 600; cursor: pointer; }
+   .ws-more summary { padding: 0.5rem 0.2rem; }
+   .ws-more-body { display: flex; flex-wrap: wrap; align-items: center; gap: var(--xs); padding-top: var(--xs); }
+   .ws-more[open] { flex-basis: 100%; }
+   .ws-jump { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--xs); font-size: 0.92rem; }
+   .ws-browser { display: flex; flex-direction: column; flex: 1 1 12rem; min-height: 10rem; margin-inline: var(--md); border: var(--rule); }
+   .ws-browser-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--xs) var(--md); padding: 0.3rem var(--sm); background: var(--ink); color: var(--paper-light); font-size: 0.78rem; }
+   .ws-browser-url { overflow: hidden; flex: 1 1 8rem; min-width: 0; font-family: var(--code); text-overflow: ellipsis; white-space: nowrap; }
+   .ws-browser-open { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--yellow); white-space: nowrap; }
+   .ws-address { flex-wrap: nowrap; }
+   .ws-address .ws-input { flex: 1; min-width: 0; min-height: 2rem; font-family: var(--code); font-size: 0.85rem; }
+   /* Shown in place of a page that would not load. */
+   .ws-blocked { position: absolute; inset: 0; display: grid; align-content: center; gap: var(--sm); overflow-y: auto; padding: var(--lg); background: var(--paper-light); }
+   .ws-blocked[hidden] { display: none; }
+   .ws-blocked p { max-width: 38rem; margin: 0; }
+   .ws-frame-wrap { position: relative; flex: 1; min-height: 0; }
+   .ws-frame { display: block; width: 100%; height: 100%; background: #ffffff; border: 0; }
+   /* Drawn over the frame from outside, so the test case itself is never changed. */
+   .ws-cursor { position: absolute; z-index: 2; border: 3px solid var(--red); border-radius: 3px; box-shadow: 0 0 0 3px color-mix(in oklch, var(--yellow) 70%, transparent); pointer-events: none; transition: all 120ms ease-out; }
+   .ws-cursor[hidden] { display: none; }
+   /* Two things to open when you want them. Closed, they are one line each. */
+   .ws-extras { display: grid; gap: 0; overflow-y: auto; max-height: 45%; padding: var(--sm) var(--md) var(--md); }
+   .ws-extra summary { padding-block: 0.35rem; }
+   .ws-extra-body { display: grid; gap: var(--sm); justify-items: start; padding-block: var(--xs) var(--sm); }
+   .ws-extra-body > div { display: grid; gap: var(--sm); width: 100%; }
+   .ws-extra-body > div[hidden] { display: none; }
+   .ws-commands { width: 100%; padding: var(--sm) var(--md); box-shadow: none; font-size: 0.82rem; }
+   .ws-table { width: 100%; border: 1px solid var(--ink); border-collapse: collapse; font-size: 0.88rem; }
+   .ws-table th, .ws-table td { padding: 0.4rem 0.6rem; border-bottom: 1px solid color-mix(in oklch, var(--ink) 16%, transparent); text-align: start; vertical-align: top; }
+   .ws-table thead th { background: var(--paper); font-size: 0.8rem; white-space: nowrap; }
+
+   /* 3. Output */
+   .ws-now { margin: 0; padding: 0.45rem var(--md); background: var(--yellow-soft); border-bottom: 1px solid var(--ink); font-size: 0.92rem; font-weight: 600; }
+   .ws-now[hidden] { display: none; }
+   .ws-log { display: grid; align-content: start; overflow-y: auto; flex: 1; min-height: 0; margin: 0; padding: 0; list-style: none; }
+   .ws-log:empty { display: none; }
+   .ws-log-empty { display: grid; place-items: center; flex: 1; padding: var(--lg); color: var(--ink-soft); text-align: center; }
+   .ws-log-empty p { max-width: 16rem; margin: 0; }
+   .ws-log-empty[hidden] { display: none; }
+   .ws-row { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr) auto; gap: var(--sm); align-items: baseline; margin: 0; padding: 0.5rem var(--md); border-bottom: 1px solid color-mix(in oklch, var(--ink) 12%, transparent); animation: ws-row-in 200ms ease-out; }
+   .ws-row:last-child { box-shadow: inset 4px 0 0 var(--red); }
+   .ws-row-step { color: var(--ink-soft); font-size: 0.8rem; text-align: end; }
+   .ws-row-phrase { min-width: 0; font-size: 1.05rem; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+   /* Which control produced the phrase. Quiet, because the phrase is the point. */
+   .ws-row-command { color: var(--ink-soft); font-size: 0.78rem; white-space: nowrap; }
+   .ws-row-tag { display: inline-block; margin-inline-end: 0.4rem; padding: 0.05rem 0.4rem; border: 1px solid var(--ink); font-size: 0.74rem; font-weight: 600; vertical-align: 0.1em; }
+   .ws-row-tag[hidden] { display: none; }
+   /* A live region speaks without the cursor moving, so its row stands apart. */
+   .ws-row--live { background: var(--yellow-soft); }
+   .ws-row--live .ws-row-tag { background: var(--ink); color: var(--yellow); }
+   .ws-row--edge .ws-row-phrase { color: var(--ink-soft); font-weight: 400; }
+   /* A checkpoint is a mark in the log, not something the screen reader said. */
+   .ws-row--mark { border-block: 1px dashed color-mix(in oklch, var(--ink) 45%, transparent); }
+   .ws-row--mark .ws-row-phrase { color: var(--ink-soft); font-size: 0.88rem; font-weight: 400; }
+   @keyframes ws-row-in { from { opacity: 0; transform: translateY(0.4rem); } to { opacity: 1; transform: none; } }
+
+   .ws-checks { display: grid; gap: var(--xs); overflow-y: auto; max-height: 40%; padding: var(--sm) var(--md); border-top: var(--rule); background: var(--paper); }
+   .ws-checks[hidden] { display: none; }
+   .ws-checks-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sm); }
+   .ws-checks-head h3 { margin: 0; font: 700 1rem/1.2 var(--display); letter-spacing: 0.02em; text-transform: none; }
+   .ws-result { padding: 0.15rem 0.5rem; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+   .ws-result:empty { display: none; }
+   .ws-check-list { display: grid; gap: 0.3rem; margin: 0; padding: 0; list-style: none; }
+   .ws-check { display: grid; grid-template-columns: 4.4rem minmax(0, 1fr); gap: var(--sm); align-items: baseline; margin: 0; font-size: 0.88rem; line-height: 1.35; }
+   .ws-check-state { padding: 0.1rem 0.3rem; background: #e7e0d3; color: #474c5c; font-size: 0.74rem; font-weight: 700; text-align: center; white-space: nowrap; }
+   .ws-check--met .ws-check-state, .ws-result--pass { background: #1e7a46; color: #ffffff; }
+   .ws-check--failed .ws-check-state, .ws-result--fail { background: #bd2b26; color: #ffffff; }
+   .ws-result--partial { background: #a15c00; color: #ffffff; }
+   .ws-check-priority { margin-inline-start: 0.3rem; color: var(--ink-soft); font-size: 0.74rem; }
+   .ws-output-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--xs) var(--sm); padding: var(--sm) var(--md) 0.3rem; border-top: var(--rule); }
+   .ws-status { color: var(--ink-soft); font-size: 0.85rem; }
+   .ws-simulated { margin: 0; padding: 0 var(--md) var(--sm); color: var(--ink-soft); font-size: 0.82rem; }
+
+   /* Narrower windows: the output moves under the other two panes, then everything stacks. */
+   @media (max-width: 1180px) {
+      .ws { grid-template-columns: 14rem minmax(0, 1fr); height: auto; }
+      .ws-cases, .ws-stage { height: calc(100dvh - var(--top) - var(--intro)); min-height: 32rem; }
+      .ws-output { grid-column: 1 / -1; height: 30rem; border-inline-start: 0; border-top: 3px solid var(--ink); }
+   }
+   @media (max-width: 760px) {
+      .ws { grid-template-columns: minmax(0, 1fr); }
+      .ws-cases { height: 16rem; min-height: 0; }
+      .ws-stage { height: auto; min-height: 0; border-inline-start: 0; border-top: 3px solid var(--ink); }
+      .ws-browser { flex: none; height: 14rem; }
+      .ws-extras { max-height: none; }
+   }
+   @media (prefers-reduced-motion: reduce) {
+      .ws-row { animation: none; }
+      .ws-cursor { transition: none; }
+   }
+</style>

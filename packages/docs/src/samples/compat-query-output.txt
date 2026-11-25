@@ -1,0 +1,5 @@
+60
+[ 'aria:aria-live' ]
+aria:alert 14
+23
+aria-live-polite-update fail Save settings button is in the VoiceOver cursor | Save settings button

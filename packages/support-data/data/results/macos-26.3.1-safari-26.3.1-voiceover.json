@@ -1,0 +1,2749 @@
+{
+   "schemaVersion": 1,
+   "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+   "environment": {
+      "id": "macos-voiceover-safari",
+      "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+      "shortLabel": "macOS VO (Safari)",
+      "platformGroup": "macos-voiceover",
+      "device": "MacBook Pro (Apple M1 Pro)",
+      "os": "macOS",
+      "osVersion": "26.3.1 (arm64)",
+      "browser": "Safari",
+      "browserVersion": "26.3.1",
+      "browserType": "browser",
+      "usageOrder": 2,
+      "screenReader": "VoiceOver",
+      "screenReaderVersion": "0.0.1-VoiceOver4"
+   },
+   "status": "tested",
+   "runs": [
+      {
+         "testSlug": "aria-labelledby-single-id",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:53:22.091Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Billing address button",
+         "notes": "Matched expected announcement: \"Billing address button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Billing address heading level 2 is in the VoiceOver cursor",
+               "itemText": "Billing address heading level 2"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Billing address button"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-single-id-1",
+               "priority": "MUST",
+               "statement": "Convey \"Billing address\" across at least 2 elements",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Billing address heading level 2 is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-labelledby-single-id-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Edit\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-single-id-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Billing address button"
+            },
+            {
+               "id": "aria-labelledby-single-id-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-multiple-ids",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:53:31.894Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Delete quarterly invoice button",
+         "notes": "Matched expected announcement: \"Delete quarterly invoice button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Delete quarterly invoice text is in the VoiceOver cursor",
+               "itemText": "Delete quarterly invoice"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Delete quarterly invoice button"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-multiple-ids-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Delete quarterly invoice\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Delete quarterly invoice button"
+            },
+            {
+               "id": "aria-labelledby-multiple-ids-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"X, button\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-multiple-ids-3",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"button X\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-multiple-ids-4",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Delete quarterly invoice button"
+            },
+            {
+               "id": "aria-labelledby-multiple-ids-5",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-reverse-dom-order",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:53:41.745Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Account settings button",
+         "notes": "Matched expected announcement: \"Account settings button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "settings Account text is in the VoiceOver cursor",
+               "itemText": "settings Account"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Account settings button"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-reverse-dom-order-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Account settings\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Account settings button"
+            },
+            {
+               "id": "aria-labelledby-reverse-dom-order-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"settings Account, button\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-reverse-dom-order-3",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Open\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-reverse-dom-order-4",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Account settings button"
+            },
+            {
+               "id": "aria-labelledby-reverse-dom-order-5",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-self-reference",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:53:51.635Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Remove Monthly plan button",
+         "notes": "Matched expected announcement: \"Remove Monthly plan button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Monthly plan text is in the VoiceOver cursor",
+               "itemText": "Monthly plan"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Remove Monthly plan button"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 2
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-self-reference-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Remove Monthly plan\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Remove Monthly plan button"
+            },
+            {
+               "id": "aria-labelledby-self-reference-2",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Remove Monthly plan button"
+            },
+            {
+               "id": "aria-labelledby-self-reference-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-display-none-target",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:54:01.317Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Export CSV report button is in the VoiceOver cursor",
+         "notes": "Matched expected announcement: \"Export CSV report button is in the VoiceOver cursor\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Export CSV report button is in the VoiceOver cursor",
+               "itemText": "Export CSV report button"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Export CSV report button"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-display-none-target-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Export CSV report\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Export CSV report button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-labelledby-display-none-target-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Download\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-display-none-target-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Export CSV report button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-labelledby-display-none-target-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-aria-hidden-target",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:54:12.384Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Archive message button is in the VoiceOver cursor",
+         "notes": "Matched expected announcement: \"Archive message button is in the VoiceOver cursor\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Archive message button is in the VoiceOver cursor",
+               "itemText": "Archive message button"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Archive message button"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-aria-hidden-target-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Archive message\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Archive message button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-labelledby-aria-hidden-target-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Move\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-aria-hidden-target-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Archive message button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-labelledby-aria-hidden-target-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-precedence-over-aria-label",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:54:24.779Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Primary email edit text",
+         "notes": "Matched expected announcement: \"Primary email edit text\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Primary email text is in the VoiceOver cursor",
+               "itemText": "Primary email"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Backup email"
+            },
+            {
+               "step": 3,
+               "command": "VO-Right Arrow",
+               "phrase": "Primary email edit text"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-precedence-over-aria-label-1",
+               "priority": "MUST",
+               "statement": "Convey \"Primary email\" across at least 2 elements",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Primary email text is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-labelledby-precedence-over-aria-label-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Secondary email\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-precedence-over-aria-label-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"text\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Primary email edit text"
+            },
+            {
+               "id": "aria-labelledby-precedence-over-aria-label-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-broken-id-fallback",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:54:34.617Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Save draft button is in the VoiceOver cursor",
+         "notes": "Matched expected announcement: \"Save draft button is in the VoiceOver cursor\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Save draft button is in the VoiceOver cursor",
+               "itemText": "Save draft button"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Save draft button"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 2
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-broken-id-fallback-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Save draft\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Save draft button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-labelledby-broken-id-fallback-2",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Save draft button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-labelledby-broken-id-fallback-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-chained-no-recursion",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:54:46.305Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "fail",
+         "keyAnnouncement": "Grandparent label button",
+         "notes": "Forbidden text \"Grandparent label\" was exposed on the target.",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Grandparent label text is in the VoiceOver cursor",
+               "itemText": "Grandparent label"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Grandparent label group"
+            },
+            {
+               "step": 3,
+               "command": "VO-Right Arrow",
+               "phrase": "Parent text"
+            },
+            {
+               "step": 4,
+               "command": "VO-Right Arrow",
+               "phrase": "end of Grandparent label group",
+               "itemText": "Grandparent label group"
+            },
+            {
+               "step": 5,
+               "command": "VO-Right Arrow",
+               "phrase": "Grandparent label button",
+               "itemText": "Grandparent label Parent text button"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 1,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-chained-no-recursion-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Parent text\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Grandparent label button"
+            },
+            {
+               "id": "aria-labelledby-chained-no-recursion-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Grandparent label\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "fail",
+               "evidence": "Grandparent label button",
+               "notes": "Forbidden text \"Grandparent label\" was exposed on the target."
+            },
+            {
+               "id": "aria-labelledby-chained-no-recursion-3",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Original button\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-labelledby-chained-no-recursion-4",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Grandparent label button"
+            },
+            {
+               "id": "aria-labelledby-chained-no-recursion-5",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-labelledby-prohibited-generic-div",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:54:57.294Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "fail",
+         "keyAnnouncement": "Visible paragraph text",
+         "notes": "\"Special announcement\" spoken 2x (expected <= 1).",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Special announcement text is in the VoiceOver cursor",
+               "itemText": "Special announcement"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Special announcement group"
+            },
+            {
+               "step": 3,
+               "command": "VO-Right Arrow",
+               "phrase": "Visible paragraph text"
+            },
+            {
+               "step": 4,
+               "command": "VO-Right Arrow",
+               "phrase": "end of Special announcement group",
+               "itemText": "Special announcement group"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 1,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-labelledby-prohibited-generic-div-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Visible paragraph text\" on the target",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Visible paragraph text"
+            },
+            {
+               "id": "aria-labelledby-prohibited-generic-div-2",
+               "priority": "MUST",
+               "statement": "Do not leak prohibited text \"Special announcement\" beyond 1 occurrence(s)",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "fail",
+               "notes": "\"Special announcement\" spoken 2x (expected <= 1)."
+            },
+            {
+               "id": "aria-labelledby-prohibited-generic-div-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-labelledby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-label-button-override",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:55:07.728Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Close settings dialog button is in the VoiceOver cursor",
+         "notes": "Matched expected announcement: \"Close settings dialog button is in the VoiceOver cursor\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Close settings dialog button is in the VoiceOver cursor",
+               "itemText": "Close settings dialog button"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Close settings dialog button"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-label-button-override-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Close settings dialog\" on the target",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Close settings dialog button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-label-button-override-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"X\" on the target",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-label-button-override-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Close settings dialog button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-label-button-override-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-label-landmark-nav",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:55:16.957Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Breadcrumb trail navigation is in the VoiceOver cursor",
+         "notes": "Matched expected announcement: \"Breadcrumb trail navigation is in the VoiceOver cursor\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Breadcrumb trail navigation is in the VoiceOver cursor",
+               "itemText": "Breadcrumb trail navigation"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 2
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-label-landmark-nav-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Breadcrumb trail\" on the target",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Breadcrumb trail navigation is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-label-landmark-nav-2",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"navigation\"",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Breadcrumb trail navigation is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-label-landmark-nav-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-label-prohibited-span",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:55:27.336Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "fail",
+         "keyAnnouncement": "Visible text",
+         "notes": "Forbidden text \"Secret label\" was exposed on the target.",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Secret label group is in the VoiceOver cursor",
+               "itemText": "Secret label group"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Visible text"
+            },
+            {
+               "step": 3,
+               "command": "VO-Right Arrow",
+               "phrase": "end of Secret label group",
+               "itemText": "Secret label group"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 1,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-label-prohibited-span-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Visible text\" on the target",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Visible text"
+            },
+            {
+               "id": "aria-label-prohibited-span-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Secret label\" on the target",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "fail",
+               "evidence": "Secret label group is in the VoiceOver cursor",
+               "notes": "Forbidden text \"Secret label\" was exposed on the target."
+            },
+            {
+               "id": "aria-label-prohibited-span-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-label",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-describedby-input-hint",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:55:38.945Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "API token Starts with sk_live edit text",
+         "notes": "Matched expected announcement: \"API token Starts with sk_live edit text\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "API token text is in the VoiceOver cursor",
+               "itemText": "API token"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "API token Starts with sk_live edit text",
+               "itemText": "API token edit text"
+            },
+            {
+               "step": 3,
+               "command": "VO-Right Arrow",
+               "phrase": "Starts with sk_live"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-describedby-input-hint-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"API token\" on the target",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "API token Starts with sk_live edit text"
+            },
+            {
+               "id": "aria-describedby-input-hint-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"Starts with sk_live\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "API token Starts with sk_live edit text"
+            },
+            {
+               "id": "aria-describedby-input-hint-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"text\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "API token Starts with sk_live edit text"
+            },
+            {
+               "id": "aria-describedby-input-hint-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-describedby-multiple-ids",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:55:49.727Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Delete project Permanent action. Cannot be undone. button is in the VoiceOver cursor",
+         "notes": "Matched expected announcement: \"Delete project Permanent action. Cannot be undone. button is in the VoiceOver cursor\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Delete project Permanent action. Cannot be undone. button is in the VoiceOver cursor",
+               "itemText": "Delete project button"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Permanent action."
+            },
+            {
+               "step": 3,
+               "command": "VO-Right Arrow",
+               "phrase": "Cannot be undone."
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-describedby-multiple-ids-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Delete project\" on the target",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Delete project Permanent action. Cannot be undone. button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-describedby-multiple-ids-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"Permanent action\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Delete project Permanent action. Cannot be undone. button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-describedby-multiple-ids-3",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"Cannot be undone\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Delete project Permanent action. Cannot be undone. button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-describedby-multiple-ids-4",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Delete project Permanent action. Cannot be undone. button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-describedby-multiple-ids-5",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-describedby-hidden-target",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:55:59.445Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Submit form Sends application immediately button is in the VoiceOver cursor",
+         "notes": "Matched expected announcement: \"Submit form Sends application immediately button is in the VoiceOver cursor\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Submit form Sends application immediately button is in the VoiceOver cursor",
+               "itemText": "Submit form button"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Submit form Sends application immediately button",
+               "itemText": "Submit form button"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-describedby-hidden-target-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Submit form\" on the target",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Submit form Sends application immediately button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-describedby-hidden-target-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"Sends application immediately\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Submit form Sends application immediately button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-describedby-hidden-target-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Submit form Sends application immediately button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-describedby-hidden-target-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-describedby",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-hidden-true-text",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:56:10.376Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Visible sentence text is in the VoiceOver cursor",
+         "notes": "Matched expected announcement: \"Visible sentence text is in the VoiceOver cursor\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Visible sentence text is in the VoiceOver cursor",
+               "itemText": "Visible sentence"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Visible sentence"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-hidden-true-text-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Visible sentence\" on the target",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Visible sentence text is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-hidden-true-text-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Hidden decorative text\" on the target",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-hidden-true-text-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-hidden-false-inside-true",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:56:24.184Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "After hidden block text is in the VoiceOver cursor",
+         "notes": "Matched expected announcement: \"After hidden block text is in the VoiceOver cursor\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "After hidden block text is in the VoiceOver cursor",
+               "itemText": "After hidden block"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "After hidden block"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-hidden-false-inside-true-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"After hidden block\" on the target",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "After hidden block text is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-hidden-false-inside-true-2",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Hidden parent text\" on the target",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-hidden-false-inside-true-3",
+               "priority": "MUST",
+               "statement": "Do not announce overridden or prohibited phrase \"Nested aria-hidden false\" on the target",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass"
+            },
+            {
+               "id": "aria-hidden-false-inside-true-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-hidden",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-expanded-false-initial",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:56:33.895Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Account menu collapsed button is in the VoiceOver cursor",
+         "notes": "Matched expected announcement: \"Account menu collapsed button is in the VoiceOver cursor\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Account menu collapsed button is in the VoiceOver cursor",
+               "itemText": "Account menu collapsed button"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Account menu collapsed button"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-expanded-false-initial-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Account menu\" on the target",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Account menu collapsed button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-expanded-false-initial-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"collapsed\"",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Account menu collapsed button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-expanded-false-initial-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Account menu collapsed button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-expanded-false-initial-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-expanded-toggle-dynamic",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:56:51.435Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Details expanded button",
+         "notes": "Pre- and post-activation behavior matched spec: \"Details expanded button\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Details collapsed button is in the VoiceOver cursor",
+               "itemText": "Details collapsed button"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Details collapsed button"
+            },
+            {
+               "step": 3,
+               "command": "VO-Space (act)",
+               "phrase": "Details expanded button"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 4,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 4
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-expanded-toggle-dynamic-1",
+               "priority": "MUST",
+               "statement": "Convey initial control text \"Details\" before activation",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Details collapsed button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-expanded-toggle-dynamic-2",
+               "priority": "MUST",
+               "statement": "Convey dynamic announcement \"expanded\" after activation",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Details expanded button"
+            },
+            {
+               "id": "aria-expanded-toggle-dynamic-3",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"expanded\"",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Details expanded button"
+            },
+            {
+               "id": "aria-expanded-toggle-dynamic-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-expanded",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-disabled-button",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:57:01.231Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "Publish changes dimmed button is in the VoiceOver cursor",
+         "notes": "Matched expected announcement: \"Publish changes dimmed button is in the VoiceOver cursor\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Publish changes dimmed button is in the VoiceOver cursor",
+               "itemText": "Publish changes dimmed button"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Publish changes dimmed button"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-disabled-button-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Publish changes\" on the target",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Publish changes dimmed button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-disabled-button-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"disabled\"",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Publish changes dimmed button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-disabled-button-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"button\"",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Publish changes dimmed button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-disabled-button-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-disabled-link",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:57:10.948Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "partial",
+         "keyAnnouncement": "Download archive dimmed text is in the VoiceOver cursor",
+         "notes": "Expected role \"link\" was not exposed in speech.",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Download archive dimmed text is in the VoiceOver cursor",
+               "itemText": "Download archive dimmed"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Download archive dimmed"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 1,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-disabled-link-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Download archive\" on the target",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Download archive dimmed text is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-disabled-link-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"disabled\"",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Download archive dimmed text is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-disabled-link-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"link\"",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "fail",
+               "notes": "Expected role \"link\" was not exposed in speech."
+            },
+            {
+               "id": "aria-disabled-link-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-disabled",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-current-page",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:57:22.102Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "current page link Pricing",
+         "notes": "Matched expected announcement: \"current page link Pricing\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Main navigation is in the VoiceOver cursor",
+               "itemText": "Main navigation"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "link Home",
+               "itemText": "Home link"
+            },
+            {
+               "step": 3,
+               "command": "VO-Right Arrow",
+               "phrase": "current page link Pricing",
+               "itemText": "Pricing current page link"
+            },
+            {
+               "step": 4,
+               "command": "VO-Right Arrow",
+               "phrase": "end of Main navigation",
+               "itemText": "Main navigation"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 1,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 1
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-current-page-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Pricing\" on the target",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "current page link Pricing"
+            },
+            {
+               "id": "aria-current-page-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"current page\"",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "current page link Pricing"
+            },
+            {
+               "id": "aria-current-page-3",
+               "priority": "SHOULD",
+               "statement": "Convey expected semantics/role \"link\"",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "link Home"
+            },
+            {
+               "id": "aria-current-page-4",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-current-step",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:57:33.759Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "pass",
+         "keyAnnouncement": "2. Shipping current step 2 of 3",
+         "notes": "Matched expected announcement: \"2. Shipping current step 2 of 3\".",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "list is in the VoiceOver cursor",
+               "itemText": "list"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "1. Account 1 of 3",
+               "itemText": "1. Account"
+            },
+            {
+               "step": 3,
+               "command": "VO-Right Arrow",
+               "phrase": "2. Shipping current step 2 of 3",
+               "itemText": "2. Shipping"
+            },
+            {
+               "step": 4,
+               "command": "VO-Right Arrow",
+               "phrase": "3. Payment 3 of 3",
+               "itemText": "3. Payment"
+            },
+            {
+               "step": 5,
+               "command": "VO-Right Arrow",
+               "phrase": "end of list",
+               "itemText": "list"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 3,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-current-step-1",
+               "priority": "MUST",
+               "statement": "Convey expected accessible text \"Shipping\" on the target",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "2. Shipping current step 2 of 3"
+            },
+            {
+               "id": "aria-current-step-2",
+               "priority": "MUST",
+               "statement": "Convey required ARIA state \"current step\"",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "2. Shipping current step 2 of 3"
+            },
+            {
+               "id": "aria-current-step-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-current",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-live-polite-update",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:57:50.160Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "fail",
+         "keyAnnouncement": "Save settings button is in the VoiceOver cursor | Save settings button",
+         "notes": "Expected phrase \"Preferences saved\" was not spoken.",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Save settings button is in the VoiceOver cursor",
+               "itemText": "Save settings button"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Save settings button"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 1,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-live-polite-update-1",
+               "priority": "MUST",
+               "statement": "Convey initial control text \"Save settings\" before activation",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Save settings button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-live-polite-update-2",
+               "priority": "MUST",
+               "statement": "Convey dynamic announcement \"Preferences saved\" after activation",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "fail",
+               "notes": "Expected phrase \"Preferences saved\" was not spoken."
+            },
+            {
+               "id": "aria-live-polite-update-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "aria-live-assertive-update",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T19:58:06.500Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "fail",
+         "keyAnnouncement": "Validate token button is in the VoiceOver cursor | Validate token button",
+         "notes": "Expected phrase \"Session expired\" was not spoken.",
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Validate token button is in the VoiceOver cursor",
+               "itemText": "Validate token button"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Validate token button"
+            }
+         ],
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 1,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "aria-live-assertive-update-1",
+               "priority": "MUST",
+               "statement": "Convey initial control text \"Validate token\" before activation",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Validate token button is in the VoiceOver cursor"
+            },
+            {
+               "id": "aria-live-assertive-update-2",
+               "priority": "MUST",
+               "statement": "Convey dynamic announcement \"Session expired\" after activation",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "fail",
+               "notes": "Expected phrase \"Session expired\" was not spoken."
+            },
+            {
+               "id": "aria-live-assertive-update-3",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "aria-live",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ]
+      },
+      {
+         "testSlug": "role-alert-dynamic",
+         "environmentKey": "macbook-pro-(apple-m1-pro) | macos | 26.3.1-(arm64) | safari | 26.3.1 | voiceover | 0.0.1-voiceover4",
+         "environment": {
+            "id": "macos-voiceover-safari",
+            "label": "macOS 26.3.1 · Safari 26.3.1 · VoiceOver",
+            "shortLabel": "macOS VO (Safari)",
+            "platformGroup": "macos-voiceover",
+            "device": "MacBook Pro (Apple M1 Pro)",
+            "os": "macOS",
+            "osVersion": "26.3.1 (arm64)",
+            "browser": "Safari",
+            "browserVersion": "26.3.1",
+            "browserType": "browser",
+            "usageOrder": 2,
+            "screenReader": "VoiceOver",
+            "screenReaderVersion": "0.0.1-VoiceOver4"
+         },
+         "runAt": "2026-11-20T21:27:44.602Z",
+         "driver": "a11ied/@guidepup/guidepup (voiceover, Safari)",
+         "outcome": "fail",
+         "keyAnnouncement": "Trigger alert button is in the VoiceOver cursor | Trigger alert button",
+         "notes": "Expected phrase \"Hello\" was not spoken.",
+         "assertionSummary": {
+            "must": {
+               "passed": 2,
+               "failed": 1,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 3
+            },
+            "should": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 0,
+               "total": 0
+            },
+            "may": {
+               "passed": 0,
+               "failed": 0,
+               "untestable": 0,
+               "unsupported": 1,
+               "total": 1
+            },
+            "severeSideEffects": 0,
+            "moderateSideEffects": 0
+         },
+         "assertionResults": [
+            {
+               "id": "alert-pre-button",
+               "priority": "MUST",
+               "statement": "Convey initial control label \"Trigger alert\" before activation",
+               "featureRef": "button",
+               "featureType": "aria",
+               "verdict": "pass",
+               "evidence": "Trigger alert button is in the VoiceOver cursor"
+            },
+            {
+               "id": "alert-post-text",
+               "priority": "MUST",
+               "statement": "Convey alert text \"Hello\" after activating the trigger button",
+               "featureRef": "alert",
+               "featureType": "aria",
+               "verdict": "fail",
+               "notes": "Expected phrase \"Hello\" was not spoken."
+            },
+            {
+               "id": "alert-post-role",
+               "priority": "MAY",
+               "statement": "Convey role \"alert\" when the alert region updates",
+               "featureRef": "alert",
+               "featureType": "aria",
+               "verdict": "unsupported",
+               "notes": "Expected phrase \"alert\" was not spoken."
+            },
+            {
+               "id": "alert-no-side-effects",
+               "priority": "MUST",
+               "statement": "Cause no severe negative side effects",
+               "featureRef": "alert",
+               "featureType": "aria",
+               "verdict": "pass",
+               "notes": "No unexpected chrome, focus trap, or spurious speech observed."
+            }
+         ],
+         "transcript": [
+            {
+               "step": 1,
+               "command": "VO-AreaTop",
+               "phrase": "Trigger alert button is in the VoiceOver cursor",
+               "itemText": "Trigger alert button"
+            },
+            {
+               "step": 2,
+               "command": "VO-Right Arrow",
+               "phrase": "Trigger alert button"
+            }
+         ]
+      }
+   ]
+}
