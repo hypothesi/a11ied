@@ -1,6 +1,9 @@
 {
    "$schema": "https://unpkg.com/@changesets/config@4.0.1/schema.json",
-   "changelog": ["./changelog.mjs", { "repo": "hypothesi/a11ied" }],
+   "changelog": [
+      "./changelog.mjs",
+      { "repo": "hypothesi/a11ied", "maintainers": ["yokuze"] }
+   ],
    "commit": false,
    "fixed": [["a11ied", "@a11ied/*"]],
    "linked": [],

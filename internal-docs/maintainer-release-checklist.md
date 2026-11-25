@@ -36,6 +36,8 @@ other ten published `@a11ied/*` packages are internal. They are on npm only beca
 Every published package has the same version. [Changesets](https://changesets.dev) bumps
 them together and writes each package's `CHANGELOG.md` from the files in `.changeset/`.
 `.changeset/README.md` says which package an entry belongs to and how to write it.
+Changelog entries thank their GitHub author, except for the logins in `maintainers` in
+`.changeset/config.json`. Add each new maintainer there.
 
 ## Publishing
 
