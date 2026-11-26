@@ -26,7 +26,7 @@ const toc = [
       <h2 id="who">Who does the testing</h2>
       <p>
          Your AI coding agent does. <code>a1 audit</code> does not start agents and does not
-         call a model. It keeps the records: it holds the list of work, gives a unit to
+         call a model. It keeps the records: it stores the list of work, gives a unit to
          whoever asks for one, checks each result that comes back, and builds the report.
       </p>
       <dl class="defs">
@@ -37,7 +37,7 @@ const toc = [
          <dt>What a worker does</dt>
          <dd>It runs <code>a1 audit next</code> to get a unit, tests the page with the other <code>a1</code> commands, and runs <code>a1 audit submit</code> with its results. Then it asks for the next unit. Over MCP it calls <code>audit_next</code> and <code>audit_submit</code> to do the same.</dd>
          <dt>Without the skill</dt>
-         <dd>Open several agent sessions yourself and tell each one to loop on <code>a1 audit next</code> under its own worker name. The work packet it prints carries the instructions.</dd>
+         <dd>Open several agent sessions yourself and tell each one to loop on <code>a1 audit next</code> under its own worker name. The work packet it prints contains the instructions.</dd>
       </dl>
       <p>
          To see what comes out, browse the <a href="/example-audit/">example report</a>. It
