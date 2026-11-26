@@ -1,6 +1,6 @@
 {
    "name": "@a11ied/core",
-   "version": "0.1.1",
+   "version": "0.2.0",
    "description": "Browser, axe, screen reader session, and audit scan runtime. Internal package of a11ied, published because the a1 CLI depends on it. Its API can change in any release; install a11ied instead.",
    "homepage": "https://github.com/hypothesi/a11ied/tree/master/packages/core#readme",
    "bugs": {
@@ -36,13 +36,13 @@
       "typecheck": "tsc -p tsconfig.json --noEmit"
    },
    "dependencies": {
-      "@a11ied/audit": "0.1.1",
-      "@a11ied/contracts": "0.1.1",
-      "@a11ied/earl": "0.1.1",
-      "@a11ied/guidepup": "0.1.1",
-      "@a11ied/knowledge": "0.1.1",
-      "@a11ied/observe": "0.1.1",
-      "@a11ied/wcag-engine": "0.1.1",
+      "@a11ied/audit": "0.2.0",
+      "@a11ied/contracts": "0.2.0",
+      "@a11ied/earl": "0.2.0",
+      "@a11ied/guidepup": "0.2.0",
+      "@a11ied/knowledge": "0.2.0",
+      "@a11ied/observe": "0.2.0",
+      "@a11ied/wcag-engine": "0.2.0",
       "@guidepup/record": "^0.1.0",
       "axe-core": "^4.13.0",
       "jsdom": "30.0.1",

@@ -1,6 +1,6 @@
 {
    "name": "@a11ied/wcag-data",
-   "version": "0.1.1",
+   "version": "0.2.0",
    "description": "Normalized WCAG, ACT, and APG data. Internal package of a11ied, published because the a1 CLI depends on it. Its API can change in any release; install a11ied instead.",
    "homepage": "https://github.com/hypothesi/a11ied/tree/master/packages/wcag-data#readme",
    "bugs": {
@@ -40,7 +40,7 @@
       "validate": "tsx scripts/validate.ts"
    },
    "dependencies": {
-      "@a11ied/contracts": "0.1.1",
+      "@a11ied/contracts": "0.2.0",
       "axe-core": "^4.13.0",
       "jsdom": "30.0.1",
       "turndown": "7.2.4",
