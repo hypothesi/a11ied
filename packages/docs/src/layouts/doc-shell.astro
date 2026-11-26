@@ -202,15 +202,26 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
          @media (max-width: 900px) {
             .shell { grid-template-columns: 1fr; }
             .rail { display: none; }
-            .mobile-bar { position: sticky; top: 0; z-index: 5; display: block; padding: var(--xs) var(--md); background: var(--yellow); border-bottom: 3px solid var(--ink); }
-            .mobile-bar .mark { width: 2.4rem; height: 2.4rem; }
+            /*
+             * The logo and the menu share one grid cell. The logo is a link to the home page
+             * and sits outside the menu's toggle, so tapping it does not open the menu.
+             */
+            .mobile-bar { --bar-row: 2.4rem; position: sticky; top: 0; z-index: 5; display: grid; padding: var(--xs) var(--md); background: var(--yellow); border-bottom: 3px solid var(--ink); }
+            .mobile-bar > * { grid-area: 1 / 1; min-width: 0; }
+            .mobile-bar .brand { z-index: 1; justify-self: start; align-self: start; }
+            .mobile-bar .mark { width: var(--bar-row); height: var(--bar-row); }
             .mobile-bar .brand-title { font-size: 1.6rem; }
-            .route-drawer summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: var(--md); cursor: pointer; }
+            /* Only the toggle opens the menu, not the whole width of the bar. */
+            .route-drawer summary { list-style: none; display: flex; align-items: center; gap: var(--xs); width: fit-content; min-height: var(--bar-row); margin-inline-start: auto; padding-inline-start: var(--md); font: 700 0.8rem/1 var(--display); letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; user-select: none; }
             .route-drawer summary::-webkit-details-marker { display: none; }
-            .route-drawer-toggle { display: flex; align-items: center; gap: var(--xs); font: 700 0.8rem/1 var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
             .route-drawer-icon--close, .route-drawer[open] .route-drawer-icon--open { display: none; }
             .route-drawer[open] .route-drawer-icon--close { display: block; }
-            .route-drawer-panel { max-height: 70vh; overflow-y: auto; padding-block: var(--md); }
+            /*
+             * A box that scrolls down also scrolls sideways when anything is wider than it.
+             * The side padding gives the links' highlight, which is wider than its text,
+             * room inside the box. The negative margin keeps the content in line with the bar.
+             */
+            .route-drawer-panel { display: grid; gap: var(--lg); max-height: 70vh; overflow-y: auto; margin-inline: calc(var(--xs) * -1); padding: var(--md) var(--xs); }
             .route-drawer-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .content { padding-top: var(--xl); }
          }
@@ -232,7 +243,7 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
       <a class="skip-link" href="#content">Skip to content</a>
       {hasSearch ? <pagefind-config bundle-path={`${basePath}pagefind/`} base-url={basePath}></pagefind-config> : null}
       <div class:list={['shell', `shell--${variant}`, { 'shell--with-toc': toc.length > 0 }]}>
-         <div class="rail">
+         <header class="rail">
             <a class="brand" href="/" aria-label="a11ied home">
                <Image src={logo} alt="" class="mark" width={112} height={112} />
                <span class="brand-title">a<span class="brand-title-accent">11</span>ied</span>
@@ -249,13 +260,14 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
                ))}
             </nav>
             <p class="rail-foot"><a class="icon-link" href={REPOSITORY_URL}><Icon name="mdi:github" aria-hidden="true" />Source on GitHub</a></p>
-         </div>
-         <div class="mobile-bar">
+         </header>
+         <header class="mobile-bar">
+            <a class="brand" href="/" aria-label="a11ied home">
+               <Image src={logo} alt="" class="mark" width={77} height={77} />
+               <span class="brand-title">a<span class="brand-title-accent">11</span>ied</span>
+            </a>
             <details class="route-drawer">
-               <summary>
-                  <span class="brand"><Image src={logo} alt="" class="mark" width={77} height={77} /><span class="brand-title">a<span class="brand-title-accent">11</span>ied</span></span>
-                  <span class="route-drawer-toggle">Menu<Plus class="route-drawer-icon route-drawer-icon--open" size={16} aria-hidden="true" focusable="false" /><Minus class="route-drawer-icon route-drawer-icon--close" size={16} aria-hidden="true" focusable="false" /></span>
-               </summary>
+               <summary>Menu<Plus class="route-drawer-icon route-drawer-icon--open" size={16} aria-hidden="true" focusable="false" /><Minus class="route-drawer-icon route-drawer-icon--close" size={16} aria-hidden="true" focusable="false" /></summary>
                <div class="route-drawer-panel">
                   {hasSearch ? <pagefind-modal-trigger class="search-trigger" placeholder="Search the docs" hide-shortcut></pagefind-modal-trigger> : null}
                   <nav class="route-drawer-nav" aria-label="Documentation">
@@ -270,7 +282,7 @@ const basePath = import.meta.env.BASE_URL.replace(/\/*$/, '/');
                   </nav>
                </div>
             </details>
-         </div>
+         </header>
          <main class="content" id="content">
             <div class="content-frame" data-pagefind-body data-pagefind-weight={variant === 'wide' ? '0.2' : '2'}>
                <header class="page-head">
