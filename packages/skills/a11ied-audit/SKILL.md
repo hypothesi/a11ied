@@ -40,7 +40,8 @@ What differs over MCP:
 
 - `audit_next` takes `passes` and `excludePasses` where the CLI takes `--pass` and `--not-pass`.
 - `audit_submit` takes the result as its `submission` argument. There is no file to write.
-- `a1 audit dashboard` has no tool. Give the user progress from `audit_status`.
+- `a1 audit dashboard` has no tool. With a shell, start it as described under "Offer the live dashboard". Without one,
+  give the user the command to run themselves, and give progress from `audit_status`.
 - One MCP server holds one screen reader session, and subagents usually share their lead's server. Two workers must
   never use the `sr_*` tools at the same time. Give one worker `passes: ["semantics"]`, give the others
   `excludePasses: ["semantics"]`, and tell the others to use `tree` and `capture` where they would use a screen reader.
@@ -136,11 +137,33 @@ Resources that cannot be shared:
 If you cannot start subagents, run the worker loop yourself. The audit still completes; it is
 just serial.
 
-## 5. Keep it moving
+## 5. Offer the live dashboard
+
+`a1 audit dashboard` serves a page on the user's machine that updates as the audit runs:
+progress by page and test pass, what each worker is testing, blocked units and what each
+needs, the findings so far, and a link to the interim report.
+
+When a person is in the conversation, offer it once, right after the workers start. Say what
+it shows and ask whether they want it. Do not offer it when nobody is there to open it, such
+as a CI job, a scheduled run, or a one-shot command with no prompt.
+
+If they want it:
+
+- Start `a1 audit dashboard` as a background process. It runs until it is stopped, so do not
+  wait for it to finish. Add `--audit <id>` when the workspace has more than one audit, and
+  `--port <port>` when port 4173 is in use.
+- Give them the address it prints, `http://127.0.0.1:4173/` by default. The page is served
+  from the machine that runs `a1`. Say so when the user reaches that machine remotely.
+- With no shell, give them the command to run in their own terminal:
+  `npx -y a11ied audit dashboard`.
+- Leave it running while they read the report, and stop it when they are done with it.
+
+If they decline, report progress from `a1 audit status` when they ask.
+
+## 6. Keep it moving
 
 `a1 audit status` shows units done, active workers, blocked units with reasons, and recent
-activity. For the user, `a1 audit dashboard` serves a live page with the same picture and a
-link to the interim report.
+activity.
 
 - A worker that dies loses nothing. Its claim expires after 20 minutes and the unit returns to
   the queue. Start a replacement with a new name, or the same name to resume its unit.
@@ -155,7 +178,7 @@ link to the interim report.
 - Do not stop while units are queued or in progress. A finished tool call, a draft report, or a
   saved checkpoint is not the end of the audit.
 
-## 6. Review the findings
+## 7. Review the findings
 
 Before reporting, read `a1 audit findings` as an editor:
 
@@ -173,7 +196,7 @@ Before reporting, read `a1 audit findings` as an editor:
 - Spot-check the critical and serious findings against their evidence. Reopen a unit whose work
   looks thin.
 
-## 7. Report
+## 8. Report
 
 ```bash
 a1 audit report
@@ -187,7 +210,8 @@ anything not verified and why, and the report path. Do not restate the report.
 ## Resuming
 
 After any interruption, run `a1 audit status`. It is the whole truth. Do not rebuild progress
-from memory or chat history. Restart workers and continue from step 5.
+from memory or chat history. Restart workers and continue from step 6. A dashboard started
+before the interruption may have stopped: offer it again if the user was using it.
 
 ## Rules
 

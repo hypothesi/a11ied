@@ -114,7 +114,8 @@ a1 audit report
 | `audit finding dismiss/merge/update`        | `audit_finding`                             |
 | `audit signals`, `audit report`             | `audit_signals`, `audit_report`             |
 
-`audit dashboard` serves a live progress page and has no MCP tool.
+`audit dashboard` serves a live progress page and has no MCP tool. When a person is in the conversation, offer to start
+it for them once an audit is running. The `a11ied-audit` skill says how.
 
 ## Screen reader session
 
