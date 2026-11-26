@@ -94,14 +94,14 @@ export function normalizeOsName(raw: string): string {
    return trimmed;
 }
 
-function getScreenReaderRank(screenReaderType: string): number {
+export function getScreenReaderRank(screenReaderType: string): number {
    if (screenReaderType === SIMULATED_SCREEN_READER) {
       return SR_VIRTUAL_RANK;
    }
    return SR_ORDER[screenReaderType] ?? SR_OTHER_RANK;
 }
 
-function getOsRank(os: string): number {
+export function getOsRank(os: string): number {
    return OS_ORDER[os] ?? OS_OTHER_RANK;
 }
 

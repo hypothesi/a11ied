@@ -1,0 +1,219 @@
+---
+import type { FeatureReport } from '@a11ied/support-data';
+import PlatformIcon from './platform-icon.astro';
+import { BROWSER_FAMILIES } from '../../lib/platforms';
+import {
+   buildPairMatrix,
+   formatSharePercentages,
+   getShareRatio,
+   type MatrixCell,
+} from '../../lib/support-share';
+
+interface Props {
+   readonly features: readonly FeatureReport[];
+}
+
+const HIGH_RATIO = 0.8,
+      MID_RATIO = 0.5;
+
+const { features } = Astro.props,
+      rows = buildPairMatrix(features);
+
+function getHeatLevel(cell: MatrixCell): string {
+   const ratio = getShareRatio(cell.share);
+
+   if (ratio >= HIGH_RATIO) {
+      return 'high';
+   }
+
+   return ratio >= MID_RATIO ? 'mid' : 'low';
+}
+---
+
+<section class="pairMatrix" aria-labelledby="pair-matrix-heading">
+   <h2 id="pair-matrix-heading" class="pairMatrix-heading">Best browser for each screen reader</h2>
+   <p class="pairMatrix-intro">
+      How well each screen reader supports the tested features in each browser: the share of
+      tests that pass fully or partially, averaged over the features, using the latest result
+      of each test. The best browser in each row is marked. Cells cover different numbers of
+      features, so a cell with few features is less certain.
+   </p>
+
+   <div class="pairMatrix-wrap" tabindex="0" role="region" aria-labelledby="pair-matrix-heading">
+      <table class="pairMatrix-table">
+         <thead>
+            <tr>
+               <th scope="col">Screen reader</th>
+               {BROWSER_FAMILIES.map((family) => (
+                  <th scope="col">
+                     <span class="pairMatrix-colHead">
+                        <PlatformIcon browser={family} size={18} />
+                        {family}
+                     </span>
+                  </th>
+               ))}
+            </tr>
+         </thead>
+         <tbody>
+            {rows.map((row) => (
+               <tr>
+                  <th scope="row">
+                     <span class="pairMatrix-rowHead">
+                        <PlatformIcon os={row.os} size={18} />
+                        <span>
+                           {row.screenReader}
+                           <span class="pairMatrix-os">{row.os}</span>
+                        </span>
+                     </span>
+                  </th>
+                  {row.cells.map((cell) => {
+                     if (cell.state === 'tested') {
+                        const featureLabel = cell.share.pairCount === 1 ? 'feature' : 'features';
+
+                        return (
+                           <td class={`pairMatrix-cell pairMatrix-cell--${getHeatLevel(cell)}`}>
+                              <strong class="pairMatrix-pct">{formatSharePercentages(cell.share).total}</strong>
+                              <span class="pairMatrix-count">of {cell.share.pairCount} {featureLabel}</span>
+                              {cell.isBest && <span class="pairMatrix-best">Best</span>}
+                           </td>
+                        );
+                     }
+
+                     if (cell.state === 'unavailable') {
+                        return <td class="pairMatrix-cell pairMatrix-cell--empty">Not available</td>;
+                     }
+
+                     return (
+                        <td class="pairMatrix-cell pairMatrix-cell--empty">
+                           {cell.state === 'pending' ? 'Pending' : 'Not tested'}
+                        </td>
+                     );
+                  })}
+               </tr>
+            ))}
+         </tbody>
+      </table>
+   </div>
+</section>
+
+<style>
+.pairMatrix {
+   display: flex;
+   flex-direction: column;
+   gap: 0.6rem;
+}
+
+.pairMatrix-heading {
+   margin: 0;
+   padding-top: 0;
+   border-top: 0;
+   font-size: 1.3rem;
+}
+
+.pairMatrix-intro {
+   margin: 0;
+   max-inline-size: 75ch;
+   font-size: 0.9rem;
+   color: var(--ink-soft);
+}
+
+.pairMatrix-wrap {
+   overflow-x: auto;
+   border: 1px solid color-mix(in oklch, var(--ink) 18%, transparent);
+   border-radius: 4px;
+   background: var(--paper-light);
+}
+
+.pairMatrix-table {
+   inline-size: 100%;
+   border-collapse: collapse;
+   font-size: 0.88rem;
+}
+
+.pairMatrix-table th,
+.pairMatrix-table td {
+   padding: 0.55rem 0.7rem;
+   border-bottom: 1px solid color-mix(in oklch, var(--ink) 12%, transparent);
+   text-align: start;
+   vertical-align: middle;
+}
+
+.pairMatrix-table tbody tr:last-child th,
+.pairMatrix-table tbody tr:last-child td {
+   border-bottom: 0;
+}
+
+.pairMatrix-table thead th {
+   font-family: var(--display);
+   font-size: 0.78rem;
+   letter-spacing: 0.04em;
+   text-transform: uppercase;
+   white-space: nowrap;
+}
+
+.pairMatrix-colHead,
+.pairMatrix-rowHead {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.4rem;
+}
+
+.pairMatrix-rowHead {
+   white-space: nowrap;
+}
+
+.pairMatrix-os {
+   display: block;
+   font-size: 0.76rem;
+   font-weight: 400;
+   color: var(--ink-soft);
+}
+
+.pairMatrix-cell {
+   min-inline-size: 7.5rem;
+}
+
+.pairMatrix-cell--high {
+   background: color-mix(in oklch, #1e7a46 16%, transparent);
+}
+
+.pairMatrix-cell--mid {
+   background: color-mix(in oklch, #d97706 16%, transparent);
+}
+
+.pairMatrix-cell--low {
+   background: color-mix(in oklch, #bd2b26 13%, transparent);
+}
+
+.pairMatrix-cell--empty {
+   font-size: 0.8rem;
+   color: var(--ink-soft);
+}
+
+.pairMatrix-pct {
+   display: block;
+   font-family: var(--display);
+   font-size: 1.15rem;
+   font-variant-numeric: tabular-nums;
+   line-height: 1.1;
+}
+
+.pairMatrix-count {
+   font-size: 0.76rem;
+   color: var(--ink-soft);
+}
+
+.pairMatrix-best {
+   display: inline-block;
+   margin-inline-start: 0.35rem;
+   padding: 0.05rem 0.35rem;
+   border-radius: 3px;
+   background: var(--ink);
+   color: var(--paper);
+   font-family: var(--display);
+   font-size: 0.68rem;
+   font-weight: 700;
+   letter-spacing: 0.05em;
+   text-transform: uppercase;
+}
+</style>

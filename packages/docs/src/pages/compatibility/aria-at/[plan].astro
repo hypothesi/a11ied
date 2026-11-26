@@ -4,6 +4,7 @@ import ExternalLink from '@lucide/astro/icons/external-link';
 import AriaAtCommandsList from '../../../components/support/aria-at-commands-list.astro';
 import AssertionSummaryBar from '../../../components/support/assertion-summary-bar.astro';
 import OutcomeBadge from '../../../components/support/outcome-badge.astro';
+import PlatformIcon from '../../../components/support/platform-icon.astro';
 import {
    deriveOutcomeFromSummary,
    getAriaAtSummary,
@@ -168,7 +169,7 @@ const toc = [
 
                {group.osGroups.map((osGroup) => (
                   <div class="srOsGroup">
-                     <h4 class="srOsGroup-title">{osGroup.os}</h4>
+                     <h4 class="srOsGroup-title"><PlatformIcon os={osGroup.os} size={14} /> {osGroup.os}</h4>
                      <div class="srRowList">
                         {osGroup.items.map((report) => {
                            const outcome = getReportOutcome(report);
@@ -190,6 +191,7 @@ const toc = [
                                           </strong>
                                           <span class="srRow-sep" aria-hidden="true">·</span>
                                           <span class="srRow-browser">
+                                             <PlatformIcon browser={report.browserName} size={15} />
                                              {formatRowBrowser(report.browserName, report.browserVersion)}
                                           </span>
                                        </span>

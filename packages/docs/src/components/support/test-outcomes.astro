@@ -3,6 +3,7 @@ import ChevronDown from '@lucide/astro/icons/chevron-down';
 import AssertionsDisclosure from './assertions-disclosure.astro';
 import AssertionSummaryBar from './assertion-summary-bar.astro';
 import OutcomeBadge from './outcome-badge.astro';
+import PlatformIcon from './platform-icon.astro';
 import TranscriptDisclosure from './transcript-disclosure.astro';
 import {
    formatCompactRatio,
@@ -55,7 +56,7 @@ const groupedCards = groupByScreenReaderAndOs(cards, ({ envFile }) => ({
 
          {group.osGroups.map((osGroup) => (
             <div class="srOsGroup">
-               <h4 class="srOsGroup-title">{osGroup.os}</h4>
+               <h4 class="srOsGroup-title"><PlatformIcon os={osGroup.os} size={14} /> {osGroup.os}</h4>
                <div class="srRowList">
                   {osGroup.items.map(({ envFile, run }) => {
                      const env = envFile.environment;
@@ -80,6 +81,7 @@ const groupedCards = groupByScreenReaderAndOs(cards, ({ envFile }) => ({
                                     </strong>
                                     <span class="srRow-sep" aria-hidden="true">·</span>
                                     <span class="srRow-browser">
+                                       <PlatformIcon browser={env.browser} browserType={env.browserType} size={15} />
                                        {formatRowBrowser(env.browser, env.browserVersion)}
                                     </span>
                                     {env.browserType === 'webview' && (

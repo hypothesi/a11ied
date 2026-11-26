@@ -24,6 +24,9 @@ import {
    type TestOutcome,
 } from '@a11ied/support-data';
 import OutcomeBadge from '../../components/support/outcome-badge.astro';
+import PairMatrix from '../../components/support/pair-matrix.astro';
+import PlatformIcon from '../../components/support/platform-icon.astro';
+import SupportShare from '../../components/support/support-share.astro';
 import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
 import {
@@ -32,12 +35,12 @@ import {
    formatScreenReader,
    parseLicense,
 } from '../../lib/support-grouping';
+import { getSupportShare, type SupportShare as FeatureSupportShare } from '../../lib/support-share';
 
 const MAX_CELLS_PER_COL = 4;
 const MAX_TARGETS_PREVIEW = 8;
 const MAJOR_MINOR_PARTS = 2;
 const DATE_PREFIX_LEN = 10;
-const PERCENT_MULTIPLIER = 100;
 
 const BROWSERSLIST_PRESETS = [
    { id: 'defaults', label: 'defaults', query: 'defaults' },
@@ -57,12 +60,12 @@ const EXAMPLE_SEARCHES = [
 ] as const;
 
 const COLUMN_DEFS = [
-   { id: 'macos-vo', label: 'macOS VoiceOver' },
-   { id: 'android-tb', label: 'Android TalkBack' },
-   { id: 'win-nvda', label: 'Windows NVDA' },
-   { id: 'win-jaws', label: 'Windows JAWS' },
-   { id: 'ios-vo', label: 'iOS VoiceOver' },
-   { id: 'virtual', label: 'Simulated' },
+   { id: 'macos-vo', label: 'macOS VoiceOver', os: 'macOS' },
+   { id: 'android-tb', label: 'Android TalkBack', os: 'Android' },
+   { id: 'win-nvda', label: 'Windows NVDA', os: 'Windows' },
+   { id: 'win-jaws', label: 'Windows JAWS', os: 'Windows' },
+   { id: 'ios-vo', label: 'iOS VoiceOver', os: 'iOS' },
+   { id: 'virtual', label: 'Simulated', os: '' },
 ] as const;
 
 type ColumnId = (typeof COLUMN_DEFS)[number]['id'];
@@ -144,6 +147,7 @@ function buildFeatureColumns(
 ): readonly {
    readonly id: ColumnId;
    readonly label: string;
+   readonly os: string;
    readonly cells: readonly FeatureEnvironmentResult[];
    readonly extraCount: number;
 }[] {
@@ -161,6 +165,7 @@ function buildFeatureColumns(
    const columns: {
       readonly id: ColumnId;
       readonly label: string;
+      readonly os: string;
       readonly cells: readonly FeatureEnvironmentResult[];
       readonly extraCount: number;
    }[] = [];
@@ -176,6 +181,7 @@ function buildFeatureColumns(
       columns.push({
          id: col.id,
          label: col.label,
+         os: col.os,
          cells,
          extraCount: Math.max(0, entries.length - cells.length),
       });
@@ -305,80 +311,14 @@ function formatCompactOS(os: string, osVersion: string): string {
    return `${os} ${osVersion}`;
 }
 
-interface RealSrOverview {
-   readonly accentState: CellState;
-   readonly verdictText: string;
-   readonly passPct: number;
-   readonly partialPct: number;
-   readonly failPct: number;
-   readonly testedCount: number;
-}
-
-function computeRealSrOverview(feature: FeatureReport): RealSrOverview {
-   const testedReal = feature.versionedEnvironments.filter((env) => {
-      if (env.status !== 'tested') {
-         return false;
-      }
-      const srLower = env.screenReader.toLowerCase();
-      return !srLower.includes('virtual') && !srLower.includes('guidepup');
-   });
-
-   if (testedReal.length === 0) {
-      return {
-         accentState: 'untested',
-         verdictText: 'Untested on real AT',
-         passPct: 0,
-         partialPct: 0,
-         failPct: 0,
-         testedCount: 0,
-      };
+function getAccentState(share: FeatureSupportShare): CellState {
+   if (share.pairCount === 0) {
+      return 'untested';
    }
-
-   let passCount = 0;
-   let partialCount = 0;
-   let failCount = 0;
-
-   for (const env of testedReal) {
-      const { state } = resolveCellState(env);
-      if (state === 'pass') {
-         passCount += 1;
-      } else if (state === 'partial') {
-         partialCount += 1;
-      } else if (state === 'fail') {
-         failCount += 1;
-      }
+   if (share.supportedScore === share.pairCount) {
+      return 'pass';
    }
-
-   const total = testedReal.length;
-   const passPct = Math.round((passCount / total) * PERCENT_MULTIPLIER);
-   const partialPct = Math.round((partialCount / total) * PERCENT_MULTIPLIER);
-   const failPct = Math.max(0, PERCENT_MULTIPLIER - passPct - partialPct);
-
-   let accentState: CellState = 'pass';
-   let verdictText = `All ${String(total)} tested pass`;
-   if (failCount === total) {
-      accentState = 'fail';
-      verdictText = `0/${String(total)} pass · Fails MUST`;
-   } else if (failCount > 0 || partialCount > 0) {
-      accentState = 'partial';
-      const detailParts: string[] = [];
-      if (failCount > 0) {
-         detailParts.push(`${String(failCount)} fail`);
-      }
-      if (partialCount > 0) {
-         detailParts.push(`${String(partialCount)} partial`);
-      }
-      verdictText = `${String(passCount)}/${String(total)} pass · ${detailParts.join(', ')}`;
-   }
-
-   return {
-      accentState,
-      verdictText,
-      passPct,
-      partialPct,
-      failPct,
-      testedCount: total,
-   };
+   return share.supportedScore + share.partialScore === 0 ? 'fail' : 'partial';
 }
 
 interface PresetVerdictPayload {
@@ -447,13 +387,15 @@ function getEnvToken(envKey: string): string {
 interface PreparedFeature {
    readonly feature: FeatureReport;
    readonly summaryLine: string;
-   readonly overview: RealSrOverview;
+   readonly share: FeatureSupportShare;
+   readonly accentState: CellState;
    readonly columns: ReturnType<typeof buildFeatureColumns>;
    readonly presetVerdicts: Readonly<Record<string, PresetVerdictPayload>>;
    readonly searchBlob: string;
 }
 
 const preparedFeatures: PreparedFeature[] = features.map((feature) => {
+   const share = getSupportShare(feature);
    const presetVerdicts: Record<string, PresetVerdictPayload> = {};
    const matchedKeyUnion = new Set<string>();
 
@@ -485,7 +427,8 @@ const preparedFeatures: PreparedFeature[] = features.map((feature) => {
    return {
       feature,
       summaryLine: formatFeatureSummary(feature),
-      overview: computeRealSrOverview(feature),
+      share,
+      accentState: getAccentState(share),
       columns: buildFeatureColumns(feature, matchedKeyUnion),
       presetVerdicts,
       searchBlob,
@@ -543,6 +486,7 @@ for (const diagnostic of report.diagnostics) {
 
 const toc = [
    { id: 'ciu-search-panel', label: 'Can I use search' },
+   { id: 'pair-matrix-heading', label: 'Best browser for each screen reader' },
    { id: 'ciu-tablist', label: 'Compatibility tables' },
 ];
 ---
@@ -692,15 +636,18 @@ const toc = [
          </search>
       </div>
 
+      <div id="ciu-pair-matrix" class="ciuPairMatrix">
+         <PairMatrix features={features} />
+      </div>
+
       <ul class="ciuCards">
-         {preparedFeatures.map(({ feature, summaryLine, overview, columns, presetVerdicts, searchBlob }) => (
+         {preparedFeatures.map(({ feature, summaryLine, share, accentState, columns, presetVerdicts, searchBlob }) => (
             <li
-               class={`ciuCard ciuCard--${overview.accentState}`}
+               class={`ciuCard ciuCard--${accentState}`}
                data-ciu-card="true"
                data-type={feature.type}
                data-search={searchBlob}
                data-browserslist={JSON.stringify(presetVerdicts)}
-               data-default-verdict={overview.verdictText}
             >
                <div class="ciuCard-top">
                   <div class="ciuCard-intro">
@@ -713,38 +660,11 @@ const toc = [
                   </div>
 
                   <div class="ciuCard-support">
-                     <div class="ciuCard-verdictRow">
-                        <span
-                           class={`ciuVerdictDot ciuVerdictDot--${overview.accentState}`}
-                           data-ciu-verdict-dot
-                           aria-hidden="true"
-                        ></span>
-                        <strong class="ciuCard-verdictText" data-ciu-verdict>
-                           {overview.verdictText}
-                        </strong>
+                     <SupportShare share={share} />
+                     <div class="ciuCard-verdictRow" data-ciu-verdict-row hidden>
+                        <span class="ciuVerdictDot" data-ciu-verdict-dot aria-hidden="true"></span>
+                        <strong class="ciuCard-verdictText" data-ciu-verdict></strong>
                      </div>
-                     {overview.testedCount > 0 && (
-                        <div class="ciuSupportBar" aria-hidden="true">
-                           {overview.passPct > 0 && (
-                              <span
-                                 class="ciuSupportBar-seg ciuSupportBar-seg--pass"
-                                 style={`width: ${String(overview.passPct)}%`}
-                              ></span>
-                           )}
-                           {overview.partialPct > 0 && (
-                              <span
-                                 class="ciuSupportBar-seg ciuSupportBar-seg--partial"
-                                 style={`width: ${String(overview.partialPct)}%`}
-                              ></span>
-                           )}
-                           {overview.failPct > 0 && (
-                              <span
-                                 class="ciuSupportBar-seg ciuSupportBar-seg--fail"
-                                 style={`width: ${String(overview.failPct)}%`}
-                              ></span>
-                           )}
-                        </div>
-                     )}
                      <a
                         href={`/compatibility/features/${feature.type}/${feature.refId}/`}
                         class="ciuCard-reportLink"
@@ -758,7 +678,7 @@ const toc = [
                   <div class="ciuColumns">
                      {columns.map((column) => (
                         <div class={`ciuCol${column.id === 'virtual' ? ' ciuCol--virtual' : ''}`}>
-                           <h3 class="ciuCol-head">{column.label}</h3>
+                           <h3 class="ciuCol-head"><PlatformIcon os={column.os} size={14} /> {column.label}</h3>
                            <div class="ciuCol-stack">
                               {column.cells.map((env) => {
                                  const verdict = resolveCellState(env);
@@ -773,7 +693,10 @@ const toc = [
                                        title="Click to inspect exact OS, device, screen reader, and assertion details"
                                     >
                                        <span class="ciuTile-row">
-                                          <span class="ciuTile-browser">{formatShortBrowser(env)}</span>
+                                          <span class="ciuTile-browser">
+                                             <PlatformIcon browser={env.browser} browserType={env.browserType} size={14} />
+                                             {formatShortBrowser(env)}
+                                          </span>
                                           <span class="ciuTile-ratio">{verdict.verdictGlyph}</span>
                                        </span>
                                        <span class="ciuTile-sub">{formatShortTileSub(env, column.id)}</span>
@@ -1160,10 +1083,14 @@ const toc = [
                      <tr>
                         <th scope="row">{formatScreenReader(env.screenReader, env.screenReaderVersion)}</th>
                         <td>
+                           <PlatformIcon browser={env.browser} browserType={env.browserType} size={14} />
                            {formatNameAndVersion(env.browser, env.browserVersion)}
                            {env.browserType === 'webview' ? ' (WebView)' : ''}
                         </td>
-                        <td>{formatNameAndVersion(env.os, env.osVersion)}</td>
+                        <td>
+                           <PlatformIcon os={env.os} size={14} />
+                           {formatNameAndVersion(env.os, env.osVersion)}
+                        </td>
                         <td>{env.device}</td>
                         <td>{envFile.status === 'tested' ? 'Tested' : (envFile.statusNote ?? 'Not yet tested')}</td>
                      </tr>
@@ -1196,8 +1123,14 @@ const toc = [
                {ariaAtEnvironments.map((env) => (
                   <tr>
                      <th scope="row">{formatScreenReader(env.screenReader, env.screenReaderVersion)}</th>
-                     <td>{formatNameAndVersion(env.browser, env.browserVersion)}</td>
-                     <td>{formatNameAndVersion(env.os, env.osVersion)}</td>
+                     <td>
+                        <PlatformIcon browser={env.browser} size={14} />
+                        {formatNameAndVersion(env.browser, env.browserVersion)}
+                     </td>
+                     <td>
+                        <PlatformIcon os={env.os} size={14} />
+                        {formatNameAndVersion(env.os, env.osVersion)}
+                     </td>
                      <td>{env.planCount}</td>
                      <td>{env.latestTestedAt ? env.latestTestedAt.slice(0, DATE_PREFIX_LEN) : ''}</td>
                   </tr>
@@ -1608,7 +1541,6 @@ section.ciuTabPanel,
    flex-shrink: 0;
 }
 
-.ciuVerdictDot--pass,
 .ciuVerdictDot--supported {
    background: #1e7a46;
 }
@@ -1617,7 +1549,6 @@ section.ciuTabPanel,
    background: #a15c00;
 }
 
-.ciuVerdictDot--fail,
 .ciuVerdictDot--unsupported {
    background: #bd2b26;
 }
@@ -1634,30 +1565,16 @@ section.ciuTabPanel,
    color: var(--ink);
 }
 
-.ciuSupportBar {
-   inline-size: 140px;
-   block-size: 7px;
-   border-radius: 99px;
-   overflow: hidden;
-   display: flex;
-   background: #e7e0d3;
+.ciuCard-verdictRow[hidden] {
+   display: none;
 }
 
-.ciuSupportBar-seg {
-   block-size: 100%;
-   display: block;
+.ciuPairMatrix {
+   margin-block-end: 1.25rem;
 }
 
-.ciuSupportBar-seg--pass {
-   background: #1e7a46;
-}
-
-.ciuSupportBar-seg--partial {
-   background: #d97706;
-}
-
-.ciuSupportBar-seg--fail {
-   background: #bd2b26;
+.ciuPairMatrix[hidden] {
+   display: none;
 }
 
 .ciuCard-reportLink {
@@ -1688,6 +1605,9 @@ section.ciuTabPanel,
 }
 
 .ciuCol-head {
+   display: flex;
+   align-items: center;
+   gap: 0.3rem;
    margin: 0;
    padding-block-end: 0.25rem;
    border-bottom: 1px solid color-mix(in oklch, var(--ink) 20%, transparent);
@@ -1769,10 +1689,20 @@ section.ciuTabPanel,
 }
 
 .ciuTile-browser {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.3rem;
    min-inline-size: 0;
    overflow: hidden;
    text-overflow: ellipsis;
    white-space: nowrap;
+}
+
+/* Brand colors blend into the red and green tiles without a light backing. */
+.ciuTile-browser :global(.platformIcon) {
+   padding: 1px;
+   border-radius: 50%;
+   background: #fff;
 }
 
 .ciuTile-ratio {

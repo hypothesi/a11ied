@@ -10,8 +10,8 @@ interface ParsedFeatureCard {
    readonly element: HTMLElement;
    readonly searchText: string;
    readonly type: string;
-   readonly defaultVerdict: string;
    readonly browserslistMap: Readonly<Record<string, ParsedFeatureVerdict>>;
+   readonly verdictRowEl: HTMLElement | undefined;
    readonly verdictEl: HTMLElement | undefined;
    readonly verdictDotEl: HTMLElement | undefined;
    readonly envCells: readonly HTMLButtonElement[];
@@ -350,6 +350,7 @@ interface HeroElements {
    readonly resetBtn: HTMLButtonElement;
    readonly statusEl: HTMLElement | undefined;
    readonly emptyEl: HTMLElement | undefined;
+   readonly pairMatrixEl: HTMLElement | undefined;
    readonly blBannerEl: HTMLElement | undefined;
    readonly blBannerTextEl: HTMLElement | undefined;
    readonly blMetaMap: Readonly<Record<string, string>>;
@@ -374,6 +375,7 @@ function queryHeroElements(): HeroElements | undefined {
 
    const statusEl = document.querySelector('#ciu-status');
    const emptyEl = document.querySelector('#ciu-empty');
+   const pairMatrixEl = document.querySelector('#ciu-pair-matrix');
    const blBannerEl = document.querySelector('#ciu-bl-banner');
    const blBannerTextEl = document.querySelector('#ciu-bl-banner-text');
    const cardNodes = [...document.querySelectorAll<HTMLElement>('[data-ciu-card]')];
@@ -382,14 +384,15 @@ function queryHeroElements(): HeroElements | undefined {
    ];
 
    const cards: ParsedFeatureCard[] = cardNodes.map((element) => {
+      const verdictRowEl = element.querySelector('[data-ciu-verdict-row]');
       const verdictEl = element.querySelector('[data-ciu-verdict]');
       const verdictDotEl = element.querySelector('[data-ciu-verdict-dot]');
       return {
          element,
          searchText: (element.dataset.search ?? '').toLowerCase(),
          type: element.dataset.type ?? '',
-         defaultVerdict: element.dataset.defaultVerdict ?? '',
          browserslistMap: parseFeatureVerdicts(element.dataset.browserslist),
+         verdictRowEl: verdictRowEl instanceof HTMLElement ? verdictRowEl : undefined,
          verdictEl: verdictEl instanceof HTMLElement ? verdictEl : undefined,
          verdictDotEl: verdictDotEl instanceof HTMLElement ? verdictDotEl : undefined,
          envCells: [...element.querySelectorAll<HTMLButtonElement>('[data-env-key]')],
@@ -403,6 +406,7 @@ function queryHeroElements(): HeroElements | undefined {
       resetBtn,
       statusEl: statusEl instanceof HTMLElement ? statusEl : undefined,
       emptyEl: emptyEl instanceof HTMLElement ? emptyEl : undefined,
+      pairMatrixEl: pairMatrixEl instanceof HTMLElement ? pairMatrixEl : undefined,
       blBannerEl: blBannerEl instanceof HTMLElement ? blBannerEl : undefined,
       blBannerTextEl: blBannerTextEl instanceof HTMLElement ? blBannerTextEl : undefined,
       blMetaMap: parseStringRecord(
@@ -421,16 +425,22 @@ function updateCardBrowserslistHighlight(
 ): void {
    const verdict = presetID === 'all' ? undefined : card.browserslistMap[presetID];
 
+   if (card.verdictRowEl) {
+      card.verdictRowEl.hidden = verdict === undefined;
+   }
+
    if (card.verdictEl) {
       card.verdictEl.textContent = verdict
          ? (BL_STATUS_LABELS[verdict.status] ?? verdict.status)
-         : card.defaultVerdict;
+         : '';
    }
 
    if (card.verdictDotEl) {
       card.verdictDotEl.classList.remove(
          'ciuVerdictDot--supported',
+         'ciuVerdictDot--partial',
          'ciuVerdictDot--unsupported',
+         'ciuVerdictDot--untested',
       );
       if (verdict) {
          card.verdictDotEl.classList.add(`ciuVerdictDot--${verdict.status}`);
@@ -525,6 +535,11 @@ function initFeatureSearch(): void {
 
       if (elements.emptyEl) {
          elements.emptyEl.hidden = visibleCount > 0;
+      }
+
+      // A search moves the matching cards up to the search box.
+      if (elements.pairMatrixEl) {
+         elements.pairMatrixEl.hidden = state.query !== '';
       }
 
       updateBrowserslistBanner(elements, state.preset);

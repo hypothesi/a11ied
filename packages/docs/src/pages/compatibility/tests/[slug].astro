@@ -4,6 +4,7 @@ import ArrowRight from '@lucide/astro/icons/arrow-right';
 import ChevronDown from '@lucide/astro/icons/chevron-down';
 import AssertionSummaryBar from '../../../components/support/assertion-summary-bar.astro';
 import OutcomeBadge from '../../../components/support/outcome-badge.astro';
+import PlatformIcon from '../../../components/support/platform-icon.astro';
 import PriorityBadge from '../../../components/support/priority-badge.astro';
 import TestCaseViewer from '../../../components/support/test-case-viewer.astro';
 import TestOutcomes from '../../../components/support/test-outcomes.astro';
@@ -206,7 +207,7 @@ const toc = [
 
                      {group.osGroups.map((osGroup) => (
                         <div class="srOsGroup">
-                           <h4 class="srOsGroup-title">{osGroup.os}</h4>
+                           <h4 class="srOsGroup-title"><PlatformIcon os={osGroup.os} size={14} /> {osGroup.os}</h4>
                            <div class="srRowList">
                               {osGroup.items.map((env) => {
                                  const outcome = getEnvOutcome(env);
@@ -231,6 +232,7 @@ const toc = [
                                                 </strong>
                                                 <span class="srRow-sep" aria-hidden="true">·</span>
                                                 <span class="srRow-browser">
+                                                   <PlatformIcon browser={env.browser} browserType={env.browserType} size={15} />
                                                    {formatRowBrowser(env.browser, env.browserVersion)}
                                                 </span>
                                              </span>

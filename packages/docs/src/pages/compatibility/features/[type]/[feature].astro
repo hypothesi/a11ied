@@ -5,6 +5,8 @@ import AriaAtCommandsList from '../../../../components/support/aria-at-commands-
 import AssertionsDisclosure from '../../../../components/support/assertions-disclosure.astro';
 import AssertionSummaryBar from '../../../../components/support/assertion-summary-bar.astro';
 import OutcomeBadge from '../../../../components/support/outcome-badge.astro';
+import PlatformIcon from '../../../../components/support/platform-icon.astro';
+import SupportShare from '../../../../components/support/support-share.astro';
 import TranscriptDisclosure from '../../../../components/support/transcript-disclosure.astro';
 import {
    deriveOutcomeFromSummary,
@@ -28,6 +30,7 @@ import {
    isVirtualScreenReader,
    parseLicense,
 } from '../../../../lib/support-grouping';
+import { getSupportShare } from '../../../../lib/support-share';
 import '../../../../styles/support-rows.css';
 
 const PERCENT_MULTIPLIER = 100;
@@ -123,6 +126,7 @@ function formatOverviewHeadline(): string {
    return `All ${String(realTotal)} pass`;
 }
 
+const share = getSupportShare(feature);
 const featureSummaryHtml = `<p>${escapeHtml(formatFeatureSummary(feature))}</p>`;
 const totalResultsCount = feature.versionedEnvironments.length;
 
@@ -170,15 +174,21 @@ const toc = [
    </div>
 
    <div class="srFeature-overview">
-      <div class="srFeature-overviewTop">
-         <strong>{formatOverviewHeadline()}</strong>
-         <span class="srFeature-overviewSub">Counts each tested screen reader and browser pair. The simulated screen reader is left out. A MUST check is something W3C ARIA-AT says a screen reader is required to convey.</span>
-      </div>
+      <SupportShare share={share} size="large" />
       {realTotal > 0 && (
-         <div class="srFeature-overviewBar" aria-hidden="true">
-            {passPct > 0 && <span class="srFeature-seg srFeature-seg--pass" style={`width: ${String(passPct)}%`}></span>}
-            {partialPct > 0 && <span class="srFeature-seg srFeature-seg--partial" style={`width: ${String(partialPct)}%`}></span>}
-            {failPct > 0 && <span class="srFeature-seg srFeature-seg--fail" style={`width: ${String(failPct)}%`}></span>}
+         <div class="srFeature-results">
+            <p class="srFeature-resultsLabel">Every result</p>
+            <strong>{formatOverviewHeadline()}</strong>
+            <div class="srFeature-overviewBar" aria-hidden="true">
+               {passPct > 0 && <span class="srFeature-seg srFeature-seg--pass" style={`width: ${String(passPct)}%`}></span>}
+               {partialPct > 0 && <span class="srFeature-seg srFeature-seg--partial" style={`width: ${String(partialPct)}%`}></span>}
+               {failPct > 0 && <span class="srFeature-seg srFeature-seg--fail" style={`width: ${String(failPct)}%`}></span>}
+            </div>
+            <span class="srFeature-overviewSub">
+               Counts every tested version of each screen reader and browser pair. The simulated
+               screen reader is left out. A MUST check is something W3C ARIA-AT says a screen
+               reader is required to convey.
+            </span>
          </div>
       )}
    </div>
@@ -242,7 +252,7 @@ const toc = [
 
                {group.osGroups.map((osGroup) => (
                   <div class="srOsGroup" data-os-group-block data-os-group={osGroup.os}>
-                     <h4 class="srOsGroup-title">{osGroup.os}</h4>
+                     <h4 class="srOsGroup-title"><PlatformIcon os={osGroup.os} size={14} /> {osGroup.os}</h4>
                      <div class="srRowList">
                         {osGroup.items.map((env) => {
                            const hasAssertions = env.summary.must.total
@@ -277,6 +287,7 @@ const toc = [
                                           </strong>
                                           <span class="srRow-sep" aria-hidden="true">·</span>
                                           <span class="srRow-browser">
+                                             <PlatformIcon browser={env.browser} browserType={env.browserType} size={15} />
                                              {formatRowBrowser(env.browser, env.browserVersion)}
                                           </span>
                                           {env.browserType === 'webview' && (
@@ -552,17 +563,25 @@ const toc = [
    border: 1px solid color-mix(in oklch, var(--ink) 18%, transparent);
    border-radius: 4px;
    background: var(--paper-light);
-   display: flex;
-   flex-direction: column;
-   gap: 0.5rem;
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+   gap: 1rem 2rem;
 }
 
-.srFeature-overviewTop {
+.srFeature-results {
    display: flex;
-   flex-wrap: wrap;
-   align-items: baseline;
-   justify-content: space-between;
-   gap: 0.45rem 1rem;
+   flex-direction: column;
+   gap: 0.4rem;
+}
+
+.srFeature-resultsLabel {
+   margin: 0;
+   font-family: var(--display);
+   font-size: 0.74rem;
+   font-weight: 700;
+   letter-spacing: 0.05em;
+   text-transform: uppercase;
+   color: var(--ink-soft);
 }
 
 .srFeature-overviewSub {

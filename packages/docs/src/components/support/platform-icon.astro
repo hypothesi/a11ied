@@ -1,0 +1,25 @@
+---
+import { Icon } from 'astro-icon/components';
+import { getBrowserIcon, getOsIcon } from '../../lib/platforms';
+
+interface Props {
+   readonly browser?: string;
+   readonly browserType?: 'browser' | 'webview';
+   readonly os?: string;
+   readonly size?: number;
+}
+
+const DEFAULT_SIZE = 16;
+
+const { browser, browserType, os, size = DEFAULT_SIZE } = Astro.props,
+      name = browser ? getBrowserIcon(browser, browserType) : getOsIcon(os ?? '');
+---
+
+{name && <Icon name={name} class="platformIcon" width={size} height={size} aria-hidden="true" focusable="false" />}
+
+<style>
+:global(.platformIcon) {
+   flex-shrink: 0;
+   vertical-align: -0.15em;
+}
+</style>
