@@ -1,5 +1,6 @@
 ---
 import DocShell from '../layouts/doc-shell.astro';
+import { AUDIT_PROMPT, SKILLS_INSTALL_COMMAND } from '../lib/agent-snippets';
 import { docsLinks } from '../lib/nav';
 import { getPracticeURL, withPracticeURL } from '../lib/practice';
 import checkSample from '../samples/check-broken-short.txt?raw';
@@ -12,8 +13,8 @@ const toc = [
    { id: 'install', label: 'Install' },
    { id: 'check', label: 'Scan a page' },
    { id: 'listen', label: 'Capture what a screen reader announces' },
+   { id: 'audit', label: 'Conduct an audit with an AI agent' },
    { id: 'test', label: 'Write a test' },
-   { id: 'agent', label: 'Set up an AI agent' },
    { id: 'results', label: 'What the results mean' },
    { id: 'next', label: 'Where to go next' },
 ];
@@ -75,33 +76,47 @@ const toc = [
    </section>
 
    <section>
+      <h2 id="audit">Conduct an audit with an AI agent</h2>
+      <p>
+         Your AI coding agent can carry out a full WCAG audit: it scans each page, tests it
+         with a screen reader, and records what no tool measures, while
+         <code>a1 audit</code> tracks the work and writes the report. The agent needs the
+         a11ied skills, which teach it how to test and how to report what it found. With the
+         skills and the CLI from <a href="#install">Install</a>, the agent runs the same
+         <code>a1</code> commands you would.
+      </p>
+      <pre><code>{SKILLS_INSTALL_COMMAND}</code></pre>
+      <p>
+         <a href="https://aix.a1st.dev/">aix</a> asks which agent gets the skills. Restart
+         the agent so it loads them, then ask for the audit.
+      </p>
+      <pre data-label="AI AGENT PROMPT"><code>{AUDIT_PROMPT}</code></pre>
+      <p>
+         The <abbr title="Model Context Protocol">MCP</abbr> server is optional. The skills
+         and the CLI are enough, but agents work well with the server too. It gives the agent
+         the <code>a1</code> commands as tools: scan a page, drive a screen reader, look up a
+         criterion. Use it for an agent that cannot run terminal commands, or when you want
+         every a11ied call to appear as a tool call.
+      </p>
+      <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
+      <p>
+         See <a href="/guides/audit">audit a site with AI agents</a>, and
+         <a href="/guides/agents">set up an AI agent</a> for other agent tasks, such as
+         checking a component while you build it.
+      </p>
+   </section>
+
+   <section>
       <h2 id="test">Write a test</h2>
       <p>
-         The same screen reader runs inside a test. This one opens a dialog and checks that
-         the dialog announces its name and that focus moves into it.
+         The simulated screen reader also runs inside a test. This one opens a dialog and
+         checks that the dialog announces its name and that focus moves into it.
       </p>
       <pre data-label="invite.test.ts"><code>{withPracticeURL(testSample, practiceURL)}</code></pre>
       <p>
          See <a href="/guides/vitest">test with Vitest</a>, or
          <a href="/guides/testing">write screen reader tests</a> for Jest, Mocha, and
          Playwright Test.
-      </p>
-   </section>
-
-   <section>
-      <h2 id="agent">Set up an AI agent</h2>
-      <p>
-         A coding agent can write a dialog, but it has no way to check what a screen reader
-         will announce. a11ied includes an
-         <abbr title="Model Context Protocol">MCP</abbr> server that gives the agent the
-         <code>a1</code> commands as tools: scan a page, drive a screen reader, look up a
-         criterion.
-      </p>
-      <pre data-label="CONFIG"><code>{mcpConfig.trimEnd()}</code></pre>
-      <p>
-         See <a href="/guides/agents">set up an AI agent</a>. Your agent can also carry out
-         a full WCAG audit while <code>a1 audit</code> tracks the work and writes the report.
-         See <a href="/guides/audit">audit a site with AI agents</a>.
       </p>
    </section>
 
