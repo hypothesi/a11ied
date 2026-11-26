@@ -37,7 +37,7 @@ export function describeStandard(report: AuditReport): string {
    return `WCAG ${config.wcagVersion} Level ${config.level} (${String(all)} success ${all === 1 ? 'criterion' : 'criteria'} in scope)`;
 }
 
-function plural(count: number, one: string, many: string): string {
+export function plural(count: number, one: string, many: string): string {
    return `${String(count)} ${count === 1 ? one : many}`;
 }
 

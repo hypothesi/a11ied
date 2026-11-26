@@ -11,6 +11,15 @@
    --a1-dash-claimed-color: #1d4ed8;
    --a1-dash-blocked-color: #a1161d;
    --a1-dash-pending-color: #505968;
+   /* Bar fills. Each differs from its neighbors for readers with a color vision deficiency. */
+   --a1-dash-done-fillColor: #17663a;
+   --a1-dash-claimed-fillColor: #1d4ed8;
+   --a1-dash-blocked-fillColor: #a1161d;
+   --a1-dash-pending-fillColor: #d5d9e1;
+   --a1-dash-critical-color: #a1161d;
+   --a1-dash-serious-color: #a04a00;
+   --a1-dash-moderate-color: #6b5600;
+   --a1-dash-minor-color: #3d4756;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,6 +34,14 @@
       --a1-dash-claimed-color: #93b4ff;
       --a1-dash-blocked-color: #ff9a9e;
       --a1-dash-pending-color: #aab2c0;
+      --a1-dash-done-fillColor: #3fa86c;
+      --a1-dash-claimed-fillColor: #5b8cf5;
+      --a1-dash-blocked-fillColor: #e5676e;
+      --a1-dash-pending-fillColor: #353c49;
+      --a1-dash-critical-color: #ff9a9e;
+      --a1-dash-serious-color: #ffb37a;
+      --a1-dash-moderate-color: #e6cf73;
+      --a1-dash-minor-color: #b8c0cd;
    }
 }
 
@@ -45,7 +62,7 @@ body {
 
 .dash {
    max-inline-size: 78rem;
-   padding: 1.5rem 1.25rem 3rem;
+   padding: 1.75rem 1.25rem 3rem;
    margin-inline: auto;
 }
 
@@ -53,14 +70,20 @@ a {
    color: var(--a1-dash-link-color);
 }
 
+:focus-visible {
+   outline: 2px solid var(--a1-dash-link-color);
+   outline-offset: 2px;
+}
+
 h1 {
    margin: 0;
-   font-size: 1.5rem;
+   font-size: 1.6rem;
    line-height: 1.2;
+   overflow-wrap: anywhere;
 }
 
 h2 {
-   margin-block: 2rem 0.6rem;
+   margin-block: 0 0.6rem;
    font-size: 1.1rem;
    line-height: 1.3;
 }
@@ -69,61 +92,448 @@ p {
    margin-block: 0 0.5rem;
 }
 
+code {
+   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+   font-size: 0.88em;
+}
+
+.dash-sprite {
+   display: none;
+}
+
+.dash-icon {
+   flex: none;
+   inline-size: 1em;
+   block-size: 1em;
+   fill: none;
+   stroke: currentcolor;
+   stroke-linecap: round;
+   stroke-linejoin: round;
+   stroke-width: 1.75;
+}
+
+.dash-icon-fill {
+   fill: currentcolor;
+   stroke: none;
+}
+
+/* Text for assistive technology only. */
+.dash-hidden {
+   position: absolute;
+   overflow: hidden;
+   inline-size: 1px;
+   block-size: 1px;
+   margin: -1px;
+   clip-path: inset(50%);
+   white-space: nowrap;
+}
+
 .dash-sub {
    color: var(--a1-dash-muted-color);
 }
 
-.dash-progress {
+.dash-nowrap {
+   white-space: nowrap;
+}
+
+.dash-section {
+   margin-block-start: 2.25rem;
+}
+
+.dash-header {
    display: flex;
    flex-wrap: wrap;
-   gap: 0.5rem 1rem;
+   gap: 0.75rem 2rem;
+   align-items: flex-start;
+   justify-content: space-between;
+}
+
+.dash-title {
+   flex: 1 1 22rem;
+   min-inline-size: 0;
+}
+
+.dash-target {
+   margin-block: 0.15rem 0;
+   color: var(--a1-dash-muted-color);
+   overflow-wrap: anywhere;
+}
+
+.dash-target a {
+   color: inherit;
+}
+
+.dash-status {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.5rem 0.75rem;
    align-items: center;
-   margin-block: 1rem;
+   margin-block: 0.75rem 0;
 }
 
-.dash-progress progress {
-   flex: 1 1 16rem;
-   block-size: 1rem;
+.dash-phase {
+   display: inline-flex;
+   gap: 0.35rem;
+   align-items: center;
+   padding: 0.2rem 0.7rem 0.2rem 0.5rem;
+   border: 1px solid currentcolor;
+   border-radius: 1rem;
+   background: color-mix(in srgb, currentcolor 12%, var(--a1-dash-bgColor));
+   font-size: 0.88rem;
 }
 
-.dash-tiles {
+.dash-phase--setup {
+   color: var(--a1-dash-pending-color);
+}
+
+.dash-phase--in-progress {
+   color: var(--a1-dash-claimed-color);
+}
+
+.dash-phase--needs-attention {
+   color: var(--a1-dash-blocked-color);
+}
+
+.dash-phase--complete {
+   color: var(--a1-dash-done-color);
+}
+
+.dash-button {
+   display: inline-block;
+   padding: 0.25rem 0.75rem;
+   border: 1px solid var(--a1-dash-borderColor);
+   border-radius: 0.4rem;
+   background: var(--a1-dash-page-bgColor);
+   color: var(--a1-dash-color);
+   font: inherit;
+   font-size: 0.88rem;
+   font-weight: 600;
+   text-decoration: none;
+   cursor: pointer;
+   user-select: none;
+}
+
+@media (hover: hover) {
+   .dash-button:hover {
+      border-color: var(--a1-dash-muted-color);
+   }
+}
+
+.dash-live {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.5rem 0.75rem;
+   align-items: center;
+   color: var(--a1-dash-muted-color);
+   font-size: 0.88rem;
+}
+
+.dash-live p {
+   margin: 0;
+}
+
+/* A dot that states whether the page is updating, alongside the text that says so. */
+.dash-live[data-dash-live] p::before {
+   display: inline-block;
+   inline-size: 0.55rem;
+   block-size: 0.55rem;
+   border-radius: 50%;
+   margin-inline-end: 0.4rem;
+   background: var(--a1-dash-pending-color);
+   content: '';
+}
+
+.dash-live[data-dash-live='on'] p::before {
+   background: var(--a1-dash-done-fillColor);
+}
+
+.dash-live[data-dash-live='lost'] p {
+   color: var(--a1-dash-blocked-color);
+   font-weight: 600;
+}
+
+.dash-live[data-dash-live='lost'] p::before {
+   background: var(--a1-dash-blocked-fillColor);
+}
+
+.dash-meta {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.6rem 2.5rem;
+   padding-block: 0.9rem;
+   border-block: 1px solid var(--a1-dash-borderColor);
+   margin-block: 1.25rem 0;
+}
+
+.dash-meta dt {
+   color: var(--a1-dash-muted-color);
+   font-size: 0.82rem;
+}
+
+.dash-meta dd {
+   margin: 0;
+   font-weight: 600;
+   overflow-wrap: anywhere;
+}
+
+.dash-alert {
+   padding: 0.9rem 1.1rem;
+   border: 1px solid var(--a1-dash-blocked-color);
+   border-inline-start-width: 0.3rem;
+   border-radius: 0.4rem;
+   margin-block-start: 1.25rem;
+   background: color-mix(
+      in srgb,
+      var(--a1-dash-blocked-color) 8%,
+      var(--a1-dash-bgColor)
+   );
+}
+
+.dash-alert h2 {
+   display: flex;
+   gap: 0.4rem;
+   align-items: center;
+   color: var(--a1-dash-blocked-color);
+}
+
+.dash-alert ul {
    display: grid;
-   grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
-   gap: 0.6rem;
+   grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+   gap: 0.75rem 2rem;
    padding: 0;
    margin: 0;
    list-style: none;
 }
 
-.dash-tiles li {
-   padding: 0.6rem 0.8rem;
+.dash-alert p {
+   margin-block: 0 0.15rem;
+   overflow-wrap: anywhere;
+}
+
+/* One click selects the whole command, ready to copy. */
+.dash-command {
+   padding: 0.1rem 0.35rem;
    border: 1px solid var(--a1-dash-borderColor);
-   border-radius: 0.4rem;
+   border-radius: 0.25rem;
+   background: var(--a1-dash-bgColor);
+   color: var(--a1-dash-color);
+   white-space: nowrap;
+   user-select: all;
 }
 
-.dash-tiles strong {
-   display: block;
-   font-size: 1.4rem;
-   line-height: 1.2;
+.dash-summary {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.75rem;
+   margin-block-start: 1.25rem;
 }
 
-.dash-tiles span {
+.dash-card {
+   flex: 1 1 15rem;
+   min-inline-size: 0;
+   padding: 1rem 1.15rem;
+   border: 1px solid var(--a1-dash-borderColor);
+   border-radius: 0.5rem;
+   background: var(--a1-dash-page-bgColor);
+}
+
+/* The widest card. It takes a row of its own when the three do not fit side by side. */
+.dash-card--units {
+   flex: 2 1 26rem;
+}
+
+.dash-card h2 {
+   margin-block-end: 0.5rem;
    color: var(--a1-dash-muted-color);
-   font-size: 0.85rem;
+   font-size: 0.88rem;
+   font-weight: 600;
 }
 
+.dash-hero,
+.dash-figure {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.15rem 0.6rem;
+   align-items: baseline;
+   margin: 0;
+}
+
+.dash-hero strong {
+   font-size: 3rem;
+   letter-spacing: -0.02em;
+   line-height: 1;
+}
+
+.dash-hero span {
+   font-size: 1.05rem;
+   font-weight: 600;
+}
+
+.dash-figure strong {
+   font-size: 1.9rem;
+   line-height: 1;
+}
+
+.dash-figure--fail strong {
+   color: var(--a1-dash-blocked-color);
+}
+
+.dash-eta {
+   margin-block: 0.35rem 0;
+   color: var(--a1-dash-muted-color);
+}
+
+.dash-bar {
+   display: flex;
+   gap: 2px;
+   overflow: hidden;
+   block-size: 0.625rem;
+   border-radius: 1rem;
+   margin-block: 1rem 0.75rem;
+   background: var(--a1-dash-pending-fillColor);
+}
+
+.dash-bar-segment {
+   flex: 0 1 0;
+   min-inline-size: 3px;
+}
+
+.dash-fill--done {
+   background: var(--a1-dash-done-fillColor);
+}
+
+.dash-fill--claimed {
+   background: var(--a1-dash-claimed-fillColor);
+}
+
+/* Stripes mark blocked work without relying on its color. */
+.dash-fill--blocked {
+   background: repeating-linear-gradient(
+      135deg,
+      var(--a1-dash-blocked-fillColor) 0 3px,
+      color-mix(in srgb, var(--a1-dash-blocked-fillColor) 55%, var(--a1-dash-bgColor)) 3px
+         5px
+   );
+}
+
+.dash-fill--pending {
+   background: var(--a1-dash-pending-fillColor);
+}
+
+.dash-legend {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.25rem 1.5rem;
+   padding: 0;
+   margin: 0;
+   list-style: none;
+}
+
+.dash-legend--zero {
+   color: var(--a1-dash-muted-color);
+}
+
+.dash-swatch {
+   display: inline-block;
+   inline-size: 0.7rem;
+   block-size: 0.7rem;
+   border-radius: 0.15rem;
+   margin-inline-end: 0.4rem;
+}
+
+.dash-breakdown {
+   padding: 0;
+   margin-block: 0.6rem 0;
+   list-style: none;
+}
+
+.dash-breakdown-row {
+   display: flex;
+   gap: 1rem;
+   justify-content: space-between;
+   padding-block: 0.25rem;
+   border-block-start: 1px solid var(--a1-dash-borderColor);
+   font-variant-numeric: tabular-nums;
+}
+
+.dash-breakdown-row--zero {
+   color: var(--a1-dash-muted-color);
+}
+
+.dash-breakdown-row--zero strong {
+   font-weight: 400;
+}
+
+/* A colored square before a label. The label states the same thing in text. */
+.dash-mark::before {
+   display: inline-block;
+   inline-size: 0.6rem;
+   block-size: 0.6rem;
+   border-radius: 0.15rem;
+   margin-inline-end: 0.5rem;
+   background: var(--a1-dash-mark-color, var(--a1-dash-pending-fillColor));
+   content: '';
+}
+
+.dash-breakdown-row--zero .dash-mark::before {
+   opacity: 0.45;
+}
+
+.dash-mark--critical,
+.dash-badge--critical {
+   --a1-dash-mark-color: var(--a1-dash-critical-color);
+}
+
+.dash-mark--serious,
+.dash-badge--serious {
+   --a1-dash-mark-color: var(--a1-dash-serious-color);
+}
+
+.dash-mark--moderate,
+.dash-mark--cannot-tell,
+.dash-badge--moderate {
+   --a1-dash-mark-color: var(--a1-dash-moderate-color);
+}
+
+.dash-mark--minor,
+.dash-mark--not-applicable,
+.dash-badge--minor {
+   --a1-dash-mark-color: var(--a1-dash-minor-color);
+}
+
+.dash-mark--pass {
+   --a1-dash-mark-color: var(--a1-dash-done-fillColor);
+}
+
+.dash-mark--pending {
+   --a1-dash-mark-color: var(--a1-dash-claimed-fillColor);
+}
+
+.dash-badge {
+   display: inline-block;
+   padding: 0.05rem 0.5rem;
+   border: 1px solid currentcolor;
+   border-radius: 1rem;
+   color: var(--a1-dash-mark-color);
+   font-size: 0.8rem;
+   font-weight: 700;
+   white-space: nowrap;
+}
+
+/* Positioned so that text hidden for assistive technology stays inside the scroll area. */
 .dash-tableWrap {
+   position: relative;
    overflow-x: auto;
 }
 
 table {
    inline-size: 100%;
-   border-collapse: collapse;
+   border-spacing: 0;
 }
 
 th,
 td {
-   padding: 0.4rem 0.55rem;
+   padding: 0.45rem 0.6rem;
    border-block-end: 1px solid var(--a1-dash-borderColor);
    text-align: start;
    vertical-align: top;
@@ -131,56 +541,180 @@ td {
 
 thead th {
    border-block-end-width: 2px;
+   color: var(--a1-dash-muted-color);
    font-size: 0.82rem;
    white-space: nowrap;
 }
 
-.dash-cell {
+tfoot th,
+tfoot td {
+   border-block-end: 0;
+   color: var(--a1-dash-muted-color);
+   font-size: 0.88rem;
    font-weight: 600;
-   white-space: nowrap;
 }
 
-.dash-cell--done {
-   color: var(--a1-dash-done-color);
+.dash-page {
+   display: flex;
+   gap: 0.5rem;
+   align-items: baseline;
 }
 
-.dash-cell--claimed {
-   color: var(--a1-dash-claimed-color);
-}
-
-.dash-cell--blocked {
-   color: var(--a1-dash-blocked-color);
-}
-
-.dash-cell--pending {
-   color: var(--a1-dash-pending-color);
+.dash-id {
+   flex: none;
+   min-inline-size: 1.75rem;
+   color: var(--a1-dash-muted-color);
+   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+   font-size: 0.82rem;
    font-weight: 400;
 }
 
-.dash-alert {
-   padding: 0.75rem 1rem;
-   border-inline-start: 0.3rem solid var(--a1-dash-blocked-color);
-   background: var(--a1-dash-page-bgColor);
+.dash-count {
+   color: var(--a1-dash-muted-color);
+   font-variant-numeric: tabular-nums;
+   white-space: nowrap;
+}
+
+.dash-count--complete {
+   color: var(--a1-dash-done-color);
+}
+
+.dash-table--workers th[scope='row'] {
+   overflow-wrap: anywhere;
+}
+
+.dash-table--workers {
+   min-inline-size: 34rem;
+}
+
+.dash-table--workers .dash-id {
+   min-inline-size: 6.5rem;
+}
+
+.dash-table--matrix,
+.dash-table--findings {
+   min-inline-size: 44rem;
+}
+
+/* The page name stays in view while the test passes scroll sideways. */
+.dash-table--matrix tr > :first-child {
+   position: sticky;
+   inset-inline-start: 0;
+   min-inline-size: 9rem;
+   max-inline-size: 22rem;
+   background: var(--a1-dash-bgColor);
+}
+
+.dash-cell {
+   white-space: nowrap;
+}
+
+.dash-cell--none {
+   color: var(--a1-dash-pending-color);
+}
+
+.dash-state {
+   display: inline-flex;
+   gap: 0.3rem;
+   align-items: center;
+}
+
+/* A long worker name is cut short here. The workers table states it in full. */
+.dash-state-label {
+   overflow: hidden;
+   max-inline-size: 11rem;
+   text-overflow: ellipsis;
+}
+
+.dash-state--done {
+   color: var(--a1-dash-done-color);
+}
+
+.dash-state--pending {
+   color: var(--a1-dash-pending-color);
+}
+
+/* Work under way and work that is stuck are the cells a reader looks for. */
+.dash-state--claimed,
+.dash-state--blocked {
+   padding: 0 0.55rem 0 0.4rem;
+   border-radius: 1rem;
+   margin-inline-start: -0.4rem;
+   background: color-mix(in srgb, currentcolor 15%, var(--a1-dash-bgColor));
+   font-weight: 700;
+}
+
+.dash-state--claimed {
+   color: var(--a1-dash-claimed-color);
+}
+
+.dash-state--blocked {
+   color: var(--a1-dash-blocked-color);
 }
 
 .dash-log {
    padding: 0;
+   border-block-start: 2px solid var(--a1-dash-borderColor);
    margin: 0;
-   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-   font-size: 0.82rem;
+   font-size: 0.88rem;
    list-style: none;
 }
 
-.dash-log li {
-   padding-block: 0.15rem;
+/* Time, actor, and message sit in one row. The message moves below when it does not fit. */
+.dash-event {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0 1rem;
+   padding: 0.3rem 0.6rem;
+   border-block-end: 1px solid var(--a1-dash-borderColor);
    overflow-wrap: anywhere;
 }
 
-.dash-log time {
+.dash-event time {
+   flex: 0 0 6.5rem;
    color: var(--a1-dash-muted-color);
+   font-variant-numeric: tabular-nums;
 }
 
-code {
-   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-   font-size: 0.88em;
+.dash-event strong {
+   flex: 0 0 9rem;
+   font-weight: 600;
+}
+
+.dash-event span {
+   flex: 1 1 18rem;
+}
+
+.dash-event--unit-blocked span {
+   color: var(--a1-dash-blocked-color);
+}
+
+/* Forced colors remove backgrounds, so the bar is drawn with system colors instead. */
+@media (forced-colors: active) {
+   .dash-bar,
+   .dash-bar-segment,
+   .dash-swatch {
+      forced-color-adjust: none;
+   }
+
+   .dash-bar {
+      background: Canvas;
+   }
+
+   .dash-fill--done {
+      background: CanvasText;
+   }
+
+   .dash-fill--claimed {
+      background: Highlight;
+   }
+
+   .dash-fill--blocked {
+      background: repeating-linear-gradient(135deg, CanvasText 0 2px, Canvas 2px 5px);
+   }
+
+   .dash-fill--pending {
+      border: 1px solid CanvasText;
+      background: Canvas;
+   }
 }

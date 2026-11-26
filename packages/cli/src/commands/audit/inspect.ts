@@ -265,9 +265,10 @@ function registerDashboard(parent: Command): void {
          .command('dashboard')
          .summary('Serve a live progress page, or write a snapshot of it.')
          .description(
-            'Serve a page on localhost that refreshes every five seconds: progress by page and ' +
-               'test pass, active workers, blocked units, findings, and the activity log. It ' +
-               'links to a live interim report. Runs until interrupted.',
+            'Serve a page on localhost that updates every five seconds without reloading, ' +
+               'and can be paused: progress by page and test pass, active workers, blocked ' +
+               'units, findings, and the activity log. It links to a live interim report. ' +
+               'Runs until interrupted.',
          )
          .option(
             '--port <port>',

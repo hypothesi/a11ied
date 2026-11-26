@@ -178,5 +178,19 @@ describe('audit dashboard', () => {
       expect(html).toContain('Working (w1)');
       expect(html).toContain('Needs a person (1)');
       expect(html).toContain('a1 audit reopen P1.forms');
+      expect(html).toContain('data-dash-pause');
+   });
+
+   it('writes a snapshot that says it does not update and loads no script', () => {
+      const audit = start(['2.4.7']);
+      addPage(audit, { locator: 'https://example.test/', name: 'Home' });
+      failFocus(audit, 'w1');
+
+      const html = renderDashboardHtml(audit);
+
+      expect(html).toContain('It does not update.');
+      expect(html).toContain('<strong>100%</strong><span>1 of 1 unit done</span>');
+      expect(html).not.toContain('<script');
+      expect(html).not.toContain('http-equiv="refresh"');
    });
 });

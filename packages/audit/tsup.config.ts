@@ -10,7 +10,7 @@ export default defineConfig({
    // Node:sqlite exists only under the node: prefix, so the prefix must survive bundling.
    removeNodeProtocol: false,
    onSuccess: async (): Promise<void> => {
-      // The report and dashboard read their stylesheets and script next to the bundle at runtime.
+      // The report and dashboard read their stylesheets and scripts next to the bundle at runtime.
       await cp(
          resolve(import.meta.dirname, 'src/report/audit-report.scss'),
          resolve(import.meta.dirname, 'dist/audit-report.scss'),
@@ -22,6 +22,10 @@ export default defineConfig({
       await cp(
          resolve(import.meta.dirname, 'src/dashboard/audit-dashboard.scss'),
          resolve(import.meta.dirname, 'dist/audit-dashboard.scss'),
+      );
+      await cp(
+         resolve(import.meta.dirname, 'src/dashboard/dashboard-live.js'),
+         resolve(import.meta.dirname, 'dist/dashboard-live.js'),
       );
    },
 });
