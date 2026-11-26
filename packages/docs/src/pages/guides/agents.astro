@@ -1,9 +1,9 @@
 ---
 import DocShell from '../../layouts/doc-shell.astro';
-import { docsLinks, REPOSITORY_URL } from '../../lib/nav';
+import { SKILLS_INSTALL_COMMAND } from '../../lib/agent-snippets';
+import { docsLinks } from '../../lib/nav';
 import mcpConfig from '../../samples/mcp-config.json.txt?raw';
 
-const skillsInstall = `npx -y @a1st/aix install ${REPOSITORY_URL}/blob/master/packages/skills/ai.json --only skills --user`;
 const toc = [
    { id: 'what', label: 'What an agent needs' },
    { id: 'skills', label: 'Install the skills' },
@@ -39,7 +39,7 @@ const toc = [
 
    <section>
       <h2 id="skills">Install the skills</h2>
-      <pre><code>{skillsInstall}</code></pre>
+      <pre><code>{SKILLS_INSTALL_COMMAND}</code></pre>
       <p>
          <a href="https://aix.a1st.dev/">aix</a> finds the coding agents on your machine and
          asks which one gets the skills. <code>--user</code> installs them for every project.

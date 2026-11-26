@@ -7,6 +7,7 @@ import logo from '../assets/logo.png';
 import Balloon from '../components/balloon.astro';
 import SiteFooter from '../components/site-footer.astro';
 import SiteHead from '../components/site-head.astro';
+import { AUDIT_PROMPT, SKILLS_INSTALL_COMMAND } from '../lib/agent-snippets';
 import { REPOSITORY_URL } from '../lib/nav';
 import { getPracticeURL, withPracticeURL } from '../lib/practice';
 import checkSample from '../samples/check-broken-short.txt?raw';
@@ -39,9 +40,6 @@ const heroCommands = [
 ].join('\n');
 const agentPrompt =
    `Check the Invite member dialog on ${practiceURL} with a11ied. Open it with the simulated screen reader and tell me whether the dialog is announced. Quote what the screen reader said.`;
-const auditPrompt =
-   'Audit https://example.com against WCAG 2.2 AA with a11ied. Do not submit the contact form. Use four workers.';
-const skillsInstall = `npx -y @a1st/aix install ${REPOSITORY_URL}/blob/master/packages/skills/ai.json --only skills --user`;
 const dashboardAlt =
    'The live dashboard for an audit in progress. 59% done: 22 of 37 work units, with about 11 minutes left. One unit needs a person, because the sign-in page needs a test account. 5 findings so far: 2 critical, 2 serious, 1 moderate. A table lists the 4 workers and the page each one is testing.';
 const reportAlt =
@@ -169,7 +167,7 @@ const reportAlt =
                         The agent then uses the <code>a1</code> command or the
                         <a href="/guides/agents#connect">MCP server</a>, whichever it has.
                      </p>
-                     <pre><code>{skillsInstall}</code></pre>
+                     <pre><code>{SKILLS_INSTALL_COMMAND}</code></pre>
                      <p><a href="/guides/agents">Set up an AI agent</a></p>
                   </li>
                   <li class="card">
@@ -178,7 +176,7 @@ const reportAlt =
                         Say what to audit and what the agent must not do, such as sending a form.
                         The agent runs the <code>a1 audit</code> commands. You do not have to.
                      </p>
-                     <pre data-label="AI AGENT PROMPT"><code>{auditPrompt}</code></pre>
+                     <pre data-label="AI AGENT PROMPT"><code>{AUDIT_PROMPT}</code></pre>
                      <p><a href="/guides/audit">Audit a site with AI agents</a></p>
                   </li>
                   <li class="card">
