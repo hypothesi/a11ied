@@ -1,0 +1,49 @@
+name: Wrong result
+description: A scan finding, transcript, WCAG lookup, or compatibility entry that is incorrect.
+labels:
+   - bug
+body:
+   - type: dropdown
+     id: kind
+     attributes:
+        label: What is wrong
+        options:
+           - A scan reported a problem that is not one
+           - A scan missed a problem
+           - The simulated screen reader does not match VoiceOver or NVDA
+           - A VoiceOver or NVDA transcript does not match what the screen reader said
+           - A WCAG criterion, mapping, or test procedure is wrong
+           - Screen reader compatibility data is wrong
+           - Something else
+     validations:
+        required: true
+
+   - type: textarea
+     id: reported
+     attributes:
+        label: What a11ied reported
+        description: Paste the output, or link to the docs page.
+        render: text
+     validations:
+        required: true
+
+   - type: textarea
+     id: correct
+     attributes:
+        label: What is correct, and how you know
+        description: For example, what VoiceOver on macOS 26 with Safari announced, or a link to the spec or ARIA pattern.
+     validations:
+        required: true
+
+   - type: textarea
+     id: markup
+     attributes:
+        label: Page or markup
+        description: A public URL or the smallest HTML that shows the problem.
+        render: html
+
+   - type: input
+     id: version
+     attributes:
+        label: a11ied version
+        description: Run `npx -y a11ied --version`.

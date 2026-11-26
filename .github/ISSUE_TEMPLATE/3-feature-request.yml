@@ -1,0 +1,24 @@
+name: Feature request
+description: Something a11ied should do that it does not do now.
+labels:
+   - enhancement
+body:
+   - type: textarea
+     id: goal
+     attributes:
+        label: What you are trying to do
+        description: Describe the task, not the solution. For example, "Test that a toast is announced without moving focus."
+     validations:
+        required: true
+
+   - type: textarea
+     id: proposal
+     attributes:
+        label: What you would like a11ied to do
+        description: A command, option, API, or tool, if you have one in mind.
+
+   - type: textarea
+     id: workaround
+     attributes:
+        label: What you do now
+        description: Your current workaround, or the other tool you use for this.

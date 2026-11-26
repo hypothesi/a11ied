@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+   - name: Troubleshooting guide
+     url: https://hypothesi.github.io/a11ied/guides/troubleshooting/
+     about: Fixes for a page that does not load, a missing browser, or a check that fails when it should pass.
+   - name: Documentation
+     url: https://hypothesi.github.io/a11ied/
+     about: Guides and the CLI, MCP, and TypeScript API references.

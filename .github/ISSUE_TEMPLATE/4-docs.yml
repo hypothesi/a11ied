@@ -1,0 +1,19 @@
+name: Documentation problem
+description: A docs page is wrong, unclear, out of date, or missing.
+labels:
+   - documentation
+body:
+   - type: input
+     id: page
+     attributes:
+        label: Page
+        description: The URL of the page, or the topic if the page does not exist.
+     validations:
+        required: true
+
+   - type: textarea
+     id: problem
+     attributes:
+        label: What is wrong or missing
+     validations:
+        required: true

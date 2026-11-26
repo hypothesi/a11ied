@@ -1,0 +1,59 @@
+name: Bug report
+description: a11ied crashes, fails, or does not do what the docs say.
+labels:
+   - bug
+body:
+   - type: textarea
+     id: what-happened
+     attributes:
+        label: What happened
+        description: The command or code you ran, and the full output or error.
+        render: text
+     validations:
+        required: true
+
+   - type: textarea
+     id: expected
+     attributes:
+        label: What you expected
+     validations:
+        required: true
+
+   - type: textarea
+     id: reproduce
+     attributes:
+        label: How to reproduce it
+        description: A public URL or the smallest HTML page that shows the problem helps the most.
+
+   - type: dropdown
+     id: interface
+     attributes:
+        label: Where it happened
+        multiple: true
+        options:
+           - a1 CLI
+           - a1 audit
+           - Test API (Vitest, Jest, Mocha, Playwright Test)
+           - MCP server
+           - Agent skills
+           - Other
+
+   - type: dropdown
+     id: screen-reader
+     attributes:
+        label: Screen reader
+        multiple: true
+        options:
+           - None
+           - Simulated (virtual)
+           - VoiceOver
+           - NVDA
+
+   - type: textarea
+     id: doctor
+     attributes:
+        label: Output of `npx -y a11ied doctor`
+        description: This lists your a11ied, Node, OS, browser, and screen reader versions. Remove any paths you do not want to share.
+        render: text
+     validations:
+        required: true
