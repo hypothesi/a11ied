@@ -33,6 +33,13 @@ packages recorded in `package-lock.json`. The `lightningcss-*` exception covers
 the platform packages recorded there. Sharp itself uses Apache-2.0; the LGPL
 exception concerns its bundled image-processing binaries.
 
+## Approved exception: `@iconify-json/logos`
+
+The maintainer approved `@iconify-json/logos` under CC0-1.0 on 2026-11-26. The docs
+site uses it for the browser and operating system logos on the screen reader
+compatibility pages. It is a development dependency of `@a11ied/docs` and is not
+distributed in any published package. The approval covers CC0-1.0 for this package only.
+
 ## Release checks for approved exceptions
 
 1. Compare the release lockfile's versions, licenses, and dependency paths with
