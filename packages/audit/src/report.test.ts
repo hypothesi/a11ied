@@ -45,6 +45,7 @@ function failFocus(audit: Audit, worker: string, evidence?: string[]): void {
          findings: [
             {
                criterion: '2.4.7',
+               reason: '2.4.7 requires a visible focus indicator. The button shows none.',
                title: 'Menu button has no focus indicator',
                severity: 'serious',
                description: 'The <Menu> button shows no change on focus.',
@@ -86,6 +87,9 @@ describe('audit report', () => {
       expect(report.findings[0]?.pageCount).toBe(PAGE_COUNT);
       expect(markdown).toContain('does not meet WCAG 2.2 Level AA');
       expect(markdown).toContain('| F1 | Menu button has no focus indicator | Serious |');
+      expect(markdown).toContain(
+         '* 2.4.7 Focus Visible: 2.4.7 requires a visible focus indicator. The button shows none.',
+      );
       expect(markdown).toContain('* Status: Final');
    });
 

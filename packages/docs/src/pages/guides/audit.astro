@@ -138,7 +138,7 @@ a1 audit submit P1.keyboard --worker w1 --file result.json</code></pre>
          <dt><code>next</code></dt>
          <dd>Prints the work packet: the page, the rules, the procedure, each criterion with when it fails, the scan's measurements, findings already recorded, and a template for the submission.</dd>
          <dt><code>submit</code></dt>
-         <dd>Takes one JSON document and accepts or rejects it whole. A rejection lists every problem, such as a criterion with no outcome. For a finding on a web page, the worker gives a selector and <code>submit</code> takes the screenshot.</dd>
+         <dd>Takes one JSON document and accepts or rejects it whole. A rejection lists every problem, such as a criterion with no outcome or a finding that does not say why it fails its criterion. For a finding on a web page, the worker gives a selector and <code>submit</code> takes the screenshot. A worker that confirms an automated finding describes it from what it observed, so the report does not repeat a scanner's rule text.</dd>
       </dl>
       <p>
          VoiceOver, NVDA, and a physical device can each serve one worker at a time. When the
@@ -199,7 +199,7 @@ a1 audit log --unit P3.forms</code></pre>
          <dt>What to fix first</dt>
          <dd>Findings ordered by severity, then by how many pages they affect.</dd>
          <dt>Findings</dt>
-         <dd>For each: the problem, who it affects, the fix, where it occurs, and a screenshot of the element with an outline around it.</dd>
+         <dd>For each: the problem, why it fails each criterion, who it affects, the fix, where it occurs, and a screenshot of the element with an outline around it.</dd>
          <dt>Results by criterion</dt>
          <dd>Fails, Passes, Not applicable, Not verified, or Not evaluated, for every criterion in scope.</dd>
          <dt>Not verified</dt>

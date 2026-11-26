@@ -10,8 +10,11 @@ import {
    getFinding,
    insertFinding,
    insertInstance,
+   isAwaitingDescription,
    listFindings,
+   rewriteFinding,
    type FindingRecord,
+   type NewFinding,
 } from './findings.js';
 import {
    submissionSchema,
@@ -29,7 +32,11 @@ const NEW_FINDING_FIELDS = [
    'description',
    'impact',
    'recommendation',
+   'reason',
 ] as const;
+
+/** A page id, such as P12, named in a note. */
+const PAGE_REFERENCE = /\bP\d+\b/gu;
 
 export interface SubmitReceipt {
    unit: Unit;
@@ -37,6 +44,8 @@ export interface SubmitReceipt {
    created: string[];
    /** Finding ids this submission added an occurrence to. */
    attached: string[];
+   /** Automated finding ids this submission described in the worker's own words. */
+   confirmed: string[];
    dismissed: string[];
 }
 
@@ -99,18 +108,27 @@ function checkSameAs(audit: Audit, finding: FindingInput, at: string): string[] 
            ];
    }
    try {
-      getFinding(audit, finding.sameAs);
-      return [];
+      const known = getFinding(audit, finding.sameAs);
+      const isNewCriterion = !failsCriterion(known, finding.criterion);
+      return isNewCriterion && !finding.reason
+         ? [
+              `${at}: ${known.id} is not yet recorded against ${finding.criterion}. Add reason: what ${finding.criterion} requires and what the page does instead.`,
+           ]
+         : [];
    } catch {
       return [`${at}: sameAs "${finding.sameAs}" is not an existing finding.`];
    }
+}
+
+function listFailedCriteria(finding: FindingInput): string[] {
+   return [finding.criterion, ...finding.alsoFails.map((each) => each.criterion)];
 }
 
 function checkFindings({ audit, submission }: SubmitContext): string[] {
    const scope = getConfig(audit).criteria;
    return submission.findings.flatMap((finding, index) => {
       const at = `findings[${String(index)}]`;
-      const outOfScope = [finding.criterion, ...finding.alsoFails]
+      const outOfScope = listFailedCriteria(finding)
          .filter((criterion) => !scope.includes(criterion))
          .map(
             (criterion) =>
@@ -144,6 +162,69 @@ function checkVisualEvidence({ audit, unit, submission }: SubmitContext): string
    );
 }
 
+/**
+ * A note is read on its own, next to one criterion on one page. One that points at
+ * another page makes the reader look elsewhere and is not an observation of this page.
+ */
+function checkNotes({ unit, submission }: SubmitContext): string[] {
+   if (unit.pageId === SITE_PAGE_ID) {
+      return [];
+   }
+   return submission.results.flatMap((result) => {
+      const others = [...new Set(result.note.match(PAGE_REFERENCE))].filter(
+         (pageId) => pageId !== unit.pageId,
+      );
+      return others.length === 0
+         ? []
+         : [
+              `results: the note for ${result.criterion} refers to ${others.join(', ')}. Say what you tested and observed on ${unit.pageId} so the note stands alone.`,
+           ];
+   });
+}
+
+/** The finding ids a list of confirmations or dismissals names, in lower case. */
+function collectFindingIds(list: readonly { finding: string }[]): Set<string> {
+   return new Set(list.map((each) => each.finding.toLowerCase()));
+}
+
+/**
+ * An automated finding says what a rule checks, not what is wrong on the page. The worker
+ * who decides its criterion on a page either describes it from what it saw or dismisses
+ * it, so no finding reaches the report in the scanner's words.
+ */
+function checkConfirmations({ unit, submission, openOnPage }: SubmitContext): string[] {
+   const confirmed = collectFindingIds(submission.confirm);
+   const dismissed = collectFindingIds(submission.dismiss);
+   const automated = openOnPage.filter((finding) => finding.source === 'axe');
+   const unknown = submission.confirm
+      .filter(
+         (each) =>
+            !automated.some(
+               (finding) => finding.id.toLowerCase() === each.finding.toLowerCase(),
+            ),
+      )
+      .map(
+         (each) =>
+            `confirm: ${each.finding} is not an automated finding open on ${unit.pageId}. Use confirm only for those; report anything else in findings.`,
+      );
+   const both = submission.confirm
+      .filter((each) => dismissed.has(each.finding.toLowerCase()))
+      .map((each) => `confirm: ${each.finding} is also in dismiss. Choose one.`);
+   const undescribed = automated
+      .filter(
+         (finding) =>
+            isAwaitingDescription(finding) &&
+            unit.criteria.includes(finding.criterion) &&
+            !confirmed.has(finding.id.toLowerCase()) &&
+            !dismissed.has(finding.id.toLowerCase()),
+      )
+      .map(
+         (finding) =>
+            `confirm: ${finding.id} is an automated finding on this page that still has the scanner's wording. If it is real, add {"finding": "${finding.id}", "title", "description", "impact", "recommendation", "reason"} to confirm, written from what you observed. If it is wrong, add it to dismiss.`,
+      );
+   return [...unknown, ...both, ...undescribed];
+}
+
 function checkDismissals({ unit, submission, openOnPage }: SubmitContext): string[] {
    return submission.dismiss
       .filter(
@@ -174,10 +255,8 @@ function checkConsistency({ unit, submission, openOnPage }: SubmitContext): stri
                !dismissed.has(finding.id.toLowerCase()),
          )
          .map((finding) => finding.id);
-      const reported = submission.findings.some(
-         (finding) =>
-            finding.criterion === result.criterion ||
-            finding.alsoFails.includes(result.criterion),
+      const reported = submission.findings.some((finding) =>
+         listFailedCriteria(finding).includes(result.criterion),
       );
       const hasFinding = reported || stillOpen.length > 0;
       if (result.outcome === 'fail' && !hasFinding) {
@@ -205,22 +284,71 @@ function storeEvidencePath(audit: Audit, path: string): string {
    return inside.startsWith('..') || isAbsolute(inside) ? absolute : inside;
 }
 
+/** The reason a submitted finding gives for each criterion it fails. */
+function collectReasons(finding: FindingInput): Record<string, string> {
+   return Object.fromEntries([
+      ...(finding.reason ? [[finding.criterion, finding.reason]] : []),
+      ...finding.alsoFails.map((each) => [each.criterion, each.reason]),
+   ]);
+}
+
 /**
  * A later occurrence can show that a known defect also fails another criterion, for
  * example when a different test pass meets it. The finding then counts against that
- * criterion too.
+ * criterion too. A reason already recorded for a criterion is kept.
  */
-function addRelatedCriteria(audit: Audit, findingId: string, criteria: string[]): void {
+function addRelatedCriteria(audit: Audit, findingId: string, input: FindingInput): void {
    const finding = getFinding(audit, findingId);
-   const related = [...new Set([...finding.related, ...criteria])].filter(
-      (criterion) => criterion !== finding.criterion,
-   );
+   const related = [
+      ...new Set([...finding.related, ...listFailedCriteria(input)]),
+   ].filter((criterion) => criterion !== finding.criterion);
    run(
       audit,
-      'UPDATE findings SET related = ? WHERE id = ?',
+      'UPDATE findings SET related = ?, reasons = ? WHERE id = ?',
       JSON.stringify(related),
+      JSON.stringify({ ...collectReasons(input), ...finding.reasons }),
       findingId,
    );
+}
+
+/**
+ * Replaces the scanner's wording on each confirmed automated finding. A finding another
+ * worker already described keeps that description.
+ */
+function applyConfirmations({ audit, worker, submission }: SubmitContext): string[] {
+   return submission.confirm.flatMap((confirmation) => {
+      const finding = getFinding(audit, confirmation.finding);
+      if (!isAwaitingDescription(finding)) {
+         return [];
+      }
+      rewriteFinding(audit, {
+         findingId: finding.id,
+         actor: worker,
+         changes: {
+            title: confirmation.title,
+            severity: confirmation.severity ?? finding.severity,
+            description: confirmation.description,
+            impact: confirmation.impact,
+            recommendation: confirmation.recommendation,
+            reasons: { [finding.criterion]: confirmation.reason },
+         },
+      });
+      return [finding.id];
+   });
+}
+
+function toNewFinding(finding: FindingInput): NewFinding {
+   return {
+      criterion: finding.criterion,
+      related: finding.alsoFails.map((each) => each.criterion),
+      reasons: collectReasons(finding),
+      title: finding.title ?? '',
+      severity: finding.severity ?? 'moderate',
+      description: finding.description ?? '',
+      impact: finding.impact ?? '',
+      recommendation: finding.recommendation ?? '',
+      source: 'agent',
+   };
 }
 
 function applyFindings({
@@ -232,23 +360,14 @@ function applyFindings({
    const created: string[] = [];
    const attached: string[] = [];
    for (const finding of submission.findings) {
-      const candidate = {
-         criterion: finding.criterion,
-         related: finding.alsoFails,
-         title: finding.title ?? '',
-         severity: finding.severity ?? 'moderate',
-         description: finding.description ?? '',
-         impact: finding.impact ?? '',
-         recommendation: finding.recommendation ?? '',
-         source: 'agent' as const,
-      };
+      const candidate = toNewFinding(finding);
       const existingId =
          finding.sameAs === undefined
             ? findMatchingFinding(audit, candidate)?.id
             : getFinding(audit, finding.sameAs).id;
       const findingId = existingId ?? insertFinding(audit, candidate);
       if (existingId !== undefined) {
-         addRelatedCriteria(audit, existingId, [finding.criterion, ...finding.alsoFails]);
+         addRelatedCriteria(audit, existingId, finding);
       }
       (existingId === undefined ? created : attached).push(findingId);
       insertInstance(audit, {
@@ -328,9 +447,11 @@ export function submitUnit(
       const problems = [
          ...(input.problems ?? []),
          ...checkCoverage(context),
+         ...checkNotes(context),
          ...checkFindings(context),
          ...checkDismissals(context),
          ...checkConsistency(context),
+         ...checkConfirmations(context),
          ...checkVisualEvidence(context),
          ...checkStates(audit, unit, submission.states),
       ];
@@ -348,6 +469,7 @@ export function submitUnit(
             reason: dismissal.reason,
          });
       }
+      const confirmed = applyConfirmations(context);
       const applied = applyFindings(context);
       applyResults(context);
       storeStates(audit, unit, submission.states);
@@ -360,6 +482,7 @@ export function submitUnit(
       return {
          unit: getUnit(audit, unit.id),
          ...applied,
+         confirmed,
          dismissed: submission.dismiss.map((each) => each.finding),
       };
    });

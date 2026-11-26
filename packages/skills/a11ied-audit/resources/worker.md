@@ -64,12 +64,12 @@ shows in the progress log. A claim with no activity for 20 minutes returns to th
 
 ## Deciding an outcome
 
-| Outcome          | Use when                                                                          | Note must say                               |
-| ---------------- | --------------------------------------------------------------------------------- | ------------------------------------------- |
-| `pass`           | You tested everything the criterion applies to on this page and found no failure. | What you tested and how.                    |
-| `fail`           | At least one thing fails. Needs a finding.                                        | The short version of the failure.           |
-| `not-applicable` | Nothing on this page is covered by the criterion.                                 | What you looked for and did not find.       |
-| `cannot-tell`    | You could not complete the check.                                                 | What blocked it and what was left untested. |
+| Outcome          | Use when                                                                          | Note must say                                               |
+| ---------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `pass`           | You tested everything the criterion applies to on this page and found no failure. | What you tested and what you observed that meets it.        |
+| `fail`           | At least one thing fails. Needs a finding.                                        | What fails, in one sentence. The finding has the detail.    |
+| `not-applicable` | Nothing on this page is covered by the criterion.                                 | What the criterion covers and that the page has none of it. |
+| `cannot-tell`    | You could not complete the check.                                                 | What blocked it and what was left untested.                 |
 
 - Decide from what you observed in this unit. A signal, an axe pass, or another page's result is
   not an observation.
@@ -81,7 +81,35 @@ shows in the progress log. A claim with no activity for 20 minutes returns to th
   Record `cannot-tell` only for what lies past the forbidden effect. Example: "Errors checked
   with an empty and an invalid submit, which the page blocked. The success message was not
   seen: sending the form is not authorized."
-- Keep notes to one or two sentences. Detail belongs in a finding.
+- A note is the reason for the outcome. Keep it to one or two sentences, and write it as
+  described under "Writing notes and findings". Detail belongs in a finding.
+
+## Writing notes and findings
+
+The report shows each note next to one criterion on one page, and each finding by itself. The
+reader is a developer who has not seen the page and may not know ARIA. Write so that reader
+understands the reason without opening anything else.
+
+- **State what you observed, with the values.** "Tabbed through all 6 controls. Each shows a
+  2px blue outline", not "Focus is visible". "The border is #d0d0d0 on #ffffff, a 1.5:1
+  contrast", not "Contrast is too low".
+- **Start with what happens for the user, then give the cause.** "Pressing Tab moves focus to
+  the text input, but the input stays scrolled out of view" comes before the property or
+  component that causes it.
+- **Refer to things by their visible label first**, then the selector or attribute: the "Remove"
+  button (`button.chip-remove`).
+- **Use short, plain sentences.** Explain a term the reader may not know, or leave it out.
+- **Make each one stand alone.** Do not write "as on P1", "same as above", or "see F3". In a
+  unit for one page, a note that mentions another page is rejected.
+- **Do not present a tool's rule text as your observation.** "Ensure interactive controls are not
+  nested" says what a rule checks. Say what is nested inside what on this page, and what a
+  screen reader or keyboard user gets as a result.
+
+| Instead of                                                                                                                                                                  | Write                                                                                                                                                                                     |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Options are role=option inside role=listbox, linked to the combobox with aria-controls and aria-activedescendant, so the list relationship is programmatic. Label as on P1. | The screen reader announces the suggestions as a list of 4 options and reads the field's label, "Tags". The options have role=option inside a role=listbox that the text field points to. |
+| Ensure interactive controls are not nested as they are not always announced by screen readers or can cause focus problems for assistive technologies.                       | Each chip is a button that contains a second button, "Remove". A screen reader announces only the outer button, so its user is never told that a chip can be removed.                     |
+| Fails 2.4.11.                                                                                                                                                               | 2.4.11 requires a focused control to be at least partly visible. The focused text input is fully hidden below the edge of the chip area, which does not scroll to it.                     |
 
 ## Findings
 
@@ -94,6 +122,11 @@ Check the packet's "Findings already recorded" first:
 - An automated finding listed "ON THIS PAGE": confirm it by looking. If it is real, your
   outcome for that criterion is `fail`. If it is a false positive, put it in `dismiss` with the
   reason.
+- An automated finding marked "SCANNER WORDING" still says what a rule checks, not what is
+  wrong on this page. If it is real, describe it in `confirm`:
+  `{"finding": "F1", "title", "description", "impact", "recommendation", "reason"}`, written
+  from what you observed. Your text replaces the scanner's. The submission is rejected until
+  the finding is in `confirm` or `dismiss`.
 
 A new finding needs:
 
@@ -101,7 +134,13 @@ A new finding needs:
   button has no accessible name", not "Problem on home page".
 - **severity**: `critical` blocks a task for some users. `serious` makes a task very difficult
   or unreliable. `moderate` causes friction with a workaround. `minor` is a small deviation.
-- **description**: what is wrong, as an observed fact with the measured values.
+- **description**: what happens for the user, then the cause, as observed facts with the
+  measured values. Two to four sentences.
+- **reason**: how the defect fails `criterion`. Say what the criterion requires, then what the
+  page does instead, in one or two sentences. The report shows it under "Why it fails".
+- **alsoFails**: other criteria in scope that the same defect fails, each as
+  `{"criterion": "2.4.7", "reason": "..."}` with its own reason. Leave a criterion out when you
+  cannot say how the defect fails it.
 - **impact**: who is affected and what they cannot do.
 - **recommendation**: the specific change. Say which attribute, element, or style to change.
 - **location**: the visible label plus a selector, such as `Header > Menu (button.nav-toggle)`.
@@ -125,7 +164,9 @@ rejected whole. A rejection lists every problem: fix them all and submit again. 
 
 - A criterion has no outcome. Every criterion in the unit needs one.
 - `fail` with no finding, or `pass` while a finding is open on this page.
-- A new finding is missing a field, or an evidence file does not exist.
+- A new finding is missing a field, such as `reason`, or an evidence file does not exist.
+- An automated finding marked "SCANNER WORDING" is in neither `confirm` nor `dismiss`.
+- A note refers to another page. Say what you observed on this one.
 - A finding on a web page has neither `screenshot` nor `evidence`, or its screenshot could not
   be taken (the selector matched nothing, or the element was hidden in that state).
 - A state from "States to cover" is not in any state's `covers`.

@@ -160,6 +160,10 @@ export function renderFinding(finding: FindingRecord): string {
          ['Criteria', [finding.criterion, ...finding.related].join(', ')],
          ['Source', finding.source],
          ['Problem', finding.description],
+         ...[finding.criterion, ...finding.related].map((criterion): [string, string] => [
+            `Fails ${criterion}`,
+            finding.reasons[criterion] ?? 'No reason recorded',
+         ]),
          ['Impact', finding.impact],
          ['Fix', finding.recommendation],
       ]),

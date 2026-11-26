@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import type { PageOutcome } from '../status.js';
 import type { AuditReport, ReportCriterion, ReportFinding } from './model.js';
 import {
    describeScope,
@@ -156,21 +157,20 @@ function renderFinding(finding: ReportFinding, options: HtmlReportOptions): stri
       })
       .join('');
    const source = describeSource(finding.source);
+   const failures = finding.failures
+      .map(({ criterion, reason }) => {
+         const link = `<a href="${escapeHtml(criterion.url)}">${escapeHtml(`${criterion.id} ${criterion.title}`)}</a>`;
+         return `<li>${link}${reason === '' ? '' : `: ${escapeHtml(reason)}`}</li>`;
+      })
+      .join('');
    return [
       `<article class="report-finding" id="${finding.id}" aria-labelledby="${finding.id}-title">`,
       `<h3 id="${finding.id}-title">${finding.id}: ${escapeHtml(finding.title)}</h3>`,
       `<p class="report-finding-meta">${badge(finding.severity, SEVERITY_LABELS[finding.severity])}`,
       `<a href="${escapeHtml(finding.criterion.url)}">${escapeHtml(`${finding.criterion.id} ${finding.criterion.title}`)} (Level ${finding.criterion.level})</a>`,
       `<span>${source}</span></p>`,
-      finding.alsoFails.length > 0
-         ? `<p class="report-finding-meta">Also fails: ${finding.alsoFails
-              .map(
-                 (each) =>
-                    `<a href="${escapeHtml(each.url)}">${escapeHtml(`${each.id} ${each.title}`)}</a>`,
-              )
-              .join(', ')}</p>`
-         : '',
       `<dl><dt>Problem</dt><dd>${escapeHtml(finding.description)}</dd>`,
+      `<dt>Why it fails</dt><dd><ul class="report-occurrences">${failures}</ul></dd>`,
       `<dt>Who it affects</dt><dd>${escapeHtml(finding.impact)}</dd>`,
       `<dt>How to fix it</dt><dd>${escapeHtml(finding.recommendation)}</dd>`,
       `<dt>Where it occurs</dt><dd><ul class="report-occurrences">${occurrences}</ul></dd></dl>`,
@@ -213,6 +213,21 @@ function renderGaps(report: AuditReport): string {
    return `<section aria-labelledby="gaps"><h2 id="gaps">Not verified</h2><p>These checks could not be completed. They are not passes.</p><ul>${items}</ul></section>`;
 }
 
+/**
+ * The auditor's note for one decision. A criterion can fail before its unit is done,
+ * because an automated finding is open on the page. There is no note yet, so the cell
+ * points to the findings.
+ */
+function renderReason(outcome: PageOutcome, criterion: ReportCriterion): string {
+   if (outcome.note !== '') {
+      return escapeHtml(outcome.note);
+   }
+   const links = criterion.findingIds
+      .map((id) => `<a href="#${id}">${id}</a>`)
+      .join(', ');
+   return `Not yet checked by an auditor. An automated scan reported ${links}.`;
+}
+
 function renderCheckNotes(report: AuditReport): string {
    const blocks = report.pages
       .map((page) => {
@@ -225,18 +240,18 @@ function renderCheckNotes(report: AuditReport): string {
                   )
                   .map(
                      (outcome) =>
-                        `<tr><th scope="row">${escapeHtml(`${criterion.info.id} ${criterion.info.title}`)}</th><td>${badge(outcome.outcome, STANDING_LABELS[outcome.outcome])}</td><td>${escapeHtml(outcome.note)}</td></tr>`,
+                        `<tr><th scope="row">${escapeHtml(`${criterion.info.id} ${criterion.info.title}`)}</th><td>${badge(outcome.outcome, STANDING_LABELS[outcome.outcome])}</td><td>${renderReason(outcome, criterion)}</td></tr>`,
                   ),
             )
             .join('');
          return rows === ''
             ? ''
-            : `<details><summary>${escapeHtml(`${page.id} ${page.name}`)}</summary><div class="report-tableWrap"><table><thead><tr><th scope="col">Success criterion</th><th scope="col">Result</th><th scope="col">What was checked</th></tr></thead><tbody>${rows}</tbody></table></div></details>`;
+            : `<details><summary>${escapeHtml(`${page.id} ${page.name}`)}</summary><div class="report-tableWrap"><table><thead><tr><th scope="col">Success criterion</th><th scope="col">Result</th><th scope="col">Reason</th></tr></thead><tbody>${rows}</tbody></table></div></details>`;
       })
       .join('');
    return blocks === ''
       ? ''
-      : `<h3>Check notes by page</h3><p>The auditor's note for each decision, for readers who want to verify the work.</p>${blocks}`;
+      : `<h3>Check notes by page</h3><p>The auditor's reason for each decision: what was tested on the page and what was observed.</p>${blocks}`;
 }
 
 function renderScope(report: AuditReport): string {

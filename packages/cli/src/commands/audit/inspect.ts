@@ -29,6 +29,7 @@ import {
 } from './render.js';
 import {
    addAuditOptions,
+   collect,
    runAuditCommand,
    splitList,
    type AuditBaseOptions,
@@ -49,6 +50,7 @@ interface UpdateOptions extends AuditBaseOptions {
    description?: string;
    impact?: string;
    recommendation?: string;
+   reason: string[];
 }
 
 interface ReportOptions extends AuditBaseOptions {
@@ -101,6 +103,20 @@ function registerLog(parent: Command): void {
    });
 }
 
+/** Splits `2.4.7=The text` into the criterion and the reason it fails. */
+function parseReason(value: string): [string, string] {
+   const separator = value.indexOf('=');
+   const criterion = value.slice(0, Math.max(separator, 0)).trim();
+   const reason = value.slice(separator + 1).trim();
+   if (criterion === '' || reason === '') {
+      throw new CliUsageError(
+         'invalid-reason',
+         `--reason takes <criterion>=<text>, such as --reason "2.4.7=No focus indicator is shown". Got "${value}".`,
+      );
+   }
+   return [criterion, reason];
+}
+
 function buildEdit(options: UpdateOptions): FindingEdit {
    const edit: FindingEdit = {};
    if (options.title !== undefined) {
@@ -118,10 +134,13 @@ function buildEdit(options: UpdateOptions): FindingEdit {
    if (options.recommendation !== undefined) {
       edit.recommendation = options.recommendation;
    }
+   if (options.reason.length > 0) {
+      edit.reasons = Object.fromEntries(options.reason.map(parseReason));
+   }
    if (Object.keys(edit).length === 0) {
       throw new CliUsageError(
          'nothing-to-update',
-         'Pass at least one of --title, --severity, --description, --impact, --recommendation.',
+         'Pass at least one of --title, --severity, --description, --impact, --recommendation, --reason.',
       );
    }
    return edit;
@@ -171,12 +190,18 @@ function registerFindingEdits(finding: Command): void {
    addAuditOptions(
       finding
          .command('update <finding>')
-         .summary("Rewrite a finding's title, severity, or text.")
+         .summary("Rewrite a finding's title, severity, text, or reasons.")
          .option('--title <text>', 'The defect in a few words.')
          .option('--severity <level>', 'critical, serious, moderate, or minor.')
          .option('--description <text>', 'What is wrong.')
          .option('--impact <text>', 'Who is affected and how.')
-         .option('--recommendation <text>', 'The change that fixes it.'),
+         .option('--recommendation <text>', 'The change that fixes it.')
+         .option(
+            '--reason <criterion=text>',
+            'How the defect fails one of its criteria, such as "2.4.7=No focus indicator is shown". Repeatable.',
+            collect,
+            [],
+         ),
    ).action(async (findingId: string, options: UpdateOptions) => {
       await runAuditCommand({
          subcommand: 'finding update',

@@ -90,6 +90,7 @@ export const findingRowSchema = z.object({
    id: z.string(),
    criterion: z.string(),
    related: jsonText(stringList),
+   reasons: jsonText(z.record(z.string(), z.string())),
    title: z.string(),
    severity: severitySchema,
    description: z.string(),

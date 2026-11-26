@@ -1,5 +1,10 @@
 import { getConfig, type Audit } from '../db.js';
-import { listFindings, SEVERITY_ORDER, type FindingRecord } from '../findings.js';
+import {
+   isAwaitingDescription,
+   listFindings,
+   SEVERITY_ORDER,
+   type FindingRecord,
+} from '../findings.js';
 import { listLimitations } from '../limitations.js';
 import { getTestPass } from '../passes.js';
 import type { AuditConfig, AuditPage, Unit } from '../schema.js';
@@ -23,6 +28,12 @@ export interface ReportOccurrence {
    evidence: string[];
 }
 
+/** One criterion a finding fails, and how. */
+export interface ReportFailure {
+   criterion: CriterionInfo;
+   reason: string;
+}
+
 export interface ReportFinding {
    id: string;
    title: string;
@@ -30,6 +41,8 @@ export interface ReportFinding {
    criterion: CriterionInfo;
    /** Other criteria the same defect fails. */
    alsoFails: CriterionInfo[];
+   /** Every criterion the defect fails with the reason, the main criterion first. */
+   failures: ReportFailure[];
    description: string;
    impact: string;
    recommendation: string;
@@ -77,6 +90,17 @@ export interface AuditReport {
    excluded: AuditPage[];
 }
 
+/**
+ * States how a finding fails one criterion. An automated finding nobody has described yet
+ * says so, instead of presenting a rule's wording as an auditor's reasoning.
+ */
+function describeFailure(finding: FindingRecord, criterion: string): string {
+   const reason = finding.reasons[criterion] ?? '';
+   return reason === '' && isAwaitingDescription(finding)
+      ? 'An automated rule that tests this criterion reported these elements. No auditor has described the failure yet.'
+      : reason;
+}
+
 function toReportFinding(
    finding: FindingRecord,
    config: AuditConfig,
@@ -90,6 +114,10 @@ function toReportFinding(
       alsoFails: finding.related.map((criterion) =>
          getCriterionInfo(criterion, config.wcagVersion),
       ),
+      failures: [finding.criterion, ...finding.related].map((criterion) => ({
+         criterion: getCriterionInfo(criterion, config.wcagVersion),
+         reason: describeFailure(finding, criterion),
+      })),
       description: finding.description,
       impact: finding.impact,
       recommendation: finding.recommendation,

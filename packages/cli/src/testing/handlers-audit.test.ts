@@ -18,7 +18,12 @@ const root = mkdtempSync(join(tmpdir(), 'a11ied-audit-cli-'));
 
 interface Packet {
    unit: { id: string; criteria: string[] };
-   knownFindings: { criterion: string; here: boolean }[];
+   knownFindings: {
+      id: string;
+      criterion: string;
+      here: boolean;
+      needsDescription: boolean;
+   }[];
    signals: Record<string, unknown>;
    stateIds: string[];
 }
@@ -52,8 +57,10 @@ function readPacket(value: unknown): Packet {
       knownFindings: findings
          .filter((finding) => isRecord(finding))
          .map((finding) => ({
+            id: String(finding['id']),
             criterion: String(finding['criterion']),
             here: finding['locationHere'] !== undefined,
+            needsDescription: finding['needsDescription'] === true,
          })),
       signals: readRecord(packet['signals']),
       stateIds: triggers
@@ -95,6 +102,17 @@ function writeSubmission(packet: Packet, name: string): string {
             outcome: failing.has(criterion) ? 'fail' : 'pass',
             note: 'Checked on the fixture page.',
          })),
+         confirm: packet.knownFindings
+            .filter((finding) => finding.needsDescription)
+            .map((finding) => ({
+               finding: finding.id,
+               title: 'Button has no name',
+               description: 'A screen reader announces the button as "button" only.',
+               impact: 'Screen reader users cannot tell what the button does.',
+               recommendation: 'Give the button visible text or an aria-label.',
+               reason:
+                  '4.1.2 requires every control to have a name. This button has none.',
+            })),
          states: [
             {
                name: 'Every control used',
@@ -148,8 +166,9 @@ describe('a1 audit, start to report', () => {
          expect(packet.signals).toHaveProperty('axe');
          expect(submitted['units']).toMatchObject({ done: 1, total: 2 });
          expect(report).toMatchObject({ final: false, verdict: 'fails', findings: 1 });
+         expect(packet.knownFindings[0]?.needsDescription).toBe(true);
          expect(readFileSync(html, 'utf8')).toContain(
-            'Buttons must have discernible text',
+            '4.1.2 requires every control to have a name. This button has none.',
          );
       },
       TEST_TIMEOUT_VERY_LONG,

@@ -63,7 +63,7 @@ What differs over MCP:
 | Automated, no agent needed                                                                                         | Judged by a worker                                                        |
 | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
 | Page discovery (`a1 audit discover`)                                                                               | Which pages, states, and flows are in scope                               |
-| axe-core failures, recorded as findings with a cropped screenshot of the element (`a1 audit scan`)                 | Whether each automated finding is real on this page                       |
+| axe-core failures, recorded as findings with a cropped screenshot of the element (`a1 audit scan`)                 | Whether each automated finding is real, and what is wrong in plain words  |
 | A list of the controls on each page that open or change a state                                                    | Testing every state, including ones the list misses                       |
 | Cropped, outlined screenshots of failing elements from a worker's `screenshot` spec                                | Which element fails and the steps that show it                            |
 | Page measurements stored as signals: tab order, focus styles, reflow, target sizes, media inventory, form controls | Every `pass` and `not-applicable`, and every failure a scanner cannot see |
@@ -163,6 +163,13 @@ Before reporting, read `a1 audit findings` as an editor:
 - Dismiss what is wrong, with the reason: `a1 audit finding dismiss F7 --reason "..."`.
 - Fix titles, severity, and wording that a developer could not act on:
   `a1 audit finding update F4 --severity serious --recommendation "..."`.
+- Check that each finding explains itself. The problem says what happens for the user and why,
+  with measured values. "Why it fails" says, for each criterion, what the criterion requires
+  and what the page does instead. Rewrite one that does not:
+  `a1 audit finding update F5 --reason "2.4.7=..." --description "..."`.
+- Rewrite any automated finding that `a1 audit finding show` lists with "No reason recorded".
+  It still has the scanner's wording, because no worker confirmed it. Describe it from its
+  evidence, following "Writing notes and findings" in the worker guide, or dismiss it.
 - Spot-check the critical and serious findings against their evidence. Reopen a unit whose work
   looks thin.
 

@@ -21,7 +21,7 @@ instructions are in `packages/skills/a11ied-audit/`.
 | Test pass | The criteria tested with one kind of interaction: `semantics`, `keyboard`, `visual`, `media`, `forms`, `pointer`, `consistency`. Every criterion belongs to exactly one pass. |
 | Unit      | One pass on one page, such as `P3.keyboard`. The unit of claiming, leasing, and submitting.                                                                                   |
 | Result    | The outcome of one criterion on one page: `pass`, `fail`, `not-applicable`, or `cannot-tell`, with a note.                                                                    |
-| Finding   | One defect, with one occurrence per page it appears on. It records the criterion it fails and any others the same defect fails.                                               |
+| Finding   | One defect, with one occurrence per page it appears on. It records the criterion it fails, any others the same defect fails, and the reason it fails each one.                |
 | Signal    | A fact a programmatic check collected about a page, shown to workers.                                                                                                         |
 | State     | A condition a page can be put in: a menu or dialog open, a tab selected, a form showing errors. Every unit judges its criteria in each state, and records which it tested.    |
 
@@ -38,7 +38,7 @@ means fail, whatever the recorded result says.
 | Programmatic                                        | Judged by an agent                                           |
 | --------------------------------------------------- | ------------------------------------------------------------ |
 | Page discovery from sitemaps and links              | Which pages, states, and flows are in scope                  |
-| axe-core violations, recorded as findings           | Whether each automated finding is real on a page             |
+| axe-core violations, recorded as findings           | Whether each automated finding is real, and what is wrong    |
 | A list of controls that open or change a state      | Testing each state, and finding the ones the list misses     |
 | Cropped, outlined screenshots of failing elements   | Which element fails, and the steps that show it              |
 | Page measurements, stored as signals                | Every `pass` and `not-applicable`                            |
@@ -103,6 +103,12 @@ after an upgrade.
 - **Consistency.** `fail` needs a finding; `pass` cannot coexist with an open finding on
   that page. These checks replace the evidence-receipt code the project used
   before, which cost more agent effort than the testing itself.
+- **Explanations.** A new finding needs a reason for each criterion it fails: what the
+  criterion requires and what the page does instead. An automated finding starts with the
+  scanner's wording, which describes a rule. The worker that decides its criterion on a page
+  must describe it in `confirm` or dismiss it, so the report never presents rule text as an
+  auditor's reasoning. A note that refers to another page is rejected, because the report
+  shows each note by itself.
 - **Changing the page set.** Adding, including, or excluding a page puts finished
   site-wide units back in the queue, since their results compared a different set of
   pages.

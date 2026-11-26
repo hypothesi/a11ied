@@ -292,6 +292,7 @@ describe('submitting a unit', () => {
       writeFileSync(join(store.dir, 'evidence', 'P1.keyboard', 'menu.png'), 'x');
       const finding = {
          criterion: '2.4.7',
+         reason: '2.4.7 requires a visible focus indicator. The menu button shows none.',
          title: 'Menu button has no focus indicator',
          severity: 'serious',
          description: 'The menu button shows no visible change on focus.',
@@ -374,6 +375,60 @@ describe('automated findings', () => {
       expect(problems[0]).toMatch(/F1 is open on this page/u);
       expect(listFindings(store)).toHaveLength(0);
       expect(listCriterionRollups(store)[0]?.standing).toBe('pass');
+   });
+
+   it('keeps the scanner wording out of the report once a worker confirms the finding', () => {
+      const store = start({ target: 'x', criteria: ['4.1.2'] });
+      addPage(store, { locator: 'https://example.test/' });
+      const findingId = recordAutomatedFinding(store, {
+         pageId: 'P1',
+         criterion: '4.1.2',
+         key: 'axe:nested-interactive:button',
+         title: 'Interactive controls must not be nested (<button>)',
+         severity: 'serious',
+         description: 'Ensure interactive controls are not nested.',
+         impact: 'i',
+         recommendation: 'r',
+         source: 'axe',
+         location: 'button.chip',
+         detail: '1 element',
+      });
+      const unit = claim(store, 'w1');
+      const results = unit.criteria.map((criterion) => ({
+         criterion,
+         outcome: 'fail',
+         note: 'The chip button contains a second button.',
+      }));
+
+      const problems = getProblems(() =>
+         submitUnit(store, { unitId: unit.id, worker: 'w1', submission: { results } }),
+      );
+      const receipt = submitUnit(store, {
+         unitId: unit.id,
+         worker: 'w1',
+         submission: {
+            results,
+            confirm: [
+               {
+                  finding: findingId,
+                  title: 'Chip button contains its Remove button',
+                  description: 'Each chip is a button with a Remove button inside it.',
+                  impact: 'Screen reader users are not told a chip can be removed.',
+                  recommendation: 'Make the Remove button a sibling of the chip button.',
+                  reason:
+                     '4.1.2 requires each control to expose its role. The inner button is not exposed.',
+               },
+            ],
+         },
+      });
+      const [finding] = buildAuditReport(store).findings;
+
+      expect(problems).toHaveLength(1);
+      expect(problems[0]).toContain("still has the scanner's wording");
+      expect(receipt.confirmed).toEqual([findingId]);
+      expect(finding?.title).toBe('Chip button contains its Remove button');
+      expect(finding?.source).toBe('axe');
+      expect(finding?.failures[0]?.reason).toContain('The inner button is not exposed.');
    });
 
    it('shows a criterion as failed as soon as an automated finding exists', () => {
@@ -596,7 +651,11 @@ describe('one defect that fails several criteria', () => {
             findings: [
                {
                   criterion: '2.4.7',
-                  alsoFails: ['2.4.11', '2.4.3'],
+                  reason: 'Focus is on a link that is not displayed.',
+                  alsoFails: [
+                     { criterion: '2.4.11', reason: 'The focused link is fully hidden.' },
+                     { criterion: '2.4.3', reason: 'Focus enters links out of order.' },
+                  ],
                   title: 'Collapsed menu links take focus while hidden',
                   severity: 'serious',
                   description: 'd',
@@ -610,6 +669,11 @@ describe('one defect that fails several criteria', () => {
       });
 
       expect(listFindings(store)).toHaveLength(1);
+      expect(listFindings(store)[0]?.reasons).toEqual({
+         '2.4.7': 'Focus is on a link that is not displayed.',
+         '2.4.11': 'The focused link is fully hidden.',
+         '2.4.3': 'Focus enters links out of order.',
+      });
       expect(listCriterionRollups(store).map((rollup) => rollup.standing)).toEqual([
          'fail',
          'fail',
@@ -643,6 +707,7 @@ describe('one defect that fails several criteria', () => {
             findings: [
                {
                   criterion: '2.4.7',
+                  reason: 'The button shows no focus indicator.',
                   sameAs: findingId,
                   location: 'button.nav',
                   evidence: [saveEvidence(store)],
@@ -650,8 +715,61 @@ describe('one defect that fails several criteria', () => {
             ],
          },
       });
+      const [extended] = listFindings(store, { criterion: '2.4.7' });
 
-      expect(listFindings(store, { criterion: '2.4.7' })[0]?.id).toBe(findingId);
+      expect(extended?.id).toBe(findingId);
+      expect(extended?.reasons['2.4.7']).toBe('The button shows no focus indicator.');
+   });
+});
+
+describe('explaining a result', () => {
+   it('rejects another criterion that comes without a reason', () => {
+      const store = start({ target: 'x', criteria: ['2.4.7', '2.4.11'] });
+      addPage(store, { locator: 'https://example.test/' });
+      const unit = claim(store, 'w1');
+
+      const problems = getProblems(() =>
+         submitUnit(store, {
+            unitId: unit.id,
+            worker: 'w1',
+            submission: {
+               ...passAll(unit),
+               findings: [
+                  {
+                     criterion: '2.4.7',
+                     reason: 'No focus indicator is shown.',
+                     alsoFails: ['2.4.11'],
+                     location: 'button.nav',
+                  },
+               ],
+            },
+         }),
+      );
+
+      expect(problems).toHaveLength(1);
+      expect(problems[0]).toContain('findings.0.alsoFails.0: Give each entry as');
+   });
+
+   it('rejects a note that points at another page instead of stating what was seen', () => {
+      const store = start({ target: 'x', criteria: ['2.4.7'] });
+      addPage(store, { locator: 'https://example.test/' });
+      addPage(store, { locator: 'https://example.test/about' });
+      const unit = claim(store, 'w1', 'P2.keyboard');
+
+      const problems = getProblems(() =>
+         submitUnit(store, {
+            unitId: unit.id,
+            worker: 'w1',
+            submission: {
+               results: [
+                  { criterion: '2.4.7', outcome: 'pass', note: 'Focus ring as on P1.' },
+               ],
+            },
+         }),
+      );
+
+      expect(problems).toHaveLength(1);
+      expect(problems[0]).toContain('refers to P1');
    });
 });
 
@@ -743,6 +861,7 @@ describe('finding evidence', () => {
                findings: [
                   {
                      criterion: '2.4.7',
+                     reason: 'No focus indicator is shown.',
                      title: 'No focus ring',
                      severity: 'serious',
                      description: 'd',

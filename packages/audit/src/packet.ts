@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 import { getConfig, type Audit } from './db.js';
-import { failsCriterion, listFindings } from './findings.js';
+import { failsCriterion, isAwaitingDescription, listFindings } from './findings.js';
 import { getPassProcedure, getTestPass } from './passes.js';
 import type { AuditConfig, AuditPage, StateInventory, Unit } from './schema.js';
 import { getCriterionInfo, type CriterionInfo } from './scope.js';
@@ -20,6 +20,11 @@ export interface KnownFinding {
    /** Where it occurs on this unit's page, when it does. */
    locationHere: string | undefined;
    otherPages: number;
+   /**
+    * An automated finding on this page that still has the scanner's wording. This unit
+    * decides its criterion, so its worker describes the finding or dismisses it.
+    */
+   needsDescription: boolean;
 }
 
 /** Everything a worker needs to carry out one unit without reading anything else. */
@@ -64,6 +69,10 @@ function listKnownFindings(audit: Audit, unit: Unit): KnownFinding[] {
             severity: finding.severity,
             source: finding.source,
             locationHere: here?.location,
+            needsDescription:
+               here !== undefined &&
+               isAwaitingDescription(finding) &&
+               unit.criteria.includes(finding.criterion),
             otherPages: new Set(
                finding.open
                   .filter((instance) => instance.pageId !== unit.pageId)
@@ -188,12 +197,14 @@ function renderKnownFindings(packet: WorkPacket): string[] {
       '',
       '## Findings already recorded for these criteria',
       'Confirm or dismiss the ones on this page. Use sameAs for another occurrence of one.',
+      'One marked SCANNER WORDING says what an automated rule checks, not what is wrong here. Look at the element. If the defect is real, describe it in confirm. If it is not, put it in dismiss.',
       ...packet.knownFindings.map((finding) => {
          const here =
             finding.locationHere === undefined
                ? 'not on this page'
                : `ON THIS PAGE at ${finding.locationHere}`;
-         return `- ${finding.id} [${finding.criterion}, ${finding.severity}, ${finding.source}] ${finding.title} (${here}; ${String(finding.otherPages)} other page(s))`;
+         const wording = finding.needsDescription ? ' SCANNER WORDING' : '';
+         return `- ${finding.id} [${finding.criterion}, ${finding.severity}, ${finding.source}] ${finding.title} (${here}; ${String(finding.otherPages)} other page(s))${wording}`;
       }),
    ];
 }
@@ -261,20 +272,42 @@ function renderSignals(packet: WorkPacket): string[] {
    ];
 }
 
+/** How to word notes and findings so a reader understands each one by itself. */
+function renderWritingRules(): string[] {
+   return [
+      '',
+      '## How to write it',
+      'A developer who has not seen the page, and may not know ARIA, reads each note and each finding by itself. Use short, plain sentences.',
+      '- note: the reason for the outcome. Say what you tested on this page and what you observed. Write "Tabbed through all 6 controls. Each shows a 2px blue outline", not "Focus is visible".',
+      '- description: first what happens for the user, then the cause, with the values you measured. Two to four sentences.',
+      '- reason: how the defect fails the criterion. Say what the criterion requires, then what the page does instead. Give one for criterion and one for each entry in alsoFails.',
+      '- Refer to each thing by its visible label first, then its selector or attribute.',
+      '- Do not refer to another page, unit, note, or finding. Do not give a rule description from a tool as your observation.',
+   ];
+}
+
 function renderSubmission(packet: WorkPacket): string[] {
    const { unit } = packet;
+   const first = unit.criteria[0] ?? '';
    const results = unit.criteria.map(
       (criterion) =>
-         `  {"criterion": "${criterion}", "outcome": "pass | fail | not-applicable | cannot-tell", "note": "what you checked and saw"}`,
+         `  {"criterion": "${criterion}", "outcome": "pass | fail | not-applicable | cannot-tell", "note": "what you tested on this page and what you observed"}`,
    );
+   const confirm = packet.knownFindings
+      .filter((finding) => finding.needsDescription)
+      .map(
+         (finding) =>
+            `  {"finding": "${finding.id}", "title": "the defect in a few words", "description": "what happens for the user, then the cause", "impact": "who is affected and what they cannot do", "recommendation": "the specific change", "reason": "what ${finding.criterion} requires and what the page does instead"}`,
+      );
    const template = [
       '{',
       ' "results": [',
       results.join(',\n'),
       ' ],',
       ' "findings": [',
-      `  {"criterion": "${unit.criteria[0] ?? ''}", "title": "short defect name, same wording on every page", "severity": "critical | serious | moderate | minor", "description": "what is wrong, as an observed fact", "impact": "who is affected and how", "recommendation": "the change that fixes it", "location": "visible label plus selector", "alsoFails": [], "detail": "optional measurements", "screenshot": {"selector": "css or role=button[name=\\"Menu\\"]", "viewport": "320x800", "click": [], "press": [], "hover": "optional"}, "evidence": []}`,
+      `  {"criterion": "${first}", "reason": "what ${first} requires and what the page does instead", "title": "short defect name, same wording on every page", "severity": "critical | serious | moderate | minor", "description": "what happens for the user, then the cause with measured values", "impact": "who is affected and what they cannot do", "recommendation": "the specific change that fixes it", "location": "visible label plus selector", "alsoFails": [{"criterion": "another criterion id", "reason": "how the same defect fails that criterion"}], "detail": "optional measurements", "screenshot": {"selector": "css or role=button[name=\\"Menu\\"]", "viewport": "320x800", "click": [], "press": [], "hover": "optional"}, "evidence": []}`,
       ' ],',
+      ...(confirm.length === 0 ? [] : [' "confirm": [', confirm.join(',\n'), ' ],']),
       ' "dismiss": [{"finding": "F1", "reason": "why it is not a failure here"}],',
       ' "states": [{"name": "Menu open", "covers": ["S1"], "tested": true, "note": "how you reached it and what you checked"}],',
       ' "summary": "one sentence"',
@@ -286,7 +319,7 @@ function renderSubmission(packet: WorkPacket): string[] {
       '## Submit',
       `Save screenshots and other evidence under ${packet.evidenceDir}`,
       `Write the JSON below to a file and run: a1 audit submit ${unit.id} --worker ${worker} --file <file>`,
-      'Every criterion needs an outcome. fail needs a finding. A new finding needs title, severity, description, impact, recommendation, and location; another occurrence of a known finding needs only sameAs, criterion, and location. When one defect fails several criteria, file it once and list the others in alsoFails.',
+      'Every criterion needs an outcome. fail needs a finding. A new finding needs title, severity, description, impact, recommendation, reason, and location; another occurrence of a known finding needs only sameAs, criterion, and location. When one defect fails several criteria, file it once and list the others in alsoFails, each with its own reason.',
       ...(packet.audit.platform === 'web'
          ? [
               'Every occurrence needs evidence. Give screenshot with a selector for the failing element and whatever viewport, zoom, textSpacing, click, press, or hover puts the page in the failing state; submit then saves a cropped picture with the element outlined. Attach your own image in evidence when the state cannot be reproduced that way.',
@@ -296,7 +329,7 @@ function renderSubmission(packet: WorkPacket): string[] {
            ]),
       `If you cannot do any of this unit, run: a1 audit block ${unit.id} --worker ${worker} --reason "<what a person must provide>"`,
       `During long work, run: a1 audit note ${unit.id} --worker ${worker} "<what you are doing>" to keep your claim alive.`,
-      'Template (delete the example finding and dismissal when you have none):',
+      'Template (delete the example finding, alsoFails entry, and dismissal when you have none):',
       ...template,
    ];
 }
@@ -353,6 +386,7 @@ export function renderWorkPacket(packet: WorkPacket): string {
       ...renderKnownFindings(packet),
       ...renderPriorResults(packet),
       ...renderSignals(packet),
+      ...renderWritingRules(),
       ...renderSubmission(packet),
    ].join('\n');
 }

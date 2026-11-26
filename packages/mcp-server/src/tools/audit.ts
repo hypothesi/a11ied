@@ -481,7 +481,7 @@ function registerFindingTools(server: McpServer): void {
       {
          title: 'Curate an audit finding',
          description:
-            'Dismiss a finding as wrong, merge duplicates into it, or rewrite its title, severity, or text.',
+            'Dismiss a finding as wrong, merge duplicates into it, or rewrite its title, severity, text, or the reason it fails each criterion.',
          inputSchema: {
             ...auditRef,
             action: z.enum(['dismiss', 'merge', 'update']),
@@ -497,6 +497,12 @@ function registerFindingTools(server: McpServer): void {
             description: z.string().optional(),
             impact: z.string().optional(),
             recommendation: z.string().optional(),
+            reasons: z
+               .record(z.string(), z.string().min(1))
+               .optional()
+               .describe(
+                  'How the defect fails each criterion, by criterion id: what the criterion requires and what the page does instead.',
+               ),
          },
          annotations: activeAnnotations,
       },
@@ -538,6 +544,9 @@ function registerFindingTools(server: McpServer): void {
                         ...(input.recommendation === undefined
                            ? {}
                            : { recommendation: input.recommendation }),
+                        ...(input.reasons === undefined
+                           ? {}
+                           : { reasons: input.reasons }),
                      },
                   }),
                };

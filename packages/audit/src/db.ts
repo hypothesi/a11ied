@@ -7,7 +7,7 @@ import { auditConfigSchema, type AuditConfig } from './schema.js';
 
 const DATABASE_FILE = 'audit.db';
 const BUSY_TIMEOUT_MS = 10_000;
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 /**
  * Changes that bring an older audit up to date, keyed by the version they upgrade from.
@@ -15,6 +15,7 @@ const SCHEMA_VERSION = 2;
  */
 const MIGRATIONS: Readonly<Record<number, string>> = {
    1: "ALTER TABLE findings ADD COLUMN related TEXT NOT NULL DEFAULT '[]';",
+   2: "ALTER TABLE findings ADD COLUMN reasons TEXT NOT NULL DEFAULT '{}';",
 };
 
 // oxlint-disable-next-line unicorn/no-null -- SQLite stores an absent value as NULL
@@ -88,6 +89,7 @@ CREATE TABLE IF NOT EXISTS findings (
  , seq INTEGER NOT NULL
  , criterion TEXT NOT NULL
  , related TEXT NOT NULL DEFAULT '[]'
+ , reasons TEXT NOT NULL DEFAULT '{}'
  , title TEXT NOT NULL
  , severity TEXT NOT NULL
  , description TEXT NOT NULL

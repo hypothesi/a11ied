@@ -12,7 +12,7 @@ import { countRowSchema, findingRowSchema, instanceRowSchema } from './rows.js';
 import type { Finding, FindingInstance, FindingSource, Severity } from './schema.js';
 
 const FINDING_COLUMNS =
-   'id, criterion, related, title, severity, description, impact, recommendation, source, key, createdAt';
+   'id, criterion, related, reasons, title, severity, description, impact, recommendation, source, key, createdAt';
 const INSTANCE_COLUMNS =
    'id, findingId, pageId, unitId, location, detail, evidence, status, dismissReason, worker, createdAt';
 
@@ -33,6 +33,8 @@ export interface FindingRecord extends Finding {
 export interface NewFinding {
    criterion: string;
    related?: readonly string[] | undefined;
+   /** How the defect fails each criterion, by criterion id. */
+   reasons?: Readonly<Record<string, string>> | undefined;
    title: string;
    severity: Severity;
    description: string;
@@ -65,6 +67,16 @@ export function failsCriterion(
    criterion: string,
 ): boolean {
    return finding.criterion === criterion || finding.related.includes(criterion);
+}
+
+/**
+ * Whether an automated finding still has the scanner's wording, which describes the rule
+ * and not what is wrong on the page. A worker who confirms it supplies its own account.
+ */
+export function isAwaitingDescription(
+   finding: Pick<Finding, 'source' | 'criterion' | 'reasons'>,
+): boolean {
+   return finding.source === 'axe' && !finding.reasons[finding.criterion];
 }
 
 /** Normalizes a title so trivially different wordings of one defect merge. */
@@ -180,11 +192,12 @@ export function insertFinding(audit: Audit, finding: NewFinding): string {
    const id = `F${String(seq)}`;
    run(
       audit,
-      'INSERT INTO findings (id, seq, criterion, related, title, severity, description, impact, recommendation, source, key, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO findings (id, seq, criterion, related, reasons, title, severity, description, impact, recommendation, source, key, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       id,
       seq,
       finding.criterion,
       JSON.stringify(finding.related ?? []),
+      JSON.stringify(finding.reasons ?? {}),
       finding.title,
       finding.severity,
       finding.description,
@@ -322,13 +335,17 @@ export function mergeFindings(
          const related = [
             ...new Set([...target.related, source.criterion, ...source.related]),
          ].filter((criterion) => criterion !== target.criterion);
+         // The target's own reason for a criterion wins over the duplicate's.
+         const reasons = { ...source.reasons, ...target.reasons };
          run(
             audit,
-            'UPDATE findings SET related = ? WHERE id = ?',
+            'UPDATE findings SET related = ?, reasons = ? WHERE id = ?',
             JSON.stringify(related),
+            JSON.stringify(reasons),
             target.id,
          );
          target.related = related;
+         target.reasons = reasons;
          run(
             audit,
             'UPDATE instances SET findingId = ? WHERE findingId = ?',
@@ -347,8 +364,52 @@ export function mergeFindings(
 }
 
 export type FindingEdit = Partial<
-   Pick<NewFinding, 'title' | 'severity' | 'description' | 'impact' | 'recommendation'>
+   Pick<
+      NewFinding,
+      'title' | 'severity' | 'description' | 'impact' | 'recommendation' | 'reasons'
+   >
 >;
+
+/**
+ * Rewrites a finding's shared text or severity. A reason replaces the one recorded for
+ * its criterion and leaves the others as they are. Call inside a transaction.
+ */
+export function rewriteFinding(
+   audit: Audit,
+   input: { findingId: string; actor: string; changes: FindingEdit },
+): void {
+   const finding = getFinding(audit, input.findingId);
+   const unknown = Object.keys(input.changes.reasons ?? {}).filter(
+      (criterion) => !failsCriterion(finding, criterion),
+   );
+   if (unknown.length > 0) {
+      throw new AuditError(
+         'criterion-not-failed',
+         `${finding.id} is not recorded against ${unknown.join(', ')}. It fails ${[finding.criterion, ...finding.related].join(', ')}.`,
+      );
+   }
+   const next = {
+      ...finding,
+      ...input.changes,
+      reasons: { ...finding.reasons, ...input.changes.reasons },
+   };
+   run(
+      audit,
+      'UPDATE findings SET title = ?, severity = ?, description = ?, impact = ?, recommendation = ?, reasons = ? WHERE id = ?',
+      next.title,
+      next.severity,
+      next.description,
+      next.impact,
+      next.recommendation,
+      JSON.stringify(next.reasons),
+      finding.id,
+   );
+   addEvent(audit, {
+      actor: input.actor,
+      type: 'finding-updated',
+      message: `Updated ${finding.id}: ${Object.keys(input.changes).join(', ')}`,
+   });
+}
 
 /** Rewrites a finding's shared text or severity during review. */
 export function updateFinding(
@@ -356,23 +417,7 @@ export function updateFinding(
    input: { findingId: string; actor: string; changes: FindingEdit },
 ): FindingRecord {
    return transact(audit, () => {
-      const finding = getFinding(audit, input.findingId);
-      const next = { ...finding, ...input.changes };
-      run(
-         audit,
-         'UPDATE findings SET title = ?, severity = ?, description = ?, impact = ?, recommendation = ? WHERE id = ?',
-         next.title,
-         next.severity,
-         next.description,
-         next.impact,
-         next.recommendation,
-         finding.id,
-      );
-      addEvent(audit, {
-         actor: input.actor,
-         type: 'finding-updated',
-         message: `Updated ${finding.id}: ${Object.keys(input.changes).join(', ')}`,
-      });
-      return getFinding(audit, finding.id);
+      rewriteFinding(audit, input);
+      return getFinding(audit, input.findingId);
    });
 }

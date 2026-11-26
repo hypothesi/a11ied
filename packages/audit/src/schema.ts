@@ -55,11 +55,17 @@ export type AuditConfig = z.infer<typeof auditConfigSchema>;
 export const criterionResultInputSchema = z.object({
    criterion: criterionIdSchema,
    outcome: outcomeSchema,
-   /** What was checked and what was seen. One or two sentences. */
+   /**
+    * Why the outcome is right: what was tested on this page and what was observed. One or
+    * two plain sentences that stand alone.
+    */
    note: z
       .string()
       .trim()
-      .min(1, 'Say what you checked in one or two sentences.')
+      .min(
+         1,
+         'Say what you tested on this page and what you observed, in one or two sentences.',
+      )
       .max(
          MAX_NOTE_LENGTH,
          `Keep the note under ${String(MAX_NOTE_LENGTH)} characters. Put detail in a finding.`,
@@ -96,13 +102,33 @@ export const screenshotSpecSchema = z.object({
 });
 export type ScreenshotSpec = z.infer<typeof screenshotSpecSchema>;
 
+const reasonSchema = z
+   .string()
+   .trim()
+   .min(1, 'Say what the criterion requires and what the page does instead.')
+   .max(MAX_NOTE_LENGTH);
+
+/** Another criterion a defect fails, and how. */
+export const alsoFailsSchema = z.object(
+   { criterion: criterionIdSchema, reason: reasonSchema },
+   {
+      error: 'Give each entry as {"criterion": "2.4.7", "reason": "what 2.4.7 requires and what the page does instead"}.',
+   },
+);
+
 export const findingInputSchema = z.object({
    criterion: criterionIdSchema,
    /**
-    * Other criteria in scope that this same defect fails. Use it for one defect with
-    * several consequences, not to bundle separate defects.
+    * How the defect fails `criterion`: what the criterion requires, then what the page
+    * does instead. One or two sentences.
     */
-   alsoFails: z.array(criterionIdSchema).default([]),
+   reason: z.string().trim().max(MAX_NOTE_LENGTH).optional(),
+   /**
+    * Other criteria in scope that this same defect fails, each with how it fails that
+    * one. Use it for one defect with several consequences, not to bundle separate
+    * defects.
+    */
+   alsoFails: z.array(alsoFailsSchema).default([]),
    /** Attach this occurrence to an existing finding instead of creating a new one. */
    sameAs: z.string().optional(),
    /** The defect in a few words, written so it reads the same on every affected page. */
@@ -124,6 +150,22 @@ export const findingInputSchema = z.object({
    screenshot: screenshotSpecSchema.optional(),
 });
 export type FindingInput = z.infer<typeof findingInputSchema>;
+
+/**
+ * A worker's own account of an automated finding it confirmed by looking. It replaces the
+ * scanner's wording, which says what a rule checks and not what is wrong on the page.
+ */
+export const confirmationInputSchema = z.object({
+   finding: z.string().min(1),
+   title: z.string().trim().min(1).max(MAX_TITLE_LENGTH),
+   severity: severitySchema.optional(),
+   description: z.string().trim().min(1).max(MAX_TEXT_LENGTH),
+   impact: z.string().trim().min(1).max(MAX_TEXT_LENGTH),
+   recommendation: z.string().trim().min(1).max(MAX_TEXT_LENGTH),
+   /** How the defect fails the finding's criterion. */
+   reason: reasonSchema,
+});
+export type ConfirmationInput = z.infer<typeof confirmationInputSchema>;
 
 export const dismissalInputSchema = z.object({
    finding: z.string().min(1),
@@ -149,6 +191,8 @@ export type StateInput = z.infer<typeof stateInputSchema>;
 export const submissionSchema = z.object({
    results: z.array(criterionResultInputSchema),
    findings: z.array(findingInputSchema).default([]),
+   /** Automated findings on this page that are real, described from what was observed. */
+   confirm: z.array(confirmationInputSchema).default([]),
    /** Automated or earlier findings that are wrong for this page, with the reason. */
    dismiss: z.array(dismissalInputSchema).default([]),
    /** Every state of the page the worker tested or deliberately left out. */
@@ -230,6 +274,11 @@ export interface Finding {
    criterion: string;
    /** Other criteria the same defect fails. */
    related: string[];
+   /**
+    * How the defect fails each criterion, by criterion id. An automated finding has none
+    * until a worker or the lead describes it.
+    */
+   reasons: Record<string, string>;
    title: string;
    severity: Severity;
    description: string;

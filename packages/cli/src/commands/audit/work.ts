@@ -180,6 +180,9 @@ function registerSubmit(parent: Command): void {
                ...(receipt.attached.length > 0
                   ? [`Added occurrences to: ${receipt.attached.join(', ')}`]
                   : []),
+               ...(receipt.confirmed.length > 0
+                  ? [`Described in your words: ${receipt.confirmed.join(', ')}`]
+                  : []),
                ...(receipt.dismissed.length > 0
                   ? [`Dismissed here: ${receipt.dismissed.join(', ')}`]
                   : []),

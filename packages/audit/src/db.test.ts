@@ -2,8 +2,10 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { closeAudit, transact, type Audit } from './db.js';
+import { closeAudit, openAudit, transact, type Audit } from './db.js';
+import { listFindings, recordAutomatedFinding } from './findings.js';
 import { startAudit } from './init.js';
+import { addPage } from './pages.js';
 
 let root = '';
 const opened: Audit[] = [];
@@ -27,6 +29,33 @@ afterEach(() => {
       closeAudit(audit);
    }
    rmSync(root, { recursive: true, force: true });
+});
+
+describe('an audit written by an older a11ied', () => {
+   it('keeps its findings when opened by a version that records reasons', () => {
+      const audit = startAudit({ target: 'https://example.test', id: 'old', root });
+      addPage(audit, { locator: 'https://example.test/' });
+      recordAutomatedFinding(audit, {
+         pageId: 'P1',
+         criterion: '1.4.3',
+         title: 'Text contrast is too low',
+         severity: 'serious',
+         description: 'd',
+         impact: 'i',
+         recommendation: 'r',
+         source: 'axe',
+         location: 'p.lead',
+         detail: '',
+      });
+      audit.db.exec('ALTER TABLE findings DROP COLUMN reasons');
+      audit.db.exec("UPDATE meta SET value = '2' WHERE key = 'schemaVersion'");
+      closeAudit(audit);
+
+      const reopened = openAudit(audit.dir);
+      opened.push(reopened);
+
+      expect(listFindings(reopened)[0]?.reasons).toEqual({});
+   });
 });
 
 describe('audit transactions', () => {

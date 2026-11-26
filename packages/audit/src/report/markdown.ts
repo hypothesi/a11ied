@@ -50,13 +50,14 @@ function renderFinding(finding: ReportFinding): string[] {
       '',
       `${SEVERITY_LABELS[finding.severity]} | [${finding.criterion.id} ${finding.criterion.title}](${finding.criterion.url}) (Level ${finding.criterion.level}) | ${describeSource(finding.source)}`,
       '',
-      ...(finding.alsoFails.length > 0
-         ? [
-              `Also fails: ${finding.alsoFails.map((each) => `${each.id} ${each.title}`).join(', ')}`,
-              '',
-           ]
-         : []),
       `**Problem:** ${finding.description}`,
+      '',
+      '**Why it fails:**',
+      '',
+      ...finding.failures.map(
+         ({ criterion, reason }) =>
+            `* ${criterion.id} ${criterion.title}${reason === '' ? '' : `: ${reason}`}`,
+      ),
       '',
       `**Impact:** ${finding.impact}`,
       '',

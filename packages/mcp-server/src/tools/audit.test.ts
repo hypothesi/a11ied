@@ -63,6 +63,16 @@ function passAll(criteria: readonly string[]): Record<string, unknown> {
    };
 }
 
+const UNLABELLED_BUTTON = {
+   reason: 'The button has no accessible name.',
+   title: 'Close button has no label',
+   severity: 'serious',
+   description: 'VoiceOver announces "button" only.',
+   impact: 'Screen reader users cannot tell what it does.',
+   recommendation: 'Set accessibilityLabel to "Close".',
+   location: 'Sign in sheet, top right',
+} as const;
+
 async function passNextUnit(client: Client, worker: string): Promise<void> {
    const { packet } = packetSchema.parse(await call(client, 'audit_next', { worker }));
    await call(client, 'audit_submit', {
@@ -158,17 +168,7 @@ describe('audit tools, a mobile audit from start to final report', () => {
             unit: mine?.unit.id,
             submission: {
                results: [{ criterion, outcome: 'fail', note: 'Unlabelled button.' }],
-               findings: [
-                  {
-                     criterion,
-                     title: 'Close button has no label',
-                     severity: 'serious',
-                     description: 'VoiceOver announces "button" only.',
-                     impact: 'Screen reader users cannot tell what it does.',
-                     recommendation: 'Set accessibilityLabel to "Close".',
-                     location: 'Sign in sheet, top right',
-                  },
-               ],
+               findings: [{ criterion, ...UNLABELLED_BUTTON }],
             },
          });
          const theirs = packetSchema.parse(
