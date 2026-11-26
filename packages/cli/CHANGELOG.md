@@ -1,5 +1,26 @@
 # a11ied
 
+## 0.2.0
+
+### Minor Changes
+
+- [`d94a31b`](https://github.com/hypothesi/a11ied/commit/d94a31b24f04e4be62214b286d215a19d0f10fa9) - `a1 audit dashboard` has a new layout: a status badge, one bar for done, working, blocked,
+  and queued units, findings by severity, criteria by result, and done counts per page and
+  per test pass. It updates in place every five seconds instead of reloading, so selected
+  text, focus, and scroll position are kept, and **Pause updates** stops it. When the server
+  stops, the page keeps the last update on screen and says the connection was lost. The
+  `a11ied-audit` skill now tells the agent to offer the dashboard when a person is in the
+  conversation, start it in the background, and give them its address.
+
+- [`9c131f8`](https://github.com/hypothesi/a11ied/commit/9c131f82be606281c9a711da7bd3843af12c3fc7) - Audit findings now say why they fail. A new finding needs a `reason` for its criterion, and
+  each `alsoFails` entry is `{"criterion", "reason"}` instead of a criterion id. The report
+  shows the reasons under "Why it fails". A worker that confirms an automated finding must
+  describe it in the new `confirm` list of the submission, or dismiss it, so the report no
+  longer repeats axe-core's rule text. `a1 audit finding update --reason "<criterion>=<text>"`
+  and the `reasons` argument of `audit_finding` edit a reason. A note that refers to another
+  page is rejected. The worker guide and work packet explain how to write notes and findings
+  in plain, concrete language.
+
 ## 0.1.1
 
 ### Patch Changes
