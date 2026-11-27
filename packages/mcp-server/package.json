@@ -1,6 +1,6 @@
 {
    "name": "@a11ied/mcp-server",
-   "version": "0.2.0",
+   "version": "0.3.0",
    "description": "The MCP server behind a1 mcp. Internal package of a11ied, published because the a1 CLI depends on it. Its API can change in any release; install a11ied instead.",
    "homepage": "https://github.com/hypothesi/a11ied/tree/master/packages/mcp-server#readme",
    "bugs": {
@@ -34,11 +34,11 @@
       "typecheck": "tsc -p tsconfig.json --noEmit"
    },
    "dependencies": {
-      "@a11ied/audit": "0.2.0",
-      "@a11ied/contracts": "0.2.0",
-      "@a11ied/core": "0.2.0",
-      "@a11ied/guidepup": "0.2.0",
-      "@a11ied/wcag-engine": "0.2.0",
+      "@a11ied/audit": "0.3.0",
+      "@a11ied/contracts": "0.3.0",
+      "@a11ied/core": "0.3.0",
+      "@a11ied/guidepup": "0.3.0",
+      "@a11ied/wcag-engine": "0.3.0",
       "@modelcontextprotocol/sdk": "^1.32.0",
       "zod": "^4.6.6"
    },

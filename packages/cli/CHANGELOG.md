@@ -1,5 +1,19 @@
 # a11ied
 
+## 0.3.0
+
+### Minor Changes
+
+- [`68ddb7a`](https://github.com/hypothesi/a11ied/commit/68ddb7ac19cbcc9b33af06f47e47f6111c559176) - `npx a11ied setup` now offers to install `a1` globally, and to add the a11ied skills and MCP server to the AI coding agents it finds, with a checkbox for each. It also asks before it changes system settings for VoiceOver or NVDA. `--yes` accepts every step.
+
+   The new `a1 update` command installs the latest version, and `a1`, `a1 --help`, `a1 doctor`, and the audit dashboard show a short notice when one is available. Set `NO_UPDATE_NOTIFIER` to turn the notice off.
+
+### Patch Changes
+
+- [`c87481d`](https://github.com/hypothesi/a11ied/commit/c87481df8bb1de5a585114c12810a35cf7633c42) - `a1 --version`, the `version` field of `--json` output, the version in `a1 doctor`, and the version the MCP server reports now match the installed version. They reported 0.1.0 in every release.
+
+- [`45fd1e1`](https://github.com/hypothesi/a11ied/commit/45fd1e1b1f68844b60e19907646cc4181365346e) - `a1` commands start about three times faster. `a1 sr next` and the other session commands went from about 0.6 seconds to 0.2 seconds, because the CLI now loads Playwright, jsdom, axe-core, and pngjs only when a command uses them.
+
 ## 0.2.0
 
 ### Minor Changes

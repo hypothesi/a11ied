@@ -1,6 +1,6 @@
 {
    "name": "@a11ied/compat",
-   "version": "0.2.0",
+   "version": "0.3.0",
    "description": "Programmatic screen reader and assistive technology compatibility query and Browserslist diagnostics engine for editors, linters, and bundlers.",
    "keywords": [
       "a11y",
@@ -44,7 +44,7 @@
       "typecheck": "tsc -p tsconfig.json --noEmit"
    },
    "dependencies": {
-      "@a11ied/support-data": "0.2.0",
+      "@a11ied/support-data": "0.3.0",
       "browserslist": "4.29.6"
    },
    "engines": {

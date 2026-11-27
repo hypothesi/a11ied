@@ -1,6 +1,6 @@
 {
    "name": "@a11ied/observe",
-   "version": "0.2.0",
+   "version": "0.3.0",
    "description": "Browser observation, page probes, and contrast sampling. Internal package of a11ied, published because the a1 CLI depends on it. Its API can change in any release; install a11ied instead.",
    "homepage": "https://github.com/hypothesi/a11ied/tree/master/packages/observe#readme",
    "bugs": {
@@ -34,7 +34,7 @@
       "prepack": "npm run build"
    },
    "dependencies": {
-      "@a11ied/contracts": "0.2.0",
+      "@a11ied/contracts": "0.3.0",
       "playwright": "^1.62.1",
       "proper-lockfile": "4.1.2",
       "yaml": "2.8.3",

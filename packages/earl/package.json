@@ -1,6 +1,6 @@
 {
    "name": "@a11ied/earl",
-   "version": "0.2.0",
+   "version": "0.3.0",
    "description": "W3C EARL 1.0 reports as JSON-LD. Internal package of a11ied, published because the a1 CLI depends on it. Its API can change in any release; install a11ied instead.",
    "homepage": "https://github.com/hypothesi/a11ied/tree/master/packages/earl#readme",
    "bugs": {
@@ -34,7 +34,7 @@
       "typecheck": "tsc -p tsconfig.json --noEmit"
    },
    "dependencies": {
-      "@a11ied/contracts": "0.2.0"
+      "@a11ied/contracts": "0.3.0"
    },
    "engines": {
       "node": ">=24"
