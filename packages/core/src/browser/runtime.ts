@@ -1,4 +1,4 @@
-import { chromium, type Browser } from 'playwright';
+import type { Browser } from 'playwright';
 
 import type {
    BrowserAutomationCandidate,
@@ -34,7 +34,12 @@ interface BrowserLaunchResult {
 function createDefaultBrowserRuntimeDeps(): BrowserRuntimeDeps {
    return {
       ...createDefaultBrowserPolicyDeps(),
-      launch: async (options) => chromium.launch(options),
+      // Loaded on first launch, so commands that never open a browser start faster.
+      launch: async (options) => {
+         const { chromium } = await import('playwright');
+
+         return chromium.launch(options);
+      },
    };
 }
 

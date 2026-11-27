@@ -1,5 +1,5 @@
 import type * as VirtualScreenReader from '@guidepup/virtual-screen-reader';
-import { JSDOM, type DOMWindow } from 'jsdom';
+import type { DOMWindow, JSDOM } from 'jsdom';
 
 import type { VirtualHost } from './virtual-host.js';
 import type { VirtualReader } from './virtual-reader.js';
@@ -33,9 +33,14 @@ function installDomGlobals(window: DOMWindow): void {
    }
 }
 
-function getDom(): JSDOM {
+/**
+ * The jsdom package loads on first use, so processes that never read a page start
+ * faster.
+ */
+async function createDom(): Promise<JSDOM> {
    if (!dom) {
-      dom = new JSDOM('<!doctype html><html><body></body></html>', {
+      const jsdom = await import('jsdom');
+      dom ??= new jsdom.JSDOM('<!doctype html><html><body></body></html>', {
          pretendToBeVisual: true,
          url: PLACEHOLDER_URL,
       });
@@ -44,17 +49,31 @@ function getDom(): JSDOM {
    return dom;
 }
 
+function getDom(): JSDOM {
+   if (!dom) {
+      throw new DriverCommandError(
+         'virtual-session-not-started',
+         'The JSDOM reader has no document yet. Start the session first.',
+         { engine: 'jsdom' },
+      );
+   }
+   return dom;
+}
+
 /** Returns the virtual reader, importing it only once the DOM globals are in place. */
 export async function loadVirtualReader(): Promise<VirtualReader> {
-   getDom();
+   await createDom();
    virtualModule ??= import('@guidepup/virtual-screen-reader');
    const loaded = await virtualModule;
    return loaded.virtual;
 }
 
 /** Replaces the document's content and URL in place. */
-function replaceVirtualDocument(document: { html: string; url: string }): void {
-   const current = getDom();
+async function replaceVirtualDocument(document: {
+   html: string;
+   url: string;
+}): Promise<void> {
+   const current = await createDom();
    const { window } = current;
    current.reconfigure({ url: document.url });
    const parsed = new window.DOMParser().parseFromString(document.html, 'text/html');
@@ -140,7 +159,7 @@ export function createJsdomVirtualHost(): VirtualHost {
       try {
          if (document) {
             await runtime.stop();
-            replaceVirtualDocument(document);
+            await replaceVirtualDocument(document);
          }
          await runtime.start();
       } catch (error) {

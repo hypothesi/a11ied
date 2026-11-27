@@ -1,9 +1,11 @@
-import { request, type APIRequestContext } from 'playwright';
-import { JSDOM } from 'jsdom';
+import { createRequire } from 'node:module';
+import type { JSDOM } from 'jsdom';
+import type { APIRequestContext, request } from 'playwright';
 import { DISCOVERY_USER_AGENT } from './robots.js';
 
 const DEFAULT_MAX_SITEMAPS = 50;
 const DEFAULT_TIMEOUT_MS = 10_000;
+const requireModule = createRequire(import.meta.url);
 
 export interface SitemapDiscoveryResult {
    urls: string[];
@@ -36,8 +38,10 @@ export function parseSitemap(
    xml: string,
    sourceUrl: string,
 ): { urls: string[]; childSitemaps: string[] } {
-   const document = new JSDOM(xml, { contentType: 'text/xml', url: sourceUrl }).window
-      .document;
+   // Required here, not imported, so commands that never read a sitemap start faster.
+   const jsdom: { JSDOM: typeof JSDOM } = requireModule('jsdom');
+   const document = new jsdom.JSDOM(xml, { contentType: 'text/xml', url: sourceUrl })
+      .window.document;
    const readLocations = (selector: string): string[] =>
       [...document.querySelectorAll(selector)]
          .map((element) => element.textContent?.trim())
@@ -103,6 +107,14 @@ async function readNextSitemap(state: SitemapState): Promise<void> {
    await readNextSitemap(state);
 }
 
+async function createRequestContext(
+   options: Parameters<typeof request.newContext>[0],
+): Promise<APIRequestContext> {
+   const playwright = await import('playwright');
+
+   return playwright.request.newContext(options);
+}
+
 /** Finds URLs from the conventional sitemap, robots.txt, and nested sitemap indexes. */
 export async function discoverSitemapUrls(
    startUrl: string,
@@ -111,7 +123,7 @@ export async function discoverSitemapUrls(
    const ownContext = options.requestContext === undefined;
    const requestContext =
       options.requestContext ??
-      (await request.newContext({
+      (await createRequestContext({
          extraHTTPHeaders: { 'user-agent': DISCOVERY_USER_AGENT },
          timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
          ...(options.storageStatePath ? { storageState: options.storageStatePath } : {}),

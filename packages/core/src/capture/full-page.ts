@@ -1,6 +1,6 @@
 import { runInOrder } from '@a11ied/guidepup';
 import type { Page } from 'playwright';
-import { PNG } from 'pngjs';
+import type { PNG } from 'pngjs';
 import { writeAtomic } from '../files/store.js';
 
 /**
@@ -55,7 +55,11 @@ function getTileHeight(scale: number): number {
    return Math.max(TILE_ALIGNMENT_CSS_PX, height - (height % TILE_ALIGNMENT_CSS_PX));
 }
 
-async function captureTiles(page: Page, metrics: FullPageMetrics): Promise<PNG[]> {
+async function captureTiles(
+   PngImage: typeof PNG,
+   page: Page,
+   metrics: FullPageMetrics,
+): Promise<PNG[]> {
    const tileHeight = getTileHeight(metrics.scale);
    const tiles: PNG[] = [],
       tops = Array.from(
@@ -70,21 +74,21 @@ async function captureTiles(page: Page, metrics: FullPageMetrics): Promise<PNG[]
          width: metrics.width,
          height: Math.min(tileHeight, metrics.height - top),
       };
-      tiles.push(PNG.sync.read(await page.screenshot({ fullPage: true, clip })));
+      tiles.push(PngImage.sync.read(await page.screenshot({ fullPage: true, clip })));
    });
    return tiles;
 }
 
-function stackTiles(tiles: readonly PNG[]): Buffer {
+function stackTiles(PngImage: typeof PNG, tiles: readonly PNG[]): Buffer {
    const height = tiles.reduce((memo, tile) => memo + tile.height, 0),
       width = tiles[0]?.width ?? 0;
-   const picture = new PNG({ width, height });
+   const picture = new PngImage({ width, height });
    let row = 0;
    for (const tile of tiles) {
       tile.data.copy(picture.data, row * width * RGBA_BYTES);
       row += tile.height;
    }
-   return PNG.sync.write(picture);
+   return PngImage.sync.write(picture);
 }
 
 /**
@@ -98,7 +102,9 @@ export async function screenshotFullPage(page: Page, path: string): Promise<void
       await page.screenshot({ path, fullPage: true });
       return;
    }
-   await writeAtomic(path, stackTiles(await captureTiles(page, metrics)), {
+   const { PNG: PngImage } = await import('pngjs');
+   const tiles = await captureTiles(PngImage, page, metrics);
+   await writeAtomic(path, stackTiles(PngImage, tiles), {
       mode: SCREENSHOT_FILE_MODE,
    });
 }

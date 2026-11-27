@@ -1,7 +1,8 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { homedir } from 'node:os';
-import { chromium } from 'playwright';
+import type { chromium } from 'playwright';
 
 import type {
    BrowserAutomationCandidate,
@@ -9,6 +10,7 @@ import type {
 } from '@a11ied/contracts';
 
 const { env: processEnv, platform: processPlatform } = process;
+const requireModule = createRequire(import.meta.url);
 
 type BrowserPathLookup = readonly string[];
 
@@ -90,7 +92,9 @@ export function createDefaultBrowserPolicyDeps(): BrowserPolicyDeps {
       playwrightExecutablePath: () => {
          let executablePath = '';
          try {
-            executablePath = chromium.executablePath();
+            // Required here, not imported, so commands that never check browsers start faster.
+            const playwright: { chromium: typeof chromium } = requireModule('playwright');
+            executablePath = playwright.chromium.executablePath();
          } catch {
             executablePath = '';
          }

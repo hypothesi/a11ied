@@ -1,5 +1,4 @@
 import type { AxeRuleResult } from '@a11ied/contracts';
-import axe from 'axe-core';
 import type { Page } from 'playwright';
 import { CliEnvironmentError } from '../errors/cli-errors.js';
 
@@ -11,7 +10,6 @@ import type { DocumentLoad } from '../targets/parse.js';
 
 const LOW_CONTENT_NODE_THRESHOLD = 10;
 const LOW_CONTENT_TEXT_THRESHOLD = 50;
-const axeScriptSource = axe.source;
 const activeScans = new WeakSet<Page>();
 
 export interface AxeScanOptions extends WithBrowserPageOptions {
@@ -136,7 +134,8 @@ async function scanBrowserPage(
          buildWaitForSelectorOptions(options.timeoutMs),
       );
    }
-   await page.evaluate(axeScriptSource);
+   const { default: axe } = await import('axe-core');
+   await page.evaluate(axe.source);
    return page.evaluate(runAxeInPage, args);
 }
 

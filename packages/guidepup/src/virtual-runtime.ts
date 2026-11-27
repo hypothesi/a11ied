@@ -133,10 +133,13 @@ export function createVirtualRuntime(options: VirtualRuntimeOptions): VirtualRun
          state.container = undefined;
       },
       async isStarted(): Promise<boolean> {
-         const container = state.container,
-            document = options.getWindow().document;
+         const { container } = state;
+         // A runtime that never started may have no window yet.
+         if (container === undefined) {
+            return false;
+         }
+         const { document } = options.getWindow();
          return (
-            container !== undefined &&
             container.isConnected &&
             (container === document || container.ownerDocument === document)
          );

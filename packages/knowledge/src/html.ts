@@ -1,4 +1,5 @@
-import { JSDOM, VirtualConsole } from 'jsdom';
+import { createRequire } from 'node:module';
+import type { JSDOM, VirtualConsole } from 'jsdom';
 import {
    pageScanSchema,
    type PageElement,
@@ -10,6 +11,8 @@ import { listRelevantCriteria } from '@a11ied/wcag-engine';
 
 const MAX_ELEMENTS_PER_SIGNAL = 10;
 const MAX_SNIPPET_LENGTH = 120;
+
+const requireModule = createRequire(import.meta.url);
 
 export type PageScanSignals = PageSignal[];
 
@@ -220,7 +223,10 @@ function matchesDetector(
 }
 
 function detectDomSignals(html: string): PageSignal[] {
-   const dom = new JSDOM(html, { virtualConsole: new VirtualConsole() });
+   // Required here, not imported, so commands that never scan HTML start faster.
+   const jsdom: { JSDOM: typeof JSDOM; VirtualConsole: typeof VirtualConsole } =
+      requireModule('jsdom');
+   const dom = new jsdom.JSDOM(html, { virtualConsole: new jsdom.VirtualConsole() });
    const matches = new Map<SignalDetector, PageElement[]>();
 
    for (const element of dom.window.document.querySelectorAll('*')) {
