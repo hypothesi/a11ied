@@ -4,7 +4,7 @@ import { renderHtmlReport } from '../report/html.js';
 import { buildAuditReport } from '../report/model.js';
 import { createEvidenceResolver } from '../report/write.js';
 import { getAuditStatus } from '../status.js';
-import { renderDashboardHtml } from './render.js';
+import { renderDashboardHtml, type UpdateNotice } from './render.js';
 
 const DEFAULT_REFRESH_SECONDS = 5;
 const HTTP_OK = 200;
@@ -15,6 +15,11 @@ const LOCALHOST = '127.0.0.1';
 export interface DashboardServer {
    url: string;
    close: () => Promise<void>;
+}
+
+export interface DashboardServerOptions {
+   /** Read on every page request, so a notice found after startup still appears. */
+   getUpdateNotice?: () => UpdateNotice | undefined;
 }
 
 interface Reply {
@@ -28,7 +33,7 @@ function send(response: ServerResponse, reply: Reply): void {
    response.end(reply.body);
 }
 
-function route(audit: Audit, path: string): Reply {
+function route(audit: Audit, path: string, options: DashboardServerOptions): Reply {
    if (path === '/') {
       return {
          status: HTTP_OK,
@@ -36,6 +41,7 @@ function route(audit: Audit, path: string): Reply {
          body: renderDashboardHtml(audit, {
             refreshSeconds: DEFAULT_REFRESH_SECONDS,
             reportHref: '/report',
+            updateNotice: options.getUpdateNotice?.(),
          }),
       };
    }
@@ -65,11 +71,12 @@ function route(audit: Audit, path: string): Reply {
 export async function startDashboardServer(
    audit: Audit,
    port = 0,
+   options: DashboardServerOptions = {},
 ): Promise<DashboardServer> {
    const server: Server = createServer((request, response) => {
       try {
          const { pathname } = new URL(request.url ?? '/', 'http://localhost');
-         send(response, route(audit, pathname));
+         send(response, route(audit, pathname, options));
       } catch (error) {
          send(response, {
             status: HTTP_ERROR,

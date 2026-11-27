@@ -8,6 +8,7 @@ import { registerCaptureCommand } from './commands/capture.js';
 import { registerCheckCommand } from './commands/check.js';
 import { registerSetupCommand } from './commands/setup.js';
 import { registerTalkBackCommand } from './commands/talkback.js';
+import { registerUpdateCommand } from './commands/update.js';
 import { registerPatternCommands } from './commands/pattern.js';
 import { registerSearchCommand } from './commands/search.js';
 import { registerWcagCommands } from './commands/wcag.js';
@@ -138,6 +139,7 @@ function registerAllCommands(program: Command): void {
    registerSearchCommand(program);
    registerDoctorCommand(program);
    registerSetupCommand(program);
+   registerUpdateCommand(program);
    registerMcpCommand(program);
    registerHelpAllCommand(program);
 }

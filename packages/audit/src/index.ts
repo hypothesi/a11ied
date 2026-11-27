@@ -101,5 +101,5 @@ export {
    type ReportFormat,
    type WrittenReport,
 } from './report/write.js';
-export { renderDashboardHtml } from './dashboard/render.js';
+export { renderDashboardHtml, type UpdateNotice } from './dashboard/render.js';
 export { startDashboardServer, type DashboardServer } from './dashboard/server.js';

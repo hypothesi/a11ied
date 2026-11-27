@@ -5,6 +5,7 @@
  * and can pause the updates. Without the script the page reloads itself instead.
  */
 const MS_PER_SECOND = 1000;
+const DISMISSED_UPDATE_KEY = 'a11ied-dashboard-dismissed-update';
 const clock = new Intl.DateTimeFormat(undefined, { timeStyle: 'medium' });
 const calendar = new Intl.DateTimeFormat(undefined, {
    dateStyle: 'medium',
@@ -35,6 +36,48 @@ function showLocalTimes() {
    for (const zone of document.querySelectorAll('[data-dash-zone]')) {
       zone.textContent = 'your local time';
    }
+}
+
+/** Storage can be blocked, so a failure only means the notice comes back on reload. */
+function readDismissedUpdate() {
+   try {
+      return localStorage.getItem(DISMISSED_UPDATE_KEY) ?? '';
+   } catch {
+      return '';
+   }
+}
+
+function saveDismissedUpdate(version) {
+   try {
+      localStorage.setItem(DISMISSED_UPDATE_KEY, version);
+   } catch {
+      // The notice is still hidden until the page reloads.
+   }
+}
+
+/** Hides the update notice the reader dismissed. A newer version shows it again. */
+function hideDismissedUpdate() {
+   const notice = document.querySelector('[data-dash-update]');
+   if (
+      notice instanceof HTMLElement &&
+      notice.dataset.dashUpdate === readDismissedUpdate()
+   ) {
+      notice.hidden = true;
+   }
+}
+
+/** Moves focus to the page heading, so it is not lost with the removed button. */
+function dismissUpdate(event) {
+   const button = event.target.closest('[data-dash-update-dismiss]');
+   const notice = button?.closest('[data-dash-update]');
+   if (!notice) {
+      return;
+   }
+   saveDismissedUpdate(notice.dataset.dashUpdate);
+   notice.hidden = true;
+   const pageHeading = document.querySelector('h1');
+   pageHeading.tabIndex = -1;
+   pageHeading.focus();
 }
 
 /** The page's replaceable parts as the server sent them, by key. */
@@ -81,6 +124,7 @@ function showPage(next, served) {
    if (focused !== '' && document.activeElement === document.body) {
       document.querySelector(`#${CSS.escape(focused)}`)?.focus({ preventScroll: true });
    }
+   hideDismissedUpdate();
    showLocalTimes();
 }
 
@@ -153,6 +197,8 @@ function start(controls) {
       await update();
    });
    controls.button.hidden = false;
+   document.addEventListener('click', dismissUpdate);
+   hideDismissedUpdate();
    showLocalTimes();
    showState(controls, 'on', `Live. Updated ${clock.format(new Date())}`);
    timer = setTimeout(update, controls.seconds * MS_PER_SECOND);

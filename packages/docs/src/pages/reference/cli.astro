@@ -15,7 +15,9 @@ const toc = [
    { id: 'wcag', label: 'a1 wcag and a1 search' },
    { id: 'pattern', label: 'a1 pattern' },
    { id: 'audit', label: 'a1 audit' },
-   { id: 'doctor', label: 'a1 doctor and a1 setup' },
+   { id: 'doctor', label: 'a1 doctor' },
+   { id: 'setup', label: 'a1 setup' },
+   { id: 'update', label: 'a1 update' },
    { id: 'other', label: 'a1 mcp and a1 help-all' },
    { id: 'exit-codes', label: 'Exit codes' },
    { id: 'environment', label: 'Environment' },
@@ -67,8 +69,10 @@ const toc = [
       <dl class="defs">
          <dt><a href="#doctor"><code>a1 doctor</code></a></dt>
          <dd>Check the browser and screen reader setup.</dd>
-         <dt><a href="#doctor"><code>a1 setup</code></a></dt>
-         <dd>Install what VoiceOver or NVDA sessions need.</dd>
+         <dt><a href="#setup"><code>a1 setup</code></a></dt>
+         <dd>Install <code>a1</code>, add it to your AI coding agents, and set up VoiceOver or NVDA.</dd>
+         <dt><a href="#update"><code>a1 update</code></a></dt>
+         <dd>Install the latest version of a11ied.</dd>
          <dt><a href="#other"><code>a1 mcp</code></a></dt>
          <dd>Start the MCP server for AI agents.</dd>
          <dt><a href="#other"><code>a1 help-all</code></a></dt>
@@ -513,7 +517,7 @@ a1 pattern check http://localhost:3000 --pattern dialog --selector '[role="dialo
          <dt><code>audit note &lt;unit&gt; [message]</code></dt>
          <dd>Keep a claim alive and log progress.</dd>
          <dt><code>audit block &lt;unit&gt; --reason</code></dt>
-         <dd>Set aside a unit that needs a person. <code>--worker</code> names who blocked it.</dd>
+         <dd>Set aside a unit that needs a person. <code>--worker</code> records who blocked it.</dd>
          <dt><code>audit reopen &lt;unit&gt; --reason</code></dt>
          <dd>Put a blocked or finished unit back in the queue.</dd>
          <dt><code>audit limitation [text]</code></dt>
@@ -539,7 +543,7 @@ a1 pattern check http://localhost:3000 --pattern dialog --selector '[role="dialo
    </section>
 
    <section>
-      <h2 id="doctor">a1 doctor and a1 setup</h2>
+      <h2 id="doctor">a1 doctor</h2>
       <p>
          <code>a1 doctor</code> checks this machine and lists the setup steps still needed,
          each with its command.
@@ -554,16 +558,77 @@ a1 pattern check http://localhost:3000 --pattern dialog --selector '[role="dialo
          <dt><code>--strict</code></dt>
          <dd>Exit 3 when a required step is missing. Without it, <code>doctor</code> exits 0.</dd>
       </dl>
-      <p>
-         <code>a1 setup</code> runs the Guidepup setup that VoiceOver and NVDA sessions need,
-         then runs <code>doctor</code>. It exits 3 when a step is still missing.
-         <code>--skip-setup</code> skips the macOS permission step, and
-         <code>--skip-install</code> skips the download.
-      </p>
       <pre><code>a1 doctor
 a1 doctor --task reader --sr voiceover --recording
-a1 doctor --strict
-a1 setup</code></pre>
+a1 doctor --strict</code></pre>
+   </section>
+
+   <section>
+      <h2 id="setup">a1 setup</h2>
+      <p>
+         Run it once on each machine. Before a global install, run it as
+         <code>npx a11ied setup</code>. It asks before each step:
+      </p>
+      <ol>
+         <li>If <code>a1</code> is not installed globally, it offers to install it with npm.</li>
+         <li>
+            It finds the AI coding agents on this machine, such as Claude Code, Codex, and
+            Cursor, and offers to add the a11ied skills and the MCP server to them. The skills,
+            the MCP server, and each agent are checkboxes. They are installed for every
+            project. Running setup again updates them.
+         </li>
+         <li>
+            It offers to run the Guidepup setup that VoiceOver and NVDA sessions need. This
+            changes system settings. The simulated screen reader needs no setup.
+         </li>
+         <li>It runs <code>doctor</code>.</li>
+      </ol>
+      <dl class="defs">
+         <dt><code>-y</code>, <code>--yes</code></dt>
+         <dd>Do every step without asking, for every agent it finds.</dd>
+         <dt><code>--json</code></dt>
+         <dd>Print JSON. It never asks, so without <code>--yes</code> only the screen reader steps run.</dd>
+         <dt><code>--skip-setup</code></dt>
+         <dd>Skip the macOS permission step.</dd>
+         <dt><code>--skip-install</code></dt>
+         <dd>Skip the screen reader download.</dd>
+      </dl>
+      <p>
+         It exits 3 when a step failed or one is still missing. The agents are set up with
+         <a href="https://aix.a1st.dev/">aix</a>. To remove them, run
+         <code>npx -y @a1st/aix remove skill a11ied</code>,
+         <code>npx -y @a1st/aix remove skill a11ied-audit</code>, and
+         <code>npx -y @a1st/aix remove mcp a11ied</code>.
+      </p>
+      <pre><code>npx a11ied setup
+a1 setup --yes --skip-setup</code></pre>
+   </section>
+
+   <section>
+      <h2 id="update">a1 update</h2>
+      <p>
+         Asks the npm registry for the latest version of a11ied. If it is newer, it asks,
+         then runs <code>npm install --global a11ied@&lt;version&gt;</code>. When a11ied is a
+         dependency of a project, it changes nothing and prints the command to run in that
+         project.
+      </p>
+      <dl class="defs">
+         <dt><code>-y</code>, <code>--yes</code></dt>
+         <dd>Install without asking.</dd>
+         <dt><code>--json</code></dt>
+         <dd>Print JSON. It never asks, so it installs only with <code>--yes</code>.</dd>
+      </dl>
+      <pre><code>a1 update
+a1 update --yes</code></pre>
+      <h3 id="update-notice">Update notices</h3>
+      <p>
+         Once a day, a1 checks for a newer version in a background process. When it finds
+         one, <code>a1</code>, <code>a1 --help</code>, and <code>a1 doctor</code> print a short
+         notice at the end of their output. The notice is never printed with
+         <code>--json</code> or <code>--version</code>, when the output is not a terminal, or
+         in CI. The <a href="#audit">audit dashboard</a> shows the same notice as a banner you
+         can dismiss.
+      </p>
    </section>
 
    <section>
@@ -608,6 +673,8 @@ a1 setup</code></pre>
          <dd>Where audits are kept. Default: <code>.a11ied/audits</code> in the working directory.</dd>
          <dt><code>A11IED_EVIDENCE</code></dt>
          <dd>The file of <code>pattern record</code> judgments. Default: <code>.a11ied/evidence.jsonl</code>.</dd>
+         <dt><code>NO_UPDATE_NOTIFIER</code></dt>
+         <dd>Set to any value to turn off the daily update check and its notices.</dd>
          <dt><code>A11IED_DRIVER_MODE</code></dt>
          <dd><code>in-process</code> keeps a simulated session inside the calling process. By default a session runs in a separate process, so it outlives the command that started it.</dd>
       </dl>

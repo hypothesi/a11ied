@@ -6,7 +6,7 @@
 
 It does three jobs:
 
-- **Look things up**: [WCAG criteria, techniques](https://hypothesi.github.io/a11ied/reference/wcag-data/), [test methods](https://hypothesi.github.io/a11ied/test-methods/), axe rules, and ARIA patterns, pinned from the W3C sources and shipped with the package, so lookups work offline.
+- **Look things up**: [WCAG criteria, techniques](https://hypothesi.github.io/a11ied/reference/wcag-data/), [test methods](https://hypothesi.github.io/a11ied/test-methods/), axe rules, and ARIA patterns, pinned from the W3C sources and included in the package, so lookups work offline.
 - **Check while you build**: [axe scans](https://hypothesi.github.io/a11ied/guides/violations/), the accessibility tree, screenshots at a viewport, zoom level, or focus stop, [real screen reader sessions](https://hypothesi.github.io/a11ied/guides/screen-reader/) with VoiceOver and NVDA through Guidepup, and TalkBack on Android over adb.
 - **Audit**: run an [agent-driven WCAG audit](https://hypothesi.github.io/a11ied/guides/audit/) of a site, page, feature, or mobile app, with durable progress, parallel workers, a live dashboard, and a client-ready report.
 
@@ -18,14 +18,15 @@ It does three jobs:
 ## install
 
 ```sh
-npm install a11ied
+npx a11ied setup
 ```
 
-This installs the `a1` command (also available as `a11ied`). It needs Node.js 24 or later.
+Setup offers to install the `a1` command globally (it is also available as `a11ied`), to add the a11ied skills and MCP server to your AI coding agents, and to set up VoiceOver or NVDA. It needs Node.js 24 or later. To use a11ied as a library or in tests, run `npm install a11ied` in your project.
 
 ```sh
 a1 doctor     # check this machine and list the setup steps still needed
-a1 setup      # run the Guidepup setup steps for VoiceOver or NVDA, then re-check
+a1 setup      # connect AI agents, set up VoiceOver or NVDA, then re-check
+a1 update     # install the latest version
 a1 help-all   # every command and option in one listing
 ```
 

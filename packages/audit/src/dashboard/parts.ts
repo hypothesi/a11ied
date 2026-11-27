@@ -28,6 +28,8 @@ const ICON_PATHS = {
       '<circle cx="8" cy="8" r="5.5"/><circle class="dash-icon-fill" cx="8" cy="8" r="2"/>',
    blocked: '<path d="M8 2.5l6 10.5H2z"/><path d="M8 6.5v3M8 11.2v.3"/>',
    pending: '<circle cx="8" cy="8" r="5.5" stroke-dasharray="2.2 2.2"/>',
+   update: '<path d="M8 13V3.5M4 7.5l4-4 4 4"/>',
+   close: '<path d="M4 4l8 8M12 4l-8 8"/>',
 } as const;
 
 export type IconName = keyof typeof ICON_PATHS;

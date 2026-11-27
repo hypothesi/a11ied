@@ -6,6 +6,7 @@ import mcpConfig from '../../samples/mcp-config.json.txt?raw';
 
 const toc = [
    { id: 'what', label: 'What an agent needs' },
+   { id: 'setup', label: 'Set up everything at once' },
    { id: 'skills', label: 'Install the skills' },
    { id: 'connect', label: 'Install the CLI or connect the MCP server' },
    { id: 'first', label: 'Make the first request' },
@@ -38,6 +39,17 @@ const toc = [
    </section>
 
    <section>
+      <h2 id="setup">Set up everything at once</h2>
+      <pre><code>npx a11ied setup</code></pre>
+      <p>
+         Setup offers to install <code>a1</code> globally, then finds the coding agents on
+         your machine. Check the skills, the MCP server, or both, and the agents that get
+         them. They are installed for every project. Restart the agent so it loads them.
+         The sections below do the same steps one at a time.
+      </p>
+   </section>
+
+   <section>
       <h2 id="skills">Install the skills</h2>
       <pre><code>{SKILLS_INSTALL_COMMAND}</code></pre>
       <p>
@@ -59,8 +71,11 @@ const toc = [
    <section>
       <h2 id="connect">Install the CLI or connect the MCP server</h2>
       <h3>The CLI</h3>
-      <pre><code>npm install --global a11ied</code></pre>
-      <p>The agent runs <code>a1</code> commands in its terminal, the same ones you would type.</p>
+      <pre><code>npx a11ied setup</code></pre>
+      <p>
+         Say yes to the global install. The agent runs <code>a1</code> commands in its
+         terminal, the same ones you would type.
+      </p>
       <h3>The MCP server</h3>
       <p>
          <abbr title="Model Context Protocol">MCP</abbr> is the standard that lets an agent
@@ -133,7 +148,7 @@ const toc = [
 
    <section>
       <h2 id="prompts">Prompts that work</h2>
-      <p>Name the page, the behavior, and what you want back.</p>
+      <p>State the page, the behavior, and what you want back.</p>
       <dl class="defs">
          <dt>Test a page</dt>
          <dd>"Use the a11ied skill to test http://localhost:3000/checkout. Run the scan first. Then test the field labels and the error messages with the screen reader. Report the two separately."</dd>
@@ -152,7 +167,7 @@ const toc = [
       <h2 id="rules">What the skills teach</h2>
       <dl class="defs defs--wide">
          <dt>Look up the criterion first</dt>
-         <dd>When a task names a WCAG criterion, the agent reads how to test it before it tests anything.</dd>
+         <dd>When a task mentions a WCAG criterion, the agent reads how to test it before it tests anything.</dd>
          <dt>Match the test to the criterion</dt>
          <dd>A scan covers part of some criteria. The rest need a screen reader, the keyboard, or judgment.</dd>
          <dt>Start simulated, finish real</dt>

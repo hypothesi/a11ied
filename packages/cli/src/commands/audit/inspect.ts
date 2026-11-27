@@ -17,6 +17,7 @@ import {
    writeAuditReport,
    type FindingEdit,
    type ReportFormat,
+   type UpdateNotice,
 } from '@a11ied/audit';
 import type { Command } from 'commander';
 import { CliUsageError } from '#core';
@@ -315,12 +316,34 @@ function registerDashboard(parent: Command): void {
          });
          return;
       }
-      const { openAudit, resolveAuditDir } = await import('@a11ied/audit');
+      const [{ openAudit, resolveAuditDir }, updateCheck] = await Promise.all([
+         import('@a11ied/audit'),
+         import('../../lib/update-check.js'),
+      ]);
       const audit = openAudit(resolveAuditDir(options.audit));
+      // Filled in by the background check below, after the server is already serving.
+      const notice: { current?: UpdateNotice } = {};
       const server = await startDashboardServer(
          audit,
          options.port ? Number.parseInt(options.port, 10) : DEFAULT_PORT,
+         {
+            getUpdateNotice: () => notice.current,
+         },
       );
+
+      // The page shows the notice on its next live update after the registry answers.
+      if (updateCheck.isUpdateCheckEnabled()) {
+         updateCheck
+            .checkLatestVersion()
+            .then((check) => {
+               if (check.isUpdateAvailable) {
+                  notice.current = { ...check, command: updateCheck.getUpdateHint() };
+               }
+            })
+            .catch(() => {
+               // An offline machine just shows no notice.
+            });
+      }
       process.stdout.write(`Audit dashboard: ${server.url}\nPress Ctrl+C to stop.\n`);
    });
 }

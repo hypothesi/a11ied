@@ -42,11 +42,39 @@ const PHASES: Readonly<Record<AuditStatus['phase'], PhaseText>> = {
    complete: { label: 'Complete', detail: 'Every unit is done.', icon: 'done' },
 };
 
+export interface UpdateNotice {
+   readonly currentVersion: string;
+   readonly latestVersion: string;
+   /** What a person runs to update. */
+   readonly command: string;
+}
+
 export interface DashboardOptions {
    /** Seconds between automatic updates. Omit for a static snapshot. */
    refreshSeconds?: number | undefined;
    /** Link to the live report, when one is being served. */
    reportHref?: string | undefined;
+   /** Shown as a dismissible ribbon when a newer a11ied is available. */
+   updateNotice?: UpdateNotice | undefined;
+}
+
+/**
+ * The wrapper is always there, so a notice that arrives after the page loaded is added by
+ * a live update. The script hides a notice the reader dismissed for that version.
+ */
+function renderUpdateNotice(notice: UpdateNotice | undefined): string {
+   if (notice === undefined) {
+      return '<div data-live="update"></div>';
+   }
+   const latest = escapeHtml(notice.latestVersion);
+   return [
+      '<div data-live="update">',
+      `<aside class="dash-update" data-dash-update="${latest}" aria-label="Update available">`,
+      `<p>${icon('update')}a11ied ${latest} is available. You have ${escapeHtml(notice.currentVersion)}. Run <code>${escapeHtml(notice.command)}</code> to update.</p>`,
+      `<button type="button" class="dash-update-dismiss" data-dash-update-dismiss aria-label="Dismiss the update notice">${icon('close')}</button>`,
+      '</aside>',
+      '</div>',
+   ].join('');
 }
 
 function renderTarget(target: string): string {
@@ -140,7 +168,7 @@ export function renderDashboardHtml(
       '<link rel="icon" href="data:,">',
       refresh,
       `<title>${escapeHtml(`${String(status.units.percentDone)}% ${status.config.name}`)} audit</title><style>${DASHBOARD_STYLES}</style></head>`,
-      `<body>${ICON_SPRITE}<main class="dash" data-dash-announcement="${escapeHtml(describeForAnnouncement(status))}">`,
+      `<body>${ICON_SPRITE}${isLive ? renderUpdateNotice(options.updateNotice) : ''}<main class="dash" data-dash-announcement="${escapeHtml(describeForAnnouncement(status))}">`,
       `<header class="dash-header">${renderTitle(status, options)}${renderFreshness(audit, options)}</header>`,
       '<p class="dash-hidden" role="status" data-dash-announcer></p>',
       renderMeta(status),

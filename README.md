@@ -14,14 +14,15 @@
 ## install
 
 ```sh
-npm install a11ied
+npx a11ied setup
 ```
 
-This installs the `a1` CLI command (also available as `a11ied`):
+Setup offers to install the `a1` command globally (it is also available as `a11ied`), to add the a11ied skills and MCP server to your AI coding agents, and to set up VoiceOver or NVDA. To use a11ied as a library or in tests, run `npm install a11ied` in your project.
 
 ```sh
 a1 doctor                    # check this machine and list the setup steps still needed
-a1 setup                     # run the Guidepup setup steps for VoiceOver or NVDA, then re-check
+a1 setup                     # connect AI agents, set up VoiceOver or NVDA, then re-check
+a1 update                    # install the latest version
 a1 wcag 4.1.3                # one criterion: techniques, failures, test method, next command
 a1 wcag rule color-contrast  # an axe rule mapped back to its criteria and fixes
 a1 pattern combobox          # the ARIA pattern: its keyboard and attribute tables

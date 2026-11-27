@@ -57,7 +57,13 @@ const cliCommands: CliCommand[] = [
    },
    {
       name: 'setup',
-      summary: 'Run the Guidepup setup steps this host still needs.',
+      summary:
+         'Install a1 globally, add the skills and MCP server to AI agents, and run the Guidepup setup steps.',
+      maturity: 'ready',
+   },
+   {
+      name: 'update',
+      summary: 'Check the npm registry for a newer a11ied and install it.',
       maturity: 'ready',
    },
    {

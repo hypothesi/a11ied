@@ -29,6 +29,8 @@ const INTENTIONALLY_UNCOVERED: ReadonlySet<string> = new Set([
    'audit finding help',
    // Runs interactive OS permission prompts and downloads screen reader assets.
    'setup',
+   // Replaces the installed package, which would replace this running server too.
+   'update',
    // Reads a file of JSON-lines actions for shell scripting, not one call.
    'sr batch',
    // Composes sr_session start + sr_action read-all + sr_transcript.

@@ -68,18 +68,26 @@
       "@a11ied/core": "0.2.0",
       "@a11ied/guidepup": "0.2.0",
       "@a11ied/mcp-server": "0.2.0",
+      "@a1st/aix-core": "0.10.1",
+      "@a1st/aix-schema": "0.10.1",
+      "@clack/prompts": "1.9.0",
       "chalk": "6.0.0",
       "clipboardy": "5.3.2",
       "commander": "^15.0.0",
       "ink": "7.1.1",
+      "is-installed-globally": "1.0.1",
       "pngjs": "7.0.0",
       "proper-lockfile": "4.1.2",
       "react": "19.2.8",
+      "semver": "7.8.5",
       "string-width": "8.1.0",
+      "update-notifier": "7.3.1",
       "wrap-ansi": "10.0.1"
    },
    "devDependencies": {
-      "@types/react": "19.2.18"
+      "@types/react": "19.2.18",
+      "@types/semver": "7.7.1",
+      "@types/update-notifier": "6.0.8"
    },
    "peerDependencies": {
       "vitest": ">=4.0.0"

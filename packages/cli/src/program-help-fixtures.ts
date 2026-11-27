@@ -38,7 +38,8 @@ export const topLevelHelpCases: HelpCase[] = [
 
       Set up this machine:
         doctor            Check the browser and screen reader setup.
-        setup             Install what the screen readers need.
+        setup             Install a1, connect AI agents, and set up screen readers.
+        update            Install the latest version of a1.
 
       Other:
         mcp               Serve the MCP tools over stdio.

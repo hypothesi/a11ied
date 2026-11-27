@@ -14,6 +14,7 @@ const EXPECTED_READY_COMMANDS = [
    'audit',
    'doctor',
    'setup',
+   'update',
    'mcp',
 ];
 
