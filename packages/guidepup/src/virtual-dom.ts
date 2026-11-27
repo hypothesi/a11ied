@@ -33,10 +33,7 @@ function installDomGlobals(window: DOMWindow): void {
    }
 }
 
-/**
- * The jsdom package loads on first use, so processes that never read a page start
- * faster.
- */
+/** The jsdom package loads on first use, so processes that never read a page start faster. */
 async function createDom(): Promise<JSDOM> {
    if (!dom) {
       const jsdom = await import('jsdom');
