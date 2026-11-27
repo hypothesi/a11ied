@@ -1,5 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
+import packageJson from '../package.json' with { type: 'json' };
+
 import { registerResources } from './resources/register.js';
 import { registerAuditTools } from './tools/audit.js';
 import { registerExecutionTools } from './tools/execution.js';
@@ -19,7 +21,7 @@ import { registerTalkBackTool } from './tools/talkback.js';
 export function createMcpServer(): McpServer {
    const server = new McpServer({
       name: 'a11ied',
-      version: '0.1.0',
+      version: packageJson.version,
    });
 
    registerResources(server);

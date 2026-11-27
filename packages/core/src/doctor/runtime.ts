@@ -22,13 +22,13 @@ import {
 } from '@a11ied/guidepup';
 
 import { createBrowserAutomationPolicy } from '../browser/policy.js';
+import { PACKAGE_VERSION } from '../package-version.js';
 import { readDoctorBrowserVersion, readDoctorReaderVersion } from './versions.js';
 import {
    checkWindowsRecording,
    probeScreenRecordingWithScreencapture,
 } from './recording.js';
 
-const PACKAGE_VERSION = '0.1.0';
 const COMMAND_TIMEOUT_MS = 5000;
 
 const supportedTargets: Target[] = [

@@ -1,7 +1,7 @@
 import { request, type APIRequestContext } from 'playwright';
 import { JSDOM } from 'jsdom';
+import { DISCOVERY_USER_AGENT } from './robots.js';
 
-const USER_AGENT = 'a11ied-audit-discover/0.1.0';
 const DEFAULT_MAX_SITEMAPS = 50;
 const DEFAULT_TIMEOUT_MS = 10_000;
 
@@ -19,7 +19,7 @@ export async function fetchRobotsSitemaps(
 ): Promise<string[]> {
    const robotsUrl = new URL('/robots.txt', originUrl).toString();
    const response = await requestContext.get(robotsUrl, {
-      headers: { 'user-agent': USER_AGENT },
+      headers: { 'user-agent': DISCOVERY_USER_AGENT },
    });
    if (!response.ok()) {
       return [];
@@ -69,7 +69,7 @@ interface SitemapState {
 
 async function loadSitemap(source: string, state: SitemapState): Promise<void> {
    const response = await state.requestContext.get(source, {
-      headers: { 'user-agent': USER_AGENT },
+      headers: { 'user-agent': DISCOVERY_USER_AGENT },
    });
    if (!response.ok()) {
       state.failures.push({ source, message: `HTTP ${String(response.status())}` });
@@ -112,7 +112,7 @@ export async function discoverSitemapUrls(
    const requestContext =
       options.requestContext ??
       (await request.newContext({
-         extraHTTPHeaders: { 'user-agent': USER_AGENT },
+         extraHTTPHeaders: { 'user-agent': DISCOVERY_USER_AGENT },
          timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
          ...(options.storageStatePath ? { storageState: options.storageStatePath } : {}),
       }));

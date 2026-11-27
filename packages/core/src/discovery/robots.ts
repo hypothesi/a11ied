@@ -1,4 +1,5 @@
 import { createRequire } from 'node:module';
+import { PACKAGE_VERSION } from '../package-version.js';
 
 interface RobotsParserResult {
    isAllowed: (url: string, userAgent?: string) => boolean | undefined;
@@ -8,7 +9,7 @@ const robotsParser: (url: string, contents: string) => RobotsParserResult = crea
    import.meta.url,
 )('robots-parser');
 
-export const DISCOVERY_USER_AGENT = 'a11ied-audit-discover/0.1.0';
+export const DISCOVERY_USER_AGENT = `a11ied-audit-discover/${PACKAGE_VERSION}`;
 
 /** Builds a standards-aware robots.txt check using the MIT-licensed robots-parser package. */
 export function buildRobotsCheck(
