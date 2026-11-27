@@ -1,6 +1,6 @@
 {
    "name": "@a11ied/support-data",
-   "version": "0.2.0",
+   "version": "0.3.0",
    "description": "Versioned screen reader and assistive technology compatibility dataset, test cases, and W3C ARIA-AT reports.",
    "keywords": [
       "a11y",
