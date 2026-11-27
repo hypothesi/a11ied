@@ -1,7 +1,7 @@
 ---
 import ChevronDown from '@lucide/astro/icons/chevron-down';
 import ExternalLink from '@lucide/astro/icons/external-link';
-import AriaAtCommandsList from '../../../components/support/aria-at-commands-list.astro';
+import AriaAtTestDisclosure from '../../../components/support/aria-at-test-disclosure.astro';
 import AssertionSummaryBar from '../../../components/support/assertion-summary-bar.astro';
 import OutcomeBadge from '../../../components/support/outcome-badge.astro';
 import PlatformIcon from '../../../components/support/platform-icon.astro';
@@ -11,7 +11,6 @@ import {
    listAriaAtPlans,
    type AriaAtEnvironmentReport,
    type AriaAtPlanFile,
-   type AriaAtTestResult,
 } from '@a11ied/support-data';
 import DocShell from '../../../layouts/doc-shell.astro';
 import { docsLinks } from '../../../lib/nav';
@@ -24,6 +23,7 @@ import {
    groupByScreenReaderAndOs,
    parseLicense,
 } from '../../../lib/support-grouping';
+import { formatGroupCount } from '../../../lib/support-rows';
 import '../../../styles/support-rows.css';
 
 export function getStaticPaths(): readonly {
@@ -49,18 +49,6 @@ function getReportOutcome(
 ): 'pass' | 'partial' | 'fail' {
    const derived = deriveOutcomeFromSummary(report.summary);
    return derived === 'fail' || derived === 'partial' ? derived : 'pass';
-}
-
-function getTestFailureCount(test: AriaAtTestResult): number {
-   let failed = 0;
-   for (const cmd of test.commandResults) {
-      for (const assertion of cmd.assertions) {
-         if (assertion.verdict === 'fail') {
-            failed += 1;
-         }
-      }
-   }
-   return failed;
 }
 
 const groupedReports = groupByScreenReaderAndOs(plan.reports, (report) => ({
@@ -163,7 +151,10 @@ const toc = [
                <div class="srGroup-head">
                   <h3 class="srGroup-title">{group.screenReaderType}</h3>
                   <span class="srGroup-count">
-                     {group.totalCount} {group.totalCount === 1 ? 'report' : 'reports'}
+                     {formatGroupCount(
+                        group.osGroups.flatMap((osGroup) => osGroup.items.map(getReportOutcome)),
+                        'report',
+                     )}
                   </span>
                </div>
 
@@ -242,40 +233,15 @@ const toc = [
 
                                     <AssertionSummaryBar summary={report.summary} />
 
-                                    <div class="srPlan-tests">
-                                       {report.tests.map((test) => {
-                                          const failCount = getTestFailureCount(test);
-
-                                          return (
-                                             <details class="srPlan-testDetails">
-                                                <summary class="srPlan-testSummary">
-                                                   <ChevronDown
-                                                      class="srPlan-testMarker"
-                                                      size={15}
-                                                      aria-hidden="true"
-                                                      focusable="false"
-                                                   />
-                                                   <span class="srPlan-testLabel">
-                                                      <strong>#{test.rowNumber}</strong> · {test.testTitle}
-                                                   </span>
-                                                   <span class="srPlan-testMeta">
-                                                      <span>
-                                                         {test.commandResults.length} {test.commandResults.length === 1 ? 'command' : 'commands'}
-                                                      </span>
-                                                      {failCount > 0 && (
-                                                         <span class="srPlan-failCount">
-                                                            {failCount} {failCount === 1 ? 'failure' : 'failures'}
-                                                         </span>
-                                                      )}
-                                                   </span>
-                                                </summary>
-                                                <AriaAtCommandsList
-                                                   commandResults={test.commandResults}
-                                                   showFeatureLinks
-                                                />
-                                             </details>
-                                          );
-                                       })}
+                                    <div class="srRow-testList">
+                                       {report.tests.map((test) => (
+                                          <AriaAtTestDisclosure
+                                             title={test.testTitle}
+                                             rowNumber={test.rowNumber}
+                                             commandResults={test.commandResults}
+                                             showFeatureLinks
+                                          />
+                                       ))}
                                     </div>
                                  </div>
                               </details>
@@ -421,104 +387,6 @@ const toc = [
    align-items: center;
    gap: 0.25rem;
    font-weight: 700;
-}
-
-.srPlan-tests {
-   display: flex;
-   flex-direction: column;
-   border-top: 1px solid color-mix(in oklch, var(--ink) 14%, transparent);
-}
-
-.srPlan-testDetails {
-   border-bottom: 1px solid color-mix(in oklch, var(--ink) 12%, transparent);
-}
-
-.srPlan-testDetails:last-child {
-   border-bottom: none;
-}
-
-.srPlan-testSummary {
-   list-style: none;
-   display: flex;
-   flex-wrap: wrap;
-   align-items: center;
-   gap: 0.45rem 0.75rem;
-   min-block-size: 40px;
-   padding-block: 0.45rem;
-   padding-inline: 0.1rem;
-   cursor: pointer;
-   font-size: 0.92rem;
-   font-weight: 700;
-   color: var(--ink);
-   user-select: none;
-}
-
-.srPlan-testSummary::-webkit-details-marker {
-   display: none;
-}
-
-.srPlan-testMarker {
-   flex-shrink: 0;
-   color: var(--ink-soft);
-   transform: rotate(-90deg);
-}
-
-.srPlan-testDetails[open] > .srPlan-testSummary .srPlan-testMarker {
-   transform: rotate(0deg);
-}
-
-details.srPlan-testDetails::details-content {
-   interpolate-size: allow-keywords;
-   overflow: clip;
-   contain: layout;
-}
-
-details.srPlan-testDetails:not([open])::details-content {
-   block-size: 0;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-   .srPlan-testMarker {
-      transition: transform 0.2s ease;
-   }
-
-   details.srPlan-testDetails::details-content {
-      transition: block-size, content-visibility, display;
-      transition-duration: 0.22s;
-      transition-timing-function: ease-in-out;
-      transition-behavior: allow-discrete;
-   }
-}
-
-.srPlan-testLabel {
-   flex: 1 1 240px;
-   min-inline-size: 0;
-}
-
-.srPlan-testMeta {
-   margin-inline-start: auto;
-   display: inline-flex;
-   align-items: center;
-   gap: 0.5rem;
-   font-size: 0.82rem;
-   font-weight: 400;
-   color: var(--ink-soft);
-}
-
-.srPlan-failCount {
-   display: inline-flex;
-   align-items: center;
-   padding-block: 0.16rem;
-   padding-inline: 0.45rem;
-   border: none;
-   border-radius: 3px;
-   background: #fde8e8;
-   color: #7f1d1d;
-   font-family: var(--display);
-   font-size: 0.74rem;
-   font-weight: 700;
-   text-transform: uppercase;
-   line-height: 1;
 }
 
 .srPlan-attribution {

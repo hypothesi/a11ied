@@ -15,6 +15,8 @@ interface ParsedFeatureCard {
    readonly verdictEl: HTMLElement | undefined;
    readonly verdictDotEl: HTMLElement | undefined;
    readonly envCells: readonly HTMLButtonElement[];
+   readonly toggleBtn: HTMLButtonElement | undefined;
+   readonly detailEl: HTMLElement | undefined;
 }
 
 interface FeatureFilterState {
@@ -49,6 +51,8 @@ interface TileDetailData {
 }
 
 const DEBOUNCE_MS = 200;
+/** A search that leaves this many features or fewer opens them, as the answer. */
+const AUTO_OPEN_MAX = 3;
 
 const BL_STATUS_LABELS: Readonly<Record<string, string>> = {
    supported: 'Supported in target',
@@ -343,11 +347,90 @@ function initTileDetails(): void {
    }
 }
 
+function isCardOpen(card: ParsedFeatureCard): boolean {
+   return card.toggleBtn?.getAttribute('aria-expanded') === 'true';
+}
+
+function setCardOpen(card: ParsedFeatureCard, isOpen: boolean): void {
+   if (!card.toggleBtn || !card.detailEl) {
+      return;
+   }
+   card.toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+   card.detailEl.hidden = !isOpen;
+   delete card.element.dataset.autoOpen;
+   if (!isOpen) {
+      closeCardDrawer(card.element);
+   }
+}
+
+/** Opens the few features a search leaves, and closes them again when it widens. */
+function syncAutoOpenCards(cards: readonly ParsedFeatureCard[], hasQuery: boolean): void {
+   const visibleCards = cards.filter((card) => !card.element.hidden);
+   const shouldOpen = hasQuery && visibleCards.length <= AUTO_OPEN_MAX;
+
+   for (const card of cards) {
+      const isAutoOpen = card.element.dataset.autoOpen === 'true';
+
+      if (shouldOpen && !card.element.hidden && !isCardOpen(card)) {
+         setCardOpen(card, true);
+         card.element.dataset.autoOpen = 'true';
+      } else if (isAutoOpen && (!shouldOpen || card.element.hidden)) {
+         setCardOpen(card, false);
+      }
+   }
+}
+
+function updateExpandAllLabel(elements: HeroElements): void {
+   const visibleCards = elements.cards.filter((card) => !card.element.hidden);
+   const isAllOpen =
+      visibleCards.length > 0 && visibleCards.every((card) => isCardOpen(card));
+
+   if (elements.expandAllBtn) {
+      elements.expandAllBtn.dataset.expanded = isAllOpen ? 'true' : 'false';
+      elements.expandAllBtn.textContent = isAllOpen ? 'Collapse all' : 'Expand all';
+   }
+}
+
+function initCardToggles(elements: HeroElements): void {
+   for (const card of elements.cards) {
+      const rowEl = card.element.querySelector('[data-ciu-row]');
+
+      card.toggleBtn?.addEventListener('click', () => {
+         setCardOpen(card, !isCardOpen(card));
+         updateExpandAllLabel(elements);
+      });
+
+      // A click anywhere on the row toggles it, except on the row's own link or button.
+      rowEl?.addEventListener('click', (event) => {
+         const isOwnControl =
+            event.target instanceof Element && event.target.closest('a, button');
+
+         if (!isOwnControl && (globalThis.getSelection()?.isCollapsed ?? true)) {
+            setCardOpen(card, !isCardOpen(card));
+            updateExpandAllLabel(elements);
+         }
+      });
+   }
+
+   elements.expandAllBtn?.addEventListener('click', () => {
+      const shouldOpen = elements.expandAllBtn?.dataset.expanded !== 'true';
+
+      for (const card of elements.cards) {
+         if (!card.element.hidden) {
+            setCardOpen(card, shouldOpen);
+         }
+      }
+      updateExpandAllLabel(elements);
+   });
+}
+
 interface HeroElements {
    readonly searchInput: HTMLInputElement;
    readonly presetSelect: HTMLSelectElement;
    readonly typeSelect: HTMLSelectElement;
    readonly resetBtn: HTMLButtonElement;
+   readonly expandAllBtn: HTMLButtonElement | undefined;
+   readonly tableEl: HTMLElement | undefined;
    readonly statusEl: HTMLElement | undefined;
    readonly emptyEl: HTMLElement | undefined;
    readonly pairMatrixEl: HTMLElement | undefined;
@@ -373,6 +456,8 @@ function queryHeroElements(): HeroElements | undefined {
       return undefined;
    }
 
+   const expandAllBtn = document.querySelector('#ciu-expand-all');
+   const tableEl = document.querySelector('#ciu-features-table');
    const statusEl = document.querySelector('#ciu-status');
    const emptyEl = document.querySelector('#ciu-empty');
    const pairMatrixEl = document.querySelector('#ciu-pair-matrix');
@@ -387,6 +472,8 @@ function queryHeroElements(): HeroElements | undefined {
       const verdictRowEl = element.querySelector('[data-ciu-verdict-row]');
       const verdictEl = element.querySelector('[data-ciu-verdict]');
       const verdictDotEl = element.querySelector('[data-ciu-verdict-dot]');
+      const toggleBtn = element.querySelector('[data-ciu-toggle]');
+      const detailEl = element.querySelector('[data-ciu-feature-detail]');
       return {
          element,
          searchText: (element.dataset.search ?? '').toLowerCase(),
@@ -396,6 +483,8 @@ function queryHeroElements(): HeroElements | undefined {
          verdictEl: verdictEl instanceof HTMLElement ? verdictEl : undefined,
          verdictDotEl: verdictDotEl instanceof HTMLElement ? verdictDotEl : undefined,
          envCells: [...element.querySelectorAll<HTMLButtonElement>('[data-env-key]')],
+         toggleBtn: toggleBtn instanceof HTMLButtonElement ? toggleBtn : undefined,
+         detailEl: detailEl instanceof HTMLElement ? detailEl : undefined,
       };
    });
 
@@ -404,6 +493,8 @@ function queryHeroElements(): HeroElements | undefined {
       presetSelect,
       typeSelect,
       resetBtn,
+      expandAllBtn: expandAllBtn instanceof HTMLButtonElement ? expandAllBtn : undefined,
+      tableEl: tableEl instanceof HTMLElement ? tableEl : undefined,
       statusEl: statusEl instanceof HTMLElement ? statusEl : undefined,
       emptyEl: emptyEl instanceof HTMLElement ? emptyEl : undefined,
       pairMatrixEl: pairMatrixEl instanceof HTMLElement ? pairMatrixEl : undefined,
@@ -495,6 +586,7 @@ function initFeatureSearch(): void {
    }
    const elements: HeroElements = queried;
 
+   initCardToggles(elements);
    restoreControlValue(elements.searchInput, 'q');
    restoreControlValue(elements.presetSelect, 'bl');
    restoreControlValue(elements.typeSelect, 'ftype');
@@ -536,11 +628,17 @@ function initFeatureSearch(): void {
       if (elements.emptyEl) {
          elements.emptyEl.hidden = visibleCount > 0;
       }
+      if (elements.tableEl) {
+         elements.tableEl.hidden = visibleCount === 0;
+      }
 
-      // A search moves the matching cards up to the search box.
+      // A search moves the matching features up to the search box.
       if (elements.pairMatrixEl) {
          elements.pairMatrixEl.hidden = state.query !== '';
       }
+
+      syncAutoOpenCards(elements.cards, state.query !== '');
+      updateExpandAllLabel(elements);
 
       updateBrowserslistBanner(elements, state.preset);
 
@@ -587,6 +685,8 @@ interface TestTableElements {
    readonly envSelect: HTMLSelectElement;
    readonly outcomeSelect: HTMLSelectElement;
    readonly resetBtn: HTMLButtonElement;
+   readonly moreFiltersEl: HTMLDetailsElement | undefined;
+   readonly moreCountEl: HTMLElement | undefined;
    readonly statusEl: HTMLElement | undefined;
    readonly emptyEl: HTMLElement | undefined;
    readonly tableWrap: HTMLElement | undefined;
@@ -600,6 +700,8 @@ function queryTestTableElements(): TestTableElements | undefined {
    const envSelect = document.querySelector('#sr-environment');
    const outcomeSelect = document.querySelector('#sr-outcome');
    const resetBtn = document.querySelector('#sr-reset');
+   const moreFiltersEl = document.querySelector('#sr-more-filters');
+   const moreCountEl = document.querySelector('#sr-more-filters-count');
    const statusEl = document.querySelector('#sr-filter-status');
    const emptyEl = document.querySelector('#sr-empty-state');
    const tableWrap = document.querySelector('.srIndex-tableWrap');
@@ -624,6 +726,9 @@ function queryTestTableElements(): TestTableElements | undefined {
       envSelect,
       outcomeSelect,
       resetBtn,
+      moreFiltersEl:
+         moreFiltersEl instanceof HTMLDetailsElement ? moreFiltersEl : undefined,
+      moreCountEl: moreCountEl instanceof HTMLElement ? moreCountEl : undefined,
       statusEl: statusEl instanceof HTMLElement ? statusEl : undefined,
       emptyEl: emptyEl instanceof HTMLElement ? emptyEl : undefined,
       tableWrap: tableWrap instanceof HTMLElement ? tableWrap : undefined,
@@ -664,6 +769,26 @@ function matchesTestRow(
    }
 
    return true;
+}
+
+/**
+ * A filter inside the closed "More filters" group still narrows the table, so the group
+ * says how many of its filters are set.
+ */
+function updateMoreFiltersCount(
+   elements: TestTableElements,
+   state: TestFilterState,
+): number {
+   const activeCount = [state.category, state.browserType, state.environment].filter(
+      (value) => value !== 'all',
+   ).length;
+
+   if (elements.moreCountEl) {
+      elements.moreCountEl.hidden = activeCount === 0;
+      elements.moreCountEl.textContent = `(${String(activeCount)} set)`;
+   }
+
+   return activeCount;
 }
 
 function initTestCaseFilters(): void {
@@ -736,6 +861,8 @@ function initTestCaseFilters(): void {
          elements.emptyEl.hidden = visibleCount > 0;
       }
 
+      updateMoreFiltersCount(elements, state);
+
       if (updateURL) {
          syncPairsToURL([
             ['tq', state.query],
@@ -773,6 +900,10 @@ function initTestCaseFilters(): void {
    });
 
    applyFilters(true, false);
+
+   if (elements.moreFiltersEl && updateMoreFiltersCount(elements, readState()) > 0) {
+      elements.moreFiltersEl.open = true;
+   }
 }
 
 function initSupportPage(): void {

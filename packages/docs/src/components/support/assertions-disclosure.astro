@@ -8,6 +8,8 @@ export interface Props {
    summary?: AssertionSummary;
    label?: string;
    mode?: 'disclosure' | 'inline';
+   /** Whether a disclosure starts open. */
+   open?: boolean;
 }
 
 const {
@@ -15,6 +17,7 @@ const {
    summary,
    label = 'Spec assertions',
    mode = 'disclosure',
+   open = false,
 } = Astro.props;
 
 const summaryText = summary
@@ -37,7 +40,7 @@ const summaryText = summary
       <AssertionsBody assertions={assertions} />
    </div>
 ) : (
-   <details class="srAssert">
+   <details class="srAssert" open={open}>
       <summary class="srAssert-summary">
          <ChevronDown class="srAssert-marker" size={16} aria-hidden="true" focusable="false" />
          <span class="srAssert-summaryText">{label}</span>

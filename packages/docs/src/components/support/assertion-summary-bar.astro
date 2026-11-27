@@ -4,9 +4,12 @@ import type { AssertionSummary, PriorityCounts } from '@a11ied/support-data/type
 export interface Props {
    summary: AssertionSummary;
    compact?: boolean;
+   /** Renders spans only, for use inside a summary element or a line of text. */
+   inline?: boolean;
 }
 
-const { summary, compact = false } = Astro.props;
+const { summary, compact = false, inline = false } = Astro.props;
+const Wrapper = inline ? 'span' : 'div';
 
 function getTierState(counts: PriorityCounts): 'ok' | 'warn' | 'fail' {
    if (counts.failed > 0) {
@@ -19,7 +22,7 @@ function getTierState(counts: PriorityCounts): 'ok' | 'warn' | 'fail' {
 }
 ---
 
-<div class={`srSummaryBar${compact ? ' srSummaryBar--compact' : ''}`}>
+<Wrapper class={`srSummaryBar${compact ? ' srSummaryBar--compact' : ''}`}>
    {summary.must.total > 0 && (
       <span class={`srSummaryBar-pill srSummaryBar-pill--${getTierState(summary.must)}`}>
          <strong>MUST</strong> {summary.must.passed}/{summary.must.total}
@@ -50,7 +53,7 @@ function getTierState(counts: PriorityCounts): 'ok' | 'warn' | 'fail' {
          0 side effects
       </span>
    )}
-</div>
+</Wrapper>
 
 <style>
 .srSummaryBar {

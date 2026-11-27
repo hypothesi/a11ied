@@ -12,6 +12,7 @@
    min-inline-size: 0;
 }
 
+.srGroups[hidden],
 .srGroup[hidden],
 .srOsGroup[hidden],
 .srRow[hidden] {
@@ -340,8 +341,49 @@ details.srRow:not([open])::details-content {
    font-weight: 700;
 }
 
+.srRow-testList {
+   display: flex;
+   flex-direction: column;
+   min-inline-size: 0;
+}
+
 .srRow-itemNotes {
    margin: 0;
    font-size: 0.88rem;
    color: var(--ink-soft);
+}
+
+.srGroup-titles {
+   display: flex;
+   flex-direction: column;
+   gap: 0.15rem;
+   min-inline-size: 0;
+}
+
+.srGroup-kind {
+   font-size: 0.8rem;
+   color: var(--ink-soft);
+}
+
+.srUnit {
+   display: flex;
+   flex-direction: column;
+   gap: 0.45rem;
+   min-inline-size: 0;
+}
+
+.srRow-unitList {
+   display: flex;
+   flex-direction: column;
+   gap: 0.85rem;
+}
+
+.srRow-unitSlot + .srRow-unitSlot {
+   padding-block-start: 0.65rem;
+   border-top: 1px solid color-mix(in oklch, var(--ink) 14%, transparent);
+}
+
+/* Under a test's own heading, a result does not repeat the test's name and outcome. */
+[data-results-view='test'] .srUnit-head {
+   display: none;
 }

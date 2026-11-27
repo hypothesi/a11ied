@@ -1,5 +1,6 @@
 ---
 import { Code } from 'astro:components';
+import ChevronRight from '@lucide/astro/icons/chevron-right';
 import RotateCcw from '@lucide/astro/icons/rotate-ccw';
 import Search from '@lucide/astro/icons/search';
 import {
@@ -23,24 +24,43 @@ import {
    type FeatureReport,
    type TestOutcome,
 } from '@a11ied/support-data';
+import InfoTip from '../../components/info-tip.astro';
 import OutcomeBadge from '../../components/support/outcome-badge.astro';
 import PairMatrix from '../../components/support/pair-matrix.astro';
 import PlatformIcon from '../../components/support/platform-icon.astro';
+import PlatformIconSprite from '../../components/support/platform-icon-sprite.astro';
 import SupportShare from '../../components/support/support-share.astro';
 import DocShell from '../../layouts/doc-shell.astro';
 import { docsLinks } from '../../lib/nav';
+import { normalizeBrowserFamily } from '../../lib/platforms';
 import {
    formatFeatureSummary,
    formatNameAndVersion,
+   formatRowBrowser,
+   formatRowOsVersion,
    formatScreenReader,
+   isVirtualScreenReader,
+   normalizeOsName,
+   normalizeScreenReaderType,
+   NOT_TESTED_LABEL,
    parseLicense,
 } from '../../lib/support-grouping';
-import { getSupportShare, type SupportShare as FeatureSupportShare } from '../../lib/support-share';
+import {
+   buildPairMatrix,
+   formatSharePercentages,
+   getHeatLevel,
+   getSupportShare,
+   listScreenReaderShares,
+   type SupportShare as FeatureSupportShare,
+} from '../../lib/support-share';
 
 const MAX_CELLS_PER_COL = 4;
 const MAX_TARGETS_PREVIEW = 8;
 const MAJOR_MINOR_PARTS = 2;
 const DATE_PREFIX_LEN = 10;
+const PERCENT = 100;
+/** The toggle, the feature name, and the share across all screen readers. */
+const LEADING_COLUMN_COUNT = 3;
 
 const BROWSERSLIST_PRESETS = [
    { id: 'defaults', label: 'defaults', query: 'defaults' },
@@ -261,7 +281,7 @@ function formatShortBrowser(env: FeatureEnvironmentResult): string {
    }
 
    if (isPending) {
-      return `${name} · Pending`;
+      return `${name} · ${NOT_TESTED_LABEL}`;
    }
    if (name === 'WKWebView') {
       return 'WKWebView';
@@ -291,9 +311,7 @@ function formatShortTileSub(env: FeatureEnvironmentResult, colID: ColumnId): str
          return `JAWS ${extractMajorVersion(env.screenReaderVersion)}${sourceTag}`;
       }
       case 'ios-vo': {
-         return env.osVersion.toLowerCase() === 'pending'
-            ? 'iOS · Pending'
-            : `iOS ${env.osVersion}`;
+         return env.osVersion.toLowerCase() === 'pending' ? 'iOS' : `iOS ${env.osVersion}`;
       }
       case 'virtual': {
          return `Guidepup virtual ${env.screenReaderVersion}`;
@@ -304,22 +322,19 @@ function formatShortTileSub(env: FeatureEnvironmentResult, colID: ColumnId): str
    }
 }
 
-function formatCompactOS(os: string, osVersion: string): string {
-   if (!osVersion || osVersion.toLowerCase().startsWith('not recorded')) {
-      return os;
-   }
-   return `${os} ${osVersion}`;
+function getScreenReaderKey(screenReader: string, os: string): string {
+   return `${screenReader}|${os}`;
 }
 
-function getAccentState(share: FeatureSupportShare): CellState {
-   if (share.pairCount === 0) {
-      return 'untested';
-   }
-   if (share.supportedScore === share.pairCount) {
-      return 'pass';
-   }
-   return share.supportedScore + share.partialScore === 0 ? 'fail' : 'partial';
+function formatBarWidth(score: number, pairCount: number): string {
+   return `width: ${String((score / pairCount) * PERCENT)}%`;
 }
+
+const matrixRows = buildPairMatrix(features);
+const isTestedRow = (row: (typeof matrixRows)[number]): boolean =>
+   row.cells.some((cell) => cell.state === 'tested');
+const screenReaderColumns = matrixRows.filter((row) => isTestedRow(row));
+const untestedScreenReaders = matrixRows.filter((row) => !isTestedRow(row));
 
 interface PresetVerdictPayload {
    readonly status: string;
@@ -342,9 +357,9 @@ function buildTileDetail(
 ): TileDetailPayload {
    const webviewLabel = env.browserType === 'webview' ? ' · WebView' : '';
    const sourceLabel = env.source === 'local' ? 'a11ied' : 'W3C ARIA-AT';
-   const title = `${formatScreenReader(env.screenReader, env.screenReaderVersion)} on ${env.browser} ${env.browserVersion}${webviewLabel}`;
-   const recorded = env.testedAt ? env.testedAt.slice(0, DATE_PREFIX_LEN) : 'Pending';
-   const meta = `OS: ${formatCompactOS(env.os, env.osVersion)} · Device: ${env.device} · Source: ${sourceLabel} · Recorded: ${recorded}`;
+   const title = `${formatScreenReader(env.screenReader, env.screenReaderVersion)} on ${formatRowBrowser(env.browser, env.browserVersion)}${webviewLabel}`;
+   const recorded = env.testedAt ? env.testedAt.slice(0, DATE_PREFIX_LEN) : NOT_TESTED_LABEL;
+   const meta = `OS: ${formatRowOsVersion(env.os, env.osVersion)} · Device: ${env.device} · Source: ${sourceLabel} · Recorded: ${recorded}`;
 
    const { must, should, may, severeSideEffects, moderateSideEffects } = env.summary;
    const parts: string[] = [];
@@ -388,7 +403,7 @@ interface PreparedFeature {
    readonly feature: FeatureReport;
    readonly summaryLine: string;
    readonly share: FeatureSupportShare;
-   readonly accentState: CellState;
+   readonly screenReaderShares: ReadonlyMap<string, FeatureSupportShare>;
    readonly columns: ReturnType<typeof buildFeatureColumns>;
    readonly presetVerdicts: Readonly<Record<string, PresetVerdictPayload>>;
    readonly searchBlob: string;
@@ -428,12 +443,56 @@ const preparedFeatures: PreparedFeature[] = features.map((feature) => {
       feature,
       summaryLine: formatFeatureSummary(feature),
       share,
-      accentState: getAccentState(share),
+      screenReaderShares: new Map(
+         listScreenReaderShares(feature).map((entry) => [
+            getScreenReaderKey(entry.screenReader, entry.os),
+            entry.share,
+         ]),
+      ),
       columns: buildFeatureColumns(feature, matchedKeyUnion),
       presetVerdicts,
       searchBlob,
    };
 });
+
+type EnvironmentFile = (typeof environmentFiles)[number];
+
+interface EnvironmentColumnGroup {
+   readonly screenReader: string;
+   readonly os: string;
+   readonly files: EnvironmentFile[];
+}
+
+const LEGEND_OUTCOMES: readonly TestOutcome[] = ['pass', 'partial', 'fail', 'not-applicable', 'untested'];
+
+/** The test cases table has one column per environment, grouped under its screen reader. */
+function groupEnvironmentColumns(files: readonly EnvironmentFile[]): readonly EnvironmentColumnGroup[] {
+   const groups = new Map<string, EnvironmentColumnGroup>();
+
+   for (const envFile of files) {
+      const { screenReader, os } = envFile.environment;
+      const isVirtual = isVirtualScreenReader(screenReader);
+      const name = isVirtual ? 'Simulated' : normalizeScreenReaderType(screenReader);
+      const osName = isVirtual ? '' : normalizeOsName(os);
+      const key = getScreenReaderKey(name, osName);
+      const group = groups.get(key) ?? { screenReader: name, os: osName, files: [] };
+
+      group.files.push(envFile);
+      groups.set(key, group);
+   }
+
+   return [...groups.values()];
+}
+
+function formatBrowserColumn(envFile: EnvironmentFile): string {
+   const { browser, browserType } = envFile.environment;
+
+   return normalizeBrowserFamily(browser, browserType) ?? browser.replace(/^Google /u, '');
+}
+
+const environmentGroups = groupEnvironmentColumns(environmentFiles);
+const groupedEnvironmentFiles = environmentGroups.flatMap((group) => group.files);
+const groupStartIDs = new Set(environmentGroups.map((group) => group.files[0]?.environment.id));
 
 interface PreparedRow {
    readonly testCase: (typeof screenReaderTests)[number];
@@ -487,17 +546,19 @@ for (const diagnostic of report.diagnostics) {
 const toc = [
    { id: 'ciu-search-panel', label: 'Can I use search' },
    { id: 'pair-matrix-heading', label: 'Best browser for each screen reader' },
-   { id: 'ciu-tablist', label: 'Compatibility tables' },
+   { id: 'ciu-features-heading', label: 'Support for each feature' },
 ];
 ---
 
 <DocShell
    title="Screen reader compatibility"
-   summary="<p>What each screen reader says for ARIA and HTML features, by browser and operating system. Search for a feature, then pick a result to read the recorded speech.</p>"
+   summary="<p>See how well screen readers support ARIA and HTML features across browsers and operating systems. Look up a feature, compare browsers, and read the tests and recorded speech behind every result.</p>"
    links={docsLinks}
    variant="wide"
    toc={toc}
 >
+   <PlatformIconSprite />
+
    <div class="ciuViewSwitch">
       <div id="ciu-tablist" class="ciuTablist" role="tablist" aria-label="Compatibility views">
          <button
@@ -618,183 +679,279 @@ const toc = [
                <span id="ciu-bl-banner-text"></span>
             </div>
 
-            <div class="ciuHero-footer">
-               <p id="ciu-status" class="ciuHero-status" role="status" aria-live="polite">
-                  Showing {features.length} of {features.length} features.
-               </p>
-               <ul class="ciuLegend" aria-label="Compatibility legend">
-                  <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--pass" aria-hidden="true"></span>Supported</li>
-                  <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--partial" aria-hidden="true"></span>Partial</li>
-                  <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--fail" aria-hidden="true"></span>Fails MUST</li>
-                  <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--untested" aria-hidden="true"></span>Untested</li>
-               </ul>
-            </div>
-            <p class="ciuHero-key">
-               MUST and SHOULD are W3C ARIA-AT's terms. A MUST check is something a screen reader is
-               required to convey. A SHOULD check is recommended.
-            </p>
          </search>
       </div>
 
       <div id="ciu-pair-matrix" class="ciuPairMatrix">
-         <PairMatrix features={features} />
+         <PairMatrix rows={matrixRows} />
       </div>
 
-      <ul class="ciuCards">
-         {preparedFeatures.map(({ feature, summaryLine, share, accentState, columns, presetVerdicts, searchBlob }) => (
-            <li
-               class={`ciuCard ciuCard--${accentState}`}
-               data-ciu-card="true"
-               data-type={feature.type}
-               data-search={searchBlob}
-               data-browserslist={JSON.stringify(presetVerdicts)}
-            >
-               <div class="ciuCard-top">
-                  <div class="ciuCard-intro">
-                     <h2 class="ciuCard-title">
-                        <a href={`/compatibility/features/${feature.type}/${feature.refId}/`}>
-                           {feature.title}
-                        </a>
-                     </h2>
-                     <p class="ciuCard-desc">{summaryLine}</p>
-                  </div>
+      <section class="ciuFeatures" aria-labelledby="ciu-features-heading">
+         <div class="ciuFeatures-head">
+            <h2 id="ciu-features-heading" class="ciuFeatures-heading">Support for each feature</h2>
+            <p id="ciu-status" class="ciuHero-status" role="status" aria-live="polite">
+               Showing {features.length} of {features.length} features.
+            </p>
+            <button id="ciu-expand-all" type="button" class="ciuResetBtn" data-expanded="false">
+               Expand all
+            </button>
+         </div>
+         <p id="ciu-features-key" class="ciuFeatures-key">
+            Each number is the share of tests that pass, fully or partially, with that screen
+            reader across its browsers. Open a row to see every browser and version.
+            {untestedScreenReaders.length > 0 && (
+               <>
+                  {' '}No results yet for{' '}
+                  {untestedScreenReaders.map((row) => `${row.screenReader} on ${row.os}`).join(', ')}.
+               </>
+            )}
+         </p>
 
-                  <div class="ciuCard-support">
-                     <SupportShare share={share} />
-                     <div class="ciuCard-verdictRow" data-ciu-verdict-row hidden>
-                        <span class="ciuVerdictDot" data-ciu-verdict-dot aria-hidden="true"></span>
-                        <strong class="ciuCard-verdictText" data-ciu-verdict></strong>
-                     </div>
-                     <a
-                        href={`/compatibility/features/${feature.type}/${feature.refId}/`}
-                        class="ciuCard-reportLink"
-                     >
-                        Full report →
-                     </a>
-                  </div>
-               </div>
-
-               {columns.length > 0 && (
-                  <div class="ciuColumns">
-                     {columns.map((column) => (
-                        <div class={`ciuCol${column.id === 'virtual' ? ' ciuCol--virtual' : ''}`}>
-                           <h3 class="ciuCol-head"><PlatformIcon os={column.os} size={14} /> {column.label}</h3>
-                           <div class="ciuCol-stack">
-                              {column.cells.map((env) => {
-                                 const verdict = resolveCellState(env);
-                                 const detailPayload = buildTileDetail(feature, env, verdict.state);
-                                 return (
-                                    <button
-                                       type="button"
-                                       class={`ciuTile ciuTile--${verdict.state}`}
-                                       aria-expanded="false"
-                                       data-env-key={getEnvToken(env.environmentKey)}
-                                       data-tile-detail={JSON.stringify(detailPayload)}
-                                       title="Click to inspect exact OS, device, screen reader, and assertion details"
-                                    >
-                                       <span class="ciuTile-row">
-                                          <span class="ciuTile-browser">
-                                             <PlatformIcon browser={env.browser} browserType={env.browserType} size={14} />
-                                             {formatShortBrowser(env)}
-                                          </span>
-                                          <span class="ciuTile-ratio">{verdict.verdictGlyph}</span>
-                                       </span>
-                                       <span class="ciuTile-sub">{formatShortTileSub(env, column.id)}</span>
-                                    </button>
-                                 );
-                              })}
-                           </div>
-                           {column.extraCount > 0 && (
-                              <a
-                                 href={`/compatibility/features/${feature.type}/${feature.refId}/`}
-                                 class="ciuCol-more"
-                              >
-                                 +{column.extraCount} more
-                              </a>
-                           )}
-                        </div>
+         <div id="ciu-features-table" class="ciuTableWrap">
+            <table class="ciuTable" aria-describedby="ciu-features-key">
+               <caption class="ciuVisuallyHidden">Support for each feature by screen reader</caption>
+               <thead>
+                  <tr>
+                     <th scope="col" class="ciuTable-toggleHead">
+                        <span class="ciuVisuallyHidden">Results</span>
+                     </th>
+                     <th scope="col">Feature</th>
+                     <th scope="col">All screen readers</th>
+                     {screenReaderColumns.map((column) => (
+                        <th scope="col">
+                           <span class="ciuTable-colHead">
+                              <PlatformIcon os={column.os} size={14} />
+                              <span>
+                                 {column.screenReader}
+                                 <span class="ciuTable-colOs">{column.os}</span>
+                              </span>
+                           </span>
+                        </th>
                      ))}
-                  </div>
-               )}
+                  </tr>
+               </thead>
+               {preparedFeatures.map(({ feature, summaryLine, share, screenReaderShares, columns, presetVerdicts, searchBlob }) => {
+                  const detailID = `ciu-detail-${feature.type}-${feature.refId}`;
+                  const reportHref = `/compatibility/features/${feature.type}/${feature.refId}/`;
+                  const percentages = formatSharePercentages(share);
 
-               <div class="ciuDetailDrawer" data-ciu-detail hidden>
-                  <div class="ciuDetailDrawer-head">
-                     <strong data-ciu-detail-title></strong>
-                     <button type="button" class="ciuDetailDrawer-close" data-ciu-detail-close>
-                        Close
-                     </button>
-                  </div>
-                  <p class="ciuDetailDrawer-meta" data-ciu-detail-meta></p>
-                  <div class="ciuDetailDrawer-foot">
-                     <span class="ciuDetailDrawer-verdict" data-ciu-detail-verdict></span>
-                     <a href={`/compatibility/features/${feature.type}/${feature.refId}/`} data-ciu-detail-link>
-                        Inspect assertions &amp; speech transcript →
-                     </a>
-                  </div>
-               </div>
-
-               <div class="ciuCard-foot">
-                  <details class="ciuCard-more">
-                     <summary>
-                        {feature.localCases.length} test {feature.localCases.length === 1 ? 'case' : 'cases'} · {feature.ariaAtPlans.length} ARIA-AT {feature.ariaAtPlans.length === 1 ? 'plan' : 'plans'}
-                     </summary>
-                     <div class="ciuCard-moreBody">
-                        {feature.localCases.length > 0 && (
-                           <div class="ciuCard-linksGroup">
-                              <h4>Test cases</h4>
-                              <ul>
-                                 {feature.localCases.map((testCase) => (
-                                    <li>
-                                       <a href={`/compatibility/tests/${testCase.slug}/`}>{testCase.title}</a>
-                                       {' · '}
-                                       <a href={`/compatibility/cases/${testCase.slug}/`} class="ciuBareLink">
-                                          bare HTML
-                                       </a>
-                                    </li>
-                                 ))}
-                              </ul>
-                           </div>
-                        )}
-
-                        {feature.ariaAtPlans.length > 0 && (
-                           <div class="ciuCard-linksGroup">
-                              <h4>W3C ARIA-AT plans</h4>
-                              <ul>
-                                 {feature.ariaAtPlans.map((plan) => (
-                                    <li>
-                                       <a href={`/compatibility/aria-at/${plan.slug}/`}>
-                                          {plan.title} ({plan.versionString})
-                                       </a>
-                                    </li>
-                                 ))}
-                              </ul>
-                           </div>
-                        )}
-
-                        {feature.specURL && (
-                           <p class="ciuCard-specLink">
-                              <a href={feature.specURL} target="_blank" rel="noopener noreferrer">
-                                 {feature.linkText || 'Specification reference'} ↗
-                              </a>
-                           </p>
-                        )}
-                     </div>
-                  </details>
-
-                  {feature.specURL && (
-                     <a
-                        href={feature.specURL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="ciuCard-footSpec"
+                  return (
+                     <tbody
+                        class="ciuFeature"
+                        data-ciu-card="true"
+                        data-type={feature.type}
+                        data-search={searchBlob}
+                        data-browserslist={JSON.stringify(presetVerdicts)}
                      >
-                        W3C Spec ↗
-                     </a>
-                  )}
-               </div>
-            </li>
-         ))}
-      </ul>
+                        <tr class="ciuFeature-row" data-ciu-row>
+                           <td class="ciuFeature-toggleCell">
+                              <button
+                                 type="button"
+                                 class="ciuFeature-toggle"
+                                 aria-expanded="false"
+                                 aria-controls={detailID}
+                                 data-ciu-toggle
+                              >
+                                 <ChevronRight size={16} aria-hidden="true" focusable="false" />
+                                 <span class="ciuVisuallyHidden">Results for {feature.title}</span>
+                              </button>
+                           </td>
+                           <th scope="row" class="ciuFeature-name">
+                              <a href={reportHref}>{feature.title}</a>
+                           </th>
+                           <td class="ciuFeature-total" data-col-label="All screen readers">
+                              {share.pairCount > 0 ? (
+                                 <>
+                                    <strong class="ciuFeature-pct">{percentages.total}</strong>
+                                    <span class="ciuShareBar" aria-hidden="true">
+                                       <span class="ciuShareBar-seg ciuShareBar-seg--pass" style={formatBarWidth(share.supportedScore, share.pairCount)}></span>
+                                       <span class="ciuShareBar-seg ciuShareBar-seg--partial" style={formatBarWidth(share.partialScore, share.pairCount)}></span>
+                                    </span>
+                                    <span class="ciuVisuallyHidden">
+                                       total: {percentages.supported} fully, {percentages.partial} partially
+                                    </span>
+                                 </>
+                              ) : (
+                                 <span class="ciuFeature-none">Not tested</span>
+                              )}
+                           </td>
+                           {screenReaderColumns.map((column) => {
+                              const columnShare = screenReaderShares.get(getScreenReaderKey(column.screenReader, column.os));
+
+                              return columnShare ? (
+                                 <td
+                                    class={`ciuFeature-cell ciuFeature-cell--${getHeatLevel(columnShare)}`}
+                                    data-col-label={`${column.screenReader} ${column.os}`}
+                                 >
+                                    <span class="ciuFeature-pct">{formatSharePercentages(columnShare).total}</span>
+                                 </td>
+                              ) : (
+                                 <td class="ciuFeature-cell" data-col-label={`${column.screenReader} ${column.os}`}>
+                                    <span class="ciuFeature-none">Not tested</span>
+                                 </td>
+                              );
+                           })}
+                        </tr>
+                        <tr id={detailID} class="ciuFeature-detail" data-ciu-feature-detail hidden>
+                           <td colspan={screenReaderColumns.length + LEADING_COLUMN_COUNT}>
+                              <div class="ciuDetail">
+                                 <div class="ciuCard-top">
+                                    <div class="ciuCard-intro">
+                                       <p class="ciuCard-desc">{summaryLine}</p>
+                                       <a href={reportHref} class="ciuCard-reportLink">
+                                          Full report for {feature.title} →
+                                       </a>
+                                    </div>
+                                    <div class="ciuCard-support">
+                                       <SupportShare share={share} />
+                                       <p class="ciuCard-verdictRow" data-ciu-verdict-row hidden>
+                                          <span class="ciuVerdictDot" data-ciu-verdict-dot aria-hidden="true"></span>
+                                          <strong class="ciuCard-verdictText" data-ciu-verdict></strong>
+                                       </p>
+                                    </div>
+                                 </div>
+
+                                 {columns.length > 0 && (
+                                    <div class="ciuColumns">
+                                       {columns.map((column) => (
+                                          <div class={`ciuCol${column.id === 'virtual' ? ' ciuCol--virtual' : ''}`}>
+                                             <h3 class="ciuCol-head"><PlatformIcon os={column.os} size={14} /> {column.label}</h3>
+                                             <div class="ciuCol-stack">
+                                                {column.cells.map((env) => {
+                                                   const verdict = resolveCellState(env);
+                                                   const detailPayload = buildTileDetail(feature, env, verdict.state);
+                                                   return (
+                                                      <button
+                                                         type="button"
+                                                         class={`ciuTile ciuTile--${verdict.state}`}
+                                                         aria-expanded="false"
+                                                         data-env-key={getEnvToken(env.environmentKey)}
+                                                         data-tile-detail={JSON.stringify(detailPayload)}
+                                                         title="Click to inspect exact OS, device, screen reader, and assertion details"
+                                                      >
+                                                         <span class="ciuTile-row">
+                                                            <span class="ciuTile-browser">
+                                                               <PlatformIcon browser={env.browser} browserType={env.browserType} size={14} />
+                                                               {formatShortBrowser(env)}
+                                                            </span>
+                                                            <span class="ciuTile-ratio">{verdict.verdictGlyph}</span>
+                                                         </span>
+                                                         <span class="ciuTile-sub">{formatShortTileSub(env, column.id)}</span>
+                                                      </button>
+                                                   );
+                                                })}
+                                             </div>
+                                             {column.extraCount > 0 && (
+                                                <a
+                                                   href={`/compatibility/features/${feature.type}/${feature.refId}/`}
+                                                   class="ciuCol-more"
+                                                >
+                                                   +{column.extraCount} more
+                                                </a>
+                                             )}
+                                          </div>
+                                       ))}
+                                    </div>
+                                 )}
+
+                                 <div class="ciuDetail-key">
+                                    <ul class="ciuLegend" aria-label="Result colors">
+                                       <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--pass" aria-hidden="true"></span>Supported</li>
+                                       <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--partial" aria-hidden="true"></span>Partial</li>
+                                       <li class="ciuLegend-item">
+                                          <span class="ciuSwatch ciuSwatch--fail" aria-hidden="true"></span>Fails MUST
+                                          <InfoTip term="MUST" glossaryTerm="MUST, SHOULD, MAY">
+                                             A MUST check is something W3C ARIA-AT requires a screen reader to convey.
+                                          </InfoTip>
+                                       </li>
+                                       <li class="ciuLegend-item"><span class="ciuSwatch ciuSwatch--untested" aria-hidden="true"></span>Untested</li>
+                                    </ul>
+                                 </div>
+
+                                 <div class="ciuDetailDrawer" data-ciu-detail hidden>
+                                    <div class="ciuDetailDrawer-head">
+                                       <strong data-ciu-detail-title></strong>
+                                       <button type="button" class="ciuDetailDrawer-close" data-ciu-detail-close>
+                                          Close
+                                       </button>
+                                    </div>
+                                    <p class="ciuDetailDrawer-meta" data-ciu-detail-meta></p>
+                                    <div class="ciuDetailDrawer-foot">
+                                       <span class="ciuDetailDrawer-verdict" data-ciu-detail-verdict></span>
+                                       <a href={`/compatibility/features/${feature.type}/${feature.refId}/`} data-ciu-detail-link>
+                                          Inspect assertions &amp; speech transcript →
+                                       </a>
+                                    </div>
+                                 </div>
+
+                                 <div class="ciuCard-foot">
+                                    <details class="ciuCard-more">
+                                       <summary>
+                                          {feature.localCases.length} test {feature.localCases.length === 1 ? 'case' : 'cases'} · {feature.ariaAtPlans.length} ARIA-AT {feature.ariaAtPlans.length === 1 ? 'plan' : 'plans'}
+                                       </summary>
+                                       <div class="ciuCard-moreBody">
+                                          {feature.localCases.length > 0 && (
+                                             <div class="ciuCard-linksGroup">
+                                                <h4>Test cases</h4>
+                                                <ul>
+                                                   {feature.localCases.map((testCase) => (
+                                                      <li>
+                                                         <a href={`/compatibility/tests/${testCase.slug}/`}>{testCase.title}</a>
+                                                         {' · '}
+                                                         <a href={`/compatibility/cases/${testCase.slug}/`} class="ciuBareLink">
+                                                            bare HTML
+                                                         </a>
+                                                      </li>
+                                                   ))}
+                                                </ul>
+                                             </div>
+                                          )}
+
+                                          {feature.ariaAtPlans.length > 0 && (
+                                             <div class="ciuCard-linksGroup">
+                                                <h4>W3C ARIA-AT plans</h4>
+                                                <ul>
+                                                   {feature.ariaAtPlans.map((plan) => (
+                                                      <li>
+                                                         <a href={`/compatibility/aria-at/${plan.slug}/`}>
+                                                            {plan.title} ({plan.versionString})
+                                                         </a>
+                                                      </li>
+                                                   ))}
+                                                </ul>
+                                             </div>
+                                          )}
+
+                                          {feature.specURL && (
+                                             <p class="ciuCard-specLink">
+                                                <a href={feature.specURL} target="_blank" rel="noopener noreferrer">
+                                                   {feature.linkText || 'Specification reference'} ↗
+                                                </a>
+                                             </p>
+                                          )}
+                                       </div>
+                                    </details>
+
+                                    {feature.specURL && (
+                                       <a
+                                          href={feature.specURL}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          class="ciuCard-footSpec"
+                                       >
+                                          W3C Spec ↗
+                                       </a>
+                                    )}
+                                 </div>
+                              </div>
+                           </td>
+                        </tr>
+                     </tbody>
+                  );
+               })}
+            </table>
+         </div>
+      </section>
 
       <p id="ciu-empty" class="srIndex-emptyState" hidden>
          No specification features match the active search or filters.
@@ -827,17 +984,6 @@ const toc = [
                   />
                </div>
             </div>
-
-            <div class="srIndex-control">
-               <label for="sr-category">Category</label>
-               <select id="sr-category">
-                  <option value="all">All categories</option>
-                  {categories.map((category) => (
-                     <option value={category}>{formatCategoryLabel(category)}</option>
-                  ))}
-               </select>
-            </div>
-
             <div class="srIndex-control">
                <label for="sr-attribute">Attribute</label>
                <select id="sr-attribute">
@@ -847,28 +993,6 @@ const toc = [
                   ))}
                </select>
             </div>
-
-            <div class="srIndex-control">
-               <label for="sr-browser-type">Browser Type</label>
-               <select id="sr-browser-type">
-                  <option value="all">All types</option>
-                  <option value="browser">Userland Browsers</option>
-                  <option value="webview">System WebViews</option>
-               </select>
-            </div>
-
-            <div class="srIndex-control">
-               <label for="sr-environment">Environment</label>
-               <select id="sr-environment">
-                  <option value="all">All environments</option>
-                  {environmentFiles.map((envFile) => (
-                     <option value={envFile.environment.id}>
-                        {envFile.environment.label}
-                     </option>
-                  ))}
-               </select>
-            </div>
-
             <div class="srIndex-control">
                <label for="sr-outcome">Outcome</label>
                <select id="sr-outcome">
@@ -880,7 +1004,6 @@ const toc = [
                   <option value="untested">Untested</option>
                </select>
             </div>
-
             <div class="srIndex-control srIndex-control--reset">
                <button id="sr-reset" type="button" class="ciuResetBtn">
                   <RotateCcw size={14} aria-hidden="true" focusable="false" />
@@ -889,30 +1012,87 @@ const toc = [
             </div>
          </div>
 
-         <p id="sr-filter-status" class="srIndex-filterStatus" role="status" aria-live="polite">
-            Showing {screenReaderTests.length} of {screenReaderTests.length} tests.
-         </p>
+         <details id="sr-more-filters" class="srIndex-more">
+            <summary>
+               More filters
+               <span id="sr-more-filters-count" class="srIndex-moreCount" hidden></span>
+            </summary>
+            <div class="srIndex-controls">
+               <div class="srIndex-control">
+                  <label for="sr-category">Category</label>
+                  <select id="sr-category">
+                     <option value="all">All categories</option>
+                     {categories.map((category) => (
+                        <option value={category}>{formatCategoryLabel(category)}</option>
+                     ))}
+                  </select>
+               </div>
+               <div class="srIndex-control">
+                  <label for="sr-browser-type">Browser Type</label>
+                  <select id="sr-browser-type">
+                     <option value="all">All types</option>
+                     <option value="browser">Userland Browsers</option>
+                     <option value="webview">System WebViews</option>
+                  </select>
+               </div>
+               <div class="srIndex-control">
+                  <label for="sr-environment">Environment</label>
+                  <select id="sr-environment">
+                     <option value="all">All environments</option>
+                     {environmentFiles.map((envFile) => (
+                        <option value={envFile.environment.id}>
+                           {envFile.environment.label}
+                        </option>
+                     ))}
+                  </select>
+               </div>
+            </div>
+         </details>
+
+         <div class="srIndex-filterFoot">
+            <p id="sr-filter-status" class="srIndex-filterStatus" role="status" aria-live="polite">
+               Showing {screenReaderTests.length} of {screenReaderTests.length} tests.
+            </p>
+            <ul class="srIndex-legend" aria-label="Result marks">
+               {LEGEND_OUTCOMES.map((outcome) => (
+                  <li><OutcomeBadge outcome={outcome} compact={true} /></li>
+               ))}
+            </ul>
+         </div>
       </search>
 
       <div
-         class="srIndex-tableWrap"
-         tabindex="0"
-         role="region"
-         aria-label="Test cases table"
+         class="srIndex-tableWrap srIndex-tableWrap--cases"
          data-env-types={JSON.stringify(environmentTypes)}
       >
-         <table class="srIndex-table">
+         <table class="srIndex-table srIndex-table--cases">
             <caption class="srIndex-caption">
                Searchable and filterable table of screen reader test cases
             </caption>
+            <colgroup></colgroup>
+            {environmentGroups.map((group) => (
+               <colgroup span={group.files.length}></colgroup>
+            ))}
             <thead>
                <tr>
-                  <th scope="col">Scenario</th>
-                  <th scope="col">Attribute</th>
-                  {environmentFiles.map((envFile) => (
-                     <th scope="col">{envFile.environment.shortLabel}</th>
+                  <th scope="col" rowspan="2">Scenario</th>
+                  {environmentGroups.map((group) => (
+                     <th scope="colgroup" colspan={group.files.length} class="srIndex-groupHead">
+                        <PlatformIcon os={group.os} size={14} />
+                        {group.screenReader}
+                        {group.os && <span class="srIndex-groupOs">{group.os}</span>}
+                     </th>
                   ))}
-                  <th scope="col">Standalone</th>
+               </tr>
+               <tr>
+                  {groupedEnvironmentFiles.map((envFile) => (
+                     <th
+                        scope="col"
+                        class:list={[ 'srIndex-browserHead', { 'srIndex-groupStart': groupStartIDs.has(envFile.environment.id) } ]}
+                     >
+                        {formatBrowserColumn(envFile)}
+                     </th>
+                  ))}
                </tr>
             </thead>
             <tbody>
@@ -936,33 +1116,32 @@ const toc = [
                               {testCase.title}
                            </a>
                            <p class="srIndex-scenarioSummary">{testCase.summary}</p>
-                        </th>
-                        <td class="srIndex-attrCell">
-                           <span class="ciuInlineTag">
-                              {formatCategoryLabel(testCase.category)}
-                           </span>
-                           {featureMatch ? (
-                              <a href={`/compatibility/features/${featureMatch.type}/${featureMatch.refId}/`}>
+                           <p class="srIndex-scenarioMeta">
+                              <span class="ciuInlineTag">
+                                 {formatCategoryLabel(testCase.category)}
+                              </span>
+                              {featureMatch ? (
+                                 <a href={`/compatibility/features/${featureMatch.type}/${featureMatch.refId}/`}>
+                                    <code>{testCase.attribute}</code>
+                                 </a>
+                              ) : (
                                  <code>{testCase.attribute}</code>
-                              </a>
-                           ) : (
-                              <code>{testCase.attribute}</code>
-                           )}
-                        </td>
-                        {environmentFiles.map((envFile) => {
+                              )}
+                              <span aria-hidden="true">·</span>
+                              <a href={`/compatibility/cases/${testCase.slug}/`}>Bare HTML ↗</a>
+                           </p>
+                        </th>
+                        {groupedEnvironmentFiles.map((envFile) => {
                            const outcome = outcomesByEnv[envFile.environment.id] ?? 'untested';
                            return (
                               <td
-                                 class="srIndex-outcomeCell"
+                                 class:list={[ 'srIndex-outcomeCell', { 'srIndex-groupStart': groupStartIDs.has(envFile.environment.id) } ]}
                                  data-col-label={envFile.environment.shortLabel}
                               >
                                  <OutcomeBadge outcome={outcome} compact={true} />
                               </td>
                            );
                         })}
-                        <td class="srIndex-caseCell" data-col-label="Standalone">
-                           <a href={`/compatibility/cases/${testCase.slug}/`}>Bare HTML ↗</a>
-                        </td>
                      </tr>
                   );
                })}
@@ -1245,10 +1424,19 @@ section.ciuTabPanel,
    margin-block-start: 0.75rem;
    padding-block-start: 0.75rem;
    border-top: 1px solid color-mix(in oklch, var(--ink) 14%, transparent);
-   display: grid;
-   grid-template-columns: repeat(auto-fit, minmax(min(155px, 100%), 1fr));
+   display: flex;
+   flex-wrap: wrap;
    gap: 0.65rem;
    align-items: end;
+}
+
+.ciuFilters .ciuFilter {
+   flex: 1 1 12rem;
+   max-inline-size: 20rem;
+}
+
+.ciuFilters .ciuFilter--action {
+   flex: 0 0 auto;
 }
 
 .ciuFilter,
@@ -1327,27 +1515,12 @@ section.ciuTabPanel,
    display: none;
 }
 
-.ciuHero-footer {
-   margin-block-start: 0.75rem;
-   display: flex;
-   flex-wrap: wrap;
-   align-items: center;
-   justify-content: space-between;
-   gap: 0.65rem;
-}
-
 .ciuHero-status,
 .srIndex-filterStatus {
    margin: 0;
    font-size: 0.84rem;
    font-weight: 700;
    color: var(--ink-soft);
-}
-
-.ciuHero-key {
-   margin: 0.6rem 0 0;
-   color: var(--ink-soft);
-   font-size: 0.85rem;
 }
 
 .ciuLegend {
@@ -1443,46 +1616,332 @@ section.ciuTabPanel,
    display: none;
 }
 
-.ciuCards {
-   list-style: none;
-   margin: 0;
+.ciuVisuallyHidden {
+   position: absolute;
+   overflow: hidden;
+   inline-size: 1px;
+   block-size: 1px;
+   margin: -1px;
    padding: 0;
-   display: flex;
-   flex-direction: column;
-   gap: 1.1rem;
+   border: 0;
+   clip-path: inset(50%);
+   white-space: nowrap;
 }
 
-.ciuCard {
+.ciuFeatures {
+   display: flex;
+   flex-direction: column;
+   gap: 0.6rem;
+   max-width: none;
+   min-inline-size: 0;
+   transform: none;
+}
+
+.ciuFeatures-head {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: baseline;
+   gap: 0.4rem 1rem;
+}
+
+.ciuFeatures-heading {
    margin: 0;
-   padding: 1rem 1.15rem;
+   padding-top: 0;
+   border-top: 0;
+   font-size: 1.3rem;
+}
+
+.ciuFeatures-head .ciuResetBtn {
+   margin-inline-start: auto;
+}
+
+.ciuFeatures-key {
+   margin: 0;
+   max-inline-size: 75ch;
+   font-size: 0.9rem;
+   color: var(--ink-soft);
+}
+
+.ciuTableWrap {
+   container-type: inline-size;
+}
+
+.ciuTableWrap[hidden] {
+   display: none;
+}
+
+.ciuTable {
+   inline-size: 100%;
    border: 1px solid color-mix(in oklch, var(--ink) 18%, transparent);
-   border-top-width: 4px;
+   border-collapse: separate;
+   border-spacing: 0;
    border-radius: 4px;
    background: var(--paper-light);
+}
+
+.ciuTable th,
+.ciuTable td {
+   padding: 0.4rem 0.7rem;
+   border-top: 0;
+   border-bottom: 1px solid color-mix(in oklch, var(--ink) 12%, transparent);
+   font-size: 0.92rem;
+   line-height: 1.3;
+   vertical-align: middle;
+}
+
+/* The column names stay in view while the rows scroll under them. */
+.ciuTable thead th {
+   position: sticky;
+   inset-block-start: var(--ciu-sticky-top, 0);
+   z-index: 2;
+   border-bottom: 2px solid color-mix(in oklch, var(--ink) 26%, transparent);
+   background: var(--paper);
+   font-size: 0.76rem;
+   letter-spacing: 0.04em;
+   white-space: nowrap;
+}
+
+.ciuTable-colHead {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.4rem;
+}
+
+.ciuTable-colOs {
+   display: block;
+   font-family: var(--body);
+   font-size: 0.74rem;
+   font-weight: 400;
+   letter-spacing: 0;
+   text-transform: none;
+   color: var(--ink-soft);
+}
+
+.ciuFeature[hidden] {
+   display: none;
+}
+
+.ciuFeature:last-child > tr:last-child > :is(th, td),
+.ciuFeature:last-child > .ciuFeature-row:has(+ [hidden]) > :is(th, td) {
+   border-bottom: 0;
+}
+
+.ciuFeature-row {
+   cursor: pointer;
+}
+
+@media (hover: hover) {
+   .ciuFeature-row:hover > :is(th, td) {
+      box-shadow: inset 0 0 0 100vmax color-mix(in oklch, var(--yellow) 22%, transparent);
+   }
+}
+
+.ciuFeature-name {
+   font-weight: 400;
+}
+
+.ciuFeature-name a {
+   overflow-wrap: anywhere;
+   font-family: var(--code);
+   font-size: 0.9rem;
+}
+
+.ciuTable .ciuFeature-toggleCell,
+.ciuTable .ciuTable-toggleHead {
+   inline-size: 1%;
+   padding-inline: 0.5rem 0;
+}
+
+.ciuTable .ciuFeature-name {
+   padding-inline-start: 0.35rem;
+}
+
+.ciuFeature-toggle {
+   display: grid;
+   place-items: center;
+   flex: none;
+   inline-size: 28px;
+   block-size: 28px;
+   padding: 0;
+   border: 1px solid transparent;
+   border-radius: 4px;
+   background: transparent;
+   color: var(--ink-soft);
+   cursor: pointer;
+}
+
+.ciuFeature-toggle:hover {
+   border-color: color-mix(in oklch, var(--ink) 28%, transparent);
+   background: var(--paper);
+   color: var(--ink);
+}
+
+.ciuFeature-toggle[aria-expanded='true'] :global(svg) {
+   transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+   .ciuFeature-toggle :global(svg) {
+      transition: transform 0.15s ease;
+   }
+}
+
+.ciuFeature-total,
+.ciuFeature-cell {
+   inline-size: 1%;
+   white-space: nowrap;
+}
+
+.ciuFeature-total {
+   min-inline-size: 8.5rem;
+}
+
+.ciuFeature-pct {
+   font-family: var(--display);
+   font-size: 1rem;
+   font-weight: 700;
+   font-variant-numeric: tabular-nums;
+   color: var(--ink);
+}
+
+.ciuFeature-total .ciuFeature-pct {
+   display: inline-block;
+   min-inline-size: 3.4rem;
+}
+
+.ciuFeature-none {
+   font-size: 0.8rem;
+   color: var(--ink-soft);
+}
+
+.ciuFeature-cell--high {
+   background: color-mix(in oklch, #1e7a46 16%, transparent);
+}
+
+.ciuFeature-cell--mid {
+   background: color-mix(in oklch, #d97706 16%, transparent);
+}
+
+.ciuFeature-cell--low {
+   background: color-mix(in oklch, #bd2b26 13%, transparent);
+}
+
+.ciuShareBar {
+   display: inline-flex;
+   overflow: hidden;
+   inline-size: 3.5rem;
+   block-size: 0.5rem;
+   border-radius: 2px;
+   background: #e7e0d3;
+   vertical-align: 0.05em;
+}
+
+.ciuShareBar-seg--pass {
+   background: #1e7a46;
+}
+
+.ciuShareBar-seg--partial {
+   background: #a15c00;
+}
+
+.ciuFeature-detail[hidden] {
+   display: none;
+}
+
+.ciuFeature-detail > td {
+   padding: 0;
+   color: var(--ink);
+   white-space: normal;
+}
+
+.ciuDetail {
    display: flex;
    flex-direction: column;
    gap: 0.8rem;
-   min-inline-size: 0;
+   padding: 0.9rem 1.15rem 1rem 2.6rem;
+   border-inline-start: 4px solid var(--ink);
+   background: var(--paper);
 }
 
-.ciuCard--pass {
-   border-top-color: #1e7a46;
+.ciuDetail-key {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: baseline;
+   gap: 0.3rem 1.25rem;
 }
 
-.ciuCard--partial {
-   border-top-color: #a15c00;
-}
+@container (width < 640px) {
+   .ciuTable,
+   .ciuTable tbody,
+   .ciuTable th,
+   .ciuTable td {
+      display: block;
+   }
 
-.ciuCard--fail {
-   border-top-color: #bd2b26;
-}
+   .ciuTable thead {
+      display: none;
+   }
 
-.ciuCard--untested {
-   border-top-color: #9ca3af;
-}
+   .ciuTable th,
+   .ciuTable td {
+      inline-size: auto;
+      border-bottom: 0;
+   }
 
-.ciuCard[hidden] {
-   display: none;
+   .ciuFeature {
+      border-bottom: 1px solid color-mix(in oklch, var(--ink) 16%, transparent);
+   }
+
+   .ciuFeature:last-child {
+      border-bottom: 0;
+   }
+
+   .ciuFeature-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      padding: 0.45rem 0.6rem 0.6rem;
+   }
+
+   .ciuFeature-row > .ciuFeature-toggleCell {
+      flex: none;
+      inline-size: auto;
+      padding: 0;
+   }
+
+   .ciuFeature-row > .ciuFeature-name {
+      flex: 1 1 calc(100% - 3rem);
+      align-self: center;
+      padding: 0;
+   }
+
+   .ciuFeature-row > td {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+      min-inline-size: 0;
+      padding: 0.2rem 0.45rem;
+      border-radius: 3px;
+   }
+
+   .ciuFeature-row > .ciuFeature-total {
+      flex: 1 1 100%;
+      padding-inline: 0;
+   }
+
+   .ciuFeature-row > td[data-col-label]::before {
+      content: attr(data-col-label);
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+   }
+
+   .ciuFeature-detail {
+      display: block;
+   }
+
+   .ciuDetail {
+      padding-inline: 0.75rem;
+   }
 }
 
 .ciuCard-top {
@@ -1498,17 +1957,8 @@ section.ciuTabPanel,
    flex: 1 1 320px;
 }
 
-.ciuCard-title {
-   /* The card's colored top edge is the only rule above the title. */
-   padding-top: 0;
-   border-top: 0;
-   margin: 0;
-   font-size: 1.42rem;
-   line-height: 1.1;
-}
-
 .ciuCard-desc {
-   margin: 0.25rem 0 0;
+   margin: 0 0 0.3rem;
    font-size: 0.92rem;
    line-height: 1.45;
    color: var(--ink-soft);
@@ -1532,6 +1982,7 @@ section.ciuTabPanel,
    display: flex;
    align-items: center;
    gap: 0.4rem;
+   margin: 0.2rem 0 0;
 }
 
 .ciuVerdictDot {
@@ -1693,9 +2144,6 @@ section.ciuTabPanel,
    align-items: center;
    gap: 0.3rem;
    min-inline-size: 0;
-   overflow: hidden;
-   text-overflow: ellipsis;
-   white-space: nowrap;
 }
 
 /* Brand colors blend into the red and green tiles without a light backing. */
@@ -1715,9 +2163,6 @@ section.ciuTabPanel,
    font-size: 0.72rem;
    line-height: 1.2;
    opacity: 0.9;
-   overflow: hidden;
-   text-overflow: ellipsis;
-   white-space: nowrap;
 }
 
 .ciuCol-more {
@@ -1781,6 +2226,7 @@ section.ciuTabPanel,
 
 .ciuDetailDrawer-meta {
    margin: 0;
+   font-size: inherit;
    color: var(--ink-soft);
 }
 
@@ -1866,7 +2312,7 @@ section.ciuTabPanel,
 
 .srIndex-controls {
    display: grid;
-   grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr));
+   grid-template-columns: repeat(auto-fit, minmax(min(9.5rem, 100%), 1fr));
    gap: 0.75rem;
    align-items: end;
 }
@@ -1875,9 +2321,30 @@ section.ciuTabPanel,
    grid-column: span 2;
 }
 
+.srIndex-more {
+   margin-block-start: 0.6rem;
+   font-size: 0.84rem;
+}
+
+.srIndex-more summary {
+   inline-size: fit-content;
+   font-weight: 700;
+   color: var(--ink-soft);
+   cursor: pointer;
+}
+
+.srIndex-more .srIndex-controls {
+   margin-block-start: 0.5rem;
+}
+
+.srIndex-moreCount {
+   margin-inline-start: 0.3rem;
+   color: var(--red-dark);
+}
+
 @media (max-width: 640px) {
    .srIndex-control--search {
-      grid-column: span 1;
+      grid-column: 1 / -1;
    }
 }
 
@@ -1899,8 +2366,27 @@ section.ciuTabPanel,
    pointer-events: none;
 }
 
-.srIndex-filterStatus {
+.srIndex-filterFoot {
    margin-block-start: 0.7rem;
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   justify-content: space-between;
+   gap: 0.5rem 1rem;
+}
+
+.srIndex-legend {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.35rem;
+}
+
+.srIndex-legend li {
+   margin: 0;
+   line-height: 1;
 }
 
 .srIndex-tableWrap {
@@ -1963,11 +2449,7 @@ section.ciuTabPanel,
    border-bottom: none;
 }
 
-.srIndex-scenarioCell {
-   position: sticky;
-   inset-inline-start: 0;
-   z-index: 1;
-   background: var(--paper-light);
+.srIndex-table tbody .srIndex-scenarioCell {
    min-inline-size: 220px;
    font-weight: 400;
 }
@@ -1984,22 +2466,22 @@ section.ciuTabPanel,
    color: var(--ink-soft);
 }
 
-.srIndex-attrCell {
-   white-space: nowrap;
+.srIndex-scenarioMeta {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: baseline;
+   gap: 0.1rem 0.4rem;
+   margin: 0.3rem 0 0;
+   font-size: 0.82rem;
+   color: var(--ink-soft);
 }
 
 .ciuInlineTag {
-   margin-inline-end: 0.35rem;
    font-family: var(--display);
    font-size: 0.74rem;
    font-weight: 700;
    color: var(--ink-soft);
    text-transform: uppercase;
-}
-
-.srIndex-caseCell a {
-   white-space: nowrap;
-   font-size: 0.84rem;
 }
 
 .srIndex-emptyState {
@@ -2151,6 +2633,89 @@ section.ciuTabPanel,
    overflow-wrap: anywhere;
 }
 
+/* The test cases table needs no sideways scroll, so its header can follow the page. */
+.srIndex-tableWrap--cases {
+   overflow: visible;
+}
+
+.srIndex-table--cases thead th {
+   vertical-align: bottom;
+}
+
+.srIndex-table--cases thead tr:first-child th[rowspan] {
+   border-start-start-radius: 4px;
+}
+
+.srIndex-groupHead {
+   padding-block-end: 0.2rem;
+   border-bottom: 0;
+   border-inline-start: 1px solid color-mix(in oklch, var(--ink) 20%, transparent);
+}
+
+.srIndex-table--cases thead th.srIndex-groupHead {
+   border-bottom: 0;
+}
+
+.srIndex-groupOs {
+   margin-inline-start: 0.3rem;
+   font-family: var(--body);
+   font-weight: 400;
+   letter-spacing: 0;
+   text-transform: none;
+   color: var(--ink-soft);
+}
+
+.srIndex-table--cases thead th.srIndex-browserHead {
+   padding-block-start: 0;
+   padding-inline: 0.3rem;
+   font-family: var(--body);
+   font-size: 0.72rem;
+   font-weight: 600;
+   letter-spacing: 0;
+   text-transform: none;
+   text-align: center;
+   white-space: normal;
+   color: var(--ink-soft);
+}
+
+.srIndex-table--cases .srIndex-outcomeCell {
+   padding-inline: 0.3rem;
+   text-align: center;
+}
+
+.srIndex-table--cases .srIndex-groupStart {
+   border-inline-start: 1px solid color-mix(in oklch, var(--ink) 20%, transparent);
+}
+
+@container (width >= 900px) {
+   .srIndex-outcomeCell :global(.srOutcomeBadge) {
+      padding: 0.25rem;
+      border-radius: 50%;
+   }
+
+   .srIndex-outcomeCell :global(.srOutcomeBadge-text) {
+      position: absolute;
+      overflow: hidden;
+      inline-size: 1px;
+      block-size: 1px;
+      margin: -1px;
+      clip-path: inset(50%);
+      white-space: nowrap;
+   }
+}
+
+/* A cell's column name, printed above it when the table is stacked on a narrow screen. */
+.srIndex-table td::before {
+   display: block;
+   margin-block-end: 0.2rem;
+   font-family: var(--display);
+   font-size: 0.72rem;
+   font-weight: 700;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+   color: var(--ink-soft);
+}
+
 @container (width < 760px) {
    .srIndex-table {
       display: block;
@@ -2188,28 +2753,68 @@ section.ciuTabPanel,
       border-bottom: none;
    }
 
-   .srIndex-table td::before {
-      display: block;
-      margin-block-end: 0.2rem;
-      font-family: var(--display);
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--ink-soft);
-   }
-
-   .srIndex-table td:nth-child(2)::before {
-      content: 'Attribute';
-   }
-
    .srIndex-table td[data-col-label]::before {
       content: attr(data-col-label);
    }
 
-   .srIndex-scenarioCell {
-      position: static;
-      border-bottom: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
+}
+
+@container (width < 900px) {
+   .srIndex-table--cases,
+   .srIndex-table--cases tbody,
+   .srIndex-table--cases th,
+   .srIndex-table--cases td {
+      display: block;
+   }
+
+   .srIndex-table--cases thead,
+   .srIndex-table--cases colgroup {
+      display: none;
+   }
+
+   .srIndex-table--cases tr {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(12rem, 100%), 1fr));
+      gap: 0 1rem;
+      padding: 0.6rem 0.75rem;
+      border-bottom: 2px solid color-mix(in oklch, var(--ink) 24%, transparent);
+   }
+
+   .srIndex-table--cases tr[hidden] {
+      display: none;
+   }
+
+   .srIndex-table--cases tr > :is(th, td) {
+      padding: 0.25rem 0;
+      border: 0;
+   }
+
+   .srIndex-table--cases tr > .srIndex-scenarioCell {
+      grid-column: 1 / -1;
+   }
+
+   .srIndex-table--cases .srIndex-outcomeCell {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      border-bottom: 1px dashed color-mix(in oklch, var(--ink) 16%, transparent);
+      font-size: 0.82rem;
+      color: var(--ink-soft);
+   }
+
+   .srIndex-table--cases tr:last-child {
+      border-bottom: 0;
+   }
+
+   .srIndex-table--cases .srIndex-outcomeCell::before {
+      content: attr(data-col-label);
+      margin: 0;
+      font-family: var(--body);
+      font-size: inherit;
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
    }
 }
 </style>

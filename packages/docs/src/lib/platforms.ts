@@ -64,6 +64,15 @@ export function getBrowserIcon(
    return family ? BROWSER_ICONS[family] : undefined;
 }
 
+/** Every icon that a platform icon can show, once each. */
+export function listPlatformIcons(): readonly string[] {
+   const names = [...Object.values(BROWSER_ICONS), ...Object.values(OS_ICONS)].filter(
+      (name): name is string => name !== undefined,
+   );
+
+   return [...new Set(names)];
+}
+
 export function getOsIcon(os: string): string | undefined {
    return OS_ICONS[normalizeOsName(os)];
 }

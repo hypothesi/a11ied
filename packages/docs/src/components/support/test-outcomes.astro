@@ -11,8 +11,10 @@ import {
    formatRowOsVersion,
    formatScreenReader,
    formatShortDate,
+   formatVersion,
    groupByScreenReaderAndOs,
 } from '../../lib/support-grouping';
+import { formatGroupCount, formatRowScreenReader } from '../../lib/support-rows';
 import '../../styles/support-rows.css';
 import type { EnvironmentResultFile, TestRunRecord } from '@a11ied/support-data/types';
 
@@ -50,7 +52,10 @@ const groupedCards = groupByScreenReaderAndOs(cards, ({ envFile }) => ({
          <div class="srGroup-head">
             <h3 class="srGroup-title">{group.screenReaderType}</h3>
             <span class="srGroup-count">
-               {group.totalCount} {group.totalCount === 1 ? 'result' : 'results'}
+               {formatGroupCount(
+                  group.osGroups.flatMap((osGroup) => osGroup.items.map(({ run }) => run?.outcome ?? 'untested')),
+                  'result',
+               )}
             </span>
          </div>
 
@@ -64,6 +69,10 @@ const groupedCards = groupByScreenReaderAndOs(cards, ({ envFile }) => ({
                      const ratioText = run?.assertionSummary
                         ? formatCompactRatio(run.assertionSummary, true)
                         : '';
+                     const screenReaderLabel = formatRowScreenReader(
+                        group.screenReaderType,
+                        env.screenReaderVersion,
+                     );
 
                      return (
                         <details class={`srRow srRow--${outcome}`}>
@@ -88,9 +97,11 @@ const groupedCards = groupByScreenReaderAndOs(cards, ({ envFile }) => ({
                                        <span class="srRow-webviewTag">WebView</span>
                                     )}
                                  </span>
-                                 <span class="srRow-secondary">
-                                    <span>{formatScreenReader(group.screenReaderType, env.screenReaderVersion)}</span>
-                                 </span>
+                                 {screenReaderLabel && (
+                                    <span class="srRow-secondary">
+                                       <span>{screenReaderLabel}</span>
+                                    </span>
+                                 )}
                               </span>
                               <span class="srRow-verdictGroup">
                                  {ratioText && <span class="srRow-ratio">{ratioText}</span>}
@@ -105,11 +116,11 @@ const groupedCards = groupByScreenReaderAndOs(cards, ({ envFile }) => ({
                                  </span>
                                  <span aria-hidden="true">·</span>
                                  <span>
-                                    <strong>Browser:</strong> {env.browser} {env.browserVersion}{env.browserType === 'webview' ? ' (WebView)' : ''}
+                                    <strong>Browser:</strong> {env.browser} {formatVersion(env.browserVersion)}{env.browserType === 'webview' ? ' (WebView)' : ''}
                                  </span>
                                  <span aria-hidden="true">·</span>
                                  <span>
-                                    <strong>OS:</strong> {env.os} {env.osVersion}
+                                    <strong>OS:</strong> {env.os} {formatVersion(env.osVersion)}
                                  </span>
                                  <span aria-hidden="true">·</span>
                                  <span>

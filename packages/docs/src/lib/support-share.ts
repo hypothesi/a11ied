@@ -20,7 +20,9 @@ import {
    normalizeScreenReaderType,
 } from './support-grouping';
 
-const MIN_CELLS_TO_RANK = 2,
+const HIGH_RATIO = 0.8,
+   MID_RATIO = 0.5,
+   MIN_CELLS_TO_RANK = 2,
    ONE_DECIMAL_SCALE = 10,
    PERCENT = 100;
 
@@ -60,12 +62,20 @@ interface LatestItemResult {
    readonly outcome: RatedOutcome;
 }
 
-export type MatrixCellState = 'tested' | 'pending' | 'untested' | 'unavailable';
+export interface BarSegment {
+   readonly tone: RatedOutcome;
+   readonly percent: number;
+}
+
+export type MatrixCellState = 'tested' | 'untested' | 'unavailable';
 
 export interface MatrixCell {
    readonly family: BrowserFamily;
    readonly state: MatrixCellState;
+   /** Over every feature tested with this browser. */
    readonly share: SupportShare;
+   /** Over only the features tested with every tested browser in the row. */
+   readonly sharedShare: SupportShare;
    readonly isBest: boolean;
 }
 
@@ -73,12 +83,23 @@ export interface MatrixRow {
    readonly screenReader: string;
    readonly os: string;
    readonly cells: readonly MatrixCell[];
+   /**
+    * How many features were tested with every tested browser in the row. Browsers are
+    * only comparable on these. It is 0 when the row has fewer than two tested browsers.
+    */
+   readonly sharedFeatureCount: number;
 }
 
-interface MatrixContext {
-   readonly knownPairs: Set<string>;
-   readonly testedPairs: Map<string, PairResult[]>;
+export interface ScreenReaderShare {
+   readonly screenReader: string;
+   readonly os: string;
+   readonly share: SupportShare;
 }
+
+export type HeatLevel = 'high' | 'mid' | 'low';
+
+/** For each screen reader, OS, and browser: its result for each feature, by feature key. */
+type TestedPairs = Map<string, Map<string, PairResult>>;
 
 const EMPTY_SHARE: SupportShare = { pairCount: 0, supportedScore: 0, partialScore: 0 };
 
@@ -242,6 +263,43 @@ export function getShareRatio(share: SupportShare): number {
       : 0;
 }
 
+export function getHeatLevel(share: SupportShare): HeatLevel {
+   const ratio = getShareRatio(share);
+
+   if (ratio >= HIGH_RATIO) {
+      return 'high';
+   }
+
+   return ratio >= MID_RATIO ? 'mid' : 'low';
+}
+
+/** One share per screen reader and OS, averaged over the browsers tested with it. */
+export function listScreenReaderShares(
+   feature: FeatureReport,
+): readonly ScreenReaderShare[] {
+   const groups = new Map<string, PairResult[]>();
+
+   for (const pair of listLatestTestedPairs(feature)) {
+      const key = getRowKey(pair.screenReader, pair.os);
+
+      groups.set(key, [...(groups.get(key) ?? []), pair]);
+   }
+
+   return [...groups.values()].flatMap((pairs) => {
+      const [first] = pairs;
+
+      return first
+         ? [
+              {
+                 screenReader: first.screenReader,
+                 os: first.os,
+                 share: summarizePairs(pairs),
+              },
+           ]
+         : [];
+   });
+}
+
 function roundToOneDecimal(value: number): number {
    return Math.round(value * ONE_DECIMAL_SCALE) / ONE_DECIMAL_SCALE;
 }
@@ -265,6 +323,17 @@ export function formatSharePercentages(share: SupportShare): SharePercentages {
    };
 }
 
+export function listShareSegments(share: SupportShare): readonly BarSegment[] {
+   if (share.pairCount === 0) {
+      return [];
+   }
+
+   return [
+      { tone: 'pass', percent: (share.supportedScore / share.pairCount) * PERCENT },
+      { tone: 'partial', percent: (share.partialScore / share.pairCount) * PERCENT },
+   ];
+}
+
 function compareRows(left: MatrixRow, right: MatrixRow): number {
    const srOrder =
       getScreenReaderRank(left.screenReader) - getScreenReaderRank(right.screenReader);
@@ -276,64 +345,71 @@ function compareRows(left: MatrixRow, right: MatrixRow): number {
    return getOsRank(left.os) - getOsRank(right.os);
 }
 
-function getCellState(pair: PairIdentity, context: MatrixContext): MatrixCellState {
-   const key = getPairKey(pair);
+function listSharedKeys(results: readonly ReadonlyMap<string, PairResult>[]): string[] {
+   const [first, ...rest] = results;
 
-   if (context.testedPairs.has(key)) {
-      return 'tested';
+   if (!first || rest.length + 1 < MIN_CELLS_TO_RANK) {
+      return [];
    }
-   if (context.knownPairs.has(key)) {
-      return 'pending';
-   }
-   return isBrowserAvailable(pair.family, pair.os) ? 'untested' : 'unavailable';
+
+   return [...first.keys()].filter((key) => rest.every((other) => other.has(key)));
 }
 
-function buildRow(screenReader: string, os: string, context: MatrixContext): MatrixRow {
+function getCellState(
+   family: BrowserFamily,
+   os: string,
+   isTested: boolean,
+): MatrixCellState {
+   if (isTested) {
+      return 'tested';
+   }
+
+   return isBrowserAvailable(family, os) ? 'untested' : 'unavailable';
+}
+
+function buildRow(screenReader: string, os: string, testedPairs: TestedPairs): MatrixRow {
    const drafts = BROWSER_FAMILIES.map((family) => {
-      const pair = { screenReader, os, family };
-      const tested = context.testedPairs.get(getPairKey(pair));
+      const results = testedPairs.get(getPairKey({ screenReader, os, family }));
 
-      return {
-         family,
-         state: getCellState(pair, context),
-         share: tested ? summarizePairs(tested) : EMPTY_SHARE,
-      };
+      return { family, results };
    });
-
-   const testedRatios = drafts
-      .filter((draft) => draft.state === 'tested')
-      .map((draft) => getShareRatio(draft.share));
-   const bestRatio =
-      testedRatios.length >= MIN_CELLS_TO_RANK ? Math.max(...testedRatios) : 0;
+   const sharedKeys = listSharedKeys(drafts.flatMap((draft) => draft.results ?? []));
+   const sharedShares = drafts.map((draft) =>
+      summarizePairs(sharedKeys.flatMap((key) => draft.results?.get(key) ?? [])),
+   );
+   const bestRatio = Math.max(0, ...sharedShares.map((share) => getShareRatio(share)));
 
    return {
       screenReader,
       os,
-      cells: drafts.map((draft) => ({
-         family: draft.family,
-         state: draft.state,
-         share: draft.share,
-         isBest:
-            bestRatio > 0 &&
-            draft.state === 'tested' &&
-            getShareRatio(draft.share) === bestRatio,
-      })),
+      sharedFeatureCount: sharedKeys.length,
+      cells: drafts.map((draft, index) => {
+         const sharedShare = sharedShares[index] ?? EMPTY_SHARE;
+
+         return {
+            family: draft.family,
+            state: getCellState(draft.family, os, draft.results !== undefined),
+            share: draft.results
+               ? summarizePairs([...draft.results.values()])
+               : EMPTY_SHARE,
+            sharedShare,
+            isBest: bestRatio > 0 && getShareRatio(sharedShare) === bestRatio,
+         };
+      }),
    };
 }
 
 /**
  * For each screen reader and OS, the share of features that each browser supports. Every
- * feature counts once per browser, with its latest result. The best browser is marked
- * only when a row has at least two tested browsers to compare.
+ * feature counts once per browser, with its latest result. Browsers were tested on
+ * different sets of features, so a row compares them, and marks the best one, only on the
+ * features tested with all of them.
  */
 export function buildPairMatrix(
    features: readonly FeatureReport[],
 ): readonly MatrixRow[] {
    const rows = new Map<string, { screenReader: string; os: string }>();
-   const context: MatrixContext = {
-      knownPairs: new Set<string>(),
-      testedPairs: new Map<string, PairResult[]>(),
-   };
+   const testedPairs: TestedPairs = new Map();
 
    for (const feature of features) {
       for (const env of feature.versionedEnvironments) {
@@ -344,20 +420,19 @@ export function buildPairMatrix(
                screenReader: pair.screenReader,
                os: pair.os,
             });
-            context.knownPairs.add(getPairKey(pair));
          }
       }
 
       for (const pair of listLatestTestedPairs(feature)) {
          const key = getPairKey(pair);
-         const list = context.testedPairs.get(key) ?? [];
+         const results = testedPairs.get(key) ?? new Map<string, PairResult>();
 
-         list.push(pair);
-         context.testedPairs.set(key, list);
+         results.set(feature.key, pair);
+         testedPairs.set(key, results);
       }
    }
 
    return [...rows.values()]
-      .map((row) => buildRow(row.screenReader, row.os, context))
+      .map((row) => buildRow(row.screenReader, row.os, testedPairs))
       .toSorted(compareRows);
 }

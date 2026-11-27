@@ -1,0 +1,37 @@
+---
+import type { LocalFeatureDrilldownItem } from '@a11ied/support-data';
+import AssertionsDisclosure from './assertions-disclosure.astro';
+import OutcomeBadge from './outcome-badge.astro';
+import TranscriptDisclosure from './transcript-disclosure.astro';
+
+export interface Props {
+   item: LocalFeatureDrilldownItem;
+}
+
+const { item } = Astro.props;
+---
+
+<div class="srUnit">
+   <div class="srRow-drilldownHeader srUnit-head">
+      <a href={`/compatibility/tests/${item.testSlug}/`} class="srRow-drilldownTitle">
+         {item.testTitle}
+      </a>
+      <OutcomeBadge outcome={item.outcome} compact />
+   </div>
+   {item.keyAnnouncement && (
+      <div class="srRow-spoken">
+         <span class="srRow-spokenLabel">Key speech</span>
+         <code class="srRow-spokenCode">{item.keyAnnouncement}</code>
+      </div>
+   )}
+   {item.notes && <p class="srRow-itemNotes">{item.notes}</p>}
+   <TranscriptDisclosure transcript={item.transcript} driver={item.driver} runAt={item.runAt} open />
+   {item.assertions.length > 0 && (
+      <AssertionsDisclosure
+         assertions={item.assertions}
+         summary={item.summary}
+         label={`Spec assertions (${item.assertions.length})`}
+         open
+      />
+   )}
+</div>

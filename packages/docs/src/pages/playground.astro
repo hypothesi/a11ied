@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import runtimeURL from '@a11ied/guidepup/virtual-page.js?url';
 import { listEnvironmentFiles, screenReaderTests } from '@a11ied/support-data';
+import ChevronRight from '@lucide/astro/icons/chevron-right';
 import ExternalLink from '@lucide/astro/icons/external-link';
 import logo from '../assets/logo.png';
 import SiteFooter from '../components/site-footer.astro';
@@ -93,9 +94,15 @@ function getShortTitle(title: string): string {
                   <input id="ws-filter" class="ws-input" type="search" autocomplete="off" placeholder="Filter" data-pg-filter />
                </div>
                <div class="ws-scroll" tabindex="0" role="group" aria-label="Test cases">
-                  {groups.map((group) => (
-                     <div class="ws-group" data-pg-group>
-                        <h3 class="ws-group-name">{group.name}</h3>
+                  {groups.map((group, index) => (
+                     <details class="ws-group" data-pg-group open={index === 0}>
+                        <summary class="ws-group-summary">
+                           <ChevronRight class="ws-group-marker" size={14} aria-hidden="true" focusable="false" />
+                           <h3 class="ws-group-name">{group.name}</h3>
+                           <span class="ws-group-count">
+                              {group.cases.length}<span class="sr-only"> test cases</span>
+                           </span>
+                        </summary>
                         <ul class="ws-case-list">
                            {group.cases.map((testCase) => (
                               <li data-pg-case-item data-search={`${testCase.title} ${testCase.attribute} ${group.name}`.toLowerCase()}>
@@ -105,7 +112,7 @@ function getShortTitle(title: string): string {
                               </li>
                            ))}
                         </ul>
-                     </div>
+                     </details>
                   ))}
                   <p class="ws-none" data-pg-none hidden>No test case matches.</p>
                </div>
@@ -335,11 +342,22 @@ function getShortTitle(title: string): string {
    .ws-filter { padding: var(--sm) var(--md); }
    .ws-scroll { overflow-y: auto; flex: 1; min-height: 0; padding-bottom: var(--md); }
    .ws-group[hidden] { display: none; }
-   .ws-group-name { padding: var(--sm) var(--md) 0.2rem; margin: 0; color: var(--ink-soft); font: 700 0.72rem/1.3 var(--display); letter-spacing: 0.1em; text-transform: uppercase; }
-   .ws-case-list { margin: 0; padding: 0; list-style: none; }
+   /* One group is open at a time by default, so the list shows a few cases, not all of them. */
+   .ws-group + .ws-group { border-top: 1px solid color-mix(in oklch, var(--ink) 14%, transparent); }
+   .ws-group-summary { display: flex; align-items: center; gap: var(--xs); min-height: 2.25rem; padding: 0.3rem var(--md) 0.3rem var(--sm); color: var(--ink-soft); list-style: none; cursor: pointer; }
+   .ws-group-summary::-webkit-details-marker { display: none; }
+   .ws-group-summary :global(.ws-group-marker) { flex: none; }
+   .ws-group[open] > .ws-group-summary :global(.ws-group-marker) { transform: rotate(90deg); }
+   .ws-group[open] > .ws-group-summary { color: var(--ink); }
+   .ws-group-name { flex: 1; margin: 0; color: inherit; font: 700 0.72rem/1.3 var(--display); letter-spacing: 0.1em; text-transform: uppercase; }
+   .ws-group-count { font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+   @media (hover: hover) {
+      .ws-group-summary:hover { background: var(--paper); color: var(--ink); }
+   }
+   .ws-case-list { margin: 0; padding: 0 0 var(--xs); list-style: none; }
    .ws-case-list li { margin: 0; }
    .ws-case-list li[hidden] { display: none; }
-   .ws-case-button { display: block; width: 100%; padding: 0.35rem var(--md); background: transparent; color: var(--ink); border: 0; border-inline-start: 4px solid transparent; font: inherit; font-size: 0.9rem; line-height: 1.35; text-align: start; cursor: pointer; }
+   .ws-case-button { display: block; width: 100%; padding: 0.4rem var(--md); background: transparent; color: var(--ink); border: 0; border-inline-start: 4px solid transparent; font: inherit; font-size: 0.9rem; line-height: 1.35; text-align: start; cursor: pointer; }
    .ws-case-button[aria-current="true"] { background: var(--yellow-soft); border-inline-start-color: var(--red); font-weight: 700; }
    @media (hover: hover) {
       .ws-case-button:not([aria-current="true"]):hover { background: var(--paper); }

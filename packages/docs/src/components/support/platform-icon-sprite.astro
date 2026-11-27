@@ -1,0 +1,23 @@
+---
+import { Icon } from 'astro-icon/components';
+import { listPlatformIcons } from '../../lib/platforms';
+---
+
+<!--
+   An icon's drawing is written into the page at its first use, and later uses point back
+   to it. A logo's gradients stop painting when that first use is inside a hidden part of
+   the page, such as a closed tab. Putting the drawings here, before any of those parts,
+   keeps them painted.
+-->
+<span class="platformSprite" aria-hidden="true">
+   {listPlatformIcons().map((name) => <Icon name={name} width={0} height={0} focusable="false" />)}
+</span>
+
+<style>
+.platformSprite {
+   position: absolute;
+   overflow: hidden;
+   inline-size: 0;
+   block-size: 0;
+}
+</style>

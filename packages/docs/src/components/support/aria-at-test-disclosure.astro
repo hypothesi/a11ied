@@ -1,0 +1,165 @@
+---
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+import {
+   deriveOutcomeFromSummary,
+   summarizeAssertions,
+   type AriaAtCommandResult,
+} from '@a11ied/support-data';
+import AriaAtCommandsList from './aria-at-commands-list.astro';
+import AssertionSummaryBar from './assertion-summary-bar.astro';
+import OutcomeBadge from './outcome-badge.astro';
+
+export interface Props {
+   title: string;
+   rowNumber?: number;
+   commandResults: readonly AriaAtCommandResult[];
+   showFeatureLinks?: boolean;
+}
+
+const { title, rowNumber, commandResults, showFeatureLinks = false } = Astro.props;
+const summary = summarizeAssertions(
+   commandResults.flatMap((result) => result.assertions),
+   commandResults.flatMap((result) => result.negativeSideEffects),
+);
+const failCount = summary.must.failed + summary.should.failed + summary.may.failed;
+const checkedCount = summary.must.total + summary.should.total + summary.may.total;
+const hasVerdict = checkedCount + summary.severeSideEffects + summary.moderateSideEffects > 0;
+const commandCount = commandResults.length;
+---
+
+<details class="srTest">
+   <summary class="srTest-summary">
+      <ChevronDown class="srTest-marker" size={15} aria-hidden="true" focusable="false" />
+      <span class="srTest-main">
+         <span class="srTest-title">
+            {rowNumber !== undefined && (
+               <>
+                  <strong>#{rowNumber}</strong>
+                  <span aria-hidden="true"> · </span>
+               </>
+            )}
+            {title}
+         </span>
+         <span class="srTest-meta">
+            {commandCount} {commandCount === 1 ? 'command' : 'commands'}
+            {failCount > 0 && (
+               <>
+                  <span aria-hidden="true"> · </span>
+                  {failCount} failed {failCount === 1 ? 'assertion' : 'assertions'}
+               </>
+            )}
+         </span>
+      </span>
+      {hasVerdict && (
+         <span class="srTest-verdict">
+            <AssertionSummaryBar summary={summary} compact inline />
+            <OutcomeBadge outcome={deriveOutcomeFromSummary(summary)} compact />
+         </span>
+      )}
+   </summary>
+   <div class="srTest-body">
+      <AriaAtCommandsList commandResults={commandResults} showFeatureLinks={showFeatureLinks} />
+   </div>
+</details>
+
+<style>
+.srTest {
+   border-top: 1px solid color-mix(in oklch, var(--ink) 14%, transparent);
+   min-inline-size: 0;
+}
+
+.srTest-summary {
+   list-style: none;
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 0.35rem 0.75rem;
+   min-block-size: 40px;
+   padding-block: 0.45rem;
+   padding-inline: 0.1rem;
+   cursor: pointer;
+   user-select: none;
+}
+
+.srTest-summary::-webkit-details-marker {
+   display: none;
+}
+
+.srTest-summary:hover {
+   background: color-mix(in oklch, var(--yellow) 24%, var(--paper-light));
+}
+
+.srTest-marker {
+   flex-shrink: 0;
+   color: var(--ink-soft);
+   transform: rotate(-90deg);
+}
+
+.srTest[open] > .srTest-summary .srTest-marker {
+   transform: rotate(0deg);
+}
+
+details.srTest::details-content {
+   interpolate-size: allow-keywords;
+   overflow: clip;
+   contain: layout;
+}
+
+details.srTest:not([open])::details-content {
+   block-size: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+   .srTest-marker {
+      transition: transform 0.2s ease;
+   }
+
+   details.srTest::details-content {
+      transition: block-size, content-visibility, display;
+      transition-duration: 0.22s;
+      transition-timing-function: ease-in-out;
+      transition-behavior: allow-discrete;
+   }
+}
+
+.srTest-main {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: baseline;
+   gap: 0.15rem 0.75rem;
+   flex: 1 1 240px;
+   min-inline-size: 0;
+}
+
+.srTest-title {
+   font-size: 0.92rem;
+   font-weight: 700;
+   color: var(--ink);
+}
+
+.srTest-meta {
+   font-size: 0.8rem;
+   color: var(--ink-soft);
+   white-space: nowrap;
+}
+
+.srTest-verdict {
+   margin-inline-start: auto;
+   display: inline-flex;
+   flex-wrap: wrap;
+   align-items: center;
+   justify-content: flex-end;
+   gap: 0.4rem 0.55rem;
+}
+
+.srTest-body {
+   padding-block: 0.25rem 0.9rem;
+   padding-inline-start: 1.55rem;
+}
+
+@media (max-width: 560px) {
+   .srTest-body {
+      padding-inline-start: 0;
+   }
+}
+</style>

@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { readFile, readdir, writeFile } from 'node:fs/promises';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
@@ -83,6 +84,35 @@ async function prefixRootRelativeLinks(directory) {
    );
 }
 
+/**
+ * The dev server serves a file in `public` only by its exact path, so `/example-audit/`
+ * is a 404 there, while the built site serves the folder's index.html.
+ */
+function servePublicFolderIndexes() {
+   const publicDirectory = new URL('public/', import.meta.url);
+
+   return {
+      name: 'serve-public-folder-indexes',
+      hooks: {
+         'astro:server:setup': ({ server }) => {
+            server.middlewares.use((request, _response, next) => {
+               const [path = ''] = (request.url ?? '').split('?');
+               const isFolder = path.endsWith('/') && !path.includes('..');
+
+               if (
+                  isFolder &&
+                  existsSync(new URL(`.${path}index.html`, publicDirectory))
+               ) {
+                  request.url = `${path}index.html`;
+               }
+
+               next();
+            });
+         },
+      },
+   };
+}
+
 /** Leaves the practice pages, the bare test fixtures, and the 404 page out of the sitemap. */
 function isSearchablePage(pageURL) {
    return !/\/(demo|compatibility\/cases)\/|\/404/.test(pageURL);
@@ -98,6 +128,7 @@ export default defineConfig({
        * exists, with no SVG files in it, avoids its warning about a missing `src/icons`.
        */
       icon({ iconDir: 'src/assets' }),
+      servePublicFolderIndexes(),
       ...(isProductionBuild
          ? [
               {

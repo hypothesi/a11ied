@@ -250,6 +250,16 @@ export function groupByScreenReaderAndOs<TItem>(
    });
 }
 
+export const NOT_TESTED_LABEL = 'Not tested';
+
+/**
+ * The data records "Pending" as the version of an environment that has not been tested
+ * yet. A reader is shown that it is not tested instead.
+ */
+export function formatVersion(version: string): string {
+   return version.trim().toLowerCase() === 'pending' ? `(${NOT_TESTED_LABEL})` : version;
+}
+
 export function formatRowOsVersion(os: string, osVersion: string): string {
    const osLabel = normalizeOsName(os);
    const trimmedVer = osVersion.trim();
@@ -257,20 +267,16 @@ export function formatRowOsVersion(os: string, osVersion: string): string {
    if (lowerVer === '' || lowerVer.startsWith('not recorded')) {
       return osLabel;
    }
-   if (lowerVer === 'pending') {
-      return `${osLabel} (Pending)`;
-   }
-   return `${osLabel} ${trimmedVer}`;
+   return `${osLabel} ${formatVersion(trimmedVer)}`;
 }
 
 export function formatRowBrowser(browser: string, browserVersion: string): string {
    const browserLabel = browser.trim();
    const trimmedVer = browserVersion.trim();
-   const lowerVer = trimmedVer.toLowerCase();
-   if (lowerVer === '' || lowerVer === 'pending' || lowerVer.startsWith('not recorded')) {
-      return `${browserLabel} (Pending)`;
+   if (trimmedVer === '' || trimmedVer.toLowerCase().startsWith('not recorded')) {
+      return browserLabel;
    }
-   return `${browserLabel} ${trimmedVer}`;
+   return `${browserLabel} ${formatVersion(trimmedVer)}`;
 }
 
 export function formatCompactRatio(summary: AssertionSummary, isTested: boolean): string {
@@ -345,7 +351,7 @@ export function escapeHtml(text: string): string {
 
 export function formatShortDate(iso?: string): string {
    if (!iso) {
-      return 'Pending';
+      return NOT_TESTED_LABEL;
    }
    return iso.slice(0, DATE_PREFIX_LEN);
 }

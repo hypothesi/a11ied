@@ -444,6 +444,11 @@ function showCase(parts: Parts, slug: string): void {
       const isCurrent = button.dataset.pgCaseButton === slug;
 
       if (isCurrent) {
+         const group = button.closest('[data-pg-group]');
+
+         if (group instanceof HTMLDetailsElement) {
+            group.open = true;
+         }
          button.setAttribute('aria-current', 'true');
          button.scrollIntoView({ block: 'nearest' });
          setText(parts, '[data-pg-title]', button.dataset.title ?? '');
@@ -468,8 +473,15 @@ function filterCases(parts: Parts): void {
       }
    }
    for (const group of parts.root.querySelectorAll('[data-pg-group]')) {
-      if (group instanceof HTMLElement) {
-         group.hidden = !group.querySelector('[data-pg-case-item]:not([hidden])');
+      if (group instanceof HTMLDetailsElement) {
+         const hasMatch =
+            group.querySelector('[data-pg-case-item]:not([hidden])') !== null;
+
+         group.hidden = !hasMatch;
+         // A match inside a closed group would otherwise stay out of sight.
+         if (query !== '' && hasMatch) {
+            group.open = true;
+         }
       }
    }
    setShown(

@@ -1,0 +1,95 @@
+---
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+import type { TestOutcome } from '@a11ied/support-data/types';
+import OutcomeBadge from './outcome-badge.astro';
+import PlatformIcon from './platform-icon.astro';
+import { formatRowBrowser, formatRowOsVersion } from '../../lib/support-grouping';
+
+export interface Props {
+   outcome: TestOutcome;
+   ratioText: string;
+   /** The screen reader's group name, such as "VoiceOver", which the filters match. */
+   screenReaderGroup: string;
+   /** The screen reader with its version, or nothing when a heading already says it. */
+   screenReaderLabel: string;
+   /** Puts the screen reader first, for a list that mixes screen readers. */
+   leadWithScreenReader?: boolean;
+   os: string;
+   osGroup: string;
+   osVersion: string;
+   browser: string;
+   browserVersion: string;
+   browserType: 'browser' | 'webview';
+   /** Who ran the test, when the surrounding group does not already say it. */
+   sourceLabel?: string;
+}
+
+const {
+   outcome,
+   ratioText,
+   screenReaderGroup,
+   screenReaderLabel,
+   leadWithScreenReader = false,
+   os,
+   osGroup,
+   osVersion,
+   browser,
+   browserVersion,
+   browserType,
+   sourceLabel = '',
+} = Astro.props;
+const secondaryParts = [ leadWithScreenReader ? '' : screenReaderLabel, sourceLabel ].filter(Boolean);
+---
+
+<details
+   class={`srRow srRow--${outcome}`}
+   data-env-row
+   data-outcome={outcome}
+   data-sr-group={screenReaderGroup}
+   data-os-group={osGroup}
+   data-browser-type={browserType}
+>
+   <summary class="srRow-summary">
+      <ChevronDown class="srRow-marker" size={16} aria-hidden="true" focusable="false" />
+      <span class="srRow-main">
+         <span class="srRow-primary">
+            {leadWithScreenReader && (
+               <>
+                  <strong class="srRow-osVer">
+                     <PlatformIcon os={os} size={15} />
+                     {screenReaderLabel}
+                  </strong>
+                  <span class="srRow-sep" aria-hidden="true">·</span>
+               </>
+            )}
+            <span class:list={[ leadWithScreenReader ? 'srRow-browser' : 'srRow-osVer' ]}>
+               {formatRowOsVersion(os, osVersion)}
+            </span>
+            <span class="srRow-sep" aria-hidden="true">·</span>
+            <span class="srRow-browser">
+               <PlatformIcon browser={browser} browserType={browserType} size={15} />
+               {formatRowBrowser(browser, browserVersion)}
+            </span>
+            {browserType === 'webview' && <span class="srRow-webviewTag">WebView</span>}
+         </span>
+         {secondaryParts.length > 0 && (
+            <span class="srRow-secondary">
+               {secondaryParts.map((part, index) => (
+                  <>
+                     {index > 0 && <span aria-hidden="true">·</span>}
+                     <span>{part}</span>
+                  </>
+               ))}
+            </span>
+         )}
+      </span>
+      <span class="srRow-verdictGroup">
+         {ratioText && <span class="srRow-ratio">{ratioText}</span>}
+         <OutcomeBadge outcome={outcome} compact />
+      </span>
+   </summary>
+
+   <div class="srRow-body">
+      <slot />
+   </div>
+</details>

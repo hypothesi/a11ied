@@ -1,0 +1,372 @@
+interface GlossaryEntry {
+   readonly term: string;
+   /** HTML. May link to another entry by its ID, or to the page that explains the term. */
+   readonly definition: string;
+}
+
+/** Kept in alphabetical order. An entry's ID is its term in lowercase with hyphens. */
+export const GLOSSARY_ENTRIES = [
+   {
+      term: 'Accessibility tree',
+      definition:
+         'The structure a browser builds from a page for assistive technology. It holds the role, name, and state of each element. A screen reader reads this tree, not the pixels. <code>a1 tree</code> prints it.',
+   },
+   {
+      term: 'Accessible name',
+      definition:
+         'The text a screen reader announces for an element, such as the label of a button. A control with no accessible name is announced by its role alone: "button".',
+   },
+   {
+      term: 'ACT rules',
+      definition:
+         'Accessibility Conformance Testing rules. The W3C\'s written procedures for testing parts of WCAG. a11ied records which rule covers which criterion. See <a href="/reference/wcag-data">WCAG data</a>.',
+   },
+   {
+      term: 'Announcement',
+      definition:
+         'What a screen reader says for one item or one event. a11ied logs each announcement as a phrase in the <a href="#transcript">transcript</a>.',
+   },
+   {
+      term: 'APG',
+      definition:
+         'The ARIA Authoring Practices Guide. The W3C\'s guide to building widgets with ARIA. It describes 30 <a href="#pattern">patterns</a> and publishes 68 working examples. <code>a1 pattern</code> prints them.',
+   },
+   {
+      term: 'ARIA',
+      definition:
+         "Accessible Rich Internet Applications. The W3C's <code>role</code> and <code>aria-*</code> attributes, which tell assistive technology what an element is and what state it is in.",
+   },
+   {
+      term: 'ARIA-AT',
+      definition:
+         'The W3C\'s ARIA and Assistive Technologies project. It writes test plans for ARIA patterns and publishes reports of how JAWS, NVDA, and VoiceOver handle them. Most results in the <a href="/compatibility">compatibility tables</a> come from it.',
+   },
+   {
+      term: 'Assistive technology',
+      definition:
+         'Software or hardware that people with disabilities use to operate a computer. A screen reader is one kind.',
+   },
+   {
+      term: 'Audit',
+      definition:
+         'A check of a site, a page, or an app against a set of WCAG criteria, ending in a report. <code>a1 audit</code> tracks an audit that your AI agents carry out. See <a href="/guides/audit">audit a site with AI agents</a>.',
+   },
+   {
+      term: 'axe-core',
+      definition:
+         'The open-source scanning engine from Deque that a11ied runs. Often called axe. Each of its checks is a <a href="#rule">rule</a>.',
+   },
+   {
+      term: 'Baseline',
+      definition:
+         'A saved list of the problems a page already has. With a baseline, a check fails only on problems that are not in the list. See <a href="/guides/scripting#baseline">baselines</a>.',
+   },
+   {
+      term: 'Browserslist',
+      definition:
+         'A shared format for naming the browsers a project supports, such as <code>defaults</code> or <code>last 2 versions</code>. <code>@a11ied/compat</code> reads it to decide which screen readers to check. See <a href="/guides/compatibility-api#browsers">choose the browsers</a>.',
+   },
+   {
+      term: 'Check',
+      definition:
+         'In the compatibility tables, one thing a screen reader was tested for conveying, such as the role of a button. W3C ARIA-AT calls it an assertion. See <a href="#must-should-may">MUST, SHOULD, MAY</a>. Separately, <code>a1 check</code> is the command that scans one page.',
+   },
+   {
+      term: 'Checkpoint',
+      definition:
+         'A named mark in a transcript. <code>a1 sr expect --since</code> looks only at what was announced after the mark. See <a href="/guides/screen-reader#check">check an announcement</a>.',
+   },
+   {
+      term: 'CI',
+      definition:
+         'Continuous integration. A service that runs your checks on every change. See <a href="/guides/ci">run in CI</a>.',
+   },
+   {
+      term: 'Conformance level',
+      definition:
+         'A, AA, or AAA. Each WCAG criterion has one. Level AA includes every Level A criterion. An a11ied audit tests Level AA unless you ask for another.',
+   },
+   {
+      term: 'Criterion',
+      definition:
+         'Short for success criterion. One numbered, testable requirement of WCAG, such as 1.4.3 Contrast (Minimum). WCAG 2.2 has 86.',
+   },
+   {
+      term: 'Diagnostic',
+      definition:
+         'One problem that <code>@a11ied/compat</code> reports, with a code, a severity, and a message. See <a href="/guides/compatibility-api#diagnostics">read the diagnostics</a>.',
+   },
+   {
+      term: 'EARL',
+      definition:
+         'Evaluation and Report Language. A W3C format for test results. <code>a1 axe</code> can write it. See <a href="/guides/scripting#reports">report files</a>.',
+   },
+   {
+      term: 'Environment',
+      definition:
+         'One combination a test ran in: a screen reader, a browser, an operating system, and a device, each with its version.',
+   },
+   {
+      term: 'Evidence',
+      definition:
+         'What supports a result. a11ied keeps three kinds apart: a <a href="#scan">scan</a>, a <a href="#transcript">transcript</a>, and a <a href="#judgment">judgment</a>. An audit also keeps screenshots. See <a href="/test-methods#claims">what each kind of evidence supports</a>.',
+   },
+   {
+      term: 'Exit code',
+      definition:
+         'The number a command returns to the shell. Every <code>a1</code> command uses the same six: 0 when nothing failed, 4 when a check failed, and four more for errors. See <a href="/guides/scripting#exit-codes">exit codes</a>.',
+   },
+   {
+      term: 'Finding',
+      definition:
+         'One defect recorded in an audit. The same defect on ten pages is one finding with ten occurrences.',
+   },
+   {
+      term: 'Focus',
+      definition:
+         'The element that receives what you type. Pressing Tab moves focus to the next control. Focus order is the order Tab moves through a page.',
+   },
+   {
+      term: 'Guidepup',
+      definition:
+         'The open-source library a11ied uses to drive VoiceOver and NVDA. Its virtual screen reader is the basis of the <a href="#simulated-screen-reader">simulated screen reader</a>.',
+   },
+   {
+      term: 'Hybrid',
+      definition:
+         'A <a href="#test-method">test method</a>. A tool produces evidence and a person judges it.',
+   },
+   {
+      term: 'JAWS',
+      definition:
+         'A commercial screen reader for Windows. a11ied does not drive it. Its results in the compatibility tables come from W3C ARIA-AT.',
+   },
+   {
+      term: 'Judgment',
+      definition:
+         "A person's or an agent's decision on something no tool measures, such as whether alt text describes its image. <code>a1 audit</code> records it.",
+   },
+   {
+      term: 'Landmark',
+      definition:
+         'A region of a page that a screen reader can jump to, such as the navigation, the main content, or the footer.',
+   },
+   {
+      term: 'Lead',
+      definition:
+         'The agent that runs an audit. It sets the scope, starts the <a href="#worker">workers</a>, reviews their findings, and writes the report.',
+   },
+   {
+      term: 'Limitation',
+      definition:
+         'Something a whole audit could not test, such as a screen reader that was not available. The report lists it under Not verified.',
+   },
+   {
+      term: 'Live region',
+      definition:
+         'A part of a page whose changes a screen reader announces without focus moving there. <code>aria-live</code>, <code>role="alert"</code>, and <code>role="status"</code> make one.',
+   },
+   {
+      term: 'Manual',
+      definition:
+         'A <a href="#test-method">test method</a>. A person reads and decides, because no tool measures the criterion.',
+   },
+   {
+      term: 'MCP',
+      definition:
+         'Model Context Protocol. The standard that lets an AI agent call outside tools. The a11ied MCP server gives an agent 37 tools. See <a href="/guides/agents">set up an AI agent</a>.',
+   },
+   {
+      term: 'MUST, SHOULD, MAY',
+      definition:
+         'The priority W3C ARIA-AT gives each <a href="#check">check</a>. A screen reader is required to convey a MUST, is recommended to convey a SHOULD, and may convey a MAY.',
+   },
+   {
+      term: 'NVDA',
+      definition:
+         'A free, open-source screen reader for Windows. a11ied drives it with <code>--sr nvda</code>.',
+   },
+   {
+      term: 'Outcome',
+      definition:
+         "A worker's decision for one criterion on one page in an audit: <code>pass</code>, <code>fail</code>, <code>not-applicable</code>, or <code>cannot-tell</code>.",
+   },
+   {
+      term: 'Pattern',
+      definition:
+         "The APG's description of one kind of widget, such as a combobox or a dialog: the keys it responds to, and the roles and states it needs. <code>a1 pattern check</code> tests a widget against one.",
+   },
+   {
+      term: 'Phrase',
+      definition:
+         'One entry in a <a href="#transcript">transcript</a>: one thing the screen reader announced.',
+   },
+   {
+      term: 'Practice page',
+      definition:
+         'A demo team settings screen that these docs serve, with ten accessibility problems built in. A second copy has all ten fixed. See <a href="/guides/demo">practice on a broken page</a>.',
+   },
+   {
+      term: 'Relevant criteria',
+      definition:
+         'The criteria worth checking on one page, judged by what the page contains. A page with no form has no form errors to test. See <a href="/relevant-criteria">relevant criteria</a>.',
+   },
+   {
+      term: 'Role',
+      definition:
+         'What an element is to assistive technology: a button, a dialog, a heading. HTML elements have roles built in, and the <code>role</code> attribute sets one.',
+   },
+   {
+      term: 'Rule',
+      definition:
+         'In a scan, one automated check, such as <code>button-name</code>. Each rule covers part of one or more criteria. In an audit, a rule is something workers must not do, such as sending a form.',
+   },
+   {
+      term: 'SARIF',
+      definition:
+         'Static Analysis Results Interchange Format. A report format that code hosts such as GitHub show next to the code. <code>a1 axe</code> can write it. See <a href="/guides/scripting#reports">report files</a>.',
+   },
+   {
+      term: 'Scan',
+      definition:
+         "An automated check of a page's markup against rules. Also called a static scan. a11ied scans with axe-core. A scan finds failures. It never proves that a criterion passes.",
+   },
+   {
+      term: 'Screen reader',
+      definition:
+         'Software that reads a screen aloud or to a braille display, and lets its user move through a page with the keyboard or touch. See <a href="/screen-readers">screen readers</a>.',
+   },
+   {
+      term: 'Session',
+      definition:
+         'One running screen reader that <code>a1</code> controls, from <code>a1 sr start</code> to <code>a1 sr stop</code>.',
+   },
+   {
+      term: 'Severity',
+      definition:
+         'How badly a finding affects people. Critical blocks a task for some users. Serious makes a task very difficult. Moderate causes friction with a workaround. Minor is a small deviation.',
+   },
+   {
+      term: 'Signal',
+      definition:
+         'A fact the audit scan measured about a page, such as its tab order or the sizes of its buttons. A worker checks it. It is never a result by itself.',
+   },
+   {
+      term: 'Simulated screen reader',
+      definition:
+         'Software that reads a page\'s accessibility tree and works out what a screen reader would announce. It runs anywhere and makes no sound. Its command name is <code>virtual</code>. It is a model, not VoiceOver or NVDA. See <a href="/screen-readers#virtual">what the simulated screen reader is</a>.',
+   },
+   {
+      term: 'Skill',
+      definition:
+         'A set of instructions installed into a coding agent. The two a11ied skills teach an agent how to test and how to run an audit. See <a href="/guides/agents#skills">install the skills</a>.',
+   },
+   {
+      term: 'State',
+      definition:
+         'A condition of a page other than how it first loads: a dialog open, a menu expanded, an error showing. An audit tests each state of a page.',
+   },
+   {
+      term: 'Subagent',
+      definition:
+         'An agent that another agent starts and gives work to. Audit workers are usually subagents of the lead.',
+   },
+   {
+      term: 'Support score',
+      definition:
+         'How well screen readers convey a feature, as a percentage. Each screen reader and browser pair tested scores the share of its tests that pass on their latest run, and the support score is the average of those pair scores. A partial pass counts toward the score and is shown in its own color. See the <a href="/compatibility">compatibility tables</a>.',
+   },
+   {
+      term: 'TalkBack',
+      definition:
+         'The screen reader built into Android. <code>a1 talkback</code> turns it on and prints what it says. See <a href="/screen-readers#talkback">TalkBack on Android</a>.',
+   },
+   {
+      term: 'Target',
+      definition:
+         'What a command tests: a web address, a local HTML file, or HTML passed on the command line. In Browserslist, a target is one browser version a project supports.',
+   },
+   {
+      term: 'Test case',
+      definition:
+         'A small page a11ied built to test one feature with screen readers. Each has a page in the <a href="/compatibility">compatibility tables</a> with what every screen reader said.',
+   },
+   {
+      term: 'Test method',
+      definition:
+         'How a criterion has to be tested: <code>automated</code>, <code>hybrid</code>, or <code>manual</code>. No criterion in WCAG 2.2 is automated. See <a href="/test-methods">test methods</a>.',
+   },
+   {
+      term: 'Test pass',
+      definition:
+         'In an audit, the criteria that are tested with one kind of interaction. There are seven: semantics, keyboard, visual, media, forms, pointer, and consistency.',
+   },
+   {
+      term: 'Test plan',
+      definition:
+         'In W3C ARIA-AT, the set of tests for one APG example, such as a menu button.',
+   },
+   {
+      term: 'Transcript',
+      definition:
+         'The log of what a screen reader announced, in order. A transcript from the simulated screen reader says so, and is not evidence of what VoiceOver or NVDA says. See <a href="/guides/screen-reader#transcript">save the transcript</a>.',
+   },
+   {
+      term: 'Understanding document',
+      definition:
+         "The W3C's explanation of one criterion: what it means, who it helps, and how to meet it. <code>a1 wcag understanding</code> prints it.",
+   },
+   {
+      term: 'Unit',
+      definition:
+         'One test pass on one page, such as the keyboard pass on the home page. A unit is what an audit worker claims and submits.',
+   },
+   {
+      term: 'Violation',
+      definition:
+         'One failure a scan found: a rule, and the elements that break it. See <a href="/guides/violations">fix scan failures</a>.',
+   },
+   {
+      term: 'VoiceOver',
+      definition:
+         'The screen reader built into macOS and iOS. a11ied drives it on macOS with <code>--sr voiceover</code>.',
+   },
+   {
+      term: 'WCAG',
+      definition:
+         'The Web Content Accessibility Guidelines, the W3C\'s standard for accessible web content. Its requirements are numbered <a href="#criterion">criteria</a>. a11ied ships versions 2.1 and 2.2.',
+   },
+   {
+      term: 'WCAG2Mobile',
+      definition:
+         "The W3C's guidance on applying WCAG to mobile apps. It is an Editor's Draft, not a W3C Recommendation.",
+   },
+   {
+      term: 'WebView',
+      definition:
+         'A browser engine embedded inside an app. A screen reader can behave differently in a WebView than in the full browser.',
+   },
+   {
+      term: 'Work packet',
+      definition:
+         "What <code>a1 audit next</code> gives a worker for one unit: the page, the procedure, each criterion, the scan's signals, and a template for the result.",
+   },
+   {
+      term: 'Worker',
+      definition:
+         'An agent that tests units in an audit. It claims a unit, tests the page, submits the result, and asks for the next one.',
+   },
+] as const satisfies readonly GlossaryEntry[];
+
+export type GlossaryTerm = (typeof GLOSSARY_ENTRIES)[number]['term'];
+
+export function getGlossaryEntryID(term: GlossaryTerm): string {
+   return term
+      .toLowerCase()
+      .replaceAll(/[^a-z0-9]+/g, '-')
+      .replaceAll(/^-|-$/g, '');
+}
+
+export function getGlossaryHref(term: GlossaryTerm): string {
+   return `/glossary#${getGlossaryEntryID(term)}`;
+}

@@ -1,0 +1,47 @@
+---
+import type { BarSegment } from '../../lib/support-share';
+
+interface Props {
+   /** Drawn left to right. Segments at 0% are skipped. */
+   readonly segments: readonly BarSegment[];
+}
+
+const { segments } = Astro.props;
+const visibleSegments = segments.filter((segment) => segment.percent > 0);
+---
+
+<!-- Decoration: the text beside the bar states the same numbers. -->
+<span class="segmentBar" aria-hidden="true">
+   {visibleSegments.map((segment) => (
+      <span class={`segmentBar-seg segmentBar-seg--${segment.tone}`} style={`inline-size: ${String(segment.percent)}%`}></span>
+   ))}
+</span>
+
+<style>
+.segmentBar {
+   display: flex;
+   overflow: hidden;
+   inline-size: 100%;
+   max-inline-size: 420px;
+   block-size: 10px;
+   border-radius: 99px;
+   background: #e7e0d3;
+}
+
+.segmentBar-seg {
+   display: block;
+   block-size: 100%;
+}
+
+.segmentBar-seg--pass {
+   background: #1e7a46;
+}
+
+.segmentBar-seg--partial {
+   background: #d97706;
+}
+
+.segmentBar-seg--fail {
+   background: #bd2b26;
+}
+</style>

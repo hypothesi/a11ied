@@ -1,3 +1,11 @@
+import { formatGroupCount } from '../lib/support-rows';
+
+/** The page shows the same results grouped two ways, and one grouping at a time. */
+type ResultsView = 'test' | 'screen-reader';
+
+const DEFAULT_VIEW: ResultsView = 'test',
+   VIEW_PARAM = 'group';
+
 interface FeatureFilterElements {
    readonly srSelect: HTMLSelectElement | undefined;
    readonly osSelect: HTMLSelectElement | undefined;
@@ -5,8 +13,25 @@ interface FeatureFilterElements {
    readonly resetButton: HTMLButtonElement | undefined;
    readonly countLabel: HTMLElement | undefined;
    readonly emptyState: HTMLElement | undefined;
-   readonly groups: readonly HTMLElement[];
+   readonly views: readonly HTMLElement[];
+   readonly viewButtons: readonly HTMLButtonElement[];
    readonly rows: readonly HTMLDetailsElement[];
+}
+
+function isResultsView(value: string | undefined): value is ResultsView {
+   return value === 'test' || value === 'screen-reader';
+}
+
+function listElements(root: ParentNode, selector: string): HTMLElement[] {
+   return [...root.querySelectorAll(selector)].filter(
+      (el): el is HTMLElement => el instanceof HTMLElement,
+   );
+}
+
+function listRows(root: ParentNode): HTMLDetailsElement[] {
+   return [...root.querySelectorAll('[data-env-row]')].filter(
+      (el): el is HTMLDetailsElement => el instanceof HTMLDetailsElement,
+   );
 }
 
 function querySelectElement(selector: string): HTMLSelectElement | undefined {
@@ -25,12 +50,11 @@ function queryHtmlElement(selector: string): HTMLElement | undefined {
 }
 
 function getElements(): FeatureFilterElements {
-   const groupEls = [
-      ...document.querySelectorAll('#sr-feature-groups [data-sr-group-block]'),
-   ].filter((el): el is HTMLElement => el instanceof HTMLElement);
-   const rowEls = [
-      ...document.querySelectorAll('#sr-feature-groups [data-env-row]'),
-   ].filter((el): el is HTMLDetailsElement => el instanceof HTMLDetailsElement);
+   const viewEls = listElements(document, '[data-results-view]');
+   const viewButtons = [
+      ...document.querySelectorAll('[data-results-view-button]'),
+   ].filter((el): el is HTMLButtonElement => el instanceof HTMLButtonElement);
+   const rowEls = viewEls.flatMap((view) => listRows(view));
 
    return {
       srSelect: querySelectElement('#sr-feature-sr'),
@@ -39,7 +63,8 @@ function getElements(): FeatureFilterElements {
       resetButton: queryButtonElement('#sr-feature-reset'),
       countLabel: queryHtmlElement('#sr-feature-count'),
       emptyState: queryHtmlElement('#sr-feature-empty'),
-      groups: groupEls,
+      views: viewEls,
+      viewButtons,
       rows: rowEls,
    };
 }
@@ -100,30 +125,27 @@ function matchesRow(row: HTMLDetailsElement, filters: ActiveFeatureFilters): boo
    return matchesSR && matchesOS && matchesBrowserType;
 }
 
+function listVisibleRows(container: ParentNode): HTMLDetailsElement[] {
+   return listRows(container).filter((row) => !row.hidden);
+}
+
 function updateGroupVisibility(groupEl: HTMLElement): number {
-   const osBlocks = [...groupEl.querySelectorAll('[data-os-group-block]')].filter(
-      (el): el is HTMLElement => el instanceof HTMLElement,
+   const visibleOutcomes = listVisibleRows(groupEl).map(
+      (row) => row.dataset.outcome ?? '',
    );
-   let groupVisible = 0;
 
-   for (const osBlock of osBlocks) {
-      const osRows = [...osBlock.querySelectorAll('[data-env-row]')].filter(
-         (el): el is HTMLDetailsElement => el instanceof HTMLDetailsElement,
-      );
-      const visibleInOs = osRows.filter((row) => !row.hidden).length;
-      osBlock.hidden = visibleInOs === 0;
-      groupVisible += visibleInOs;
+   for (const osBlock of listElements(groupEl, '[data-os-group-block]')) {
+      osBlock.hidden = listVisibleRows(osBlock).length === 0;
    }
 
-   groupEl.hidden = groupVisible === 0;
+   groupEl.hidden = visibleOutcomes.length === 0;
 
-   const countBadge = groupEl.querySelector('[data-sr-group-count]');
+   const countBadge = groupEl.querySelector('[data-result-group-count]');
    if (countBadge instanceof HTMLElement) {
-      const noun = groupVisible === 1 ? 'result' : 'results';
-      countBadge.textContent = `${String(groupVisible)} ${noun}`;
+      countBadge.textContent = formatGroupCount(visibleOutcomes, 'result');
    }
 
-   return groupVisible;
+   return visibleOutcomes.length;
 }
 
 function applyFeatureFilters(elements: FeatureFilterElements, updateURL: boolean): void {
@@ -137,13 +159,19 @@ function applyFeatureFilters(elements: FeatureFilterElements, updateURL: boolean
       row.hidden = !matchesRow(row, filters);
    }
 
-   let totalVisible = 0;
-   for (const groupEl of elements.groups) {
-      totalVisible += updateGroupVisibility(groupEl);
+   for (const groupEl of listElements(
+      document,
+      '[data-results-view] [data-result-group]',
+   )) {
+      updateGroupVisibility(groupEl);
    }
 
+   // Each grouping has its own rows, so the count is of the one on screen.
+   const activeView = elements.views.find((view) => !view.hidden);
+   const total = activeView ? activeView.querySelectorAll('[data-env-row]').length : 0;
+   const totalVisible = activeView ? listVisibleRows(activeView).length : 0;
+
    if (elements.countLabel) {
-      const total = elements.rows.length;
       const noun = total === 1 ? 'result' : 'results';
       elements.countLabel.textContent = `Showing ${String(totalVisible)} of ${String(total)} ${noun}`;
    }
@@ -157,14 +185,82 @@ function applyFeatureFilters(elements: FeatureFilterElements, updateURL: boolean
    }
 }
 
+/**
+ * A result is in the page once. It sits under its test by default and moves into its
+ * environment's row for the screen reader grouping.
+ */
+function moveUnits(view: ResultsView): void {
+   const targetAttribute = view === 'test' ? 'data-unit-home' : 'data-unit-slot';
+
+   for (const unit of listElements(document, '[data-unit]')) {
+      const unitID = unit.dataset.unit ?? '';
+      const target = document.querySelector(
+         `[${targetAttribute}="${CSS.escape(unitID)}"]`,
+      );
+      // A row that lists several tests keeps each test's log and assertions closed.
+      const isAlone =
+         (target?.parentElement?.querySelectorAll('[data-unit-slot]').length ?? 0) <= 1;
+
+      target?.append(unit);
+      for (const disclosure of unit.querySelectorAll('.srTranscript, .srAssert')) {
+         if (disclosure instanceof HTMLDetailsElement) {
+            disclosure.open = isAlone;
+         }
+      }
+   }
+}
+
+function showView(
+   elements: FeatureFilterElements,
+   view: ResultsView,
+   updateURL: boolean,
+): void {
+   for (const viewEl of elements.views) {
+      viewEl.hidden = viewEl.dataset.resultsView !== view;
+   }
+   for (const button of elements.viewButtons) {
+      button.setAttribute(
+         'aria-pressed',
+         button.dataset.resultsViewButton === view ? 'true' : 'false',
+      );
+   }
+   moveUnits(view);
+
+   if (updateURL) {
+      const url = new URL(globalThis.location.href);
+
+      if (view === DEFAULT_VIEW) {
+         url.searchParams.delete(VIEW_PARAM);
+      } else {
+         url.searchParams.set(VIEW_PARAM, view);
+      }
+      globalThis.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+   }
+
+   applyFeatureFilters(elements, false);
+}
+
 export function initFeatureDetailFilters(): void {
    const elements = getElements();
    if (elements.rows.length === 0) {
       return;
    }
 
+   const requestedView =
+      new URLSearchParams(globalThis.location.search).get(VIEW_PARAM) ?? undefined;
+
    readFiltersFromURL(elements);
-   applyFeatureFilters(elements, false);
+   showView(elements, isResultsView(requestedView) ? requestedView : DEFAULT_VIEW, false);
+
+   for (const button of elements.viewButtons) {
+      button.addEventListener('click', () => {
+         const view = button.dataset.resultsViewButton;
+
+         if (isResultsView(view)) {
+            showView(elements, view, true);
+         }
+      });
+   }
 
    const handleChange = (): void => {
       applyFeatureFilters(elements, true);

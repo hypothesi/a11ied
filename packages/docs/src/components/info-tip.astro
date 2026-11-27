@@ -1,0 +1,113 @@
+---
+import CircleQuestionMark from '@lucide/astro/icons/circle-question-mark';
+import { createElementID } from '../lib/element-id';
+import { getGlossaryHref, type GlossaryTerm } from '../lib/glossary';
+
+interface Props {
+   /** The word or phrase the slot defines. Used in the button's accessible name. */
+   readonly term: string;
+   /** Adds a link to this glossary entry below the definition. */
+   readonly glossaryTerm?: GlossaryTerm;
+}
+
+const { term, glossaryTerm } = Astro.props;
+const popoverID = createElementID('info-tip');
+const descriptionID = `${popoverID}-description`;
+const anchorName = `--${popoverID}`;
+---
+
+<button
+   type="button"
+   class="infoTip"
+   popovertarget={popoverID}
+   aria-label={`What "${term}" means`}
+   aria-describedby={descriptionID}
+   style={`anchor-name: ${anchorName}`}
+   data-info-tip
+><CircleQuestionMark size={15} aria-hidden="true" focusable="false" /></button><span
+   id={popoverID}
+   class="infoTip-popover"
+   popover
+   style={`position-anchor: ${anchorName}`}
+>
+   <span id={descriptionID}><slot /></span>
+   {glossaryTerm && (
+      <a class="infoTip-glossaryLink" href={getGlossaryHref(glossaryTerm)}>
+         See "{glossaryTerm}" in the glossary
+      </a>
+   )}
+</span>
+
+<style>
+.infoTip {
+   display: inline-grid;
+   place-items: center;
+   inline-size: 1.5rem;
+   block-size: 1.5rem;
+   margin: -0.3rem 0;
+   padding: 0;
+   border: 0;
+   border-radius: 50%;
+   background: none;
+   color: var(--ink-soft);
+   vertical-align: middle;
+   cursor: help;
+   /* A long press opens the definition, so the phone's own long-press menu must not. */
+   -webkit-touch-callout: none;
+   user-select: none;
+   touch-action: manipulation;
+}
+
+.infoTip:hover,
+.infoTip[aria-expanded='true'] {
+   color: var(--ink);
+}
+
+.infoTip:focus-visible {
+   outline: 2px solid var(--ink);
+   outline-offset: 1px;
+}
+
+/* Round caps on zero-length dashes draw the circle as 16 dots. */
+.infoTip :global(circle) {
+   stroke-dasharray: 0 3.927;
+}
+
+.infoTip-popover {
+   max-inline-size: min(32ch, calc(100vw - 2rem));
+   padding: 0.5rem 0.65rem;
+   border: 1px solid var(--ink);
+   border-radius: 4px;
+   background: var(--paper-light);
+   box-shadow: 3px 3px 0 color-mix(in oklch, var(--ink) 25%, transparent);
+   color: var(--ink);
+   font-family: system-ui, sans-serif;
+   font-size: 0.82rem;
+   font-weight: 400;
+   letter-spacing: 0;
+   line-height: 1.4;
+   text-align: start;
+   text-transform: none;
+}
+
+.infoTip-glossaryLink {
+   display: block;
+   margin-block-start: 0.35rem;
+   font-size: 0.78rem;
+   font-weight: 600;
+}
+
+/* Browsers without anchor positioning show the popover centered in the viewport. */
+@supports (position-area: block-end) {
+   .infoTip-popover {
+      position-area: block-end span-inline-end;
+      position-try-fallbacks: block-end span-inline-start, flip-block;
+      margin: 0.3rem 0;
+      inset: auto;
+   }
+}
+</style>
+
+<script>
+   import '../scripts/info-tips';
+</script>

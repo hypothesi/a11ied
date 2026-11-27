@@ -1,44 +1,28 @@
 ---
-import type { FeatureReport } from '@a11ied/support-data';
+import InfoTip from '../info-tip.astro';
 import PlatformIcon from './platform-icon.astro';
 import { BROWSER_FAMILIES } from '../../lib/platforms';
-import {
-   buildPairMatrix,
-   formatSharePercentages,
-   getShareRatio,
-   type MatrixCell,
-} from '../../lib/support-share';
+import { formatSharePercentages, getHeatLevel, type MatrixRow } from '../../lib/support-share';
 
 interface Props {
-   readonly features: readonly FeatureReport[];
+   readonly rows: readonly MatrixRow[];
 }
 
-const HIGH_RATIO = 0.8,
-      MID_RATIO = 0.5;
+const { rows } = Astro.props;
 
-const { features } = Astro.props,
-      rows = buildPairMatrix(features);
-
-function getHeatLevel(cell: MatrixCell): string {
-   const ratio = getShareRatio(cell.share);
-
-   if (ratio >= HIGH_RATIO) {
-      return 'high';
-   }
-
-   return ratio >= MID_RATIO ? 'mid' : 'low';
+function formatFeatureCount(count: number): string {
+   return `${String(count)} ${count === 1 ? 'feature' : 'features'}`;
 }
 ---
 
 <section class="pairMatrix" aria-labelledby="pair-matrix-heading">
-   <h2 id="pair-matrix-heading" class="pairMatrix-heading">Best browser for each screen reader</h2>
-   <p class="pairMatrix-intro">
-      How well each screen reader supports the tested features in each browser: the share of
-      tests that pass fully or partially, averaged over the features, using the latest result
-      of each test. The best browser in each row is marked. Cells cover different numbers of
-      features, so a cell with few features is less certain.
-   </p>
-
+   <div class="pairMatrix-headingRow">
+      <h2 id="pair-matrix-heading" class="pairMatrix-heading">Best browser for each screen reader</h2>
+      <InfoTip term="Best browser for each screen reader" glossaryTerm="Support score">
+         Each percentage is the share of tests that pass, fully or partially, for that screen
+         reader in that browser. It is averaged over features, using each test's latest result.
+      </InfoTip>
+   </div>
    <div class="pairMatrix-wrap" tabindex="0" role="region" aria-labelledby="pair-matrix-heading">
       <table class="pairMatrix-table">
          <thead>
@@ -63,29 +47,44 @@ function getHeatLevel(cell: MatrixCell): string {
                         <span>
                            {row.screenReader}
                            <span class="pairMatrix-os">{row.os}</span>
+                           {row.sharedFeatureCount > 0 && (
+                              <span class="pairMatrix-basis">
+                                 Compared on {formatFeatureCount(row.sharedFeatureCount)}
+                                 <InfoTip term={`Compared on ${formatFeatureCount(row.sharedFeatureCount)}`}>
+                                    Browsers were tested on different features, so this row compares
+                                    them only on the {row.sharedFeatureCount} tested in every browser.
+                                    A second, smaller percentage covers every feature that browser was
+                                    tested on, and is not comparable with the others.
+                                 </InfoTip>
+                              </span>
+                           )}
                         </span>
                      </span>
                   </th>
                   {row.cells.map((cell) => {
-                     if (cell.state === 'tested') {
-                        const featureLabel = cell.share.pairCount === 1 ? 'feature' : 'features';
-
-                        return (
-                           <td class={`pairMatrix-cell pairMatrix-cell--${getHeatLevel(cell)}`}>
-                              <strong class="pairMatrix-pct">{formatSharePercentages(cell.share).total}</strong>
-                              <span class="pairMatrix-count">of {cell.share.pairCount} {featureLabel}</span>
-                              {cell.isBest && <span class="pairMatrix-best">Best</span>}
-                           </td>
-                        );
-                     }
-
                      if (cell.state === 'unavailable') {
                         return <td class="pairMatrix-cell pairMatrix-cell--empty">Not available</td>;
                      }
+                     if (cell.state === 'untested') {
+                        return <td class="pairMatrix-cell pairMatrix-cell--empty">Not tested</td>;
+                     }
+
+                     const isCompared = row.sharedFeatureCount > 0;
+                     const mainShare = isCompared ? cell.sharedShare : cell.share;
+                     const hasMoreFeatures = isCompared && cell.share.pairCount > row.sharedFeatureCount;
 
                      return (
-                        <td class="pairMatrix-cell pairMatrix-cell--empty">
-                           {cell.state === 'pending' ? 'Pending' : 'Not tested'}
+                        <td class={`pairMatrix-cell pairMatrix-cell--${getHeatLevel(mainShare)}`}>
+                           <span class="pairMatrix-score">
+                              <strong class="pairMatrix-pct">{formatSharePercentages(mainShare).total}</strong>
+                              {cell.isBest && <span class="pairMatrix-best">Best</span>}
+                           </span>
+                           {hasMoreFeatures && (
+                              <span class="pairMatrix-all">
+                                 {formatSharePercentages(cell.share).total} across all {formatFeatureCount(cell.share.pairCount)}
+                              </span>
+                           )}
+                           {!isCompared && <span class="pairMatrix-all">{formatFeatureCount(mainShare.pairCount)} tested</span>}
                         </td>
                      );
                   })}
@@ -103,6 +102,12 @@ function getHeatLevel(cell: MatrixCell): string {
    gap: 0.6rem;
 }
 
+.pairMatrix-headingRow {
+   display: flex;
+   align-items: center;
+   gap: 0.4rem;
+}
+
 .pairMatrix-heading {
    margin: 0;
    padding-top: 0;
@@ -110,12 +115,6 @@ function getHeatLevel(cell: MatrixCell): string {
    font-size: 1.3rem;
 }
 
-.pairMatrix-intro {
-   margin: 0;
-   max-inline-size: 75ch;
-   font-size: 0.9rem;
-   color: var(--ink-soft);
-}
 
 .pairMatrix-wrap {
    overflow-x: auto;
@@ -190,22 +189,36 @@ function getHeatLevel(cell: MatrixCell): string {
    color: var(--ink-soft);
 }
 
-.pairMatrix-pct {
+.pairMatrix-score {
+   display: flex;
+   align-items: center;
+   gap: 0.4rem;
+}
+
+.pairMatrix-basis {
    display: block;
+   margin-block-start: 0.15rem;
+   font-size: 0.74rem;
+   font-weight: 400;
+   color: var(--ink-soft);
+}
+
+.pairMatrix-pct {
    font-family: var(--display);
    font-size: 1.15rem;
    font-variant-numeric: tabular-nums;
    line-height: 1.1;
 }
 
-.pairMatrix-count {
-   font-size: 0.76rem;
+
+.pairMatrix-all {
+   display: block;
+   margin-block-start: 0.2rem;
+   font-size: 0.74rem;
    color: var(--ink-soft);
 }
 
 .pairMatrix-best {
-   display: inline-block;
-   margin-inline-start: 0.35rem;
    padding: 0.05rem 0.35rem;
    border-radius: 3px;
    background: var(--ink);

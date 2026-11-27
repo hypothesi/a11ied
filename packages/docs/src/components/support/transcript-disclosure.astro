@@ -9,6 +9,8 @@ export interface Props {
    runAt: string;
    mode?: 'disclosure' | 'inline';
    label?: string;
+   /** Whether a disclosure starts open. */
+   open?: boolean;
 }
 
 const {
@@ -17,6 +19,7 @@ const {
    runAt,
    mode = 'disclosure',
    label = 'Screen reader log',
+   open = false,
 } = Astro.props;
 const entryCountLabel = `${String(transcript.length)} ${transcript.length === 1 ? 'announcement' : 'announcements'}`;
 ---
@@ -30,7 +33,7 @@ const entryCountLabel = `${String(transcript.length)} ${transcript.length === 1 
       <TranscriptBody transcript={transcript} driver={driver} runAt={runAt} />
    </div>
 ) : (
-   <details class="srTranscript">
+   <details class="srTranscript" open={open}>
       <summary class="srTranscript-summary">
          <ChevronDown class="srTranscript-marker" size={16} aria-hidden="true" focusable="false" />
          <span class="srTranscript-summaryText">{label}</span>

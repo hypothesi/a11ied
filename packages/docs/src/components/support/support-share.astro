@@ -1,5 +1,7 @@
 ---
-import { formatSharePercentages, type SupportShare } from '../../lib/support-share';
+import { formatSharePercentages, listShareSegments, type SupportShare } from '../../lib/support-share';
+import InfoTip from '../info-tip.astro';
+import SegmentBar from './segment-bar.astro';
 
 interface Props {
    readonly share: SupportShare;
@@ -9,26 +11,30 @@ interface Props {
 const { share, size = 'compact' } = Astro.props;
 const percentages = formatSharePercentages(share);
 const pairLabel = share.pairCount === 1 ? 'pair' : 'pairs';
-const spokenSummary = `Supported by ${percentages.total} of tested pairs: ${percentages.supported} fully and ${percentages.partial} partially.`;
+const hasPartial = share.partialScore > 0;
 ---
 
 <div class={`supportShare supportShare--${size}`}>
    {share.pairCount > 0 ? (
       <>
-         <p class="supportShare-label">Support <span>% of tested pairs</span></p>
-         <p class="supportShare-figures" aria-hidden="true">
-            <span class="supportShare-full">{percentages.supported}</span>
-            <span class="supportShare-op">+</span>
-            <span class="supportShare-partial">{percentages.partial}</span>
-            <span class="supportShare-op">=</span>
+         <p class="supportShare-label">
+            Support
+            <InfoTip term="Support" glossaryTerm="Support score">
+               The average score of the {share.pairCount} screen reader and browser {pairLabel}
+               tested. A pair's score is the share of its tests that pass on their latest run.
+            </InfoTip>
+         </p>
+         <p class="supportShare-value">
             <strong class="supportShare-total">{percentages.total}</strong>
+            {hasPartial && (
+               <span class="supportShare-breakdown">
+                  <span class="supportShare-full">{percentages.supported} full</span>
+                  {' · '}
+                  <span class="supportShare-partial">{percentages.partial} partial</span>
+               </span>
+            )}
          </p>
-         <p class="supportShare-hidden">{spokenSummary}</p>
-         <p class="supportShare-note">
-            Supported + partial, averaged over {share.pairCount} screen reader and browser
-            {pairLabel}. Each pair counts once, scored by the share of its tests that pass, using
-            the latest result of each test.
-         </p>
+         {size === 'large' && <SegmentBar segments={listShareSegments(share)} />}
       </>
    ) : (
       <p class="supportShare-label">Not tested with a real screen reader</p>
@@ -46,6 +52,25 @@ const spokenSummary = `Supported by ${percentages.total} of tested pairs: ${perc
    margin: 0;
 }
 
+/*
+ * When the parent is a grid, the label, value, and bar rows line up with the card next to
+ * it, so both bars sit at the same height.
+ */
+.supportShare--large {
+   display: grid;
+   grid-row: span 3;
+   grid-template-rows: subgrid;
+   row-gap: 0.4rem;
+}
+
+.supportShare-value {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: baseline;
+   align-self: end;
+   gap: 0.1rem 0.6rem;
+}
+
 .supportShare-label {
    font-family: var(--display);
    font-size: 0.74rem;
@@ -55,25 +80,23 @@ const spokenSummary = `Supported by ${percentages.total} of tested pairs: ${perc
    color: var(--ink-soft);
 }
 
-.supportShare-label span {
-   font-weight: 400;
-   text-transform: none;
-   letter-spacing: 0;
-}
-
-.supportShare-figures {
-   display: flex;
-   flex-wrap: wrap;
-   align-items: baseline;
-   gap: 0.35rem;
+.supportShare-total {
    font-family: var(--display);
    font-size: 1.15rem;
+   font-weight: 700;
    font-variant-numeric: tabular-nums;
    line-height: 1.15;
+   color: var(--ink);
 }
 
-.supportShare--large .supportShare-figures {
+.supportShare--large .supportShare-total {
    font-size: 1.65rem;
+}
+
+.supportShare-breakdown {
+   font-size: 0.8rem;
+   font-variant-numeric: tabular-nums;
+   color: var(--ink-soft);
 }
 
 .supportShare-full {
@@ -82,37 +105,5 @@ const spokenSummary = `Supported by ${percentages.total} of tested pairs: ${perc
 
 .supportShare-partial {
    color: #a15c00;
-}
-
-.supportShare-op {
-   color: var(--ink-soft);
-}
-
-.supportShare-total {
-   color: var(--ink);
-}
-
-.supportShare-note {
-   max-inline-size: 32ch;
-   font-size: 0.76rem;
-   line-height: 1.35;
-   color: var(--ink-soft);
-}
-
-.supportShare--large .supportShare-note {
-   max-inline-size: 60ch;
-   font-size: 0.82rem;
-}
-
-.supportShare-hidden {
-   position: absolute;
-   overflow: hidden;
-   inline-size: 1px;
-   block-size: 1px;
-   margin: -1px;
-   padding: 0;
-   border: 0;
-   clip-path: inset(50%);
-   white-space: nowrap;
 }
 </style>

@@ -1,0 +1,36 @@
+---
+import type { AriaAtFeatureDrilldownItem } from '@a11ied/support-data';
+import AriaAtTestDisclosure from './aria-at-test-disclosure.astro';
+
+export interface Props {
+   /** The tests of one W3C report, which all belong to the same plan. */
+   tests: readonly AriaAtFeatureDrilldownItem[];
+}
+
+const { tests } = Astro.props;
+const [ report ] = tests;
+---
+
+{report && (
+   <div class="srUnit">
+      <div class="srRow-drilldownHeader">
+         <div class="srRow-drilldownTitles srUnit-head">
+            <strong class="srRow-drilldownHeading">{report.planTitle}</strong>
+            <span class="srRow-drilldownSub">
+               {report.planVersionString} · {report.planPhase} · {tests.length} {tests.length === 1 ? 'test' : 'tests'}
+            </span>
+         </div>
+         <div class="srRow-drilldownLinks">
+            <a href={`/compatibility/aria-at/${report.planSlug}/`} class="srUnit-head">Full plan report</a>
+            <a href={report.upstreamReportURL} target="_blank" rel="noopener noreferrer">
+               W3C report #{report.reportID}
+            </a>
+         </div>
+      </div>
+      <div class="srRow-testList">
+         {tests.map((test) => (
+            <AriaAtTestDisclosure title={test.testTitle} commandResults={test.commandResults} />
+         ))}
+      </div>
+   </div>
+)}
