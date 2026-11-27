@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:f
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { installAgentItems } from './setup-agents.js';
+import { detectAgentEditors, installAgentItems } from './setup-agents.js';
 
 let home = '';
 
@@ -19,9 +19,11 @@ afterEach(() => {
 
 describe('installAgentItems', () => {
    it('installs the bundled skills and an npx MCP server into Claude Code', async () => {
+      const detected = await detectAgentEditors();
+      const editors = detected.filter((editor) => editor.id === 'claude-code');
       const outcomes = await installAgentItems({
          sections: ['skills', 'mcp'],
-         editors: ['claude-code'],
+         editors,
          hasGlobalInstall: false,
       });
       const config = JSON.parse(readFileSync(join(home, '.claude.json'), 'utf8')) as {
@@ -34,6 +36,7 @@ describe('installAgentItems', () => {
          'a11ied',
       ]);
       expect(outcomes.every((outcome) => outcome.isInstalled)).toBe(true);
+      expect(outcomes[0]?.editorLabel).toBe('Claude Code');
       expect(existsSync(join(home, '.claude', 'skills', 'a11ied', 'SKILL.md'))).toBe(
          true,
       );

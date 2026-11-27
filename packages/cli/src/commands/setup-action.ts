@@ -1,6 +1,7 @@
 import { cliExitCodes, type DoctorReport } from '#contracts';
 import type * as Core from '#core';
 import type { GuidepupSetupStep, GuidepupSetupStepResult } from '#core';
+import type { DetectedEditor } from '@a1st/aix-core';
 import { CLI_VERSION } from '../lib/constants.js';
 import { code, dim, doctorTextStyle, heading, symbols } from '../lib/format.js';
 import type { CommandExecution } from '../lib/helpers.js';
@@ -13,7 +14,6 @@ import {
 import { askToChoose, askYesNo, canPrompt } from '../lib/prompts.js';
 import {
    detectAgentEditors,
-   getEditorLabel,
    installAgentItems,
    listSkillNames,
    type AgentInstallOutcome,
@@ -132,16 +132,18 @@ async function chooseAgentItems(options: SetupOptions): Promise<AgentItem[]> {
 
 async function chooseEditors(
    options: SetupOptions,
-   detected: string[],
-): Promise<string[]> {
+   detected: readonly DetectedEditor[],
+): Promise<readonly DetectedEditor[]> {
    if (options.yes) {
       return detected;
    }
 
-   return askToChoose(
+   const chosen = await askToChoose(
       'Install them for:',
-      detected.map((editor) => ({ value: editor, label: getEditorLabel(editor) })),
+      detected.map((editor) => ({ value: editor.id, label: editor.displayName })),
    );
+
+   return detected.filter((editor) => chosen.includes(editor.id));
 }
 
 async function setUpAgents(
@@ -262,7 +264,7 @@ function renderGlobalInstall(outcome: GlobalInstallOutcome): string {
 }
 
 function renderEditorLine(
-   editor: string,
+   editorLabel: string,
    outcomes: readonly AgentInstallOutcome[],
 ): string[] {
    const installed = outcomes.filter((outcome) => outcome.isInstalled);
@@ -274,7 +276,7 @@ function renderEditorLine(
    const summary = names.length === 0 ? 'nothing installed' : names.join(', ');
 
    return [
-      `${symbol} ${getEditorLabel(editor)}: ${summary}`,
+      `${symbol} ${editorLabel}: ${summary}`,
       ...problems.flatMap((outcome) =>
          outcome.messages.map((message) => `    ${dim(`${outcome.name}: ${message}`)}`),
       ),
@@ -282,12 +284,12 @@ function renderEditorLine(
 }
 
 function renderAgents(agents: readonly AgentInstallOutcome[]): string[] {
-   const editors = [...new Set(agents.map((outcome) => outcome.editor))];
+   const editorLabels = [...new Set(agents.map((outcome) => outcome.editorLabel))];
 
-   return editors.flatMap((editor) =>
+   return editorLabels.flatMap((editorLabel) =>
       renderEditorLine(
-         editor,
-         agents.filter((outcome) => outcome.editor === editor),
+         editorLabel,
+         agents.filter((outcome) => outcome.editorLabel === editorLabel),
       ),
    );
 }

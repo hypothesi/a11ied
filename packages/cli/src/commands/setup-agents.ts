@@ -1,8 +1,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { installItem } from '@a1st/aix-core';
-import { editorSupportProfiles } from '@a1st/aix-schema';
+import type { DetectedEditor, installItem } from '@a1st/aix-core';
 import { PACKAGE_NAME } from '../lib/constants.js';
 
 export type AgentItem = 'skills' | 'mcp';
@@ -17,6 +16,7 @@ interface InstallableItem {
 
 export interface AgentInstallOutcome {
    readonly editor: string;
+   readonly editorLabel: string;
    readonly section: AgentItem;
    readonly name: string;
    readonly isInstalled: boolean;
@@ -67,17 +67,11 @@ function getMcpItem(hasGlobalInstall: boolean): InstallableItem {
    return { section: 'mcp', name: PACKAGE_NAME, value };
 }
 
-export function getEditorLabel(editor: string): string {
-   const profile = editorSupportProfiles.find((candidate) => candidate.id === editor);
-
-   return profile?.name ?? editor;
-}
-
 export function listSkillNames(): string[] {
    return listSkills().map((skill) => skill.name);
 }
 
-export async function detectAgentEditors(): Promise<string[]> {
+export async function detectAgentEditors(): Promise<DetectedEditor[]> {
    const { detectEditors } = await import('@a1st/aix-core');
 
    return detectEditors(process.cwd());
@@ -90,11 +84,17 @@ function listSkipReasons(result: EditorResult): string[] {
    ].map((detail) => detail.reason);
 }
 
-function toOutcome(item: InstallableItem, result: EditorResult): AgentInstallOutcome {
+function toOutcome(
+   item: InstallableItem,
+   result: EditorResult,
+   editors: readonly DetectedEditor[],
+): AgentInstallOutcome {
+   const detected = editors.find((editor) => editor.id === result.editor);
    const skipReasons = listSkipReasons(result);
 
    return {
       editor: result.editor,
+      editorLabel: detected?.displayName ?? result.editor,
       section: item.section,
       name: item.name,
       isInstalled: result.success && skipReasons.length === 0,
@@ -103,17 +103,13 @@ function toOutcome(item: InstallableItem, result: EditorResult): AgentInstallOut
 }
 
 /**
- * Installs the chosen items for every project on this machine (user scope). Installing
- * again replaces the earlier copy, so it also updates them.
- */
-/**
  * Installs one item after another, because several items can write to the same editor
  * config file and to the same install record.
  */
 async function installEach(
    install: typeof installItem,
    items: readonly InstallableItem[],
-   editors: readonly string[],
+   editors: readonly DetectedEditor[],
 ): Promise<AgentInstallOutcome[]> {
    const [item, ...rest] = items;
 
@@ -126,18 +122,22 @@ async function installEach(
       name: item.name,
       value: item.value,
       scope: 'user',
-      editors,
+      editors: editors.map((editor) => editor.id),
    });
 
    return [
-      ...results.map((result) => toOutcome(item, result)),
+      ...results.map((result) => toOutcome(item, result, editors)),
       ...(await installEach(install, rest, editors)),
    ];
 }
 
+/**
+ * Installs the chosen items for every project on this machine (user scope). Installing
+ * again replaces the earlier copy, so it also updates them.
+ */
 export async function installAgentItems(options: {
    readonly sections: readonly AgentItem[];
-   readonly editors: readonly string[];
+   readonly editors: readonly DetectedEditor[];
    readonly hasGlobalInstall: boolean;
 }): Promise<AgentInstallOutcome[]> {
    const { installItem: install } = await import('@a1st/aix-core');
